@@ -1,0 +1,12 @@
+{
+  "release": "V1.20.5-H7.6",
+  "surface": "Problemas 2.0",
+  "source_smoke": "PASS 27/27",
+  "regression_qa": "PASS 1559/1559",
+  "linux_preflight": "PASS",
+  "syntax_check": "PASS",
+  "full_typecheck": "NOT_RUN_DEPENDENCIES_NOT_INSTALLED",
+  "production_build": "NOT_RUN_DEPENDENCIES_NOT_INSTALLED",
+  "browser_runtime": "PENDING_USER_LINUX_VALIDATION",
+  "note": "npm ci timed out in the generation environment before dependencies were fully installed."
+}

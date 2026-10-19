@@ -1,0 +1,57 @@
+BLUE OCEAN Service Studio V1.20.5-H7.35 — QA REAL
+Phase: Improvement Portfolio
+Date: 2026-10-13
+
+H7.35 Improvement Portfolio                         176/176 PASS
+H7.34 Problems, Opportunities & Prioritization      175/175 PASS
+H7.33 Current × Future Service                      134/134 PASS
+H7.32 Decision & Iteration Loop                     190/190 PASS
+npm run qa                                          3684 OK / 0 FAIL
+syntax:check                                        PASS
+H7.35 TypeScript strict core                        PASS (Bundler resolution; model + backlog + current-future + portfolio)
+lock:verify                                         PASS
+source:authority                                    PASS
+foundation:smoke                                    12/12 PASS
+project-foundation:smoke                            46/46 PASS
+preflight-linux.sh                                  PASS
+
+DOMAIN GUARANTEES VALIDATED
+- Only selected/planned H7.34 opportunities can create initiatives.
+- Initiative creation is idempotent per opportunity and does not mutate H7.34 backlog state.
+- Opportunity problem linkage is snapshotted into the initiative for traceability.
+- Prototype provenance can infer canonical experiment references at initiative creation.
+- Dependency, decision, experiment and metric IDs are validated against canonical state.
+- Self-dependencies and missing dependencies are rejected.
+- Effort/impact are clamped to 1..5 and progress to 0..100.
+- Implemented initiatives force 100% progress and record implementedAt.
+- Leaving Implemented clears implementedAt instead of preserving false completion history.
+- Blocking is deterministic: any dependency not Implemented blocks the initiative.
+- Overdue is deterministic from targetDate for non-implemented initiatives.
+- Portfolio report exposes status counts, blocked/overdue counts, average progress and eligible opportunities.
+- H7.35 never auto-modifies Journey, Proposition, Channels, Blueprint, Decisions, Experiments or Metrics.
+
+INSTALL / BUILD TRUTH
+npm ci: NOT COMPLETED; the command stalled and was terminated. Partial node_modules was removed.
+Full React typecheck: NOT DECLARED PASS because dependencies were not completely installed.
+Vite production build: NOT DECLARED PASS for the same reason.
+Visual/browser QA: NOT DECLARED PASS; no browser validation was executed for H7.35.
+
+PACKAGE HYGIENE
+node_modules     absent
+dist             absent
+.generated       absent
+artifacts        absent
+__pycache__      absent
+
+FINAL ZIP VALIDATION
+Linux ZIP re-extracted                         PASS
+H7.35 from re-extracted ZIP                  176/176 PASS
+H7.34 from re-extracted ZIP                  175/175 PASS
+H7.33 from re-extracted preflight            134/134 PASS
+H7.32 from re-extracted preflight            190/190 PASS
+syntax from re-extracted ZIP                 PASS
+preflight from re-extracted ZIP              PASS
+START.sh / start-linux.sh / preflight-linux  755 / 755 / 755
+forbidden generated directories              all absent
+Source / Linux / Vercel canonical source     identical before final packaging
+SHA256                                        generated for all three final ZIPs

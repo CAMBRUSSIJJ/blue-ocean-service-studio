@@ -1,0 +1,39 @@
+{
+  "version": "1.20.3",
+  "principle": "O Whiteboard deve ensinar como um serviço funciona: etapas na horizontal, experiência/ operação em camadas verticais e uma linha de visibilidade com significado semântico, sem duplicar o Service Graph.",
+  "levels": [
+    {
+      "id": "L1",
+      "name": "Código",
+      "status": "PASS",
+      "evidence": "Service Frame Engine, cinco camadas, linhas de interação/visibilidade, semantic placement, coverage e criação direta estão presentes na fonte."
+    },
+    {
+      "id": "L2",
+      "name": "Contrato",
+      "status": "PASS",
+      "evidence": "npm run qa PASS; 44 gates com contagem explícita = 1630/1630; Service Frame 71/71."
+    },
+    {
+      "id": "L3",
+      "name": "Runtime",
+      "status": "PARTIAL",
+      "evidence": "Domínio, runtime JS, regressão, parser, core typecheck e preflight foram executados; navegador real não pôde iniciar."
+    },
+    {
+      "id": "L4",
+      "name": "Visual",
+      "status": "UNAVAILABLE",
+      "evidence": "Chromium esperado pelo Playwright não está instalado neste ambiente."
+    }
+  ],
+  "critical_paths": [
+    "Whiteboards -> Novo Service Frame -> etapas x cinco camadas",
+    "Cliente -> Linha de interação -> Frontstage -> Linha de visibilidade -> Backstage",
+    "Mover card entre células -> atualizar serviceStageId + serviceLayer",
+    "Context Library -> Smart Object -> Service Frame sem duplicar entidade",
+    "Service Frame -> Ver Blueprint -> projeção formal do mesmo serviço",
+    "Cobertura por etapa -> mostrar exatamente quais camadas estão faltando"
+  ],
+  "canonical_rule": "Position in the Service Frame is view metadata. Canonical business knowledge remains in Service Graph entities and is referenced, never copied."
+}

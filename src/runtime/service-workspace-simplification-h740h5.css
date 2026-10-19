@@ -1,0 +1,27 @@
+/* V1.20.5-H7.40-H5 — Service Workspace Simplification */
+.bo-h740h5 .bo-h722-head-copy{max-width:none!important;width:100%}
+.bo-h740h5-kpis{display:grid;grid-template-columns:repeat(6,minmax(118px,1fr));gap:8px;margin-top:14px;max-width:1040px}
+.bo-h740h5-kpis>div{min-width:0;padding:10px 11px;border:1px solid #dfe8f2;border-radius:11px;background:rgba(255,255,255,.82);display:grid;gap:2px}
+.bo-h740h5-kpis small{font-size:9px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;color:#6e8198}
+.bo-h740h5-kpis strong{font-size:16px;line-height:1.1;color:#19395f;letter-spacing:-.02em}
+.bo-h740h5-kpis span{font-size:9px;line-height:1.35;color:#7d8da0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bo-h740h5-metrics-details{margin-top:8px;max-width:1040px}
+.bo-h740h5-metrics-details>summary{cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:#3568ad;font-size:10px;font-weight:800;list-style:none}
+.bo-h740h5-metrics-details>summary::-webkit-details-marker{display:none}.bo-h740h5-metrics-details>summary::after{content:'+';font-size:13px}.bo-h740h5-metrics-details[open]>summary::after{content:'−'}
+.bo-h740h5-all-metrics{max-height:none!important;margin-top:8px!important;padding:10px;border:1px solid #e5edf5;border-radius:12px;background:#fbfdff}
+.bo-h740h5-overview{gap:18px!important}.bo-h740h5-overview .bo-h722-artifact-strip{order:1}.bo-h740h5-overview .bo-h740h5-phase-map{order:2}
+.bo-h740h5-continue{padding:18px 20px!important}.bo-h740h5-continue .bo-h722-section-title{margin-bottom:12px}.bo-h740h5-continue .bo-h722-artifact-grid{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.bo-h740h5-phase-map{padding:20px!important}.bo-h740h5-phase-map .bo-h722-section-title{margin-bottom:14px}.bo-h740h5-phase-map .bo-h722-section-title p{max-width:720px;line-height:1.5}
+.bo-h740h5-phase-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.bo-h740h5-phase-grid>button{min-width:0;min-height:228px;border:1px solid #dce6f0;border-radius:14px;background:#fff;padding:15px;text-align:left;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.bo-h740h5-phase-grid>button:hover{transform:translateY(-2px);border-color:#aac5e8;box-shadow:0 12px 26px rgba(30,74,123,.08)}
+.bo-h740h5-phase-grid header{display:flex;align-items:center;justify-content:space-between;gap:10px}.bo-h740h5-phase-grid header>span{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:#edf4ff;color:#2457d6}.bo-h740h5-phase-grid header em{font-style:normal;font-size:11px;font-weight:850;color:#3b618e;background:#f2f6fa;border-radius:999px;padding:4px 7px}
+.bo-h740h5-phase-grid>button>strong{font-size:17px;line-height:1.15;color:#17395f}.bo-h740h5-phase-grid>button>p{margin:0;color:#71839a;font-size:11px;line-height:1.45;min-height:48px}
+.bo-h740h5-phase-grid>button>div{display:flex;flex-wrap:wrap;gap:5px}.bo-h740h5-phase-grid>button>div span{font-size:9px;color:#5f7186;background:#f7f9fc;border:1px solid #e7edf4;border-radius:999px;padding:4px 6px}
+.bo-h740h5-phase-grid footer{margin-top:auto;border-top:1px solid #edf2f7;padding-top:10px;display:grid;gap:5px}.bo-h740h5-phase-grid footer small{font-size:9px;color:#7a8ca0}.bo-h740h5-phase-grid footer b{display:flex;align-items:center;gap:5px;color:#2457d6;font-size:10px}
+.bo-h740h5-phase-grid>button[data-phase='understand'] header>span{background:#edf6ff;color:#1f6fad}.bo-h740h5-phase-grid>button[data-phase='design'] header>span{background:#eaf8f6;color:#0e8779}.bo-h740h5-phase-grid>button[data-phase='validate'] header>span{background:#f3efff;color:#6a4bc0}.bo-h740h5-phase-grid>button[data-phase='improve'] header>span{background:#eef3ff;color:#345ec0}.bo-h740h5-phase-grid>button[data-phase='operate'] header>span{background:#eef6f8;color:#336e7c}
+.bo-h740h5-architecture-note{margin-top:14px;border-top:1px solid #edf2f7;padding-top:12px}.bo-h740h5-architecture-note summary{cursor:pointer;color:#41658f;font-size:10px;font-weight:800}.bo-h740h5-architecture-note p{margin:8px 0 0;color:#74869b;font-size:10px;line-height:1.55;max-width:980px}
+.bo-h740h5 .bo-h740h3-workspace-groups{margin-bottom:0}.bo-h740h5 .bo-h740h3-workspace-subnav{border-top:1px solid #edf2f7}
+@media(max-width:1420px){.bo-h740h5-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.bo-h740h5-phase-grid{grid-template-columns:repeat(3,minmax(220px,1fr))}}
+@media(max-width:980px){.bo-h740h5-phase-grid{grid-template-columns:repeat(2,minmax(220px,1fr))}.bo-h740h5-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.bo-h740h5-kpis{grid-template-columns:1fr 1fr}.bo-h740h5-phase-grid{grid-template-columns:1fr}.bo-h740h5-phase-grid>button{min-height:0}.bo-h740h5-kpis span{white-space:normal}.bo-h740h5-continue,.bo-h740h5-phase-map{padding:15px!important}}

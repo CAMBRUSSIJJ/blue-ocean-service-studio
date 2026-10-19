@@ -1,0 +1,18 @@
+{
+  "release": "V1.20.5-H7.36",
+  "phase": "Metrics & Service Outcomes",
+  "browserValidated": false,
+  "visualQa": "NOT_RUN",
+  "reactTypecheck": "NOT_DECLARED_PASS",
+  "viteBuild": "NOT_DECLARED_PASS",
+  "sourceQa": {
+    "h736": "203/203 PASS",
+    "h735": "176/176 PASS",
+    "accumulated": "3887 OK / 0 FAIL",
+    "syntax": "PASS",
+    "preflight": "PASS",
+    "strictCore": "PASS"
+  },
+  "reason": "npm ci did not complete and no browser validation was executed. Source/domain gates and the H7.36 strict core are independently validated.",
+  "generatedAt": "2026-10-13T22:08:37-03:00"
+}

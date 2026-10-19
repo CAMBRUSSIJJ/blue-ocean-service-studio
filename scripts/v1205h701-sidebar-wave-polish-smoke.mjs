@@ -1,0 +1,24 @@
+import fs from 'node:fs';
+const read = (p) => fs.readFileSync(p, 'utf8');
+const app = read('src/App.tsx');
+const css = read('src/runtime/sidebar-h701.css');
+const style = read('src/style.css');
+const pkg = JSON.parse(read('package.json'));
+let ok = 0; let fail = 0;
+function check(condition, label) { if (condition) { console.log('OK  ', label); ok++; } else { console.log('FAIL', label); fail++; } }
+check(!app.includes('workspaceExpanded') && !app.includes('setWorkspaceExpanded'), 'accordion Workspace legado removido');
+check(app.includes('data-sidebar-section="design"') && app.includes('Desenho do serviço'), 'grupo Desenho do serviço presente');
+check(app.includes('data-sidebar-section="context"') && app.includes('Contexto'), 'grupo Contexto presente');
+check(app.includes('data-sidebar-section="management"') && app.includes('Gestão'), 'grupo Gestão presente');
+check(app.includes('Journey maps') && app.includes('Blueprints') && app.includes('Whiteboards') && app.includes('Hierarquias'), 'ferramentas de desenho preservadas');
+check(app.includes('Personas') && app.includes('Necessidades') && app.includes('Jobs') && app.includes('Dores') && app.includes('Hipóteses') && app.includes('Problemas') && app.includes('Evidências'), 'objetos de contexto preservados');
+check(app.includes('Portfólio') && app.includes('Métricas') && app.includes('Pesquisa') && app.includes('Templates') && app.includes('Arquivo'), 'ferramentas de gestão preservadas');
+check(app.includes('bo-h701-sidebar-wave') && app.includes('bo-h701-wave-back') && app.includes('bo-h701-wave-front'), 'onda decorativa presente na sidebar');
+check(css.includes('@keyframes bo-h701-wave-drift') && css.includes('@keyframes bo-h701-wave-drift-front'), 'animação de onda possui dois planos');
+check(css.includes('@media(prefers-reduced-motion:reduce)'), 'onda respeita prefers-reduced-motion');
+check(css.includes('.bo1205h3-nav-child.is-active::before') && css.includes('background:#0b63f6'), 'estado ativo possui indicador lateral Blue Ocean');
+check(style.includes("@import './runtime/sidebar-h701.css';"), 'CSS H7.0.1 importado no entrypoint');
+check(style.indexOf("sidebar-h701.css") < style.indexOf('@tailwind base'), 'import H7.0.1 precede regras Tailwind');
+check(pkg.scripts['v1205h701:sidebar-wave-polish-smoke'], 'script H7.0.1 registrado');
+console.log(`\nH7.0.1 Sidebar & Wave Polish: ${ok} OK / ${fail} FAIL`);
+process.exit(fail ? 1 : 0);

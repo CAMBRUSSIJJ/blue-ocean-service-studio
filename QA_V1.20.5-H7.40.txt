@@ -1,0 +1,57 @@
+BLUE OCEAN Service Studio V1.20.5-H7.40 — QA REAL
+Phase: Professional Product Hardening
+Date: 2026-10-13
+
+H7.40 Professional Product Hardening                    115/115 PASS
+H7.39 Executive Service Cockpit                         138/138 PASS
+H7.38 Service Operations Bridge                         197/197 PASS
+npm run qa                                               4548 OK / 0 FAIL
+syntax:check                                             PASS
+H7.40 TypeScript strict core                             PASS (Bundler resolution; product-hardening)
+lock:verify                                              PASS
+source:authority                                         PASS
+foundation:smoke                                         12/12 PASS
+project-foundation:smoke                                 46/46 PASS
+preflight-linux.sh                                       PASS
+H7.40 Browser Hardening (real Chromium 144)              13/13 PASS
+Full-app localhost browser gate                          UNAVAILABLE (ERR_BLOCKED_BY_ADMINISTRATOR)
+
+PRODUCT HARDENING GUARANTEES VALIDATED
+- New Product Readiness perspective reports persistence, recovery, permissions, integrity, runtime and accessibility deterministically.
+- React fallback state now has debounced autosave and explicit pagehide/beforeunload/hidden-page flush paths.
+- Collaboration RBAC is enforced in the React fallback in addition to the existing canonical Data Bridge edit guard.
+- Existing durable recovery/IndexedDB capabilities are reused instead of introducing a parallel persistence engine.
+- Readiness checks distinguish PASS, ATTENTION and BLOCKED; unknown/unavailable external gates are never promoted to PASS.
+- Linux launcher keeps exact npm ci and now has a bounded install guard; a failed/hung install cannot continue as if the source had built successfully.
+- npm registry behavior is constrained with fail-fast .npmrc settings to avoid unbounded install hangs.
+- Responsive H7.40 readiness layout has desktop/tablet/mobile breakpoints, visible keyboard focus and reduced-motion handling.
+- Real Chromium hardening gate validated DOM, six readiness areas, IndexedDB, BroadcastChannel, matchMedia, reduced-motion, 6/2/1 responsive columns and focus-visible styling.
+
+INSTALL / BUILD TRUTH
+npm ci: NOT COMPLETED. Final controlled attempt ended with npm's own error: "Exit handler never called!"; a prior timeout also failed to terminate npm cleanly. No successful dependency installation is claimed.
+Partial node_modules: REMOVED.
+Full React typecheck: NOT DECLARED PASS. Without installed dependencies, TypeScript first fails resolving react/react-jsx-runtime/lucide-react and cascades from there.
+Vite production build: NOT DECLARED PASS because dependencies were not completely installed.
+Vercel deploy: NOT RUN / NOT DECLARED PASS.
+Full-app browser validation via localhost: UNAVAILABLE in this environment because Chromium navigation to 127.0.0.1 is blocked by administrator policy.
+Scoped H7.40 browser hardening: PASS 13/13 in real Chromium 144 using in-page rendering of the H7.40 UI/CSS and runtime-capability probes.
+
+PACKAGE HYGIENE BEFORE PACKAGING
+node_modules     absent
+dist             absent
+.generated       absent
+artifacts        removed after browser evidence capture
+__pycache__      absent
+
+FINAL ZIP VALIDATION
+Linux ZIP re-extracted                         PASS
+H7.40 from re-extracted ZIP                  115/115 PASS
+H7.39 from re-extracted ZIP                  138/138 PASS
+syntax from re-extracted ZIP                 PASS
+preflight from re-extracted ZIP              PASS
+H7.40 browser hardening from extracted ZIP   13/13 PASS (Chromium 144)
+START.sh / start-linux.sh / preflight-linux  755 / 755 / 755
+forbidden generated directories              all absent
+Source / Linux / Vercel canonical source     identical
+Files in package                              1049
+SHA256                                        generated after final packaging

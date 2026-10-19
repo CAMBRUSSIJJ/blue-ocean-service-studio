@@ -1,0 +1,19 @@
+{
+  "version": "1.20.4",
+  "principle": "Service Readiness responde se há contexto, definição e estrutura mínimos para avançar no desenho. Não é Health nem Coverage e nunca é persistido como score canônico.",
+  "levels": [
+    {"id":"L1","name":"Código","status":"PASS","evidence":"Service Readiness Engine derivado, 17 critérios, três domínios e roteamento de gaps estão presentes na fonte."},
+    {"id":"L2","name":"Contrato","status":"PASS","evidence":"Gate V1.20.4 específico passa 54/54 e npm run qa passa integralmente."},
+    {"id":"L3","name":"Runtime","status":"PARTIAL","evidence":"Engine, parser, core typecheck, regressão e preflight executados; browser real depende do Chromium do Playwright."},
+    {"id":"L4","name":"Visual","status":"UNAVAILABLE","evidence":"Chromium esperado pelo Playwright não está instalado neste ambiente de validação."}
+  ],
+  "critical_paths": [
+    "Service Home -> Service Readiness -> Contexto / Definição / Estrutura",
+    "Lacuna de Contexto -> Context Library na aba correta",
+    "Lacuna de Definição -> Definition Studio",
+    "Lacuna de Estrutura -> Service Frame",
+    "100% -> Ready to Design -> fase Desenhar",
+    "Alteração no Service Graph -> score recalculado sem estado persistido"
+  ],
+  "canonical_rule": "Readiness is a deterministic derived report over Service Graph + Service Project Definition + Service Frame metadata; the score itself is never persisted as canonical business data."
+}

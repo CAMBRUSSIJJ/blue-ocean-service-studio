@@ -1,0 +1,42 @@
+BLUE OCEAN Service Studio — V1.18.5 QA
+
+PASS  workspace-preferences:smoke — 50/50
+PASS  attention:smoke — 32/32
+PASS  health:smoke — 26/26
+PASS  home:v3:smoke — 19/19
+PASS  full historical npm run qa — 506 OK / 0 FAIL, V1.12 through V1.18.5
+PASS  demo smoke — 79 objects, 0 broken references, 5 stages, 7 evidence, 7 initiatives
+PASS  workspace-preferences.ts + continue-engine.ts strict standalone typecheck with TypeScript 5.8.3
+PASS  WorkspaceHome.tsx transpile/syntax diagnostic — 0 errors
+PASS  main.tsx transpile/syntax diagnostic — 0 errors
+PASS  behavioral runtime fixture — 12 assertions
+PASS  package-lock verify
+PASS  source authority
+PASS  source foundation
+PASS  Linux preflight
+
+BEHAVIORAL FIXTURE
+- favorite add is idempotent
+- two pins preserve deliberate order
+- pin reorder persists deterministic order
+- recent history caps at 50
+- repeated target is deduplicated
+- later edit replaces earlier open for same target
+- tracked context outranks older inferred context
+- orphaned references are counted without crashing
+- equal timestamps use activity weight; edited outranks opened
+
+PERSISTENCE SAFETY
+- preferences scoped by user + workspace
+- IndexedDB durable store + localStorage fallback
+- IndexedDB open timeout: 1800 ms
+- blocked IndexedDB falls back instead of blocking the Home
+- newest state wins between cache and durable storage
+- global mutations serialized by workspace
+- deleted references are pruned safely
+
+LIMITATION
+- `npm ci --no-audit --no-fund` could not complete because npm registry tarball requests returned EAI_AGAIN.
+- Partial node_modules was removed before packaging.
+- Full project `npm run typecheck`, `npm run build` and Vite production output are therefore not claimed as passed here.
+- The two new TypeScript services passed strict standalone compilation with TypeScript 5.8.3, and changed TSX entry surfaces passed TypeScript parse/transpile diagnostics.

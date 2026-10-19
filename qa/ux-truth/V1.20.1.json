@@ -1,0 +1,39 @@
+{
+  "version": "1.20.1",
+  "principle": "A definição do serviço deve ser rastreável ao Discovery e suficientemente explícita antes de orientar o desenho.",
+  "levels": [
+    {
+      "id": "L1",
+      "name": "Código",
+      "status": "PASS",
+      "evidence": "Service Definition Studio, domínio de readiness e persistência expandida do Service Project estão presentes na fonte."
+    },
+    {
+      "id": "L2",
+      "name": "Contrato",
+      "status": "PASS",
+      "evidence": "Service Definition Studio 87/87; regressão completa 1538/1538 em 44 gates."
+    },
+    {
+      "id": "L3",
+      "name": "Runtime",
+      "status": "PARTIAL",
+      "evidence": "Domínio, persistência, schema/runtime e regressão foram executados; navegador real não pôde iniciar."
+    },
+    {
+      "id": "L4",
+      "name": "Visual",
+      "status": "UNAVAILABLE",
+      "evidence": "Chromium esperado pelo Playwright não está instalado neste ambiente."
+    }
+  ],
+  "critical_paths": [
+    "Service Home -> Definir -> Service Definition Studio",
+    "Discovery -> Persona/Problem/Evidence -> rastreabilidade da definição",
+    "Promessa + outcome + escopo + limites + princípios",
+    "Critérios de sucesso + fora do escopo + premissas",
+    "Readiness determinístico -> bloquear desenho enquanto incompleto",
+    "Salvar definição -> service.project.definition -> persistir referências canônicas"
+  ],
+  "canonical_rule": "Service Project stores the definition and references canonical Discovery entities by ID. Personas, Problems and Evidence remain owned by the Service Graph and are never duplicated inside the definition."
+}

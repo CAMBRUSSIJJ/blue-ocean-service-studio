@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const pkg=JSON.parse(read('package.json'));
+const app=read('src/App.tsx'), runtime=read('src/runtime/shell-consistency.js'), css=read('src/runtime/shell-consistency.css'), index=read('index.html'), prep=read('scripts/prepare-assets.mjs'), main=read('src/main.tsx');
+let ok=0,total=0;function check(n,p){total++;if(!p){console.error('FAIL '+n);process.exitCode=1}else{ok++;console.log('OK   '+n)}}
+check('baseline V1.16.3 preservada em versão >= 1.16.3',/^1\.(?:16\.(?:[3-9]|[1-9]\d)|1[7-9]\.|[2-9]\d\.)/.test(pkg.version));
+check('header nativo possui breadcrumbs canônicos',app.includes('bo1163-breadcrumbs')&&app.includes('activeViewGroup'));
+check('seletor de serviço no topo da sidebar',app.includes('bo1163-service-switcher')&&app.includes('Serviço atual'));
+check('status de salvamento único no header',app.includes('bo1163-save-status')&&app.includes('Falha ao salvar'));
+check('sidebar nativa usa Workspace IA e não EXECUTAR',app.includes('data-sidebar-section="design"')&&app.includes('data-sidebar-section="context"')&&app.includes('Journey maps')&&app.includes('Personas')&&!app.includes('rt182-nav-group-label">EXECUTAR'));
+check('runtime normaliza páginas legadas',runtime.includes('normalizePageHeaders')&&runtime.includes('bo1163-page-header'));
+check('runtime mantém um item ativo',runtime.includes('normalizeActiveNav')&&runtime.includes("aria-current','page"));
+check('runtime oculta badge local redundante',runtime.includes('bo1163-hide-local-badge'));
+check('CSS fixa header em 48px',css.includes('--bo-shell-header:48px')&&css.includes('.rt182-host-header'));
+check('CSS possui contexto de serviço responsivo',css.includes('.bo1163-service-context')&&css.includes('@media(max-width:720px)'));
+check('CSS remove eyebrows legadas',css.includes('.bo1163-legacy-eyebrow{display:none'));
+check('asset v1163 entra no index',index.includes('v1163-shell-consistency.css')&&index.includes('v1163-shell-consistency.js'));
+check('prepare-assets publica v1163',prep.includes("v1163-shell-consistency.js")&&prep.includes("v1163-shell-consistency.css"));
+check('body marca bo-v1163',main.includes("'bo-v1163'"));
+console.log(`V1.16.3 Shell & Page Consistency: ${ok}/${total}`);if(process.exitCode)process.exit(process.exitCode);

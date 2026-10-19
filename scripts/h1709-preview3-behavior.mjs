@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { cardsInCell, duplicateCellCard, formatCardText, moveJourneyCard } from '../src/domain/journey-card-operations.ts';
+const lane = { id:'lane1', type:'text', label:'Texto', cards:{ a:'Legado' } };
+assert.equal(cardsInCell(lane,'a')[0].content,'Legado');
+const duplicated = duplicateCellCard(lane,'a','legacy:lane1:a','new-1');
+assert.deepEqual(cardsInCell(duplicated,'a').map(x=>x.id),['legacy:lane1:a','new-1']);
+assert.equal(cardsInCell(duplicated,'a')[1].content,'Legado');
+assert.equal(duplicateCellCard(duplicated,'a','new-1','new-1'), duplicated);
+assert.equal(formatCardText('olá',0,3,'bold').content,'**olá**');
+assert.equal(formatCardText('oi',0,2,'italic').content,'*oi*');
+assert.equal(formatCardText('a\nb',0,3,'list').content,'- a\n- b');
+assert.equal(formatCardText('site',0,4,'link').content,'[site](https://)');
+const moved = moveJourneyCard([duplicated],'lane1','a','new-1','lane1','a',0);
+assert.deepEqual(cardsInCell(moved[0],'a').map(x=>x.id),['new-1','legacy:lane1:a']);
+assert.equal(lane.cards.a,'Legado');
+console.log('PASS: 9 verificações de domínio H17.0.9 Preview 3');

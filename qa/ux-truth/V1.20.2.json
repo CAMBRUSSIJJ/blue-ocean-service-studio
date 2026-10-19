@@ -1,0 +1,39 @@
+{
+  "version": "1.20.2",
+  "principle": "O usuário deve construir e reutilizar o contexto do serviço antes de escolher a ferramenta de desenho; cada objeto continua único no Service Graph.",
+  "levels": [
+    {
+      "id": "L1",
+      "name": "Código",
+      "status": "PASS",
+      "evidence": "Context Library, rota Contexto, Universal Inspector, filtros, navegação do Whiteboard e conversão para Smart Objects estão presentes na fonte."
+    },
+    {
+      "id": "L2",
+      "name": "Contrato",
+      "status": "PASS",
+      "evidence": "npm run qa PASS; 1575/1575 verificações explícitas; Context Library 85/85."
+    },
+    {
+      "id": "L3",
+      "name": "Runtime",
+      "status": "PARTIAL",
+      "evidence": "Domínio, relações, remoção, Whiteboard contracts, parser e regressão foram executados; navegador real não pôde iniciar."
+    },
+    {
+      "id": "L4",
+      "name": "Visual",
+      "status": "UNAVAILABLE",
+      "evidence": "Chromium esperado pelo Playwright não está instalado neste ambiente."
+    }
+  ],
+  "critical_paths": [
+    "Visão geral -> Contexto -> Personas/Necessidades/Jobs/Dores/Hipóteses/Problemas/Evidências",
+    "Objeto de contexto -> Universal Inspector -> propriedades/relacionamentos",
+    "Context Library -> Whiteboards -> biblioteca Contexto -> reutilizar objeto canônico",
+    "Post-it livre -> Transformar em objeto -> Service Graph",
+    "Hipótese -> evidência -> validação explícita -> Problema",
+    "+ Criar -> Contexto -> abrir aba correta da Context Library"
+  ],
+  "canonical_rule": "Context Library is a view/editor over Service Graph entities. It must never duplicate canonical service knowledge inside pages, tabs or Whiteboards."
+}

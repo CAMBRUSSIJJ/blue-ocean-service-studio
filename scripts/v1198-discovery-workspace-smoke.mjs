@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import { buildDiscoveryWorkspaceReport, createDiscoveryEntity } from '../src/services/discovery-workspace.ts';
+import { buildServiceProjectReport, createServiceProjectState, updateServiceProjectDefinition } from '../src/services/service-project.ts';
+let passed=0; const ok=(condition,message)=>{assert.ok(condition,message);passed++;};
+const now='2026-10-07T12:00:00.000Z';
+const graph={schemaVersion:3,persistenceRevision:1,entities:{},views:{whiteboards:{}},service:{id:'svc-1',name:'Lavanderia',description:'',journeyIds:[],createdAt:now,updatedAt:now,project:createServiceProjectState('svc-1',now)},journeys:{},stages:{},touchpoints:{},problems:{},opportunities:{},tasks:{},blueprintDraft:{evidencias:'',frontstage:'',backstage:'',suporte:''},research:{sources:{}}};
+let report=buildDiscoveryWorkspaceReport(graph);
+ok(report.score===0,'empty score');ok(report.totalChecks===6,'six discovery dimensions');ok(!report.minimumContextReady,'empty not ready');
+const specs=[['persona','Cliente recorrente',[]],['need','Ganhar tempo',['persona-1']],['job','Ter roupas prontas',['need-1']],['pain','Deslocamento demorado',['job-1']],['problemHypothesis','Coleta resolve fricção',['pain-1']],['evidence','7/10 citam falta de tempo',['problemHypothesis-1']]];
+for(const [kind,title,relatedIds] of specs){const entity=createDiscoveryEntity({graph,kind,title,relatedIds,now,id:`${kind}-1`});graph.entities[kind]={[entity.id]:entity};ok(entity.type===kind,`created ${kind}`);ok(entity.serviceId==='svc-1',`${kind} ownership`);}
+report=buildDiscoveryWorkspaceReport(graph);
+ok(report.score===100,'full discovery score');ok(report.completedChecks===6,'all checks complete');ok(report.minimumContextReady,'minimum context ready');ok(report.totalObjects===6,'six objects');ok(report.relationshipCount===5,'five relationships');ok(report.recent.length===6,'recent stream');
+for(const kind of ['persona','need','job','pain','problemHypothesis','evidence']) ok(report.collections[kind].count===1,`${kind} count`);
+const evidence=graph.entities.evidence['evidence-1'];ok(evidence.status==='captured','evidence status');ok(evidence.confidence==='medium','evidence confidence default');
+const projectReport=buildServiceProjectReport(graph);ok(projectReport.phases.discovery.score===100,'service project discovery score');ok(projectReport.discoveryReady,'service project discovery ready');
+const defined=updateServiceProjectDefinition(graph,{promise:'Economizar tempo',outcome:'Roupa pronta',scope:'Coleta e entrega',startBoundary:'Pedido',endBoundary:'Entrega',principles:['Simples']});
+ok(defined.service.project.definition.promise==='Economizar tempo','definition persisted');ok(defined.service.project.definition.principles.length===1,'principles persisted');
+const home=fs.readFileSync('src/views/WorkspaceHome.tsx','utf8');const whiteboards=fs.readFileSync('src/views/WhiteboardsView.tsx','utf8');const blueprints=fs.readFileSync('src/views/BlueprintWorkspaceView.tsx','utf8');const css=fs.readFileSync('src/runtime/service-project-home.css','utf8');
+for(const marker of ['data-discovery-workspace="1"','Descoberta antes do desenho','CONTEXTO CONECTADO','COBERTURA DE DESCOBERTA','Relacionar com','Confiança da evidência','Ir para Definir']) ok(home.includes(marker),`home marker ${marker}`);
+for(const kind of ['persona','need','job','pain','problemHypothesis','evidence']) ok(home.includes(`'${kind}'`),`ui kind ${kind}`);
+ok(!whiteboards.includes('buildDiscoveryWorkspaceReport')&&whiteboards.includes('Ir para Blueprints'),'whiteboards free from Discovery gate');ok(blueprints.includes('Criar Service Blueprint'),'blueprints own structured service entry');ok(css.includes('.bo1198-discovery-grid'),'discovery grid css');ok(css.includes('.bo1198-context-stream'),'context stream css');ok(css.includes('.bo1198-discovery-progress'),'discovery progress css');
+console.log(`V1.19.8 Discovery Workspace: ${passed} OK / 0 FAIL`);

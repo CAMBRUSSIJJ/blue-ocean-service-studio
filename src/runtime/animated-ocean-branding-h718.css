@@ -1,0 +1,146 @@
+/* H7.18 — Animated Ocean Branding & Navigation Icons
+   Keep the H7.17 composition intact; add slow motion and make the icon language unmistakably Blue Ocean. */
+
+:root{
+  --bo-h718-current:#2563eb;
+  --bo-h718-aqua:#38bfc7;
+  --bo-h718-depth:#0b3154;
+  --bo-h718-foam:#eef8ff;
+}
+
+/* --- Motion: same waves, only a restrained drift. --- */
+.bo-h718 .bo-auth-shell::before{
+  animation:bo-h718-auth-wave-drift 18s ease-in-out infinite;
+  will-change:background-position;
+}
+@keyframes bo-h718-auth-wave-drift{
+  0%,100%{background-position:50% 100%}
+  35%{background-position:51.15% 100%}
+  70%{background-position:49.25% 100%}
+}
+
+/* Workspace receives a second, very light moving current over the H7.17 static surface. */
+.bo-h718 .bo1215-dashboard[data-ocean-home="7.15"]::after{
+  content:''!important;
+  display:block!important;
+  position:absolute;
+  pointer-events:none;
+  z-index:-1;
+  left:-2.5%;
+  right:-2.5%;
+  bottom:-2px;
+  height:342px;
+  background:url('/blue-ocean-surface-light-h717.svg') center bottom/100% 340px no-repeat;
+  opacity:.34;
+  animation:bo-h718-workspace-current 22s ease-in-out infinite;
+  will-change:transform,opacity;
+}
+@keyframes bo-h718-workspace-current{
+  0%,100%{transform:translate3d(0,0,0);opacity:.31}
+  32%{transform:translate3d(1.1%,2px,0);opacity:.37}
+  68%{transform:translate3d(-.8%,-2px,0);opacity:.33}
+}
+
+/* The sidebar wave moves too, but never changes its silhouette. */
+.bo-h718 .bo-h701-wave-back{animation:bo-h718-sidebar-current-back 12s ease-in-out infinite;transform-origin:center}
+.bo-h718 .bo-h701-wave-front{animation:bo-h718-sidebar-current-front 9s ease-in-out infinite;transform-origin:center}
+@keyframes bo-h718-sidebar-current-back{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+@keyframes bo-h718-sidebar-current-front{0%,100%{transform:translateX(0)}50%{transform:translateX(-4px)}}
+
+/* --- Sidebar: each module now has a branded semantic glyph container. --- */
+.bo-h718 .bo-h701-sidebar-nav button{position:relative}
+.bo-h718 .bo-h718-sidebar-icon{
+  --bo-h718-nav-accent:#376fa8;
+  --bo-h718-nav-surface:#f0f6fb;
+  width:24px;height:24px;display:inline-grid;place-items:center;flex:0 0 24px;
+  border-radius:8px 8px 6px 8px;
+  color:var(--bo-h718-nav-accent);
+  background:var(--bo-h718-nav-surface);
+  border:1px solid color-mix(in srgb,var(--bo-h718-nav-accent) 17%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+  transition:transform .16s ease,background-color .16s ease,border-color .16s ease,color .16s ease;
+}
+.bo-h718 .bo-h701-sidebar-nav button:hover .bo-h718-sidebar-icon{transform:translateY(-1px);border-color:color-mix(in srgb,var(--bo-h718-nav-accent) 30%,transparent)}
+.bo-h718 .bo-h701-sidebar-nav button.is-active .bo-h718-sidebar-icon,
+.bo-h718 .bo-h701-sidebar-nav button[aria-current="page"] .bo-h718-sidebar-icon{
+  color:#fff;background:var(--bo-h718-nav-accent);border-color:var(--bo-h718-nav-accent);
+  box-shadow:0 5px 14px color-mix(in srgb,var(--bo-h718-nav-accent) 20%,transparent);
+}
+.bo-h718 .bo-h701-sidebar-nav button.is-active::after,
+.bo-h718 .bo-h701-sidebar-nav button[aria-current="page"]::after{
+  content:'';position:absolute;right:8px;width:18px;height:2px;border-radius:99px;
+  background:linear-gradient(90deg,transparent,var(--bo-h718-nav-accent));opacity:.42;
+}
+
+.bo-h718 [data-icon-kind="dashboard"],.bo-h718 [data-icon-kind="journey"]{--bo-h718-nav-accent:#2563eb;--bo-h718-nav-surface:#eef5ff}
+.bo-h718 [data-icon-kind="blueprint"]{--bo-h718-nav-accent:#0f8f83;--bo-h718-nav-surface:#eaf8f6}
+.bo-h718 [data-icon-kind="whiteboard"]{--bo-h718-nav-accent:#7657d6;--bo-h718-nav-surface:#f3f0ff}
+.bo-h718 [data-icon-kind="hierarchy"],.bo-h718 [data-icon-kind="job"]{--bo-h718-nav-accent:#4f63c7;--bo-h718-nav-surface:#eff1ff}
+.bo-h718 [data-icon-kind="persona"]{--bo-h718-nav-accent:#7657d6;--bo-h718-nav-surface:#f3f0ff}
+.bo-h718 [data-icon-kind="need"],.bo-h718 [data-icon-kind="research"]{--bo-h718-nav-accent:#2d8ed8;--bo-h718-nav-surface:#edf7ff}
+.bo-h718 [data-icon-kind="pain"]{--bo-h718-nav-accent:#e36a72;--bo-h718-nav-surface:#fff0f1}
+.bo-h718 [data-icon-kind="hypothesis"]{--bo-h718-nav-accent:#d69a26;--bo-h718-nav-surface:#fff7e8}
+.bo-h718 [data-icon-kind="problem"]{--bo-h718-nav-accent:#d94b5b;--bo-h718-nav-surface:#fff0f2}
+.bo-h718 [data-icon-kind="evidence"]{--bo-h718-nav-accent:#1598c9;--bo-h718-nav-surface:#ecf9ff}
+.bo-h718 [data-icon-kind="metric"]{--bo-h718-nav-accent:#14946d;--bo-h718-nav-surface:#eaf9f3}
+.bo-h718 [data-icon-kind="portfolio"],.bo-h718 [data-icon-kind="template"]{--bo-h718-nav-accent:#174a88;--bo-h718-nav-surface:#eef5ff}
+.bo-h718 [data-icon-kind="archive"],.bo-h718 [data-icon-kind="settings"]{--bo-h718-nav-accent:#657386;--bo-h718-nav-surface:#f2f5f8}
+.bo-h718 [data-icon-kind="collaboration"]{--bo-h718-nav-accent:#168bb5;--bo-h718-nav-surface:#eefaff}
+
+.bo-h718 .bo-h701-nav-section__label{position:relative;padding-left:18px!important}
+.bo-h718 .bo-h701-nav-section__label::before{
+  content:'';position:absolute;left:5px;top:50%;width:8px;height:5px;transform:translateY(-50%);
+  border-top:1.5px solid #6aa6d8;border-bottom:1.5px solid #7bcfd0;border-radius:50%;opacity:.72;
+}
+
+/* --- Home headers and utility icons: no generic SaaS pictograms. --- */
+.bo-h718 .bo1207-dashboard-section h2>svg,
+.bo-h718 .bo1215-learn-grid button i>svg{color:#2563eb}
+.bo-h718 .bo1207-action-copy strong>svg{color:currentColor;opacity:.78}
+
+.bo-h718 .bo-h718-recents-header{align-items:flex-start!important}
+.bo-h718 .bo-h718-recents-heading{display:flex;align-items:center;gap:10px;min-width:0}
+.bo-h718 .bo-h718-recents-heading h2{margin:0;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.bo-h718 .bo-h718-service-context{
+  display:inline-flex;align-items:center;gap:5px;max-width:340px;padding:4px 8px;
+  border-radius:999px;background:rgba(238,245,255,.9);border:1px solid #d6e5f6;
+  color:#41627f;font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.bo-h718 .bo-h718-service-context svg{flex:0 0 auto;color:#174a88}
+.bo-h718 .bo-h718-recents-header>button{display:inline-flex!important;align-items:center!important;gap:5px!important}
+
+/* --- Recents: artifact identity is visible before the user reads the label. --- */
+.bo-h718 .bo-h718-recent-kind{display:flex!important;align-items:center;gap:4px;color:#61738a!important;font-weight:750!important;letter-spacing:.035em}
+.bo-h718 .bo1215-recent-card[data-artifact-type="Journey"] .bo-h718-recent-kind svg{color:#2563eb}
+.bo-h718 .bo1215-recent-card[data-artifact-type="Blueprint"] .bo-h718-recent-kind svg{color:#0f8f83}
+.bo-h718 .bo1215-recent-card[data-artifact-type="Whiteboard"] .bo-h718-recent-kind svg{color:#7657d6}
+
+.bo-h718-artifact-preview{overflow:visible}
+.bo-h718-artifact-mark{
+  position:absolute;right:-4px;top:-5px;z-index:5;width:24px;height:24px;display:grid;place-items:center;
+  border-radius:8px;background:rgba(255,255,255,.94);border:1px solid currentColor;
+  box-shadow:0 5px 12px rgba(31,67,102,.09);color:inherit;
+}
+.bo-h718-current-line{
+  position:absolute;left:2px;right:2px;bottom:0;height:6px;border-top:1.5px solid currentColor;border-radius:50%;
+  opacity:.18;transform:skewX(-16deg);
+}
+.bo-h718-artifact-preview.is-compact .bo-h718-artifact-mark{right:-12px;top:-9px;transform:scale(.78)}
+.bo-h718-artifact-preview.is-compact .bo-h718-current-line{display:none}
+
+/* Keep controls operationally calm while strengthening branded icon surfaces. */
+.bo-h718 .bo1215-learn-grid>button>i{border-radius:10px 10px 7px 10px!important}
+.bo-h718 .bo1215-learn-grid>button>i svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.3))}
+
+@media(max-width:760px){
+  .bo-h718 .bo-h718-service-context{display:none}
+  .bo-h718 .bo-h718-sidebar-icon{width:26px;height:26px;flex-basis:26px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .bo-h718 .bo-auth-shell::before,
+  .bo-h718 .bo1215-dashboard[data-ocean-home="7.15"]::after,
+  .bo-h718 .bo-h701-wave-back,
+  .bo-h718 .bo-h701-wave-front{animation:none!important;transform:none!important}
+  .bo-h718 .bo-h718-sidebar-icon{transition:none!important}
+}

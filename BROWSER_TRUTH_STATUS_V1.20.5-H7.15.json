@@ -1,0 +1,12 @@
+{
+  "release": "V1.20.5-H7.15",
+  "surface": "Ocean Workspace Home",
+  "h715_smoke": "PASS 30/30",
+  "regression_qa": "PASS",
+  "linux_preflight": "PASS",
+  "syntax_check": "PASS",
+  "full_typecheck": "NOT_VALIDATED_DEPENDENCIES_NOT_INSTALLED",
+  "production_build": "NOT_VALIDATED_DEPENDENCIES_NOT_INSTALLED",
+  "browser_runtime": "PENDING_USER_LINUX_VALIDATION",
+  "note": "npm ci did not complete in the generation environment; no browser claim is made without a dependency-complete runtime."
+}

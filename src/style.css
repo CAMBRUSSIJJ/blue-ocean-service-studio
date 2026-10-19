@@ -1,0 +1,98 @@
+@import './design-system/index.css';
+@import './runtime/dashboard-parity.css';
+@import './runtime/creation-reset.css';
+@import './runtime/service-builder-assistant.css';
+@import './runtime/interaction-structure-ux.css';
+@import './runtime/service-project-home.css';
+@import './runtime/dashboard-h70.css';
+@import './runtime/workspace-library-h3.css';
+@import './runtime/sidebar-h701.css';
+@import './runtime/personas-h71.css';
+@import './runtime/personas-h713.css';
+@import './runtime/personas-h724.css';
+@import './runtime/needs-h72.css';
+@import './runtime/jobs-h73.css';
+@import './runtime/pains-h74.css';
+@import './runtime/hypotheses-h75.css';
+@import './runtime/problems-h76.css';
+@import './runtime/evidence-h77.css';
+@import './runtime/design-handoff-h78.css';
+@import './runtime/journey-maps-h79.css';
+@import './runtime/service-blueprint-h710.css';
+@import './runtime/whiteboard-h711.css';
+@import './runtime/brand-experience-h712.css';
+@import './runtime/blue-ocean-identity-h713.css';
+@import './runtime/service-depth-adaptive-home-h714.css';
+@import './runtime/ocean-workspace-home-h715.css';
+@import './runtime/blue-ocean-object-language-h716.css';
+@import './runtime/ocean-surface-h717.css';
+@import './runtime/animated-ocean-branding-h718.css';
+@import './runtime/journey-cover-h718h1.css';
+@import './runtime/motion-identity-h719.css';
+@import './runtime/visual-recovery-h719h1.css';
+@import './runtime/dashboard-composition-h720.css';
+@import './runtime/dashboard-recovery-h720h1.css';
+@import './runtime/journey-workspace-h721.css';
+@import './runtime/unified-service-blueprint-h722.css';
+@import './runtime/journey-editor-h723.css';
+@import './runtime/journey-library-sidebar-h724.css';
+@import './runtime/service-ecology-h725.css';
+@import './runtime/research-studio-h726.css';
+@import './runtime/service-proposition-h727.css';
+@import './runtime/blueprint-semantic-h728.css';
+@import './runtime/channel-continuity-h729.css';
+@import './runtime/service-prototype-lab-h730.css';
+@import './runtime/evidence-learning-h731.css';
+@import './runtime/decision-iteration-h732.css';
+@import './runtime/current-future-h733.css';
+@import './runtime/improvement-backlog-h734.css';
+@import './runtime/improvement-portfolio-h735.css';
+@import './runtime/service-outcomes-h736.css';
+@import './runtime/service-governance-h737.css';
+@import './runtime/service-operations-bridge-h738.css';
+@import './runtime/executive-service-cockpit-h739.css';
+@import './runtime/product-hardening-h740.css';
+@import './runtime/product-ux-h740h2.css';
+@import './runtime/product-coherence-h740h3.css';
+@import './runtime/product-polish-h740h4.css';
+@import './runtime/service-workspace-simplification-h740h5.css';
+@import './runtime/guided-service-workspace-h740h7.css';
+@import './runtime/project-home-h740h8.css';
+@import './runtime/project-architecture-hardening-h740h9.css';
+@import './runtime/project-shell-h740h10.css';
+@import './runtime/service-first-navigation-h740h11.css';
+@import './runtime/persistent-global-sidebar-h740h13.css';
+@import './runtime/interaction-accessibility-polish-h740h14.css';
+@import './runtime/usage-relations-h740h152.css';
+@import './runtime/design-service-ux-h740h153.css';
+@import './runtime/design-service-visual-h740h154.css';
+@import './runtime/discovery-ux-h740h155.css';
+@import './runtime/research-ux-h740h156.css';
+@import './runtime/adaptive-experience-h16.css';
+@import './runtime/foundation-deep-adaptation-h161.css';
+@import './runtime/research-driven-context-h162.css';
+@import './runtime/design-service-proposal-h164.css';
+@import './runtime/research-proposal-h165.css';
+@import './runtime/research-workflow-ux-h166.css';
+@import './runtime/research-flow-interaction-h167.css';
+@import './runtime/design-start-choice-h168.css';
+@import './runtime/single-experience-h17.css';
+@import './runtime/direct-creation-h1703.css';
+@import './runtime/direct-journey-reference-h1704.css';
+@import './runtime/journey-free-canvas-h1705.css';
+@import './runtime/journey-canvas-free.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { min-height: 100%; margin: 0; }
+html, body { font-family: var(--bo-font-sans); font-size: 14px; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+body, button, input, textarea, select { font-family: var(--bo-font-sans); }
+button, input, textarea, select { font: inherit; }
+
+/* V1.17.8 — account affordance inside authenticated workspace */
+.bo1178-account{position:relative}.bo1178-account__trigger{height:34px;min-width:38px;padding:0 8px;border:1px solid var(--bo-border,#e3e7ed);border-radius:8px;background:#fff;color:#475467;display:flex;align-items:center;gap:6px;cursor:pointer}.bo1178-account__trigger>span{width:22px;height:22px;border-radius:6px;background:#0b1f3b;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}.bo1178-account__menu{position:absolute;right:0;top:42px;z-index:130;width:220px;padding:8px;border:1px solid #e3e7ed;border-radius:10px;background:#fff;box-shadow:0 16px 36px rgba(16,24,40,.12)}.bo1178-account__menu>div{padding:8px 9px 10px;border-bottom:1px solid #eef1f4}.bo1178-account__menu strong,.bo1178-account__menu small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bo1178-account__menu strong{font-size:12px;color:#172033}.bo1178-account__menu small{font-size:11px;color:#667085;margin-top:3px}.bo1178-account__menu button{width:100%;margin-top:6px;border:0;background:transparent;border-radius:7px;padding:8px 9px;display:flex;align-items:center;gap:8px;font-size:11px;color:#475467;cursor:pointer}.bo1178-account__menu button:hover{background:#f7f8fa;color:#172033}
+
+
+
+

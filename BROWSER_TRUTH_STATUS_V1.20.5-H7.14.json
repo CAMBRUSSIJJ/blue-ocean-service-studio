@@ -1,0 +1,16 @@
+{
+  "release": "V1.20.5-H7.14",
+  "surface": "Service Depth & Adaptive Home",
+  "h714_smoke": "PASS 30/30",
+  "h713_regression": "PASS 26/26",
+  "h712_regression": "PASS 25/25",
+  "qa": "PASS",
+  "syntax_check": "PASS",
+  "lock_verify": "PASS",
+  "source_authority": "PASS",
+  "foundation_smoke": "PASS 12/12",
+  "linux_preflight": "PASS",
+  "full_typecheck": "NOT_RUN_DEPENDENCY_INSTALL_TIMEOUT",
+  "production_build": "NOT_RUN_DEPENDENCY_INSTALL_TIMEOUT",
+  "browser_runtime": "PENDING_USER_LINUX_VALIDATION"
+}

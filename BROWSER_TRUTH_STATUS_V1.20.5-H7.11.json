@@ -1,0 +1,15 @@
+{
+  "release": "V1.20.5-H7.11",
+  "surface": "Whiteboard 2.0",
+  "source_smoke": "PASS 40/40",
+  "regression_qa": "PASS 1747/1747",
+  "linux_preflight": "PASS",
+  "lock_verify": "PASS",
+  "source_authority": "PASS",
+  "foundation_smoke": "PASS 12/12",
+  "syntax_check": "PASS",
+  "full_typecheck": "NOT_RUN_DEPENDENCIES_NOT_INSTALLED",
+  "production_build": "NOT_RUN_DEPENDENCIES_NOT_INSTALLED",
+  "browser_runtime": "PENDING_USER_LINUX_VALIDATION",
+  "note": "npm ci exceeded the generation environment limit; partial node_modules was removed before packaging."
+}

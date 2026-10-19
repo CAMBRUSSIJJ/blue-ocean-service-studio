@@ -1,0 +1,6 @@
+{
+  "release": "V1.20.1-H1",
+  "status": "NOT_RUN",
+  "reason": "Compile-only hotfix with no visual or interaction changes. V1.20.1 Browser Truth remained UNAVAILABLE in this environment because the Playwright Chromium executable was absent.",
+  "visual_changes": false
+}

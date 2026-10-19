@@ -1,0 +1,9 @@
+{
+  "release": "V1.20.5-H7.40-H12",
+  "browser_full_app": "not_run",
+  "reason": "release focused on source navigation contracts; final package remains source-clean",
+  "source_qa": "pass",
+  "h12_smoke": "31/31",
+  "preflight": "pass",
+  "note": "No browser PASS is claimed for H12 in this execution."
+}

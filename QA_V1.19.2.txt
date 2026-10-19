@@ -1,0 +1,55 @@
+BLUE OCEAN Service Studio — V1.19.2 QA
+Visual Service Builder
+
+RESULTADO PRINCIPAL
+PASS  npm run qa — 975 OK / 0 FAIL
+PASS  V1.19.2 Visual Service Builder — 72/72
+PASS  V1.19.1 Whiteboard Core Reliability — 42/42
+PASS  V1.19.0 Service Builder Assistant — 51/51
+PASS  V1.18.9 Creation Architecture Reset — 83/83
+PASS  V1.18.8 Guided Service Builder — 117/117
+PASS  Sim Kit 2.2 static contracts — 16/16
+PASS  node --check whiteboard-core.js
+PASS  node --check guidance-engine.js
+PASS  node --check Sim Kit phase7.cjs
+PASS  tsc --noEmit --noCheck
+PASS  package-lock verify
+PASS  source authority
+PASS  source foundation
+PASS  Linux preflight
+
+ESCOPO VALIDADO DA V1.19.2
+- BuilderSession isolada por Whiteboard.
+- Seletor inicial: Criar do zero / Mapear existente / Melhorar existente.
+- Criar do zero começa em 0% e não conta objetos antigos do Service Graph.
+- Serviço/objetivo/limites tornam-se cards visuais no Whiteboard.
+- Persona criada pelo Assistente é canônica e não é anexada automaticamente a etapas antigas.
+- Jornada/Stage da sessão ficam associados à BuilderSession.
+- Etapas aparecem como Smart Objects organizados horizontalmente.
+- Touchpoint, emoção, Frontstage, Backstage, Processo e Sistema são distribuídos em lanes visuais.
+- Evidência, Problema, Métrica e Melhoria também são materializados no quadro.
+- Sequência de etapas e fluxo Persona → primeira etapa recebem conexões explícitas.
+- Objetos antigos não entram no progresso de create_new.
+- Whiteboard vazio mostra “Quadro em branco”, não Readiness herdado.
+- Sessão ativa mostra “Construção X%”, separada do Service Health/Readiness.
+- Empty onboarding desaparece quando o Assistente está ativo.
+- Dashboard “Construção guiada” cria um novo Whiteboard vazio antes de iniciar o Assistente.
+- Campos críticos do Assistente desativam autocomplete nativo quando aplicável.
+
+SIM KIT 2.2
+- Fase 7 atualizada para validar seletor de sessão, progresso inicial 0%, materialização visual e persistência.
+- O build instrumentado continua fora do source original (.generated/).
+- Static contracts: 16/16.
+
+NÃO EXECUTADO / NÃO DECLARADO COMO PASS
+- Sim Kit 2.2 dinâmico (jsdom/fake-indexeddb/esbuild): dependências não disponíveis neste ambiente e instalação npm não concluiu dentro do limite.
+- Full React/Vite production build: npm ci não concluiu dentro do limite deste ambiente; nenhum PASS de build é declarado.
+- Gate Playwright/Chromium completo: não executado nesta release neste ambiente.
+
+LIMITAÇÕES CONHECIDAS MANTIDAS
+- plano realmente infinito para esquerda/cima ainda não implementado;
+- edges ainda não possuem relationType semântico;
+- imagens ainda podem residir como data URL no Service Graph;
+- Undo geral ainda usa snapshots amplos fora das otimizações já feitas;
+- conflito entre abas preserva rascunho, mas não possui UI final de compare/merge;
+- Visual Service Builder ainda é determinístico; IA generativa não decide estrutura nesta release.

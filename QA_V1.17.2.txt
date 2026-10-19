@@ -1,0 +1,333 @@
+BLUE OCEAN Service Studio V1.17.2 — QA
+
+JS syntax: OK
+
+> blue-ocean-service-studio@1.17.2 lock:verify
+> node scripts/v1151-lock-verify.mjs
+
+OK   package-lock usa lockfileVersion 3
+OK   nome do lock alinhado ao package.json
+OK   versão raiz do lock alinhada ao package.json
+OK   packages[""] alinhado à versão da aplicação
+OK   dependencies: lucide-react (^0.468.0) está travado no lock
+OK   dependencies: react (^19.1.1) está travado no lock
+OK   dependencies: react-dom (^19.1.1) está travado no lock
+OK   dependencies: zod (^4.6.5) está travado no lock
+OK   devDependencies: @types/react (^19.1.8) está travado no lock
+OK   devDependencies: @types/react-dom (^19.1.6) está travado no lock
+OK   devDependencies: @vitejs/plugin-react (^4.7.0) está travado no lock
+OK   devDependencies: autoprefixer (^10.4.21) está travado no lock
+OK   devDependencies: postcss (^8.5.6) está travado no lock
+OK   devDependencies: tailwindcss (^3.4.17) está travado no lock
+OK   devDependencies: typescript (^5.8.3) está travado no lock
+OK   devDependencies: vite (^6.3.5) está travado no lock
+
+Lock verify: OK
+
+> blue-ocean-service-studio@1.17.2 qa
+> npm run stability:smoke && npm run design:smoke && npm run workspace:smoke && npm run navigation:smoke && npm run precision:smoke && npm run branding:smoke && npm run whiteboard:smoke && npm run demo:smoke && npm run whiteboard:unified-smoke && npm run design:v4:smoke && npm run shell:consistency:smoke && npm run home:v2:smoke && npm run library:smoke && npm run wizard:smoke
+
+
+> blue-ocean-service-studio@1.17.2 stability:smoke
+> node scripts/v1120-stability-smoke.mjs
+
+OK  baseline V1.12 preservada em versão >= 1.12.0
+OK  recovery antes da aplicação
+OK  quarentena de estado inválido
+OK  importação funciona fora do editor
+OK  rollback de importação
+OK  sessão tolera storage bloqueado
+OK  shell sem MutationObserver
+OK  shell dirigido por eventos
+OK  Error Boundary React
+OK  boot/error/offline states
+OK  stability antes do React
+OK  assets V1.12 preparados
+V1.12.0 stability smoke: 12/12
+
+> blue-ocean-service-studio@1.17.2 design:smoke
+> node scripts/v1130-design-system-smoke.mjs
+
+OK   baseline V1.13 preservada em versão >= 1.13.0
+OK   tokens semânticos
+OK   componentes permanentes
+OK   biblioteca React
+OK   bridge legado isolado
+OK   asset único gerado
+OK   design system carregado por último
+OK   badge da aplicação usa versão gerada
+OK   sem nova dependência visual
+OK   tokens fonte existem
+V1.13+ design-system smoke: 10/10
+
+> blue-ocean-service-studio@1.17.2 workspace:smoke
+> node scripts/v1140-workspace-home-smoke.mjs
+
+OK   baseline Workspace Home preservada em versão >= 1.14.0
+OK   rota home tipada
+OK   workspace é entrada padrão
+OK   Home React consome Service Graph real
+OK   Home React possui continuar e recentes
+OK   App expõe Workspace e + Criar global
+OK   8 tipos de criação disponíveis
+OK   runtime Workspace Home registrado
+OK   Whiteboard livre possui API de criação
+OK   Journey Home não atropela Workspace Home
+OK   assets V1.14 entram no pipeline
+OK   CSS usa Design Tokens V2
+OK   sem diálogos nativos no runtime
+OK   sem polling DOM por MutationObserver
+
+V1.14.0 Workspace Home: 14/14
+
+> blue-ocean-service-studio@1.17.2 navigation:smoke
+> node scripts/v1150-global-navigation-smoke.mjs
+
+OK   versão >= 1.15.0
+OK   runtime Global Navigation existe
+OK   busca indexa o Service Graph
+OK   Blueprints entram no índice
+OK   atalho Ctrl/Cmd K e /
+OK   teclado de resultados
+OK   trigger nativo no header
+OK   foco contextual de etapa
+OK   resultado de tarefa abre editor
+OK   Pesquisa possui deep-link
+OK   Inteligência possui deep-link
+OK   Benefícios possui deep-link
+OK   asset V1.15 no pipeline
+OK   asset carregado antes do React
+OK   CSS responsivo e dialog acessível
+OK   sem polling por MutationObserver
+OK   sem armazenamento paralelo de dados
+
+V1.15.0 Global Navigation: 17/17
+
+> blue-ocean-service-studio@1.17.2 precision:smoke
+> node scripts/v1153-precision-studio-smoke.mjs
+
+OK   baseline Precision Studio preservada em versão >= 1.15.3
+OK   runtime Precision Studio existe
+OK   CSS Precision Studio existe
+OK   sidebar compacta 216/60
+OK   header compacto 48px
+OK   canvas neutro e superfícies claras
+OK   Home reduz cardificação
+OK   collapse persistente e atalho
+OK   Inspector Universal disponível
+OK   toolbar contextual disponível
+OK   API registrada
+OK   hooks nativos no App
+OK   assets no pipeline
+OK   assets no bootstrap
+OK   CSS responsivo
+OK   sem MutationObserver
+OK   sem armazenamento paralelo do Service Graph
+
+V1.15.3 Precision Studio Shell: 17/17
+
+> blue-ocean-service-studio@1.17.2 branding:smoke
+> node scripts/v1153-branding-smoke.mjs
+
+OK   baseline Branding preservada em versão >= 1.15.3
+OK   tokens canônicos do branding
+OK   geometria canônica 216/48/320
+OK   paleta verde estrutural antiga removida do CSS fonte
+OK   Pesquisa não injeta mais ENTENDER duplicado
+OK   shell legado não injeta MODELAR/EXECUTAR
+OK   shell canônico remove headings legados
+OK   estado ativo único na sidebar
+OK   alias BlueOceanRuntime disponível
+OK   branding antigo removido de nomes de exportação
+OK   formatos/storage legados preservados para compatibilidade
+OK   asset V1.15.3 no pipeline
+OK   asset V1.15.3 no bootstrap
+OK   título BLUE OCEAN usa versão canônica
+
+V1.15.3 Branding Consolidation: 14/14
+
+> blue-ocean-service-studio@1.17.2 whiteboard:smoke
+> node scripts/v1154-whiteboard-ux-smoke.mjs
+
+OK   baseline Whiteboard V1.15.4 preservada
+OK   reconciliação de geometria estruturada
+OK   stage Smart Object oculto em view estruturada
+OK   sticky Blueprint só quando necessário
+OK   tour Blueprint não inicia automaticamente
+OK   coach flutuante é opt-in
+OK   empty cells têm CTA visível
+OK   piso tipográfico 11px
+OK   menu Ferramentas agrupado
+OK   mobile isola o editor da sidebar
+OK   marca usa blue-ocean-mark.svg
+OK   build visível usa APP_VERSION
+OK   blue estrutural antigo removido do Whiteboard
+
+V1.15.4+ Whiteboard UX Recovery: 13/13
+
+> blue-ocean-service-studio@1.17.2 demo:smoke
+> node scripts/v1102-demo-smoke.mjs
+
+Demo smoke: 79 objetos · 0 problemas de referência · 5 etapas · 7 evidências · 7 iniciativas · OK
+
+> blue-ocean-service-studio@1.17.2 whiteboard:unified-smoke
+> node scripts/v1161-whiteboard-unified-smoke.mjs
+
+OK   baseline V1.16.1 preservada em versão >= 1.16.1
+OK   Whiteboard UX runtime versionada
+OK   Inspector Universal 320 px
+OK   Inspector abre ao concluir seleção
+OK   preferência do Inspector é configurável
+OK   toolbar contextual reduzida
+OK   ações secundárias migradas para menu
+OK   Readiness único no cabeçalho
+OK   fórmula do Readiness explícita
+OK   diagnósticos específicos não confundem progresso
+OK   Readiness pode ser ocultado
+OK   runtime whiteboardUx exposto
+OK   V1.15.4 geometry recovery preservada
+OK   piso tipográfico preservado
+
+V1.16.1 Whiteboard Integrity & Unified UX: 14/14
+
+> blue-ocean-service-studio@1.17.2 design:v4:smoke
+> node scripts/v1162-design-system-v4-smoke.mjs
+
+OK   baseline V1.16.2 preservada em versão >= 1.16.2
+OK   escala tipográfica v4 começa em 11px
+OK   tokens de ícone e camadas
+OK   aliases semânticos do board
+OK   aliases legados sem !important nos custom properties
+OK   facade único de ícones
+OK   produto não importa lucide diretamente
+OK   biblioteca React ampliada
+OK   página interna Design System
+OK   Whiteboard sem paleta slate estrutural
+OK   dívida !important reduzida para <= 300
+OK   piso tipográfico do board preservado >= 11px
+OK   componentes v4 possuem Chip Tooltip e DS page
+OK   body marca bo-v1162
+V1.16.2 Design System v4: 14/14 · !important=261
+
+> blue-ocean-service-studio@1.17.2 shell:consistency:smoke
+> node scripts/v1163-shell-consistency-smoke.mjs
+
+OK   baseline V1.16.3 preservada em versão >= 1.16.3
+OK   header nativo possui breadcrumbs canônicos
+OK   seletor de serviço no topo da sidebar
+OK   status de salvamento único no header
+OK   grupo nativo usa MELHORAR e não EXECUTAR
+OK   runtime normaliza páginas legadas
+OK   runtime mantém um item ativo
+OK   runtime oculta badge local redundante
+OK   CSS fixa header em 48px
+OK   CSS possui contexto de serviço responsivo
+OK   CSS remove eyebrows legadas
+OK   asset v1163 entra no index
+OK   prepare-assets publica v1163
+OK   body marca bo-v1163
+V1.16.3 Shell & Page Consistency: 14/14
+
+> blue-ocean-service-studio@1.17.2 home:v2:smoke
+> node scripts/v1170-home2-smoke.mjs
+
+OK   versão V1.17.0 ou superior
+OK   Home possui primeiro uso e estado ativo
+OK   primeiro uso oferece zero template importar
+OK   Home usa Readiness único
+OK   próximo passo aciona guidedBuilder
+OK   faixa operacional possui quatro sinais
+OK   atenção cobre atraso comentários gaps owner benefício revisão
+OK   recentes unificam jornada blueprint pesquisa
+OK   favoritos são condicionais e reais
+OK   personalização leve persiste preferências
+OK   atividade tem estado vazio útil
+OK   App fornece importação à Home
+OK   runtime fallback conhece Readiness e atenção
+OK   runtime usa versão sincronizada
+OK   CSS Home 2.0 tem layout e breakpoints
+OK   Home 2.0 mantém piso tipográfico de 11px
+OK   body registra bo-v1170
+OK   descrição Home no shell fala próximo passo
+V1.17.0 Home 2.0: 18/18
+
+> blue-ocean-service-studio@1.17.2 library:smoke
+> node scripts/v1171-library-smoke.mjs
+
+OK   versão V1.17.1 ou superior
+OK   Jornadas possuem grade lista e gestão
+OK   Jornadas possuem ordenação
+OK   Jornadas possuem filtros rápidos
+OK   Jornadas possuem seleção e ações em lote
+OK   Templates de Jornada têm preview estrutural
+OK   Blueprints possuem ordenação
+OK   Blueprints possuem filtros rápidos
+OK   Blueprints possuem seleção e ações em lote
+OK   Templates de Blueprint têm preview estrutural
+OK   Preferências da biblioteca persistem no metadata
+OK   CSS da biblioteca tem seleção bulk preview e responsivo
+OK   CSS mantém piso de 11 px
+OK   asset V1.17.1 entra no pipeline
+OK   body registra bo-v1171
+OK   Journey shell recebe versão sincronizada
+V1.17.1 Journeys & Blueprints Library: 16/16
+
+> blue-ocean-service-studio@1.17.2 wizard:smoke
+> node scripts/v1172-wizard-smoke.mjs
+
+OK   versão V1.17.2
+OK   stepper visível possui oito passos
+OK   stepper acompanha modais do roteiro
+OK   preview ao vivo deriva do Service Graph
+OK   preview mostra etapas contatos e operação
+OK   resumo final existe
+OK   resumo final abre Jornada e Blueprint
+OK   continuação automática de passos diretos
+OK   continuação automática de experiência e operação
+OK   Stage Flow preserva contexto do wizard
+OK   ações do stage flow preservam contexto
+OK   builder mantém único Service Graph
+OK   CSS tem layout stepper preview resumo
+OK   CSS mantém piso tipográfico de 11 px
+OK   CSS é responsivo
+OK   asset V1.17.2 entra no pipeline
+OK   body registra bo-v1172
+OK   QA principal inclui wizard smoke
+V1.17.2 Wizard Montar serviço 2.0: 18/18
+
+> blue-ocean-service-studio@1.17.2 source:authority
+> node scripts/v1160-source-authority.mjs
+
+OK   source authority contém src/main.tsx
+OK   source authority contém src/App.tsx
+OK   source authority contém src/domain/schema.ts
+OK   source authority contém src/runtime/whiteboard-core.js
+OK   source authority contém scripts/prepare-assets.mjs
+OK   source authority contém vite.config.ts
+OK   source authority contém package-lock.json
+OK   package-lock alinhado à versão
+OK   App não fixa versão visual antiga
+OK   Whiteboard não fixa badge/título antigo
+OK   versão gerada alinhada quando presente
+
+Source authority: OK
+
+> blue-ocean-service-studio@1.17.2 foundation:smoke
+> node scripts/v1160-source-foundation-smoke.mjs
+
+OK   fundação V1.16+ preservada
+OK   source React canônico existe
+OK   versão React vem do gerador
+OK   Whiteboard não fixa versão de produto
+OK   prepare-assets injeta versão
+OK   build tem provenance
+OK   verify source authority
+OK   CI usa npm ci
+OK   CI roda release verify
+OK   CI prepara Playwright
+OK   changelog existe
+OK   dist não é source authority
+
+V1.16+ Source Foundation: 12/12
+
+LIMITAÇÃO: npm ci/build completo não validado neste ambiente; instalação expirou e deixou dependências de tipos incompletas.

@@ -1,0 +1,28 @@
+BLUE OCEAN Service Studio — V1.18.4 QA
+
+PASS  attention:smoke — 32/32
+PASS  health:smoke — 26/26
+PASS  home:v3:smoke — 19/19
+PASS  full historical npm run qa — all gates V1.12 through V1.18.4
+PASS  demo smoke — 79 objects, 0 broken references, 5 stages, 7 evidence, 7 initiatives
+PASS  attention-engine.ts + service-health.ts strict standalone typecheck with TypeScript 5.8.3
+PASS  WorkspaceHome.tsx transpile/syntax diagnostic — 0 errors
+PASS  deterministic runtime check on demo graph
+PASS  critical-priority runtime scenario — overdue task > at-risk benefit > overdue review
+PASS  lock verify, source authority, source foundation and Linux preflight
+
+DEMO ATTENTION CHECK (2026-10-06 fixture)
+- Total attention items: 2
+- Top: 1 ação sem responsável — medium — priority 74
+- 2 comentários abertos — low — priority 54
+
+CRITICAL PRIORITY FIXTURE
+- 100 critical task.overdue
+- 98 critical benefit.at_risk
+- 97 critical review.overdue
+
+LIMITATION
+- `npm ci --no-audit --no-fund` timed out/fails in this packaging environment because npm tarballs return EAI_AGAIN.
+- Partial node_modules was discarded before packaging.
+- Full project `npm run typecheck` and Vite production build are therefore not claimed as passed here.
+- Full TypeScript/Vite verification remains required on Linux/CI with registry access.

@@ -1,0 +1,17 @@
+<svg width="1600" height="340" viewBox="0 0 1600 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="a" x1="0" y1="100" x2="1600" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DDF3FF" stop-opacity="0.82"/>
+      <stop offset="0.48" stop-color="#DCEAFF" stop-opacity="0.62"/>
+      <stop offset="1" stop-color="#EAF7FF" stop-opacity="0.82"/>
+    </linearGradient>
+    <linearGradient id="b" x1="0" y1="180" x2="1600" y2="290" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C7F1EF" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#D9E7FF" stop-opacity="0.30"/>
+    </linearGradient>
+  </defs>
+  <path d="M0 185C218 128 401 143 590 177C808 216 986 235 1200 191C1370 156 1495 164 1600 201V340H0V185Z" fill="url(#a)"/>
+  <path d="M0 224C225 161 433 173 623 204C829 238 1009 279 1217 246C1368 222 1497 210 1600 238V340H0V224Z" fill="#E8F4FF" fill-opacity="0.86"/>
+  <path d="M0 166C240 107 435 118 633 151C846 187 1007 221 1219 183C1385 154 1491 149 1600 178V217C1453 192 1360 198 1228 223C1002 267 824 222 620 189C421 157 218 156 0 211V166Z" fill="url(#b)"/>
+  <path d="M0 192C213 134 415 142 611 174C836 211 1002 251 1218 215C1380 188 1484 187 1600 214" stroke="#B7DDFB" stroke-opacity="0.72" stroke-width="1.4"/>
+</svg>

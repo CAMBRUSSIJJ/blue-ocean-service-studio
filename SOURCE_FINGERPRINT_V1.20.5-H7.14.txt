@@ -1,0 +1,12 @@
+BLUE OCEAN Service Studio — SOURCE FINGERPRINT V1.20.5-H7.14
+
+e486df89a78c34b7e3b066a9340670c1a1c579dea4452022d1c6a79b28c842cb  src/views/WorkspaceDashboardView.tsx
+f6558eb8644498c5e134dd1966226b26ac85c6cfbbb10fc5ae6bb2d69da766a0  src/services/service-depth.ts
+05def3c9f3985ab16781697c5a707896f41fd7916e242320abdc28a6ed9abf07  src/runtime/service-depth-adaptive-home-h714.css
+5b419174eb2d839a86715fc40587fdb6b02be3d1e9862b8f09fafd1f5c1f8615  src/runtime/blue-ocean-identity-h713.css
+1ff2553334d62c4cb6849921689988af542c9e7bc2b36ee9f368bbe015082904  src/App.tsx
+42de9653d6a6fa3e542a9ff3b11a54f29fe463c8a786ae7204aa7ecdec38a4b7  src/main.tsx
+cb194bd7f3c638aca1828f5f65d1c55087f53caea4d4785ce0c6ee968c18b888  src/style.css
+976ab741cca0fa4f1c97624bc6a013faa417688ec2dd35735fe656569aab4aaa  scripts/v1205h714-service-depth-adaptive-home-smoke.mjs
+7445ff17054698ce7a037e6f6db17073c184e52167eb91da1b95ecc35d46d373  package.json
+adb1a80f3505a27800466353ded76059c4b20cbd38616f505b511bb2efa83523  preflight-linux.sh

@@ -1,0 +1,15 @@
+{
+  "release": "V1.20.5-H7.7",
+  "surface": "Evidências 2.0",
+  "source_smoke": "PASS 34/34",
+  "regression_qa": "PASS 1593/1593",
+  "linux_preflight": "PASS",
+  "lock_verify": "PASS",
+  "source_authority": "PASS",
+  "foundation_smoke": "PASS 12/12",
+  "syntax_check": "PASS",
+  "full_typecheck": "NOT_RUN_INSTALL_TIMEOUT",
+  "production_build": "NOT_RUN_INSTALL_TIMEOUT",
+  "browser_runtime": "PENDING_USER_LINUX_VALIDATION",
+  "note": "npm ci timed out before dependency installation completed; partial node_modules was removed before packaging."
+}

@@ -1,0 +1,57 @@
+BLUE OCEAN Service Studio — QA V1.19.5
+======================================
+
+Release: UX Truth & Service Project Entry
+
+REGRESSÃO COMPLETA
+------------------
+npm run qa
+Resultado: 1139 OK / 0 FAIL
+
+GATE ESPECÍFICO V1.19.5
+-----------------------
+npm run ux-truth:smoke
+Resultado: 35 OK / 0 FAIL
+
+GATES DE BASE
+-------------
+Service Composition V1.19.4: 59/59
+Creation Architecture Reset V1.18.9: 83/83
+Service Builder Assistant V1.19.0: 51/51
+Guided Service Builder V1.18.8: 117/117
+
+INTEGRIDADE
+-----------
+node --check whiteboard-core.js: PASS
+node --check workspace-home.js: PASS
+python py_compile browser truth: PASS
+npm run syntax:check (tsc --noEmit --noCheck): PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS
+
+BROWSER TRUTH
+-------------
+npm run ux-truth:browser
+Status: UNAVAILABLE (exit 2)
+Motivo: Playwright Python está disponível, mas o Chromium esperado pelo Playwright não está instalado no ambiente.
+Nenhum PASS visual/runtime foi inferido dessa indisponibilidade.
+
+DEPENDÊNCIAS / BUILD
+--------------------
+npm ci: NÃO CONCLUIU neste ambiente; a tentativa ficou parcial e foi removida antes do empacotamento.
+npm run typecheck completo: NÃO DECLARADO (dependências incompletas).
+npm run build React/Vite: NÃO DECLARADO (dependências incompletas).
+
+CONTRATOS UX TRUTH IMPORTANTES
+------------------------------
+- Service Project Home presente.
+- Fases Entender / Definir / Desenhar / Validar / Melhorar presentes.
+- Discovery mede Persona / Necessidade / Problema-Hipótese / Evidência.
+- Problema/Hipótese pode existir antes de Journey.
+- Montagem estruturada exige Persona + Problema/Hipótese.
+- Whiteboard livre continua disponível.
+- Modal legado "Preparar o Serviço" proibido no runtime.
+- Copy "representação(ões) visuais" proibida no runtime.
+- API legada de Recipe redireciona para contexto do serviço.

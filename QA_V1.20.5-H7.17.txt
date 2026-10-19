@@ -1,0 +1,40 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.17 Ocean Surface & Background System
+============================================================================
+
+BASE
+V1.20.5-H7.16 — Blue Ocean Object Language
+
+ESCOPO
+- Correção do fundo fragmentado do Login.
+- Remoção visual do raster antigo de ondas na H7.17.
+- Novo fundo vetorial contínuo Deep Ocean para autenticação.
+- Novo fundo oceânico leve para o workspace.
+- Remoção do anel decorativo isolado em Recentes.
+- Remoção da meia-onda interna do painel de Recentes.
+- Shelf translúcida em Recentes.
+- Quick Actions, Depth Chip e Aprender integrados à superfície.
+- Sidebar wave alinhada à mesma paleta.
+
+GATES EXECUTADOS
+H7.17 Ocean Surface & Background System       30/30 PASS
+H7.16 Blue Ocean Object Language               40/40 PASS
+npm run qa                               1928 OK / 0 FAIL
+npm run syntax:check                              PASS
+npm run lock:verify                               PASS
+npm run source:authority                          PASS
+npm run foundation:smoke                     12/12 PASS
+preflight-linux.sh                                PASS
+
+TYPECHECK / BUILD
+node_modules: AUSENTE.
+npm run typecheck completo: NÃO DECLARADO.
+npm run build completo: NÃO DECLARADO.
+
+INTEGRIDADE ESPERADA DO PACOTE FINAL
+- node_modules: ausente
+- dist: ausente
+- .generated: ausente
+- artifacts: ausente
+- __pycache__: ausente
+- START.sh: 755
+- preflight-linux.sh: 755

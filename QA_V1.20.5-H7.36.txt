@@ -1,0 +1,60 @@
+BLUE OCEAN Service Studio V1.20.5-H7.36 — QA REAL
+Phase: Metrics & Service Outcomes
+Date: 2026-10-13
+
+H7.36 Metrics & Service Outcomes                     203/203 PASS
+H7.35 Improvement Portfolio                          176/176 PASS
+H7.34 Problems, Opportunities & Prioritization       175/175 PASS
+H7.33 Current × Future Service                       134/134 PASS
+H7.32 Decision & Iteration Loop                      190/190 PASS
+npm run qa                                           3887 OK / 0 FAIL
+syntax:check                                         PASS
+H7.36 TypeScript strict core                         PASS (Bundler resolution; model + service-outcomes)
+lock:verify                                          PASS
+source:authority                                     PASS
+foundation:smoke                                     12/12 PASS
+project-foundation:smoke                             46/46 PASS
+preflight-linux.sh                                   PASS
+
+DOMAIN GUARANTEES VALIDATED
+- Canonical metric definitions remain in entities.metric; outcomes stores bindings + measurement history.
+- Six target kinds are validated: Proposition, Journey, Touchpoint, Handoff, Blueprint and Initiative.
+- Default semantic roles are deterministic: value, outcome, experience, SLA, operation and result.
+- Duplicate bindings are idempotent and missing metric/target IDs are rejected.
+- Binding a metric to an Initiative explicitly synchronizes H7.35 metricIds; unbinding reverses that explicit link.
+- Existing H7.35 metricIds are exposed as implicit outcome bindings without being persisted or duplicated.
+- Metric readings are numeric, timestamped and update the canonical current value.
+- at_least / at_most target status is deterministic.
+- Baseline-to-target progress is deterministic and clamped to 0..100.
+- Trend uses measurement history and respects metric direction.
+- Outcome reports expose metric status, progress, trend, bindings and history.
+- Initiative outcome proof distinguishes achieved, partial, tracking, not achieved and unmeasured states.
+- Implemented initiatives without measurable proof are flagged explicitly.
+- H7.36 binding actions do not mutate Proposition, Journey, Touchpoint, Handoff or Blueprint content.
+
+INSTALL / BUILD TRUTH
+npm ci: NOT COMPLETED; the command stalled and was terminated. Partial node_modules was removed.
+Full React typecheck: NOT DECLARED PASS because dependencies were not completely installed.
+Vite production build: NOT DECLARED PASS for the same reason.
+Visual/browser QA: NOT DECLARED PASS; no browser validation was executed for H7.36.
+
+PACKAGE HYGIENE
+node_modules     absent
+dist             absent
+.generated       absent
+artifacts        absent
+__pycache__      absent
+
+FINAL ZIP VALIDATION
+Linux ZIP re-extracted                         PASS
+H7.36 from re-extracted ZIP                  203/203 PASS
+H7.35 from re-extracted ZIP                  176/176 PASS
+H7.34 from re-extracted ZIP                  175/175 PASS
+H7.33 from re-extracted preflight            134/134 PASS
+H7.32 from re-extracted preflight            190/190 PASS
+syntax from re-extracted ZIP                 PASS
+preflight from re-extracted ZIP              PASS
+START.sh / start-linux.sh / preflight-linux  755 / 755 / 755
+forbidden generated directories              all absent
+Source / Linux / Vercel canonical source     identical before final packaging
+SHA256                                        generated for all three final ZIPs

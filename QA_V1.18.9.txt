@@ -1,0 +1,57 @@
+BLUE OCEAN Service Studio — V1.18.9 QA
+Release: Creation Architecture Reset
+
+RESULTADO PRINCIPAL
+PASS  creation-reset:smoke — 83/83
+PASS  full historical npm run qa — 810 OK / 0 FAIL, V1.12 through V1.18.9
+PASS  demo smoke — 79 objects, 0 broken-reference problems, 5 stages, 7 evidence, 7 initiatives
+PASS  tsc --noEmit --noCheck — project source parses successfully
+PASS  node --check — whiteboard-core.js
+PASS  node --check — workspace-home.js
+PASS  node --check — shell.js
+PASS  package-lock verify
+PASS  source authority
+PASS  source foundation
+PASS  Linux preflight
+
+CREATION RESET CONTRACTS
+- clean workspace has an explicit uninitialized sentinel and no user Service
+- production initialization contains no starter Journey or Stage
+- production blank state contains no Descoberta, Primeiro Contato, Pagamento, Jornada principal or Blueprint principal
+- createServiceGraph creates only the Service over an empty canonical graph
+- demo graph is separated and only loaded by explicit user action
+- untouched historical starter is detected by exact IDs before being reset
+- controller exposes hasService and explicit Service creation
+- Whiteboards is a first-class route and sidebar module
+- structured modules are disabled until a Service exists
+- Home exposes a true no-Service state
+- Home offers Create Service, Import Service and optional Example Service
+- after Service creation the user chooses Blank Whiteboard, Guided Construction or Template
+- blank Whiteboard is viewKind=free with items={} and edges={}
+- free Whiteboards are never registered as Blueprints
+- Blueprint Home indexes only viewKind=blueprint
+- blank Blueprint has no journeyId and no automatic Stage materialization
+- Journey-linked Blueprint requires explicit valid journeyId
+- Service Graph integrity accepts zero Journeys
+- Guided Builder progress creates no Persona or Journey
+- Journey primitive normalization does not invent a default Persona
+- guided Stage flow asks for explicit blank Journey creation when needed
+- Dashboard/Creation Reset CSS imports load before Tailwind directives
+- no Smaply brand/assets/code introduced
+
+PACKAGED SOURCE INVARIANTS
+- source-first release
+- no stale dist is used as release authority
+- no partial node_modules is shipped
+- src remains canonical product source
+- generated public runtime assets are refreshed with prepare-assets
+
+DEPENDENCY / BUILD LIMITATION
+- npm ci online could not complete in this environment because registry access stalled/failed.
+- npm ci --offline failed ENOTCACHED because zod-4.6.5.tgz was not available in the local cache.
+- Full node_modules-dependent React/Vite typecheck and production build are therefore NOT claimed as passed here.
+
+BROWSER E2E LIMITATION
+- A runtime creation harness was prepared for Chromium/Playwright.
+- Navigation to localhost and file:// was blocked by the execution environment with ERR_BLOCKED_BY_ADMINISTRATOR.
+- Browser E2E is therefore NOT claimed as passed.

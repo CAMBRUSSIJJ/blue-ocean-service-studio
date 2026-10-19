@@ -1,0 +1,27 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.5 Hipóteses 2.0
+
+VALIDAÇÃO EXECUTADA
+- H7.5 smoke específico: 24/24 PASS
+- npm run qa: 1532 OK / 0 FAIL
+- preflight-linux.sh: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: 12/12 PASS
+
+ESCOPO VALIDADO
+- HypothesesView dedicada substitui a tabela genérica de Hipóteses.
+- Biblioteca: busca, filtros, criação, estado, confiança, evidências, prontidão e rastreabilidade.
+- Detalhe: Visão geral, Contexto, Evidências, Validação e Uso.
+- Campos próprios: premissa, comportamento esperado, critério de validação, impacto se estiver errada, confiança e risco.
+- Reutiliza o Problem & Evidence Engine canônico; não cria segundo modelo de validação.
+- Evidências têm stance explícito: sustenta, contradiz ou contextual.
+- Relações canônicas/bidirecionais com Persona, Necessidade, Job, Dor e Evidência.
+- Prontidão determinística bloqueia validação sem Dor, contexto do cliente, evidência e suporte observável.
+- Ação "Validar como Problema" promove a hipótese para Problem rastreável por sourceHypothesisId.
+- CSS H7.5 importado antes do Tailwind e sem paleta estrutural verde legada.
+
+LIMITAÇÃO DESTE AMBIENTE
+- npm ci não concluiu dentro do limite e deixou dependências de tipos incompletas.
+- tsc global confirmou que faltam typings React/Babel do node_modules parcial; isso não foi tratado como erro do H7.5.
+- Portanto, npm run typecheck e npm run build completos NÃO foram declarados como PASS aqui.
+- Rodar no Linux do usuário: npm ci && npm run typecheck && npm run build.

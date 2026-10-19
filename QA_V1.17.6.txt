@@ -1,0 +1,37 @@
+BLUE OCEAN Service Studio V1.17.6 — QA
+
+Gate específico:
+- V1.17.6 Brand & Product Polish Final: 20/20
+
+Regressão completa:
+- V1.12 Stability: 12/12
+- V1.13 Design System: 10/10
+- V1.14 Workspace Home: 14/14
+- V1.15 Global Navigation: 17/17
+- V1.15.3 Precision Studio: 17/17
+- V1.15.3 Branding: 14/14
+- V1.15.4 Whiteboard UX: 13/13
+- Demo smoke: 79 objetos / 0 referências quebradas / 5 etapas / 7 evidências / 7 iniciativas
+- V1.16.1 Whiteboard Unified UX: 14/14
+- V1.16.2 Design System v4: 14/14
+- V1.16.3 Shell Consistency: 14/14
+- V1.17.0 Home 2.0: 18/18
+- V1.17.1 Library: 16/16
+- V1.17.2 Wizard 2.0: 18/18
+- V1.17.3 Unified Workspaces: 19/19
+- V1.17.4 Whiteboard Finalization: 19/19
+- V1.17.5 Responsive & Accessibility: 19/19
+- V1.17.6 Brand & Product Polish Final: 20/20
+
+Outros gates:
+- package-lock: OK
+- Source Authority: OK
+- Source Foundation: 12/12
+- `tsc --noEmit --noCheck`: OK
+- `node --check` do runtime V1.17.6: OK
+- asset prepare: OK
+- tipografia <11 px na camada final: 0
+- paleta verde estrutural legada na camada final: 0
+
+Limitação do ambiente:
+`npm ci` voltou a expirar durante acesso ao registry e deixou `node_modules` incompleto. O `tsc --noEmit` completo falha somente por bibliotecas de tipos ausentes (React, React DOM, Babel/Estree), portanto não é tratado como falha comprovada do source V1.17.6. Build Vite, Lighthouse/axe e screenshots devem rodar no Linux/CI/Vercel com acesso normal ao npm.

@@ -1,0 +1,5 @@
+/* V1.20.5-H17 — Single Experience Baseline
+   The former Advanced projection is now the only active product experience. */
+[data-single-experience="H17"] .bo-h16-experience-control,
+[data-single-experience="H17"] .bo-h16-profile-chip{display:none!important}
+[data-single-experience="H17"]{--bo-active-experience:dense}

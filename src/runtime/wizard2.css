@@ -1,0 +1,58 @@
+/* BLUE OCEAN Service Studio — V1.17.2 Wizard “Montar serviço” 2.0
+   Progressive builder with visible stepper, live preview and final summary. */
+.bo1172-builder-modal .rt144-modalbox{max-width:1120px}
+.bo1172-builder-stepper{display:grid;grid-template-columns:repeat(8,minmax(76px,1fr));gap:6px;padding:14px 20px 4px;overflow-x:auto;scrollbar-width:thin}
+.bo1172-builder-stepper button{min-width:76px;border:0;background:transparent;display:grid;grid-template-columns:24px minmax(0,1fr);align-items:center;gap:6px;padding:6px;border-radius:8px;color:var(--bo-color-text-muted);text-align:left;cursor:pointer}
+.bo1172-builder-stepper button:hover{background:var(--bo-color-surface-subtle);color:var(--bo-color-text)}
+.bo1172-builder-stepper button i{display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--bo-color-border);border-radius:50%;background:var(--bo-color-surface);font-size:11px;font-style:normal;font-weight:800}
+.bo1172-builder-stepper button span{font-size:11px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bo1172-builder-stepper button.done i{border-color:var(--bo-color-primary-200);background:var(--bo-color-primary-50);color:var(--bo-color-primary-700)}
+.bo1172-builder-stepper button.active{background:var(--bo-color-primary-50);color:var(--bo-color-primary-900)}
+.bo1172-builder-stepper button.active i{border-color:var(--bo-color-primary-600);background:var(--bo-color-primary-600);color:#fff}
+.bo1172-builder-hero{margin-top:10px}
+.bo1172-builder-body{display:grid;grid-template-columns:minmax(360px,.92fr) minmax(420px,1.08fr);gap:14px;padding:8px 20px 4px}
+.bo1172-builder-route{min-width:0;display:grid;align-content:start;gap:10px}
+.bo1172-builder-body .rt1811-builder-steps{padding:0}
+.bo1172-builder-body .rt1811-builder-step.active{border-color:var(--bo-color-primary-300);background:var(--bo-color-primary-50);box-shadow:inset 3px 0 0 var(--bo-color-primary-600)}
+.bo1172-live-preview{min-width:0;border:1px solid var(--bo-color-border);border-radius:12px;background:var(--bo-board-canvas);overflow:hidden;align-self:start}
+.bo1172-live-preview>header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:12px 13px;border-bottom:1px solid var(--bo-color-border);background:var(--bo-color-surface)}
+.bo1172-live-preview>header>div{display:grid;gap:2px}
+.bo1172-live-preview>header small,.bo1172-builder-summary header small{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--bo-color-primary-600)}
+.bo1172-live-preview>header b{font-size:13px;color:var(--bo-color-text)}
+.bo1172-live-preview>header span{font-size:11px;color:var(--bo-color-text-muted)}
+.bo1172-live-preview>header em{font-size:16px;font-style:normal;font-weight:850;color:var(--bo-color-primary-900)}
+.bo1172-preview-canvas{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(138px,1fr);gap:8px;min-height:230px;padding:14px;overflow-x:auto;background-image:linear-gradient(var(--bo-color-border-soft) 1px,transparent 1px),linear-gradient(90deg,var(--bo-color-border-soft) 1px,transparent 1px);background-size:24px 24px}
+.bo1172-preview-stage{display:grid;grid-template-rows:auto auto minmax(52px,1fr) auto;align-content:start;gap:6px;padding:10px;border:1px solid var(--bo-color-border);border-radius:9px;background:rgba(255,255,255,.96);box-shadow:var(--bo-shadow-xs)}
+.bo1172-preview-stage small{font-size:11px;color:var(--bo-color-text-muted);font-weight:800;letter-spacing:.06em}
+.bo1172-preview-stage>b{font-size:12px;color:var(--bo-color-text)}
+.bo1172-preview-stage p{margin:0;padding:7px;border-radius:6px;background:var(--bo-color-surface-subtle);font-size:11px;line-height:1.35;color:var(--bo-color-text-secondary)}
+.bo1172-preview-stage>div{display:flex;flex-wrap:wrap;gap:5px}
+.bo1172-preview-stage>div span{padding:3px 5px;border:1px solid var(--bo-color-border);border-radius:5px;background:var(--bo-color-surface);font-size:11px;color:var(--bo-color-text-muted)}
+.bo1172-preview-empty{grid-column:1/-1;align-self:center;justify-self:center;max-width:300px;display:grid;gap:5px;text-align:center;padding:18px}
+.bo1172-preview-empty b{font-size:13px}.bo1172-preview-empty span{font-size:11px;line-height:1.45;color:var(--bo-color-text-muted)}
+.bo1172-live-preview>footer{display:flex;flex-wrap:wrap;gap:6px;padding:9px 12px;border-top:1px solid var(--bo-color-border);background:var(--bo-color-surface)}
+.bo1172-live-preview>footer span{font-size:11px;color:var(--bo-color-text-muted)}
+.bo1172-live-preview>footer b{color:var(--bo-color-text)}
+.bo1172-builder-summary{display:grid;gap:12px;margin:12px 20px 4px;padding:16px;border:1px solid var(--bo-color-primary-200);border-radius:12px;background:linear-gradient(135deg,var(--bo-color-primary-50),var(--bo-color-surface))}
+.bo1172-builder-summary header{display:grid;gap:3px}
+.bo1172-builder-summary header b{font-size:15px;color:var(--bo-color-primary-900)}
+.bo1172-builder-summary header span{font-size:11px;line-height:1.45;color:var(--bo-color-text-muted)}
+.bo1172-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.bo1172-summary-grid>div{display:grid;gap:2px;padding:10px;border:1px solid var(--bo-color-border);border-radius:8px;background:var(--bo-color-surface)}
+.bo1172-summary-grid strong{font-size:18px;color:var(--bo-color-primary-900)}
+.bo1172-summary-grid span{font-size:11px;color:var(--bo-color-text-muted)}
+.bo1172-summary-actions{display:flex;flex-wrap:wrap;gap:8px}
+.bo1172-builder-footer{margin-top:10px}
+@media(max-width:980px){
+  .bo1172-builder-stepper{grid-template-columns:repeat(8,112px)}
+  .bo1172-builder-body{grid-template-columns:1fr}
+  .bo1172-preview-canvas{min-height:190px}
+}
+@media(max-width:720px){
+  .bo1172-builder-modal .rt144-modalbox{max-width:none}
+  .bo1172-builder-stepper{padding:10px 12px 2px;grid-template-columns:repeat(8,104px)}
+  .bo1172-builder-body{padding:6px 12px 2px}
+  .bo1172-preview-canvas{grid-auto-columns:150px}
+  .bo1172-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bo1172-builder-summary{margin:10px 12px 4px}
+}

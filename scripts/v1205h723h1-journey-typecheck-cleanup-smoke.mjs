@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+const read=(p)=>fs.readFileSync(p,'utf8');
+let ok=0,fail=0;
+const check=(v,l)=>{if(v){console.log('OK  ',l);ok++}else{console.log('FAIL',l);fail++}};
+const view=read('src/views/JourneyView.tsx');
+const controller=read('src/state/useStudioController.ts');
+const pkg=JSON.parse(read('package.json'));
+const journeyDestructure=(view.match(/const \{([\s\S]*?)\} = studio;/)||[])[1]||'';
+check(!journeyDestructure.includes('collapsedRows'),'JourneyView não destrutura collapsedRows sem uso');
+check(journeyDestructure.includes('rowVisible'),'JourneyView preserva rowVisible');
+check(journeyDestructure.includes('toggleRow'),'JourneyView preserva toggleRow');
+check(controller.includes('const [collapsedRows, setCollapsedRows]'),'estado collapsedRows permanece no controller');
+check(controller.includes('!collapsedRows.includes(row)'),'rowVisible continua derivado de collapsedRows');
+check(view.includes('mapRowVisible'),'filtro Essencial/Detalhado continua operacional');
+check(Boolean(pkg.scripts['v1205h723h1:typecheck-cleanup-smoke']),'script H7.23-H1 registrado');
+check(pkg.scripts.qa?.includes('v1205h723h1:typecheck-cleanup-smoke'),'QA acumulado inclui H7.23-H1');
+console.log(`\nH7.23-H1 Journey Typecheck Cleanup: ${ok} OK / ${fail} FAIL`);
+process.exit(fail?1:0);

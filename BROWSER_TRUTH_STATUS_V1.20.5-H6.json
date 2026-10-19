@@ -1,0 +1,7 @@
+{
+  "release": "V1.20.5-H6",
+  "status": "NOT_RUN",
+  "reason": "O ambiente de empacotamento não conseguiu concluir npm ci (zod@4.6.5 indisponível no cache/rede). O teste pós-correção foi incluído em scripts/v1205h6-browser-routing.py para execução em ambiente com build/browser disponível.",
+  "pre_fix_evidence": "Vídeo do usuário mostrou Dashboard runtime sobreposta a Whiteboards/Journey e navegação duplicada.",
+  "required_flow": ["home", "whiteboards", "journey", "context", "home"]
+}

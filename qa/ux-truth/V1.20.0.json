@@ -1,0 +1,20 @@
+{
+  "version": "1.20.0",
+  "principle": "Problema validado não é sinônimo de hipótese criada: a promoção exige contexto, evidência rastreável e decisão explícita.",
+  "levels": [
+    {"id":"L1","name":"Código","status":"PASS","evidence":"Problem & Evidence Studio, serviço de domínio, evidence stance, validação e entidade canônica problem estão presentes na fonte."},
+    {"id":"L2","name":"Contrato","status":"PASS","evidence":"Problem & Evidence Studio 107/107; Persona 89/89; Discovery 51/51; Service Home 19/19; regressão completa 1449/1449."},
+    {"id":"L3","name":"Runtime","status":"PARTIAL","evidence":"Fluxo de domínio Dor/Contexto -> Hipótese -> Evidência -> Problema validado foi executado nos smokes; navegador real não pôde iniciar."},
+    {"id":"L4","name":"Visual","status":"UNAVAILABLE","evidence":"Chromium esperado pelo Playwright não está instalado neste ambiente."}
+  ],
+  "critical_paths": [
+    "Service Home -> Entender -> Problem & Evidence Studio",
+    "Hipótese -> conectar Persona/Need/Job/Pain",
+    "Hipótese -> relacionar Evidence como supports/contradicts/neutral",
+    "Critérios determinísticos -> bloquear contradição forte não resolvida",
+    "Validar como problema -> criar entities.problem preservando sourceHypothesisId e evidenceIds",
+    "Editar hipótese validada -> validationNeedsReview -> revalidar sem duplicar problema",
+    "Evidence Desk -> editar confiança e tipo de fonte preservando relações"
+  ],
+  "canonical_rule": "Hypothesis, Evidence and validated Problem remain canonical Service Graph entities. Evidence stance is relation metadata owned by the hypothesis; Service Project derives progress and never duplicates these collections."
+}

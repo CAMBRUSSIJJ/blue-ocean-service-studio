@@ -1,0 +1,79 @@
+/* BLUE OCEAN Service Studio V1.17.6 — Brand & Product Polish Final
+   Final non-destructive visual layer: brand, state surfaces, motion, microcopy affordances and product finish. */
+:root{
+  --bo1176-motion-fast:120ms cubic-bezier(.2,.7,.2,1);
+  --bo1176-motion-normal:180ms cubic-bezier(.2,.7,.2,1);
+  --bo1176-motion-slow:200ms cubic-bezier(.2,.7,.2,1);
+}
+body.bo-v1176{background:var(--bo-color-canvas);color:var(--bo-color-text)}
+body.bo-v1176 button,body.bo-v1176 a,body.bo-v1176 input,body.bo-v1176 textarea,body.bo-v1176 select{
+  transition:border-color var(--bo1176-motion-fast),background-color var(--bo1176-motion-fast),color var(--bo1176-motion-fast),box-shadow var(--bo1176-motion-fast),opacity var(--bo1176-motion-fast),transform var(--bo1176-motion-fast);
+}
+body.bo-v1176 button:active:not(:disabled){transform:translateY(1px)}
+body.bo-v1176 [role="dialog"],body.bo-v1176 .bo115-dialog,body.bo-v1176 .rt144-modalbox{animation:bo1176-enter var(--bo1176-motion-normal) both}
+@keyframes bo1176-enter{from{opacity:0;transform:translateY(6px) scale(.995)}to{opacity:1;transform:none}}
+
+/* Brand: one mark, one wordmark, readable supporting label. */
+body.bo-v1176 .rt182-host-brand{height:64px!important;min-height:64px!important;padding:0 14px!important;gap:10px!important}
+body.bo-v1176 .rt182-host-brand>div:first-child{width:36px!important;height:36px!important;min-width:36px!important;border-radius:9px!important;background:var(--bo-color-primary-900) url('/blue-ocean-mark.svg') center/32px 32px no-repeat!important}
+body.bo-v1176 .rt182-host-brand h1{font-size:12px!important;letter-spacing:.105em!important;font-weight:750!important;color:var(--bo-color-primary-900)!important}
+body.bo-v1176 .rt182-host-brand p{font-size:11px!important;letter-spacing:.06em!important;color:var(--bo-color-text-muted)!important;margin-top:2px!important;text-transform:none!important}
+body.bo-v1176 .bo-nav-heading,body.bo-v1176 .rt182-nav-group-label{font-size:11px!important;letter-spacing:.08em!important;color:var(--bo-color-text-muted)!important}
+body.bo-v1176 .rt182-host-sidebar nav button small{font-size:11px!important;letter-spacing:.04em!important}
+
+/* Product surfaces: flatter, quieter and consistent. */
+body.bo-v1176 .bo117-section,body.bo-v1176 .rt182-bp-card,body.bo-v1176 .rt182-card,body.bo-v1176 .bo-workspace-panel,
+body.bo-v1176 .rt188-kanban-column,body.bo-v1176 .bo117-next-step,body.bo-v1176 .bo117-card{
+  box-shadow:none!important;border-color:var(--bo-color-border)!important;
+}
+body.bo-v1176 .bo117-recent-card:hover,body.bo-v1176 .rt182-bp-card:hover,body.bo-v1176 .rt188-task-card:hover{box-shadow:var(--bo-shadow-xs)!important;transform:translateY(-1px)}
+
+/* Empty states share one visual language without stock illustrations or emoji. */
+body.bo-v1176 .bo117-empty,body.bo-v1176 .rt182-empty,body.bo-v1176 .rt182-empty-inline,body.bo-v1176 .rt188-column-empty,
+body.bo-v1176 .bo115-empty,body.bo-v1176 .bo-empty-state,body.bo-v1176 .rt194-empty{
+  position:relative;overflow:hidden;background:var(--bo-color-surface-subtle)!important;border-color:var(--bo-color-border-strong)!important;color:var(--bo-color-text-muted)!important;
+}
+body.bo-v1176 .bo117-empty::before,body.bo-v1176 .rt182-empty::before,body.bo-v1176 .bo115-empty::before,body.bo-v1176 .bo-empty-state::before,body.bo-v1176 .rt194-empty::before{
+  content:"";display:block;width:96px;height:64px;margin:0 auto 10px;background:url('/blue-ocean-empty-state.svg') center/contain no-repeat;
+}
+body.bo-v1176 .bo117-empty svg{display:none!important}
+body.bo-v1176 .bo117-empty strong,body.bo-v1176 .rt182-empty h3,body.bo-v1176 .bo115-empty strong,body.bo-v1176 .bo-empty-state h3,body.bo-v1176 .rt194-empty b{color:var(--bo-color-text)!important;font-size:13px!important}
+body.bo-v1176 .bo117-empty span,body.bo-v1176 .rt182-empty p,body.bo-v1176 .bo115-empty span,body.bo-v1176 .bo-empty-state p,body.bo-v1176 .rt194-empty p{color:var(--bo-color-text-muted)!important;font-size:12px!important;line-height:1.45!important}
+
+/* Loading / boot / safe-mode use the same brand surface. */
+.bo1120-boot,.bo1120-runtime-fatal,.bo1120-fatal-state{background:var(--bo-color-canvas)!important;color:var(--bo-color-text)!important}
+.bo1120-boot>div,.bo1120-runtime-fatal>section,.bo1120-fatal-state section{position:relative;width:min(520px,calc(100vw - 32px))!important;border:1px solid var(--bo-color-border)!important;border-radius:14px!important;box-shadow:var(--bo-shadow-sm)!important;padding:28px!important;background:var(--bo-color-surface)!important}
+.bo1176-state-mark{width:44px;height:44px;border-radius:11px;background:var(--bo-color-primary-900) url('/blue-ocean-mark.svg') center/39px 39px no-repeat;margin-bottom:18px}
+.bo1120-boot span,.bo1120-runtime-fatal span,.bo1120-fatal-state .bo1120-fatal-eyebrow{font-size:11px!important;letter-spacing:.09em!important;color:var(--bo-color-primary-600)!important}
+.bo1120-boot strong,.bo1120-runtime-fatal h1,.bo1120-fatal-state h1{font-size:20px!important;letter-spacing:-.02em!important;color:var(--bo-color-text)!important}
+.bo1120-boot small,.bo1120-runtime-fatal p,.bo1120-fatal-state p{font-size:13px!important;color:var(--bo-color-text-muted)!important;line-height:1.5!important}
+.bo1176-boot-lines{display:grid;gap:7px;margin-top:18px;width:100%}.bo1176-boot-lines i{display:block;height:8px;border-radius:999px;background:linear-gradient(90deg,var(--bo-color-surface-muted) 25%,var(--bo-color-primary-50) 50%,var(--bo-color-surface-muted) 75%);background-size:200% 100%;animation:bo1176-shimmer 1.25s linear infinite}.bo1176-boot-lines i:nth-child(1){width:86%}.bo1176-boot-lines i:nth-child(2){width:68%}.bo1176-boot-lines i:nth-child(3){width:44%}
+@keyframes bo1176-shimmer{to{background-position:-200% 0}}
+
+/* Offline is informative, compact and non-blocking. */
+.bo1120-offline-banner{top:10px!important;display:flex!important;align-items:center!important;gap:8px!important;max-width:min(640px,calc(100vw - 24px))!important;padding:9px 12px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:9px!important;background:var(--bo-color-primary-900)!important;box-shadow:var(--bo-shadow-sm)!important;font-size:12px!important;line-height:1.35!important}
+.bo1120-offline-banner::before{content:"";width:8px;height:8px;flex:0 0 8px;border-radius:999px;background:var(--bo-color-warning-600);box-shadow:0 0 0 3px rgba(217,119,6,.16)}
+
+/* Toast is product-neutral: success green is semantic only. */
+body.bo-v1176 .rt188-toast{bottom:20px!important;right:20px!important;min-height:42px!important;padding:9px 12px!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:9px!important;background:var(--bo-color-primary-900)!important;box-shadow:var(--bo-shadow-md)!important;font-size:12px!important;animation:bo1176-toast var(--bo1176-motion-normal) both!important}
+@keyframes bo1176-toast{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Skeleton primitives: motion stays in the 120–200ms interaction range; shimmer is state feedback only. */
+body.bo-v1176 .bo-skeleton{background:linear-gradient(90deg,var(--bo-color-surface-muted) 25%,var(--bo-color-primary-50) 50%,var(--bo-color-surface-muted) 75%)!important;background-size:200% 100%!important;animation:bo1176-shimmer 1.25s linear infinite!important}
+
+/* Error / 404-like in-app states. */
+.bo1176-error-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.bo1176-error-actions button{min-height:38px;border-radius:7px;padding:0 13px;font-size:12px;font-weight:700}.bo1176-error-actions .primary{border:1px solid var(--bo-color-primary-600);background:var(--bo-color-primary-600);color:#fff}.bo1176-error-actions .secondary{border:1px solid var(--bo-color-border-strong);background:var(--bo-color-surface);color:var(--bo-color-text)}
+
+/* Final microcopy/readability guard: structural UI text never drops below 11 px. */
+body.bo-v1176 .rt182-status,body.bo-v1176 .rt182-template-card em,body.bo-v1176 .rt182-template-card span,body.bo-v1176 .rt182-table-wrap th,
+body.bo-v1176 .rt182-create-box>header span,body.bo-v1176 .rt182-config-form label>span{font-size:11px!important}
+
+@media(max-width:599px){
+  body.bo-v1176 .rt182-host-brand{height:56px!important;min-height:56px!important}
+  body.bo-v1176 .rt182-host-brand>div:first-child{width:34px!important;height:34px!important;min-width:34px!important;background-size:30px 30px!important}
+  .bo1120-boot>div,.bo1120-runtime-fatal>section,.bo1120-fatal-state section{padding:22px!important}
+  body.bo-v1176 .rt188-toast{left:12px!important;right:12px!important;bottom:calc(var(--bo-mobile-nav-h,64px) + 10px)!important}
+}
+@media(prefers-reduced-motion:reduce){
+  body.bo-v1176 *,body.bo-v1176 *::before,body.bo-v1176 *::after,.bo1176-boot-lines i{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}

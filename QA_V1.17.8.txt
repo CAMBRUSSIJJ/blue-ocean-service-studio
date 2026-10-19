@@ -1,0 +1,6 @@
+BLUE OCEAN Service Studio V1.17.8
+Professional Entry & Authentication Experience
+
+Gate específico: npm run auth:smoke
+Escopo: auth local-first, login/signup/recovery, loading workspace, branding, responsive, sign-out.
+Backend/OAuth real: fora do escopo desta versão.

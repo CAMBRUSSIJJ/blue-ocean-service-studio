@@ -1,0 +1,27 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.0.4 Visible Wave Click Feedback
+
+Achado reproduzido a partir da gravação do usuário:
+- troca de abas funciona;
+- onda decorativa do rodapé aparece;
+- feedback de clique H7.0.3 não fica visualmente perceptível.
+
+Causa comprovada na fonte:
+- ripple da sidebar usava z-index:1;
+- navegação usa z-index:2;
+- efeito ficava atrás da superfície de navegação;
+- prefers-reduced-motion removia todo feedback de clique.
+
+Correção H7.0.4:
+- ripple lateral sobe para camada z-index:4;
+- cada botão clicado recebe ripple próprio;
+- surge inferior sobe até 18px e aumenta saturação temporariamente;
+- feedback reduced-motion passa a usar highlight curto sem movimento amplo;
+- paleta permanece azul/ciano, sem #1D9E75.
+
+Gates executados neste ambiente:
+- H7.0.4 visible wave smoke: 8/8 PASS
+- npm run qa: PASS
+- preflight-linux.sh: PASS
+
+Limitação:
+- Browser Truth do H7.0.4 ainda depende da execução no navegador do usuário após npm ci/build.

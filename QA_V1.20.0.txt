@@ -1,0 +1,60 @@
+BLUE OCEAN Service Studio — QA V1.20.0
+======================================
+
+Release: Problem & Evidence Studio
+Baseline: V1.19.9
+
+REGRESSÃO COMPLETA
+------------------
+npm run qa
+Resultado: 1449 OK / 0 FAIL
+Gates com contagem: 43
+
+GATES DA LINHA SERVICE PROJECT
+------------------------------
+V1.19.7 Service Home: 19 OK / 0 FAIL
+V1.19.8 Discovery Workspace: 51 OK / 0 FAIL
+V1.19.9 Persona Studio: 89 OK / 0 FAIL
+V1.20.0 Problem & Evidence Studio: 107 OK / 0 FAIL
+
+V1.20.0 — CONTRATOS PRINCIPAIS
+------------------------------
+- Hipótese permanece canônica em entities.problemHypothesis.
+- Evidência permanece canônica em entities.evidence.
+- Problema explicitamente validado é persistido em entities.problem.
+- Problema validado preserva sourceHypothesisId, contextIds e evidenceIds.
+- Evidence × Hypothesis registra stance: supports / contradicts / neutral.
+- Confidence pertence à evidência; stance pertence à relação com a hipótese.
+- Evidência contraditória de alta confiança bloqueia readiness até ser resolvida/reclassificada.
+- Validação é explícita; score não promove automaticamente uma hipótese.
+- Alteração posterior marca validationNeedsReview.
+- Revalidação atualiza o mesmo problema, sem duplicação.
+- Improvement usa problemas validados/estruturados como entrada, não mera hipótese.
+- schemaVersion permanece 3; Service Project version permanece 1.
+
+INTEGRIDADE
+-----------
+npm run syntax:check: PASS
+Typecheck isolado model + Discovery + Persona + Problem/Evidence + Service Project: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS
+Runtime integrity inicializa job / pain / problemHypothesis / problem: PASS
+
+BROWSER TRUTH
+-------------
+Status: UNAVAILABLE neste ambiente.
+Motivo: Playwright Python está instalado, porém o executável Chromium esperado não está instalado.
+Nenhum PASS visual/runtime foi inferido dessa indisponibilidade.
+
+DEPENDÊNCIAS / BUILD
+--------------------
+npm ci --ignore-scripts --no-audit --no-fund: tentativa excedeu o limite do ambiente e deixou node_modules parcial; instalação parcial removida antes do empacotamento.
+npm run typecheck completo: NÃO DECLARADO, pois React/react-jsx-runtime e demais dependências não estão instalados de forma completa.
+npm run build React/Vite: NÃO DECLARADO pelo mesmo motivo.
+
+EMPACOTAMENTO
+-------------
+Os pacotes finais devem conter fonte sem node_modules, dist antigo, .generated, artifacts de Browser Truth ou __pycache__.
+O ZIP Linux é reextraído em diretório novo e os gates essenciais são repetidos antes da entrega.

@@ -1,0 +1,27 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.2.1 Typecheck Cleanup
+
+Escopo
+- Corrigir 5 diagnósticos reportados pelo tsc --noEmit após H7.2.
+- Não alterar comportamento funcional de Personas 2.0 ou Necessidades 2.0.
+
+Correções
+1. NeedsView.tsx
+   - removido blankDraft: NeedProfileDraft não utilizado.
+2. PersonasView.tsx
+   - removido Link2 não utilizado.
+   - removido GraphEntity não utilizado.
+   - removido blankDraft: PersonaProfileDraft não utilizado.
+3. WorkspaceLibraryView.tsx
+   - removido branch impossível page === 'personas' dentro da tabela genérica.
+   - delegação dedicada para PersonasView permanece intacta.
+
+Gates executados neste ambiente
+- H7.2.1 Typecheck Cleanup smoke: 7/7 PASS
+- H7.2 Needs 2.0 smoke: 15/15 PASS
+- H7.1 Personas 2.0 smoke: 14/14 PASS
+- npm run qa: 1421 OK / 0 FAIL
+- preflight-linux.sh: PASS
+
+Limitação
+- O full `npm run typecheck` não foi executado neste ambiente porque o pacote não contém node_modules e não há instalação confiável de dependências disponível aqui.
+- O usuário deve confirmar no Linux com `npm ci && npm run typecheck && npm run build`.

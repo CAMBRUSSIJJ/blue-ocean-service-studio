@@ -1,0 +1,27 @@
+BLUE OCEAN SERVICE STUDIO — V1.20.5-H7.40-H15.2
+Usage & Relations — QA executado diretamente
+
+PASS  H7.40-H15.2 Usage & Relations                 75/75
+PASS  H7.40-H15 Service Model Index                 36/36
+PASS  H7.40-H14 Interaction & Accessibility Polish  35/35
+PASS  H7.40-H13 Persistent Global Sidebar           25/25
+PASS  H7.40-H12 Primary Sidebar + Project Switch    31/31
+PASS  H7.40-H11 Service-first Navigation            20/20
+PASS  H7.37 Service Governance                     211/211
+PASS  H7.36 Metrics & Service Outcomes             203/203
+PASS  H7.35 Improvement Portfolio                  176/176
+PASS  H7.29 Channels + Touchpoints                 129/129
+PASS  H7.25 Service Ecology                         60/60
+PASS  syntax:check
+PASS  lock:verify
+PASS  source:authority
+PASS  preflight-linux.sh
+PASS  bash -n START.sh / start-linux.sh / preflight-linux.sh
+PASS  service-model-index.ts + service-object-navigation.ts
+      TypeScript 5.8.3 strict + noUnusedLocals/noUnusedParameters
+
+Observação:
+O pacote source não inclui node_modules. Nesta execução não foi atribuído um
+resultado novo ao typecheck completo dependente das definições React instaladas,
+nem um total acumulado ao `npm run qa`. O preflight e os gates listados acima
+foram executados diretamente e passaram.

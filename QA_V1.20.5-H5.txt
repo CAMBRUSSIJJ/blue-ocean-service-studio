@@ -1,0 +1,40 @@
+BLUE OCEAN Service Studio — QA V1.20.5-H5
+===========================================
+Release: CSS Import Order Hotfix
+
+OBJETIVO
+--------
+Eliminar o warning PostCSS/Vite `@import must precede all other statements` causado por `workspace-library-h3.css` ter sido importado depois de regras CSS em `src/style.css`.
+
+CORREÇÃO
+--------
+- `@import './runtime/workspace-library-h3.css';` movido para o bloco inicial de imports.
+- O import agora precede `@tailwind base/components/utilities` e qualquer regra CSS.
+- Nenhuma regra visual de `workspace-library-h3.css` foi removida.
+- Gate dedicado `v1205h5:css-import-order-smoke` adicionado ao `npm run qa`.
+
+VALIDAÇÃO EXECUTADA NESTE AMBIENTE
+----------------------------------
+- H5 CSS Import Order smoke: 6 OK / 0 FAIL
+- H4 Typecheck Cleanup smoke: 7 OK / 0 FAIL
+- npm run syntax:check: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: PASS
+- npm run qa: PASS
+- Linhas explícitas OK no QA: 1303
+- Linhas FAIL no QA: 0
+- preflight-linux.sh: PASS
+
+FULL BUILD / TYPECHECK
+----------------------
+`npm ci --ignore-scripts` foi tentado neste ambiente, mas excedeu o limite da infraestrutura antes de concluir. Qualquer `node_modules` parcial foi removido antes do empacotamento.
+Por isso o build completo React/Vite deste H5 deve ser reexecutado no ambiente local já funcional.
+
+COMANDOS DE VALIDAÇÃO LOCAL
+---------------------------
+npm ci
+npm run typecheck
+npm run build
+
+Resultado esperado específico do H5: o build não deve mais emitir o warning `@import must precede all other statements` para `workspace-library-h3.css`.

@@ -1,0 +1,48 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.12
+Brand Experience & Workspace Home 2.0
+Base: V1.20.5-H7.11-H1
+
+RESULTADO PRINCIPAL
+-------------------
+H7.12 Brand Experience                         25/25 PASS
+npm run qa                                     1772 OK / 0 FAIL
+H7.11 Whiteboard 2.0                           40/40 PASS
+H7.0 Dashboard Polish                          10/10 PASS
+H7.0.1 Sidebar & Wave Polish                   14/14 PASS
+
+GATES ESTRUTURAIS
+-----------------
+syntax check                                   PASS
+lock verify                                    PASS
+source authority                               PASS
+foundation smoke                               12/12 PASS
+preflight Linux                                PASS
+
+ESCOPO H7.12
+------------
+- IA e posicionamento do Dashboard preservados.
+- Quick Actions com identidade de Journey / Contexto / Resultado.
+- Recentes com thumbnails semânticos e metadados reais.
+- Favoritos com tratamento de referência.
+- Continue de onde parou.
+- Próximo passo calculado pelo estado real do Service Graph.
+- Sinais do serviço: Personas / Problemas validados / Evidências.
+- Aprender rebaixado visualmente para não competir com o trabalho corrente.
+- Sidebar e header recebem acabamento de marca sem novas rotas.
+- Reduced motion preservado.
+
+TYPECHECK / BUILD
+-----------------
+`npm run typecheck` sem node_modules não é um gate válido: React/lucide e tipos de dependências não podem ser resolvidos.
+`npm ci --offline --ignore-scripts` falhou com ENOTCACHED para zod-4.6.5.tgz.
+Por isso typecheck/build completos NÃO são classificados como PASS nesta geração.
+
+LIMPEZA DO PACOTE
+-----------------
+node_modules     AUSENTE
+dist             AUSENTE
+.generated       AUSENTE
+artifacts        AUSENTE
+__pycache__      AUSENTE
+START.sh         755
+preflight        755

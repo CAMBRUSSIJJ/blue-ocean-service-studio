@@ -1,0 +1,19 @@
+{
+  "version": "1.19.5",
+  "principle": "Uma mudança visual só é DONE quando código, contrato, runtime e visual estão comprovados.",
+  "levels": [
+    {"id":"L1","name":"Código","meaning":"A implementação existe na fonte."},
+    {"id":"L2","name":"Contrato","meaning":"O comportamento é verificável por gate determinístico."},
+    {"id":"L3","name":"Runtime","meaning":"O caminho real de uso executa sem depender de atalho interno."},
+    {"id":"L4","name":"Visual","meaning":"A superfície final corresponde ao estado esperado em navegador real."}
+  ],
+  "critical_paths": [
+    "Login local -> Dashboard -> Criar serviço -> Service Project Home",
+    "Service Project Home -> Persona/Problema -> Whiteboards -> Montar serviço",
+    "Whiteboards -> menu do quadro -> Excluir -> dialog padronizado"
+  ],
+  "forbidden_runtime_ui": [
+    "Preparar o Serviço",
+    "representação(ões) visuais"
+  ]
+}

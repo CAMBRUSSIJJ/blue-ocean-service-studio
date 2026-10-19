@@ -1,0 +1,9 @@
+
+/* H17.0.9: independently editable free-form cards */
+.bo-h1709-card-stack{display:flex;flex-direction:column;gap:8px;min-width:0}.bo-h1709-card{position:relative}.bo-h1709-card textarea{padding-right:28px}.bo-h1709-remove-card{position:absolute;top:5px;right:5px;padding:4px;color:#64748b;border-radius:5px;background:#fff}.bo-h1709-remove-card:hover{color:#b42318;background:#fff1f2}.bo-h1709-add-card{display:inline-flex;align-items:center;gap:5px;align-self:flex-start;font-size:11px;color:#4163c8;padding:6px;border-radius:5px}.bo-h1709-add-card:hover{background:#eef3ff}
+
+/* H17.0.9 movement: explicit handle keeps textarea selection/editing independent. */
+.bo-h1709-card { position: relative; }
+.bo-h1709-drag-handle { cursor: grab; border: 0; background: transparent; color: #64748b; padding: 3px 7px; font-size: 17px; touch-action: none; }
+.bo-h1709-drag-handle:active { cursor: grabbing; }
+.bo-h1709-drag-handle:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; border-radius: 4px; }

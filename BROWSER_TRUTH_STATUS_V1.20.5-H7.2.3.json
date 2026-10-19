@@ -1,0 +1,12 @@
+{
+  "release": "V1.20.5-H7.2.3",
+  "status": "not-run",
+  "reason": "Browser/runtime dependencies are not installed in this packaging environment.",
+  "required_user_validation": [
+    "npm ci",
+    "npm run typecheck",
+    "npm run build",
+    "./START.sh",
+    "Create a Simple Persona and an Advanced Persona"
+  ]
+}

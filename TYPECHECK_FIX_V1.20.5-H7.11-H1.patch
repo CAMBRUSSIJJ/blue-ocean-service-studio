@@ -1,0 +1,60 @@
+--- a/src/services/design-handoff.ts
++++ b/src/services/design-handoff.ts
+@@ -1,4 +1,4 @@
+-import type { DesignContextRef, GraphEntity, Id, Journey, ServiceGraph, WhiteboardItem, WhiteboardView } from '../domain/model';
++import type { DesignContextRef, GraphEntity, Id, Journey, ServiceGraph, WhiteboardView } from '../domain/model';
+ import { buildServiceDefinitionStudioReport } from './service-definition.ts';
+ import { touchServiceProject } from './service-project.ts';
+ import { syncWhiteboardDesignContext } from './whiteboard-studio.ts';
+--- a/src/services/whiteboard-studio.ts
++++ b/src/services/whiteboard-studio.ts
+@@ -96,7 +96,7 @@
+   return uniq(ids);
+ }
+ 
+-function addExplicitRelationEdges(graph: ServiceGraph, board: WhiteboardView, items: Record<Id, WhiteboardItem>, edges: Record<Id, WhiteboardEdge>): number {
++function addExplicitRelationEdges(graph: ServiceGraph, items: Record<Id, WhiteboardItem>, edges: Record<Id, WhiteboardEdge>): number {
+   const smart = Object.values(items).filter((item): item is Extract<WhiteboardItem, { kind: 'smart' }> => item.kind === 'smart');
+   const byObjectId = new Map<Id, Extract<WhiteboardItem, { kind: 'smart' }>[] >();
+   smart.forEach((item) => byObjectId.set(item.objectId, [...(byObjectId.get(item.objectId) ?? []), item]));
+@@ -190,7 +190,7 @@
+     });
+   }
+   const nextBoard: WhiteboardView = { ...board, items, edges, layoutMode: 'free', gridVisible: true, snapToGrid: true, updatedAt: now };
+-  const edgesAdded = addExplicitRelationEdges(graph, nextBoard, items, edges);
++  const edgesAdded = addExplicitRelationEdges(graph, items, edges);
+   if (!added && !framesAdded && !edgesAdded) return { graph, added: 0, framesAdded: 0, edgesAdded: 0 };
+   return { graph: replaceBoard(graph, { ...nextBoard, edges }, now), added, framesAdded, edgesAdded };
+ }
+@@ -222,7 +222,7 @@
+     }
+   });
+   const nextBoard: WhiteboardView = { ...board, journeyId: journey.id, items, edges, updatedAt: now };
+-  const edgesAdded = addExplicitRelationEdges(graph, nextBoard, items, edges);
++  const edgesAdded = addExplicitRelationEdges(graph, items, edges);
+   if (!added && !framesAdded && !edgesAdded && board.journeyId === journey.id) return { graph, added: 0, framesAdded: 0, edgesAdded: 0 };
+   return { graph: replaceBoard(graph, { ...nextBoard, edges }, now), added, framesAdded, edgesAdded };
+ }
+@@ -281,7 +281,7 @@
+     items[item.id] = item; added += 1;
+   }
+   const nextTarget: WhiteboardView = { ...target, journeyId: target.journeyId ?? source.journeyId, items, edges, updatedAt: now };
+-  const edgesAdded = addExplicitRelationEdges(working, nextTarget, items, edges);
++  const edgesAdded = addExplicitRelationEdges(working, items, edges);
+   if (!added && !framesAdded && !edgesAdded && !entitiesCreated && target.journeyId === nextTarget.journeyId) return { graph, added: 0, framesAdded: 0, edgesAdded: 0, entitiesCreated: 0, sourceBoardId: source.id };
+   return { graph: replaceBoard(working, { ...nextTarget, edges }, now), added, framesAdded, edgesAdded, entitiesCreated, sourceBoardId: source.id };
+ }
+--- a/src/views/BlueprintView.tsx
++++ b/src/views/BlueprintView.tsx
+@@ -17,11 +17,6 @@
+   type BlueprintLaneKey,
+ } from '../services/service-blueprint-studio';
+ 
+-type CanvasBlockProps = {
+-  number: string; title: string; value: string; placeholder: string; bgColor: string; borderColor: string;
+-  readOnly?: boolean; onChange?: (value: string) => void;
+-};
+-
+ type DragSession =
+   | { type: 'items'; startX: number; startY: number; origins: Record<Id, { x: number; y: number }> }
+   | { type: 'resize'; itemId: Id; startX: number; startY: number; width: number; height: number }

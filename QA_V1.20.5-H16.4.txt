@@ -1,0 +1,27 @@
+BLUE OCEAN Service Studio — V1.20.5-H16.4 Design do Serviço Proposal Layout
+
+VALIDADO NESTE PACOTE:
+- H16.4 Design Service Proposal Layout: 25/25 PASS
+- H16.3 Phase Status Consistency: 16/16 PASS
+- H16.2 Research-Driven Context + View Modes: 49/49 PASS
+- H16.1 Foundation Experience Deep Adaptation: 54/54 PASS
+- H16 Adaptive Experience Foundation: 56/56 PASS
+- H15.6 Research Studio UX & Guided Actions: 50/50 PASS
+- H15.4 Design do Serviço Visual Polish: 40/40 PASS
+- npm run syntax:check: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- preflight-linux.sh: PASS
+
+TYPECHECK COMPLETO:
+- Não certificado no ambiente de empacotamento porque o pacote Source não contém node_modules/React/@types.
+- O Linux launcher executa npm ci e release:verify antes da primeira abertura quando a build ainda não existe.
+
+ESCOPO H16.4:
+- Implementação da proposta visual enviada pelo usuário para Design do serviço em Fundamentos.
+- Hero de próximo passo em largura total.
+- Caminho do serviço em card próprio.
+- Fase em foco em layout 2/1 com Lista como padrão e Cards opcional.
+- Fluxo de conexão vertical e painel Já estruturado.
+- Sidebar Fundamentos: Entender/Pesquisa; Desenhar/Jornada + Como o serviço funciona; Testar/Protótipos; Melhorar/Melhorias; Acompanhar/Resultados.
+- Nenhuma migração destrutiva de ServiceGraph.

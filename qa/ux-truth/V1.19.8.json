@@ -1,0 +1,17 @@
+{
+  "version": "1.19.8",
+  "principle": "Discovery precede composition: contexto canônico antes de Journey, Blueprint ou construção guiada.",
+  "levels": [
+    {"id":"L1","name":"Código","status":"PASS","evidence":"Workspace e serviço de Discovery presentes na fonte."},
+    {"id":"L2","name":"Contrato","status":"PASS","evidence":"Service Home 19/19; Discovery Workspace 51/51; regressão 1183/0."},
+    {"id":"L3","name":"Runtime","status":"PARTIAL","evidence":"Operações canônicas foram executadas nos smokes; browser real não pôde ser iniciado."},
+    {"id":"L4","name":"Visual","status":"UNAVAILABLE","evidence":"Chromium do Playwright ausente neste ambiente."}
+  ],
+  "critical_paths": [
+    "Service Home -> Entender -> criar Persona/Need/Job/Pain/Hypothesis/Evidence",
+    "Entender -> contexto mínimo -> Definir",
+    "Definir -> salvar definition -> Desenhar",
+    "Whiteboards -> construção guiada -> readiness compartilhado com Discovery"
+  ],
+  "canonical_rule": "Discovery objects live in Service Graph; service.project keeps lifecycle and definition without duplicated collections."
+}

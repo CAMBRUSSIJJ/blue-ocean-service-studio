@@ -1,0 +1,57 @@
+BLUE OCEAN Service Studio — V1.19.3 QA
+Whiteboard Interaction & Structure UX
+
+RESULTADO PRINCIPAL
+PASS  npm run qa — 1045 OK / 0 FAIL
+PASS  V1.19.3 Interaction & Structure UX — 70/70
+PASS  V1.19.2 Visual Service Builder — 72/72
+PASS  V1.19.1 Whiteboard Core Reliability — 42/42
+PASS  V1.19.0 Service Builder Assistant — 51/51
+PASS  V1.18.9 Creation Architecture Reset — 83/83
+PASS  V1.18.8 Guided Service Builder — 117/117
+PASS  Sim Kit 2.3 static contracts — 32/32
+PASS  node --check whiteboard-core.js
+PASS  tsc --noEmit --noCheck
+PASS  package-lock verify
+PASS  source authority
+PASS  source foundation
+PASS  Linux preflight
+
+ESCOPO VALIDADO DA V1.19.3
+- Zoom 10%–400% com slider.
+- Ctrl/Cmd + wheel usa zoom ancorado no cursor.
+- Ajustar tudo e Ajustar seleção permanecem disponíveis.
+- Biblioteca de Whiteboards expõe Renomear / Duplicar / Excluir.
+- Exclusão de Whiteboard pede confirmação.
+- Renomeação inline no canvas existe e suporta Enter/Escape.
+- Smart Object renomeia a entidade canônica; objeto livre permanece local.
+- Inspector mantém edição incremental sem destruir o campo por tecla.
+- Smart Object diferencia Remover do quadro de Excluir do serviço.
+- Exclusão canônica calcula impacto via deletePlan/applyDeletePlan.
+- Entity Picker V2 separa Criar novo de Reutilizar existente.
+- Picker usa linguagem contextual para Stage e Touchpoint.
+- Stage oferece exemplos de momentos; Touchpoint oferece canais comuns.
+- Duplicatas por nome normalizado são detectadas.
+- Entidades existentes são agrupadas por origem/contexto.
+- Objeto já presente no quadro é localizado em vez de duplicado.
+- Imagem possui contexto “Onde esta imagem entra?”, Etapa relacionada e Área do serviço.
+- Fluxo principal usa “Estrutura do serviço” em vez de exigir o termo Service Graph.
+- Correções V1.19.1/V1.19.2 continuam preservadas.
+
+SIM KIT 2.3
+- Static contracts: 32/32.
+- Mantém F0–F7 do Sim Kit 2.2.
+- Contratos estáticos adicionais cobrem zoom, gestão de quadros, rename, semântica de exclusão e Entity Picker V2.
+
+NÃO EXECUTADO / NÃO DECLARADO COMO PASS
+- Sim Kit 2.3 dinâmico: dependências externas não puderam ser instaladas neste ambiente.
+- Full React/Vite production build: npm ci recebeu EAI_AGAIN do registry.
+- Typecheck completo dependente de node_modules: não declarado como PASS.
+- Playwright/Chromium visual completo: não executado nesta release.
+
+LIMITAÇÕES CONHECIDAS
+- coordenadas negativas/infinito real para esquerda/cima;
+- relationType semântico nas conexões;
+- asset store dedicado para imagens;
+- compare/merge visual para conflitos entre abas;
+- validação visual/pixel de drag/touch em navegador real.

@@ -1,0 +1,23 @@
+{
+  "version": "V1.20.5-H7.32",
+  "feature": "Decision & Iteration Loop",
+  "browser_validation": "not_run",
+  "visual_validation": "not_declared",
+  "react_typecheck": "not_declared",
+  "vite_build": "not_declared",
+  "reason": "npm ci did not complete; the partial process was terminated and the final package was restored to a clean source-only state without node_modules.",
+  "validated": {
+    "domain_smoke": "190/190 PASS",
+    "h731_regression": "141/141 PASS",
+    "h730_regression": "129/129 PASS",
+    "h729_regression": "129/129 PASS",
+    "cumulative_qa": "3199 OK / 0 FAIL",
+    "syntax_check": "PASS",
+    "lock_verify": "PASS",
+    "source_authority": "PASS",
+    "foundation_smoke": "12/12 PASS",
+    "project_foundation": "46/46 PASS",
+    "preflight_linux": "PASS",
+    "core_typescript_strict": "PASS"
+  }
+}

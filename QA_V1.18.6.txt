@@ -1,0 +1,38 @@
+BLUE OCEAN Service Studio — V1.18.6 QA
+
+PASS  architecture:smoke — 51/51
+PASS  workspace-preferences:smoke — 50/50
+PASS  attention:smoke — 32/32
+PASS  health:smoke — 26/26
+PASS  home:v3:smoke — 19/19
+PASS  full historical npm run qa — 557 OK / 0 FAIL, V1.12 through V1.18.6
+PASS  demo smoke — 79 objects, 0 broken references, 5 stages, 7 evidence, 7 initiatives
+PASS  service-architecture-engine.ts strict standalone typecheck with TypeScript 5.8.3
+PASS  project syntax/noCheck parse — 0 syntax errors
+PASS  package-lock synchronized to 1.18.6
+
+ARCHITECTURE ENGINE BEHAVIOR
+- five deterministic layers: Experience, Service, Operation, Improvement, Results
+- structural coverage bounded 0–100
+- explicit weighted formula 25/20/20/20/15
+- demo reports 5 stages, 7 opportunities, 7 initiatives, 7 metrics, 3 benefits
+- primary Journey selection is deterministic
+- primary flow mirrors real Journey stage order
+- per-stage touchpoint and opportunity counts come from graph relations
+- sparse graph lowers structural coverage
+- missing Blueprint, Process and Metrics generate deterministic gaps
+- empty graph generates missing-Journey gap without runtime failure
+- gaps are sorted by deterministic numeric priority
+
+ARCHITECTURAL SAFETY
+- engine has no window/document/localStorage/IndexedDB dependency
+- Home reads the report; it does not mutate architecture objects
+- Service Architecture is explicitly distinct from Service Health
+- existing Attention, Continue, Favorites and Pins contracts remain intact
+- no Service Graph schema/migration/storage change
+
+LIMITATION
+- `npm ci --ignore-scripts --no-audit --no-fund` could not complete because npm registry tarball requests returned EAI_AGAIN and the command was terminated after repeated retries.
+- Partial node_modules was removed before packaging.
+- Full project `npm run typecheck`, `npm run build` and Vite production output are therefore not claimed as passed here.
+- The new architecture engine passed strict standalone compilation with TypeScript 5.8.3; the project also passed `tsc --noEmit --noCheck` syntax parsing.

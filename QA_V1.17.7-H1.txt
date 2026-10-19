@@ -1,0 +1,13 @@
+BLUE OCEAN Service Studio — V1.17.7-H1
+Hotfix: TypeScript unused-import recovery
+
+Correções:
+- DesignSystemView.tsx: remove import React não utilizado (TS6133)
+- WorkspaceHome.tsx: remove Gauge não utilizado (TS6133)
+
+Gate específico:
+- npm run hotfix:h1:smoke
+
+Observação:
+- O typecheck integral continua obrigatório em source:verify/release:verify.
+- No ambiente de geração, npm ci não concluiu por indisponibilidade/timeout do registry.

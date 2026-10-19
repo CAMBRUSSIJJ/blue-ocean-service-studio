@@ -1,0 +1,61 @@
+BLUE OCEAN Service Studio — QA V1.19.8
+======================================
+
+Release: Discovery Workspace
+
+ESCOPO FUNCIONAL
+----------------
+- Service Home com cinco fases clicáveis.
+- Entender convertido em Discovery Workspace operacional.
+- Persona -> Necessidade -> Job -> Dor -> Hipótese -> Evidência.
+- Criação rápida e relações de contexto.
+- Coverage/readiness derivados do Service Graph.
+- Definition persistida no Service Project.
+- Guided Builder consome o mesmo readiness do Discovery.
+
+REGRESSÃO
+---------
+npm run qa
+Resultado dos gates legados: 1183 OK / 0 FAIL
+
+GATES NOVOS
+-----------
+npm run service-home:smoke
+Resultado: 19 OK / 0 FAIL
+
+npm run discovery:smoke
+Resultado: 51 OK / 0 FAIL
+
+INTEGRIDADE / RELEASE
+---------------------
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS
+START.sh: executável no pacote Linux
+
+ARQUITETURA
+-----------
+- schemaVersion permanece 3.
+- Discovery não é duplicado dentro de service.project.
+- Personas/Needs/Jobs/Pains/Hypotheses/Evidence permanecem no Service Graph.
+- service.project continua mantendo ciclo/fase + definição.
+- Whiteboards usam o relatório de Discovery para o gate da construção guiada.
+
+BROWSER TRUTH
+-------------
+Status: UNAVAILABLE neste ambiente.
+Motivo: Playwright Python disponível; Chromium do Playwright ausente.
+Nenhum PASS visual/runtime foi inferido.
+
+DEPENDÊNCIAS / BUILD
+--------------------
+npm ci: excedeu o limite do ambiente e deixou instalação parcial.
+A instalação parcial não continha React nem tsc utilizáveis e foi removida.
+Typecheck React/Vite completo: NÃO DECLARADO.
+Build React/Vite: NÃO DECLARADO.
+
+OBSERVAÇÃO DE BASELINE
+----------------------
+O ZIP persistido disponível para reconstrução era V1.19.6. A superfície esperada da V1.19.7 foi reconstituída e ganhou gate próprio 19/19 antes da implementação do Discovery Workspace.

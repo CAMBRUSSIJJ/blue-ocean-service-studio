@@ -1,0 +1,36 @@
+{
+  "release": "V1.20.5-H7.40-H7",
+  "browser": {
+    "guided_workspace_chromium": {
+      "status": "PASS",
+      "browser": "system Chromium",
+      "checks": 10,
+      "passed": 10,
+      "scope": [
+        "desktop hero layout",
+        "five-phase stepper",
+        "capability rows",
+        "CTA normal flow",
+        "desktop no global overflow",
+        "tablet responsive layout",
+        "tablet no global overflow",
+        "mobile capability row",
+        "phone no global overflow"
+      ]
+    },
+    "full_application_server": {
+      "status": "NOT_VALIDATED",
+      "reason": "Complete dependency installation did not finish in this execution."
+    }
+  },
+  "install": {
+    "npm_ci_include_dev": {
+      "status": "UNAVAILABLE",
+      "reason": "npm ci remained stuck beyond the controlled timeout and was terminated; partial node_modules was removed."
+    }
+  },
+  "react_typecheck": "NOT_VALIDATED",
+  "vite_build": "NOT_VALIDATED",
+  "vercel_deploy": "NOT_VALIDATED",
+  "truth_policy": "UNKNOWN, UNAVAILABLE and NOT_VALIDATED are never promoted to PASS."
+}

@@ -1,0 +1,60 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.28
+QA — Blueprint Semantic Zoom + Custom Layers
+Data: 2026-10-13
+
+ESCOPO
+- Zoom semântico do Blueprint: Estratégico / Journey / Operacional
+- Persistência do nível semântico por Blueprint
+- Lanes canônicas retrocompatíveis
+- Lanes personalizadas por serviço
+- Visibilidade de cada lane por nível de zoom
+- Camadas obrigatórias/opcionais integradas ao Blueprint Health
+- Presets Padrão, Saúde, Hospitalidade e SaaS
+- Proteção contra exclusão de lane customizada com conteúdo
+- Sincronização Journey → Blueprint preservando settings H7.28
+- Schema Zod compatível com boards antigos sem blueprintSettings
+
+GATES EXECUTADOS
+H7.28 Blueprint Semantic Zoom + Custom Layers: 93/93 PASS
+npm run qa: 2610 OK / 0 FAIL
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: 12/12 PASS
+npm run project-foundation:smoke: 46/46 PASS
+./preflight-linux.sh: PASS
+Core TypeScript não-React (model.ts + service-project.ts + service-blueprint-studio.ts): PASS
+
+REGRESSÕES CRÍTICAS PRESERVADAS
+- H7.27 Service Proposition + What-if Scenarios: 85/85 PASS
+- H7.26 Research Studio + Insight Pipeline: 64/64 PASS
+- H7.25 Service Ecology + Stakeholder Network: 60/60 PASS
+- H7.24 Journey Library & Collapsible Sidebar: 40/40 PASS
+- H7.22 Unified Service Blueprint Workspace: 47/47 PASS
+- Service Blueprints 2.0: 36/36 PASS
+- Whiteboard 2.0: 40/40 PASS
+- Structured Service Frame: 74/74 PASS
+
+TESTE DE DOMÍNIO H7.28
+- Board legado recebe defaults sem mutação destrutiva: PASS
+- Estratégico mostra Customer + Frontstage + Backstage: PASS
+- Journey acrescenta Evidências: PASS
+- Operacional mostra as seis lanes canônicas: PASS
+- Trocar zoom não altera itens do Blueprint: PASS
+- Criar lane customizada: PASS
+- Marcar lane customizada como obrigatória: PASS
+- Gap de lane obrigatória é determinístico: PASS
+- Adicionar conteúdo à lane customizada: PASS
+- Remoção bloqueada enquanto a lane contém itens: PASS
+- Preset SaaS adiciona Interface / CS / Automação / Dados: PASS
+- Aplicação repetida de preset é idempotente: PASS
+- Sync da Journey preserva blueprintSettings: PASS
+
+LIMITAÇÕES / NÃO DECLARADO COMO PASS
+- npm ci não concluiu dentro da janela de execução disponível do ambiente.
+- typecheck React completo não foi declarado como PASS.
+- build Vite completo não foi declarado como PASS.
+- browser/runtime visual não foi executado nesta sessão.
+
+CONCLUSÃO
+Os gates executáveis, o núcleo TypeScript H7.28 e a regressão acumulada passaram. A release preserva Blueprints legados e adiciona zoom semântico e camadas configuráveis sem reescrever Journey ou Whiteboard.

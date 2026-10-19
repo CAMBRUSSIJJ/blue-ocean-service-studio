@@ -1,0 +1,27 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.2.2
+Persona Simple / Advanced Configurator
+
+COMPROVADO NESTE AMBIENTE
+- syntax:check: PASS
+- persona:smoke: 89/89 PASS
+- H7.2.2 persona config smoke: 23/23 PASS
+- H7.1 Personas 2.0: 14/14 PASS
+- H7.2 Needs 2.0: 15/15 PASS
+- H7.2.1 cleanup: 7/7 PASS
+- npm run qa: PASS (1444 linhas OK observadas)
+- preflight-linux.sh: PASS
+- lock:verify: PASS
+- source:authority: PASS
+- foundation:smoke: 12/12 PASS
+
+TYPECHECK COMPLETO
+- Tentado sem node_modules: NÃO VÁLIDO como gate do produto.
+- Falha inicia por `Cannot find module 'react'` / typings JSX ausentes.
+- Rodar no Linux do usuário: npm ci && npm run typecheck && npm run build.
+
+ESCOPO FUNCIONAL
+- Modo Simples e Avançada antes de criar Persona.
+- Layout persistente: profile-left / balanced / story-first.
+- Blocos selecionáveis e persistidos no Service Graph.
+- Completude determinística baseada nos blocos selecionados.
+- Editor muda composição conforme layout e profundidade.

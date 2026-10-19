@@ -1,0 +1,59 @@
+import fs from 'node:fs';
+const read=(p)=>fs.readFileSync(p,'utf8');
+const exists=(p)=>fs.existsSync(p);
+let ok=0,fail=0; const check=(v,l)=>{if(v){console.log('OK  ',l);ok++}else{console.log('FAIL',l);fail++}};
+const view=read('src/views/BlueprintWorkspaceView.tsx');
+const app=read('src/App.tsx');
+const css=read('src/runtime/journey-library-sidebar-h724.css');
+const style=read('src/style.css');
+const main=read('src/main.tsx');
+const preflight=read('preflight-linux.sh');
+const pkg=JSON.parse(read('package.json'));
+
+check(exists('src/runtime/journey-library-sidebar-h724.css'),'CSS H7.24 existe');
+check(css.includes('H7.24 — Journey Library parity + collapsible sidebar'),'CSS declara H7.24');
+check(style.includes("@import './runtime/journey-library-sidebar-h724.css';"),'CSS H7.24 importado');
+check(style.indexOf('journey-editor-h723.css') < style.indexOf('journey-library-sidebar-h724.css'),'H7.24 sucede H7.23 na cascata');
+check(main.includes("'bo-h724j'"),'body recebe marker H7.24 Journey/Sidebar');
+check(app.includes('data-journey-library-sidebar="7.24"'),'shell declara H7.24');
+check(view.includes('data-journey-library-workspace="7.24"'),'Service Workspace declara H7.24');
+
+check(view.includes('data-journey-library="1"'),'Journey possui biblioteca própria');
+check(view.includes('EXPERIÊNCIA DO SERVIÇO') && view.includes('<h2>Journeys</h2>'),'Journey library possui cabeçalho equivalente ao Blueprint');
+check(view.includes('Buscar Journey'),'Journey library possui busca');
+check(view.includes("setJourneyViewMode('cards')") && view.includes("setJourneyViewMode('table')"),'Journey alterna Cards/Tabela');
+check(view.includes('bo-h724-journey-grid'),'Journey possui grid de cards');
+check(view.includes('journeyCoverSrc(journey)'),'cards usam capa canônica da Journey');
+check(view.includes('Nenhuma Journey ainda'),'Journey possui estado vazio');
+check(view.includes('Criar Journey'),'Journey pode ser criada no próprio tab');
+check(view.includes('journeyApi') && view.includes("api<JourneyHomeApi>('journeyHome')"),'criação/abertura usa runtime canônico journeyHome');
+check(view.includes('setJourneyEditorOpen(true)'),'Journey só abre editor após seleção/criação');
+check(view.includes('Todas as Journeys'),'editor possui retorno para biblioteca');
+check(view.includes("if (id === 'journey') setJourneyEditorOpen(false)"),'clicar no tab Journey retorna à biblioteca');
+check(view.includes("workspaceTab === 'journey' && !journeyEditorOpen") && view.includes("workspaceTab === 'journey' && journeyEditorOpen"),'library e editor têm estados separados');
+
+check(app.includes("useState(() =>") && app.includes("bo-sidebar-collapsed"),'sidebar recolhível persiste preferência');
+check(app.includes('PanelLeftClose') && app.includes('PanelLeftOpen'),'sidebar possui affordance visual de recolher/expandir');
+check(app.includes('data-sidebar-collapsed={isSidebarCollapsed ? "1" : "0"}'),'sidebar expõe estado recolhido');
+check(app.includes('bo-h724-sidebar-toggle'),'controle de recolhimento existe');
+check(css.includes('.bo-h724-sidebar.is-collapsed{width:72px!important}'),'sidebar recolhida usa largura compacta');
+check(css.includes('.bo-h724-sidebar{width:256px!important'),'sidebar expandida mantém largura de trabalho');
+check(css.includes('.bo-h724-sidebar.is-collapsed .bo1163-service-switcher__copy'),'seletor de serviço se adapta ao estado recolhido');
+check(css.includes('.bo-h724-sidebar.is-collapsed .bo-h701-nav-section__label'),'labels de seção são ocultados no modo recolhido');
+check(css.includes('.bo-h724-sidebar.is-collapsed .rt182-host-footer'),'footer se adapta ao modo recolhido');
+check(css.includes('@media(max-width:767px){.bo-h724-sidebar-toggle{display:none}'),'collapse desktop não conflita com navegação móvel');
+
+check(view.includes("workspaceTab === 'blueprint' && <>{handoff.readyForJourney"),'ações globais de Blueprint ficam restritas ao tab Blueprint');
+check(view.includes("workspaceTab === 'journey' && !journeyEditorOpen && <button") && view.includes('Criar Journey'),'CTA do header muda para Journey no tab Journey');
+check(view.includes('O mapa só é carregado depois que você escolher uma Journey'),'biblioteca explica o novo fluxo');
+check(view.includes('<JourneyView studio={studio}/>'),'editor Journey canônico permanece incorporado');
+check(view.includes('<WhiteboardsView studio={studio}/>'),'Whiteboard permanece incorporado');
+check(view.includes('data-unified-legacy-targets'),'contratos legados continuam documentados');
+
+check(Boolean(pkg.scripts['v1205h724:journey-library-sidebar-smoke']),'script H7.24 registrado');
+check(pkg.scripts.qa?.includes('v1205h724:journey-library-sidebar-smoke'),'QA acumulado inclui H7.24');
+check(String(pkg.description).includes('H7.24 Journey Library & Collapsible Sidebar'),'package descreve H7.24');
+check(preflight.includes('journey-library-sidebar-h724.css') && preflight.includes('v1205h724-journey-library-sidebar-smoke.mjs'),'preflight conhece H7.24');
+
+console.log(`\nH7.24 Journey Library & Collapsible Sidebar: ${ok} OK / ${fail} FAIL`);
+process.exit(fail?1:0);

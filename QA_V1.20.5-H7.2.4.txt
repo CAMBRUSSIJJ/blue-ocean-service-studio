@@ -1,0 +1,39 @@
+BLUE OCEAN SERVICE STUDIO — QA V1.20.5-H7.2.4
+Persona Editor UX Polish
+
+ESCOPO
+- Refinamento visual e de densidade do editor de Persona.
+- Nenhum novo objeto de domínio.
+- Service Graph permanece como fonte canônica.
+
+VALIDAÇÕES EXECUTADAS NESTE AMBIENTE
+PASS  v1205h724:persona-editor-ux-smoke — 16/16
+PASS  npm run qa — 1453 OK / 0 FAIL
+PASS  preflight-linux.sh
+PASS  npm run lock:verify
+PASS  npm run source:authority
+PASS  npm run foundation:smoke — 12/12
+PASS  tsc --noEmit --noCheck — sintaxe TS/TSX
+
+VALIDAÇÃO AINDA PENDENTE NESTE AMBIENTE
+- npm run typecheck completo: não executado porque node_modules não está instalado neste artefato de trabalho.
+- npm run build completo: não executado pelo mesmo motivo.
+- Browser Truth pós-H7.2.4: ainda precisa ser verificado visualmente no Linux do usuário.
+
+MUDANÇAS PROTEGIDAS PELO SMOKE H7.2.4
+1. Textareas auto-grow.
+2. Overview em conteúdo principal + rail lateral.
+3. Completude movida para rail lateral.
+4. Canais por chips.
+5. Tags por chips.
+6. Responsável com sugestões via datalist.
+7. Remover Persona saiu da action bar fixa.
+8. Remoção continua acessível pelo menu de contexto.
+9. Barra inferior informa estado de salvamento.
+10. Chips pendentes são incorporados ao salvar.
+11. CSS H7.2.4 carregado antes do Tailwind.
+12. Rail sticky e grid amplo.
+13. Campos compactos e auto-grow.
+14. Componentes de chips presentes.
+15. Responsividade preservada.
+16. Paleta verde estrutural antiga não reintroduzida.

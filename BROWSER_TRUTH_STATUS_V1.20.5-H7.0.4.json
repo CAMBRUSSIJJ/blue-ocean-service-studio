@@ -1,0 +1,17 @@
+{
+  "release": "V1.20.5-H7.0.4",
+  "status": "pending-user-runtime",
+  "video_evidence": "H7.0.3 click wave not visibly perceptible; tab navigation itself works",
+  "static_fix": {
+    "sidebar_ripple_z_index": 4,
+    "button_local_ripple": true,
+    "bottom_wave_surge": true,
+    "reduced_motion_feedback": true
+  },
+  "required_manual_check": [
+    "Click Dashboard -> Personas -> Journey maps -> Blueprints -> Problemas",
+    "Verify a bright blue/cyan ripple appears on every clicked item",
+    "Verify a larger wave pulse crosses the sidebar at the clicked vertical position",
+    "Verify the bottom ocean lifts briefly after each click"
+  ]
+}

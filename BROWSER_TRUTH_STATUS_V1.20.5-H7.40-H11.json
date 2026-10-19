@@ -1,0 +1,50 @@
+{
+  "release": "V1.20.5-H7.40-H11",
+  "service_first_navigation": {
+    "status": "PASS",
+    "checks": "20/20",
+    "scope": [
+      "global_sidebar_uses_service",
+      "service_contains_projects",
+      "project_opens_project_home",
+      "project_service_opens_guided_workspace",
+      "breadcrumb_home_service_project",
+      "mobile_global_service_entry",
+      "h10_project_shell_preserved"
+    ]
+  },
+  "chromium_service_first": {
+    "status": "PASS",
+    "checks": "6/6",
+    "scope": [
+      "service_visible_in_primary_sidebar",
+      "service_shows_project_list",
+      "project_is_selectable",
+      "desktop_no_overflow",
+      "tablet_no_overflow",
+      "mobile_no_overflow"
+    ]
+  },
+  "full_react_typecheck": {
+    "status": "NOT_VALIDATED",
+    "reason": "full dependency installation was not completed in this validation environment"
+  },
+  "vite_production_build": {
+    "status": "NOT_VALIDATED",
+    "reason": "full dependency installation was not completed in this validation environment"
+  },
+  "policy": "NOT_VALIDATED is not promoted to PASS",
+  "candidate_zip_reextract": {
+    "status": "PASS",
+    "h11": "20/20",
+    "h10": "28/28",
+    "h9": "28/28",
+    "h8": "25/25",
+    "syntax": "PASS",
+    "preflight": "PASS",
+    "browser": "6/6",
+    "files": 1121,
+    "forbidden_directories": 0,
+    "launcher_permissions": "755/755/755"
+  }
+}

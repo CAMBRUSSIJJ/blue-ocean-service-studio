@@ -1,0 +1,21 @@
+{
+  "name": "blue-ocean-whiteboard-sim-kit",
+  "version": "2.3.0",
+  "private": true,
+  "description": "Gate funcional Sim Kit 2.3 para Interaction & Structure UX, Visual Service Builder, Whiteboard Core Reliability e Service Builder Assistant do BLUE OCEAN Service Studio.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "preflight": "node preflight.cjs",
+    "qa": "./run-all.sh",
+    "summary": "node summarize.cjs",
+    "check:scripts": "node --check boot.cjs && node --check lib.cjs && node --check phase0.cjs && node --check phase1.cjs && node --check phase2.cjs && node --check phase3.cjs && node --check phase4.cjs && node --check phase5.cjs && node --check phase6.cjs && node --check phase7.cjs && node --check summarize.cjs && node --check static-contracts.cjs",
+    "static:contracts": "node static-contracts.cjs \"$BLUE_OCEAN_ROOT\""
+  },
+  "devDependencies": {
+    "esbuild": "0.25.0",
+    "fake-indexeddb": "6.0.1",
+    "jsdom": "26.1.0"
+  }
+}

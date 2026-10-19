@@ -1,0 +1,200 @@
+/* H7.20 — Dashboard Composition & Density
+   Goal: preserve Blue Ocean identity while fixing hierarchy, empty space and desktop density.
+   No new product modules; this layer only composes existing Dashboard content. */
+
+:root{
+  --bo-h720-ink:#10283d;
+  --bo-h720-muted:#617487;
+  --bo-h720-line:#dbe5ef;
+  --bo-h720-blue:#1d6ed1;
+  --bo-h720-surface:rgba(255,255,255,.82);
+}
+
+/* Overall rhythm: content sits higher and finishes before the decorative ocean floor. */
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"]{
+  padding:22px 24px 104px!important;
+}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-dashboard-section{
+  position:relative;
+}
+
+/* Creation row stays familiar but becomes denser and more intentional. */
+.bo-h720 .bo1215-topline{
+  max-width:1180px!important;
+  gap:18px!important;
+  align-items:center!important;
+  margin-bottom:18px!important;
+}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-dashboard-actions{
+  width:auto!important;
+  max-width:690px!important;
+  grid-template-columns:repeat(3,minmax(190px,1fr))!important;
+  gap:8px!important;
+  margin:0!important;
+}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-action-card{
+  min-height:62px!important;
+  padding:9px 12px!important;
+  border-radius:9px!important;
+  box-shadow:0 1px 2px rgba(15,35,58,.025)!important;
+}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-icon{
+  width:37px!important;height:37px!important;border-radius:9px!important;
+}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy strong{font-size:12px!important}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy em{font-size:8px!important;margin-top:2px!important}
+
+/* Depth remains useful but no longer reads as a floating dashboard widget. */
+.bo-h720 .bo1215-depth-chip{
+  width:154px!important;
+  min-width:154px!important;
+  min-height:50px!important;
+  padding:8px 10px!important;
+  border-radius:9px!important;
+  box-shadow:none!important;
+  background:rgba(247,251,255,.86)!important;
+  border-color:#d7e4f2!important;
+}
+.bo-h720 .bo1215-depth-chip>span:nth-of-type(2) small{font-size:6px!important;letter-spacing:.09em!important}
+.bo-h720 .bo1215-depth-chip>span:nth-of-type(2) strong{font-size:9px!important;margin-top:2px!important}
+.bo-h720 .bo1215-depth-chip>i{height:2px!important;margin-top:5px!important}
+
+/* Recentes: adaptive canvas instead of a full-width empty tray. */
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-recents{
+  width:min(100%,1180px)!important;
+  min-height:0!important;
+  margin:0 0 18px!important;
+  padding:13px 14px 14px!important;
+  background:rgba(255,255,255,.70)!important;
+  border:1px solid rgba(190,208,226,.72)!important;
+  border-radius:11px!important;
+  box-shadow:0 8px 28px rgba(24,70,108,.035)!important;
+  overflow:hidden!important;
+}
+.bo-h720 .bo1215-recents[data-recent-count="0"]{max-width:640px!important}
+.bo-h720 .bo1215-recents[data-recent-count="1"]{max-width:286px!important}
+.bo-h720 .bo1215-recents[data-recent-count="2"]{max-width:526px!important}
+.bo-h720 .bo1215-recents[data-recent-count="3"]{max-width:766px!important}
+.bo-h720 .bo1215-recents[data-recent-count="4"]{max-width:1006px!important}
+.bo-h720 .bo1215-recents[data-recent-count="5"]{max-width:1180px!important}
+.bo-h720 .bo1215-recents>header{min-height:30px!important;align-items:center!important;margin-bottom:8px!important}
+.bo-h720 .bo-h718-service-context{display:none!important}
+.bo-h720 .bo1215-recents>header button{font-size:8px!important;padding:4px 2px!important}
+.bo-h720 .bo1215-panel-wave{display:none!important}
+
+.bo-h720 .bo1215-recent-grid{
+  display:grid!important;
+  grid-template-columns:repeat(var(--bo-h720-recent-columns,5),210px)!important;
+  gap:12px!important;
+  overflow-x:auto!important;
+  padding:1px 1px 3px!important;
+}
+.bo-h720 .bo1215-recents[data-recent-count="0"] .bo1215-recent-grid{--bo-h720-recent-columns:1}
+.bo-h720 .bo1215-recents[data-recent-count="1"] .bo1215-recent-grid{--bo-h720-recent-columns:1}
+.bo-h720 .bo1215-recents[data-recent-count="2"] .bo1215-recent-grid{--bo-h720-recent-columns:2}
+.bo-h720 .bo1215-recents[data-recent-count="3"] .bo1215-recent-grid{--bo-h720-recent-columns:3}
+.bo-h720 .bo1215-recents[data-recent-count="4"] .bo1215-recent-grid{--bo-h720-recent-columns:4}
+.bo-h720 .bo1215-recents[data-recent-count="5"] .bo1215-recent-grid{--bo-h720-recent-columns:5}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-recent-card{
+  width:210px!important;
+  min-width:210px!important;
+  min-height:246px!important;
+  padding:10px!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.96)!important;
+}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-recent-preview{
+  height:118px!important;
+  margin-bottom:10px!important;
+  border-radius:8px!important;
+}
+.bo-h720 .bo-h718h1-dashboard-journey-cover img{object-fit:cover!important}
+.bo-h720 .bo1215-recent-card>strong{font-size:12px!important;line-height:1.25!important}
+.bo-h720 .bo1215-recent-card .bo1207-recent-meta{font-size:8.5px!important;margin-top:6px!important}
+.bo-h720 .bo1215-recent-card>em{font-size:7.5px!important;margin-top:7px!important}
+
+/* Empty Favorites is a utility row, not a whole dashboard section. */
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-favorites{
+  margin:0 0 17px!important;
+  padding:0 2px!important;
+}
+.bo-h720 .bo1215-favorites.is-empty{
+  display:flex!important;
+  align-items:center!important;
+  gap:13px!important;
+  min-height:27px!important;
+}
+.bo-h720 .bo1215-favorites.is-empty>header{min-height:0!important;flex:0 0 auto!important}
+.bo-h720 .bo1215-favorites.is-empty .bo1215-favorite-empty{
+  margin:0!important;
+  color:#8794a3!important;
+  font-size:8.5px!important;
+  line-height:1.2!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+
+/* Aprender: one recommendation with more weight + four lighter cards. */
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn{
+  max-width:1180px!important;
+  margin:0!important;
+}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn>header{min-height:28px!important}
+.bo-h720 .bo1215-learn-grid{
+  display:grid!important;
+  grid-template-columns:minmax(250px,1.35fr) repeat(4,minmax(160px,1fr))!important;
+  gap:9px!important;
+}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid>button{
+  min-height:86px!important;
+  padding:10px 11px!important;
+  grid-template-columns:36px minmax(0,1fr)!important;
+  gap:8px!important;
+  border-radius:9px!important;
+  background:rgba(255,255,255,.78)!important;
+}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid>button>i{
+  width:36px!important;height:36px!important;border-radius:8px!important;
+}
+.bo-h720 .bo1215-learn-grid>button strong{font-size:9.5px!important}
+.bo-h720 .bo1215-learn-grid>button small{font-size:7.5px!important}
+.bo-h720 .bo1215-learn-grid>button.is-recommended{
+  background:linear-gradient(145deg,rgba(239,247,255,.96),rgba(248,252,255,.94))!important;
+  border-color:#b8cff0!important;
+  box-shadow:0 7px 22px rgba(29,110,209,.06)!important;
+}
+.bo-h720 .bo1215-learn-grid>button.is-recommended strong{font-size:10.5px!important}
+.bo-h720 .bo1215-learn-grid>button.is-recommended small{white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden!important}
+
+/* Decorative ocean remains background atmosphere instead of filling unused content space. */
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"]::before{
+  opacity:.62!important;
+}
+
+@media(max-width:1220px){
+  .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid>button.is-recommended{grid-column:span 2}
+}
+@media(max-width:920px){
+  .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-dashboard-actions{max-width:none!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .bo-h720 .bo1215-depth-chip{width:146px!important;min-width:146px!important}
+  .bo-h720 .bo1215-recents{max-width:100%!important;width:100%!important}
+  .bo-h720 .bo1215-recent-grid{display:flex!important;overflow-x:auto!important}
+  .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid>button.is-recommended{grid-column:span 2}
+}
+@media(max-width:680px){
+  .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"]{padding:16px 12px 72px!important}
+  .bo-h720 .bo1215-topline{display:block!important}
+  .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-dashboard-actions{grid-template-columns:1fr!important;gap:7px!important}
+  .bo-h720 .bo1215-depth-chip{margin-top:9px!important}
+  .bo-h720 .bo1215-favorites.is-empty{display:block!important}
+  .bo-h720 .bo1215-favorites.is-empty .bo1215-favorite-empty{white-space:normal!important;margin-top:3px!important}
+  .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid{grid-template-columns:1fr!important}
+  .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid>button.is-recommended{grid-column:auto}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .bo-h720 .bo1215-recent-card,.bo-h720 .bo1215-learn-grid>button,.bo-h720 .bo1215-action-card{transition:none!important}
+}

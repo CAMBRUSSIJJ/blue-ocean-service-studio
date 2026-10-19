@@ -1,0 +1,12 @@
+{
+  "release": "V1.20.5-H7.12",
+  "surface": "Brand Experience & Workspace Home 2.0",
+  "source_smoke": "PASS 25/25",
+  "regression_qa": "PASS 1772/1772",
+  "linux_preflight": "PASS",
+  "syntax_check": "PASS",
+  "full_typecheck": "NOT_RUN_DEPENDENCIES_NOT_INSTALLED",
+  "production_build": "NOT_RUN_DEPENDENCIES_NOT_INSTALLED",
+  "browser_runtime": "PENDING_USER_LINUX_VALIDATION",
+  "note": "npm ci offline não pôde instalar zod porque o tarball não existe no cache local."
+}

@@ -1,0 +1,48 @@
+BLUE OCEAN Service Studio — QA V1.20.5-H7.31
+Evidence & Learning System
+
+NOVO GATE
+H7.31 Evidence & Learning System             141/141 PASS
+
+REGRESSÕES DIRETAS
+H7.30 Service Prototype Lab                  129/129 PASS
+H7.29 Channels + Touchpoints + Continuity    129/129 PASS
+H7.28 Blueprint Semantic Zoom                 93/93 PASS
+
+SUÍTE ACUMULADA
+npm run qa                                  3009 OK
+                                                0 FAIL
+
+GATES INDEPENDENTES
+syntax:check                                  PASS
+lock:verify                                   PASS
+source:authority                              PASS
+foundation:smoke                            12/12 PASS
+project-foundation:smoke                    46/46 PASS
+preflight-linux.sh                             PASS
+TypeScript strict núcleo H7.31                 PASS
+
+VALIDADO NO H7.31
+- modelo ServiceLearningState / ServiceLearningRecord
+- schema Zod para learningSystem
+- materialização explícita de experimento concluído
+- evidência canônica sourceType=experiment
+- proveniência experimentId/criterion/observation
+- idempotência por rodada concluída
+- verdict deterministic validated/refuted/inconclusive
+- confiança determinística low/medium/high
+- recomendação inicial keep/iterate/retest
+- edição humana de síntese/racional/confiança/recomendação
+- status draft/reviewed/archived
+- cobertura de aprendizado
+- integração com a nona perspectiva Aprendizados
+- preservação de Journey, etapas, Touchpoints, Proposição, cenários e Blueprint
+
+NÃO DECLARADO COMO PASS
+- npm ci completo
+- typecheck React completo
+- vite build
+- validação visual real em navegador
+
+MOTIVO
+O source final é entregue sem node_modules. A tentativa de npm ci permaneceu sem concluir e foi encerrada; dependências parciais foram removidas antes do empacotamento.

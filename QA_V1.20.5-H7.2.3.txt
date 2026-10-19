@@ -1,0 +1,22 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.2.3
+Persona Timestamp Typecheck Hotfix
+
+COMPROVADO NESTE AMBIENTE
+- H7.2.3 persona timestamp smoke: 5/5 PASS
+- H7.2.2 persona config smoke: 23/23 PASS
+- H7.2 Needs 2.0: 15/15 PASS
+- H7.1 Personas 2.0: 14/14 PASS
+- npm run qa: PASS
+- preflight-linux.sh: PASS
+
+CORREÇÃO
+- createPersona gera `now` explicitamente.
+- `now` é repassado a createDiscoveryEntity.
+- service.updatedAt usa o mesmo `now`.
+- removido acesso `entity.updatedAt` do GraphEntity genérico.
+- sem `as any`.
+
+TYPECHECK COMPLETO
+- Não executado neste ambiente porque o pacote de trabalho não contém dependências instaladas.
+- O erro TS2339 enviado pelo usuário foi removido diretamente na fonte.
+- Validar no Linux do usuário: npm ci && npm run typecheck && npm run build.

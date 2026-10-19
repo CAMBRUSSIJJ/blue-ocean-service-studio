@@ -1,0 +1,11 @@
+BLUE OCEAN Service Studio — SOURCE FINGERPRINT V1.20.5-H7.13
+
+cb2fddeee3ab38d4e34b218bdec11546d8c8256b76c7ec72b7019f060b46cad5  src/views/WorkspaceDashboardView.tsx
+5b419174eb2d839a86715fc40587fdb6b02be3d1e9862b8f09fafd1f5c1f8615  src/runtime/blue-ocean-identity-h713.css
+ef9c7bff615e3fac13f884cc15c24c21c82bbd628d02a27ceac0895a6f8ed79d  src/design-system/tokens.css
+34edd21f87d0c2f181d8209cf9b1d78caba6a706910fdca08c6171f0ac1b1ea2  src/App.tsx
+12e902e92b76346c820d92d60ea84bbed18b1384ed0a5aa224c2894089ef1ac5  src/main.tsx
+fbfe108d31ad68740dfe46b4ab327ccc177a4b771441baf548c038cbd665260c  src/style.css
+a83be202d5b4d0d3f3c0c1c50bd97db7c69a28f5ed7d324bcf636ba8b5c17fad  scripts/v1205h713-blue-ocean-identity-smoke.mjs
+d8c88e23ad0d09edfa9ad3a7ffd731b61cc641c4a0baa7edf3adb68883e64c08  package.json
+d867842ef12e272991b3f9c56c4cdfdda3d6d9b0de42f9634c28eb97558ecaf2  preflight-linux.sh

@@ -1,0 +1,7 @@
+{
+  "version": "1.20.5-H7.19",
+  "browser_e2e_executed": false,
+  "status": "not_executed",
+  "reason": "No browser runtime with installed dependencies was available in this packaging environment.",
+  "validated": ["source smoke", "syntax", "preflight", "lock", "source authority", "foundation"]
+}

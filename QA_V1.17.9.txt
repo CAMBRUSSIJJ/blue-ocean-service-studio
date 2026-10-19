@@ -1,0 +1,13 @@
+BLUE OCEAN Service Studio V1.17.9
+Auth Runtime Recovery & Wave Entry
+
+Gate específico: npm run auth:runtime:smoke
+Resultado: 20/20
+QA histórico: PASS após atualização do contrato de estabilidade para recovery antes do workspace.
+Lock verify: PASS
+Source authority: PASS
+JS syntax (stability/persistence public+source): PASS
+
+Limitação do ambiente de empacotamento:
+- npm ci expirou por indisponibilidade do registry neste ambiente.
+- typecheck/build completos devem ser executados no Linux/CI com dependências instaladas.

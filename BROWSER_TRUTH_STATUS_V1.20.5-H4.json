@@ -1,0 +1,6 @@
+{
+  "release": "V1.20.5-H4",
+  "status": "NOT_RUN",
+  "reason": "Hotfix de typecheck sem mudança visual; Browser Truth da H3 permanece a última evidência visual disponível.",
+  "typecheck_cleanup_smoke": "7/7 PASS"
+}

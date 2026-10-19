@@ -1,0 +1,13 @@
+/* V1.20.5-H7.40-H9 — Project Architecture Hardening */
+.bo-h740h9-home{--h9-ok:#0b7a5a;--h9-warn:#9a670f}
+.bo-h740h9-project-actions{display:flex;align-items:center;gap:2px}
+.bo-h740h9-project-actions button{display:grid;place-items:center}
+.bo-h740h9-archived{margin-top:34px;border-top:1px solid #e6ebf0;padding-top:24px}
+.bo-h740h9-archived>header{margin-bottom:10px}.bo-h740h9-archived>header small{display:block;color:#667085;font-size:10px;font-weight:800;letter-spacing:.12em}.bo-h740h9-archived>header h2{font-size:17px;margin:3px 0}.bo-h740h9-archived>header p{font-size:12px;color:#667085;margin:0}
+.bo-h740h9-archived>div{display:grid;gap:8px}.bo-h740h9-archived article{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:10px;border:1px solid #e3e8ee;border-radius:11px;background:#fbfcfd;padding:10px 12px}.bo-h740h9-archived article>span{width:30px;height:30px;border-radius:8px;background:#eef2f6;color:#667085;display:grid;place-items:center}.bo-h740h9-archived article strong,.bo-h740h9-archived article small{display:block}.bo-h740h9-archived article strong{font-size:12px;color:#344054}.bo-h740h9-archived article small{font-size:10px;color:#98a2b3;margin-top:2px}.bo-h740h9-archived article button{border:1px solid #d0d5dd;border-radius:8px;background:#fff;color:#475467;padding:7px 10px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;cursor:pointer}
+.bo-h740h9-rename-modal{width:min(520px,94vw)}
+/* O breadcrumb canônico já vive no shell. Os marcadores antigos permanecem no DOM apenas para contratos de regressão. */
+.bo-h71-page-head>div>span:first-child,.bo1205h3-page-head>div>span:first-child{display:none!important}
+/* Escopo explícito: templates dentro do projeto são aplicação local; templates na Home criam projetos globais. */
+[data-project-scope="project"] [data-project-template-action]{font-weight:700}
+@media(max-width:760px){.bo-h740h9-archived article{grid-template-columns:30px minmax(0,1fr)}.bo-h740h9-archived article button{grid-column:2;width:max-content}}

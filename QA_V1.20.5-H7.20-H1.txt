@@ -1,0 +1,40 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.20-H1 Dashboard Balance Recovery
+QA report
+
+Finding addressed
+- H7.20 over-compressed the desktop Dashboard: Recentes was capped at 766px for 3 items, quick actions at 690px, depth chip at 154px, and Learn stopped well before the right edge. At 1920x1200 this created an obvious left-heavy layout and excessive empty space.
+
+Validated fixes
+- workspace canvas restored to full available width
+- Recentes no longer shrinks by item count
+- recent cards remain finite and preserve Journey covers
+- quick actions use a balanced 3-column row
+- depth indicator restored to readable dimensions
+- Learn uses the available desktop width
+- empty Favorites remains compact without becoming microscopic
+- H7.19-H1 visual recovery remains intact
+- H7.18-H1 Journey Cover remains intact
+
+Executed gates
+- v1205h720h1:dashboard-recovery-smoke: 20/20 PASS
+- v1205h720:dashboard-composition-smoke: 27/27 PASS
+- v1205h719h1:visual-recovery-smoke: 28/28 PASS
+- v1205h719:motion-identity-smoke: 40/40 PASS
+- v1205h718h1:journey-cover-smoke: 35/35 PASS
+- syntax:check: PASS
+- npm run qa: PASS, 2104 OK lines / 0 FAIL lines
+- lock:verify: PASS
+- source:authority: PASS
+- project-foundation:smoke: PASS
+- preflight-linux.sh: PASS
+
+Not claimed
+- npm ci did not complete within the available execution window.
+- Therefore full typecheck/build with installed dependencies are NOT claimed as PASS in this environment.
+
+Package hygiene target
+- no node_modules
+- no dist
+- no .generated
+- no artifacts
+- no __pycache__

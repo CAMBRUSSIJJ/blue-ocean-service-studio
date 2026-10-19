@@ -1,0 +1,73 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.30
+QA — Service Prototype Lab
+Data: 2026-10-13
+
+ESCOPO
+- Service Prototype Lab como oitava perspectiva do Service Workspace
+- Experimentos canônicos vinculados a Journey, etapas, Touchpoints e cenário “E se?”
+- Snapshot de Journey / Proposição / Touchpoints / canais / cenário
+- Sete fidelidades de protótipo
+- Participantes e papéis
+- Critérios de sucesso com alvo, evidência e resultado
+- Readiness determinístico antes da execução
+- Observações durante o teste
+- Resultado determinístico Passou / Falhou / Inconclusivo
+- Conclusão manual explícita
+- Reabertura e arquivamento
+- Fontes canônicas preservadas; refresh de snapshot somente explícito
+
+GATES EXECUTADOS
+H7.30 Service Prototype Lab: 129/129 PASS
+npm run qa: 2868 OK / 0 FAIL
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: 12/12 PASS
+npm run project-foundation:smoke: 46/46 PASS
+./preflight-linux.sh: PASS
+TypeScript core H7.30 (model.ts + service-prototype-lab.ts, strict, não-React): PASS
+
+REGRESSÕES CRÍTICAS PRESERVADAS
+- H7.29 Channels + Touchpoints + Continuity: 129/129 PASS
+- H7.28 Blueprint Semantic Zoom + Custom Layers: 93/93 PASS
+- H7.27 Service Proposition + What-if Scenarios: 85/85 PASS
+- H7.26 Research Studio + Insight Pipeline: 64/64 PASS
+- Service Blueprints 2.0: 36/36 PASS
+- Whiteboard 2.0: 40/40 PASS
+- Demais gates históricos presentes no npm run qa: PASS dentro da suíte acumulada
+
+TESTE DE DOMÍNIO H7.30
+- Criação do experimento gera ID e persiste no prototypeLab: PASS
+- Snapshot captura Journey: PASS
+- Snapshot captura etapas: PASS
+- Snapshot captura Touchpoints e canais: PASS
+- Snapshot captura cenário alternativo: PASS
+- Snapshot captura promessa da Proposição: PASS
+- Criação não altera Journey / etapas / Touchpoints / Proposição / cenários / Blueprint: PASS
+- Participante é associado ao experimento: PASS
+- Critérios de sucesso são associados: PASS
+- Readiness alcança 100% com plano mínimo completo: PASS
+- Experimento pronto inicia e registra startedAt: PASS
+- Todos os critérios PASS sugerem resultado passed: PASS
+- Qualquer critério FAIL sugere resultado failed: PASS
+- Observações persistem: PASS
+- Conclusão registra outcome e completedAt: PASS
+- Relatório calcula taxa de validação: PASS
+- Reabertura remove conclusão mantendo plano: PASS
+- Fonte externa alterada não reescreve snapshot automaticamente: PASS
+- Refresh explícito atualiza snapshot: PASS
+- Refresh não altera Journey nem Blueprint: PASS
+- Critério pode ser editado/removido: PASS
+- Participante pode ser desvinculado: PASS
+- Experimento incompleto não inicia: PASS
+- Experimento arquivado sai da lista ativa: PASS
+
+LIMITAÇÕES / NÃO DECLARADO COMO PASS
+- npm ci completo não concluiu dentro da janela de execução disponível.
+- npm ci --offline falha porque zod@4.6.5 não está no cache local.
+- typecheck React completo não foi declarado como PASS.
+- build Vite completo não foi declarado como PASS.
+- browser/runtime visual não foi executado nesta sessão.
+
+CONCLUSÃO
+A H7.30 transforma os artefatos do serviço em uma disciplina de experimentação sem reescrever as fontes. O domínio, a lógica determinística, os contratos de compatibilidade, o workspace e a regressão acumulada passaram nos gates executáveis.

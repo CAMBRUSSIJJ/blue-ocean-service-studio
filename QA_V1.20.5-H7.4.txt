@@ -1,0 +1,23 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.4 Dores 2.0
+
+VALIDAÇÃO EXECUTADA
+- H7.4 smoke específico: 22/22 PASS
+- npm run qa: 1508 OK / 0 FAIL
+- preflight-linux.sh: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: 12/12 PASS
+
+ESCOPO VALIDADO
+- PainsView dedicada substitui a tabela genérica de Dores.
+- Biblioteca: busca, filtros, criação, severidade, frequência e rastreabilidade.
+- Detalhe: Visão geral, Pessoas, Relações, Evidências e Uso.
+- Campos próprios: contexto, impacto, sinal observável, alternativa atual, consequência, severidade e frequência.
+- Relações canônicas/bidirecionais com Persona, Necessidade, Job, Hipótese, Problema e Evidência.
+- Completude determinística e pronta para problem framing apenas com base mínima completa.
+- CSS H7.4 importado antes do Tailwind e sem paleta estrutural verde legada.
+
+LIMITAÇÃO DESTE AMBIENTE
+- npm ci não concluiu dentro do limite; TypeScript não foi instalado.
+- Portanto, npm run typecheck e npm run build completos NÃO foram declarados como PASS aqui.
+- Rodar no Linux do usuário: npm ci && npm run typecheck && npm run build.

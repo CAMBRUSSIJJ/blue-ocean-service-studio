@@ -1,0 +1,54 @@
+BLUE OCEAN Service Studio V1.20.5-H7.34 — QA REAL
+Phase: Problems, Opportunities & Prioritization
+Date: 2026-10-13
+
+H7.34 Problems, Opportunities & Prioritization  175/175 PASS
+H7.33 Current × Future Service                   134/134 PASS
+H7.32 Decision & Iteration Loop                  190/190 PASS
+H7.31 Evidence & Learning System                 141/141 PASS
+H7.30 Service Prototype Lab                      129/129 PASS
+npm run qa                                       3508 OK / 0 FAIL
+syntax:check                                     PASS
+H7.34 TypeScript strict core                     PASS (Bundler resolution; improvement-backlog.ts)
+lock:verify                                      PASS
+source:authority                                 PASS
+foundation:smoke                                 12/12 PASS
+project-foundation:smoke                         46/46 PASS
+preflight-linux.sh                               PASS
+
+DOMAIN GUARANTEES VALIDATED
+- Backlog materializes signals from seven canonical source classes without mutating the source objects.
+- Validated problems can accumulate multiple provenance refs, including Blueprint, without duplication.
+- Synchronization is idempotent and preserves manual triage fields.
+- Missing source signals deactivate history instead of deleting it.
+- Priority score is deterministic and uses Impact, Frequency, Risk, Urgency and Ease (inverse Effort).
+- Priority bands are deterministic: Critical >=80, High >=65, Medium >=45, Low otherwise.
+- Scores are clamped to the valid 1..5 domain before calculation.
+- Opportunities can be created from valid backlog problems and retain explicit problem linkage.
+- Legacy opportunities are imported idempotently.
+- Research, Journey, Channels, Prototype Lab, Current × Future and Blueprint remain unchanged by backlog synchronization.
+
+INSTALL / BUILD TRUTH
+npm ci: NOT COMPLETED in the available execution window; a lingering partial process was terminated and partial node_modules removed.
+Full React typecheck: NOT DECLARED PASS because dependencies were not completely installed.
+Vite production build: NOT DECLARED PASS for the same reason.
+Visual/browser QA: NOT DECLARED PASS; no browser validation was executed for H7.34.
+
+PACKAGE HYGIENE
+node_modules     absent
+dist             absent
+.generated       absent
+artifacts        absent
+__pycache__      absent
+
+FINAL ZIP VALIDATION
+Linux ZIP re-extracted                         PASS
+H7.34 from re-extracted ZIP                  175/175 PASS
+H7.33 from re-extracted ZIP                  134/134 PASS
+H7.32 from re-extracted ZIP                  190/190 PASS
+syntax from re-extracted ZIP                 PASS
+preflight from re-extracted ZIP              PASS
+START.sh / start-linux.sh / preflight-linux  755 / 755 / 755
+forbidden generated directories              all absent
+Source / Linux / Vercel canonical source     identical before packaging
+SHA256                                        generated for all three ZIPs

@@ -1,0 +1,19 @@
+V1.20.5-H7.40-H1 — TYPECHECK CLEANUP HOTFIX
+
+Correções aplicadas: 7/7 erros reportados
+- TS2538 channel-continuity: corrigido
+- TS6196 decision imports: 2 corrigidos
+- TS6133 Blueprint import: corrigido
+- TS6133 Improvement constant: corrigido
+- TS6133 Learning icon import: corrigido
+- TS6133 Prototype import: corrigido
+
+QA source após patch:
+- tsc --noEmit --noCheck: PASS
+- npm run qa: 4548 OK / 0 FAIL
+- H7.29: 129/129 PASS
+- H7.30: 129/129 PASS
+- H7.34: 175/175 PASS
+- H7.40: 115/115 PASS
+
+Full dependency-backed typecheck/build: requer npm ci completo na máquina de execução.

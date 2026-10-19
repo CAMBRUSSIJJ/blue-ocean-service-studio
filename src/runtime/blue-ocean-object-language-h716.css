@@ -1,0 +1,80 @@
+/* H7.16 — Blue Ocean Object Language
+   One visual grammar for artifacts, context objects and operational Smart Objects. */
+:root{
+  --bo-object-journey:#2563eb;
+  --bo-object-blueprint:#0f8f83;
+  --bo-object-whiteboard:#7657d6;
+  --bo-object-persona:#7657d6;
+  --bo-object-need:#2d8ed8;
+  --bo-object-job:#4f63c7;
+  --bo-object-pain:#e36a72;
+  --bo-object-hypothesis:#d69a26;
+  --bo-object-problem:#d94b5b;
+  --bo-object-evidence:#1598c9;
+  --bo-object-metric:#14946d;
+  --bo-object-system:#657386;
+}
+
+/* Home: proprietary glyphs and real artifact silhouettes. */
+.bo-h716 .bo1215-action-card .bo1207-action-icon svg{filter:drop-shadow(0 1px 0 rgba(255,255,255,.12))}
+.bo-h716 .bo1215-action-card[data-kind="journey"] .bo1207-action-icon{border-radius:12px 12px 9px 12px!important}
+.bo-h716 .bo1215-action-card[data-kind="persona"] .bo1207-action-icon{border-radius:50% 50% 11px 11px!important}
+.bo-h716 .bo1215-action-card[data-kind="metric"] .bo1207-action-icon{border-radius:9px 12px 12px 9px!important}
+.bo-h716 .bo1215-depth-icon{border-radius:10px 10px 7px 10px!important}
+
+.bo-h716-recent-preview>.bo-h716-artifact-preview{position:relative;z-index:1}
+.bo-h716-artifact-preview{position:relative;display:block;width:92px;height:62px;color:#2563eb}
+.bo-h716-artifact-preview i,.bo-h716-artifact-preview b{position:absolute;display:block;box-sizing:border-box}
+.bo-h716-artifact-preview.is-journey i{width:17px;height:17px;border:2px solid currentColor;border-radius:50%;background:#fff;top:24px}
+.bo-h716-artifact-preview.is-journey i:nth-child(1){left:4px}.bo-h716-artifact-preview.is-journey i:nth-child(2){left:38px;top:12px}.bo-h716-artifact-preview.is-journey i:nth-child(3){right:4px;top:29px}
+.bo-h716-artifact-preview.is-journey b{height:2px;background:currentColor;transform-origin:left center;opacity:.58;border-radius:99px}
+.bo-h716-artifact-preview.is-journey b:nth-of-type(1){left:19px;top:29px;width:27px;transform:rotate(-20deg)}
+.bo-h716-artifact-preview.is-journey b:nth-of-type(2){left:53px;top:22px;width:23px;transform:rotate(22deg)}
+.bo-h716-artifact-preview.is-journey b:nth-of-type(3){left:16px;right:8px;bottom:5px;height:1px;background:linear-gradient(90deg,transparent,currentColor,transparent);opacity:.28}
+
+.bo-h716-artifact-preview.is-blueprint{color:#0f8f83}
+.bo-h716-artifact-preview.is-blueprint i{left:4px;right:4px;height:8px;border:1.5px solid currentColor;border-radius:4px;background:color-mix(in srgb,currentColor 7%,white)}
+.bo-h716-artifact-preview.is-blueprint i:nth-child(1){top:4px}.bo-h716-artifact-preview.is-blueprint i:nth-child(2){top:19px}.bo-h716-artifact-preview.is-blueprint i:nth-child(3){top:34px}.bo-h716-artifact-preview.is-blueprint i:nth-child(4){top:49px}
+.bo-h716-artifact-preview.is-blueprint b{top:2px;bottom:2px;width:2px;background:currentColor;border-radius:99px;opacity:.4}.bo-h716-artifact-preview.is-blueprint b:nth-of-type(1){left:31px}.bo-h716-artifact-preview.is-blueprint b:nth-of-type(2){right:24px}
+
+.bo-h716-artifact-preview.is-whiteboard{color:#7657d6}
+.bo-h716-artifact-preview.is-whiteboard i{width:22px;height:22px;border:2px solid currentColor;background:#fff}
+.bo-h716-artifact-preview.is-whiteboard i:nth-child(1){left:4px;top:8px;border-radius:6px}.bo-h716-artifact-preview.is-whiteboard i:nth-child(2){left:36px;top:28px;transform:rotate(45deg);border-radius:4px;color:#14946d}.bo-h716-artifact-preview.is-whiteboard i:nth-child(3){right:4px;top:7px;border-radius:50%;color:#d69a26}
+.bo-h716-artifact-preview.is-whiteboard b{height:2px;background:#9aa6b5;transform-origin:left center;opacity:.68}.bo-h716-artifact-preview.is-whiteboard b:nth-of-type(1){left:24px;top:25px;width:21px;transform:rotate(22deg)}.bo-h716-artifact-preview.is-whiteboard b:nth-of-type(2){left:55px;top:27px;width:20px;transform:rotate(-25deg)}
+.bo-h716-artifact-preview.is-compact{width:44px;height:30px;transform:scale(.72);transform-origin:center}.bo-h716-dialog-art i{display:block!important}.bo-h716-dialog-art>.bo-h716-artifact-preview{margin:auto}
+.bo-h716-favorite-icon{color:var(--bo-object-journey)!important;background:#eef5ff!important;border:1px solid #d7e5ff;border-radius:8px!important}
+
+/* Whiteboard / Blueprint Smart Objects: semantic color follows the object, not the screen. */
+.bo-h716-object-card:not([data-bo-object="service"]){
+  background:linear-gradient(145deg,var(--bo-h716-surface,#fff),color-mix(in srgb,var(--bo-h716-surface,#fff) 68%,#fff))!important;
+  border-color:color-mix(in srgb,var(--bo-h716-accent,#64748b) 35%,#d8e0e9)!important;
+  box-shadow:0 2px 8px rgba(22,34,52,.055)!important;
+  overflow:visible!important;
+}
+.bo-h716-object-card:not([data-bo-object="service"])::before{content:'';position:absolute;left:-1px;top:14px;bottom:14px;width:3px;border-radius:0 4px 4px 0;background:var(--bo-h716-accent,#64748b);opacity:.88}
+.bo-h716-object-card[data-bo-object-shape="halo"]{border-radius:18px 18px 12px 12px!important}
+.bo-h716-object-card[data-bo-object-shape="layer"]{border-radius:9px 14px 9px 14px!important}
+.bo-h716-object-card[data-bo-object-shape="block"]{border-radius:8px!important}
+.bo-h716-object-card[data-bo-object="problem"]::after{content:'';position:absolute;right:10px;top:-1px;width:16px;height:7px;background:var(--bo-h716-accent);clip-path:polygon(0 0,100% 0,50% 100%);opacity:.8}
+.bo-h716-object-card[data-bo-object="evidence"]::after{content:'•••';position:absolute;right:10px;bottom:7px;color:var(--bo-h716-accent);font-size:8px;letter-spacing:2px;opacity:.55}
+.bo-h716-object-card[data-bo-object="frontstage"]::after,.bo-h716-object-card[data-bo-object="backstage"]::after{content:'';position:absolute;left:13px;right:13px;height:1px;background:linear-gradient(90deg,transparent,var(--bo-h716-accent),transparent);opacity:.45}
+.bo-h716-object-card[data-bo-object="frontstage"]::after{top:8px}.bo-h716-object-card[data-bo-object="backstage"]::after{bottom:8px}
+.bo-h716-object-head{min-height:27px}
+.bo-h716-object-icon{width:27px;height:27px;display:grid;place-items:center;flex:0 0 auto;border-radius:8px;color:var(--bo-h716-accent);background:color-mix(in srgb,var(--bo-h716-accent) 8%,white);border:1px solid color-mix(in srgb,var(--bo-h716-accent) 24%,transparent)}
+.bo-h716-object-label{color:var(--bo-h716-ink,#475569)!important;letter-spacing:.10em!important}
+.bo-h716-graph-chip{color:var(--bo-h716-ink,#174ea6)!important;background:color-mix(in srgb,var(--bo-h716-accent,#2563eb) 10%,white)!important;border:1px solid color-mix(in srgb,var(--bo-h716-accent,#2563eb) 18%,transparent)!important;padding:2px 5px;border-radius:5px}
+
+/* Object library uses the same grammar as canvas objects. */
+.bo-h716-library-icon{width:26px;height:26px;display:inline-grid;place-items:center;margin-right:7px;border-radius:7px;background:#f3f6fa;color:#315d92;vertical-align:middle}
+.bo-h716-library-object-row{display:flex;align-items:center;gap:6px;margin-bottom:2px;color:#315d92}.bo-h716-library-object-row span{color:inherit}
+.bo-h716-inspector-type{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;font-weight:750;color:#27364a}.bo-h716-inspector-type svg{color:#2563eb}
+
+/* Relation language: semantic presets remain legible in the inspector and the canvas. */
+.bo-h716-relation-presets>span{display:block;margin-bottom:7px;font-size:11px;font-weight:700;color:#475569}.bo-h716-relation-presets>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.bo-h716-relation-presets button{height:29px;border:1px solid #dfe4eb;border-radius:7px;background:#fff;font-size:10px;font-weight:750;color:#516071;cursor:pointer}.bo-h716-relation-presets button[data-relation="supports"]{color:#0d7299;border-color:#bce2f0;background:#f1fbff}.bo-h716-relation-presets button[data-relation="contradicts"]{color:#a42d3c;border-color:#f0c4ca;background:#fff5f6}.bo-h716-relation-presets button[data-relation="contextualizes"]{color:#5941ab;border-color:#d8cef6;background:#f8f6ff}.bo-h716-relation-presets button[data-relation="depends"]{color:#536173;background:#f6f7f9}.bo-h716-relation-presets button:hover{filter:brightness(.985);box-shadow:0 2px 7px rgba(20,34,53,.05)}
+
+/* Object language should not become maritime decoration in operational surfaces. */
+.bo-h716-object-card[data-bo-object-family="operation"] .bo-h716-object-icon{border-radius:6px}
+.bo-h716-object-card[data-bo-object-family="context"] .bo-h716-object-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255,.65)}
+
+@media(prefers-reduced-motion:reduce){.bo-h716-object-card,.bo-h716-relation-presets button{transition:none!important}}
+.bo-h716-legacy-wave{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}

@@ -1,0 +1,17 @@
+{
+  "release": "V1.20.5-H7.0.1",
+  "surface": "Sidebar + Dashboard shell",
+  "status": "pending-user-runtime",
+  "static_and_smoke_qa": "pass",
+  "required_flow": [
+    "Dashboard",
+    "Journey maps",
+    "Blueprints",
+    "Personas",
+    "Problemas",
+    "Portfólio",
+    "Configurações",
+    "Dashboard"
+  ],
+  "acceptance": "Sidebar mantém hierarquia visual estável, uma única seleção ativa, onda sem sobrepor conteúdo e nenhuma superfície legada reaparece."
+}

@@ -1,0 +1,10 @@
+{
+  "version": "1.20.3",
+  "surface": "Structured Service Frame",
+  "status": "UNAVAILABLE",
+  "attempted": true,
+  "url": "http://127.0.0.1:4173",
+  "reason": "Playwright Python está disponível, porém o executável Chromium esperado pelo Playwright não está instalado neste ambiente.",
+  "declared_pass": false,
+  "screenshots": []
+}

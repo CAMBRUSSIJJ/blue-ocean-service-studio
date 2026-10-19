@@ -1,0 +1,22 @@
+{
+  "release": "V1.20.5-H7.2",
+  "feature": "Needs 2.0",
+  "source_contracts": "pass",
+  "regression_qa": "pass",
+  "preflight_linux": "pass",
+  "full_typecheck": "not_run_dependency_install_timeout",
+  "production_build": "not_run_dependency_install_timeout",
+  "interactive_browser_truth": "pending_user_linux_validation",
+  "required_flow": [
+    "Necessidades",
+    "Criar necessidade",
+    "Abrir detalhe",
+    "Visao geral",
+    "Pessoas",
+    "Relacoes",
+    "Evidencias",
+    "Uso",
+    "Salvar",
+    "Voltar para biblioteca"
+  ]
+}

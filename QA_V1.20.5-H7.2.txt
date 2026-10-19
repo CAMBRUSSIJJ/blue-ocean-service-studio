@@ -1,0 +1,27 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.2 — Needs 2.0
+
+ESCOPO
+- Necessidades deixa a biblioteca genérica e recebe view dedicada.
+- Biblioteca com busca, filtros, importância, Personas/Evidências e rastreabilidade.
+- Detalhe com abas Visão geral, Pessoas, Relações, Evidências e Uso.
+- Campos próprios: contexto, resultado desejado, alternativa atual, sinal de sucesso e importância.
+- Relações canônicas preservadas no Service Graph, sem duplicação de objetos.
+
+GATES EXECUTADOS NESTE AMBIENTE
+PASS  v1205h72:needs-2-smoke — 15/15
+PASS  npm run qa — 1414 OK / 0 FAIL
+PASS  preflight-linux.sh
+PASS  regressão H7.1 Personas 2.0
+PASS  regressão H7.0.x / H6 / H5
+
+NÃO DECLARADO COMO PASS
+- npm run typecheck completo: npm ci expirou antes de instalar node_modules/.bin/tsc neste ambiente.
+- npm run build completo: depende do mesmo npm ci.
+- Browser Truth interativo: não executado neste ambiente; deve ser confirmado no Linux do usuário após build.
+
+CRITÉRIO DE VALIDAÇÃO NO LINUX
+npm ci
+npm run typecheck
+npm run build
+./preflight-linux.sh
+./START.sh

@@ -1,0 +1,35 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.3 Jobs 2.0
+
+GATES EXECUTADOS NESTE AMBIENTE
+- v1205h73:jobs-2-smoke: 21/21 PASS
+- npm run qa: 1486 OK / 0 FAIL
+- preflight-linux.sh: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: 12/12 PASS
+
+VALIDAÇÃO FUNCIONAL H7.3
+- JobsView dedicada: PASS
+- Biblioteca / detalhe: PASS
+- 5 abas: PASS
+- Campos JTBD próprios: PASS
+- Job Statement: PASS
+- Completude determinística: PASS
+- Relações bidirecionais Job↔Persona: PASS
+- Relações bidirecionais Job↔Necessidade: PASS
+- Evidência/confiança no relatório: PASS
+- Job completo chega a 100% / readyForDesign: PASS
+- Criação com timestamp explícito: PASS
+- Needs também sem entity.updatedAt na criação: PASS
+
+NÃO EXECUTADO / NÃO COMPROVADO
+- npm ci: tentativa expirou antes de instalar TypeScript
+- npm run typecheck: NÃO EXECUTADO (tsc indisponível)
+- npm run build: NÃO EXECUTADO
+- browser truth real: PENDENTE
+
+Comando recomendado no Linux:
+  npm ci
+  npm run typecheck
+  npm run build
+  ./START.sh

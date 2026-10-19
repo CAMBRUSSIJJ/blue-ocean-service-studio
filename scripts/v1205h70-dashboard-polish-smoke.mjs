@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+const read = (p) => fs.readFileSync(p, 'utf8');
+const dashboard = read('src/views/WorkspaceDashboardView.tsx');
+const library = read('src/views/WorkspaceLibraryView.tsx');
+const css = read('src/runtime/dashboard-h70.css');
+const style = read('src/style.css');
+const pkg = JSON.parse(read('package.json'));
+let ok = 0; let fail = 0;
+function check(condition, label) { if (condition) { console.log('OK  ', label); ok++; } else { console.log('FAIL', label); fail++; } }
+check(dashboard.includes('data-bo-dashboard-version="7.0"'), 'Dashboard declara versão H7.0');
+check(!dashboard.includes('setActiveTab'), 'Dashboard não usa setActiveTab direto');
+check(dashboard.includes("new CustomEvent('rt-navigation'"), 'Dashboard usa coordenador rt-navigation');
+check(dashboard.includes('Nova jornada') && dashboard.includes('Nova persona') && dashboard.includes('Nova métrica'), 'três ações rápidas presentes');
+check(dashboard.includes('Recentes de') && dashboard.includes('Favoritos de') && dashboard.includes('Aprender'), 'três blocos principais presentes');
+check(!dashboard.includes('bo1205h3-dashboard-title'), 'título interno duplicado removido');
+check(library.includes("bo-workspace-create-page"), 'criação rápida integra com páginas de biblioteca');
+check(style.includes("@import './runtime/dashboard-h70.css';"), 'CSS H7.0 importado no entrypoint');
+check(css.includes('.bo1207-dashboard-actions') && css.includes('.bo1207-recent-grid') && css.includes('.bo1207-learn-grid'), 'CSS cobre ações, recentes e aprender');
+check(pkg.scripts['v1205h70:dashboard-polish-smoke'], 'script H7.0 registrado');
+console.log(`\nH7.0 Dashboard Polish: ${ok} OK / ${fail} FAIL`);
+process.exit(fail ? 1 : 0);

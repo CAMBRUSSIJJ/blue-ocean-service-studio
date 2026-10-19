@@ -1,0 +1,16 @@
+BLUE OCEAN SERVICE STUDIO — SOURCE FINGERPRINT V1.20.5-H7.40-H7
+files_without_generated_dirs=1089
+tree_sha256=d5a6ba9cce9af866172b614ad1443c6d01cf2e4cb0b9ad7817831b8b43a7bfac
+
+KEY FILES
+8c307d6877e36a60909e304cd1979c377d5048b4858a06b75a037e652522b817  package.json
+306376fc5d40fec5a5f49605769f3c83c1fec27323276157d295e9ff2442eb69  package-lock.json
+09cdc499970318f7fbbfd54d532454d5ee87db812b37e2224ebb3023f44b6533  src/views/BlueprintWorkspaceView.tsx
+e22519bc128813851b61f7c721cf38b6ba6f51b0116a12e9adc51fc852f08395  src/services/guided-service-workspace.ts
+8edc066ce6b8858dc0f25291706d5d1f417d331aad3bc932f237a512427c94ac  src/runtime/guided-service-workspace-h740h7.css
+d82b98dba8665273c9e8040f11c0ab7bff0e0943df6ba00864031b1d93a0a5e1  scripts/v1205h740h7-guided-service-workspace-smoke.mjs
+3062c817edc030c0111cd91b4e3467dc36548535aa7613b372612df086cda78c  scripts/v1205h740h7-browser-guided.py
+c7470fd7686479fb4bfc755e00ad1433ffc31a29fec38cf04809d4efce622cc0  preflight-linux.sh
+49272f0888e2c3f935d61935b95b716d9a553742e7c42528192fcc8404ec6a68  QA_V1.20.5-H7.40-H7.txt
+
+FORBIDDEN GENERATED DIRECTORIES: node_modules, dist, .generated, artifacts, __pycache__

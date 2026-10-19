@@ -1,0 +1,13 @@
+BLUE OCEAN Service Studio — SOURCE FINGERPRINT V1.20.5-H7.18
+=============================================================
+0a10ab87292cdf8040aede937fcdc3bbf0a1b484443115467c9fd16d38b3b2f9  src/runtime/animated-ocean-branding-h718.css
+e5f6124f912c89a7d93619f49e593f98441b31dd5ca3db22fb3510b10d8b8b71  src/design-system/blue-ocean-objects.tsx
+d0f4a7cf50f07ad6c8f52c090f41abdeaf97975b8ca53120a3d3b0bb69c7c570  src/style.css
+51b7a4b685ba51604d5321b42a04c7ca7e3dbab03f0759c52a975a7a278e003e  src/main.tsx
+77827b5e8f2fc6e2f8e9725c7b636b9077e89bf655e9ffe95ddff20992f8e725  src/App.tsx
+cb7d978b82dd850fc55a68e70148966a4bbd2fcc9175095d8f0b71284cc35028  src/views/WorkspaceDashboardView.tsx
+99a63e3f9708ff282cc13cb91278ec4eb5ffda726116d4a38d79bf4baa9bca22  scripts/v1205h718-animated-ocean-branding-smoke.mjs
+42a0a916188627ee101dbc53674b8f46d3b0cfe45b0c652b131eb8cac1d4d11a  package.json
+1ad0c80fa0ad379b22921131d6e350ed5666145f62c24b142f2cdaf4710d1a62  preflight-linux.sh
+af355879c879e707a6fad9a5bc52dac0461c4e793ee66dc334aa7b6aa85e6fa9  RELEASE_NOTES_V1.20.5-H7.18.md
+c59388c29d68d922060981d363176fbcbfb759fdab92db587deb8b0b650f7cce  QA_V1.20.5-H7.18.txt

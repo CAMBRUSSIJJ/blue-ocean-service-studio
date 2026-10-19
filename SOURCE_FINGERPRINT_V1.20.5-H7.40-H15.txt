@@ -1,0 +1,12 @@
+BLUE OCEAN SERVICE STUDIO — V1.20.5-H7.40-H15
+Service Model Integration / Service Model Index
+
+file_count_without_this_fingerprint=1145
+tree_sha256_without_this_fingerprint=9c8b6ff1de721936d3a620e3a9d15aed932ea89cb225fec9691b9644fdda0b26
+
+key_files:
+a27d86b5b71c26d0aa50c76dcec9a3d09d87d02b7f3d6ccf6766fceb65f3ab50  src/services/service-model-index.ts
+32b13b1d0c0ba236635f5c6b29abe669df5f7227e32a14631449f2eef33e38f3  scripts/v1205h740h15-service-model-index-smoke.mjs
+e0a7739a90a6bcda09732554171d4d3380896e953251ed33d561dae5c31ca94a  package.json
+e110e7f44f5ef84d912c63eac4c6d3b3ab51684220933d2caf37bb6241b9075e  preflight-linux.sh
+7aae300c8671e6227d12236e15b64bd5e88a64a5df967370c5bd9d8e6ceb6605  start-linux.sh

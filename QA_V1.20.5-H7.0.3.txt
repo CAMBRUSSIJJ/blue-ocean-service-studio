@@ -1,0 +1,27 @@
+BLUE OCEAN Service Studio V1.20.5-H7.0.3 — QA
+
+Objetivo:
+- Tornar a identidade de onda perceptível em cada clique de navegação da sidebar.
+
+Implementado:
+- onClickCapture central na navegação lateral.
+- cálculo da origem vertical da onda a partir do item clicado.
+- ripple localizado na altura da aba.
+- surge sincronizado da onda inferior.
+- crista visual breve no item clicado.
+- timeout de limpeza para não deixar classes transitórias no DOM.
+- prefers-reduced-motion preservado.
+- paleta azul/ciano; sem #1D9E75.
+
+Gates executados:
+- v1205h703-wave-navigation-interaction-smoke: 11 OK / 0 FAIL
+- npm run qa: PASS completo
+- preflight-linux.sh: OK
+- H7.0.2: 6/6 PASS
+- H7.0.1: 14/14 PASS
+- H7.0: 10/10 PASS
+- H6 routing: 28/28 PASS
+
+Limitação:
+- typecheck/build completos não foram executados nesta árvore distribuída porque node_modules não é incluído no pacote.
+- repetir no Linux: npm ci && npm run typecheck && npm run build && ./preflight-linux.sh

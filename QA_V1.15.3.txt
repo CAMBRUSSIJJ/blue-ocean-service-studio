@@ -1,0 +1,15 @@
+BLUE OCEAN Service Studio — V1.15.3 QA
+
+Stability V1.12 .............. 12/12
+Design System V1.13 .......... 10/10
+Workspace Home V1.14 ......... 14/14
+Global Navigation V1.15 ...... 17/17
+Precision Studio ............. 17/17
+Branding Consolidation ....... 14/14
+Demo ......................... 79 objects / 0 broken references
+Dist verify .................. OK
+Legacy structural palette .... 0 known occurrences in published CSS
+Visible legacy brand ......... 0 known occurrences in published runtime UI
+
+Known environment limitation:
+A clean React/Vite rebuild requires installed npm dependencies. The current environment does not contain React/React DOM/lucide packages. Published dist keeps the previously validated React bundle with deterministic visible-brand/version string patches and regenerated V1.15.3 runtime assets.

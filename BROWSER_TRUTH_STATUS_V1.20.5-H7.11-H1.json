@@ -1,0 +1,11 @@
+{
+  "release": "V1.20.5-H7.11-H1",
+  "surface": "Whiteboard 2.0 Typecheck Cleanup",
+  "h711_smoke": "PASS 40/40",
+  "lock_verify": "PASS",
+  "source_authority": "PASS",
+  "foundation_smoke": "PASS 12/12",
+  "syntax_check": "PASS",
+  "full_typecheck": "PENDING_USER_ENV_DEPENDENCIES",
+  "production_build": "PENDING_USER_ENV_DEPENDENCIES"
+}

@@ -1,0 +1,48 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.21 Journey Workspace 3.0
+QA report
+
+Scope
+- Journey library
+- Journey hero and navigation
+- Overview
+- Journey editor compatibility
+- Emotional curve
+- Evidence workspace
+- Insights workspace
+- Journey Cover compatibility
+- Journey Maps 2.0 compatibility
+- Dashboard H7.20-H1 regression protection
+
+Executed gates
+- v1205h721:journey-workspace-3-smoke: 48/48 PASS
+- v1205h79:journey-maps-2-smoke: 41/41 PASS
+- v1205h718h1:journey-cover-smoke: 35/35 PASS
+- v1205h719h1:visual-recovery-smoke: 28/28 PASS
+- v1205h720:dashboard-composition-smoke: 27/27 PASS
+- v1205h720h1:dashboard-recovery-smoke: 20/20 PASS
+- syntax:check: PASS
+- npm run qa: PASS, 2164 OK lines / 0 FAIL lines
+- lock:verify: PASS
+- source:authority: PASS
+- foundation:smoke: 12/12 PASS
+- preflight-linux.sh: PASS
+
+Important implementation assertions
+- new tabs use the canonical Journey entity
+- evidence lists resolve canonical evidence IDs from Service Graph
+- insights use deterministic Journey report gaps/blockers
+- emotional curve is computed from Stage.emotion
+- no operational content is invented for Blueprint
+- Journey Cover upload/fallback system remains intact
+
+Not claimed
+- npm ci did not complete within the available execution window.
+- full typecheck/build with installed dependencies are NOT claimed as PASS in this environment.
+- browser runtime QA is NOT claimed in this environment.
+
+Package hygiene target
+- no node_modules
+- no dist
+- no .generated
+- no artifacts
+- no __pycache__

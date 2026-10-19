@@ -1,0 +1,19 @@
+{
+  "release": "V1.20.5-H7.40-H4",
+  "status": "PARTIAL_PASS",
+  "browser": "Chromium 144.0.7559.96",
+  "verified": {
+    "ux_polish_css_gate": "8/8 PASS",
+    "product_coherence_gate": "10/10 PASS",
+    "desktop_1920_no_global_overflow": true,
+    "tablet_1000_no_global_overflow": true,
+    "mobile_600_no_global_overflow": true,
+    "service_guide_responsive_columns": "6 / 3 / 2"
+  },
+  "not_claimed": {
+    "full_app_browser_after_production_build": "UNAVAILABLE — npm ci did not complete",
+    "production_build": "NOT VALIDATED",
+    "react_full_typecheck": "NOT VALIDATED"
+  },
+  "truth_policy": "Unavailable or unfinished checks are not promoted to PASS."
+}

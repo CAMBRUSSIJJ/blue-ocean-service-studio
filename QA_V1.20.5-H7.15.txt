@@ -1,0 +1,43 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.15 Ocean Workspace Home
+================================================================
+
+BASE
+V1.20.5-H7.14 — Service Depth & Adaptive Home
+
+ESCOPO
+- Home visualmente simplificada para o ritmo da referência fornecida.
+- 3 ações principais no topo.
+- Recentes como painel dominante.
+- Favoritos simplificados.
+- Aprender em uma única faixa.
+- Service Depth condensada em selo Blue Ocean.
+- Inteligência H7.12-H7.14 preservada sem widgets visuais concorrentes.
+- Sidebar com branding Blue Ocean reforçado.
+
+GATES EXECUTADOS
+H7.15 Ocean Workspace Home                 30/30 PASS
+H7.14 Service Depth & Adaptive Home        30/30 PASS
+H7.13 Blue Ocean Identity                  26/26 PASS
+H7.12 Brand Experience                     25/25 PASS
+npm run qa                                      PASS
+npm run syntax:check                            PASS
+npm run lock:verify                             PASS
+npm run source:authority                        PASS
+npm run foundation:smoke                   12/12 PASS
+preflight-linux.sh                              PASS
+
+REGRESSÃO ACUMULADA
+Base H7.14: 1828 verificações / 0 FAIL
+H7.15:        30 verificações / 0 FAIL
+Total:      1858 verificações / 0 FAIL
+
+TYPECHECK / BUILD
+npm ci: NÃO CONCLUÍDO no ambiente de geração dentro do limite disponível.
+node_modules parcial: REMOVIDO.
+npm run typecheck completo: NÃO DECLARADO.
+npm run build completo: NÃO DECLARADO.
+A execução sem dependências gera erros de resolução de React/JSX e não é uma validação legítima do source.
+
+ARTEFATO FINAL
+Deve permanecer sem node_modules, dist, .generated, artifacts e __pycache__.
+START.sh e preflight-linux.sh: modo executável 755.

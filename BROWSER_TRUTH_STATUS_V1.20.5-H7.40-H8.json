@@ -1,0 +1,42 @@
+{
+  "release": "V1.20.5-H7.40-H8",
+  "project_home_chromium": {
+    "status": "PASS",
+    "checks": "8/8",
+    "scope": [
+      "desktop_3_columns",
+      "continue_visible",
+      "desktop_no_overflow",
+      "tablet_2_columns",
+      "tablet_no_overflow",
+      "mobile_1_column",
+      "mobile_hero_stacked",
+      "mobile_no_overflow"
+    ]
+  },
+  "project_library_domain": {
+    "status": "PASS",
+    "checks": "25/25"
+  },
+  "full_react_typecheck": {
+    "status": "NOT_VALIDATED",
+    "reason": "npm ci --include=dev did not complete in this environment"
+  },
+  "vite_production_build": {
+    "status": "NOT_VALIDATED",
+    "reason": "dependencies were not fully installed in this environment"
+  },
+  "policy": "UNAVAILABLE and NOT_VALIDATED are not promoted to PASS",
+  "candidate_zip_reextract": {
+    "status": "PASS",
+    "h8": "25/25",
+    "h7": "36/36",
+    "hardening": "115/115",
+    "syntax": "PASS",
+    "preflight": "PASS",
+    "browser": "8/8",
+    "files": 1099,
+    "forbidden_directories": 0,
+    "launcher_permissions": "755/755/755"
+  }
+}

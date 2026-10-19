@@ -1,0 +1,24 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.6 Problemas 2.0
+
+VALIDAÇÃO EXECUTADA
+- H7.6 Problemas 2.0 smoke: 27/27 PASS
+- npm run qa: 1559 OK / 0 FAIL
+- preflight-linux.sh: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: 12/12 PASS
+- npm run syntax:check (tsc --noEmit --noCheck): PASS
+
+ESCOPO H7.6
+- ProblemsView dedicada em vez da tabela contextual genérica.
+- Problema validado não é criado diretamente: o CTA inicia uma Hipótese.
+- Estrutura do problema: causa raiz, impacto, população afetada, sinal observável, severidade e prioridade.
+- Qualidade determinística e readiness para Service Definition.
+- Rastreabilidade preservada até a hipótese de origem.
+- Relações bidirecionais com Persona, Necessidade, Job, Dor, Hipótese e Evidência.
+- Remoção limpa problemIds, validatedProblemId e referências do Service Definition.
+
+LIMITAÇÕES / TRUTH
+- npm ci expirou no ambiente de geração antes de concluir a instalação.
+- Por isso npm run typecheck e npm run build completos NÃO foram marcados como PASS nesta geração.
+- Browser/runtime visual ainda precisa ser confirmado no Linux do usuário após npm ci.

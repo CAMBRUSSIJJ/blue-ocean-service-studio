@@ -1,0 +1,26 @@
+import fs from 'node:fs';
+const app=fs.readFileSync('src/App.tsx','utf8');
+const facade=fs.readFileSync('src/design-system/icons.ts','utf8');
+const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+const changelog=fs.readFileSync('CHANGELOG.md','utf8');
+const preflight=fs.readFileSync('preflight-linux.sh','utf8');
+const launcher=fs.readFileSync('start-linux.sh','utf8');
+let passed=0, failed=0;
+function check(name, valid) { console.log(`${valid ? 'OK' : 'FAIL'} ${name}`); valid ? passed++ : failed++; }
+const imports=[...app.matchAll(/import\s*\{([^}]+)\}\s*from\s*['"]\.\/design-system\/icons['"]/g)];
+const names=imports.flatMap(m => m[1].split(',').map(x=>x.trim()));
+check('ícone de serviço usado no App',app.includes('<ChevronsUpDown size={14} />'));
+check('ícone importado da fonte canônica',names.includes('ChevronsUpDown'));
+check('somente uma importação do ícone',names.filter(n=>n==='ChevronsUpDown').length===1);
+check('fachada exporta lucide-react',facade.includes("export * from 'lucide-react'"));
+check('projeto declara lucide-react',Boolean(pkg.dependencies?.['lucide-react']));
+check('H17 preservada como experiência canônica',app.includes('data-single-experience="H17"'));
+check('metadata reconhece hotfix',pkg.description.includes('V1.20.5-H17.0.1'));
+check('script de smoke disponível',Boolean(pkg.scripts['v1205h1701:icon-typecheck-smoke']));
+check('QA encadeia smoke',pkg.scripts.qa.includes('v1205h1701:icon-typecheck-smoke'));
+check('preflight verifica smoke',preflight.includes('node scripts/v1205h1701-icon-typecheck-smoke.mjs'));
+check('launcher identifica H17.0.1',launcher.includes('RELEASE="H17.0.3.1"') || (launcher.includes('RELEASE="H17.0.5"') || launcher.includes('RELEASE="H17.0.4"')) || launcher.includes('RELEASE="H17.0.3"') || launcher.includes('RELEASE="H17.0.2"') || launcher.includes('RELEASE="H17.0.1"'));
+check('changelog registra hotfix',changelog.includes('# V1.20.5-H17.0.1'));
+check('notes presentes',fs.existsSync('RELEASE_NOTES_V1.20.5-H17.0.1.md'));
+console.log(`\nV1.20.5-H17.0.1 Sidebar Icon Typecheck Hotfix: ${passed}/${passed+failed} PASS`);
+process.exit(failed ? 1 : 0);

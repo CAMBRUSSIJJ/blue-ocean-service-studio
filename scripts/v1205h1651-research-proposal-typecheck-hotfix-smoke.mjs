@@ -1,0 +1,41 @@
+import fs from 'node:fs';
+const read=(p)=>fs.readFileSync(p,'utf8');
+const view=read('src/views/ResearchStudioView.tsx');
+const app=read('src/App.tsx');
+const workspace=read('src/views/BlueprintWorkspaceView.tsx');
+const main=read('src/main.tsx');
+const pkg=JSON.parse(read('package.json'));
+const changelog=read('CHANGELOG.md');
+const launcher=read('start-linux.sh');
+const preflight=read('preflight-linux.sh');
+let ok=0,fail=0;
+const check=(name,cond)=>{if(cond){ok++;console.log(`PASS ${name}`)}else{fail++;console.error(`FAIL ${name}`)}};
+
+const professionalStart=view.indexOf('</div> : <>');
+const professionalEnd=view.indexOf('\n    </>}\n\n    {dialog &&', professionalStart);
+const professional=professionalStart>=0&&professionalEnd>professionalStart?view.slice(professionalStart,professionalEnd):'';
+
+check('H16.5.1 marcado na Pesquisa',view.includes('data-research-proposal-hotfix="H16.5.1"'));
+check('H16.5.1 marcado no shell',app.includes('data-research-proposal-hotfix="H16.5.1"'));
+check('H16.5.1 marcado no workspace',workspace.includes('data-research-proposal-hotfix="H16.5.1"'));
+check('body class H16.5.1 registrada',main.includes("'bo-h1651'"));
+check('ramo profissional foi localizado',Boolean(professional));
+check('ramo profissional não compara foundation',professional&&!professional.includes("experience.level === 'foundation'"));
+check('hero profissional mantém Pesquisa do serviço',professional.includes('<small>PESQUISA DO SERVIÇO</small>'));
+check('hero profissional distingue advanced',professional.includes("experience.level === 'advanced' ? 'Pesquisa, evidência e rastreabilidade em uma só visão'"));
+check('maturidade profissional não usa branch foundation',professional.includes('<small>MATURIDADE DA PESQUISA</small>')&&professional.includes('{researchMaturity}%'));
+check('Campo e materiais é profissional direto',professional.includes('<small>CAMPO E MATERIAIS</small>')&&professional.includes('Preserve o que aconteceu antes de interpretar'));
+check('Evidência cria Insight no modo profissional',professional.includes('<Sparkles size={15}/> Criar Insight'));
+check('Insights usam linguagem profissional direta',professional.includes('<small>INSIGHTS</small>')&&professional.includes('<Lightbulb size={15}/> Novo Insight'));
+check('empty state profissional não testa foundation',professional.includes('<strong>Nenhum Insight ainda</strong>'));
+check('modal fora do branch preserva adaptação por nível',view.includes("experience.level === 'foundation' ? 'Nova pergunta de pesquisa' : 'Novo projeto de pesquisa'"));
+check('layout H16.5 Fundamentos preservado',view.includes('bo-h165-foundation-research')&&view.includes('Fluxo')&&view.includes('Mapa'));
+check('metadata preserva H16.5.1 no histórico',String(pkg.description||'').includes('V1.20.5-H16.5.1 Research Proposal Typecheck Hotfix'));
+check('script H16.5.1 registrado',pkg.scripts['v1205h1651:research-proposal-typecheck-hotfix-smoke']==='node scripts/v1205h1651-research-proposal-typecheck-hotfix-smoke.mjs');
+check('QA preserva H16.5.1',String(pkg.scripts?.qa||'').includes('npm run v1205h1651:research-proposal-typecheck-hotfix-smoke'));
+check('launcher aponta H16.5.1 ou posterior',/RELEASE="H16\.(?:5\.1|[6-9](?:\.[0-9]+)?)"/.test(launcher)||launcher.includes('RELEASE="H17'));
+check('preflight executa H16.5.1',preflight.includes('v1205h1651-research-proposal-typecheck-hotfix-smoke.mjs'));
+check('changelog registra H16.5.1',changelog.includes('# V1.20.5-H16.5.1 — Research Proposal Typecheck Hotfix'));
+
+console.log(`\nH16.5.1 Research Proposal Typecheck Hotfix: ${ok}/${ok+fail} PASS`);
+process.exit(fail?1:0);

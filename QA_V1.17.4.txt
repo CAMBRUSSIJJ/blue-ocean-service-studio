@@ -1,0 +1,32 @@
+BLUE OCEAN Service Studio V1.17.4 — QA
+
+Gate específico:
+- V1.17.4 Whiteboard Interface Finalization: 19/19
+
+Regressão completa:
+- V1.12 Stability: 12/12
+- V1.13 Design System: 10/10
+- V1.14 Workspace Home: 14/14
+- V1.15 Global Navigation: 17/17
+- V1.15.3 Precision Studio: 17/17
+- V1.15.3 Branding: 14/14
+- V1.15.4 Whiteboard UX: 13/13
+- Demo smoke: 79 objetos / 0 referências quebradas / 5 etapas / 7 evidências / 7 iniciativas
+- V1.16.1 Whiteboard Unified UX: 14/14
+- V1.16.2 Design System v4: 14/14 · core whiteboard !important=261
+- V1.16.3 Shell Consistency: 14/14
+- V1.17.0 Home 2.0: 18/18
+- V1.17.1 Library: 16/16
+- V1.17.2 Wizard 2.0: 18/18
+- V1.17.3 Unified Workspaces: 19/19
+- V1.17.4 Whiteboard Finalization: 19/19
+
+Outros gates:
+- package-lock: OK
+- Source Authority: OK
+- Source Foundation: 12/12
+- JS syntax do runtime publicado: OK
+- preflight Linux: OK
+
+Limitação do ambiente:
+`npm ci` não concluiu porque registry.npmjs.org retornou EAI_AGAIN para diversos tarballs (incluindo vite, typescript e zod). Portanto typecheck completo e build Vite não são declarados como aprovados neste ambiente. O launcher/CI executam esses gates em ambiente com acesso ao registry.

@@ -1,0 +1,20 @@
+node_modules/
+dist/
+artifacts/
+VERSION
+src/generated/app-version.ts
+public/app-version.json
+public/v*.js
+public/v*.css
+.DS_Store
+npm-debug.log*
+
+# GitHub deployment safeguards
+.env
+.env.*
+!.env.example
+.vercel/
+*.pem
+*.key
+*.p12
+*.pfx

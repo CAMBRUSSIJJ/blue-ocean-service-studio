@@ -1,0 +1,18 @@
+{
+  "version": "1.19.9",
+  "principle": "Persona é contexto canônico do Discovery, não um módulo isolado nem um personagem inventado sem evidência.",
+  "levels": [
+    {"id":"L1","name":"Código","status":"PASS","evidence":"Persona Studio, serviço de domínio, relações e UI estão presentes na fonte."},
+    {"id":"L2","name":"Contrato","status":"PASS","evidence":"Persona Studio 89/89; Discovery 51/51; Service Home 19/19; regressão completa 1342/1342."},
+    {"id":"L3","name":"Runtime","status":"PARTIAL","evidence":"Criação, edição, relações bidirecionais e remoção segura foram executadas nos smokes; browser real não pôde iniciar."},
+    {"id":"L4","name":"Visual","status":"UNAVAILABLE","evidence":"Chromium do Playwright ausente neste ambiente."}
+  ],
+  "critical_paths": [
+    "Service Home -> Entender -> criar Persona -> Persona Studio",
+    "Persona simples -> contexto + objetivo -> salvar no Service Graph",
+    "Persona profissional -> comportamentos/expectativas/restrições/gatilhos/alternativas/canais",
+    "Persona -> conectar Need/Job/Pain/Hypothesis/Evidence -> relações simétricas",
+    "Remover Persona -> limpar relações -> preservar demais objetos de Discovery"
+  ],
+  "canonical_rule": "Persona continues as one GraphEntity in Service Graph. Persona Studio enriches and relates that entity without duplicated collections or a new schema root."
+}

@@ -1,0 +1,8 @@
+{
+  "version": "V1.20.5-H7.40-H6",
+  "scope": "Typecheck-only cleanup",
+  "browser_ui_changed": false,
+  "inherits_visual_validation_from": "V1.20.5-H7.40-H5",
+  "status": "NOT_REQUIRED_FOR_THIS_CHANGE",
+  "note": "H7.40-H6 removes one unused TypeScript local only; no JSX, CSS, routing or runtime behavior changed."
+}

@@ -1,0 +1,49 @@
+BLUE OCEAN Service Studio — QA V1.20.1-H1
+=========================================
+Release: WorkspaceHome Typecheck Hotfix
+Base funcional: V1.20.1 Service Definition Studio
+
+ERROS REPORTADOS E CORREÇÃO
+---------------------------
+TS6133 jobs: REMOVIDO
+TS6133 pains: REMOVIDO
+TS2339 entity.updatedAt: CORRIGIDO com anotação GraphEntity
+TS6133 designCount: REMOVIDO
+TS6133 validationCount: REMOVIDO
+TS6133 improvementCount: REMOVIDO
+
+GATE H1
+-------
+npm run workspace-home:h1:smoke
+Resultado: 9 OK / 0 FAIL
+
+COMPATIBILIDADE UX TRUTH
+------------------------
+npm run ux-truth:smoke
+Resultado: 35 OK / 0 FAIL
+Contrato `type: discoveryCreate` preservado.
+
+REGRESSÃO COMPLETA
+------------------
+npm run qa
+Resultado: PASS / 0 FAIL.
+Inclui Service Home, Discovery, Persona Studio, Problem & Evidence, Service Definition e gate H1.
+
+INTEGRIDADE
+-----------
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS (12/12)
+./preflight-linux.sh: PASS
+
+DEPENDÊNCIAS / TYPECHECK COMPLETO
+--------------------------------
+npm ci: excedeu o limite do ambiente e deixou node_modules parcial; parcial removido.
+npm run typecheck React/Vite completo: NÃO DECLARADO neste ambiente.
+npm run build React/Vite: NÃO DECLARADO neste ambiente.
+
+ESCOPO
+------
+Sem mudança funcional, visual, de schema ou persistência.
+VERSION e package.json.version permanecem 1.20.1; H1 identifica somente o hotfix de compilação.

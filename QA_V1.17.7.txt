@@ -1,0 +1,22 @@
+BLUE OCEAN Service Studio V1.17.7 — TypeScript Gate Recovery
+
+CONFIRMADO NESTE AMBIENTE
+- V1.17.7 TypeScript Gate Recovery: 15/15
+- Regressão WorkspaceHome (união JourneyRecord/fallback): TypeScript OK
+- whiteboard-contract.ts + domain/model.ts em strict: TypeScript OK
+- package-lock alinhado: OK
+- Source Authority: OK
+- QA histórico completo: OK
+- Preflight Linux: OK
+- brand-polish.js: node --check OK
+- MutationObserver em src/runtime: 0
+
+CORREÇÕES PRINCIPAIS
+- journeyRecords/blueprintRecords/researchSources recebem view-model types explícitos.
+- SmartObjectKind completo no Blueprint.
+- Smart objects core e graph.entities usam resolução unificada.
+- source:verify agora executa typecheck real (tsc --noEmit).
+- brand polish deixou de usar MutationObserver.
+
+LIMITAÇÃO DO AMBIENTE
+O typecheck completo do aplicativo não pode ser concluído aqui porque node_modules não está instalado e o registry npm ficou indisponível nas tentativas anteriores. O gate de release agora exige o typecheck real após `npm ci`, portanto em Linux/CI/Vercel uma falha de tipos bloqueia a release.

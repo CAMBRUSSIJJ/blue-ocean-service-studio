@@ -1,0 +1,63 @@
+/* Legacy compatibility bridge: old modules keep their DOM/handlers, while visual primitives resolve to V1.13 tokens. */
+body.bo-v1130{--legacy-brand-dark:var(--bo-color-primary-900);--legacy-brand-accent:var(--bo-color-primary-600)}
+
+/* Workspace surfaces */
+body.bo-v1130 main,
+body.bo-v1130 [class$="-home"],
+body.bo-v1130 [class*="-home "]{color:var(--bo-color-text)}
+body.bo-v1130 .rt192-research-home,
+body.bo-v1130 .rt193-layers-home,
+body.bo-v1130 .rt195-intelligence-home,
+body.bo-v1130 .rt196-benefits-home,
+body.bo-v1130 .rt197-review-home,
+body.bo-v1130 .rt1101-collaboration-home,
+body.bo-v1130 .rt1102-demo-home{background:var(--bo-color-canvas)!important;color:var(--bo-color-text)!important}
+
+/* Typography hierarchy */
+body.bo-v1130 :is(.rt192-research-home,.rt193-layers-home,.rt195-intelligence-home,.rt196-benefits-home,.rt197-review-home,.rt1101-collaboration-home,.rt1102-demo-home) :is(h1,h2,h3){color:var(--bo-color-primary-900)!important;letter-spacing:-.01em}
+body.bo-v1130 :is(.rt192-research-home,.rt193-layers-home,.rt195-intelligence-home,.rt196-benefits-home,.rt197-review-home,.rt1101-collaboration-home,.rt1102-demo-home) :is(p,small){color:var(--bo-color-text-muted)}
+body.bo-v1130 :is(.rt192-eyebrow,.rt193-eyebrow,.rt195-eyebrow,.rt196-eyebrow,.rt197-eyebrow,.rt1101-eyebrow,.rt1102-eyebrow){color:var(--bo-color-primary-600)!important}
+
+/* Existing module panels/cards */
+body.bo-v1130 :is(.rt192-panel,.rt193-panel,.rt195-panel,.rt196-panel,.rt197-panel,.rt1101-panel,.rt1102-panel),
+body.bo-v1130 :is(.rt192-card,.rt193-card,.rt195-card,.rt196-benefit-card,.rt197-card,.rt1101-card,.rt1102-card){background:var(--bo-color-surface)!important;border-color:var(--bo-color-border)!important;border-radius:var(--bo-radius-lg)!important;box-shadow:var(--bo-shadow-xs)!important}
+
+/* Buttons across injected runtimes */
+body.bo-v1130 :is(.rt144-btn,.rt192-btn,.rt193-btn,.rt194-btn,.rt195-btn,.rt196-btn,.rt197-btn,.rt1101-btn,.rt1102-btn){border-radius:var(--bo-radius-md)!important;border-color:var(--bo-color-border-strong)!important;background:var(--bo-color-surface)!important;color:var(--bo-color-text-secondary)!important;box-shadow:none!important;font-family:var(--bo-font-sans)!important;font-weight:var(--bo-weight-semibold)!important;transition:background var(--bo-transition-fast),border-color var(--bo-transition-fast),color var(--bo-transition-fast)!important}
+body.bo-v1130 :is(.rt144-btn,.rt192-btn,.rt193-btn,.rt194-btn,.rt195-btn,.rt196-btn,.rt197-btn,.rt1101-btn,.rt1102-btn):hover:not(:disabled){background:var(--bo-color-primary-50)!important;border-color:var(--bo-color-primary-200)!important;color:var(--bo-color-primary-700)!important}
+body.bo-v1130 :is(.rt144-btn,.rt192-btn,.rt193-btn,.rt194-btn,.rt195-btn,.rt196-btn,.rt197-btn,.rt1101-btn,.rt1102-btn).primary{background:var(--bo-color-primary-600)!important;border-color:var(--bo-color-primary-600)!important;color:#fff!important}
+body.bo-v1130 :is(.rt144-btn,.rt192-btn,.rt193-btn,.rt194-btn,.rt195-btn,.rt196-btn,.rt197-btn,.rt1101-btn,.rt1102-btn).primary:hover:not(:disabled){background:var(--bo-color-primary-700)!important;border-color:var(--bo-color-primary-700)!important}
+
+/* Tabs / active state */
+body.bo-v1130 :is(.rt192-tabs,.rt193-tabs,.rt195-tabs,.rt196-tabs,.rt197-tabs,.rt1101-tabs,.rt1102-tabs){border-color:var(--bo-color-border)!important}
+body.bo-v1130 :is(.rt192-tabs,.rt193-tabs,.rt195-tabs,.rt196-tabs,.rt197-tabs,.rt1101-tabs,.rt1102-tabs) button{color:var(--bo-color-text-muted)!important}
+body.bo-v1130 :is(.rt192-tabs,.rt193-tabs,.rt195-tabs,.rt196-tabs,.rt197-tabs,.rt1101-tabs,.rt1102-tabs) button.active{color:var(--bo-color-primary-700)!important;border-bottom-color:var(--bo-color-primary-600)!important}
+
+/* Forms */
+body.bo-v1130 :is(.rt144-modal,.rt192-modal,.rt193-modal,.rt195-modal,.rt196-modal,.rt197-modal,.rt1101-modal,.rt1102-modal) :is(input,select,textarea),
+body.bo-v1130 :is(.rt192-toolbar,.rt193-toolbar,.rt195-toolbar,.rt196-toolbar,.rt197-toolbar,.rt1101-toolbar,.rt1102-toolbar) :is(input,select){border-color:var(--bo-color-border-strong)!important;background:var(--bo-color-surface)!important;color:var(--bo-color-text)!important;border-radius:var(--bo-radius-md)!important}
+body.bo-v1130 :is(input,select,textarea):focus{outline:0!important;border-color:var(--bo-color-primary-500)!important;box-shadow:var(--bo-focus-ring)!important}
+
+/* Dialogs */
+body.bo-v1130 :is(.rt144-modalbox,.rt192-dialog,.rt193-dialog,.rt195-dialog,.rt196-dialog,.rt197-dialog,.rt1101-dialog,.rt1102-dialog){background:var(--bo-color-surface)!important;border:1px solid var(--bo-color-border)!important;border-radius:var(--bo-radius-xl)!important;box-shadow:var(--bo-shadow-lg)!important;color:var(--bo-color-text)!important}
+
+/* Sidebar / header are canonical components. */
+body.bo-v1130 aside.rt182-host-sidebar{width:var(--bo-sidebar-w)!important;background:var(--bo-color-surface)!important;border-color:var(--bo-color-border)!important}
+body.bo-v1130 header.rt182-host-header{height:var(--bo-header-h)!important;min-height:var(--bo-header-h)!important;background:var(--bo-color-surface)!important;border-color:var(--bo-color-border)!important}
+body.bo-v1130 .rt182-host-sidebar nav button{border-radius:var(--bo-radius-md)!important;min-height:40px!important}
+body.bo-v1130 .rt182-host-sidebar nav button[aria-current="page"],body.bo-v1130 .rt182-host-sidebar nav button.is-active,body.bo-v1130 .rt182-host-sidebar nav button.active{background:var(--bo-color-primary-100)!important;color:var(--bo-color-primary-900)!important}
+
+/* React/Tailwind compatibility for core views */
+body.bo-v1130 .tool-button{min-height:var(--bo-control-h-md)!important;border-color:var(--bo-color-border-strong)!important;border-radius:var(--bo-radius-md)!important;color:var(--bo-color-text-secondary)!important;box-shadow:none!important}
+body.bo-v1130 .tool-button:hover:not(:disabled){background:var(--bo-color-primary-50)!important;color:var(--bo-color-primary-700)!important;border-color:var(--bo-color-primary-200)!important}
+body.bo-v1130 .bg-blue-600{background:var(--bo-color-primary-600)!important}
+body.bo-v1130 .hover\:bg-blue-700:hover{background:var(--bo-color-primary-700)!important}
+body.bo-v1130 .text-blue-700,body.bo-v1130 .text-blue-600{color:var(--bo-color-primary-700)!important}
+body.bo-v1130 .bg-blue-50{background:var(--bo-color-primary-50)!important}
+body.bo-v1130 .border-blue-100,body.bo-v1130 .border-blue-200{border-color:var(--bo-color-primary-200)!important}
+
+/* Scrollbars */
+body.bo-v1130 ::-webkit-scrollbar{width:8px;height:8px}
+body.bo-v1130 ::-webkit-scrollbar-track{background:var(--bo-color-surface-muted)}
+body.bo-v1130 ::-webkit-scrollbar-thumb{background:var(--bo-color-border-strong);border-radius:var(--bo-radius-pill)}
+body.bo-v1130 ::-webkit-scrollbar-thumb:hover{background:var(--bo-color-text-faint)}

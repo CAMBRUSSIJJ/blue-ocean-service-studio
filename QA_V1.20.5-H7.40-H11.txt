@@ -1,0 +1,68 @@
+BLUE OCEAN SERVICE STUDIO — V1.20.5-H7.40-H11
+Service-first Project Navigation — QA FINAL
+Data: 2026-10-14
+
+ESCOPO
+- Sidebar global usa Serviço como entrada principal.
+- Serviço contém a lista de projetos.
+- Projeto abre sua Home específica somente após a seleção.
+- Dentro do projeto, Serviço abre o Guided Service Workspace.
+- Breadcrumb segue Home → Serviço → Projeto.
+- Mobile usa Serviço como entrada global.
+- Project Shell H10 permanece intacto.
+
+GATES DE SOURCE
+npm run qa                                         PASS — 4773 OK / 0 FAIL
+H7.40-H11 Service-first Project Navigation         PASS — 20/20
+H7.40-H10 Project Shell                            PASS — 28/28
+H7.40-H9 Project Architecture Hardening            PASS — 28/28
+H7.40-H8 Project Home                              PASS — 25/25
+syntax:check                                       PASS
+lock:verify                                        PASS
+source:authority                                   PASS
+foundation:smoke                                   PASS — 12/12
+project-foundation:smoke                           PASS — 46/46
+preflight-linux.sh                                 PASS
+
+SERVICE-FIRST NAVIGATION
+Sidebar principal = Serviço                        PASS
+Serviço → Projetos                                 PASS
+Projeto → Home do Projeto                          PASS
+Projeto → Serviço interno                          PASS
+Breadcrumb Home → Serviço → Projeto                PASS
+Mobile global = Serviço                            PASS
+Project Shell H10 preservado                       PASS
+
+BROWSER
+Chromium real — Service-first                      PASS — 6/6
+- sidebar principal exibe Serviço
+- Serviço mostra Projetos do serviço
+- projeto continua selecionável
+- desktop sem overflow
+- tablet sem overflow
+- mobile sem overflow
+
+GATES NÃO DECLARADOS COMO PASS
+React/TS typecheck completo (tsc --noEmit)         NÃO VALIDADO nesta execução
+Vite production build                              NÃO VALIDADO nesta execução
+Vercel deploy                                      NÃO VALIDADO nesta execução
+
+POLÍTICA DE VERDADE
+Nenhum gate NOT_VALIDATED foi promovido a PASS.
+
+RESULTADO
+SERVICE-FIRST NAVIGATION / PROJECT SHELL / SOURCE / DOMAIN / QA / BROWSER: APROVADOS.
+FULL REACT TYPECHECK + VITE BUILD: aguardam ambiente com dependências completas.
+
+VALIDAÇÃO DO ZIP LINUX REEXTRAÍDO — CANDIDATO DE RELEASE
+H7.40-H11 Service-first Project Navigation         PASS — 20/20
+H7.40-H10 Project Shell                            PASS — 28/28
+H7.40-H9 Project Architecture Hardening            PASS — 28/28
+H7.40-H8 Project Home                              PASS — 25/25
+syntax:check                                       PASS
+preflight-linux.sh                                 PASS
+Chromium Service-first                             PASS — 6/6
+Arquivos                                           1121
+Diretórios proibidos                               0
+START.sh / start-linux.sh / preflight-linux.sh     755 / 755 / 755
+Linux / Source / Vercel                            conteúdo canônico idêntico

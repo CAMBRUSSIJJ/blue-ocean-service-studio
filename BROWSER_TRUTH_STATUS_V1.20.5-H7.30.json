@@ -1,0 +1,19 @@
+{
+  "release": "V1.20.5-H7.30",
+  "browser_runtime_executed": false,
+  "status": "NOT_EXECUTED",
+  "reason": "npm ci did not complete in the available execution window; npm ci --offline cannot proceed because zod@4.6.5 is not cached, so no fresh browser bundle was produced in this session.",
+  "validated_instead": [
+    "H7.30 domain smoke 129/129",
+    "full accumulated QA 2868/2868",
+    "H7.29 regression 129/129",
+    "H7.28 regression 93/93",
+    "syntax:check",
+    "lock:verify",
+    "source:authority",
+    "foundation:smoke 12/12",
+    "project-foundation:smoke 46/46",
+    "preflight-linux",
+    "strict non-React TypeScript core"
+  ]
+}

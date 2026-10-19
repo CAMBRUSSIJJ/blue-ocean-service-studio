@@ -1,0 +1,15 @@
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+const failures=[]; const check=(ok,msg)=>{console.log(`${ok?'OK  ':'FAIL'} ${msg}`); if(!ok)failures.push(msg)};
+const required=['src/main.tsx','src/App.tsx','src/domain/schema.ts','src/runtime/whiteboard-core.js','scripts/prepare-assets.mjs','vite.config.ts','package-lock.json'];
+for(const f of required)check(existsSync(f),`source authority contém ${f}`);
+const pkg=JSON.parse(readFileSync('package.json','utf8'));
+const lock=JSON.parse(readFileSync('package-lock.json','utf8'));
+check(lock.version===pkg.version&&lock.packages?.['']?.version===pkg.version,'package-lock alinhado à versão');
+const app = readFileSync('src/App.tsx','utf8');
+const whiteboard = readFileSync('src/runtime/whiteboard-core.js','utf8');
+check(!app.includes('V1.10.2')&&!app.includes('V1.15.4'),'App não fixa versão visual antiga');
+check(!whiteboard.includes("build.textContent='V1.10.2'")&&!whiteboard.includes("document.title='BLUE OCEAN Service Studio · V1.10.2'"),'Whiteboard não fixa badge/título antigo');
+check(!existsSync('src/generated/app-version.ts') || readFileSync('src/generated/app-version.ts','utf8').includes(pkg.version),'versão gerada alinhada quando presente');
+if(failures.length)process.exit(1);
+console.log('\nSource authority: OK');

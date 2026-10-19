@@ -1,0 +1,37 @@
+BLUE OCEAN Service Studio — QA V1.20.5-H4
+==========================================
+
+Release: Typecheck Cleanup Hotfix
+
+CORREÇÕES
+---------
+1. src/App.tsx: remove import não usado `Plus`.
+2. src/views/WhiteboardsView.tsx: adiciona import `ArrowRight`, já usado no JSX.
+3. src/views/WorkspaceLibraryView.tsx: remove import não usado `contextEntityDescription`.
+
+GATE ESPECÍFICO H4
+------------------
+npm run v1205h4:typecheck-cleanup-smoke
+Resultado: 7 OK / 0 FAIL
+
+REGRESSÃO
+---------
+npm run qa: PASS
+
+GATES ESTRUTURAIS
+-----------------
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS (launcher)
+
+TYPECHECK / BUILD COMPLETOS
+--------------------------
+`npm ci --ignore-scripts` foi tentado neste ambiente, mas excedeu o limite de execução antes de concluir.
+Por isso `npm run typecheck` e `npm run build` completos não são declarados como PASS neste ambiente.
+O hotfix foi construído diretamente sobre os três diagnósticos TS reportados pelo ambiente do usuário.
+
+EMPACOTAMENTO
+-------------
+Sem node_modules, dist antigo, .generated, artifacts ou __pycache__.

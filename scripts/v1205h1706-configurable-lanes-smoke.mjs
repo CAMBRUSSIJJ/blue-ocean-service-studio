@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const canvas = readFileSync('src/views/JourneyCanvasFree.tsx', 'utf8');
+const model = readFileSync('src/domain/model.ts', 'utf8');
+const view = readFileSync('src/views/JourneyView.tsx', 'utf8');
+for (const name of ['text', 'image', 'stage', 'icons', 'grid', 'divider', 'emotion', 'embed']) assert.ok(canvas.includes(`type: '${name}'`), `${name} lane missing`);
+for (const phrase of ['saveLanes(', 'changeLane(', 'moveLane(', 'hidden: true', 'hidden: false', 'onChange={(event) => updateCard', 'data-configurable-lanes', 'journey.mapLayout?.lanes ?? []']) assert.ok(canvas.includes(phrase), phrase);
+assert.ok(model.includes('mapLayout?: JourneyMapLayout'));
+assert.ok(model.includes('painIds?: Id[]'));
+assert.ok(view.includes("kind === 'pain' ? { painIds:"));
+console.log('H17.0.6 configurable lanes source smoke passed');

@@ -1,0 +1,25 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.0 Dashboard Polish
+
+EVIDÊNCIA EXECUTADA NA FONTE
+- npm run syntax:check: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: PASS
+- npm run v1205h5:css-import-order-smoke: PASS (6/6)
+- npm run v1205h6:routing-layer-smoke: PASS (28/28)
+- npm run v1205h61:navigation-binding-smoke: PASS (5/5)
+- npm run v1205h70:dashboard-polish-smoke: PASS (10/10)
+- npm run qa: PASS
+
+ESCOPO H7.0
+- Dashboard React única e sem título interno duplicado
+- Ações rápidas: Jornada / Persona / Métrica
+- Recentes / Favoritos / Aprender
+- Dashboard sem setActiveTab direto
+- Navegação via rt-navigation
+- Quick create de Persona/Métrica abre criação na página correta
+- CSS H7.0 isolado e importado antes do workspace-library-h3.css para preservar H5
+
+LIMITAÇÃO
+- `npm run typecheck` completo não é considerado executado neste ambiente: node_modules não está presente. A tentativa gera erros de resolução de React/lucide, não uma evidência válida de TypeScript da aplicação.
+- Browser Truth visual: pendente de execução no Linux do usuário.

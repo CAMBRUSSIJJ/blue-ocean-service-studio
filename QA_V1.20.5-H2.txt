@@ -1,0 +1,66 @@
+BLUE OCEAN Service Studio — QA V1.20.5-H2
+==========================================
+Release: Visual Architecture Recovery
+
+ACHADO DE BROWSER REAL
+----------------------
+Captura do usuário confirmou:
+- grupos antigos da sidebar reaparecendo;
+- Whiteboards fora de DESENHO;
+- Busca / Criar colidindo no header;
+- Service Home ainda redundante e visualmente pesada.
+
+CAUSA RAIZ
+----------
+- blue-ocean-shell.js reescrevia a navegação React após render.
+- workspace-home.js/global-navigation.js injetavam controles no header da Home por ausência de marker nativo.
+- Service Home mantinha hero, phase cards, Readiness completo e summary lateral ao mesmo tempo.
+
+GATE ESPECÍFICO H2
+------------------
+npm run v1205h2:visual-recovery-smoke
+Resultado: 30 OK / 0 FAIL
+
+REGRESSÃO
+---------
+npm run qa: PASS
+Inclui V1.20.5-H1 15/15 e V1.20.5 77/77.
+
+CACHE LOCAL
+-----------
+serve-linux.py e serve-linux.mjs agora enviam Cache-Control: no-store para impedir que assets públicos antigos sobrevivam entre hotfixes.
+
+INTEGRIDADE
+-----------
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS
+
+FULL TYPECHECK / BUILD
+----------------------
+O H1 anterior foi comprovado pelo usuário no ambiente real com:
+- npm run typecheck: PASS
+- npm run build: PASS
+- dist:verify: PASS
+
+Neste ambiente H2 não possui node_modules e, por política de release, não inclui dependências ou dist. As alterações H2 são de shell JS, markup React e CSS; parser TypeScript completo sem check (`syntax:check`) passou.
+
+BROWSER TRUTH
+-------------
+A captura real enviada pelo usuário foi usada como evidência do defeito e como critério de correção. Chromium Playwright continua indisponível neste ambiente para screenshot automatizado pós-fix.
+
+ARTIFACT GATE — ZIP LINUX
+-------------------------
+O ZIP Linux foi reextraído em diretório novo.
+VERSION: 1.20.5
+START.sh: 755
+node_modules/dist/.generated/artifacts/__pycache__: AUSENTES
+v1205h2:visual-recovery-smoke: 30/30
+npm run qa: PASS
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+preflight-linux.sh: PASS

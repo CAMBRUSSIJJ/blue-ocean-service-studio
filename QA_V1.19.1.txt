@@ -1,0 +1,46 @@
+BLUE OCEAN Service Studio — V1.19.1 QA
+Whiteboard Core Reliability
+
+PASS  npm run qa — 903 OK / 0 FAIL
+PASS  V1.19.1 reliability smoke — 42/42
+PASS  V1.19.0 Service Builder Assistant regression — 51/51
+PASS  V1.18.9 Creation Architecture Reset regression — 83/83
+PASS  V1.18.8 Guided Service Builder regression — 117/117
+PASS  Sim Kit static contracts — 16/16
+PASS  Sim Kit 2.1 JS syntax checks
+PASS  tsc --noEmit --noCheck
+PASS  package-lock verify
+PASS  source authority
+PASS  source foundation
+PASS  Linux preflight
+
+BASELINE REPORTED BY USER (SIM KIT 2.0)
+31 assertions PASS / 3 FAIL
+F6 result absent
+F7 result absent
+8 known issues open / 1 resolved
+
+TARGETED FIXES
+- 2.4 Inspector focus/cursor: incremental text editing; no renderAll per key; history consolidated on blur.
+- 2.5 Drag: explicit pointer listeners + incremental geometry update.
+- 3.6 Connection drag: explicit pointer listener on connection handles.
+- 2.2 Placement: collision-aware placement engine.
+- 2.12/2.13 Shortcuts/focus: universal UI-control guard + focus restore.
+- 2.14/2.15 Accessibility: tabindex/role/aria-label + aria-live toast.
+- 4.4 Canvas: dynamic world size for positive coordinates.
+- 4.10 Multi-tab conflict: persistent conflict draft.
+- 4.11 Back: internal rt-navigation to whiteboards, no forced reload.
+- F6 crash: template lookup made semantic instead of exact-text dependent.
+- F7 crash: assistant setMode alias + Service Graph refresh after explicit service creation.
+
+NOT EXECUTED / NOT CLAIMED AS PASS
+- Dynamic Sim Kit 2.1: jsdom/fake-indexeddb/esbuild unavailable because npm install could not complete in this environment.
+- Full React/Vite production build: npm ci could not complete in this environment.
+- Real-browser reliability gate: prepared, but local Chromium blocks localhost with ERR_BLOCKED_BY_ADMINISTRATOR.
+
+REMAINING KNOWN LIMITATIONS
+- negative coordinates / infinite plane to left/up;
+- semantic relation types on edges;
+- data-URL image asset model;
+- broad graph snapshots for general Undo;
+- conflict compare/merge UI.

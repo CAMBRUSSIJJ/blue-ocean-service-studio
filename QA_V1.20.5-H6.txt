@@ -1,0 +1,37 @@
+BLUE OCEAN Service Studio — V1.20.5-H6 Routing & Layer Recovery
+
+ACHADO DE RUNTIME (vídeo do usuário)
+- Dashboard permanecia visível quando breadcrumb/sidebar mudavam para outra view.
+- Workspace legado aparecia duplicado.
+- Controles globais legados podiam se sobrepor ao shell React.
+
+CAUSA COMPROVADA
+- workspace-home.js criava #bo-v114-workspace-home fora do React.
+- ensureNav() injetava Workspace no shell nativo.
+- ensureGlobalCreate() podia injetar + Criar.
+- navegação React não sincronizava rt-navigation.
+
+CORREÇÃO H6
+- ownership nativo da Dashboard.
+- runtime Workspace aposentado visualmente quando sidebar React nativa existe.
+- limpeza de artefatos injetados.
+- rt-navigation canônico para core/library.
+- coordenador de superfícies antigas em App.tsx.
+- shell legado não reagrupa sidebar React.
+- CSS fail-safe contra Home antiga.
+
+VALIDAÇÃO EXECUTADA
+H6 Routing & Layer Recovery: 28 OK / 0 FAIL
+QA regressivo: 1331 OK / 0 FAIL
+H5 CSS Import Order: 6 OK / 0 FAIL
+H4 Typecheck Cleanup: 7 OK / 0 FAIL
+H3 Workspace IA: 68 OK / 0 FAIL
+lock:verify: PASS
+source:authority: PASS
+foundation:smoke: 12/12 PASS
+preflight Linux: PASS
+
+LIMITAÇÃO HONESTA
+npm ci não concluiu neste ambiente. Tentativa offline confirmou zod@4.6.5 ausente do cache.
+Portanto npm run typecheck, npm run build e Browser Truth pós-fix NÃO são declarados PASS aqui.
+O script scripts/v1205h6-browser-routing.py foi incluído para validar o fluxo real em ambiente com build.

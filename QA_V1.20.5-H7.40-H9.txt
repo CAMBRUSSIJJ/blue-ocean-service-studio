@@ -1,0 +1,72 @@
+BLUE OCEAN SERVICE STUDIO — V1.20.5-H7.40-H9
+Project Architecture Hardening — QA FINAL
+Data: 2026-10-14
+
+ESCOPO
+- Stepper: navegação diferente de conclusão/progresso.
+- Isolamento real de snapshots entre projetos.
+- Persistência ao trocar de projeto e recovery do projeto ativo.
+- Criar, abrir, favoritar, renomear, arquivar e restaurar projeto.
+- Breadcrumb canônico sem repetição visual de Workspace.
+- Escopo explícito Global × Projeto.
+- Project selector preservado.
+- Templates globais × Aplicar template no projeto.
+- Equipe/Configurações com escopo do projeto.
+
+GATES DE SOURCE
+npm run qa                                         PASS — 4725 OK / 0 FAIL
+H7.40-H9 Project Architecture Hardening            PASS — 28/28
+H7.40-H8 Project Home & Workspace Architecture     PASS — 25/25
+H7.40-H7 Guided Service Workspace                  PASS — 36/36
+H7.40-H6 Typecheck Final Cleanup                   PASS — 4/4
+H7.40-H5 Service Workspace Simplification          PASS — 32/32
+syntax:check                                       PASS
+lock:verify                                        PASS
+source:authority                                   PASS
+foundation:smoke                                   PASS — 12/12
+project-foundation:smoke                           PASS — 46/46
+preflight-linux.sh                                 PASS
+TypeScript strict — project-library.ts + model.ts  PASS
+
+MULTI-PROJECT DOMAIN
+Projeto A alterado sem alterar Projeto B           PASS
+Rename Project sem renomear Service                PASS
+Favorite persistente                               PASS
+Archive preserva snapshot                          PASS
+Restore devolve projeto à lista ativa              PASS
+Active project persiste para recovery              PASS
+Flush antes de transição do projeto ativo          PASS
+
+BROWSER
+Chromium real — Project Hardening                  PASS — 9/9
+- estado concluído independente da seleção
+- estado parcial independente da seleção
+- seleção usa destaque próprio
+- conectores não simulam progresso
+- ações rename/archive/favorite visíveis
+- restore de arquivados visível
+- desktop/mobile sem overflow
+
+GATES NÃO DECLARADOS COMO PASS
+React/TS typecheck completo (tsc --noEmit)         NÃO VALIDADO nesta execução
+Vite production build                              NÃO VALIDADO nesta execução
+Vercel deploy                                      NÃO VALIDADO nesta execução
+
+POLÍTICA DE VERDADE
+Nenhum gate NOT_VALIDATED foi promovido a PASS.
+
+RESULTADO
+PROJECT ARCHITECTURE / MULTI-PROJECT ISOLATION / SOURCE / DOMAIN / QA / BROWSER: APROVADOS.
+FULL REACT TYPECHECK + VITE BUILD: aguardam ambiente com dependências completas.
+
+VALIDAÇÃO DO ZIP LINUX REEXTRAÍDO — CANDIDATO DE RELEASE
+H7.40-H9 Project Architecture Hardening            PASS — 28/28
+H7.40-H8 Project Home & Workspace Architecture     PASS — 25/25
+H7.40-H7 Guided Service Workspace                  PASS — 36/36
+syntax:check                                       PASS
+preflight-linux.sh                                 PASS
+Chromium Project Hardening                         PASS — 9/9
+Arquivos                                           1106
+Diretórios proibidos                               0
+START.sh / start-linux.sh / preflight-linux.sh     755 / 755 / 755
+Linux / Source / Vercel                            conteúdo canônico idêntico

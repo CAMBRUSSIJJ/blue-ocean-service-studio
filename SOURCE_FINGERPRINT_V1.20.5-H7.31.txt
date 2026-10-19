@@ -1,0 +1,28 @@
+BLUE OCEAN Service Studio — SOURCE FINGERPRINT V1.20.5-H7.31
+Generated from the validated H7.31 source tree.
+
+KEY FILES SHA256
+6d7dc71ba3b4bee47129bfa70bc06800b74f92d13bc7bcc686cb96c8401fc03d  package.json
+306376fc5d40fec5a5f49605769f3c83c1fec27323276157d295e9ff2442eb69  package-lock.json
+931f4ce7ce9487744420741190a1e5488113317b1bc401205229a4e27ffb869b  src/domain/model.ts
+c6474615b6ab206eb6fb256c946eb32eb0feaad7f26840bd8330b23e4a85d6bf  src/domain/schema.ts
+331f98a1c4d9a183bfc4dd5718945ec13d9fbbdeecd7a0d4350ca5ec3b8dec5d  src/services/service-prototype-lab.ts
+63c225216bc195f6ff1011a446cf98478c6054d682d8152aa1a0296610293c3b  src/services/evidence-studio.ts
+cd21a64966ab9a57e597b3ebc700445f8f7adb85f362f4fd41d3fbc0a6bc9975  src/services/evidence-learning-system.ts
+99456fafaa27e4e169fe39c28c9ceb2a9caa3a5ee0fb4ecd75b457e4faeb7a18  src/views/BlueprintWorkspaceView.tsx
+74020ceff439e9a10a073485e14c750c2b63a7e3e97e7dbc614603b9014e930b  src/views/ServiceLearningView.tsx
+8ff5dc96d986daec283d4a1b421f3e79baa434731335192591c7d65e714d8806  src/runtime/evidence-learning-h731.css
+876c2952dfe749a0be70f7110ce673e438ab1e7698f45255cf019873fdbd43b9  src/style.css
+87958e9361695e6bc89aff9ec012af7af1f34e86c2cdfacf0b587f70fec23615  src/main.tsx
+e9937ead284e627755e814cab04ef627f7502fd404d7a1f0ab13ea36c75d1eff  scripts/v1205h731-evidence-learning-smoke.mjs
+892b079ea0db4c91bf005e8c5a1b604e2cdf30f6dcf0926bda8be840a6d55dda  preflight-linux.sh
+b672f34b8436e833b9b363017e3f820a4c653d52344e3b159c6a49065e768c3d  RELEASE_NOTES_V1.20.5-H7.31.md
+d66d9d47fe4fa8bedb78f42190ab2b2d1c241dd0b7884eef088b2a237206116b  QA_V1.20.5-H7.31.txt
+8337419aec3ccac2d3d3cbb714a9468c135e11bd0cb97e011427e84bb8ff5419  BROWSER_TRUTH_STATUS_V1.20.5-H7.31.json
+
+PACKAGE CLEANLINESS
+node_modules: absent
+dist: absent
+.generated: absent
+artifacts: absent
+__pycache__: absent

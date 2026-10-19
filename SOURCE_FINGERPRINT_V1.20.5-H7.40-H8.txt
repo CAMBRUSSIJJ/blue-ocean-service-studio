@@ -1,0 +1,19 @@
+BLUE OCEAN SERVICE STUDIO — SOURCE FINGERPRINT V1.20.5-H7.40-H8
+files_without_generated_dirs=1098
+tree_sha256=b19d9491b746a8fdcc1c1965b64d5a65fcf9de4603361e655805aa82b8c64349
+
+KEY FILES
+5d4671092280e94f9f2c9d412944c9d1d49a0db7343d48b3b169fb3b1efa2e8e  package.json
+306376fc5d40fec5a5f49605769f3c83c1fec27323276157d295e9ff2442eb69  package-lock.json
+35445249ae68cb98ef26f24dece8fecb2388506ad480804fc37dc7546d1a5acc  src/App.tsx
+40d07cfd2571e2447c689c1486c8949ed1da3cf79f81c30167e087ce96d3cedf  src/state/useStudioController.ts
+061a1191fea78392095c4030566680f6cbf97e0894b44edc0aee8828a7e92246  src/services/project-library.ts
+96fc250027b0327b9df4b6eb92227ad531cb604fed138429d60e53916712a1a8  src/views/ProjectHomeView.tsx
+09d63100f16b1571f371482df8848866e43fae28c4fc47a5903991bb93f900e7  src/runtime/project-home-h740h8.css
+2d10c17606430ccbbc03151729eaf759233f69e470ab2016ed0342392cd12a47  scripts/v1205h740h8-project-home-smoke.mjs
+8dc51a7e5a5fb54b4be0dea8a5524fdea52d37884eb97d86f688718d6c82a46e  scripts/v1205h740h8-browser-project-home.py
+e6994f9e3f63978f4de2e1117daaf2a1ea1618fe0edd9c616c2ea3541d234730  preflight-linux.sh
+b4c03013b729f07c433fdc810cc4eedf7c74dac86fbd3d3baa1b69e9613969fe  QA_V1.20.5-H7.40-H8.txt
+0b96fb9420c6baa1a65aa52643e85e84ce18919c8bf219110b0afe2abbf7836d  BROWSER_TRUTH_STATUS_V1.20.5-H7.40-H8.json
+
+FORBIDDEN GENERATED DIRECTORIES: node_modules, dist, .generated, artifacts, __pycache__

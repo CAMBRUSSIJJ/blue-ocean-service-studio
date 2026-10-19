@@ -1,0 +1,17 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.11-H1 Typecheck Cleanup
+
+CORREÇÕES
+- TS6196 design-handoff.ts: WhiteboardItem import não utilizado — REMOVIDO
+- TS6133 whiteboard-studio.ts: parâmetro board não utilizado — REMOVIDO
+- TS6196 BlueprintView.tsx: CanvasBlockProps não utilizado — REMOVIDO
+
+VALIDAÇÃO EXECUTADA
+- H7.11 Whiteboard 2.0 smoke: 40/40 PASS
+- lock verify: PASS
+- source authority: PASS
+- foundation smoke: 12/12 PASS
+- syntax check (tsc --noEmit --noCheck): PASS
+
+LIMITAÇÃO
+- npm ci excedeu o limite do ambiente e foi interrompido.
+- full typecheck/build não são declarados PASS neste artefato sem dependências instaladas.

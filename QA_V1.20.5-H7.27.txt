@@ -1,0 +1,55 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.27
+QA — Service Proposition + What-if Scenarios
+Data: 2026-10-13
+
+ESCOPO
+- Proposição de serviço canônica no Service Graph
+- Rastreabilidade para Insights, Necessidades, Problemas e Evidências
+- Readiness determinístico da proposição
+- Cenários alternativos "E se?"
+- Comparação atual × alternativa
+- Critérios de sucesso e estados de experimento
+- Promoção explícita de cenário para a proposição atual
+- Proteção do Journey/Blueprint/Whiteboard contra mutação implícita
+- Integração da aba Proposição ao Unified Service Workspace
+
+GATES EXECUTADOS
+H7.27 Service Proposition + What-if Scenarios: 85/85 PASS
+npm run qa: 2517 OK / 0 FAIL
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: 12/12 PASS
+./preflight-linux.sh: PASS
+Core TypeScript não-React (service-proposition.ts + model.ts): PASS
+
+REGRESSÕES CRÍTICAS PRESERVADAS
+- H7.26 Research Studio + Insight Pipeline: PASS
+- H7.25 Service Ecology + Stakeholder Network: PASS
+- H7.24 Journey Library & Collapsible Sidebar: PASS
+- H7.22 Unified Service Blueprint Workspace: 47/47 PASS
+- Journey Maps 2.0: 41/41 PASS
+- Service Blueprints 2.0: 36/36 PASS
+- Whiteboard 2.0: 40/40 PASS
+- CSS Import Order: 6/6 PASS
+- H7.20 Dashboard Composition: 27/27 PASS
+
+TESTE DE DOMÍNIO H7.27
+- Salvar proposição estruturada: PASS
+- Preservar fontes e proveniência: PASS
+- Criar cenário alternativo sem duplicar entidades: PASS
+- Registrar hipótese e critérios de sucesso: PASS
+- Colocar cenário em teste: PASS
+- Comparar cenário atual × alternativa: PASS
+- Promover cenário para proposição atual: PASS
+- Manter Blueprint byte-a-byte inalterado durante save/create/promote: PASS
+- Preservar rastreabilidade após promoção: PASS
+
+LIMITAÇÕES / NÃO DECLARADO COMO PASS
+- npm ci não concluiu dentro da janela disponível do ambiente.
+- typecheck React completo não foi declarado como PASS.
+- build Vite completo não foi declarado como PASS.
+- browser/runtime visual não foi executado nesta sessão.
+
+CONCLUSÃO
+Os gates executáveis e a regressão acumulada passaram. A H7.27 está pronta como source release, com a limitação explícita de dependências externas para typecheck/build completos.

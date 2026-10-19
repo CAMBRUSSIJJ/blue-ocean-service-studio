@@ -1,0 +1,59 @@
+BLUE OCEAN SERVICE STUDIO V1.20.5-H7.40-H13
+Persistent Global Sidebar
+
+RESULTADO PRINCIPAL
+H7.40-H13 smoke: 25/25 PASS
+H7.40-H13 browser: 8/8 PASS (Chromium real)
+Full npm run qa: PASS / exit 0
+Expected accumulated checks: 4829 OK / 0 FAIL
+
+GATES
+syntax:check: PASS
+lock:verify: PASS
+source:authority: PASS
+foundation:smoke: 12/12 PASS
+project-foundation:smoke: 46/46 PASS
+preflight-linux.sh: PASS
+
+REGRESSÕES CONFIRMADAS
+H7.40-H12: 31/31 PASS
+H7.40-H11: 20/20 PASS
+H7.40-H10: 28/28 PASS
+H7.22 Unified Service Workspace: 47/47 PASS
+
+CONTRATO H13
+- A sidebar principal é persistente em Home, Serviço e dentro de projetos.
+- Desenho do serviço / Contexto / Gestão não desaparecem ao abrir projeto.
+- Personas, Necessidades, Jobs, Dores, Hipóteses, Problemas e Evidências permanecem acessíveis no mesmo lugar.
+- Oportunidades, Catálogo de métricas, Pesquisa, Templates e Arquivo permanecem acessíveis no mesmo lugar.
+- Projeto não possui segunda sidebar; suas áreas viraram barra contextual no conteúdo central.
+- A barra contextual do projeto contém Visão geral / Serviço / Pesquisa / Biblioteca / Arquivos / Equipe / Configurações.
+- Navegar para uma entidade pela sidebar preserva o contexto do projeto aberto.
+- Serviço continua sendo a entrada para a lista de projetos.
+- O switcher do serviço/projeto permanece disponível sem trocar a estrutura da sidebar.
+
+BROWSER
+Chromium real: 8/8 PASS
+- Personas visível com projeto aberto
+- Problemas visível com projeto aberto
+- Catálogo de métricas visível com projeto aberto
+- Barra contextual do projeto visível
+- Biblioteca contextual visível
+- Desktop sem overflow global
+- Tablet sem overflow global
+- Mobile sem overflow global
+
+TYPECHECK/BUILD
+Não declarados como PASS nesta execução. O pacote final permanece source-clean e não contém node_modules. `syntax:check` e os gates de source passaram.
+
+VALIDAÇÃO DO ZIP FINAL
+- Linux reextraído: H13 25/25 PASS
+- H12 regressão: 31/31 PASS
+- syntax:check: PASS
+- preflight: PASS
+- Chromium H13: 8/8 PASS
+- START.sh / start-linux.sh / preflight-linux.sh: 755 / 755 / 755
+- arquivos por pacote: 1133
+- diretórios proibidos: ausentes
+- Linux / Source / Vercel: conteúdo canônico idêntico
+- SHA256 dos 3 ZIPs: verificação OK

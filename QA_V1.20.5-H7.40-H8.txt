@@ -1,0 +1,66 @@
+BLUE OCEAN SERVICE STUDIO — V1.20.5-H7.40-H8
+Project Home & Workspace Architecture — QA FINAL
+Data: 2026-10-14
+
+ESCOPO
+- Home global acima do workspace de serviço.
+- Biblioteca local de múltiplos projetos.
+- Separação Projeto × Serviço.
+- Criar, abrir, favoritar e alternar projetos.
+- Recentes, favoritos e templates.
+- Breadcrumb Home → Projetos → Projeto → ferramenta.
+- Guided Service Workspace H7.40-H7 preservado dentro do projeto.
+- Snapshot do Service Graph isolado por projeto.
+- Responsividade desktop/tablet/mobile da Project Home.
+
+GATES DE SOURCE
+npm run qa                                      PASS — 4697 OK / 0 FAIL
+H7.40-H8 Project Home & Workspace Architecture PASS — 25/25
+H7.40-H7 Guided Service Workspace              PASS — 36/36
+H7.40-H6 Typecheck Final Cleanup               PASS — 4/4
+H7.40-H5 Service Workspace Simplification      PASS — 32/32
+H7.40 Professional Product Hardening           PASS — 115/115
+syntax:check                                    PASS
+lock:verify                                     PASS
+source:authority                                PASS
+foundation:smoke                               PASS — 12/12
+project-foundation:smoke                       PASS — 46/46
+preflight-linux.sh                              PASS
+TypeScript strict — project-library.ts         PASS
+
+BROWSER
+Chromium real — Project Home                   PASS — 8/8
+- Desktop: 3 colunas
+- Continue de onde parou visível
+- Hero sem overflow
+- Tablet: 2 colunas, sem overflow
+- Mobile: 1 coluna, hero empilhado, sem overflow
+
+GATES NÃO DECLARADOS COMO PASS
+npm ci --include=dev                           UNAVAILABLE nesta execução
+  Motivo: instalação não concluiu dentro da janela controlada.
+  O processo parcial foi encerrado e node_modules foi removido.
+React/TS typecheck completo (tsc --noEmit)     NÃO VALIDADO nesta execução
+Vite production build                          NÃO VALIDADO nesta execução
+Vercel deploy                                  NÃO VALIDADO nesta execução
+
+POLÍTICA DE VERDADE
+Nenhum gate UNKNOWN/UNAVAILABLE foi promovido a PASS.
+
+RESULTADO
+PROJECT HOME / PROJECT LIBRARY / SOURCE / DOMAIN / QA / BROWSER: APROVADOS.
+INSTALL + FULL REACT TYPECHECK + VITE BUILD: aguardam ambiente com npm ci concluído.
+
+VALIDAÇÃO DO ZIP LINUX REEXTRAÍDO — CANDIDATO DE RELEASE
+H7.40-H8 Project Home & Workspace Architecture PASS — 25/25
+H7.40-H7 Guided Service Workspace              PASS — 36/36
+H7.40-H6 Typecheck Final Cleanup               PASS — 4/4
+H7.40-H5 Service Workspace Simplification      PASS — 32/32
+H7.40 Professional Product Hardening           PASS — 115/115
+syntax:check                                    PASS
+preflight-linux.sh                              PASS
+Chromium Project Home                           PASS — 8/8
+Arquivos                                        1099
+Diretórios proibidos                            0
+START.sh / start-linux.sh / preflight-linux.sh  755 / 755 / 755
+Linux / Source / Vercel                         conteúdo canônico idêntico

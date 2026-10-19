@@ -1,0 +1,10 @@
+/* H7.40-H13 — Persistent Global Sidebar */
+.bo-h740h13-project-context-nav,.bo-h740h13-project-context-nav *{box-sizing:border-box}
+.bo-h740h13-project-context-nav{display:flex;align-items:center;gap:6px;min-width:0;padding:8px 20px;border-bottom:1px solid #e4e9ef;background:#fbfcfe;overflow-x:auto;scrollbar-width:thin;flex:0 0 auto}
+.bo-h740h13-project-context-nav button{border:1px solid transparent;background:transparent;color:#667085;border-radius:8px;padding:7px 10px;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:650;white-space:nowrap;cursor:pointer}
+.bo-h740h13-project-context-nav button:hover{background:#f1f6fa;color:#164f73}
+.bo-h740h13-project-context-nav button.is-active{background:#eaf4fb;color:#176da0;border-color:#c7ddea}
+.bo-h740h13-persistent-switcher{min-width:0}
+.bo-h740h13-project-menu{z-index:80}
+[data-persistent-global-nav="7.40-H13"]{display:block}
+@media(max-width:760px){.bo-h740h13-project-context-nav{padding:7px 10px}.bo-h740h13-project-context-nav button{padding:7px 9px;font-size:10px}}

@@ -1,0 +1,65 @@
+BLUE OCEAN Service Studio — QA V1.20.1
+=====================================
+Release: Service Definition Studio
+
+REGRESSÃO COMPLETA
+------------------
+npm run qa
+Resultado: 1538 verificações / 0 FAIL em 44 gates com contagem.
+
+GATES PRINCIPAIS
+----------------
+Service Home V1.19.7: 19 / 19
+Discovery Workspace V1.19.8: 51 / 51
+Persona Studio V1.19.9: 89 / 89
+Problem & Evidence Studio V1.20.0: 107 / 107
+Service Definition Studio V1.20.1: 87 / 87
+
+DEFINITION STUDIO
+-----------------
+- 9 critérios determinísticos de readiness.
+- Promise / outcome / scope / boundaries / principles.
+- successCriteria / outOfScope / assumptions.
+- Persona / Problem / Evidence referenciados por ID.
+- Ir para desenho bloqueado enquanto readiness < 100%.
+- projetos antigos normalizam novos arrays automaticamente.
+- schema e runtime validam referências da definição.
+
+INTEGRIDADE
+-----------
+npm run syntax:check: PASS
+typecheck isolado do domínio novo: PASS
+node --check src/runtime/data-integrity.js: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS (12/12)
+./preflight-linux.sh: PASS
+
+BROWSER TRUTH
+-------------
+Status: UNAVAILABLE.
+Motivo: Playwright Python disponível, mas o executável Chromium esperado não está instalado.
+Nenhum PASS visual foi inferido.
+
+DEPENDÊNCIAS / BUILD
+--------------------
+npm ci: tentativa excedeu o limite do ambiente; instalação parcial (~804 KB) foi removida.
+npm run typecheck React/Vite completo: NÃO DECLARADO.
+npm run build React/Vite: NÃO DECLARADO.
+
+EMPACOTAMENTO
+-------------
+Os pacotes finais não devem conter node_modules, dist, .generated, artifacts ou __pycache__.
+O ZIP Linux será reextraído e revalidado antes da entrega.
+
+VALIDAÇÃO DO ZIP LINUX FINAL
+----------------------------
+ZIP reextraído em diretório novo: PASS
+VERSION: 1.20.1
+package.json: 1.20.1
+START.sh: modo 755
+node_modules/dist/.generated/artifacts/__pycache__: AUSENTES
+Linux preflight no ZIP extraído: PASS
+TypeScript parser no ZIP extraído: PASS
+Typecheck isolado do domínio no ZIP extraído: PASS
+Regressão no ZIP extraído: 1538 / 1538, 0 FAIL, 44 gates.

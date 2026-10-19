@@ -1,0 +1,82 @@
+BLUE OCEAN Service Studio — QA V1.20.2
+======================================
+
+Release: Service Context Library
+
+REGRESSÃO COMPLETA
+------------------
+npm run qa
+Resultado: PASS
+Verificações com contagem explícita: 1575 OK / 1575
+Gates com contagem explícita: 43
+FAIL: 0
+
+GATES RECENTES
+--------------
+V1.19.7 Service Home                 19 / 19
+V1.19.8 Discovery Workspace          51 / 51
+V1.19.9 Persona Studio               89 / 89
+V1.20.0 Problem & Evidence Studio   107 / 107
+V1.20.1 Service Definition Studio    87 / 87
+V1.20.1-H1 WorkspaceHome Hotfix       9 / 9
+V1.20.2 Service Context Library       85 / 85
+
+INTEGRIDADE / SOURCE
+--------------------
+npm run syntax:check: PASS
+node --check src/runtime/whiteboard-core.js: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+Core typecheck isolado (model + Discovery + Context Library + Persona + Problem/Evidence + Definition + Service Project): PASS
+
+CORE UX VALIDADA POR CONTRATO
+-----------------------------
+- Contexto é rota de primeira classe.
+- 7 abas canônicas: Personas, Necessidades, Jobs, Dores, Hipóteses, Problemas e Evidências.
+- Universal Inspector concentra propriedades, relações e uso.
+- Busca e filtros funcionais.
+- Relações são bidirecionais no Service Graph.
+- Problema validado não nasce diretamente pela criação rápida.
+- Remoção canônica limpa relações, referências de Definition e instâncias de Whiteboard.
+- Whiteboard reutiliza objetos da Context Library sem duplicação.
+- Post-it/card pode virar objeto canônico.
+- Visão geral substitui Dashboard como rótulo principal.
+- + Criar global é agrupado por Contexto / Desenho / Melhoria e medição.
+
+BROWSER TRUTH
+-------------
+Status: UNAVAILABLE
+Motivo: Playwright Python disponível, porém Chromium esperado pelo Playwright não está instalado.
+Nenhum PASS visual/runtime foi inferido.
+
+TYPECHECK / BUILD COMPLETOS
+---------------------------
+npm ci: tentativa excedeu o limite do ambiente e deixou instalação parcial (~804 KB).
+A instalação parcial não continha tsc/vite e foi removida antes do empacotamento.
+npm run typecheck React/Vite completo: NÃO DECLARADO.
+npm run build: NÃO DECLARADO.
+
+LIMITAÇÕES
+----------
+- Visual browser-level não comprovado neste ambiente.
+- Filtros avançados multidimensionais não fazem parte desta versão; os quatro filtros atuais são funcionais.
+- Inserção de objetos em um quadro ocorre dentro do Whiteboard, pela categoria Contexto; a Context Library navega para Whiteboards sem fingir inserir em um quadro não selecionado.
+
+ZIP LINUX FINAL — REEXTRAÇÃO
+----------------------------
+Artefato: Blue-Ocean-Service-Studio-V1.20.2-Linux-Source-Launcher.zip
+Validação em diretório limpo: PASS
+VERSION: 1.20.2
+package.json: 1.20.2
+START.sh: 755
+node_modules/dist/.generated/artifacts/__pycache__: AUSENTES
+npm run syntax:check: PASS
+node --check src/runtime/whiteboard-core.js: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+npm run context-library:smoke: 85 / 85
+Core typecheck isolado: PASS
+./preflight-linux.sh: PASS
+npm run qa: PASS

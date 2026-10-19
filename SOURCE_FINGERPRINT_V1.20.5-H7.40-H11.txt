@@ -1,0 +1,18 @@
+BLUE OCEAN SERVICE STUDIO — SOURCE FINGERPRINT V1.20.5-H7.40-H11
+files_without_generated_dirs=1120
+tree_sha256=499f5262111eb69904464aead908007d144f170ce57db389cd44228e2de60c2b
+
+KEY FILES
+60fcc646087b55cf84e0c654e0b4c4ca8a435577748b3526e6435f65149fddfd  package.json
+306376fc5d40fec5a5f49605769f3c83c1fec27323276157d295e9ff2442eb69  package-lock.json
+8015dae73fb75797b103b7990e600a2670a4fed1680c977d895542e4ebf6b8f9  src/App.tsx
+6e965fd2ee2304f30f90913f826ceeb697243d048f308f1e160c681d956c763d  src/views/ProjectHomeView.tsx
+395409aa91f850dc3a615612c205b530bdf14d139554817606c0a951282b932b  src/views/ProjectShellView.tsx
+5d4dfb451e365ec09a8202c758584f6fa7dedd3cb4d0e70036edb9a173c00749  src/runtime/service-first-navigation-h740h11.css
+82a7a906057d3b047e94bc0950804236f1185dba07c8384ddd6c6e2022c0cec3  scripts/v1205h740h11-service-first-navigation-smoke.mjs
+09a6fb30be7b7e3aea1aaa093fef833c4dc00e5fea8f591afe5398288c1ade07  scripts/v1205h740h11-browser-service-first.py
+64d288a437014c9c447ad2d00406c07af5525d8de5592a5d44353061a038d9a1  preflight-linux.sh
+c8b3852da931ed743e6e12e77b58fe699321600745fbf60d78af4677c2bc1c65  QA_V1.20.5-H7.40-H11.txt
+23d1d971302116e6f915ba3a7a1b1eb849352fcc65ca069446b5ecfce64adf9c  BROWSER_TRUTH_STATUS_V1.20.5-H7.40-H11.json
+
+FORBIDDEN GENERATED DIRECTORIES: node_modules, dist, .generated, artifacts, __pycache__

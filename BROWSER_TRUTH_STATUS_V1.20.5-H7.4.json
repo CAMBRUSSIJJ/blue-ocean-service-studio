@@ -1,0 +1,11 @@
+{
+  "release": "V1.20.5-H7.4",
+  "feature": "Dores 2.0",
+  "status": "pending-user-linux-runtime",
+  "source_smoke": "22/22 PASS",
+  "regression": "1508 OK / 0 FAIL",
+  "preflight_linux": "PASS",
+  "typecheck": "NOT RUN - npm ci did not complete in this environment",
+  "build": "NOT RUN - npm ci did not complete in this environment",
+  "browser_truth": "Requires opening Dores in the user's Linux runtime and validating create/edit/relations/evidence/usage visually."
+}

@@ -1,0 +1,48 @@
+BLUE OCEAN Service Studio — V1.18.8 QA
+Release: Guided Service Builder Foundation
+
+PASS  guidance:smoke — 117/117
+PASS  dashboard-parity:smoke — 53/53
+PASS  architecture:smoke — 51/51
+PASS  workspace-preferences:smoke — 50/50
+PASS  attention:smoke — 32/32
+PASS  health:smoke — 26/26
+PASS  full historical npm run qa — 727 OK / 0 FAIL, V1.12 through V1.18.8
+PASS  demo smoke — 79 objects, 0 broken references, 5 stages, 7 evidence, 7 initiatives
+PASS  tsc --noEmit --noCheck — project source parses successfully with global TypeScript 5.8.3
+PASS  node --check — guidance-engine.js
+PASS  node --check — whiteboard-core.js
+PASS  source authority
+PASS  source foundation
+PASS  package-lock synchronized to 1.18.8
+PASS  Linux preflight including V1.18.8 guidance assets
+
+GUIDED SERVICE BUILDER CONTRACTS
+- deterministic Guidance Engine is separate from UI components
+- three assistance levels: guided / essential / off
+- floating coach remains opt-in
+- universal guidance drawer has definition, rationale, steps, example, common mistakes and checklist
+- contextual guidance covers Service, Persona, Stage, Customer Action, Touchpoint, Emotion, Frontstage, Backstage, Process, System, Evidence, Problem, Opportunity, Metric, Blueprint and Journey
+- first-service construction progress has eight methodological blocks
+- progress is not reused as Service Health
+- next step is deterministic from canonical Service Graph state
+- blank graph starts at 0% with Service as next step
+- structured synthetic graph reaches 100% without inventing a next step
+- Dashboard exposes explicit Guided Builder entry
+- shell exposes contextual Help
+- Guided Builder API upgraded to V2.0
+- no secondary Service Graph introduced
+
+ARCHITECTURAL SAFETY
+- no Service Graph schema change
+- no migration or project storage change
+- no parallel wizard persistence
+- existing Journey/Blueprint/Whiteboard flows are reused
+- historical opt-in coach behavior preserved
+- Service Health, Attention, Continue/Preferences and Architecture remain separate concerns
+
+DEPENDENCY/BUILD LIMITATION
+- npm ci was attempted and npm registry requests returned EAI_AGAIN.
+- Partial node_modules was removed before packaging.
+- No stale dist from V1.18.7 is included.
+- Full dependency-aware React/Vite typecheck and production build are therefore not claimed as passed in this environment.

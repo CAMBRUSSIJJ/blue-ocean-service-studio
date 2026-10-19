@@ -1,0 +1,23 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.40-H2
+
+STATUS
+- Full source QA chain: PASS (exit 0)
+- H7.40-H2 navigation/onboarding smoke: 15/15 PASS
+- H7.40 professional hardening: 115/115 PASS
+- H7.22 unified workspace regression: 47/47 PASS
+- syntax:check: PASS
+- lock:verify: PASS
+- source:authority: PASS
+- preflight-linux.sh: PASS
+- Chromium 144 browser hardening: 13/13 PASS
+
+FIXES VERIFIED
+- Sidebar no longer has functional disabled={!hasService} bindings.
+- Clicking a protected module without a service navigates to an explanatory gate instead of doing nothing.
+- Create-service modal is mounted in the current React shell.
+- Dashboard first-use onboarding exposes the correct service-design sequence.
+- Settings uses product-facing language; technical metadata is under Advanced.
+
+LIMITATION
+- npm ci did not complete in this execution environment; partial node_modules was removed.
+- Therefore full React typecheck and Vite production build are not marked PASS here.

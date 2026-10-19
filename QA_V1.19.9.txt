@@ -1,0 +1,62 @@
+BLUE OCEAN Service Studio — QA V1.19.9
+======================================
+
+Release: Persona Studio
+
+ESCOPO FUNCIONAL
+----------------
+- Persona Studio integrado à fase Entender.
+- Modo Simples e modo Profissional sobre a mesma Persona canônica.
+- Contexto, objetivo, situação e frase representativa.
+- Comportamentos, expectativas, restrições, gatilhos, alternativas e canais.
+- Relações Persona <-> Need/Job/Pain/Hypothesis/Evidence.
+- Fundação determinística da Persona.
+- Resumo de confiança das evidências conectadas.
+- Remoção segura com limpeza de relações e preservação dos demais objetos.
+
+GATE ESPECÍFICO
+---------------
+npm run persona:smoke
+Resultado: 89 OK / 0 FAIL
+
+GATES HERDADOS CRÍTICOS
+-----------------------
+npm run service-home:smoke
+Resultado: 19 OK / 0 FAIL
+
+npm run discovery:smoke
+Resultado: 51 OK / 0 FAIL
+
+npm run qa
+Resultado: 1342 OK / 0 FAIL
+
+INTEGRIDADE
+-----------
+npm run syntax:check: PASS
+Focused TypeScript model + discovery + persona: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS
+
+ARQUITETURA
+-----------
+- schemaVersion permanece 3.
+- profileVersion da Persona = 1 dentro do GraphEntity.
+- Nenhuma coleção duplicada em service.project.
+- Relações do Persona Studio são normalizadas nos dois sentidos.
+- relationshipCount do Discovery conta pares lógicos únicos.
+- Exclusão da Persona não exclui Need/Job/Pain/Hypothesis/Evidence.
+
+BROWSER TRUTH
+-------------
+Status: UNAVAILABLE.
+Motivo: Playwright Python disponível; Chromium do Playwright ausente.
+Nenhum PASS visual/runtime foi inferido.
+
+DEPENDÊNCIAS / BUILD
+--------------------
+npm ci: excedeu o limite do ambiente e deixou instalação parcial.
+A instalação parcial foi removida.
+Typecheck React/Vite completo: NÃO DECLARADO.
+Build React/Vite: NÃO DECLARADO.

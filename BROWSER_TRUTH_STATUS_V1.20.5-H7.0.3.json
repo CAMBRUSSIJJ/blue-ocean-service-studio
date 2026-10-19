@@ -1,0 +1,17 @@
+{
+  "release": "V1.20.5-H7.0.3",
+  "surface": "Sidebar wave navigation interaction",
+  "status": "pending-user-runtime",
+  "static_and_smoke_qa": "pass",
+  "required_flow": [
+    "Dashboard",
+    "Journey maps",
+    "Blueprints",
+    "Whiteboards",
+    "Personas",
+    "Problemas",
+    "Portfólio",
+    "Configurações"
+  ],
+  "acceptance": "Cada clique válido na sidebar produz uma ondulação perceptível na altura do item, uma crista breve no botão e um surge na onda inferior, sem atrasar ou duplicar a navegação."
+}

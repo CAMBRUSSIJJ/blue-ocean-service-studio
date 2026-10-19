@@ -1,0 +1,50 @@
+BLUE OCEAN Service Studio — V1.18.7 QA
+Release: Dashboard Parity
+
+PASS  dashboard-parity:smoke — 53/53
+PASS  architecture:smoke — 51/51
+PASS  workspace-preferences:smoke — 50/50
+PASS  attention:smoke — 32/32
+PASS  health:smoke — 26/26
+PASS  full historical npm run qa — 610 OK / 0 FAIL, V1.12 through V1.18.7
+PASS  demo smoke — 79 objects, 0 broken references, 5 stages, 7 evidence, 7 initiatives
+PASS  tsc --noEmit --noCheck — project source parses successfully
+PASS  strict isolated TypeScript 5.8.3 — Continue, Preferences, Health, Attention and Architecture engines
+PASS  source authority
+PASS  source foundation
+PASS  package-lock synchronized to 1.18.7
+PASS  Linux preflight
+PASS  public generated assets synchronized after Persona runtime addition
+
+DASHBOARD PARITY CONTRACTS
+- white 232px desktop sidebar
+- 48px dashboard header
+- compact workspace/service identity row
+- Dashboard as primary entry
+- Workspace group and Journey maps remain visible
+- three quick-create actions: Journey, Persona, Metric
+- Persona creation writes to canonical Service Graph
+- Recents derive first from Continue Engine and are capped to five on dashboard
+- full recent history remains available
+- Favorites are separate from Recents
+- Pins remain supported and persist deliberate order without creating a duplicate dashboard region
+- Learn area exposes six product destinations
+- Import remains accessible
+- Architecture and Attention remain accessible from the dashboard header
+- Health, Attention and Architecture retain complete focused diagnostic views
+- CSS-generated card art; no copied third-party screenshots/assets
+- tablet/mobile breakpoints present; mobile quick-create is one column
+
+ARCHITECTURAL SAFETY
+- no Service Graph schema change
+- no migration or project storage change
+- no parallel graph introduced by React Home
+- workspace preferences remain user/workspace scoped
+- diagnostic surfaces remain read/navigation oriented
+- existing V1.18.3–V1.18.6 engines remain in use
+
+DEPENDENCY/BUILD LIMITATION
+- `npm ci` could not complete because registry access returned EAI_AGAIN / missing offline tarball (ENOTCACHED for zod 4.6.5).
+- Partial node_modules was removed before packaging.
+- No stale dist from V1.18.6 is included.
+- Full dependency-aware React/Vite typecheck and production build are therefore not claimed as passed in this environment.

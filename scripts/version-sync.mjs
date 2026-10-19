@@ -1,0 +1,10 @@
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+const version = String(pkg.version || '').trim();
+if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error(`Versão inválida em package.json: ${version}`);
+mkdirSync('src/generated', { recursive: true });
+mkdirSync('public', { recursive: true });
+writeFileSync('src/generated/app-version.ts', `// Gerado por scripts/version-sync.mjs. Não edite manualmente.\nexport const APP_VERSION = ${JSON.stringify(version)} as const;\nexport const APP_VERSION_LABEL = ${JSON.stringify('V' + version)} as const;\n`);
+writeFileSync('public/app-version.json', JSON.stringify({ product: 'BLUE OCEAN Service Studio', version }, null, 2) + '\n');
+writeFileSync('VERSION', version + '\n');
+console.log(`Versão sincronizada: ${version}`);

@@ -1,0 +1,10 @@
+{
+  "release": "V1.20.5-H3",
+  "status": "UNAVAILABLE",
+  "reason": "A aplicação H3 não pôde ser buildada nesta sessão porque as dependências npm completas não estão disponíveis no cache/offline. As capturas fornecidas pelo usuário serviram como referência e evidência pré-fix, não como prova visual pós-fix.",
+  "reference_evidence": [
+    "capturas do Blue Ocean V1.20.5-H2 enviadas pelo usuário",
+    "capturas de referência para Dashboard, Personas, Portfolio, Metrics, Templates e Journey maps"
+  ],
+  "declared_pass": false
+}

@@ -1,0 +1,65 @@
+BLUE OCEAN Service Studio — QA V1.20.5-H3
+==========================================
+Release: Workspace IA & Blueprint Migration
+
+ESCOPO
+------
+- Service Frame migra de Whiteboards para Blueprints.
+- Context Library visual monolítica é removida.
+- Objetos do Service Graph ganham páginas próprias.
+- Sidebar é reorganizada como Dashboard + Workspace.
+- Dashboard, Personas, Portfólio, Métricas e Templates seguem o padrão visual enviado como referência.
+
+GATE ESPECÍFICO H3
+------------------
+npm run v1205h3:workspace-ia-smoke
+Resultado: 68 OK / 0 FAIL
+
+REGRESSÃO COMPLETA
+------------------
+npm run qa
+Resultado: PASS
+50 gates com contagem explícita
+1909 / 1909 verificações
+0 FAIL
+
+GATES DE FONTE
+--------------
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS
+
+TYPECHECK / BUILD COMPLETOS
+---------------------------
+O ambiente desta sessão não possui as dependências React/Vite instaladas e `npm ci --offline` falhou porque zod@4.6.5 não está no cache npm local.
+Portanto H3 NÃO declara `npm run typecheck` React completo nem `npm run build` Vite como PASS neste ambiente.
+A baseline H1/H2 havia sido comprovada pelo usuário em ambiente real com typecheck/build/dist:verify PASS, mas H3 introduz novas views React e deve ser recompilada no ambiente do usuário após download.
+
+BROWSER TRUTH
+-------------
+As capturas do usuário foram usadas para diagnosticar a arquitetura anterior e como referência visual.
+Não há screenshot automatizado pós-H3 declarado como PASS nesta sessão porque a aplicação H3 não pôde ser buildada sem dependências npm completas.
+
+ARQUITETURA
+-----------
+- Whiteboard livre: exploração, pesquisa, raciocínio.
+- Blueprint: Service Frame, Cliente, Frontstage, Backstage, Processos, Sistemas/Recursos.
+- Workspace pages: Personas, Necessidades, Jobs, Dores, Hipóteses, Problemas, Evidências, Portfólio, Métricas, Templates, Arquivo.
+- Service Graph permanece canônico.
+
+ARTIFACT GATE — ZIP LINUX
+-------------------------
+O ZIP Linux provisório foi reextraído em diretório novo e validado a partir do próprio artefato.
+VERSION: 1.20.5
+START.sh: 755
+node_modules/dist/.generated/artifacts/__pycache__: AUSENTES
+v1205h3:workspace-ia-smoke: 68/68
+npm run qa: PASS
+50 gates com contagem explícita: 1909/1909
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+preflight-linux.sh: PASS

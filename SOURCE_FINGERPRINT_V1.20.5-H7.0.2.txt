@@ -1,0 +1,7 @@
+dafe0ce2dc15ec918f9ed20c1d87a13d4ed31eff02c969881520096faa14f8be  /mnt/data/Blue-Ocean-Service-Studio-V1.20.5-H7.0.2-Linux-Source-Launcher/package.json
+306376fc5d40fec5a5f49605769f3c83c1fec27323276157d295e9ff2442eb69  /mnt/data/Blue-Ocean-Service-Studio-V1.20.5-H7.0.2-Linux-Source-Launcher/package-lock.json
+89afb32855cc889eb5939ed3efaeb42d3acf5a41311d2e50e2db80717f7f43d2  /mnt/data/Blue-Ocean-Service-Studio-V1.20.5-H7.0.2-Linux-Source-Launcher/src/App.tsx
+3b01dc6b461adacde16474732f16ddd0b0b95788e1f1b4d89a1e270c42ab5518  /mnt/data/Blue-Ocean-Service-Studio-V1.20.5-H7.0.2-Linux-Source-Launcher/src/views/WorkspaceDashboardView.tsx
+861d5000ec1e60d53a1659b7788cc73202ba5571a129c77480d488b24e564fc9  /mnt/data/Blue-Ocean-Service-Studio-V1.20.5-H7.0.2-Linux-Source-Launcher/src/runtime/sidebar-h701.css
+26481129ece607b8530526253998273f12add4f6f1016a9979a036993c72d985  /mnt/data/Blue-Ocean-Service-Studio-V1.20.5-H7.0.2-Linux-Source-Launcher/preflight-linux.sh
+fe7159d6cf58d7b631e572d5b5643b942e1df3e0df893c910d35d29c12d7b3e9  /mnt/data/Blue-Ocean-Service-Studio-V1.20.5-H7.0.2-Linux-Source-Launcher/scripts/v1205h702-preflight-branding-hotfix-smoke.mjs

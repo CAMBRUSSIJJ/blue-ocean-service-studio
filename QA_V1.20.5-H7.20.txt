@@ -1,0 +1,41 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.20
+Dashboard Composition & Density
+
+ESCOPO
+- reduzir vazio interno de Recentes;
+- aumentar presença das capas e cards;
+- retirar redundância visual do chip de workspace;
+- compactar Favoritos vazio;
+- dar hierarquia real a Aprender;
+- reduzir peso visual de ações rápidas e Service Depth;
+- preservar branding, Journey Cover e hotfix visual H7.19-H1.
+
+CORREÇÕES
+1. Recentes usa largura adaptativa por data-recent-count.
+2. 3 itens -> max-width 766px, em vez de bandeja desktop completa.
+3. Cards recentes: 210px; preview: 118px; altura mínima: 246px.
+4. Chip visual do workspace em Recentes ocultado na camada H7.20.
+5. Panel wave interno de Recentes removido.
+6. Favoritos vazio vira linha utilitária compacta.
+7. Aprender reduzido para 5 cards: 1 recomendado + 4 secundários.
+8. Ações rápidas limitadas a 690px e menor altura.
+9. Service Depth compactado para 154px.
+10. Breakpoints tablet/mobile preservam overflow e legibilidade.
+
+QA
+H7.20 Dashboard Composition              27/27 PASS
+H7.19-H1 Visual Recovery                 28/28 PASS
+H7.19 Motion Identity                    40/40 PASS
+H7.18-H1 Journey Cover                   35/35 PASS
+H7.18 Animated Ocean Branding            38/38 PASS
+npm run qa                               2096 OK / 0 FAIL
+npm run syntax:check                     PASS
+npm run lock:verify                      PASS
+npm run source:authority                 PASS
+npm run foundation:smoke                 12/12 PASS
+preflight-linux.sh                       PASS
+
+TYPECHECK/BUILD
+npm ci: não concluiu dentro do limite do ambiente e foi encerrado.
+node_modules parcial removido antes do empacotamento.
+Typecheck/build completos: NÃO DECLARADOS COMO PASS.

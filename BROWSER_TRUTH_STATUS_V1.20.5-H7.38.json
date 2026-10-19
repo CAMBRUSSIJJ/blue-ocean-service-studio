@@ -1,0 +1,20 @@
+{
+  "release": "V1.20.5-H7.38",
+  "phase": "Service Operations Bridge",
+  "browserValidated": false,
+  "visualQa": "NOT_RUN",
+  "reactTypecheck": "NOT_DECLARED_PASS",
+  "viteBuild": "NOT_DECLARED_PASS",
+  "externalConnectivity": "NOT_DECLARED_ACTIVE",
+  "sourceQa": {
+    "h738": "197/197 PASS",
+    "h737": "211/211 PASS",
+    "h736": "203/203 PASS",
+    "accumulated": "4295 OK / 0 FAIL",
+    "syntax": "PASS",
+    "preflight": "PASS",
+    "strictCore": "PASS"
+  },
+  "reason": "npm ci did not complete and no browser or authenticated external-provider validation was executed. Source/domain gates and the H7.38 strict core are independently validated.",
+  "generatedAt": "2026-10-13T22:29:43-03:00"
+}

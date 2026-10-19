@@ -1,0 +1,12 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.9 source fingerprint
+
+7e6527b157aa99de24f480e7bf6e1e86b150545b4a1654ee07a9dd8030214fbc  src/domain/model.ts
+42919666efe63d152442f2fea4a1428c34447c1f831531dcac5e5d5295c07e2b  src/services/journey-map-studio.ts
+72d3b8e997da60682e1d171cbc0e2a48672f441d0c886f6eaa03fa478c12f0d6  src/state/useStudioController.ts
+5fe1f4954dff35c194b9dca1ec44340e235214f6642d59cde85ef7577448572b  src/views/JourneyView.tsx
+7baba6653c631b76675d413bdab2f22e1b0792c5c14abd6f934dc8a6dc829b26  src/runtime/journey-maps-h79.css
+d52a62081760ea223bd8995070001388458949fe7b19452691e981517b021e60  src/style.css
+e9df2bd32a37e448052fdbe96c7131f1c6de2cfda84e9600918421b9c5f1f4da  src/domain/graph-operations.ts
+a418fe29216e8a498b0fc9cdb6c6e968457edaaa29fd1f8212a00261cb71be95  scripts/v1205h79-journey-maps-2-smoke.mjs
+e8211baddff239889a945d08ca49c649a16693fcd4ec66e708fbaf81429e0871  preflight-linux.sh
+16d94e41ea8174e169ba07ccfd31125e6c28d355832221d3937da90bf2c24b98  package.json

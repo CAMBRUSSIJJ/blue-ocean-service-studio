@@ -1,0 +1,30 @@
+BLUE OCEAN Service Studio V1.17.3 — QA
+
+Gate específico:
+V1.17.3 Unified Workspaces & Page States: 19/19
+
+Regressão completa:
+- V1.12 Stability: 12/12
+- V1.13 Design System: 10/10
+- V1.14 Workspace Home: 14/14
+- V1.15 Global Navigation: 17/17
+- V1.15.3 Precision Studio: 17/17
+- V1.15.3 Branding: 14/14
+- V1.15.4 Whiteboard UX: 13/13
+- Demo smoke: 79 objetos / 0 referências quebradas
+- V1.16.1 Whiteboard Unified UX: 14/14
+- V1.16.2 Design System v4: 14/14
+- V1.16.3 Shell Consistency: 14/14
+- V1.17.0 Home 2.0: 19/19
+- V1.17.1 Library: 16/16
+- V1.17.2 Wizard 2.0: 19/19
+- V1.17.3 Unified Workspaces: 19/19
+
+Outros gates:
+- JS syntax do runtime V1.17.3: OK
+- package-lock: OK
+- Source Authority: OK
+- Source Foundation: 12/12
+
+Limitação do ambiente:
+`npm ci` excedeu o timeout de rede. Em modo offline, npm confirmou que `zod-4.6.5.tgz` não está em cache (ENOTCACHED). Portanto typecheck/build Vite completo não é declarado como aprovado neste ambiente.

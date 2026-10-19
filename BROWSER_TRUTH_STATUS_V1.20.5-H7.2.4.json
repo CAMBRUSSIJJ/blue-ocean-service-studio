@@ -1,0 +1,13 @@
+{
+  "release": "V1.20.5-H7.2.4",
+  "surface": "Personas > Visão geral",
+  "status": "pending-user-linux-browser",
+  "expected": [
+    "textarea fields start compact and grow with content",
+    "right rail uses previously empty horizontal space",
+    "channels and tags render as chips",
+    "completeness appears in the right rail",
+    "remove persona is only in the overflow menu",
+    "bottom action bar shows save state"
+  ]
+}

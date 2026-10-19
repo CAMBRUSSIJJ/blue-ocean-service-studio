@@ -1,0 +1,69 @@
+/* V1.20.5-H16.8 — Design Start Choice & In-Flow Discovery */
+
+/* A fase Entender ensina que o desenho pode começar antes da estruturação total. */
+.bo-h168-flex-note{margin-top:12px;padding:11px 12px;border:1px solid #dbe7f0;border-radius:12px;background:#fbfdff;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.bo-h168-flex-note>div{min-width:0}
+.bo-h168-flex-note small,.bo-h168-design-start small,.bo-h168-design-continuity small,.bo-h168-choice-modal header small{display:block;color:#617d95;font-size:7px;font-weight:900;letter-spacing:.12em}
+.bo-h168-flex-note strong{display:block;margin-top:3px;color:#294760;font-size:9.5px}
+.bo-h168-flex-note p{margin:3px 0 0;color:#758a9d;font-size:7.5px;line-height:1.45}
+.bo-h168-flex-note>button,.bo-h168-design-start>button{flex:0 0 auto;min-height:33px;padding:7px 10px;border:0;border-radius:8px;background:#2256c7;color:#fff;font-size:8px;font-weight:850;display:inline-flex;align-items:center;gap:5px;cursor:pointer;box-shadow:0 7px 18px rgba(34,86,199,.15)}
+.bo-h168-flex-note>button:hover,.bo-h168-design-start>button:hover{background:#194cae;transform:translateY(-1px)}
+
+/* Em Desenhar há uma única decisão primária; a escolha de ferramenta vem depois da intenção. */
+.bo-h168-design-start{margin-top:13px;padding:14px;border:1px solid #d5e4f0;border-radius:13px;background:linear-gradient(135deg,#fbfdff,#f4f9ff);display:flex;align-items:center;justify-content:space-between;gap:16px}
+.bo-h168-design-start h4{margin:3px 0 4px;color:#203e57;font-size:12px}
+.bo-h168-design-start p{margin:0;max-width:700px;color:#6f8599;font-size:8px;line-height:1.5}
+.bo-h168-design-continuity{margin-top:13px;padding:13px;border:1px solid #dbe6ef;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.bo-h168-design-continuity>div:first-child{min-width:0}
+.bo-h168-design-continuity strong{display:block;margin-top:3px;color:#28465e;font-size:10px}
+.bo-h168-design-continuity p{margin:3px 0 0;max-width:690px;color:#73889a;font-size:7.5px;line-height:1.45}
+.bo-h168-design-continuity>div:last-child{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.bo-h168-design-continuity button{min-height:32px;padding:6px 9px;border:1px solid #cbdce9;border-radius:8px;background:#fff;color:#286394;font-size:7.5px;font-weight:850;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.bo-h168-design-continuity button.primary{border-color:#2256c7;background:#2256c7;color:#fff}
+.bo-h168-design-continuity button:hover{transform:translateY(-1px);box-shadow:0 6px 15px rgba(34,86,199,.1)}
+
+/* Chooser por intenção: Journey é recomendada para Fundamentos; Whiteboard é transversal. */
+.bo-h168-choice-backdrop{position:fixed;inset:0;z-index:170;background:rgba(18,36,54,.34);backdrop-filter:blur(3px);display:grid;place-items:center;padding:18px;animation:bo-h168-fade-in .16s ease-out both}
+.bo-h168-choice-modal{width:min(690px,calc(100vw - 30px));max-height:calc(100vh - 36px);overflow:auto;border:1px solid #cfdeea;border-radius:16px;background:#fff;box-shadow:0 30px 80px rgba(14,39,65,.24);padding:16px;animation:bo-h168-modal-in .2s ease-out both}
+.bo-h168-choice-modal>header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:2px 2px 13px;border-bottom:1px solid #e6edf3}
+.bo-h168-choice-modal>header h2{margin:4px 0 4px;color:#17364f;font-size:16px;line-height:1.2}
+.bo-h168-choice-modal>header p{margin:0;max-width:560px;color:#72879a;font-size:8.5px;line-height:1.5}
+.bo-h168-choice-modal>header>button{width:31px;height:31px;border:1px solid #d9e4ed;border-radius:8px;background:#fff;color:#577087;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+.bo-h168-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:13px 0}
+.bo-h168-choice-card{position:relative;min-height:190px;padding:14px;border:1px solid #dbe6ef;border-radius:13px;background:#fbfdff;color:#29465f;text-align:left;display:flex;flex-direction:column;align-items:flex-start;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease}
+.bo-h168-choice-card:hover,.bo-h168-choice-card:focus-visible{transform:translateY(-2px);border-color:#a9c7df;background:#fff;box-shadow:0 12px 28px rgba(33,80,122,.12);outline:none}
+.bo-h168-choice-card.is-recommended{border-color:#b5cbff;background:linear-gradient(180deg,#f7faff,#fff)}
+.bo-h168-choice-icon{width:38px;height:38px;border-radius:10px;background:#eaf3ff;color:#2256c7;display:grid;place-items:center;margin-bottom:10px}
+.bo-h168-choice-card em{font-style:normal;color:#4773bf;font-size:6.7px;font-weight:900;letter-spacing:.1em;min-height:13px}
+.bo-h168-choice-card strong{display:block;margin-top:3px;color:#203f58;font-size:12px}
+.bo-h168-choice-card p{margin:6px 0 12px;color:#6f8496;font-size:8px;line-height:1.55;flex:1}
+.bo-h168-choice-card b{font-size:8px;color:#2256c7;display:inline-flex;align-items:center;gap:5px}
+.bo-h168-choice-modal>footer{padding-top:11px;border-top:1px solid #e6edf3;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bo-h168-choice-modal>footer span{color:#7a8ea0;font-size:7.5px;line-height:1.4}
+.bo-h168-choice-modal>footer button{min-height:30px;padding:5px 9px;border:1px solid #d6e1ea;border-radius:8px;background:#fff;color:#526c82;font-size:7.5px;font-weight:800;cursor:pointer}
+
+/* Journey usa linguagem de descoberta e captura evidência sem tirar a pessoa do mapa. */
+.bo-h168-journey-discovery{box-shadow:inset 3px 0 0 #8bb9e8}
+.bo-h168-journey-discovery .bo-h79-section-title strong{color:#24465f}
+
+/* Entrada vinda do chooser não pergunta pela intenção duas vezes. */
+.bo-h167-whiteboard-start:has(.bo-h167-whiteboard-start__choices){} /* selector marker for progressive enhancement; no visual dependency */
+
+@keyframes bo-h168-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes bo-h168-modal-in{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+@media(max-width:820px){
+  .bo-h168-flex-note,.bo-h168-design-start,.bo-h168-design-continuity{align-items:flex-start;flex-direction:column}
+  .bo-h168-design-continuity>div:last-child{width:100%;flex-wrap:wrap}
+  .bo-h168-choice-grid{grid-template-columns:1fr}
+  .bo-h168-choice-card{min-height:150px}
+}
+@media(max-width:520px){
+  .bo-h168-choice-backdrop{padding:8px}
+  .bo-h168-choice-modal{width:calc(100vw - 16px);padding:12px;border-radius:13px}
+  .bo-h168-choice-modal>footer{align-items:flex-start;flex-direction:column}
+}
+@media(prefers-reduced-motion:reduce){
+  .bo-h168-choice-backdrop,.bo-h168-choice-modal{animation:none}
+  .bo-h168-choice-card,.bo-h168-flex-note>button,.bo-h168-design-start>button,.bo-h168-design-continuity button{transition:none;transform:none!important}
+}

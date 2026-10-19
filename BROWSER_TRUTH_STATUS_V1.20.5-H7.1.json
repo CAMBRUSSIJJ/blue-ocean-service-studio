@@ -1,0 +1,25 @@
+{
+  "release": "V1.20.5-H7.1",
+  "status": "pending-user-runtime",
+  "scope": "Personas 2.0",
+  "static_validation": {
+    "persona_view_dedicated": true,
+    "library_search_filters": true,
+    "five_detail_tabs": true,
+    "canonical_persona_studio": true,
+    "service_graph_relations": true,
+    "responsive_css": true,
+    "qa": "pass",
+    "preflight_linux": "pass"
+  },
+  "required_manual_check": [
+    "Open Personas and verify only the Personas library is visible",
+    "Search and use the four Persona filters",
+    "Create a Persona and confirm it opens the detailed workspace",
+    "Edit Visão geral and Comportamento fields, save, reload, and verify persistence",
+    "Connect Necessidades/Jobs/Dores/Hipóteses and verify relation counts",
+    "Connect Evidências and verify the Evidências tab count",
+    "Open Uso and verify visual/relation counts",
+    "Remove a test Persona and verify it disappears without leaving broken navigation"
+  ]
+}

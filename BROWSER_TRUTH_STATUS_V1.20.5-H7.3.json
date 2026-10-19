@@ -1,0 +1,18 @@
+{
+  "release": "V1.20.5-H7.3",
+  "feature": "Jobs 2.0",
+  "status": "pending-local-browser-validation",
+  "staticAndDomainGates": "pass",
+  "fullTypecheck": "not-run-in-packaging-environment",
+  "productionBuild": "not-run-in-packaging-environment",
+  "recommendedFlow": [
+    "Jobs library",
+    "Create Job",
+    "Overview",
+    "People",
+    "Relations",
+    "Evidence",
+    "Usage",
+    "Save and reopen"
+  ]
+}

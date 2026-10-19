@@ -1,0 +1,35 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.9 Journey Maps 2.0
+
+VALIDAÇÃO EXECUTADA
+- H7.9 Journey Maps 2.0 smoke: 41/41 PASS
+- H7.8 Context-to-Service Handoff smoke: 37/37 PASS
+- npm run qa: 1671 OK / 0 FAIL
+- preflight-linux.sh: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: 12/12 PASS
+- npm run syntax:check (tsc --noEmit --noCheck): PASS
+
+ESCOPO H7.9
+- Journey passa de 5 para 10 dimensões sem abandonar linhas recolhíveis.
+- Pensamentos, Necessidades, Evidências e Momentos da Verdade entram como dimensões próprias.
+- Problemas validados ficam separados de fricções locais da etapa.
+- Need/Problem/Evidence são links para entidades canônicas do DesignContextRef.
+- links externos ao DesignContextRef são rejeitados.
+- score determinístico de qualidade existe por etapa e para a Journey.
+- health strip mostra etapas, Momentos da Verdade, cobertura de Evidência e cobertura de Necessidades.
+- Inspector 2.0 concentra edição profunda e distribuição do contexto do Discovery.
+- Journey → Blueprint exige estrutura mínima e preserva rastreabilidade.
+- Blueprint nasce vazio de conteúdo operacional para não inventar Frontstage/Backstage.
+- duplicação de etapas copia arrays contextuais por valor.
+- preflight Linux verifica os novos arquivos H7.9.
+
+REGRA DE PRODUTO
+Uma observação local da Journey não se torna automaticamente um Problema validado. Necessidades, Problemas validados e Evidências são reutilizados por referência canônica. A Journey organiza onde cada contexto se manifesta na experiência.
+
+LIMITAÇÕES / TRUTH
+- `npm ci --no-audit --no-fund` excedeu o limite do ambiente e deixou somente instalação parcial; ela foi removida.
+- `npm run typecheck` completo NÃO foi marcado como PASS sem dependências instaladas.
+- `npm run build` completo NÃO foi marcado como PASS pela mesma razão.
+- o source final permanece sem node_modules, dist, .generated e artifacts.
+- Browser/runtime visual ainda deve ser confirmado no Linux do usuário após npm ci.

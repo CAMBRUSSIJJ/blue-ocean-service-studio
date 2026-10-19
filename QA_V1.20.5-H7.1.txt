@@ -1,0 +1,33 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.1 Personas 2.0
+
+Escopo:
+- lapidar exclusivamente a aba Personas;
+- manter Persona como objeto canônico do Service Graph;
+- criar biblioteca + workspace detalhado sem duplicar domínio.
+
+Implementado:
+- view dedicada PersonasView.tsx;
+- busca e filtros de biblioteca;
+- tabela no padrão Workspace;
+- criação dentro do módulo;
+- detalhe com Visão geral / Comportamento / Relações / Evidências / Uso;
+- modo simples e profissional;
+- completude derivada do Persona Studio;
+- relações canônicas via updatePersonaProfile;
+- remoção segura via removePersonaFromGraph;
+- rastreabilidade de uso;
+- CSS dedicado e responsivo.
+
+Gates executados neste ambiente:
+- H7.1 Personas 2.0 smoke: 14/14 PASS
+- npm run qa: PASS
+- npm run syntax:check (tsc --noEmit --noCheck): PASS
+- preflight-linux.sh: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: PASS
+
+Limitação empírica:
+- npm ci excedeu o tempo do ambiente e deixou instalação parcial; o full `npm run typecheck` não pôde ser validado aqui.
+- a tentativa de full typecheck falhou por tipos ausentes da instalação parcial (React/Babel/ESTree), não por diagnóstico em PersonasView.tsx.
+- Browser Truth permanece pendente da execução da release no navegador do usuário.

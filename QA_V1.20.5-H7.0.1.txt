@@ -1,0 +1,28 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.0.1 Sidebar & Wave Polish
+
+EVIDÊNCIA EXECUTADA NA FONTE
+- npm run qa: PASS (1360 linhas OK / 0 FAIL)
+- npm run syntax:check: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: PASS
+- ./preflight-linux.sh: PASS
+- npm run v1205h5:css-import-order-smoke: PASS (6/6)
+- npm run v1205h6:routing-layer-smoke: PASS (28/28)
+- npm run v1205h61:navigation-binding-smoke: PASS (5/5)
+- npm run v1205h70:dashboard-polish-smoke: PASS (10/10)
+- npm run v1205h701:sidebar-wave-polish-smoke: PASS (14/14)
+
+ESCOPO H7.0.1
+- accordion Workspace removido
+- grupos Desenho do serviço / Contexto / Gestão
+- Colaboração e Configurações fixos no rodapé
+- seletor do serviço visível e compacto
+- estado ativo com indicador Blue Ocean
+- onda decorativa dupla animada
+- prefers-reduced-motion respeitado
+- contratos legados de QA migrados para a arquitetura atual
+
+LIMITAÇÃO
+- Full npm run typecheck/build não foi comprovado neste ambiente por ausência de node_modules.
+- Browser Truth visual permanece pendente no Linux do usuário.

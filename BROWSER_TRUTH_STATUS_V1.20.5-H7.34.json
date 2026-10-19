@@ -1,0 +1,16 @@
+{
+  "release": "V1.20.5-H7.34",
+  "phase": "Problems, Opportunities & Prioritization",
+  "browserValidated": false,
+  "visualQa": "NOT_RUN",
+  "reactTypecheck": "NOT_DECLARED_PASS",
+  "viteBuild": "NOT_DECLARED_PASS",
+  "sourceQa": {
+    "h734": "175/175 PASS",
+    "accumulated": "3508 OK / 0 FAIL",
+    "syntax": "PASS",
+    "preflight": "PASS"
+  },
+  "reason": "npm ci did not complete; a lingering partial process was terminated and no browser validation was executed. Source/domain gates are independently validated.",
+  "generatedAt": "2026-10-13T21:38:23-03:00"
+}

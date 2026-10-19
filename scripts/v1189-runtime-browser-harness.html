@@ -1,0 +1,55 @@
+<!doctype html><html><head><meta charset="utf-8"><title>V1.18.9 Runtime Harness</title></head><body><main id="harness">running</main><script type="module">
+const result={checks:[],errors:[]};const check=(name,pass,detail='')=>{result.checks.push({name,pass:Boolean(pass),detail});if(!pass)result.errors.push(name+(detail?' · '+detail:''))};
+try{
+  localStorage.clear();
+  await new Promise((resolve,reject)=>{const req=indexedDB.deleteDatabase('realtalent-service-studio-v155-recovery');req.onsuccess=req.onerror=req.onblocked=()=>resolve()});
+  await import('../src/runtime/whiteboard-core.js?e2e=1189');
+  const runtime=window.BlueOceanRuntime;
+  check('runtime registry',!!runtime);
+  const data=runtime.api('dataBridge'), core=runtime.api('whiteboardCore'), bp=runtime.api('blueprintHome'), journeys=runtime.api('journeyHome');
+  check('core APIs registered',!!data&&!!core&&!!bp&&!!journeys);
+  let g=data.get();
+  check('clean workspace sentinel',g.service.id==='workspace-uninitialized',g.service.id);
+  check('clean workspace no service name',g.service.name==='');
+  check('clean workspace no journeys',g.service.journeyIds.length===0&&Object.keys(g.journeys).length===0);
+  check('clean workspace no stages',Object.keys(g.stages).length===0);
+  check('clean workspace no boards',Object.keys(g.views.whiteboards).length===0);
+  let createServiceEvent=0;window.addEventListener('bo-create-service',()=>createServiceEvent++);
+  const denied=await core.createBlank('Should not exist');
+  check('board blocked before service',denied===null);
+  check('create service event emitted',createServiceEvent===1,String(createServiceEvent));
+  data.transact(next=>{const now=new Date().toISOString();next.service={...next.service,id:'service-e2e',name:'Lavanderia Express',description:'Teste E2E',createdAt:now,updatedAt:now};return next},'E2E criar serviço');
+  g=data.get();
+  check('service created without journey',g.service.name==='Lavanderia Express'&&g.service.journeyIds.length===0);
+  check('service created without board',Object.keys(g.views.whiteboards).length===0);
+  const wb=await core.createBlank('Discovery vazio');
+  check('blank whiteboard created',!!wb?.id);
+  g=data.get();const wbRec=g.views.whiteboards[wb.id];
+  check('blank whiteboard is free',wbRec?.viewKind==='free',wbRec?.viewKind);
+  check('blank whiteboard items zero',Object.keys(wbRec?.items||{}).length===0);
+  check('blank whiteboard edges zero',Object.keys(wbRec?.edges||{}).length===0);
+  check('blank whiteboard did not create journey',g.service.journeyIds.length===0);
+  check('blank whiteboard did not create stages',Object.keys(g.stages).length===0);
+  check('free board excluded from blueprint library',!(bp.model().records||[]).some(x=>x.boardId===wb.id));
+  const bpc=bp.create({mode:'blank',name:'Blueprint vazio'});
+  check('blank blueprint created',!!bpc?.id);
+  await bp.open(bpc.id,{mode:'blank'});
+  g=data.get();const bpRec=g.views.whiteboards[bpc.id],bpModel=(bp.model().records||[]).find(x=>x.boardId===bpc.id);
+  check('blank blueprint classified blueprint',bpRec?.viewKind==='blueprint');
+  check('blank blueprint has zero items',Object.keys(bpRec?.items||{}).length===0);
+  check('blank blueprint has zero edges',Object.keys(bpRec?.edges||{}).length===0);
+  check('blank blueprint has no journey link',!bpRec?.journeyId&&!bpModel?.journeyId,String(bpRec?.journeyId||bpModel?.journeyId||''));
+  check('blank blueprint still no journeys',g.service.journeyIds.length===0);
+  check('blank blueprint still no stages',Object.keys(g.stages).length===0);
+  const j=journeys.create({name:'Jornada explícita',status:'draft'});
+  check('explicit journey created',!!j?.id);
+  g=data.get();check('new explicit journey has zero stages',(g.journeys[j.id]?.stageIds||[]).length===0);
+  check('explicit journey is only journey',g.service.journeyIds.length===1&&g.service.journeyIds[0]===j.id);
+  const linked=bp.create({mode:'journey',name:'Blueprint ligado',journeyId:j.id});
+  check('journey blueprint requires and accepts explicit id',!!linked?.id);
+  g=data.get();const linkedRecord=(bp.model().records||[]).find(x=>x.boardId===linked.id);
+  check('linked blueprint stores explicit journey',linkedRecord?.journeyId===j.id,linkedRecord?.journeyId||'');
+  check('no hidden stages after explicit link',Object.keys(g.stages).length===0);
+}catch(error){result.errors.push(String(error?.stack||error));}
+result.ok=result.errors.length===0;window.__V1189_RESULT__=result;document.getElementById('harness').textContent=result.ok?'PASS':'FAIL';
+</script></body></html>

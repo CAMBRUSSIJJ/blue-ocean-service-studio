@@ -1,0 +1,80 @@
+BLUE OCEAN Service Studio — QA V1.20.3
+======================================
+Release: Structured Service Frame
+
+REGRESSÃO COMPLETA
+------------------
+npm run qa
+Resultado: PASS
+Gates com contagem explícita: 44
+Verificações explícitas: 1630 OK / 0 FAIL
+
+GATE V1.20.3
+------------
+npm run service-frame:smoke
+Resultado: 71 OK / 0 FAIL
+
+COMPATIBILIDADE DA COMPOSIÇÃO
+-----------------------------
+npm run composition:smoke
+Resultado: 43 OK / 0 FAIL
+A composição histórica permanece compatível, mas a antiga matriz de 12 lanes foi substituída pelo Service Frame de 5 camadas.
+
+ESTRUTURA CANÔNICA
+------------------
+Camadas:
+1. Cliente
+2. Frontstage
+3. Backstage
+4. Processos de suporte
+5. Sistemas e recursos
+
+Linhas semânticas:
+- Linha de interação: Cliente ↔ Frontstage
+- Linha de visibilidade: Frontstage / Backstage
+
+Posicionamento:
+- Coluna = serviceStageId
+- Linha = serviceLayer
+- Movimento no frame altera metadados da instância; não duplica a entidade canônica.
+
+COVERAGE
+--------
+Cobertura = células estruturais preenchidas / células estruturais possíveis.
+O diagnóstico lista exatamente quais camadas faltam por etapa; não é score de IA.
+
+INTEGRIDADE / GATES
+-------------------
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS
+node --check src/runtime/whiteboard-core.js: PASS
+node --check public/v1102-whiteboard.js: PASS
+Typecheck isolado model + service-frame: PASS
+Design System V1.16.2: PASS (14/14; !important=290)
+Whiteboard UX V1.15.4: PASS (13/13)
+
+BROWSER TRUTH
+-------------
+Status: UNAVAILABLE.
+Playwright Python está instalado; Chromium do Playwright não está instalado.
+Nenhum PASS visual foi inferido.
+
+DEPENDÊNCIAS / BUILD
+--------------------
+npm ci: tentativa excedeu o limite do ambiente e deixou instalação parcial (~804 KB); node_modules foi removido.
+npm run typecheck completo: NÃO DECLARADO, porque React/lucide/tipos não foram instalados completamente.
+npm run build: NÃO DECLARADO pelo mesmo motivo.
+
+EMPACOTAMENTO
+-------------
+ZIP Linux reextraído em diretório novo: PASS
+VERSION: 1.20.3
+package.json: 1.20.3
+START.sh: 755
+node_modules/dist/.generated/artifacts/__pycache__: AUSENTES
+npm run qa no ZIP: PASS
+44 gates com contagem explícita: 1630 OK / 0 FAIL
+syntax / lock / source authority / foundation / preflight / core typecheck: PASS

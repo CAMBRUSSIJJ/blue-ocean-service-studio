@@ -1,0 +1,51 @@
+BLUE OCEAN Service Studio — QA V1.19.6
+======================================
+
+Release: Service Project Foundation
+
+REGRESSÃO COMPLETA
+------------------
+npm run qa
+Resultado: 1171 OK / 0 FAIL
+
+GATE ESPECÍFICO V1.19.6
+-----------------------
+npm run project-foundation:smoke
+Resultado: 44 OK / 0 FAIL
+
+FUNDAÇÃO CANÔNICA
+-----------------
+- `service.project` persistido com `version: 1`.
+- ID de projeto estável e vinculado ao `serviceId`.
+- Fases: Discovery / Definition / Design / Validation / Improvement.
+- Definition foundation: promise / outcome / scope / startBoundary / endBoundary / principles.
+- Progresso das fases é derivado do Service Graph; Personas, necessidades, problemas e evidências não são duplicados dentro do project.
+- Projetos V3 antigos recebem Service Project por migração transparente.
+- Runtime JS/Data Bridge executa a mesma normalização.
+- Integridade valida ownership e currentPhase do Service Project.
+- `problemHypothesis` passa a fazer parte das entidades conhecidas pelo runtime de integridade.
+
+INTEGRIDADE
+-----------
+npm run syntax:check (tsc --noEmit --noCheck): PASS
+Typecheck isolado model + service-project + graph-operations + integrity: PASS
+node --check data-integrity.js: PASS
+node --check whiteboard-core.js: PASS
+node --check workspace-home.js: PASS
+python py_compile browser truth: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS
+
+BROWSER TRUTH
+-------------
+Status: UNAVAILABLE neste ambiente.
+Motivo: Playwright está instalado, porém o Chromium esperado pelo Playwright não está instalado.
+Nenhum PASS visual/runtime foi inferido dessa indisponibilidade.
+
+DEPENDÊNCIAS / BUILD
+--------------------
+npm ci: tentativa excedeu o limite do ambiente e deixou instalação parcial; `node_modules` parcial foi removido antes do empacotamento.
+npm run typecheck completo: NÃO DECLARADO, pois React/Zod e tipos não estão instalados neste ambiente.
+npm run build React/Vite: NÃO DECLARADO pelo mesmo motivo.

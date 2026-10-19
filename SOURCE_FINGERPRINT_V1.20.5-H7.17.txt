@@ -1,0 +1,12 @@
+BLUE OCEAN Service Studio — SOURCE FINGERPRINT V1.20.5-H7.17
+=============================================================
+3ca781c01fe9c30ccbf4d4132b4d38abc6acd15511fe0a35a51ef4bda9166f36  src/runtime/ocean-surface-h717.css
+cb7977e258b2e0b0dce5372b13bb96992e5a038dac24186c83c44b577f5aace5  public/blue-ocean-surface-dark-h717.svg
+a4f8b237c2cce6535a884bb9f357dc8f75b5e2c93a11d3924b90fcd2484c8381  public/blue-ocean-surface-light-h717.svg
+8a6d6b4e0d0d2f22144c5f469bd4c7fcd6ffc4336439402546547dc89b6d5d5b  src/style.css
+143bab97053ffd5589c6a58938a567cf4d0e9fcf24d653f47d873d16127c6185  src/main.tsx
+54d881926a5896ab522d1314c022191b259c4395b3c5bbe3c8eb4672e73d25a5  src/App.tsx
+eba87e7bafe8cd55959ed650f29febcbddf6f30294e93333a655b84141896c4b  src/views/WorkspaceDashboardView.tsx
+98839bb80dcdf38e024cdc374637173634accd626888205626d4f3e3c0c18245  scripts/v1205h717-ocean-surface-smoke.mjs
+eb2e9d49a1df96ec179abbc6bffaa3e345487881c39793770f17a166d827db5b  package.json
+974f9db03b8768db10605b6c69142c8befb500e4e227fe65ce7693424dbbadba  preflight-linux.sh

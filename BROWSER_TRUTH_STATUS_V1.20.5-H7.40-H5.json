@@ -1,0 +1,22 @@
+{
+  "release": "V1.20.5-H7.40-H5",
+  "status": "PARTIAL_PASS",
+  "browser": "Chromium 144.0.7559.96",
+  "verified": {
+    "service_workspace_simplification_gate": "11/11 PASS",
+    "h3_product_coherence_gate": "10/10 PASS",
+    "h4_ux_polish_gate": "8/8 PASS",
+    "desktop_1920_phase_columns": 5,
+    "laptop_1200_phase_columns": 3,
+    "tablet_800_phase_columns": 2,
+    "mobile_600_phase_columns": 1,
+    "global_horizontal_overflow": false,
+    "phase_cta_absolute_positioning": false
+  },
+  "not_claimed": {
+    "production_build": "NOT VALIDATED — npm ci did not complete",
+    "react_full_typecheck": "NOT VALIDATED — npm ci did not complete",
+    "full_app_browser_after_production_build": "NOT VALIDATED"
+  },
+  "truth_policy": "Unavailable or unfinished checks are not promoted to PASS."
+}

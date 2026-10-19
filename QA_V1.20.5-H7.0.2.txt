@@ -1,0 +1,23 @@
+BLUE OCEAN Service Studio V1.20.5-H7.0.2 — QA
+
+Causa observada no Linux do usuário:
+- preflight falhava após build porque rgba(29,158,117,.075) era minificado para #1d9e7513;
+- #1D9E75 pertence à lista de paleta estrutural legado proibida pelo preflight.
+
+Correções:
+- wave-front: rgba(14,165,233,.075) (ciano), mantendo wave-back azul.
+- preflight reporta arquivo + token, sem dump de CSS minificado.
+
+Gates executados:
+- v1205h702-preflight-branding-hotfix-smoke: 6 OK / 0 FAIL
+- preflight-linux.sh: OK (source, sem dist gerado)
+- npm run qa: PASS completo
+- H7.0.1: 14/14 PASS
+- H7.0: 10/10 PASS
+- H6: 28/28 PASS
+- H6.1: 5/5 PASS
+- H5: 6/6 PASS
+
+Limitação:
+- build/typecheck completos não foram reexecutados neste ambiente porque a árvore distribuída não inclui node_modules.
+- repetir no Linux: npm ci && npm run typecheck && npm run build && ./preflight-linux.sh

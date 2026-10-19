@@ -1,0 +1,28 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.7 Evidências 2.0
+
+VALIDAÇÃO EXECUTADA
+- H7.7 Evidências 2.0 smoke: 34/34 PASS
+- npm run qa: 1593 OK / 0 FAIL
+- preflight-linux.sh: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: 12/12 PASS
+- npm run syntax:check (tsc --noEmit --noCheck): PASS
+
+ESCOPO H7.7
+- EvidenceView dedicada em vez da tabela contextual genérica.
+- criação direta de Evidência preservada como regra de produto.
+- separação entre observação e interpretação.
+- proveniência: tipo, origem, método, data, amostra/contexto e confiança.
+- score determinístico de qualidade com readiness para decisão.
+- filtros específicos de qualidade, rastreabilidade, uso e contradição.
+- relações bidirecionais com Persona, Necessidade, Job, Dor, Hipótese e Problema.
+- stance explícita em Hipóteses/Problemas: Sustenta, Contradiz, Contextual.
+- Service Graph mantém IDs tipados no lado da Evidência e `evidenceIds` no lado relacionado.
+- remoção limpa `evidenceLinks`, `evidenceIds`, suporte/contradição e Service Definition.
+
+LIMITAÇÕES / TRUTH
+- `npm ci --ignore-scripts --no-audit --no-fund` excedeu o limite do ambiente e foi interrompido; a instalação parcial foi removida antes do empacotamento.
+- Por isso `npm run typecheck` e `npm run build` completos NÃO foram marcados como PASS nesta geração.
+- `tsc --noEmit --noCheck` passou, portanto a sintaxe TypeScript/TSX está válida.
+- Browser/runtime visual ainda precisa ser confirmado no Linux do usuário após `npm ci`.

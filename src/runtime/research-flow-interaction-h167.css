@@ -1,0 +1,91 @@
+/* V1.20.5-H16.7 — Research Flow Interaction Polish + flexible discovery capture */
+
+/* Pesquisa: estado não linear e evidência com origem como sinal de estruturação. */
+.bo-h726-research[data-research-flow-polish="H16.7"][data-experience-level="foundation"] .bo-h165-foundation-research{gap:14px}
+.bo-h167-research-state{grid-column:1/3;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;padding-top:11px;border-top:1px solid rgba(255,255,255,.17)}
+.bo-h167-research-state>span{min-width:0;padding:8px 10px;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:rgba(255,255,255,.055);display:grid;grid-template-columns:18px minmax(0,1fr);grid-template-rows:auto auto;gap:1px 6px;color:#d7e8f7}
+.bo-h167-research-state>span i{grid-row:1/3;width:18px;height:18px;border:1px solid rgba(255,255,255,.28);border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:8px;font-weight:900}
+.bo-h167-research-state>span b{font-size:8px;line-height:1.2;color:#fff}
+.bo-h167-research-state>span small{font-size:7px;line-height:1.25;color:#bcd5e9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bo-h167-research-state>span.is-done i{background:#79c0fa;border-color:#79c0fa;color:#0a3a6b}
+.bo-h167-research-state>span.is-attention{background:rgba(255,194,91,.12);border-color:rgba(255,203,112,.35)}
+.bo-h167-research-state>span.is-attention i{background:#fff0c9;border-color:#ffd77c;color:#7b5200}
+
+/* O board usa toda a largura. Detalhes entram somente depois da seleção. */
+.bo-h167-workspace{display:block!important;position:relative}
+.bo-h167-workspace .bo-h166-board{width:100%}
+.bo-h726-research[data-research-flow-polish="H16.7"] .bo-h166-drop-column{min-height:270px;align-self:start;background:#f0f5fa;border-color:#dfe9f2}
+.bo-h726-research[data-research-flow-polish="H16.7"] .bo-h165-column>header{padding-bottom:7px;border-bottom:1px solid #dde8f1}
+.bo-h726-research[data-research-flow-polish="H16.7"] .bo-h165-stack{min-height:0}
+.bo-h726-research[data-research-flow-polish="H16.7"] .bo-h165-empty{min-height:116px;padding:16px 12px;background:rgba(255,255,255,.58);display:flex;flex-direction:column;justify-content:center}
+.bo-h726-research[data-research-flow-polish="H16.7"] .bo-h165-empty strong{display:block;color:#36536d;font-size:8.5px}
+.bo-h726-research[data-research-flow-polish="H16.7"] .bo-h165-empty span{display:block;margin-top:4px;color:#7d91a3;font-size:7.5px;line-height:1.45}
+.bo-h726-research[data-research-flow-polish="H16.7"] .bo-h166-drop-hint{min-height:30px;margin-top:8px}
+
+/* Evidência deixa de ser botão aninhado e separa seleção, alerta de origem e drag. */
+.bo-h167-evidence-open{width:100%;padding:0;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.bo-h167-evidence-open>strong{display:block;margin-top:4px;color:#203d57;font-size:9.5px;line-height:1.3;overflow-wrap:anywhere}
+.bo-h167-evidence-open>p{margin:4px 0 0;color:#718497;font-size:8px;line-height:1.4;overflow-wrap:anywhere}
+.bo-h167-origin-action{padding:4px 7px!important;border:1px solid #efd8a0!important;border-radius:999px!important;background:#fff7df!important;color:#7d590f!important;text-decoration:none!important;font-size:7px!important;font-weight:850!important;cursor:pointer}
+.bo-h167-origin-action:hover{background:#fff1c7!important}
+
+/* Drawer contextual: não comprime as quatro colunas e não abre sem escolha explícita. */
+.bo-h167-evidence-drawer{position:absolute!important;z-index:45;right:10px;top:10px;width:min(330px,calc(100% - 20px));max-height:calc(100% - 20px);overflow:auto;box-shadow:0 22px 52px rgba(20,50,78,.22)!important;border-color:#bdd2e5!important;animation:bo-h167-drawer-in .2s ease-out both}
+.bo-h167-drawer-close{position:absolute;right:10px;top:10px;width:29px;height:29px;border:1px solid #d8e4ee;border-radius:8px;background:#fff;color:#54708a;display:grid;place-items:center;cursor:pointer}
+.bo-h167-evidence-drawer>small{padding-right:34px}
+.bo-h167-origin-copy{margin:0 0 7px!important;color:#7b8fa1!important;font-size:8px!important;line-height:1.45!important}
+.bo-h167-link-origin{border-color:#e6c77a!important;background:#fff8e7!important;color:#79550b!important;font-weight:850}
+@keyframes bo-h167-drawer-in{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+
+/* O que a pesquisa está produzindo deixa de parecer KPI e vira continuação do trabalho. */
+.bo-h167-understanding-strip{margin-top:12px;padding:12px 13px;border:1px solid #dce7f1;border-radius:13px;background:#fff;display:grid;grid-template-columns:190px minmax(0,1fr);gap:13px;align-items:center}
+.bo-h167-understanding-strip header small,.bo-h167-work-choice header small{display:block;color:#5c7790;font-size:7px;font-weight:900;letter-spacing:.12em}
+.bo-h167-understanding-strip header strong{display:block;margin-top:3px;color:#29475f;font-size:9px;line-height:1.35}
+.bo-h167-understanding-strip>div{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.bo-h167-understanding-strip button{min-height:54px;padding:8px 9px;border:1px solid #e0e9f1;border-radius:9px;background:#f8fbfd;color:#6b8094;text-align:left;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;cursor:pointer}
+.bo-h167-understanding-strip button span{grid-column:1/3;font-size:7px;color:#71889d}
+.bo-h167-understanding-strip button b{font-size:8.5px;color:#29465f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bo-h167-understanding-strip button em{font-size:7.5px;font-style:normal;font-weight:850;color:#23649c}
+.bo-h167-understanding-strip button:hover{border-color:#b8d0e5;background:#fff}
+
+/* Design do serviço: linguagem específica + dois caminhos igualmente válidos. */
+.bo-h167-work-choice{margin-top:14px;padding:13px;border:1px solid #d7e5f1;border-radius:13px;background:linear-gradient(180deg,#fbfdff,#f7fbff)}
+.bo-h167-work-choice header h4{margin:3px 0 3px;color:#24445f;font-size:12px}
+.bo-h167-work-choice header p{margin:0;color:#708599;font-size:8px;line-height:1.45}
+.bo-h167-work-choice>div{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.bo-h167-work-choice article{padding:11px;border:1px solid #dde8f1;border-radius:10px;background:#fff;display:flex;gap:9px;align-items:flex-start}
+.bo-h167-work-choice article>span{width:25px;height:25px;border-radius:8px;background:#eaf3ff;color:#2256c7;display:grid;place-items:center;flex:0 0 auto;font-size:9px;font-weight:900}
+.bo-h167-work-choice article strong{display:block;color:#29465f;font-size:9px}
+.bo-h167-work-choice article p{margin:3px 0 8px;color:#75899b;font-size:7.5px;line-height:1.45}
+.bo-h167-work-choice article button{min-height:30px;padding:5px 8px;border:1px solid #c9dae8;border-radius:7px;background:#fff;color:#286394;font-size:7.5px;font-weight:800;display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+.bo-h167-work-choice article div>div{display:flex;gap:5px;flex-wrap:wrap}
+.bo-h167-work-choice article button:hover{background:#eff6fd;border-color:#aac9e2}
+
+/* Journey: contexto pode ser capturado dentro da etapa sem bloquear o desenho. */
+.bo-h167-journey-capture{background:#f7fbff!important;border:1px solid #d5e5f3!important;border-radius:12px;padding:12px!important}
+.bo-h167-journey-capture__form{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:6px;margin-top:9px}
+.bo-h167-journey-capture__form select,.bo-h167-journey-capture__form input{min-width:0;min-height:34px;border:1px solid #d4e2ed;border-radius:8px;background:#fff;color:#314d66;padding:6px 8px;font-size:8px}
+.bo-h167-journey-capture__form button{min-height:34px;padding:6px 10px;border:0;border-radius:8px;background:#2256c7;color:#fff;font-size:8px;font-weight:850;cursor:pointer}
+.bo-h167-journey-capture>small{display:block;margin-top:6px;color:#7a8ea0;font-size:7px;line-height:1.4}
+
+/* Whiteboard: começar com o que já existe ou registrar durante o raciocínio visual. */
+.bo-h167-whiteboard-start{width:min(620px,calc(100vw - 28px))!important}
+.bo-h167-whiteboard-start__choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 12px}
+.bo-h167-whiteboard-start__choices article{padding:12px;border:1px solid #dbe6ef;border-radius:10px;background:#f8fbfd}
+.bo-h167-whiteboard-start__choices strong{display:block;color:#29465f;font-size:10px}
+.bo-h167-whiteboard-start__choices p{margin:4px 0 8px;color:#74899b;font-size:8px;line-height:1.45}
+.bo-h167-whiteboard-start__choices button{min-height:31px;padding:5px 8px;border:1px solid #c6d9e9;border-radius:7px;background:#fff;color:#286394;font-size:7.5px;font-weight:850;display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+
+@media(max-width:1040px){
+  .bo-h167-research-state{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .bo-h167-understanding-strip{grid-template-columns:1fr}
+  .bo-h167-evidence-drawer{position:fixed!important;right:14px;top:auto;bottom:14px;max-height:min(72vh,620px)}
+}
+@media(max-width:760px){
+  .bo-h167-research-state{grid-column:1;grid-template-columns:1fr 1fr}
+  .bo-h167-understanding-strip>div{grid-template-columns:1fr 1fr}
+  .bo-h167-work-choice>div,.bo-h167-whiteboard-start__choices{grid-template-columns:1fr}
+  .bo-h167-journey-capture__form{grid-template-columns:1fr}
+}
+@media(max-width:520px){.bo-h167-research-state,.bo-h167-understanding-strip>div{grid-template-columns:1fr}.bo-h167-evidence-drawer{left:10px;right:10px;width:auto}}
+@media(prefers-reduced-motion:reduce){.bo-h167-evidence-drawer{animation:none}.bo-h167-work-choice article button,.bo-h167-understanding-strip button{transition:none}}

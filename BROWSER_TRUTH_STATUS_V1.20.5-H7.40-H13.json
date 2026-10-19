@@ -1,0 +1,18 @@
+{
+  "release": "V1.20.5-H7.40-H13",
+  "browser_h13": "pass",
+  "browser_h13_checks": "8/8",
+  "engine": "Chromium real via Playwright",
+  "validated": [
+    "sidebar global permanece com Personas dentro do projeto",
+    "sidebar global permanece com Problemas dentro do projeto",
+    "sidebar global permanece com Catálogo de métricas dentro do projeto",
+    "barra contextual do projeto renderiza Visão geral e Biblioteca",
+    "desktop sem overflow global",
+    "tablet sem overflow global",
+    "mobile sem overflow global"
+  ],
+  "full_app_server_browser": "not_claimed",
+  "source_qa": "pass",
+  "preflight": "pass"
+}

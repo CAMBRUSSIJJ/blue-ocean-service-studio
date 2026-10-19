@@ -1,0 +1,150 @@
+/* H7.19 — Motion Identity & Sidebar Icon System
+   Login motion becomes a layered ocean atmosphere; sidebar glyphs become the primary Blue Ocean navigation signature. */
+
+:root{
+  --bo-h719-deep:#06182b;
+  --bo-h719-depth:#0a3150;
+  --bo-h719-current:#2563eb;
+  --bo-h719-aqua:#55d2d0;
+  --bo-h719-foam:#f5fbff;
+}
+
+/* ---------- Entry screen: three motion layers, content stays still. ---------- */
+.bo-h719 .bo-auth-shell{overflow:hidden}
+.bo-h719 .bo-h719-auth-motion{
+  position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;isolation:isolate;
+}
+.bo-h719 .bo-h719-auth-motion>span{position:absolute;inset:-4%;pointer-events:none;will-change:transform,opacity,background-position}
+.bo-h719 .bo-h719-auth-motion__depth{
+  background:
+    radial-gradient(38% 34% at 22% 30%,rgba(53,137,203,.17),transparent 70%),
+    radial-gradient(31% 28% at 70% 19%,rgba(85,210,208,.09),transparent 74%);
+  animation:bo-h719-depth-breathe 28s ease-in-out infinite;
+}
+.bo-h719 .bo-h719-auth-motion__current{
+  inset:auto -7% -9% -7%;height:70%;
+  background:url('/blue-ocean-surface-dark-h717.svg') center bottom/112% 100% no-repeat;
+  opacity:.14;mix-blend-mode:screen;
+  animation:bo-h719-current-drift 23s ease-in-out infinite;
+}
+.bo-h719 .bo-h719-auth-motion__foam{
+  inset:auto -8% -12% -8%;height:50%;
+  background:url('/blue-ocean-surface-dark-h717.svg') center bottom/116% 100% no-repeat;
+  opacity:.075;filter:saturate(.75) brightness(1.28);
+  animation:bo-h719-foam-drift 17s ease-in-out infinite;
+}
+@keyframes bo-h719-depth-breathe{
+  0%,100%{transform:scale(1) translate3d(0,0,0);opacity:.82}
+  45%{transform:scale(1.035) translate3d(1.2%,-.8%,0);opacity:1}
+  72%{transform:scale(1.015) translate3d(-.7%,.5%,0);opacity:.9}
+}
+@keyframes bo-h719-current-drift{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  34%{transform:translate3d(1.7%,-5px,0) scale(1.015)}
+  68%{transform:translate3d(-1.2%,3px,0) scale(1.008)}
+}
+@keyframes bo-h719-foam-drift{
+  0%,100%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(-2.1%,-7px,0)}
+}
+
+/* The H7.17 base wave stays exactly where it was, with a wider/longer drift so no loop is perceived. */
+.bo-h719 .bo-auth-shell::before{animation:bo-h719-base-tide 34s ease-in-out infinite!important}
+@keyframes bo-h719-base-tide{
+  0%,100%{background-position:50% 100%;opacity:.96}
+  30%{background-position:51.4% 100%;opacity:.985}
+  67%{background-position:48.8% 100%;opacity:.945}
+}
+
+/* Premium entrance choreography: only opacity/transform; no layout movement. */
+.bo-h719 .bo-auth-brand{animation:bo-h719-reveal .58s cubic-bezier(.2,.75,.2,1) both}
+.bo-h719 .bo-auth-story__copy{animation:bo-h719-reveal .72s .08s cubic-bezier(.2,.75,.2,1) both}
+.bo-h719 .bo-auth-story__signal{animation:bo-h719-reveal .68s .18s cubic-bezier(.2,.75,.2,1) both}
+.bo-h719 .bo-auth-story footer{animation:bo-h719-reveal .62s .24s cubic-bezier(.2,.75,.2,1) both}
+.bo-h719 .bo-auth-card{animation:bo-h719-card-arrive .68s .05s cubic-bezier(.2,.75,.2,1) both}
+@keyframes bo-h719-reveal{from{opacity:0;transform:translate3d(0,10px,0)}to{opacity:1;transform:none}}
+@keyframes bo-h719-card-arrive{from{opacity:0;transform:translate3d(12px,0,0) scale(.992)}to{opacity:1;transform:none}}
+
+/* One restrained light pass on the brand mark at entry. */
+.bo-h719 .bo-auth-brand>div{position:relative;overflow:hidden}
+.bo-h719 .bo-auth-brand>div::after{
+  content:'';position:absolute;inset:-35% auto -35% -70%;width:45%;transform:skewX(-20deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);
+  animation:bo-h719-mark-glint 1.05s .42s ease-out both;
+}
+@keyframes bo-h719-mark-glint{from{left:-70%;opacity:0}20%{opacity:1}to{left:135%;opacity:0}}
+
+/* Primary button gets a current sweep on hover, without shifting the button. */
+.bo-h719 .bo-auth-primary{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(135deg,#1f63ef,#167fd0)!important}
+.bo-h719 .bo-auth-primary::after{
+  content:'';position:absolute;left:-34%;bottom:0;width:34%;height:2px;border-radius:99px;
+  background:linear-gradient(90deg,transparent,#8cf4eb,rgba(255,255,255,.9),transparent);opacity:0;
+}
+.bo-h719 .bo-auth-primary:hover::after{animation:bo-h719-button-current .7s ease-out}
+@keyframes bo-h719-button-current{0%{left:-34%;opacity:0}18%{opacity:.9}100%{left:105%;opacity:0}}
+
+/* ---------- Sidebar: the glyph itself is the signature, not a generic rounded square. ---------- */
+.bo-h719 .bo-h719-sidebar-icon{
+  width:28px!important;height:28px!important;flex:0 0 28px!important;
+  position:relative;display:inline-grid!important;place-items:center!important;
+  border:0!important;border-radius:50% 50% 45% 55%!important;
+  color:var(--bo-h718-nav-accent)!important;
+  background:radial-gradient(circle at 38% 30%,rgba(255,255,255,.98),color-mix(in srgb,var(--bo-h718-nav-surface) 85%,#fff) 62%,var(--bo-h718-nav-surface))!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bo-h718-nav-accent) 15%,transparent),0 2px 8px rgba(32,71,103,.035)!important;
+  transition:transform .18s ease,box-shadow .18s ease,color .18s ease,background .18s ease!important;
+  isolation:isolate;
+}
+.bo-h719 .bo-h719-sidebar-icon::after{
+  content:'';position:absolute;left:4px;right:4px;bottom:4px;height:5px;border-top:1.3px solid currentColor;border-radius:50%;opacity:.23;transform:skewX(-14deg);z-index:-1;
+}
+.bo-h719 .bo-h719-sidebar-icon svg{width:17px;height:17px;overflow:visible;filter:none;transition:transform .18s ease,filter .18s ease}
+.bo-h719 .bo-h701-sidebar-nav button:hover .bo-h719-sidebar-icon{transform:translate3d(2px,-1px,0);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bo-h718-nav-accent) 24%,transparent),0 6px 14px color-mix(in srgb,var(--bo-h718-nav-accent) 9%,transparent)!important}
+.bo-h719 .bo-h701-sidebar-nav button:hover .bo-h719-sidebar-icon svg{transform:scale(1.045)}
+.bo-h719 .bo-h701-sidebar-nav button.is-active .bo-h719-sidebar-icon,
+.bo-h719 .bo-h701-sidebar-nav button[aria-current="page"] .bo-h719-sidebar-icon{
+  color:#fff!important;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--bo-h718-nav-accent) 88%,#fff),var(--bo-h718-nav-accent))!important;
+  box-shadow:0 7px 17px color-mix(in srgb,var(--bo-h718-nav-accent) 23%,transparent),inset 0 1px 0 rgba(255,255,255,.32)!important;
+}
+.bo-h719 .bo-h701-sidebar-nav button.is-active .bo-h719-sidebar-icon::after,
+.bo-h719 .bo-h701-sidebar-nav button[aria-current="page"] .bo-h719-sidebar-icon::after{opacity:.62;border-color:rgba(255,255,255,.9)}
+.bo-h719 .bo-h701-sidebar-nav button.is-active .bo-h719-sidebar-icon svg,
+.bo-h719 .bo-h701-sidebar-nav button[aria-current="page"] .bo-h719-sidebar-icon svg{filter:drop-shadow(0 1px 0 rgba(0,0,0,.08))}
+
+/* Current indicator on the left replaces the generic right-hand active dash. */
+.bo-h719 .bo-h701-sidebar-nav button.is-active::after,
+.bo-h719 .bo-h701-sidebar-nav button[aria-current="page"]::after{
+  right:auto!important;left:1px!important;top:50%!important;width:3px!important;height:25px!important;
+  transform:translateY(-50%)!important;border-radius:0 8px 8px 0!important;
+  background:linear-gradient(180deg,transparent,var(--bo-h718-nav-accent) 26%,var(--bo-h719-aqua) 74%,transparent)!important;opacity:.78!important;
+}
+
+/* Stronger section families, still subtle enough to keep navigation readable. */
+.bo-h719 [data-sidebar-section="design"] .bo-h701-nav-section__label{color:#225b9a!important}
+.bo-h719 [data-sidebar-section="context"] .bo-h701-nav-section__label{color:#6951a9!important}
+.bo-h719 [data-sidebar-section="management"] .bo-h701-nav-section__label{color:#397080!important}
+.bo-h719 .bo-h701-nav-section__label::before{width:10px!important;height:6px!important;border-color:#4f9bd2!important;opacity:.9!important}
+
+/* Brand mark in shell gets the same ocean halo as the navigation system. */
+.bo-h719 .rt182-host-brand>div:first-child{
+  background:linear-gradient(145deg,#174a88,#2563eb 58%,#1598c9)!important;
+  box-shadow:0 6px 18px rgba(37,99,235,.18),inset 0 1px 0 rgba(255,255,255,.25);
+  border-radius:50% 50% 44% 56%!important;
+}
+
+@media(max-width:760px){
+  .bo-h719 .bo-h719-sidebar-icon{width:28px!important;height:28px!important;flex-basis:28px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .bo-h719 .bo-h719-auth-motion>span,
+  .bo-h719 .bo-auth-shell::before,
+  .bo-h719 .bo-auth-brand,
+  .bo-h719 .bo-auth-story__copy,
+  .bo-h719 .bo-auth-story__signal,
+  .bo-h719 .bo-auth-story footer,
+  .bo-h719 .bo-auth-card,
+  .bo-h719 .bo-auth-brand>div::after,
+  .bo-h719 .bo-auth-primary::after{animation:none!important;transform:none!important;opacity:1}
+  .bo-h719 .bo-h719-sidebar-icon,.bo-h719 .bo-h719-sidebar-icon svg{transition:none!important}
+}

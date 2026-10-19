@@ -1,0 +1,18 @@
+import { readFileSync, existsSync } from 'node:fs';
+const read=p=>readFileSync(p,'utf8');
+const checks=[];const check=(name,ok)=>{checks.push([name,!!ok]);console.log(`${ok?'OK':'FAIL'}  ${name}`)};
+const pkg=JSON.parse(read('package.json'));const wb=read('src/runtime/whiteboard-core.js');const shell=read('src/runtime/blue-ocean-shell.js');const kernel=read('src/runtime/persistence-kernel.js');const main=read('src/main.tsx');const auth=existsSync('src/auth/AuthExperience.tsx')?read('src/auth/AuthExperience.tsx'):'';const index=read('index.html');const prep=read('scripts/prepare-assets.mjs');
+check('baseline V1.12 preservada em versão >= 1.12.0',/^1\.(?:1[2-9]|[2-9]\d)\./.test(pkg.version));
+check('recovery antes do workspace',wb.includes('prepareBeforeApp')&&wb.includes('prepare:prepareBeforeApp')&&((auth.includes('prepareWorkspaceRuntime')&&auth.includes('bridge.prepare'))||main.includes("await dataBridge()?.prepare?.()")));
+check('quarentena de estado inválido',wb.includes('QUARANTINE_KEY')&&wb.includes('quarantineInvalidState'));
+check('importação funciona fora do editor',wb.includes('function dialogHost(){return overlay||document.body}')&&wb.includes('mountDialog(root)'));
+check('rollback de importação',wb.includes("label:'Rollback de importação'")&&wb.includes('const previous={graph:clone(graph)'));
+check('sessão tolera storage bloqueado',kernel.includes('degraded: !writable')&&kernel.includes('const write ='));
+check('shell sem MutationObserver',!shell.includes('MutationObserver'));
+check('shell dirigido por eventos',shell.includes("'rt-app-ready'")&&shell.includes("'rt-runtime-registered'"));
+check('Error Boundary React',existsSync('src/components/AppErrorBoundary.tsx')&&main.includes('AppErrorBoundary'));
+check('boot/error/offline states',existsSync('src/runtime/stability.js')&&existsSync('src/runtime/stability.css'));
+check('stability antes do React',index.indexOf('v1120-stability.js')>0&&index.indexOf('v1120-stability.js')<index.indexOf('/src/main.tsx'));
+check('assets V1.12 preparados',prep.includes('v1120-stability.js')&&prep.includes('v1120-shell.js'));
+if(checks.some(([,ok])=>!ok))process.exit(1);
+console.log(`V1.12.0 stability smoke: ${checks.length}/${checks.length}`);

@@ -1,0 +1,77 @@
+BLUE OCEAN Service Studio — QA V1.20.5
+======================================
+Release: Frontstage / Backstage Advanced System
+
+ESCOPO
+------
+- Cinco lanes do Service Frame preservadas.
+- Papéis, canais, dependências, políticas e evidências como contexto operacional.
+- Visibilidade semântica derivada da camada.
+- Evidência física/digital/humana/documental/operacional.
+- Diagnóstico operacional determinístico por etapa.
+- Inspector operacional + biblioteca operacional.
+
+GATE ESPECÍFICO V1.20.5
+-----------------------
+npm run frontstage-backstage:smoke
+Resultado: 77 OK / 0 FAIL
+
+REGRESSÃO COMPLETA
+------------------
+npm run qa
+Resultado: PASS
+Gates com contagem explícita: 49
+Verificações contadas: 1818 / 1818
+FAIL: 0
+
+INTEGRIDADE
+-----------
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS
+node --check src/runtime/whiteboard-core.js: PASS
+node --check public/v1102-whiteboard.js: PASS
+
+TYPECHECK DO DOMÍNIO NOVO
+------------------------
+tsc isolado com moduleResolution Bundler:
+- src/domain/model.ts
+- src/services/service-frame.ts
+- src/services/frontstage-backstage.ts
+Resultado: PASS
+
+BROWSER TRUTH
+-------------
+Status: UNAVAILABLE
+Motivo: Playwright Python disponível, porém o executável Chromium esperado não está instalado.
+Nenhum PASS visual foi inferido.
+
+DEPENDÊNCIAS / BUILD
+--------------------
+npm ci --ignore-scripts: tentativa excedeu o limite do ambiente e deixou ~804 KB de node_modules parcial.
+A instalação parcial foi removida antes do empacotamento.
+npm run typecheck completo: NÃO DECLARADO. Sem React/@types instalados, o tsc falha já na resolução de dependências.
+npm run build React/Vite: NÃO DECLARADO pelo mesmo motivo.
+
+REGRA CANÔNICA
+--------------
+As relações operacionais pertencem às entidades do Service Graph. O Whiteboard mantém somente representação, posicionamento e visibilidade derivada da camada.
+
+VALIDAÇÃO DO ZIP LINUX FINAL
+----------------------------
+O pacote Linux foi extraído em diretório novo e validado fora da pasta de trabalho.
+VERSION: 1.20.5
+package.json: 1.20.5
+START.sh: 755
+Diretórios proibidos (node_modules/dist/.generated/artifacts/__pycache__): ausentes
+frontstage-backstage:smoke: 77 / 77
+syntax:check: PASS
+lock:verify: PASS
+source:authority: PASS
+foundation:smoke: PASS
+preflight-linux: PASS
+core typecheck isolado: PASS
+npm run qa (TERM=xterm): PASS / status 0
+49 gates contados: 1818 / 1818

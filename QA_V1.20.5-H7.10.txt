@@ -1,0 +1,36 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.10 Service Blueprints 2.0
+
+VALIDAÇÃO EXECUTADA
+- H7.10 Service Blueprints 2.0 smoke: 36/36 PASS
+- H7.9 Journey Maps 2.0 smoke: 41/41 PASS
+- H7.8 Context-to-Service Handoff smoke: 37/37 PASS
+- npm run qa: 1707 OK / 0 FAIL
+- preflight-linux.sh: PASS
+- npm run lock:verify: PASS
+- npm run source:authority: PASS
+- npm run foundation:smoke: 12/12 PASS
+- npm run syntax:check (tsc --noEmit --noCheck): PASS
+
+ESCOPO H7.10
+- Blueprint estruturado deixa de ser quatro textareas globais e vira matriz etapa-a-etapa.
+- 6 camadas: Evidências, Ações do cliente, Frontstage, Backstage, Processos, Sistemas / suporte.
+- 3 separadores: Linha de interação, Linha de Visibilidade e Linha de interação interna.
+- Customer Action vem da Journey e não é editada no Blueprint.
+- sync Journey → Blueprint cria apenas referências canônicas de Stage/Evidence.
+- sync não inventa Frontstage, Backstage, Processos ou Sistemas.
+- gaps vazios ficam visíveis e entram no score determinístico.
+- health mede qualidade geral, cobertura operacional, cobertura de evidência e gaps.
+- Processo e Sistema são lanes separadas também no Whiteboard React.
+- placement por blueprintStageId + blueprintLane é preservado.
+- contrato legado "Linha de Visibilidade" preservado.
+- preflight Linux exige os novos arquivos H7.10.
+
+REGRA DE PRODUTO
+Journey responde "o que o cliente vive e faz". Blueprint responde "como o serviço entrega isso". Ausência de definição operacional é um gap e não deve ser preenchida automaticamente.
+
+LIMITAÇÕES / TRUTH
+- `npm ci` voltou a exceder o limite do ambiente; o processo foi encerrado e node_modules parcial foi removido.
+- `npm run typecheck` completo NÃO foi marcado como PASS sem dependências instaladas.
+- `npm run build` completo NÃO foi marcado como PASS pela mesma razão.
+- o source final permanece sem node_modules, dist, .generated e artifacts.
+- Browser/runtime visual ainda deve ser confirmado no Linux do usuário após npm ci.

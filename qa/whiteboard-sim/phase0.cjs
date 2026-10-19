@@ -1,0 +1,21 @@
+const fs = require('fs');
+const path = require('path');
+const L = require('./lib.cjs');
+(async () => {
+  const { assert, diagnostic, setPhase, save, makeEnv } = L;
+  setPhase('F0 · Ambiente, bundle e contratos do runtime');
+  const manifestPath = path.join(__dirname, 'sim-manifest.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  diagnostic('0.1', 'Manifesto do Sim Kit', `kit=${manifest.simKitVersion}; projeto=${manifest.projectVersion}; core sha256=${manifest.whiteboardCoreSha256.slice(0, 16)}…`);
+  assert('0.2', 'Build instrumentado não altera o source original', manifest.sourceMutated === false);
+  const { w } = makeEnv();
+  const apis = w.BlueOceanRuntime.list();
+  assert('0.3', 'Runtime registra whiteboardCore', apis.includes('whiteboardCore'), apis.join(', '));
+  assert('0.4', 'Runtime registra serviceBuilderAssistant', apis.includes('serviceBuilderAssistant'), apis.join(', '));
+  assert('0.5', 'Probe instrumentado está disponível', !!w.__wb && typeof w.__wb.renderAll === 'function');
+  assert('0.6', 'Operações canônicas de domínio foram incorporadas ao bundle', !!w.__simDomain?.createServiceGraph && !!w.__simDomain?.createBlankWorkspaceGraph);
+  const g = w.__simDomain.createBlankWorkspaceGraph();
+  assert('0.7', 'Workspace canônico nasce sem serviço do usuário', w.__simDomain.isWorkspaceEmpty(g) && Object.keys(g.views.whiteboards || {}).length === 0 && Object.keys(g.journeys || {}).length === 0);
+  diagnostic('0.8', 'Erros de runtime durante boot', w.__errors.length ? w.__errors.join(' | ') : 'nenhum');
+  save('r0'); process.exit(0);
+})().catch(e => { console.error('ERRO', e); process.exit(1); });

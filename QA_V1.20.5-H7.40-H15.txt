@@ -1,0 +1,24 @@
+BLUE OCEAN SERVICE STUDIO — V1.20.5-H7.40-H15
+Service Model Integration / Service Model Index
+
+EXECUTADO NESTA ENTREGA
+- H7.40-H15 Service Model Index smoke: 36/36 PASS
+- H7.40-H14 Interaction & Accessibility Polish: 35/35 PASS
+- syntax:check: PASS
+- lock:verify: PASS
+- source:authority: PASS
+- compilação TypeScript isolada de model.ts + service-model-index.ts em strict mode: PASS
+- bash -n em START.sh, start-linux.sh e preflight-linux.sh: PASS
+
+NÃO DECLARADO COMO EXECUTADO
+- npm run qa completo
+- preflight-linux.sh completo
+- browser suite H15 (H15 não altera UI nesta fase)
+
+NOTA DE AMBIENTE
+A tentativa de npm ci neste ambiente terminou com erro interno do npm ("Exit handler never called").
+Por isso não é atribuído um PASS ao typecheck/release:verify completos nesta execução.
+O launcher mantém npm ci/release:verify na primeira abertura quando a build ainda não existe.
+
+CONTRATO H15
+O Service Model Index é read-only: não migra, duplica nem altera as entidades persistidas da H14.

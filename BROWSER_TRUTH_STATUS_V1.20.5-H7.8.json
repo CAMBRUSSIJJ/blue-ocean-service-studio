@@ -1,0 +1,17 @@
+{
+  "release": "V1.20.5-H7.8",
+  "surface": "Context-to-Service Handoff",
+  "source_smoke": "PASS 37/37",
+  "regression_qa": "PASS 1630/1630",
+  "assistant_smoke": "PASS 51/51",
+  "workspace_h3_smoke": "PASS 68/68",
+  "linux_preflight": "PASS",
+  "lock_verify": "PASS",
+  "source_authority": "PASS",
+  "foundation_smoke": "PASS 12/12",
+  "syntax_check": "PASS",
+  "full_typecheck": "NOT_VALIDATED_DEPENDENCIES_NOT_INSTALLED",
+  "production_build": "NOT_VALIDATED_DEPENDENCIES_NOT_INSTALLED",
+  "browser_runtime": "PENDING_USER_LINUX_VALIDATION",
+  "note": "Final source package intentionally contains no node_modules/dist. Full typecheck/build require npm ci on the target environment."
+}

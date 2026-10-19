@@ -1,0 +1,54 @@
+{
+  "release": "V1.20.5-H7.40-H9",
+  "project_architecture_hardening": {
+    "status": "PASS",
+    "checks": "28/28",
+    "scope": [
+      "project_snapshot_isolation",
+      "rename_without_service_rename",
+      "favorite_persistence",
+      "archive_preserves_snapshot",
+      "restore_project",
+      "active_project_recovery",
+      "global_vs_project_scope",
+      "canonical_breadcrumb_cleanup",
+      "navigation_not_progress"
+    ]
+  },
+  "chromium_project_hardening": {
+    "status": "PASS",
+    "checks": "9/9",
+    "scope": [
+      "project_actions_visible",
+      "archived_restore_visible",
+      "complete_phase_state",
+      "partial_phase_state",
+      "selected_phase_independent",
+      "neutral_stepper_connectors",
+      "desktop_no_overflow",
+      "mobile_no_overflow",
+      "archived_mobile_layout"
+    ]
+  },
+  "full_react_typecheck": {
+    "status": "NOT_VALIDATED",
+    "reason": "full dependency installation was not completed in this validation environment"
+  },
+  "vite_production_build": {
+    "status": "NOT_VALIDATED",
+    "reason": "full dependency installation was not completed in this validation environment"
+  },
+  "policy": "NOT_VALIDATED is not promoted to PASS",
+  "candidate_zip_reextract": {
+    "status": "PASS",
+    "h9": "28/28",
+    "h8": "25/25",
+    "h7": "36/36",
+    "syntax": "PASS",
+    "preflight": "PASS",
+    "browser": "9/9",
+    "files": 1106,
+    "forbidden_directories": 0,
+    "launcher_permissions": "755/755/755"
+  }
+}

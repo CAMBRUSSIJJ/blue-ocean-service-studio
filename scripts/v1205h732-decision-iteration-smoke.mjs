@@ -1,0 +1,220 @@
+import fs from 'node:fs';
+import {
+  addDecisionChange, applyApprovedDecision, archiveDecision, buildDecisionLoopReport, createDecisionFromLearning,
+  DECISION_STATUS_LABELS, DECISION_TARGET_FIELDS, DECISION_TARGET_LABELS, DECISION_VALUE_OPTIONS, decideServiceChange, emptyDecisionSystem,
+  normalizeDecisionSystem, readDecisionTargetValue, removeDecisionChange, reopenDecision, submitDecision, updateDecisionRecord,
+} from '../src/services/decision-iteration-loop.ts';
+
+const checks=[]; const ok=(label,cond)=>{checks.push([label,Boolean(cond)]); console.log(`${cond?'OK  ':'FAIL'} ${label}`)};
+const read=(p)=>fs.readFileSync(p,'utf8');
+const model=read('src/domain/model.ts'); const schema=read('src/domain/schema.ts'); const service=read('src/services/decision-iteration-loop.ts');
+const workspace=read('src/views/BlueprintWorkspaceView.tsx'); const view=read('src/views/ServiceDecisionView.tsx'); const css=read('src/runtime/decision-iteration-h732.css');
+const style=read('src/style.css'); const main=read('src/main.tsx'); const pkg=JSON.parse(read('package.json')); const preflight=read('preflight-linux.sh');
+
+ok('modelo define ServiceDecisionStatus', model.includes("export type ServiceDecisionStatus = 'draft' | 'proposed' | 'approved' | 'rejected' | 'applied' | 'archived'"));
+ok('modelo define ServiceDecisionTargetKind', model.includes("export type ServiceDecisionTargetKind = 'proposition' | 'journey' | 'blueprint'"));
+ok('modelo define ServiceDecisionApplicationResult', model.includes("export type ServiceDecisionApplicationResult = 'applied' | 'conflict' | 'noop'"));
+ok('modelo define ServiceDecisionChange', model.includes('export type ServiceDecisionChange = {'));
+ok('change guarda targetKind', model.includes('targetKind: ServiceDecisionTargetKind;'));
+ok('change guarda targetId opcional', model.includes('targetId?: Id;'));
+ok('change guarda targetLabel', model.includes('targetLabel: string;'));
+ok('change guarda field', model.includes('field: string;'));
+ok('change guarda beforeValue', model.includes('beforeValue: string;'));
+ok('change guarda proposedValue', model.includes('proposedValue: string;'));
+ok('modelo define ServiceDecisionRecord', model.includes('export type ServiceDecisionRecord = {'));
+ok('decision referencia learning', model.includes('learningId: Id;'));
+ok('decision guarda recommendation snapshot', model.includes('recommendationSnapshot: LearningRecommendation;'));
+ok('decision guarda confidence snapshot', model.includes('confidenceSnapshot: LearningConfidence;'));
+ok('decision guarda learning summary snapshot', model.includes('learningSummarySnapshot: string;'));
+ok('decision guarda changes', model.includes('changes: ServiceDecisionChange[];'));
+ok('decision guarda approval metadata', model.includes('decidedAt?: string;') && model.includes('decidedBy?: string;') && model.includes('decisionNote?: string;'));
+ok('decision guarda application metadata', model.includes('appliedAt?: string;') && model.includes('applicationResult?: ServiceDecisionApplicationResult;'));
+ok('modelo define ServiceDecisionState', model.includes('export type ServiceDecisionState = {'));
+ok('Service expõe decisionSystem', model.includes('decisionSystem?: ServiceDecisionState;'));
+
+ok('schema define serviceDecisionChange', schema.includes('const serviceDecisionChange=z.object'));
+ok('schema valida três targets', schema.includes("targetKind:z.enum(['proposition','journey','blueprint'])"));
+ok('schema define serviceDecisionRecord', schema.includes('const serviceDecisionRecord=z.object'));
+ok('schema valida seis status', schema.includes("status:z.enum(['draft','proposed','approved','rejected','applied','archived'])"));
+ok('schema valida application result', schema.includes("applicationResult:z.enum(['applied','conflict','noop']).optional()"));
+ok('schema define serviceDecisionState', schema.includes('const serviceDecisionState=z.object'));
+ok('schema inclui decisionSystem no service', schema.includes('decisionSystem:serviceDecisionState.optional()'));
+
+ok('domínio oferece emptyDecisionSystem', service.includes('emptyDecisionSystem'));
+ok('domínio oferece normalizeDecisionSystem', service.includes('normalizeDecisionSystem'));
+ok('domínio expõe labels de status', Object.keys(DECISION_STATUS_LABELS).length===6);
+ok('domínio expõe labels de target', Object.keys(DECISION_TARGET_LABELS).length===3);
+ok('proposição possui campos permitidos', DECISION_TARGET_FIELDS.proposition.some((item)=>item.value==='promise'));
+ok('journey possui campos permitidos', DECISION_TARGET_FIELDS.journey.some((item)=>item.value==='objective'));
+ok('blueprint restringe edição ao nome nesta fase', DECISION_TARGET_FIELDS.blueprint.length===1 && DECISION_TARGET_FIELDS.blueprint[0].value==='name');
+ok('status proposition possui opções válidas', DECISION_VALUE_OPTIONS['proposition:status'].length===3);
+ok('status journey possui opções válidas', DECISION_VALUE_OPTIONS['journey:status'].length===3);
+ok('prioridade journey possui opções válidas', DECISION_VALUE_OPTIONS['journey:priority'].length===4);
+ok('domínio lê valor atual do alvo', service.includes('readDecisionTargetValue'));
+ok('domínio cria decisão a partir de learning', service.includes('createDecisionFromLearning'));
+ok('criação exige learning revisado', service.includes("learning.status !== 'reviewed'"));
+ok('criação é idempotente por learning ativo', service.includes("record.learningId === learningId && record.status !== 'archived'"));
+ok('domínio atualiza decisão em draft', service.includes('updateDecisionRecord'));
+ok('domínio adiciona mudança', service.includes('addDecisionChange'));
+ok('mudança captura beforeValue', service.includes('const beforeValue = readDecisionTargetValue'));
+ok('mudança rejeita valor igual ao atual', service.includes('O valor proposto precisa ser diferente'));
+ok('domínio remove mudança', service.includes('removeDecisionChange'));
+ok('domínio envia para aprovação', service.includes('submitDecision'));
+ok('submit exige ao menos uma mudança', service.includes('Adicione ao menos uma mudança'));
+ok('domínio aprova/rejeita', service.includes('decideServiceChange'));
+ok('aprovação só parte de proposed', service.includes("record.status !== 'proposed'"));
+ok('domínio reabre decisão', service.includes('reopenDecision'));
+ok('domínio aplica decisão aprovada', service.includes('applyApprovedDecision'));
+ok('apply exige status approved', service.includes("record.status !== 'approved'"));
+ok('apply compara estado atual com snapshot', service.includes("readDecisionTargetValue(graph, change.targetKind, change.field, change.targetId) !== change.beforeValue"));
+ok('apply registra conflito sem sobrescrever', service.includes("applicationResult: 'conflict'"));
+ok('apply atualiza proposition', service.includes("change.targetKind === 'proposition'"));
+ok('apply atualiza journey', service.includes("change.targetKind === 'journey'"));
+ok('apply atualiza blueprint', service.includes('graph.views.whiteboards'));
+ok('domínio arquiva decisão', service.includes('archiveDecision'));
+ok('decisão aplicada não pode ser arquivada', service.includes("record.status === 'applied'"));
+ok('domínio constrói report', service.includes('buildDecisionLoopReport'));
+ok('report só elegibiliza learning reviewed', service.includes("record.status === 'reviewed'"));
+ok('report libera learning se decisão anterior foi arquivada', service.includes("record.status !== 'archived'"));
+
+ok('Workspace importa ServiceDecisionView', workspace.includes("import { ServiceDecisionView } from './ServiceDecisionView'"));
+ok('Workspace importa buildDecisionLoopReport', workspace.includes("buildDecisionLoopReport"));
+ok('Workspace possui tab decisions', workspace.includes("'learning' | 'decisions' | 'blueprint'"));
+ok('Workspace inclui Decisões na navegação', workspace.includes("['decisions', 'Decisões', 'opportunity']"));
+ok('Workspace monta ServiceDecisionView', workspace.includes("workspaceTab === 'decisions' && <ServiceDecisionView"));
+ok('Workspace calcula decisionReport', workspace.includes('buildDecisionLoopReport(graph)'));
+ok('Workspace readiness inclui decisionReady', workspace.includes('decisionReady'));
+ok('Workspace expõe 10 perspectivas', workspace.includes('workspaceReadiness}/10'));
+ok('Workspace mantém contrato H7.31 de 9 perspectivas', workspace.includes('H7.31 legacy contract: Um serviço, nove perspectivas conectadas'));
+ok('Overview explica decisão rastreável', workspace.includes('Decisões transformam aprendizado em mudança aprovada e rastreável'));
+ok('Overview possui card DECIDIR', workspace.includes('<small>DECIDIR</small><strong>Decisões</strong>'));
+ok('Overview possui classe H7.32', workspace.includes('bo-h732-overview-flow'));
+ok('Workspace raiz marca H7.32', workspace.includes('data-decision-iteration-loop="7.32"'));
+
+ok('view H7.32 possui marker', view.includes('data-decision-iteration-loop="7.32"'));
+ok('view explica aprendizado vira decisão', view.includes('Aprendizado vira decisão. Decisão vira mudança controlada.'));
+ok('view mostra aprendizados prontos', view.includes('APRENDIZADOS PRONTOS PARA DECISÃO'));
+ok('view exige reviewed via report', view.includes('report.eligibleLearnings'));
+ok('view possui ação Abrir decisão', view.includes('Abrir decisão'));
+ok('view mostra pacote de mudanças', view.includes('PACOTE DE MUDANÇAS'));
+ok('view usa opções controladas para enums', view.includes('DECISION_VALUE_OPTIONS'));
+ok('view mostra antes depois', view.includes('<del>{change.beforeValue'));
+ok('view possui envio para aprovação', view.includes('Enviar para aprovação'));
+ok('view possui aprovação humana', view.includes('APROVAÇÃO HUMANA'));
+ok('view possui Aprovar', view.includes('Aprovar'));
+ok('view possui Rejeitar', view.includes('Rejeitar'));
+ok('view explicita que aprovação não aplica', view.includes('A aprovação não aplica a mudança automaticamente.'));
+ok('view possui aplicação explícita', view.includes('Aplicar mudança aprovada'));
+ok('view mostra conflito', view.includes('Aplicação bloqueada por conflito'));
+ok('view permite reabrir', view.includes('Reabrir'));
+ok('view permite arquivar', view.includes('arquivar decisão'));
+ok('view possui guardrail', view.includes('Controle de mudança'));
+ok('view explicita sem aplicação silenciosa', view.includes('Nenhuma decisão é aplicada ao criar, editar ou aprovar'));
+
+ok('CSS H7.32 existe', fs.existsSync('src/runtime/decision-iteration-h732.css'));
+ok('CSS H7.32 importado depois H7.31', style.indexOf('evidence-learning-h731.css') < style.indexOf('decision-iteration-h732.css'));
+ok('CSS possui hero', css.includes('.bo-h732-hero'));
+ok('CSS possui KPIs', css.includes('.bo-h732-kpis'));
+ok('CSS possui ready grid', css.includes('.bo-h732-ready-grid'));
+ok('CSS possui workspace', css.includes('.bo-h732-workspace'));
+ok('CSS possui lista', css.includes('.bo-h732-list'));
+ok('CSS possui editor', css.includes('.bo-h732-editor'));
+ok('CSS possui change builder', css.includes('.bo-h732-change-builder'));
+ok('CSS possui change list', css.includes('.bo-h732-change-list'));
+ok('CSS possui approval', css.includes('.bo-h732-approval'));
+ok('CSS possui conflict', css.includes('.bo-h732-conflict'));
+ok('CSS possui applied', css.includes('.bo-h732-applied'));
+ok('CSS possui guard', css.includes('.bo-h732-guard'));
+ok('CSS é responsivo 980', css.includes('@media(max-width:980px)'));
+ok('CSS é responsivo 680', css.includes('@media(max-width:680px)'));
+ok('body recebe marker H7.32', main.includes("'bo-h732'"));
+ok('package descreve H7.32', String(pkg.description).includes('H7.32 Decision & Iteration Loop'));
+ok('script H7.32 registrado', Boolean(pkg.scripts['v1205h732:decision-iteration-smoke']));
+ok('QA acumulado inclui H7.32', pkg.scripts.qa?.includes('v1205h732:decision-iteration-smoke'));
+ok('preflight conhece service H7.32', preflight.includes('decision-iteration-loop.ts'));
+ok('preflight conhece view H7.32', preflight.includes('ServiceDecisionView.tsx'));
+ok('preflight conhece CSS H7.32', preflight.includes('decision-iteration-h732.css'));
+ok('preflight executa smoke H7.32', preflight.includes('v1205h732-decision-iteration-smoke.mjs'));
+
+const now='2026-10-13T23:00:00.000Z';
+const graph={schemaVersion:3,service:{id:'svc',name:'Lavanderia',description:'',journeyIds:['j1'],createdAt:now,updatedAt:now,proposition:{version:1,current:{version:1,status:'ready',audience:'Famílias',problem:'Pouco tempo',promise:'Coleta simples',outcome:'Roupas prontas no prazo',experience:'Sem repetir informações',differentiator:'Acompanhamento',businessValue:'Recorrência',capabilities:['Logística'],principles:['Clareza'],linkedInsightIds:[],linkedNeedIds:[],linkedProblemIds:[],linkedEvidenceIds:[],createdAt:now,updatedAt:now},updatedAt:now},learningSystem:{version:1,activeLearningId:'l1',updatedAt:now,records:{l1:{id:'l1',serviceId:'svc',experimentId:'e1',experimentCompletedAt:now,hypothesisSnapshot:'Cliente aceita coleta sem contato manual',experimentOutcome:'passed',verdict:'validated',confidence:'high',recommendation:'keep',status:'reviewed',summary:'A coleta autônoma funcionou para a amostra.',rationale:'Reduz atrito sem perder contexto.',evidenceIds:['ev1'],createdAt:now,updatedAt:now,reviewedAt:now},l2:{id:'l2',serviceId:'svc',experimentId:'e2',experimentCompletedAt:now,hypothesisSnapshot:'Hipótese ainda não revisada',experimentOutcome:'inconclusive',verdict:'inconclusive',confidence:'low',recommendation:'retest',status:'draft',summary:'Ainda não sabemos.',evidenceIds:[],createdAt:now,updatedAt:now}}}},journeys:{j1:{id:'j1',serviceId:'svc',name:'Coleta e entrega',stageIds:[],owner:'Operações',status:'active',priority:'medium',objective:'Coletar no prazo',createdAt:now,updatedAt:now}},stages:{},touchpoints:{},channels:{},channelHandoffs:{},problems:{},opportunities:{},tasks:{},blueprintDraft:{evidencias:'',frontstage:'',backstage:'',suporte:''},research:{sources:{},projects:{},observations:{},collections:{}},entities:{evidence:{ev1:{id:'ev1',type:'evidence',title:'Teste'}}},views:{whiteboards:{b1:{id:'b1',serviceId:'svc',name:'Blueprint Coleta',journeyId:'j1',viewKind:'blueprint',items:{},edges:{},layoutMode:'service',updatedAt:now}}}};
+const original=JSON.stringify({journeys:graph.journeys,proposition:graph.service.proposition,views:graph.views,entities:graph.entities});
+const empty=emptyDecisionSystem(now); ok('empty system versão 1', empty.version===1); ok('empty system sem records', Object.keys(empty.records).length===0);
+const normalized=normalizeDecisionSystem(graph,now); ok('normalize cria system vazio sem mutar graph', Object.keys(normalized.records).length===0 && !graph.service.decisionSystem);
+ok('read proposition promise', readDecisionTargetValue(graph,'proposition','promise')==='Coleta simples');
+ok('read journey objective', readDecisionTargetValue(graph,'journey','objective','j1')==='Coletar no prazo');
+ok('read blueprint name', readDecisionTargetValue(graph,'blueprint','name','b1')==='Blueprint Coleta');
+ok('read rejeita campo fora whitelist', readDecisionTargetValue(graph,'journey','serviceId','j1')===null);
+ok('read rejeita target ausente', readDecisionTargetValue(graph,'journey','name','missing')===null);
+
+const draftLearning=createDecisionFromLearning(graph,'l2',now); ok('learning não revisado não cria decisão', !draftLearning.created && draftLearning.decisionId===null);
+const created=createDecisionFromLearning(graph,'l1',now); ok('learning revisado cria decisão', created.created && Boolean(created.decisionId));
+const did=created.decisionId; let g=created.graph; ok('decision system persistido', Boolean(g.service.decisionSystem));
+ok('decisão nasce draft', g.service.decisionSystem.records[did].status==='draft');
+ok('decisão snapshot recommendation', g.service.decisionSystem.records[did].recommendationSnapshot==='keep');
+ok('decisão snapshot confidence', g.service.decisionSystem.records[did].confidenceSnapshot==='high');
+ok('decisão snapshot summary', g.service.decisionSystem.records[did].learningSummarySnapshot.includes('coleta autônoma'));
+ok('criar decisão não muta artefatos', JSON.stringify({journeys:g.journeys,proposition:g.service.proposition,views:g.views,entities:g.entities})===original);
+const duplicate=createDecisionFromLearning(g,'l1',now); ok('segunda criação reabre decisão existente', !duplicate.created && duplicate.decisionId===did);
+
+g=updateDecisionRecord(g,did,{title:'Padronizar coleta autônoma',rationale:'Resultado validado em protótipo.'},now); ok('update altera título em draft', g.service.decisionSystem.records[did].title==='Padronizar coleta autônoma');
+let result=addDecisionChange(g,did,{targetKind:'proposition',field:'promise',proposedValue:'Coleta autônoma com acompanhamento'},now); ok('adiciona mudança proposition', Boolean(result.changeId)); g=result.graph;
+result=addDecisionChange(g,did,{targetKind:'journey',targetId:'j1',field:'objective',proposedValue:'Permitir coleta autônoma no prazo'},now); ok('adiciona mudança journey', Boolean(result.changeId)); g=result.graph;
+const journeyChangeId=result.changeId;
+result=addDecisionChange(g,did,{targetKind:'blueprint',targetId:'b1',field:'name',proposedValue:'Blueprint Coleta Autônoma'},now); ok('adiciona mudança blueprint', Boolean(result.changeId)); g=result.graph;
+ok('três mudanças no pacote', g.service.decisionSystem.records[did].changes.length===3);
+ok('snapshot proposition antes correto', g.service.decisionSystem.records[did].changes.find(c=>c.targetKind==='proposition').beforeValue==='Coleta simples');
+ok('snapshot journey antes correto', g.service.decisionSystem.records[did].changes.find(c=>c.targetKind==='journey').beforeValue==='Coletar no prazo');
+ok('snapshot blueprint antes correto', g.service.decisionSystem.records[did].changes.find(c=>c.targetKind==='blueprint').beforeValue==='Blueprint Coleta');
+const same=addDecisionChange(g,did,{targetKind:'journey',targetId:'j1',field:'objective',proposedValue:'Coletar no prazo'},now); ok('não aceita proposta igual ao atual', same.changeId===null);
+const invalid=addDecisionChange(g,did,{targetKind:'journey',targetId:'j1',field:'serviceId',proposedValue:'x'},now); ok('não aceita campo fora whitelist', invalid.changeId===null);
+const invalidStatus=addDecisionChange(g,did,{targetKind:'journey',targetId:'j1',field:'status',proposedValue:'qualquer'},now); ok('não aceita status inválido', invalidStatus.changeId===null);
+const emptyName=addDecisionChange(g,did,{targetKind:'blueprint',targetId:'b1',field:'name',proposedValue:'   '},now); ok('não aceita nome vazio', emptyName.changeId===null);
+const removed=removeDecisionChange(g,did,journeyChangeId,now); ok('remove mudança em draft', removed.service.decisionSystem.records[did].changes.length===2);
+result=addDecisionChange(removed,did,{targetKind:'journey',targetId:'j1',field:'objective',proposedValue:'Permitir coleta autônoma no prazo'},now); g=result.graph; ok('reinsere mudança journey', g.service.decisionSystem.records[did].changes.length===3);
+ok('montar pacote ainda não muta sources', JSON.stringify({journeys:g.journeys,proposition:g.service.proposition,views:g.views,entities:g.entities})===original);
+
+const submitted=submitDecision(g,did,now); ok('submit funciona com mudanças', submitted.submitted); g=submitted.graph; ok('status vira proposed', g.service.decisionSystem.records[did].status==='proposed');
+ok('submit registra submittedAt', g.service.decisionSystem.records[did].submittedAt===now);
+const frozen=addDecisionChange(g,did,{targetKind:'journey',targetId:'j1',field:'owner',proposedValue:'CX'},now); ok('não edita pacote após submit', frozen.changeId===null);
+ok('submit não muta sources', JSON.stringify({journeys:g.journeys,proposition:g.service.proposition,views:g.views,entities:g.entities})===original);
+
+const rejected=decideServiceChange(g,did,'rejected',{decidedBy:'Service Owner',decisionNote:'Testar mais uma rodada'},now); ok('rejeição registrada', rejected.decided && rejected.graph.service.decisionSystem.records[did].status==='rejected');
+ok('rejeição registra responsável', rejected.graph.service.decisionSystem.records[did].decidedBy==='Service Owner');
+ok('rejeição não muta sources', JSON.stringify({journeys:rejected.graph.journeys,proposition:rejected.graph.service.proposition,views:rejected.graph.views,entities:rejected.graph.entities})===original);
+const reopened=reopenDecision(rejected.graph,did,now); ok('reabre decisão rejeitada', reopened.service.decisionSystem.records[did].status==='draft');
+ok('reabrir limpa metadados de aprovação', !reopened.service.decisionSystem.records[did].decidedAt);
+const resub=submitDecision(reopened,did,now); const approved=decideServiceChange(resub.graph,did,'approved',{decidedBy:'Service Owner',decisionNote:'Aprovado para implantação'},now);
+ok('aprovação registrada', approved.decided && approved.graph.service.decisionSystem.records[did].status==='approved');
+ok('aprovação não aplica', JSON.stringify({journeys:approved.graph.journeys,proposition:approved.graph.service.proposition,views:approved.graph.views,entities:approved.graph.entities})===original);
+
+const conflictBase=structuredClone(approved.graph); conflictBase.journeys.j1.objective='Mudança feita por outra pessoa';
+const conflict=applyApprovedDecision(conflictBase,did,now); ok('conflito bloqueia aplicação', !conflict.applied && conflict.conflict);
+ok('conflito preserva edição mais nova', conflict.graph.journeys.j1.objective==='Mudança feita por outra pessoa');
+ok('conflito não aplica proposition', conflict.graph.service.proposition.current.promise==='Coleta simples');
+ok('conflito não aplica blueprint', conflict.graph.views.whiteboards.b1.name==='Blueprint Coleta');
+ok('conflito registrado na decisão', conflict.graph.service.decisionSystem.records[did].applicationResult==='conflict');
+ok('conflito mantém status approved', conflict.graph.service.decisionSystem.records[did].status==='approved');
+const conflictReopen=reopenDecision(conflict.graph,did,now); ok('conflito aprovado pode voltar a draft', conflictReopen.service.decisionSystem.records[did].status==='draft');
+
+const applied=applyApprovedDecision(approved.graph,did,now); ok('aplicação aprovada funciona', applied.applied && !applied.conflict);
+ok('aplica proposition promise', applied.graph.service.proposition.current.promise==='Coleta autônoma com acompanhamento');
+ok('aplica journey objective', applied.graph.journeys.j1.objective==='Permitir coleta autônoma no prazo');
+ok('aplica blueprint name', applied.graph.views.whiteboards.b1.name==='Blueprint Coleta Autônoma');
+ok('status vira applied', applied.graph.service.decisionSystem.records[did].status==='applied');
+ok('applicationResult vira applied', applied.graph.service.decisionSystem.records[did].applicationResult==='applied');
+ok('appliedAt registrado', applied.graph.service.decisionSystem.records[did].appliedAt===now);
+ok('changes recebem appliedAt', applied.graph.service.decisionSystem.records[did].changes.every(c=>c.appliedAt===now));
+ok('learning permanece intacto', JSON.stringify(applied.graph.service.learningSystem)===JSON.stringify(graph.service.learningSystem));
+ok('evidence permanece intacta', JSON.stringify(applied.graph.entities)===JSON.stringify(graph.entities));
+ok('service updatedAt avança', applied.graph.service.updatedAt===now);
+const archivedApplied=archiveDecision(applied.graph,did,now); ok('decisão aplicada não é arquivada', archivedApplied.service.decisionSystem.records[did].status==='applied');
+const secondApply=applyApprovedDecision(applied.graph,did,now); ok('não reaplica decisão já applied', !secondApply.applied && !secondApply.conflict);
+
+const fresh=createDecisionFromLearning(graph,'l1',now); const archived=archiveDecision(fresh.graph,fresh.decisionId,now); ok('draft pode ser arquivado', archived.service.decisionSystem.records[fresh.decisionId].status==='archived');
+const archivedReport=buildDecisionLoopReport(archived); ok('arquivado sai da lista ativa', archivedReport.counts.decisions===0);
+ok('learning volta a ficar elegível após arquivamento', archivedReport.counts.eligible===1);
+const report=buildDecisionLoopReport(applied.graph); ok('report conta uma decisão', report.counts.decisions===1); ok('report conta uma aplicada', report.counts.applied===1); ok('report sem learning elegível coberto', report.counts.eligible===0);
+ok('activeDecisionId preservado', report.activeDecisionId===did);
+
+const failed=checks.filter(([,v])=>!v); console.log(`\nH7.32 Decision & Iteration Loop: ${checks.length-failed.length}/${checks.length} PASS`); if(failed.length){console.error(failed.map(([l])=>`- ${l}`).join('\n')); process.exit(1)}

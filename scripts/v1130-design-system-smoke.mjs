@@ -1,0 +1,25 @@
+import { readFileSync, existsSync } from 'node:fs';
+const checks=[];
+function check(label,ok){checks.push([label,!!ok]);console.log(`${ok?'OK  ':'FAIL'} ${label}`);if(!ok)process.exitCode=1}
+const pkg=JSON.parse(readFileSync('package.json','utf8'));
+const index=readFileSync('index.html','utf8');
+const prep=readFileSync('scripts/prepare-assets.mjs','utf8');
+const tokens=readFileSync('src/design-system/tokens.css','utf8');
+const components=readFileSync('src/design-system/components.css','utf8');
+const compat=readFileSync('src/design-system/legacy-compat.css','utf8');
+const ui=readFileSync('src/components/ui/index.tsx','utf8');
+const app=readFileSync('src/App.tsx','utf8');
+const versionParts=String(pkg.version||'0.0.0').split('.').map(Number);
+const atLeast113=versionParts[0]>1||(versionParts[0]===1&&versionParts[1]>=13);
+check('baseline V1.13 preservada em versão >= 1.13.0',atLeast113);
+check('tokens semânticos',tokens.includes('--bo-color-primary-900')&&tokens.includes('--bo-color-surface')&&tokens.includes('--bo-focus-ring'));
+check('componentes permanentes',components.includes('.bo-button')&&components.includes('.bo-input')&&components.includes('.bo-dialog')&&components.includes('.bo-table'));
+check('biblioteca React',ui.includes('export const Button')&&ui.includes('export const Input')&&ui.includes('export function StatusBadge'));
+check('bridge legado isolado',compat.includes('Legacy compatibility bridge')&&compat.includes('.rt196-benefits-home'));
+check('asset único gerado',prep.includes('v1130-design-system.css'));
+check('design system carregado por último',index.indexOf('v1130-design-system.css')>index.indexOf('v1120-stability.css'));
+check('badge da aplicação usa versão gerada',app.includes("from './generated/app-version'")&&app.includes('V${APP_VERSION}'));
+check('sem nova dependência visual',!pkg.dependencies?.['@mui/material']&&!pkg.dependencies?.['antd']);
+check('tokens fonte existem',existsSync('src/design-system/tokens.ts'));
+console.log(`V1.13+ design-system smoke: ${checks.filter(([,ok])=>ok).length}/${checks.length}`);
+if(process.exitCode)process.exit(process.exitCode);

@@ -1,0 +1,27 @@
+{
+  "version": "V1.20.5-H7.40-H3",
+  "browser": "Chromium 144.0.7559.96",
+  "status": "PARTIAL_PASS",
+  "source_browser_gates": {
+    "h740_hardening": {
+      "status": "PASS",
+      "checks": "13/13"
+    },
+    "h740h3_coherence": {
+      "status": "PASS",
+      "checks": "10/10",
+      "viewports": [
+        1920,
+        1000,
+        600
+      ],
+      "global_horizontal_overflow": false
+    }
+  },
+  "full_app_browser": {
+    "status": "NOT_VALIDATED",
+    "reason": "npm ci did not complete in this execution environment, so a production/full-app bundle was not produced here."
+  },
+  "react_typecheck": "NOT_VALIDATED",
+  "vite_build": "NOT_VALIDATED"
+}

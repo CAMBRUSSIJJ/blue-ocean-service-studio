@@ -1,0 +1,18 @@
+{
+  "release": "V1.20.5-H7.40-H14",
+  "browser_h14": "pass",
+  "browser_h14_checks": "8/8",
+  "engine": "Chromium real via Playwright",
+  "validated": [
+    "Design do serviço distinguido do Serviço global",
+    "status Salvo neste dispositivo visível",
+    "capability row legível",
+    "target da sidebar >= 40px em desktop",
+    "target contextual >= 40px em desktop",
+    "desktop sem overflow global",
+    "tablet sem overflow global",
+    "mobile sem overflow global"
+  ],
+  "full_app_server_browser": "not_claimed",
+  "source_preflight": "pass"
+}

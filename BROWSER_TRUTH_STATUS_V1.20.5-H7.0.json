@@ -1,0 +1,16 @@
+{
+  "release": "V1.20.5-H7.0",
+  "surface": "Dashboard",
+  "status": "pending-user-runtime",
+  "static_and_smoke_qa": "pass",
+  "required_flow": [
+    "Dashboard",
+    "Nova persona -> modal de criação em Personas",
+    "Dashboard",
+    "Nova métrica -> modal de criação em Métricas",
+    "Dashboard",
+    "Journey maps",
+    "Dashboard"
+  ],
+  "acceptance": "Uma única superfície principal por vez, sem Home legada ou conteúdo sobreposto."
+}

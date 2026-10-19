@@ -1,0 +1,27 @@
+V1.20.5-H7.40-H15.2 — Usage & Relations
+
+Arquivos adicionados/alterados sobre H15-F3:
+- CHANGELOG.md
+- QA_V1.20.5-H7.40-H15.2.txt
+- RELEASE_NOTES_V1.20.5-H7.40-H15.2.md
+- SOURCE_FINGERPRINT_V1.20.5-H7.40-H15.2.txt
+- package.json
+- preflight-linux.sh
+- scripts/v1205h740h152-usage-relations-smoke.mjs
+- src/App.tsx
+- src/components/ServiceUsageRelations.tsx
+- src/runtime/usage-relations-h740h152.css
+- src/services/service-object-navigation.ts
+- src/style.css
+- src/views/BlueprintWorkspaceView.tsx
+- src/views/ChannelContinuityView.tsx
+- src/views/EvidenceView.tsx
+- src/views/HypothesesView.tsx
+- src/views/ImprovementPortfolioView.tsx
+- src/views/JobsView.tsx
+- src/views/NeedsView.tsx
+- src/views/PainsView.tsx
+- src/views/PersonasView.tsx
+- src/views/ProblemsView.tsx
+- src/views/ServiceEcologyView.tsx
+- src/views/ServiceOutcomesView.tsx

@@ -1,0 +1,54 @@
+BLUE OCEAN SERVICE STUDIO V1.20.5-H7.40-H14
+Interaction & Accessibility Polish
+
+RESULTADO PRINCIPAL
+H7.40-H14 smoke: 35/35 PASS
+H7.40-H14 browser: 8/8 PASS (Chromium real)
+
+GATES
+syntax:check: PASS
+lock:verify: PASS
+source:authority: PASS
+foundation:smoke: 12/12 PASS
+project-foundation:smoke: 46/46 PASS
+preflight-linux.sh: PASS
+
+REGRESSÕES CONFIRMADAS
+H7.40-H13: 25/25 PASS
+H7.40-H12: 31/31 PASS (preflight)
+H7.40-H11: 20/20 PASS
+H7.40-H10: 28/28 PASS
+H7.40-H7 Guided Service Workspace: 36/36 PASS
+H7.40 Professional Product Hardening: 115/115 PASS
+
+CONTRATO H14
+- Serviço global e Design do serviço não usam mais o mesmo rótulo no mesmo contexto.
+- Sidebar global persistente é preservada.
+- Desenho do serviço / Contexto / Gestão podem ser recolhidos e a preferência persiste.
+- Header do app entra em modo compacto nas ferramentas do Design do serviço.
+- Feedback de persistência: Salvando… / Salvo neste dispositivo / Não foi possível salvar.
+- aria-current, foco visível e hit targets foram reforçados.
+- Capability rows receberam tipografia e espaçamento maiores.
+- Caminho guiado passa a comunicar iteração: Evolua o serviço, fase por fase.
+
+BROWSER
+Chromium real: 8/8 PASS
+- Design do serviço visível
+- status de salvamento explícito
+- capability row legível
+- sidebar/context nav com targets ampliados
+- desktop/tablet/mobile sem overflow
+
+FULL QA / TYPECHECK / BUILD
+O encadeamento completo `npm run qa` não foi concluído nesta execução devido ao overhead/timeout do npm. Os gates H14, preflight e regressões críticas foram executados diretamente e passaram. React typecheck completo e Vite build não são declarados como PASS nesta execução porque o pacote final permanece source-clean e não contém node_modules.
+
+VALIDAÇÃO DO PACOTE FINAL
+- arquivos por pacote: 1140
+- START.sh / start-linux.sh / preflight-linux.sh: 755 / 755 / 755
+- diretórios proibidos: ausentes
+- Linux / Source / Vercel: conteúdo canônico idêntico
+- H14 no ZIP reextraído: PASS
+- H13 no ZIP reextraído: PASS
+- syntax:check no ZIP reextraído: PASS
+- preflight no ZIP reextraído: PASS
+- Chromium H14 no ZIP reextraído: 8/8 PASS

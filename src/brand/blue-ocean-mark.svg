@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Blue Ocean</title>
+  <desc id="desc">Onda abstrata em azul e turquesa</desc>
+  <defs>
+    <linearGradient id="wave" x1="14" y1="65" x2="115" y2="65" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1748B8"/>
+      <stop offset="0.46" stop-color="#1E63F0"/>
+      <stop offset="0.74" stop-color="#00A3FF"/>
+      <stop offset="1" stop-color="#00D4C4"/>
+    </linearGradient>
+    <linearGradient id="depth" x1="26" y1="76" x2="99" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1F3B" stop-opacity=".96"/>
+      <stop offset=".62" stop-color="#0B3E85" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#00A3FF" stop-opacity=".24"/>
+    </linearGradient>
+  </defs>
+  <path d="M11 78c17 1 27-8 39-21 10-11 20-17 31-14 10 3 15 15 25 19 6 3 12 2 18-1-7 11-16 18-26 18-13 0-20-12-31-14-11-2-19 4-28 9-8 5-17 7-28 4Z" fill="url(#depth)"/>
+  <path d="M9 73c18 0 28-11 40-24 10-11 21-18 33-14 11 3 17 16 27 21 7 3 13 1 19-3-6 13-16 22-27 22-14 0-22-13-33-16-11-3-20 3-29 8-9 5-18 8-30 6Z" fill="url(#wave)"/>
+</svg>

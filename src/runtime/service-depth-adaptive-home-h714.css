@@ -1,0 +1,44 @@
+/* H7.14 — Service Depth & Adaptive Home
+   The ocean metaphor reflects actual maturity. It does not imply a false linear workflow. */
+
+.bo1207-dashboard[data-adaptive-home="7.14"]{--bo-h714-current:#2563eb;--bo-h714-deep:#123b61;--bo-h714-border:#dce6f1;--bo-h714-soft:#f3f8fd}
+
+/* Non-linear current: Context -> Journey -> Blueprint, with Whiteboard branching from Journey. */
+.bo1214-current{padding-bottom:10px}.bo1214-current-map{position:relative;z-index:2;margin-top:12px;display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:center}
+.bo1214-main-current{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:5px 0}
+.bo1214-main-current .bo1213-current-wave{left:5%;right:5%;top:19px}
+.bo1214-main-current>button,.bo1214-whiteboard-branch>button{position:relative;z-index:2;appearance:none;border:0;background:transparent;padding:0;display:grid;grid-template-columns:29px minmax(0,1fr) auto;align-items:center;gap:7px;text-align:left;cursor:pointer;color:#6e7c8d}
+.bo1214-main-current>button strong,.bo1214-whiteboard-branch>button strong{display:block;font-size:9px;color:#536276}.bo1214-main-current>button small,.bo1214-whiteboard-branch>button small{display:block;margin-top:2px;font-size:8px;color:#98a3b0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bo1214-main-current>button>em,.bo1214-whiteboard-branch>button>em{font-size:8px;font-style:normal;font-weight:800;color:#92a0b0}
+.bo1214-main-current>button.is-complete .bo1213-current-dot,.bo1214-whiteboard-branch>button.is-complete .bo1213-current-dot{background:var(--bo-h714-current);border-color:var(--bo-h714-current);color:#fff}
+.bo1214-main-current>button.is-complete strong,.bo1214-whiteboard-branch>button.is-complete strong{color:#173c66}
+.bo1214-main-current>button.is-current .bo1213-current-dot{border-color:#5b93f5;color:#2563eb;box-shadow:0 0 0 5px #edf4ff,0 0 0 6px rgba(37,99,235,.14)}
+.bo1214-whiteboard-branch{position:relative;padding-left:32px}.bo1214-whiteboard-branch>i{position:absolute;left:0;top:50%;width:25px;height:28px;border-left:1.5px solid rgba(37,99,235,.22);border-bottom:1.5px solid rgba(37,99,235,.22);border-radius:0 0 0 12px;transform:translateY(-28px)}
+.bo1214-whiteboard-branch>button{width:100%;border:1px dashed #d4e0ee;background:rgba(255,255,255,.66);border-radius:10px;padding:8px 10px}
+.bo1214-whiteboard-branch>button.is-exploration{border-color:#9fc0f8;background:#f7faff}.bo1214-whiteboard-branch>button.is-exploration .bo1213-current-dot{border-color:#6f9df8;color:#2563eb;background:#fff}
+.bo1214-whiteboard-branch>button.is-complete{border-style:solid;border-color:#b7cff6;background:#f7fbff}
+.bo1214-depth-breakdown{position:relative;z-index:2;margin-top:11px;padding-top:9px;border-top:1px solid #edf2f7;display:flex;gap:8px;flex-wrap:wrap}.bo1214-depth-breakdown>span{display:flex;align-items:center;gap:5px;border-radius:999px;background:#f7faff;padding:3px 7px;font-size:7.5px;color:#708196}.bo1214-depth-breakdown b{font-weight:720;color:#50637a}.bo1214-depth-breakdown i{font-style:normal;color:#8ea0b4}.bo1214-depth-breakdown [data-depth-component="problem"]{background:#fff7f7}.bo1214-depth-breakdown [data-depth-component="evidence"]{background:#f4f9ff}
+
+/* Recents adapts to content volume instead of reserving an empty ocean of space. */
+.bo1207-dashboard[data-adaptive-home="7.14"] .bo1214-recents{min-height:0!important;height:auto!important;padding-bottom:14px!important}
+.bo1207-dashboard[data-adaptive-home="7.14"] .bo1214-recents::after{width:132px;height:132px;right:-52px;top:-52px;border-width:20px;opacity:.7}
+.bo1207-dashboard[data-adaptive-home="7.14"] .bo1214-recents .bo1207-recent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,190px));justify-content:start;overflow:visible;gap:10px}
+.bo1207-dashboard[data-adaptive-home="7.14"] .bo1214-recents .bo1207-recent-card{min-width:0;min-height:203px;width:auto;flex:none}
+.bo1214-work-state{display:inline-flex!important;align-items:center;width:max-content;margin-top:6px!important;padding:2px 6px;border-radius:999px;background:#f2f5f8;color:#718095!important;font-size:7px!important;font-weight:750;text-transform:none!important;letter-spacing:0!important}.bo1207-recent-card[data-work-state="structured"] .bo1214-work-state{background:#ecf8f3;color:#28745c!important}.bo1207-recent-card[data-work-state="started"] .bo1214-work-state{background:#eef4ff;color:#3568b8!important}.bo1207-recent-card[data-work-state="empty"] .bo1214-work-state{background:#f7f7f8;color:#8993a2!important}
+
+/* Empty Favorites is intentionally compact; it expands only when there is content. */
+.bo1214-favorites.is-empty{display:grid;grid-template-columns:auto minmax(260px,420px);grid-template-rows:auto;align-items:center;column-gap:16px;margin-bottom:15px!important;padding:2px!important}.bo1214-favorites.is-empty>header{min-height:0!important}.bo1214-favorites.is-empty>header>small{display:none}.bo1214-favorites.is-empty .bo1207-favorite-empty{margin:0!important;min-height:0!important;width:auto!important;padding:7px 10px!important;background:#fff;border:1px dashed #d9e2ed;border-radius:8px}.bo1214-favorites.has-favorites{margin-bottom:19px!important}
+
+/* Continue is based on meaningful work, not mere entity existence. */
+.bo1207-dashboard[data-adaptive-home="7.14"] .bo1207-continuity-card.is-continue{border-color:#d7e3f2}.bo1207-dashboard[data-adaptive-home="7.14"] .bo1207-continuity-card.is-continue>p{max-width:68ch}
+
+/* Signals remain branded but stop overpowering the primary work surfaces. */
+.bo1207-dashboard[data-adaptive-home="7.14"] .bo1207-service-signals{background:linear-gradient(145deg,#153d62,#1b527a)!important;border-color:#315f84!important;box-shadow:none!important}
+.bo1207-dashboard[data-adaptive-home="7.14"] .bo1207-service-signals>div span{display:grid;gap:1px}.bo1207-dashboard[data-adaptive-home="7.14"] .bo1207-service-signals>div em{font-size:7px;font-style:normal;font-weight:500;color:rgba(235,246,255,.65);white-space:nowrap}
+
+/* Learning reacts to the current service gap. */
+.bo1214-learn{display:grid;grid-template-columns:300px minmax(0,1fr);grid-template-areas:"head head" "recommend cards";gap:9px 12px}.bo1214-learn>header{grid-area:head}.bo1214-learning-recommended{grid-area:recommend;min-height:72px;border:1px solid #d9e5f2;border-radius:10px;background:linear-gradient(145deg,#fbfdff,#f3f8ff);padding:11px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;cursor:pointer;color:#20364e}.bo1214-learning-recommended>span{min-width:0}.bo1214-learning-recommended small{display:block;font-size:7px;font-weight:850;letter-spacing:.11em;color:#5f80a4}.bo1214-learning-recommended strong{display:block;margin-top:3px;font-size:11px}.bo1214-learning-recommended p{margin:3px 0 0;font-size:8px;line-height:1.35;color:#75869a}.bo1214-learning-recommended>b{flex:0 0 auto;display:flex;align-items:center;gap:4px;font-size:8px;color:#2563eb}.bo1214-learning-recommended.tone-teal{background:linear-gradient(145deg,#fbfefd,#eef9f7);border-color:#cee7e2}.bo1214-learning-recommended.tone-amber{background:linear-gradient(145deg,#fffdfa,#fff7e8);border-color:#f0dfbb}.bo1214-learning-recommended.tone-violet{background:linear-gradient(145deg,#fdfcff,#f5f1ff);border-color:#e1d8fb}
+.bo1214-learn .bo1207-learn-grid{grid-area:cards;grid-template-columns:repeat(3,minmax(0,1fr))!important;align-self:stretch}
+
+@media(max-width:1050px){.bo1214-current-map{grid-template-columns:1fr}.bo1214-whiteboard-branch{padding-left:42px;max-width:420px}.bo1214-whiteboard-branch>i{width:34px}.bo1214-learn{grid-template-columns:1fr;grid-template-areas:"head" "recommend" "cards"}.bo1214-learning-recommended{min-height:64px}.bo1214-learn .bo1207-learn-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:680px){.bo1214-main-current{grid-template-columns:1fr;gap:8px}.bo1214-main-current .bo1213-current-wave{display:none}.bo1214-main-current>button{padding:5px 0}.bo1214-whiteboard-branch{padding-left:0;max-width:none}.bo1214-whiteboard-branch>i{display:none}.bo1214-depth-breakdown{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.bo1214-favorites.is-empty{grid-template-columns:1fr;gap:7px}.bo1214-recents .bo1207-recent-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.bo1214-learn .bo1207-learn-grid{grid-template-columns:1fr!important}}

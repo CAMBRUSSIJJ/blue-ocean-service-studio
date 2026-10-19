@@ -1,0 +1,229 @@
+/* H7.20-H1 — Dashboard Balance Recovery
+   Fixes the over-compression introduced in H7.20.
+   Principle: keep the Smaply-like full workspace canvas, preserve Blue Ocean identity,
+   and improve density without collapsing the content into the left edge. */
+
+:root{
+  --bo-h720h1-max:none;
+  --bo-h720h1-panel:rgba(255,255,255,.78);
+  --bo-h720h1-line:rgba(188,207,226,.78);
+  --bo-h720h1-shadow:0 8px 26px rgba(25,69,107,.035);
+}
+
+/* Restore a full, balanced desktop canvas. */
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"]{
+  width:100%!important;
+  max-width:none!important;
+  padding:24px 26px 96px!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"]>.bo1207-dashboard-section,
+.bo-h720h1 .bo1215-topline{
+  width:100%!important;
+  max-width:none!important;
+}
+
+/* Header row: creation tools stay left, depth belongs to the same row and right edge. */
+.bo-h720h1 .bo1215-topline{
+  display:flex!important;
+  align-items:stretch!important;
+  justify-content:space-between!important;
+  gap:20px!important;
+  margin:0 0 20px!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-dashboard-actions{
+  width:min(760px,calc(100% - 220px))!important;
+  max-width:760px!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin:0!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-action-card{
+  min-height:72px!important;
+  padding:12px 14px!important;
+  border-radius:10px!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-icon{
+  width:40px!important;
+  height:40px!important;
+  border-radius:9px!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy strong{
+  font-size:13px!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy em{
+  font-size:8.5px!important;
+  margin-top:3px!important;
+}
+.bo-h720h1 .bo1215-depth-chip{
+  flex:0 0 184px!important;
+  width:184px!important;
+  min-width:184px!important;
+  min-height:64px!important;
+  padding:10px 12px 10px 45px!important;
+  align-self:center!important;
+  margin-left:auto!important;
+  border-radius:10px!important;
+}
+.bo-h720h1 .bo1215-depth-chip>span:nth-of-type(2) small{
+  font-size:7px!important;
+  letter-spacing:.10em!important;
+}
+.bo-h720h1 .bo1215-depth-chip>span:nth-of-type(2) strong{
+  font-size:11px!important;
+  margin-top:2px!important;
+}
+.bo-h720h1 .bo1215-depth-chip>i{
+  height:3px!important;
+  margin-top:0!important;
+}
+
+/* Recent work is a full-width workspace band again.
+   The cards stay finite, but the panel no longer shrinks around 1–3 items. */
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-recents,
+.bo-h720h1 .bo1215-recents[data-recent-count="0"],
+.bo-h720h1 .bo1215-recents[data-recent-count="1"],
+.bo-h720h1 .bo1215-recents[data-recent-count="2"],
+.bo-h720h1 .bo1215-recents[data-recent-count="3"],
+.bo-h720h1 .bo1215-recents[data-recent-count="4"],
+.bo-h720h1 .bo1215-recents[data-recent-count="5"]{
+  width:100%!important;
+  max-width:none!important;
+  min-height:278px!important;
+  margin:0 0 20px!important;
+  padding:15px 17px 17px!important;
+  border:1px solid var(--bo-h720h1-line)!important;
+  border-radius:11px!important;
+  background:linear-gradient(135deg,rgba(255,255,255,.84),rgba(246,250,255,.78))!important;
+  box-shadow:var(--bo-h720h1-shadow)!important;
+  overflow:hidden!important;
+}
+.bo-h720h1 .bo1215-recents>header{
+  min-height:32px!important;
+  margin-bottom:10px!important;
+}
+.bo-h720h1 .bo1215-recents>header button{
+  font-size:9px!important;
+  padding:4px 2px!important;
+}
+.bo-h720h1 .bo1215-recent-grid{
+  display:flex!important;
+  align-items:stretch!important;
+  gap:14px!important;
+  overflow-x:auto!important;
+  padding:1px 1px 4px!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-recent-card{
+  flex:0 0 198px!important;
+  width:198px!important;
+  min-width:198px!important;
+  min-height:232px!important;
+  padding:10px!important;
+  border-radius:10px!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-recent-preview{
+  height:108px!important;
+  margin-bottom:9px!important;
+  border-radius:8px!important;
+}
+.bo-h720h1 .bo1215-recent-card>strong{
+  font-size:11.5px!important;
+  line-height:1.22!important;
+}
+.bo-h720h1 .bo1215-recent-card .bo1207-recent-meta{
+  font-size:8.5px!important;
+  margin-top:5px!important;
+}
+.bo-h720h1 .bo1215-recent-card>em{
+  font-size:7.5px!important;
+  margin-top:6px!important;
+}
+
+/* Favorites: compact when empty, but not microscopically small. */
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-favorites{
+  margin:0 0 19px!important;
+  padding:0 2px!important;
+}
+.bo-h720h1 .bo1215-favorites.is-empty{
+  display:flex!important;
+  align-items:center!important;
+  min-height:31px!important;
+  gap:14px!important;
+}
+.bo-h720h1 .bo1215-favorites.is-empty .bo1215-favorite-empty{
+  font-size:9px!important;
+  color:#7f8c9b!important;
+  white-space:normal!important;
+  overflow:visible!important;
+}
+
+/* Learning row uses the available width instead of stopping halfway across the screen. */
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn>header{
+  min-height:31px!important;
+}
+.bo-h720h1 .bo1215-learn-grid{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:minmax(260px,1.25fr) repeat(4,minmax(190px,1fr))!important;
+  gap:11px!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid>button{
+  min-height:84px!important;
+  padding:10px 12px!important;
+  grid-template-columns:38px minmax(0,1fr)!important;
+  gap:9px!important;
+  border-radius:9px!important;
+}
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid>button>i{
+  width:38px!important;
+  height:38px!important;
+}
+.bo-h720h1 .bo1215-learn-grid>button strong{font-size:10px!important}
+.bo-h720h1 .bo1215-learn-grid>button small{font-size:7.8px!important}
+.bo-h720h1 .bo1215-learn-grid>button.is-recommended strong{font-size:10.5px!important}
+
+/* Keep the ocean floor as atmosphere only; don't let it become the layout's focal point. */
+.bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"]::before{
+  opacity:.50!important;
+}
+
+@media(max-width:1280px){
+  .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-dashboard-actions{
+    width:min(690px,calc(100% - 205px))!important;
+  }
+  .bo-h720h1 .bo1215-learn-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .bo-h720h1 .bo1215-learn-grid>button.is-recommended{grid-column:span 2}
+}
+@media(max-width:920px){
+  .bo-h720h1 .bo1215-topline{align-items:flex-start!important}
+  .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-dashboard-actions{
+    width:100%!important;
+    max-width:none!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .bo-h720h1 .bo1215-depth-chip{flex-basis:166px!important;width:166px!important;min-width:166px!important}
+  .bo-h720h1 .bo1215-learn-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .bo-h720h1 .bo1215-learn-grid>button.is-recommended{grid-column:span 2}
+}
+@media(max-width:680px){
+  .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"]{padding:16px 12px 72px!important}
+  .bo-h720h1 .bo1215-topline{display:block!important}
+  .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-dashboard-actions{
+    grid-template-columns:1fr!important;
+    gap:7px!important;
+  }
+  .bo-h720h1 .bo1215-depth-chip{margin:9px 0 0!important;width:184px!important;min-width:184px!important}
+  .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-recents{min-height:0!important}
+  .bo-h720h1 .bo1215-recent-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;overflow:visible!important}
+  .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-recent-card{width:auto!important;min-width:0!important;min-height:218px!important}
+  .bo-h720h1 .bo1215-favorites.is-empty{display:block!important}
+  .bo-h720h1 .bo1215-favorites.is-empty .bo1215-favorite-empty{margin-top:3px!important}
+  .bo-h720h1 .bo1215-learn-grid{grid-template-columns:1fr!important}
+  .bo-h720h1 .bo1215-learn-grid>button.is-recommended{grid-column:auto}
+}

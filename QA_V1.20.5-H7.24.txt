@@ -1,0 +1,41 @@
+BLUE OCEAN Service Studio — V1.20.5-H7.24
+Journey Library & Collapsible Sidebar
+
+STATUS
+======
+H7.24 dedicated smoke: 40/40 PASS
+npm run qa: PASS
+Accumulated checks: 2308 OK / 0 FAIL
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run project-foundation:smoke: 46/46 PASS
+./preflight-linux.sh: PASS
+
+REGRESSION GATES
+================
+H7.23-H1 Journey Typecheck Cleanup: 8/8 PASS
+H7.23 Journey Editor UX 4.0: 49/49 PASS
+H7.22 Unified Service Blueprint Workspace: 47/47 PASS
+H7.21 Journey Workspace 3.0: 48/48 PASS
+H7.9 Journey Maps 2.0: 41/41 PASS
+H7.10 Service Blueprints 2.0: 36/36 PASS
+H7.11 Whiteboard 2.0: 40/40 PASS
+
+H7.24 CONTRACT
+==============
+- Journey opens as a library, not directly as an arbitrary editor.
+- Journey can be created from the Journey perspective.
+- Journey cards use the canonical Journey cover.
+- Cards/Table and search are available.
+- Editor has a return path to All Journeys.
+- Header CTA is contextual to Journey vs Blueprint.
+- Desktop sidebar is collapsible and preference is persisted locally.
+- Collapsed sidebar adapts service switcher, section labels and footer.
+- Mobile navigation remains independent from desktop collapse.
+
+LIMITATION
+==========
+Full `npm run typecheck` and build are NOT declared PASS in this environment.
+`node_modules` was absent and `npm ci --ignore-scripts` did not complete inside the execution window.
+The observed typecheck errors therefore begin at dependency resolution (React/JSX/lucide types), not at an H7.24-specific TypeScript diagnostic.

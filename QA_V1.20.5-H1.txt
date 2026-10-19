@@ -1,0 +1,63 @@
+BLUE OCEAN Service Studio — QA V1.20.5-H1
+==========================================
+Release: Full Typecheck Hotfix
+
+ERROS DE ENTRADA
+----------------
+55 diagnósticos TypeScript reportados em 3 arquivos:
+- BlueprintView.tsx: 1
+- ContextLibraryView.tsx: 3
+- WorkspaceHome.tsx: 51
+
+CORREÇÕES
+---------
+1. WhiteboardSemantic: role/dependency/policy adicionados a semanticLabels.
+2. ProblemEvidenceStudioReport: score/checks migrados para validationScore/validationChecks.
+3. WorkspaceHome: drafts/reports anuláveis recebem fallbacks tipados + escalares derivados nulo-seguros.
+4. validatedProblem: acesso convertido para estado/título/data derivados nulo-seguros.
+5. Nenhum `as any` ou non-null assertion usado para mascarar o problema.
+
+GATE ESPECÍFICO H1
+------------------
+npm run v1205h1:typecheck-hotfix-smoke
+Resultado: 15 OK / 0 FAIL
+
+REGRESSÃO COMPLETA
+------------------
+npm run qa
+Resultado: PASS
+Base V1.20.5: 49 gates / 1818 verificações
+H1 adicional: 1 gate / 15 verificações
+Total esperado da cadeia contada: 50 gates / 1833 verificações
+FAIL: 0
+
+INTEGRIDADE
+-----------
+npm run syntax:check: PASS
+npm run lock:verify: PASS
+npm run source:authority: PASS
+npm run foundation:smoke: PASS
+./preflight-linux.sh: PASS
+
+TYPECHECK / BUILD COMPLETOS
+---------------------------
+npm ci: NÃO CONCLUÍDO neste ambiente.
+Causa observada: resolução DNS de registry.npmjs.org indisponível; tentativa deixa instalação parcial e foi removida.
+npm run typecheck completo: NÃO DECLARADO neste ambiente.
+npm run build React/Vite: NÃO DECLARADO neste ambiente.
+
+IMPORTANTE
+----------
+O H1 corrige diretamente as causas dos 55 diagnósticos fornecidos. A confirmação final do `npm run typecheck` completo deve ser executada em um ambiente com as dependências instaláveis.
+
+VALIDAÇÃO DO ZIP LINUX H1
+-------------------------
+O pacote Linux H1 foi extraído em diretório novo e validado fora da pasta de trabalho.
+VERSION: 1.20.5
+package.json: 1.20.5
+START.sh: 755
+Diretórios proibidos (node_modules/dist/.generated/artifacts/__pycache__): ausentes
+v1205h1:typecheck-hotfix-smoke: 15 / 15
+syntax:check: PASS
+preflight-linux: PASS
+npm run qa (TERM=xterm): PASS / status 0

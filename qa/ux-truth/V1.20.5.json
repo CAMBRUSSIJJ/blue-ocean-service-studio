@@ -1,0 +1,19 @@
+{
+  "version": "1.20.5",
+  "principle": "Frontstage e Backstage permanecem camadas simples do Service Frame; papéis, canais, dependências, políticas e evidências aprofundam os objetos sem criar novas linhas concorrentes.",
+  "levels": [
+    {"id":"L1","name":"Código","status":"PASS","evidence":"Operational context service, novos tipos canônicos, Inspector operacional e diagnóstico por etapa estão presentes na fonte."},
+    {"id":"L2","name":"Contrato","status":"PASS","evidence":"Gate V1.20.5 específico passa 77/77 e regressão completa passa."},
+    {"id":"L3","name":"Runtime","status":"PARTIAL","evidence":"Parser, core typecheck, runtime JS, regressão e preflight executados; browser real depende do Chromium do Playwright."},
+    {"id":"L4","name":"Visual","status":"UNAVAILABLE","evidence":"Chromium esperado pelo Playwright não está instalado neste ambiente de validação."}
+  ],
+  "critical_paths": [
+    "Service Frame -> Operação -> biblioteca operacional",
+    "Frontstage -> papel + canal + evidência física/digital",
+    "Backstage -> papel + dependência + política",
+    "Processo/Sistema -> dependências operacionais",
+    "Inspector -> Contexto operacional -> relações canônicas",
+    "Mover objeto acima/abaixo da linha -> serviceVisibility derivada da camada"
+  ],
+  "canonical_rule": "Operational context is stored as canonical entity references in the Service Graph; the Service Frame continues to store only visual placement and derived visibility metadata."
+}

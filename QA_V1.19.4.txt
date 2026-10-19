@@ -1,0 +1,242 @@
+BLUE OCEAN SERVICE STUDIO — QA V1.19.4
+======================================
+
+Release: V1.19.4 — Service Composition Framework
+
+RESULTADO
+- Regressão histórica npm run qa: PASS
+- Checks acumulados: 1104 OK / 0 FAIL
+- V1.19.4 Service Composition: 59/59
+- Sim Kit 2.4 static contracts: 44/44
+- Lock verify: PASS
+- Source authority: PASS
+- Source foundation: PASS
+- TypeScript parser (tsc --noEmit --noCheck): PASS
+- Linux preflight: PASS
+
+ESCOPO V1.19.4
+- Service Recipe por tipo de negócio
+- Ingredientes metodológicos
+- Modo livre persistente
+- Nova visualização Serviço
+- Matriz Frontstage/Backstage/Process/System etc.
+- Smart Cards V2
+- Runtime serviceComposition
+
+LIMITAÇÃO AMBIENTAL
+`npm ci` não concluiu dentro da janela disponível neste ambiente. Portanto esta release não declara build React/Vite completo como aprovado aqui. O pacote não contém node_modules parcial nem dist antigo.
+
+--- V1.19.4 gate ---
+
+> blue-ocean-service-studio@1.19.4 composition:smoke
+> node scripts/v1194-service-composition-smoke.mjs
+
+OK   version 1.19.4
+OK   package version 1.19.4
+OK   service view registered
+OK   flow renamed relations
+OK   service recipe templates
+OK   generic recipe
+OK   restaurant recipe
+OK   clinic recipe
+OK   consulting recipe
+OK   saas recipe
+OK   field service recipe
+OK   client ingredient
+OK   promise ingredient
+OK   channels ingredient
+OK   people ingredient
+OK   process ingredient
+OK   systems ingredient
+OK   rules ingredient
+OK   resources ingredient
+OK   metrics ingredient
+OK   capacity ingredient
+OK   evidence ingredient
+OK   recipe persistent state
+OK   recipe modal
+OK   recipe does not auto create
+OK   experience mode
+OK   continue alone persists free
+OK   continue alone closes library
+OK   service composition lanes
+OK   customer lane
+OK   touchpoint lane
+OK   frontstage lane
+OK   backstage lane
+OK   process lane
+OK   system lane
+OK   people lane
+OK   problem lane
+OK   metric lane
+OK   improvement lane
+OK   composition layout
+OK   composition structure
+OK   apply service layout
+OK   render service structure
+OK   five views
+OK   recipe top action
+OK   recipe tools action
+OK   composition tools action
+OK   runtime composition api
+OK   smart card v2 class
+OK   smart cards white
+OK   smart card css
+OK   stage accent css
+OK   touchpoint accent css
+OK   problem accent css
+OK   recipe responsive css
+OK   service grid css
+OK   service lane css
+OK   service cell css
+OK   free mode hides onboarding
+
+Service Composition V1.19.4: 59 OK / 0 FAIL
+
+--- Sim Kit 2.4 static ---
+OK   createServiceGraph parte de blank workspace
+OK   blank workspace usa workspace-uninitialized
+OK   whiteboard createBlank bloqueia workspace sem serviço
+OK   whiteboard blank cria viewKind free
+OK   assistente registra API pública
+OK   assistente possui quatro modos
+OK   assistente exige Whiteboard livre
+OK   abrir assistente não cria entidades diretamente
+OK   assistente cria Persona somente por ação explícita
+OK   assistente cria Jornada somente por ação explícita
+OK   assistente cria Stage somente por ação explícita
+OK   assistant progress exige pelo menos 2 etapas
+OK   assistant state é persistido por boardId
+OK   Home oferece Criar serviço
+OK   Home declara que Jornada/etapas/Blueprint/quadros começam em zero
+OK   Home guided cria blank board antes de iniciar assistant
+OK   zoom usa limites 10–400%
+OK   zoom por wheel preserva ponto do cursor
+OK   zoom possui slider acessível
+OK   fit content e selection são explícitos
+OK   runtime expõe gestão do Whiteboard
+OK   renomeação inline existe
+OK   Smart Object renomeia entidade canônica
+OK   remoção visual é distinta da exclusão canônica
+OK   exclusão canônica calcula impacto
+OK   Entity Picker V2 existe
+OK   picker separa criar e reutilizar
+OK   picker contextualiza Etapa
+OK   picker contextualiza Ponto de contato
+OK   picker previne duplicata por nome normalizado
+OK   picker agrupa entidades por origem
+OK   picker localiza entidade já presente
+OK   visualização Serviço existe
+OK   Service Recipe possui templates por negócio
+OK   Service Recipe não cria conteúdo automaticamente
+OK   receita possui ingredientes centrais
+OK   continuar sozinho persiste modo livre
+OK   continuar sozinho fecha biblioteca
+OK   composição organiza experiência e operação
+OK   composição inclui análise e melhoria
+OK   Service view não é o grafo de relações
+OK   Smart Cards V2 registrados
+OK   runtime expõe serviceComposition
+OK   visualizações incluem Livre Serviço Jornada Blueprint Relações
+
+Static contracts: 44/44
+
+--- lock ---
+
+> blue-ocean-service-studio@1.19.4 lock:verify
+> node scripts/v1151-lock-verify.mjs
+
+OK   package-lock usa lockfileVersion 3
+OK   nome do lock alinhado ao package.json
+OK   versão raiz do lock alinhada ao package.json
+OK   packages[""] alinhado à versão da aplicação
+OK   dependencies: lucide-react (^0.468.0) está travado no lock
+OK   dependencies: react (^19.1.1) está travado no lock
+OK   dependencies: react-dom (^19.1.1) está travado no lock
+OK   dependencies: zod (^4.6.5) está travado no lock
+OK   devDependencies: @types/react (^19.1.8) está travado no lock
+OK   devDependencies: @types/react-dom (^19.1.6) está travado no lock
+OK   devDependencies: @vitejs/plugin-react (^4.7.0) está travado no lock
+OK   devDependencies: autoprefixer (^10.4.21) está travado no lock
+OK   devDependencies: postcss (^8.5.6) está travado no lock
+OK   devDependencies: tailwindcss (^3.4.17) está travado no lock
+OK   devDependencies: typescript (^5.8.3) está travado no lock
+OK   devDependencies: vite (^6.3.5) está travado no lock
+
+Lock verify: OK
+
+--- source authority ---
+
+> blue-ocean-service-studio@1.19.4 source:authority
+> node scripts/v1160-source-authority.mjs
+
+OK   source authority contém src/main.tsx
+OK   source authority contém src/App.tsx
+OK   source authority contém src/domain/schema.ts
+OK   source authority contém src/runtime/whiteboard-core.js
+OK   source authority contém scripts/prepare-assets.mjs
+OK   source authority contém vite.config.ts
+OK   source authority contém package-lock.json
+OK   package-lock alinhado à versão
+OK   App não fixa versão visual antiga
+OK   Whiteboard não fixa badge/título antigo
+OK   versão gerada alinhada quando presente
+
+Source authority: OK
+
+--- foundation ---
+
+> blue-ocean-service-studio@1.19.4 foundation:smoke
+> node scripts/v1160-source-foundation-smoke.mjs
+
+OK   fundação V1.16+ preservada
+OK   source React canônico existe
+OK   versão React vem do gerador
+OK   Whiteboard não fixa versão de produto
+OK   prepare-assets injeta versão
+OK   build tem provenance
+OK   verify source authority
+OK   CI usa npm ci
+OK   CI roda release verify
+OK   CI prepara Playwright
+OK   changelog existe
+OK   dist não é source authority
+
+V1.16+ Source Foundation: 12/12
+
+--- preflight ---
+✓ package.json
+✓ package-lock.json
+✓ src/main.tsx
+✓ src/App.tsx
+✓ src/views/WorkspaceHome.tsx
+✓ src/runtime/home3.css
+✓ src/runtime/attention-engine.css
+✓ src/runtime/workspace-preferences.css
+✓ src/services/attention-engine.ts
+✓ src/services/continue-engine.ts
+✓ src/services/workspace-preferences.ts
+✓ src/services/service-architecture-engine.ts
+✓ src/runtime/service-architecture.css
+✓ src/runtime/dashboard-parity.css
+✓ src/runtime/guidance-engine.js
+✓ src/runtime/guidance-engine.css
+✓ src/runtime/creation-reset.css
+✓ src/runtime/service-builder-assistant.css
+✓ src/runtime/interaction-structure-ux.css
+✓ src/views/WhiteboardsView.tsx
+✓ scripts/v1188-guided-builder-smoke.mjs
+✓ scripts/v1189-creation-architecture-reset-smoke.mjs
+✓ scripts/v1190-service-builder-assistant-smoke.mjs
+✓ scripts/v1191-whiteboard-core-reliability-smoke.mjs
+✓ scripts/v1192-visual-service-builder-smoke.mjs
+✓ scripts/v1193-interaction-structure-ux-smoke.mjs
+✓ qa/whiteboard-sim/phase7.cjs
+✓ public/v1188-guidance-engine.js
+✓ public/v1188-guidance-engine.css
+✓ src/brand/bo-ocean-wave-1181.webp
+• dist/ ainda não gerado; o source está pronto para `npm ci && npm run release:verify`.
+✓ shell sem MutationObserver
+✓ diálogos controlados pela aplicação
+✓ Node v22.16.0
+Preflight: OK

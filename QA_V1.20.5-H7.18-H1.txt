@@ -1,0 +1,31 @@
+BLUE OCEAN Service Studio V1.20.5-H7.18-H1 — Journey Cover System
+
+VALIDATED
+- H7.18-H1 Journey Cover smoke: 35/35 PASS
+- H7.18 Animated Ocean Branding: 38/38 PASS
+- H7.17 Ocean Surface: 30/30 PASS
+- H7.16 Object Language: 40/40 PASS
+- npm run qa: PASS (2001 accumulated checks / 0 FAIL)
+- npm run syntax:check: PASS
+- preflight Linux: PASS
+
+FUNCTIONAL CONTRACT
+- Every Journey has a default Blue Ocean cover when coverImage is absent.
+- User can upload PNG/JPG/WebP from Journey editor.
+- Input max: 6 MB.
+- Browser resizes to max 1600x900 and persists WebP quality 0.86.
+- User can restore the default cover at any time.
+- Active Dashboard renders the cover in Recentes, Favoritos and Todos os recentes.
+- Legacy WorkspaceHome also resolves the canonical cover.
+- Existing Journey data remains compatible because coverImage is optional.
+
+TYPECHECK / BUILD
+- npm run typecheck was attempted without installed project dependencies and fails at module resolution (React/react-jsx-runtime/lucide-react), producing a cascade unrelated to H7.18-H1.
+- Therefore full typecheck/build are NOT claimed as PASS in this environment.
+- npm run syntax:check is PASS.
+
+PACKAGE HYGIENE TARGET
+- node_modules absent
+- dist absent
+- .generated absent
+- artifacts absent

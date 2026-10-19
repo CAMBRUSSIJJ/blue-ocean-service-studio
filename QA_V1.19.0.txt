@@ -1,0 +1,64 @@
+BLUE OCEAN Service Studio — V1.19.0 QA
+Release: Service Builder Assistant
+
+RESULTADO PRINCIPAL
+PASS  service-builder-assistant:smoke — 51/51
+PASS  full historical npm run qa — 861 OK / 0 FAIL, V1.12 through V1.19.0
+PASS  creation-reset:smoke — 83/83
+PASS  guided-builder:smoke — 117/117
+PASS  tsc --noEmit --noCheck — project source parses successfully
+PASS  node --check — src/runtime/whiteboard-core.js
+PASS  node --check — src/runtime/guidance-engine.js
+PASS  package-lock verify
+PASS  source authority
+PASS  source foundation
+PASS  Linux preflight
+PASS  generated public runtime refreshed with prepare-assets
+
+SERVICE BUILDER ASSISTANT CONTRACTS
+- assistant lives inside a truly free Whiteboard and does not require leaving the canvas
+- blank Whiteboard remains items={} and edges={} until explicit user action
+- starting the assistant creates no Persona, Journey, Stage, Blueprint or other Service Graph entity
+- four modes exist: Criar, Entender, Revisar and Melhorar
+- assistant state is persisted per Whiteboard
+- creation flow covers service definition, objective/boundaries, customer/persona, stages, experience, operation, evidence, problems, metrics, improvements and final review
+- user can pause and resume the assistant
+- optional evidence/problems/metrics/improvements can be deferred without fabricated content
+- methodology Q&A is deterministic in this phase; no generative AI is required
+- assistant questions and last answers persist in its board state
+- Persona created by assistant is a real Service Graph entity and a Smart Object on the free canvas
+- Journey created by assistant is a real empty Journey and remains linked to the current free Whiteboard
+- Stage created by assistant is a real Service Graph Stage and a Smart Object on the free canvas
+- Frontstage, Backstage, Process and System can be structured while staying in the free Whiteboard
+- assistant review reports structure/gaps and does not invent observations
+- final completion requires explicit user action
+- Home guided entry creates/opens a blank free Whiteboard before starting the assistant
+- Whiteboards library provides a dedicated guided creation action
+- assistant panel is responsive and only renders in free Whiteboard context
+
+CREATION RESET INVARIANTS PRESERVED
+- clean workspace has no user Service until explicit creation
+- Service creation does not auto-create Journey, Stage, Persona, Blueprint or Whiteboard
+- blank Whiteboard remains truly blank
+- free Whiteboards are not indexed as Blueprints
+- blank Blueprint has no automatic Journey/stages
+- no legacy 'Serviço principal / Jornada principal / Descoberta / Primeiro Contato / Pagamento' is injected into a new workspace
+
+SOURCE / PACKAGE INVARIANTS
+- package version: 1.19.0
+- package-lock root version aligned to 1.19.0
+- source-first release
+- src/ remains canonical authority
+- public runtime assets regenerated from canonical src runtime
+- no partial node_modules is shipped
+- no stale dist is shipped
+
+DEPENDENCY / BUILD LIMITATION
+- npm ci could not complete in this execution environment because npm registry package fetches failed/stalled with EAI_AGAIN.
+- The failed partial node_modules was removed before packaging.
+- Full node_modules-dependent React/Vite typecheck and production build are therefore NOT claimed as passed here.
+- The source-level TypeScript parse/transpile gate (`tsc --noEmit --noCheck`) did pass.
+
+BROWSER VALIDATION
+- Release-specific contracts and full historical smoke regression passed.
+- A fresh end-to-end browser interaction run is not claimed for this environment; final visual/browser validation should be performed on the user's Linux runtime after dependencies install successfully.

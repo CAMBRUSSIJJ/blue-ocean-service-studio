@@ -1,0 +1,177 @@
+/* H7.17 — Ocean Surface & Background System
+   Fixes fragmented backgrounds and gives Login + Workspace one coherent ocean surface.
+   Principle: one continuous background, waves as atmosphere, content remains primary. */
+
+:root{
+  --bo-h717-deep:#06182b;
+  --bo-h717-depth:#0a3150;
+  --bo-h717-current:#0e6fb0;
+  --bo-h717-aqua:#65d6d4;
+  --bo-h717-sky:#e8f4ff;
+  --bo-h717-foam:#f8fbff;
+  --bo-h717-line:#d6e6f4;
+}
+
+/* ---------- Authentication: replace the broken raster strip with one continuous ocean scene. ---------- */
+.bo-h717 .bo-auth-shell{
+  background:
+    radial-gradient(58% 62% at 18% 16%,rgba(45,126,190,.28),transparent 68%),
+    radial-gradient(38% 46% at 78% 14%,rgba(101,214,212,.11),transparent 72%),
+    linear-gradient(135deg,#041526 0%,#07223b 46%,#0a3150 72%,#0d3d5d 100%)!important;
+  color:#fff!important;
+}
+.bo-h717 .bo-auth-shell::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:url('/blue-ocean-surface-dark-h717.svg') center bottom/cover no-repeat;
+  opacity:.96;
+}
+.bo-h717 .bo-auth-shell::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(2,14,27,.20) 0%,rgba(2,14,27,.03) 58%,rgba(4,24,43,.20) 100%);
+}
+.bo-h717 .bo-auth-wave{display:none!important}
+.bo-h717 .bo-auth-story__veil{
+  inset:-56px -86px -56px -56px!important;
+  background:linear-gradient(90deg,rgba(2,14,28,.44) 0%,rgba(2,14,28,.17) 62%,transparent 100%)!important;
+}
+.bo-h717 .bo-auth-brand strong,.bo-h717 .bo-auth-story h1{color:#f8fbff!important}
+.bo-h717 .bo-auth-brand small{color:#9fc4e3!important}
+.bo-h717 .bo-auth-story__copy>p{color:#c3d8ea!important}
+.bo-h717 .bo-auth-capabilities{color:#dceaf6!important}
+.bo-h717 .bo-auth-eyebrow{color:#d7e9f8!important}
+.bo-h717 .bo-auth-story footer{color:#92b1cb!important}
+.bo-h717 .bo-auth-story__signal{
+  color:#cce0f0!important;
+  border-color:rgba(154,209,239,.23)!important;
+  background:rgba(4,23,43,.40)!important;
+  box-shadow:0 8px 26px rgba(0,0,0,.10);
+}
+.bo-h717 .bo-auth-panel{position:relative}
+.bo-h717 .bo-auth-panel::before{
+  content:'';
+  position:absolute;
+  inset:-56px -56px;
+  z-index:-1;
+  pointer-events:none;
+  background:radial-gradient(68% 72% at 50% 48%,rgba(255,255,255,.12),transparent 72%);
+  border-left:1px solid rgba(197,225,246,.10);
+}
+.bo-h717 .bo-auth-card{
+  border-color:rgba(255,255,255,.78)!important;
+  background:rgba(255,255,255,.975)!important;
+  box-shadow:0 28px 90px rgba(0,11,24,.34),0 1px 0 rgba(255,255,255,.9) inset!important;
+}
+.bo-h717 .bo-auth-panel__footer{color:rgba(225,240,251,.66)!important}
+
+/* ---------- Workspace canvas: a single light-ocean surface instead of isolated tinted panels. ---------- */
+body.bo-h717.rt182-host main{
+  position:relative;
+  background-color:#f7fbff!important;
+  background-image:
+    radial-gradient(52% 420px at 92% -80px,rgba(37,99,235,.08),transparent 72%),
+    radial-gradient(38% 340px at 22% 8%,rgba(101,214,212,.055),transparent 75%),
+    url('/blue-ocean-surface-light-h717.svg')!important;
+  background-repeat:no-repeat,no-repeat,no-repeat!important;
+  background-position:top right,top left,bottom center!important;
+  background-size:900px 520px,760px 440px,100% 340px!important;
+}
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]{
+  position:relative;
+  min-height:calc(100vh - 58px);
+  background:transparent!important;
+}
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::before{
+  content:''!important;
+  display:block!important;
+  position:absolute;
+  z-index:-1;
+  left:22px;
+  right:22px;
+  top:111px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(37,99,235,.12) 14%,rgba(101,214,212,.14) 56%,transparent 94%);
+  pointer-events:none;
+}
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{display:none!important}
+
+/* Quick actions feel embedded in the ocean surface, not pasted on white. */
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"] .bo1215-action-card{
+  background:rgba(255,255,255,.88)!important;
+  border-color:#dbe6f1!important;
+  box-shadow:0 10px 30px rgba(25,72,110,.045),0 1px 0 rgba(255,255,255,.92) inset!important;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"] .bo1215-action-card::after{
+  bottom:-40px!important;
+  height:58px!important;
+  opacity:.42!important;
+}
+.bo-h717 .bo1215-depth-chip{
+  border-color:#d6e5f3!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.90),rgba(237,247,255,.94))!important;
+  box-shadow:0 10px 28px rgba(24,78,118,.05)!important;
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+
+/* Recents: remove the detached ring/half-wave bug. The section becomes a clean glass shelf. */
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"] .bo1215-recents{
+  background:linear-gradient(145deg,rgba(255,255,255,.84),rgba(247,251,255,.78))!important;
+  border-color:#dbe6f1!important;
+  box-shadow:0 16px 42px rgba(24,72,108,.045),0 1px 0 rgba(255,255,255,.85) inset!important;
+  backdrop-filter:blur(9px);
+  -webkit-backdrop-filter:blur(9px);
+}
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"] .bo1215-recents::after{display:none!important}
+.bo-h717 .bo1215-panel-wave{display:none!important}
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"] .bo1215-recent-card{
+  background:rgba(255,255,255,.92)!important;
+  border-color:#dfe8f1!important;
+  box-shadow:0 7px 18px rgba(24,72,108,.035)!important;
+}
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"] .bo1215-recent-card:hover{
+  border-color:#bfd6ea!important;
+  box-shadow:0 12px 24px rgba(24,72,108,.075)!important;
+}
+
+/* Learning and favorites keep the light surface visible instead of building another opaque dashboard layer. */
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"] .bo1215-favorites,
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"] .bo1215-learn{background:transparent!important}
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"] .bo1215-learn-grid>button{
+  background:rgba(255,255,255,.82)!important;
+  border-color:#dde7f0!important;
+  box-shadow:0 7px 20px rgba(28,75,111,.025)!important;
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+}
+.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"] .bo1215-learn-grid>button:hover{background:#fff!important}
+.bo-h717 .bo1215-learn-grid>button.is-recommended{
+  background:linear-gradient(145deg,rgba(241,248,255,.96),rgba(232,245,255,.90))!important;
+  border-color:#bcd3eb!important;
+}
+
+/* Sidebar wave now belongs to the same palette as the page surface. */
+.bo-h717 .bo-h701-sidebar-wave{opacity:1!important;filter:saturate(.92)}
+.bo-h717 .bo-h701-wave-back{fill:rgba(37,99,235,.14)!important}
+.bo-h717 .bo-h701-wave-front{fill:rgba(101,214,212,.16)!important}
+
+@media(max-width:900px){
+  .bo-h717 .bo-auth-shell::before{background-size:auto 100%;background-position:38% bottom}
+  body.bo-h717.rt182-host main{background-size:720px 440px,620px 360px,150% 260px!important}
+}
+@media(max-width:600px){
+  .bo-h717 .bo-auth-shell::before{opacity:.70;background-position:30% bottom}
+  .bo-h717 .bo-auth-story__veil{background:linear-gradient(180deg,rgba(2,14,28,.28),rgba(2,14,28,.08))!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .bo-h717 .bo-auth-shell::before,.bo-h717 .bo1215-dashboard{scroll-behavior:auto}
+}

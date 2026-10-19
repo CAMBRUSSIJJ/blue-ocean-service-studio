@@ -1,0 +1,75 @@
+BLUE OCEAN SERVICE STUDIO — V1.20.5-H7.40-H10
+Project Shell & Contextual Navigation — QA FINAL
+Data: 2026-10-14
+
+ESCOPO
+- Abrir projeto passa a abrir a Home do Projeto, não o Service Workspace.
+- Sidebar permanece compacta e contextual, sem expor todas as entidades do serviço.
+- Projeto possui 7 áreas: Visão geral, Serviço, Pesquisa, Biblioteca, Arquivos, Equipe e Configurações.
+- Serviço é um módulo explícito do projeto, aberto por CTA deliberado.
+- Biblioteca consolida Personas, Necessidades, Jobs, Dores, Hipóteses, Problemas, Evidências, Hierarquias, Oportunidades e Métricas.
+- Global Home e Project Home são superfícies distintas.
+- Mobile separa Projeto × Serviço.
+- Breadcrumb do projeto retorna para Project Home.
+
+GATES DE SOURCE
+npm run qa                                         PASS — 4753 OK / 0 FAIL
+H7.40-H10 Project Shell & Contextual Navigation    PASS — 28/28
+H7.40-H9 Project Architecture Hardening            PASS — 28/28
+H7.40-H8 Project Home & Workspace Architecture     PASS — 25/25
+H7.40-H7 Guided Service Workspace                  PASS — 36/36
+H7.40-H6 Typecheck Final Cleanup                   PASS — 4/4
+H7.40-H5 Service Workspace Simplification          PASS — 32/32
+syntax:check                                       PASS
+lock:verify                                        PASS
+source:authority                                   PASS
+foundation:smoke                                   PASS — 12/12
+project-foundation:smoke                           PASS — 46/46
+preflight-linux.sh                                 PASS
+
+PROJECT SHELL
+Projeto abre Project Home                          PASS
+Abrir serviço é ação explícita                     PASS
+Sidebar do projeto possui 7 áreas                  PASS
+Entidades não ficam permanentes na sidebar         PASS
+Biblioteca agrupa contexto/descoberta/gestão       PASS
+Home global permanece distinta                     PASS
+Configurações globais não viram contexto local     PASS
+Mobile diferencia Projeto × Serviço                PASS
+
+BROWSER
+Chromium real — Project Shell                      PASS — 9/9
+- sidebar com apenas 7 áreas contextuais
+- Personas não exposta permanentemente
+- serviço principal visível
+- CTA Abrir serviço visível
+- 6 áreas do projeto visíveis na Home
+- desktop sem overflow
+- tablet sem overflow
+- mobile sem overflow
+- mobile reduz áreas para uma coluna
+
+GATES NÃO DECLARADOS COMO PASS
+React/TS typecheck completo (tsc --noEmit)         NÃO VALIDADO nesta execução
+Vite production build                              NÃO VALIDADO nesta execução
+Vercel deploy                                      NÃO VALIDADO nesta execução
+
+POLÍTICA DE VERDADE
+Nenhum gate NOT_VALIDATED foi promovido a PASS.
+
+RESULTADO
+PROJECT SHELL / CONTEXTUAL NAVIGATION / SOURCE / DOMAIN / QA / BROWSER: APROVADOS.
+FULL REACT TYPECHECK + VITE BUILD: aguardam ambiente com dependências completas.
+
+VALIDAÇÃO DO ZIP LINUX REEXTRAÍDO — CANDIDATO DE RELEASE
+H7.40-H10 Project Shell & Contextual Navigation    PASS — 28/28
+H7.40-H9 Project Architecture Hardening            PASS — 28/28
+H7.40-H8 Project Home & Workspace Architecture     PASS — 25/25
+H7.40-H7 Guided Service Workspace                  PASS — 36/36
+syntax:check                                       PASS
+preflight-linux.sh                                 PASS
+Chromium Project Shell                             PASS — 9/9
+Arquivos                                           1114
+Diretórios proibidos                               0
+START.sh / start-linux.sh / preflight-linux.sh     755 / 755 / 755
+Linux / Source / Vercel                            conteúdo canônico idêntico

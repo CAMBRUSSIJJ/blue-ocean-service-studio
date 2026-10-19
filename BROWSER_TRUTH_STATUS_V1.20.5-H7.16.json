@@ -1,0 +1,12 @@
+{
+  "release": "V1.20.5-H7.16",
+  "surface": "Blue Ocean Object Language",
+  "h716_smoke": "PASS 40/40",
+  "regression_qa": "PASS 1898 OK / 0 FAIL",
+  "linux_preflight": "PASS",
+  "syntax_check": "PASS",
+  "full_typecheck": "NOT_VALIDATED_DEPENDENCIES_NOT_INSTALLED",
+  "production_build": "NOT_VALIDATED_DEPENDENCIES_NOT_INSTALLED",
+  "browser_runtime": "PENDING_USER_LINUX_VALIDATION",
+  "note": "npm ci did not complete within the generation environment; no browser-runtime claim is made without a dependency-complete runtime."
+}

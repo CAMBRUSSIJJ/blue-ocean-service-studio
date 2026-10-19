@@ -1,0 +1,14 @@
+{
+  "release": "V1.20.5-H7.13",
+  "surface": "Blue Ocean Identity System",
+  "h713_smoke": "PASS 26/26",
+  "h712_regression": "PASS 25/25",
+  "qa": "PASS",
+  "syntax_check": "PASS",
+  "lock_verify": "PASS",
+  "source_authority": "PASS",
+  "foundation_smoke": "PASS 12/12",
+  "linux_preflight": "PASS",
+  "full_typecheck": "NOT_RUN_DEPENDENCIES_NOT_INSTALLED",
+  "production_build": "NOT_RUN_DEPENDENCIES_NOT_INSTALLED"
+}

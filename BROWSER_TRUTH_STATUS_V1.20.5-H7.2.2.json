@@ -1,0 +1,15 @@
+{
+  "release": "V1.20.5-H7.2.2",
+  "surface": "Persona Simple / Advanced Configurator",
+  "browser_truth": "not_executed_in_packaging_environment",
+  "reason": "node_modules absent; source/static/runtime smoke gates passed",
+  "required_user_validation": [
+    "npm ci",
+    "npm run typecheck",
+    "npm run build",
+    "open Personas > Criar persona",
+    "verify Simple/Avançada switch",
+    "verify three layout previews",
+    "verify selected blocks persist after creation"
+  ]
+}

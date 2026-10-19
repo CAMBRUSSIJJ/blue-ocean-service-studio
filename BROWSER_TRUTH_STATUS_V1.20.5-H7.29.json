@@ -1,0 +1,17 @@
+{
+  "release": "V1.20.5-H7.29",
+  "browser_runtime_executed": false,
+  "status": "NOT_EXECUTED",
+  "reason": "npm ci did not complete inside the available execution window; no browser bundle was produced in this session.",
+  "validated_instead": [
+    "H7.29 domain smoke 129/129",
+    "full accumulated QA 2739/2739",
+    "syntax:check",
+    "lock:verify",
+    "source:authority",
+    "foundation:smoke 12/12",
+    "project-foundation:smoke 46/46",
+    "preflight-linux",
+    "non-React TypeScript core"
+  ]
+}
