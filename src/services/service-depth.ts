@@ -22,6 +22,7 @@ const clamp = (value: number) => Math.max(0, Math.min(100, Math.round(value)));
 const ratio = (done: number, total: number) => total > 0 ? clamp((done / total) * 100) : 0;
 const average = (values: number[]) => values.length ? clamp(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;
 const entityCount = (graph: ServiceGraph, kind: string) => Object.keys(graph.entities?.[kind] ?? {}).length;
+const researchEvidence = (graph: ServiceGraph) => Object.values(graph.entities?.evidence ?? {}).filter(item => item.evidencePurpose !== 'service');
 const linkedStageEvidence = (stage: Stage) => Array.isArray(stage.evidenceIds) ? stage.evidenceIds.length : 0;
 const meaningfulFreeBoard = (board: WhiteboardView) => {
   const items = Object.values(board.items ?? {}).filter((item) => !(item.kind === 'free' && item.shape === 'frame')).length;
@@ -44,10 +45,10 @@ const journeyScore = (graph: ServiceGraph) => {
 };
 
 const evidenceScore = (graph: ServiceGraph) => {
-  const evidence = Object.values(graph.entities?.evidence ?? {});
+  const evidence = researchEvidence(graph);
   if (!evidence.length) return 0;
   const qualityScores = evidence.map((item) => buildEvidenceStudioReport(graph, item.id)?.qualityScore ?? 0);
-  const stageLinks = Object.values(graph.stages ?? {}).reduce((sum, stage) => sum + linkedStageEvidence(stage), 0);
+  const stageLinks = Object.values(graph.stages ?? {}).reduce((sum, stage) => sum + (stage.evidenceIds ?? []).filter(id => evidence.some(item => item.id === id)).length, 0);
   const hypothesisOrProblemLinks = evidence.filter((item) => {
     const related = Array.isArray(item.relatedIds) ? item.relatedIds.length : 0;
     const hypotheses = Array.isArray(item.hypothesisIds) ? item.hypothesisIds.length : 0;
@@ -89,7 +90,7 @@ export const buildServiceDepthReport = (graph: ServiceGraph): ServiceDepthReport
   const raw: Array<Omit<ServiceDepthComponent, 'points'>> = [
     { id: 'context', label: 'Contexto', weight: 20, score: contextScore, detail: personaCount ? `${personaCount} persona(s) · ${relatedContext} sinal(is) relacionado(s)` : 'Persona e contexto ainda não estruturados' },
     { id: 'journey', label: 'Journey', weight: 25, score: journeyScore(graph), detail: `${Object.keys(graph.journeys ?? {}).length} Journey(s) · ${Object.keys(graph.stages ?? {}).length} etapa(s)` },
-    { id: 'evidence', label: 'Evidências', weight: 15, score: evidenceScore(graph), detail: `${entityCount(graph, 'evidence')} evidência(s) com qualidade e uso considerados` },
+    { id: 'evidence', label: 'Evidências', weight: 15, score: evidenceScore(graph), detail: `${researchEvidence(graph).length} evidência(s) de pesquisa com qualidade e uso considerados` },
     { id: 'problem', label: 'Problemas', weight: 15, score: problemScore(graph), detail: `${Object.values(graph.entities?.problem ?? {}).filter((item) => item.status === 'validated').length} problema(s) validado(s)` },
     { id: 'blueprint', label: 'Blueprint', weight: 20, score: blueprintScore(graph), detail: `${Object.values(graph.views?.whiteboards ?? {}).filter((board) => board.viewKind === 'blueprint').length} Blueprint(s) estruturado(s)` },
     { id: 'composition', label: 'Composição', weight: 5, score: compositionScore(graph), detail: `${Object.values(graph.views?.whiteboards ?? {}).filter((board) => board.viewKind !== 'blueprint').length} Whiteboard(s) livre(s)` },

@@ -1,3 +1,4 @@
+import { BLUEPRINT_FRAME_LAYERS, isCustomerServiceEvidence } from './blueprint-methodology.ts';
 import type { GraphEntity, Id, ServiceFrameLayerKey, ServiceGraph, WhiteboardItem } from '../domain/model';
 
 export type ServiceFrameLayerDefinition = {
@@ -8,16 +9,10 @@ export type ServiceFrameLayerDefinition = {
   visibleToCustomer: boolean;
 };
 
-export const SERVICE_FRAME_LAYERS: ServiceFrameLayerDefinition[] = [
-  { key: 'customer', label: 'Cliente', question: 'O que a pessoa faz, precisa ou tenta alcançar?', defaultKind: 'customerAction', visibleToCustomer: true },
-  { key: 'frontstage', label: 'Frontstage', question: 'Com quem ou com o que o cliente interage?', defaultKind: 'frontstage', visibleToCustomer: true },
-  { key: 'backstage', label: 'Backstage', question: 'O que precisa acontecer sem o cliente ver?', defaultKind: 'backstage', visibleToCustomer: false },
-  { key: 'process', label: 'Processos de suporte', question: 'Que processo, regra ou rotina sustenta este momento?', defaultKind: 'process', visibleToCustomer: false },
-  { key: 'enablement', label: 'Sistemas e recursos', question: 'Que tecnologia, recurso ou infraestrutura permite a operação?', defaultKind: 'system', visibleToCustomer: false },
-];
+export const SERVICE_FRAME_LAYERS: ServiceFrameLayerDefinition[] = BLUEPRINT_FRAME_LAYERS;
 
 const KIND_TO_LAYER: Record<string, ServiceFrameLayerKey> = {
-  persona: 'customer', need: 'customer', job: 'customer', pain: 'customer', problemHypothesis: 'customer', problem: 'customer', evidence: 'customer', emotion: 'customer', customerAction: 'customer',
+  persona: 'customer', need: 'customer', job: 'customer', pain: 'customer', problemHypothesis: 'customer', problem: 'customer', evidence: 'evidence', emotion: 'customer', customerAction: 'customer',
   touchpoint: 'frontstage', channel: 'frontstage', frontstage: 'frontstage', person: 'frontstage', responsible: 'frontstage',
   backstage: 'backstage',
   process: 'process', task: 'process', opportunity: 'process',
@@ -33,6 +28,7 @@ export function defaultServiceFrameLayer(kind?: string): ServiceFrameLayerKey {
 }
 
 export function serviceFrameLayerForItem(item: WhiteboardItem): ServiceFrameLayerKey {
+  if (item.kind === 'smart' && item.objectKind === 'evidence' && (!item.serviceLayer || item.serviceLayer === 'customer')) return 'evidence';
   if (isServiceFrameLayer(item.serviceLayer)) return item.serviceLayer;
   if (item.kind === 'smart') return defaultServiceFrameLayer(item.objectKind);
   return defaultServiceFrameLayer(item.semantic);
@@ -82,7 +78,11 @@ export function buildServiceFrameCoverage(graph: ServiceGraph, boardId: Id): Ser
     for (const item of items) {
       if (item.kind === 'smart' && item.objectKind === 'stage') continue;
       if (serviceFrameStageForItem(item, graph) !== stage.id) continue;
-      present.add(serviceFrameLayerForItem(item));
+      const layer = serviceFrameLayerForItem(item);
+      const record = item.kind === 'smart' ? graph.entities[item.objectKind]?.[item.objectId] : undefined;
+      const content = record?.title ?? record?.name ?? record?.description ?? (item.kind === 'free' ? item.text : '');
+      if (!String(content ?? '').trim()) continue;
+      if (layer !== 'evidence' || isCustomerServiceEvidence(record)) present.add(layer);
     }
     const missing = SERVICE_FRAME_LAYERS.map(layer => layer.key).filter(key => !present.has(key));
     const complete = SERVICE_FRAME_LAYERS.length - missing.length;

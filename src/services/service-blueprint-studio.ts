@@ -1,3 +1,4 @@
+import { isCustomerServiceEvidence } from './blueprint-methodology.ts';
 import type {
   BlueprintLaneConfig, BlueprintSemanticZoom, BlueprintSettings, GraphEntity, Id, ServiceGraph, Stage,
   WhiteboardItem, WhiteboardSemantic, WhiteboardTone, WhiteboardView,
@@ -12,7 +13,7 @@ export type BlueprintLaneDefinition = BlueprintLaneConfig;
 const ALL_ZOOMS: BlueprintSemanticZoom[] = ['strategic', 'journey', 'operational'];
 
 export const SERVICE_BLUEPRINT_LANES: BlueprintLaneDefinition[] = [
-  { id: 'evidence', key: 'evidence', role: 'evidence', label: 'Evidências', description: 'Provas, sinais e artefatos que sustentam a leitura da etapa.', tone: 'slate', editable: true, required: true, order: 10, visibleIn: ['journey', 'operational'] },
+  { id: 'evidence', key: 'evidence', role: 'evidence', label: 'Evidências', description: 'Artefatos físicos e digitais que o cliente percebe durante a entrega do serviço.', tone: 'slate', editable: true, required: true, order: 10, visibleIn: ['journey', 'operational'] },
   { id: 'customer', key: 'customer', role: 'customer', label: 'Ações do cliente', description: 'O que a pessoa faz na Journey. Esta linha vem da Jornada.', tone: 'blue', editable: false, required: true, order: 20, visibleIn: ALL_ZOOMS },
   { id: 'frontstage', key: 'frontstage', role: 'frontstage', label: 'Frontstage', description: 'Ações visíveis da organização diante do cliente.', tone: 'emerald', editable: true, required: true, order: 30, visibleIn: ALL_ZOOMS },
   { id: 'backstage', key: 'backstage', role: 'backstage', label: 'Backstage', description: 'Ações internas invisíveis ao cliente que sustentam a entrega.', tone: 'amber', editable: true, required: true, order: 40, visibleIn: ALL_ZOOMS },
@@ -202,6 +203,7 @@ const laneForSemantic = (semantic: WhiteboardSemantic | undefined): BlueprintLan
 export function blueprintLaneForItem(item: WhiteboardItem): BlueprintLaneKey | null {
   const explicit = String(item.blueprintLane ?? '').trim();
   if (explicit) return explicit;
+  if (item.serviceLayer) return item.serviceLayer === 'enablement' ? 'system' : item.serviceLayer;
   if (item.kind === 'smart') {
     if (item.objectKind === 'stage' || item.objectKind === 'customerAction') return 'customer';
     if (item.objectKind === 'evidence') return 'evidence';
@@ -214,8 +216,13 @@ export function blueprintLaneForItem(item: WhiteboardItem): BlueprintLaneKey | n
 }
 
 export function blueprintStageIdForItem(graph: ServiceGraph, board: WhiteboardView, item: WhiteboardItem): Id | null {
+  if (item.serviceStageId && graph.stages[item.serviceStageId]) return item.serviceStageId;
   if (item.blueprintStageId && graph.stages[item.blueprintStageId]) return item.blueprintStageId;
   if (item.kind === 'smart' && item.objectKind === 'stage' && graph.stages[item.objectId]) return item.objectId;
+  if (item.kind === 'smart') {
+    const stageId = graph.entities[item.objectKind]?.[item.objectId]?.stageId;
+    if (stageId && graph.stages[stageId]) return stageId;
+  }
   if (item.kind === 'smart' && item.objectKind === 'evidence') {
     const journey = board.journeyId ? graph.journeys[board.journeyId] : undefined;
     const owner = journey?.stageIds.map((id) => graph.stages[id]).find((stage) => safeIds(stage?.evidenceIds).includes(item.objectId));
@@ -253,10 +260,10 @@ export function buildServiceBlueprintReport(graph: ServiceGraph, boardId: Id): S
   const stages = (journey?.stageIds ?? []).map((id) => graph.stages[id]).filter((stage): stage is Stage => Boolean(stage));
   const stageReports = stages.map((stage, index): BlueprintStageReport => {
     const laneItems = Object.fromEntries(lanes.map((lane) => [lane.key, blueprintCellItems(graph, board, stage.id, lane.key)])) as Record<BlueprintLaneKey, WhiteboardItem[]>;
-    const evidence = safeIds(stage.evidenceIds).map((id) => graph.entities?.evidence?.[id]).filter((entity): entity is GraphEntity => Boolean(entity));
+    const evidence = safeIds(stage.evidenceIds).map((id) => graph.entities?.evidence?.[id]).filter((entity): entity is GraphEntity => isCustomerServiceEvidence(entity));
     const laneCounts = Object.fromEntries(lanes.map((lane) => {
       const items = laneItems[lane.key] ?? [];
-      if (lane.role === 'evidence') return [lane.key, uniq([...evidence.map((item) => item.id), ...items.map((item) => item.kind === 'smart' ? item.objectId : item.id)]).length];
+      if (lane.role === 'evidence') return [lane.key, uniq([...evidence.map((item) => item.id), ...items.filter(item => item.kind === 'smart' && isCustomerServiceEvidence(graph.entities[item.objectKind]?.[item.objectId])).map((item) => item.kind === 'smart' ? item.objectId : item.id)]).length];
       if (lane.role === 'customer') return [lane.key, stage.customerAction.trim() ? 1 : 0];
       return [lane.key, items.length];
     })) as Record<BlueprintLaneKey, number>;

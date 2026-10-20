@@ -26,7 +26,7 @@ const graph={
     channel:{'ch-door':{id:'ch-door',type:'channel',title:'Contato presencial'}},
     dependency:{'dep-order':{id:'dep-order',type:'dependency',title:'Pedido confirmado'}},
     policy:{'pol-label':{id:'pol-label',type:'policy',title:'Etiqueta obrigatória'}},
-    evidence:{'ev-receipt':{id:'ev-receipt',type:'evidence',title:'Comprovante digital',stageId:'s1',evidenceMedium:'digital'},'ev-tag':{id:'ev-tag',type:'evidence',title:'Etiqueta física',stageId:'s2',evidenceMedium:'physical'}},
+    evidence:{'ev-receipt':{id:'ev-receipt',type:'evidence',title:'Comprovante digital',stageId:'s1',evidencePurpose:'service',evidenceMedium:'digital'},'ev-tag':{id:'ev-tag',type:'evidence',title:'Etiqueta física',stageId:'s2',evidencePurpose:'service',evidenceMedium:'physical'}},
   },
   service:{id:'svc',name:'Lavanderia',description:'',journeyIds:['j1'],createdAt:now,updatedAt:now},
   journeys:{j1:{id:'j1',serviceId:'svc',name:'Fluxo',stageIds:['s1','s2']}},

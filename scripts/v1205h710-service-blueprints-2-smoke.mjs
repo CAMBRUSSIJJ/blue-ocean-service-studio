@@ -56,11 +56,11 @@ const graph={
 const initial=buildServiceBlueprintReport(graph,'bp1');
 ok('Report encontra Journey e duas etapas', initial?.journeyId==='j1' && initial?.stageCount===2 && initial?.stages.length===2);
 ok('Ação do cliente conta sem criar item duplicado', initial?.stages[0].laneCounts.customer===1 && Object.keys(graph.views.whiteboards.bp1.items).length===0);
-ok('Evidência canônica da Journey conta na primeira etapa', initial?.stages[0].laneCounts.evidence===1 && initial?.stages[0].evidence[0]?.id==='evidence1');
+ok('Entrevistas permanecem pesquisa e não contam como artefato do serviço', initial?.stages[0].laneCounts.evidence===0 && initial?.stages[0].evidence.length===0);
 ok('Etapa sem evidência vira gap real', initial?.stages[1].gaps.some((gap)=>gap.lane==='evidence'));
 ok('Blueprint vazio mostra gaps críticos de operação', (initial?.criticalGapCount??0)>=4 && initial?.readyForValidation===false);
 ok('Cobertura operacional começa em zero', initial?.operationalCoverage===0);
-ok('Cobertura de evidência começa em 50%', initial?.evidenceCoverage===50);
+ok('Cobertura não presume evidências percebidas a partir de pesquisa', initial?.evidenceCoverage===0);
 
 const synced=syncBlueprintFromJourney(graph,'bp1',now);
 ok('Sincronização adiciona referências canônicas da Journey', synced.stageItems===2 && synced.evidenceItems===1 && synced.added===3);
@@ -82,6 +82,12 @@ add('s2','evidence','Registro operacional','evidence-s2');
 ok('Conteúdo operacional é criado na etapa correta', blueprintCellItems(current,current.views.whiteboards.bp1,'s1','frontstage').some((item)=>item.id==='front-s1'));
 ok('Processos e Sistemas ocupam lanes diferentes', blueprintCellItems(current,current.views.whiteboards.bp1,'s1','process').length===1 && blueprintCellItems(current,current.views.whiteboards.bp1,'s1','system').length===1);
 ok('Evidência local pode complementar evidência canônica', blueprintCellItems(current,current.views.whiteboards.bp1,'s2','evidence').some((item)=>item.id==='evidence-s2'));
+const beforeArtifacts=buildServiceBlueprintReport(current,'bp1');
+ok('Notas livres e entrevistas não completam evidência percebida',beforeArtifacts.evidenceCoverage===0 && beforeArtifacts.readyForValidation===false);
+for(const stageId of ['s1','s2']){
+ const id='artifact-'+stageId;current.entities.evidence[id]={id,type:'evidence',stageId,title:'Comprovante '+stageId,evidencePurpose:'service',evidenceMedium:'digital'};
+ current.stages[stageId].evidenceIds=[...(current.stages[stageId].evidenceIds||[]),id];
+}
 const complete=buildServiceBlueprintReport(current,'bp1');
 ok('Blueprint completo chega a 100%', complete?.overallScore===100 && complete?.operationalCoverage===100 && complete?.evidenceCoverage===100);
 ok('Blueprint completo não possui gaps', complete?.gapCount===0 && complete?.criticalGapCount===0);

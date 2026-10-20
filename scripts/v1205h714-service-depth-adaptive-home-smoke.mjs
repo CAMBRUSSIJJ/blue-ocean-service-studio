@@ -30,6 +30,9 @@ rich.stages.s2={id:'s2',journeyId:'j1',title:'Entrega',customerAction:'Recebe ro
 rich.touchpoints.t1={id:'t1',serviceId:'svc',name:'Site',channel:'digital'}; rich.touchpoints.t2={id:'t2',serviceId:'svc',name:'Entrega',channel:'fisico'};
 const blueprintItems={};
 for (const [idx,stageId] of ['s1','s2'].entries()) {
+  const artifactId=`artifact-${stageId}`;
+  rich.entities.evidence[artifactId]={id:artifactId,title:'Comprovante do serviço',stageId,evidencePurpose:'service',evidenceMedium:'digital'};
+  blueprintItems[artifactId]={id:artifactId,kind:'smart',objectKind:'evidence',objectId:artifactId,serviceStageId:stageId,serviceLayer:'evidence',x:0,y:0,width:100,height:60};
   for (const [lane,semantic] of [['frontstage','frontstage'],['backstage','backstage'],['process','process'],['system','system']]) {
     const id=`${stageId}-${lane}`; blueprintItems[id]={id,kind:'free',shape:'note',semantic,text:`${lane} ${idx}`,x:0,y:0,width:100,height:60,blueprintStageId:stageId,blueprintLane:lane};
   }
@@ -37,6 +40,7 @@ for (const [idx,stageId] of ['s1','s2'].entries()) {
 rich.views.whiteboards.bp1={id:'bp1',serviceId:'svc',name:'Blueprint',journeyId:'j1',viewKind:'blueprint',layoutMode:'blueprint',items:blueprintItems,edges:{},designContext:{version:1,source:'service-definition',createdAt:'2026-01-01',personaIds:['p1'],needIds:['n1'],jobIds:[],painIds:[],problemIds:['pr1'],evidenceIds:['e1']}};
 rich.views.whiteboards.w1={id:'w1',serviceId:'svc',name:'Exploração',viewKind:'free',items:{a:{id:'a',kind:'free',shape:'note',text:'A',x:0,y:0,width:100,height:60},b:{id:'b',kind:'free',shape:'note',text:'B',x:100,y:0,width:100,height:60},c:{id:'c',kind:'free',shape:'note',text:'C',x:200,y:0,width:100,height:60}},edges:{e:{id:'e',fromId:'a',toId:'b',label:'',style:'solid',arrow:'end'}}};
 const richReport=buildServiceDepthReport(rich);
+check(richReport.components.find(item=>item.id==='evidence').score===100,'artefatos do serviço não alteram a qualidade das evidências de pesquisa');
 check(richReport.score===100,'serviço maduro alcança profundidade 100');
 check(richReport.label==='Blue Ocean','100% recebe estado Blue Ocean');
 check(richReport.components.every((item)=>item.score===100),'todos os componentes maduros chegam a 100');

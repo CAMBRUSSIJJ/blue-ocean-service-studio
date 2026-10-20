@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { ServiceGraph } from './model';
-import { validateGraphIntegrity } from './integrity';
+import { validateGraphIntegrity } from './integrity.ts';
 
 const id=z.string().min(1); const idList=z.array(id);
 const serviceProjectPhase=z.enum(['discovery','definition','design','validation','improvement']);
@@ -80,7 +80,7 @@ const whiteboardEdge=z.object({id,fromId:id,toId:id,label:z.string(),style:z.enu
 const blueprintSemanticZoom=z.enum(['strategic','journey','operational']);
 const blueprintLane=z.object({id,key:z.string().min(1),role:z.enum(['evidence','customer','frontstage','backstage','process','system','custom']),label:z.string().min(1),description:z.string(),tone,editable:z.boolean(),required:z.boolean(),order:z.number().finite(),visibleIn:z.array(blueprintSemanticZoom).min(1),custom:z.boolean().optional()}).passthrough();
 const blueprintSettings=z.object({version:z.literal(1),semanticZoom:blueprintSemanticZoom,preset:z.enum(['standard','healthcare','hospitality','saas','custom']),lanes:z.array(blueprintLane),updatedAt:z.string()}).passthrough();
-const whiteboard=z.object({id,serviceId:id,name:z.string(),journeyId:z.string().optional(),viewKind:z.enum(['journey','blueprint','free']).optional(),items:z.record(id,whiteboardItem),edges:z.record(id,whiteboardEdge).default({}),layoutMode:z.enum(['free','blueprint','flow','journey']).optional(),gridVisible:z.boolean().optional(),snapToGrid:z.boolean().optional(),blueprintSettings:blueprintSettings.optional()}).passthrough();
+const whiteboard=z.object({id,serviceId:id,name:z.string(),journeyId:z.string().optional(),viewKind:z.enum(['journey','blueprint','free']).optional(),items:z.record(id,whiteboardItem),edges:z.record(id,whiteboardEdge).default({}),layoutMode:z.enum(['free','service','blueprint','flow','journey']).optional(),gridVisible:z.boolean().optional(),snapToGrid:z.boolean().optional(),blueprintSettings:blueprintSettings.optional()}).passthrough();
 const views=z.object({whiteboards:z.record(id,whiteboard)}).passthrough();
 
 export const legacyGraphSchema=graphData.omit({entities:true,research:true,integrity:true});

@@ -41,7 +41,9 @@ body.bo-journey-editor-open #root{visibility:hidden}
 .bo-focused-journey:has(.bo-h1705-inspector) .bo-h1705-bottom-bar{z-index:10}
 .bo-focused-journey .bo-h1709-card:not(:focus-within) .bo-h1706-format{visibility:hidden}
 /* The Blueprint uses the same compact header and a single floating navigation dock. */
-.bo1174-board.bo-simple-blueprint .bo1174-board-header{height:56px!important;min-height:56px!important;padding:0 16px!important;gap:10px!important}
+.bo1174-board.bo-simple-blueprint .bo1174-board-header{display:flex!important;flex-wrap:nowrap!important;height:56px!important;min-height:56px!important;padding:0 16px!important;gap:10px!important}
+.bo1174-board.bo-simple-blueprint .bo1174-board-header>.rt190-context{flex:1!important;min-width:0!important;width:auto!important}
+.bo1174-board.bo-simple-blueprint .bo1174-board-header>.rt190-topmid,.bo1174-board.bo-simple-blueprint .bo1174-board-header>.rt190-actions{flex:0 0 auto!important;width:auto!important}
 .bo-simple-blueprint .bo1174-board-crumb{display:none!important}
 .bo-simple-blueprint .rt190-context-copy{min-width:0}
 .bo-simple-blueprint .rt190-doc-title b{font-size:15px!important}
@@ -54,9 +56,11 @@ body.bo-journey-editor-open #root{visibility:hidden}
 .bo1174-board.bo-simple-blueprint .bo1174-statusbar button{height:34px!important;min-height:34px!important;min-width:30px!important;padding:5px!important;border:0!important;background:transparent!important;color:#fff!important;box-shadow:none!important;border-radius:5px!important}
 .bo1174-board.bo-simple-blueprint .bo1174-statusbar button.active,.bo1174-board.bo-simple-blueprint .bo1174-statusbar button:hover{background:#46565f!important;color:#fff!important}
 .bo1174-board.bo-simple-blueprint .bo1174-statusbar button:focus-visible{outline:2px solid #a5c9ff!important;outline-offset:-2px!important}
+.bo1174-board.bo-simple-blueprint .bo1174-statusbar .rt144-btn::after{content:none!important}
 .bo-simple-blueprint .bo1174-statusbar .bo1174-status-group{padding:0 3px!important;gap:2px!important;border-color:#56616a!important}
 .bo-simple-blueprint .bo1174-statusbar .bo1193-zoom-slider,.bo-simple-blueprint .bo1174-statusbar .bo1174-status-group.fit{display:none!important}
 .rt144.bo1174-board.bo-simple-blueprint .bo1174-statusbar .zoom>button.rt144-btn.zoom{color:#fff!important;min-width:44px!important;font-size:11px!important}
+.rt144.bo1174-board.bo-simple-blueprint.bo1175-mobile-read .rt190-actions>.rt190-tools-menu{display:inline-flex!important;align-items:center;min-height:40px!important}
 @media(max-width:880px){.bo-focused-journey .bo-h1705-saving{display:none}.bo-focused-journey .bo-h1705-menubar{margin-left:auto}.bo-focused-journey .bo-h1705-inspector{z-index:25}}
 @media(max-width:530px){
  .bo-focused-journey .bo-h1705-topbar{height:52px;min-height:52px;padding:0 8px;gap:2px}

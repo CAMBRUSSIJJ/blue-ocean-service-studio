@@ -84,6 +84,7 @@
 @import './runtime/editor-simplification.css';
 @import './runtime/focused-editor.css';
 @import './runtime/journey-surface-polish.css';
+@import './runtime/blueprint-methodology.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

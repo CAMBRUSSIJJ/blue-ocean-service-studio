@@ -1,9 +1,11 @@
+import { transpileModule, ModuleKind, ScriptTarget } from 'typescript';
 import { copyFileSync, mkdirSync, readdirSync, unlinkSync, readFileSync, writeFileSync } from 'node:fs';
 const pkg = JSON.parse(readFileSync('package.json','utf8'));
 const appVersion = String(pkg.version);
 
 mkdirSync('public', { recursive: true });
 mkdirSync('src/generated', { recursive: true });
+writeFileSync('public/v1102-blueprint-methodology.js', transpileModule(readFileSync('src/services/blueprint-methodology.ts', 'utf8'), { compilerOptions: { module: ModuleKind.ESNext, target: ScriptTarget.ES2022 } }).outputText);
 writeFileSync('src/generated/app-version.ts', `// Gerado por scripts/prepare-assets.mjs. Não edite manualmente.\nexport const APP_VERSION = ${JSON.stringify(appVersion)} as const;\nexport const APP_VERSION_LABEL = ${JSON.stringify('V'+appVersion)} as const;\n`);
 writeFileSync('public/app-version.json', JSON.stringify({product:'BLUE OCEAN Service Studio',version:appVersion}, null, 2)+'\n');
 writeFileSync('VERSION', appVersion+'\n');
@@ -80,6 +82,7 @@ for (const [source, target] of [
       './view-config.js':'./v1102-view-config.js',
       './journey-templates.js':'./v1102-journey-templates.js',
       './blueprint-from-selection.js':'./v1102-blueprint-from-selection.js',
+      './blueprint-methodology.js':'./v1102-blueprint-methodology.js',
       './guidance-engine.js':'./v1188-guidance-engine.js',
       './practical-simulation-data.js':'./v1102-practical-simulation-data.js',
     };

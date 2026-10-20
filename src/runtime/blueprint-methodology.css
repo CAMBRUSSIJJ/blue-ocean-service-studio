@@ -1,0 +1,42 @@
+.bo-method-dialog{width:min(760px,calc(100vw - 28px))!important;max-width:760px!important;color:#334155}
+.bo-method-dialog h3{font-size:14px;font-weight:650;color:#28384d;margin:0 0 8px}
+.bo-method-dialog p{font-size:12px;line-height:1.6;color:#52647b}
+.bo-method-form{display:grid;gap:16px;padding-top:8px}
+.rt144-modal .rt144-modalbox.bo-method-dialog{padding:0!important}
+.rt144-modal .rt144-modalbox.bo-method-dialog>.bo-method-form{padding:16px 22px 22px}
+.rt144-modal .rt144-modalbox.bo-method-review>:not(.rt144-panelhead){margin-left:22px;margin-right:22px}
+.rt144-modal .rt144-modalbox.bo-method-review>.bo-method-actions{margin-bottom:20px}
+.rt144-modal .rt144-modalbox.bo-method-dialog .bo-method-field>span,.rt144-modal .rt144-modalbox.bo-method-dialog .bo-method-check>span,.rt144-modal .rt144-modalbox.bo-method-dialog .bo-method-links>label>span{font-size:12px!important;line-height:1.6!important;color:#334155!important;letter-spacing:normal!important;text-transform:none!important}
+.bo-method-field{display:grid;gap:7px;min-width:0;font-size:12px;font-weight:550;color:#334155}
+.bo-method-field>small{font-weight:400;color:#52647b;line-height:1.5}
+.bo-method-field input,.bo-method-field textarea,.bo-method-field select{width:100%;min-width:0;min-height:38px;padding:9px 10px;border:1px solid #d6dee9;border-radius:7px;background:#fff;font-size:13px;font-weight:400;line-height:1.5;color:#334155}
+.bo-method-field textarea{resize:vertical;min-height:72px}
+.bo-method-field input:focus-visible,.bo-method-field textarea:focus-visible,.bo-method-field select:focus-visible{outline:2px solid #59799f;outline-offset:2px}
+.bo-method-section{display:grid;gap:12px;padding-top:18px;border-top:1px solid #e8edf2}
+.bo-method-section>p{margin:0}
+.bo-method-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.bo-method-links{display:grid;gap:8px;padding:12px;border:1px solid #e2e8f0;border-radius:8px;min-width:0}
+.bo-method-links legend{padding:0 5px;font-size:12px;font-weight:600;color:#334155}
+.bo-method-links>label:not(.bo-method-field),.bo-method-check{display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.6;font-weight:400;color:#42536a}
+.bo-method-links input[type=checkbox],.bo-method-check input[type=checkbox]{width:17px;min-width:17px;height:17px;min-height:17px;padding:0;margin-top:2px;accent-color:#3154e5}
+.bo-method-optional{padding:14px 0;border-top:1px solid #e2e8f0}
+.bo-method-optional>summary{cursor:pointer;font-size:13px;font-weight:600;color:#334155;min-height:30px}
+.bo-method-optional[open]{display:grid;gap:15px}
+.bo-method-optional .bo-method-field{margin-top:12px}
+.bo-method-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:12px;border-top:1px solid #e8edf2}
+.bo-method-actions button,.bo-method-issue button,.bo-method-optional>button{min-height:36px;padding:8px 12px;border:1px solid #d6dee9;border-radius:7px;font-size:12px;background:#fff;color:#334155}
+.bo-method-actions button.primary{background:#3154e5;color:#fff;border-color:#3154e5}
+.bo-method-promise{padding:12px 14px;border-left:3px solid #b5c4d9;border-radius:0 6px 6px 0;background:#f6f8fb;color:#334155!important;font-size:13px!important;white-space:pre-wrap}
+.bo-method-review-summary{display:grid;gap:8px;padding:12px 0}
+.bo-method-review-summary>strong{font-size:16px;color:#28384d}
+.bo-method-review-summary>span{font-size:12px;color:#52647b}
+.bo-method-issues{display:grid;gap:9px;margin:16px 0}
+.bo-method-issue{padding:10px 12px;border:1px solid #e1e6ed;border-left:3px solid #c4cfdd;border-radius:6px}
+.bo-method-issue.critical{border-left-color:#b95b53}
+.bo-method-issue>p{margin:0 0 8px}
+.bo-method-issue>p:only-child{margin:0}
+.bo-method-form .bo-method-error{margin:0;color:#a53d35}
+.bo-method-field[hidden]{display:none}
+.bo1203-service-line.internal{border-color:#8b92a3;border-top-style:dashed}
+.bo1203-service-line.internal>span{color:#52647b}
+@media(max-width:530px){.bo-method-grid{grid-template-columns:1fr}.bo-method-dialog{width:calc(100vw - 20px)!important}.rt144-modal .rt144-modalbox.bo-method-dialog>.bo-method-form{padding:14px}.rt144-modal .rt144-modalbox.bo-method-review>:not(.rt144-panelhead){margin-left:14px;margin-right:14px}.bo-method-links{padding:10px}.bo-method-actions{flex-wrap:wrap}}

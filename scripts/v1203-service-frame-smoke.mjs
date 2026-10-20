@@ -17,14 +17,14 @@ const pkg=JSON.parse(read('package.json'));
 ok(versionAtLeast(pkg.version,1,20,3),'package version 1.20.3 or newer');
 ok(versionAtLeast(read('VERSION').trim(),1,20,3),'VERSION 1.20.3 or newer');
 
-ok(SERVICE_FRAME_LAYERS.length===5,'five structural service layers');
-ok(SERVICE_FRAME_LAYERS.map(x=>x.key).join('|')==='customer|frontstage|backstage|process|enablement','canonical layer order');
-ok(SERVICE_FRAME_LAYERS[0].label==='Cliente','customer layer label');
-ok(SERVICE_FRAME_LAYERS[1].label==='Frontstage','frontstage layer label');
-ok(SERVICE_FRAME_LAYERS[2].label==='Backstage','backstage layer label');
-ok(SERVICE_FRAME_LAYERS[3].label==='Processos de suporte','process layer label');
-ok(SERVICE_FRAME_LAYERS[4].label==='Sistemas e recursos','enablement layer label');
-ok(SERVICE_FRAME_LAYERS.filter(x=>x.visibleToCustomer).map(x=>x.key).join('|')==='customer|frontstage','only customer and frontstage are visible');
+ok(SERVICE_FRAME_LAYERS.length===6,'six structural service layers');
+ok(SERVICE_FRAME_LAYERS.map(x=>x.key).join('|')==='evidence|customer|frontstage|backstage|process|enablement','canonical layer order');
+ok(SERVICE_FRAME_LAYERS[1].label==='Cliente','customer layer label');
+ok(SERVICE_FRAME_LAYERS[2].label==='Frontstage','frontstage layer label');
+ok(SERVICE_FRAME_LAYERS[3].label==='Backstage','backstage layer label');
+ok(SERVICE_FRAME_LAYERS[4].label==='Processos de suporte','process layer label');
+ok(SERVICE_FRAME_LAYERS[5].label==='Sistemas e recursos','enablement layer label');
+ok(SERVICE_FRAME_LAYERS.filter(x=>x.visibleToCustomer).map(x=>x.key).join('|')==='evidence|customer|frontstage','evidence, customer and frontstage are visible');
 ok(isServiceFrameLayer('backstage'),'layer guard accepts backstage');
 ok(!isServiceFrameLayer('problem'),'layer guard rejects business object as structural layer');
 ok(defaultServiceFrameLayer('touchpoint')==='frontstage','touchpoint defaults frontstage');
@@ -38,12 +38,14 @@ const now='2026-10-07T21:30:00.000Z';
 const graph={
   schemaVersion:3,persistenceRevision:1,
   entities:{
+    evidence:{'ev-1':{id:'ev-1',type:'evidence',stageId:'stage-1',title:'Comprovante',evidencePurpose:'service',evidenceMedium:'digital'}},
     frontstage:{'front-1':{id:'front-1',type:'frontstage',serviceId:'svc',stageId:'stage-1',title:'Atendente confirma coleta'}},
     backstage:{'back-1':{id:'back-1',type:'backstage',serviceId:'svc',stageId:'stage-1',title:'Separar rota'}},
     process:{'proc-1':{id:'proc-1',type:'process',serviceId:'svc',stageId:'stage-1',title:'Planejar rota'}},
     system:{'sys-1':{id:'sys-1',type:'system',serviceId:'svc',stageId:'stage-1',title:'Roteirizador'}},
   },
   views:{whiteboards:{'wb-1':{id:'wb-1',serviceId:'svc',name:'Service Frame',journeyId:'journey-1',viewKind:'free',layoutMode:'service',items:{
+    'e':{id:'e',kind:'smart',objectKind:'evidence',objectId:'ev-1',x:0,y:0,width:200,height:100},
     'f':{id:'f',kind:'smart',objectKind:'frontstage',objectId:'front-1',x:0,y:0,width:200,height:100},
     'b':{id:'b',kind:'smart',objectKind:'backstage',objectId:'back-1',x:0,y:0,width:200,height:100},
     'p':{id:'p',kind:'smart',objectKind:'process',objectId:'proc-1',x:0,y:0,width:200,height:100},
@@ -65,17 +67,17 @@ ok(moved.serviceLayer==='backstage','semantic placement stores layer');
 ok(graph.views.whiteboards['wb-1'].items.f.serviceStageId===undefined,'placement is immutable');
 const coverage=buildServiceFrameCoverage(graph,'wb-1');
 ok(coverage.stages.length===2,'coverage evaluates every journey stage');
-ok(coverage.stages[0].complete===5,'customer action plus four operational layers completes stage');
+ok(coverage.stages[0].complete===6,'customer action, service evidence and four operational layers complete the stage');
 ok(coverage.stages[0].percent===100,'complete stage is 100 percent');
 ok(coverage.stages[0].missing.length===0,'complete stage has no missing layers');
 ok(coverage.stages[1].complete===0,'empty stage has zero layers');
-ok(coverage.stages[1].missing.length===5,'empty stage exposes five gaps');
-ok(coverage.complete===5 && coverage.total===10 && coverage.percent===50,'overall coverage is deterministic cells completed over total cells');
+ok(coverage.stages[1].missing.length===6,'empty stage exposes six gaps');
+ok(coverage.complete===6 && coverage.total===12 && coverage.percent===50,'overall coverage is deterministic cells completed over total cells');
 ok(buildServiceFrameCoverage(graph,'missing').total===0,'missing board returns empty coverage safely');
 
 const model=read('src/domain/model.ts');
-for(const marker of ["export type ServiceFrameLayerKey = 'customer' | 'frontstage' | 'backstage' | 'process' | 'enablement'","serviceStageId?: Id","serviceLayer?: ServiceFrameLayerKey","'free' | 'service' | 'blueprint' | 'flow' | 'journey'"]) ok(model.includes(marker),`model marker ${marker}`);
-const core=read('src/runtime/whiteboard-core.js');
+for(const marker of ["export type ServiceFrameLayerKey = 'evidence' | 'customer' | 'frontstage' | 'backstage' | 'process' | 'enablement'","serviceStageId?: Id","serviceLayer?: ServiceFrameLayerKey","'free' | 'service' | 'blueprint' | 'flow' | 'journey'"]) ok(model.includes(marker),`model marker ${marker}`);
+const core=read('src/runtime/whiteboard-core.js')+read('src/services/blueprint-methodology.ts');
 for(const marker of [
   'SERVICE_FRAME_LAYERS','function serviceFrameMetrics()','function serviceCompositionLayout(','function renderServiceCompositionStructure(canvas)',
   'LINHA DE INTERAÇÃO','LINHA DE VISIBILIDADE','cliente ↕ frontstage','acima visível · abaixo invisível',

@@ -263,7 +263,37 @@ export type BlueprintDraft = {
   suporte: string;
 };
 
-export type GraphEntity = { id: Id; type?: string; title?: string; name?: string; description?: string; stageId?: Id; journeyId?: Id; serviceId?: Id; owner?: string; scenarioIds?: Id[]; experienceState?: 'current' | 'future' | 'both'; [key: string]: unknown };
+export type BlueprintEvidencePurpose = 'service' | 'research';
+export type BlueprintActivityRef = { kind: 'frontstage' | 'backstage' | 'process'; id: Id };
+export type BlueprintActivityDetails = {
+  durationMinutes?: number;
+  waitMinutes?: number;
+  targetMinutes?: number;
+  capacityPerHour?: number;
+  demandPerHour?: number;
+  failureMode?: string;
+  recoveryAction?: string;
+  promiseLinked?: boolean;
+  promiseContribution?: string;
+  customerMessage?: string;
+  predecessors?: BlueprintActivityRef[];
+};
+export type BlueprintQualityDimension = 'reliability' | 'responsiveness' | 'assurance' | 'empathy' | 'tangibles';
+export type BlueprintServiceStrategy = {
+  version: 1;
+  promiseSource?: 'service' | 'custom';
+  servicePromise?: string;
+  product?: string;
+  price?: string;
+  place?: string;
+  promotion?: string;
+  people?: string;
+  process?: string;
+  physicalEvidence?: string;
+  qualityCriteria?: Partial<Record<BlueprintQualityDimension, { criterion: string; metricId?: Id }>>;
+};
+
+export type GraphEntity = { id: Id; type?: string; title?: string; name?: string; description?: string; stageId?: Id; journeyId?: Id; serviceId?: Id; owner?: string; scenarioIds?: Id[]; experienceState?: 'current' | 'future' | 'both'; evidencePurpose?: BlueprintEvidencePurpose; operationalDetails?: BlueprintActivityDetails; [key: string]: unknown };
 
 export type ServiceLayerKey = 'experience' | 'research' | 'friction' | 'improvement' | 'operation' | 'measurement';
 export type ServiceLayerSettings = { visibleLayers: ServiceLayerKey[]; preset?: string };
@@ -774,7 +804,7 @@ export type CoreObjectKind = 'stage' | 'touchpoint' | 'problem' | 'opportunity' 
 export type RuntimeObjectKind = CoreObjectKind | 'benefit' | 'persona' | 'need' | 'job' | 'pain' | 'problemHypothesis' | 'expectation' | 'channel' | 'emotion' | 'evidence' | 'insight' | 'metric' | 'customerAction' | 'frontstage' | 'backstage' | 'process' | 'system' | 'person' | 'solution' | 'experiment' | 'resource' | 'responsible' | 'role' | 'dependency' | 'policy';
 export type SmartObjectKind = RuntimeObjectKind;
 export type WhiteboardTone = 'slate' | 'blue' | 'emerald' | 'amber' | 'violet' | 'rose' | 'yellow';
-export type ServiceFrameLayerKey = 'customer' | 'frontstage' | 'backstage' | 'process' | 'enablement';
+export type ServiceFrameLayerKey = 'evidence' | 'customer' | 'frontstage' | 'backstage' | 'process' | 'enablement';
 export type WhiteboardSemantic = 'note' | 'evidence' | 'frontstage' | 'backstage' | 'process' | 'system' | 'role' | 'dependency' | 'policy' | 'frame';
 export type WhiteboardItem =
   | { id: Id; kind: 'free'; shape: 'note' | 'text' | 'shape' | 'frame'; semantic?: WhiteboardSemantic; tone?: WhiteboardTone; groupId?: Id; text: string; x: number; y: number; width: number; height: number; serviceStageId?: Id; serviceLayer?: ServiceFrameLayerKey; blueprintStageId?: Id; blueprintLane?: string }
@@ -786,7 +816,7 @@ export type WhiteboardLayoutMode = 'free' | 'service' | 'blueprint' | 'flow' | '
 export type WhiteboardView = {
   id: Id; serviceId: Id; name: string; journeyId?: Id; viewKind?: 'journey' | 'blueprint' | 'free'; items: Record<Id, WhiteboardItem>; edges: Record<Id, WhiteboardEdge>;
   layoutMode?: WhiteboardLayoutMode; gridVisible?: boolean; snapToGrid?: boolean;
-  designContext?: DesignContextRef; blueprintSettings?: BlueprintSettings; updatedAt?: string;
+  designContext?: DesignContextRef; blueprintSettings?: BlueprintSettings; serviceStrategy?: BlueprintServiceStrategy; serviceFrameVersion?: number; updatedAt?: string;
 };
 
 export type JourneyRow = 'customerAction' | 'thoughts' | 'emotion' | 'needs' | 'touchpoints' | 'moments' | 'validatedProblems' | 'evidence' | 'problems' | 'opportunities';

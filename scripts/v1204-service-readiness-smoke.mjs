@@ -11,7 +11,7 @@ const completeGraph={
   entities:{
     persona:{p1:{id:'p1',type:'persona',title:'Cliente'}},
     need:{n1:{id:'n1',type:'need',title:'Previsibilidade'}},
-    evidence:{e1:{id:'e1',type:'evidence',title:'Entrevista',confidence:'high'}},
+    evidence:{e1:{id:'e1',type:'evidence',title:'Entrevista',confidence:'high'},artifact1:{id:'artifact1',type:'evidence',title:'Comprovante de coleta',evidencePurpose:'service',evidenceMedium:'digital'},artifact2:{id:'artifact2',type:'evidence',title:'Comprovante de entrega',evidencePurpose:'service',evidenceMedium:'documentary'}},
     problem:{pr1:{id:'pr1',type:'problem',title:'Atraso imprevisível',status:'validated',evidenceIds:['e1']}},
   },
   service:{id:'svc',name:'Lavanderia',description:'',journeyIds:['j1'],createdAt:now,updatedAt:now,project:{version:1,id:'project-svc',serviceId:'svc',status:'active',currentPhase:'design',createdAt:now,updatedAt:now,definition:{promise:'Coleta previsível',outcome:'Roupa entregue no prazo',scope:'Coleta, lavagem e entrega',startBoundary:'Pedido confirmado',endBoundary:'Entrega concluída',principles:['Clareza'],successCriteria:['95% no prazo'],outOfScope:[],assumptions:[],personaIds:['p1'],problemIds:['pr1'],evidenceIds:['e1']}}},
@@ -23,6 +23,7 @@ const completeGraph={
   },edges:{}}}},
   touchpoints:{},problems:{},opportunities:{},tasks:{},blueprintDraft:{evidencias:'',frontstage:'',backstage:'',suporte:''},research:{sources:{}},
 };
+for(const [stageId,id] of [['s1','artifact1'],['s2','artifact2']])completeGraph.views.whiteboards.wb.items[id]={...item(id,stageId,'evidence'),kind:'smart',objectKind:'evidence',objectId:id};
 
 const ready=buildServiceReadinessReport(completeGraph);
 ok(ready.version===1,'report version 1');

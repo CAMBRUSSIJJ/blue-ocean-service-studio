@@ -1,3 +1,12 @@
+## Blueprint: estrutura e revisão da entrega
+
+- Completa a vista operacional com evidências do serviço e as linhas de interação, visibilidade e interação interna.
+- Distingue artefatos percebidos pelo cliente de evidências de pesquisa; registros antigos permanecem preservados e pedem classificação explícita.
+- Acrescenta detalhes de atividades com papéis, canais, relações, execução, espera, prazo, capacidade, demanda, falhas, recuperação e contribuição para a promessa.
+- Verifica vínculos ausentes, dependências circulares, prazos inviáveis e demanda superior à capacidade, separando cobertura estrutural de revisão da entrega.
+- Acrescenta estratégia opcional com os 7 Ps e cinco dimensões de qualidade percebida, sem novos controles permanentes no canvas.
+- Preserva metadados em backups, cancelamento e histórico; mantém as novas formas editáveis em desktop e tablet e a revisão disponível no modo de leitura do celular.
+
 ## Cartões mais suaves e seletor de faixas padronizado
 
 - Integra o texto à superfície do cartão, com bordas leves, sombras discretas e ajuste automático da altura.

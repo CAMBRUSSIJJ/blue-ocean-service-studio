@@ -1,3 +1,4 @@
+import { isCustomerServiceEvidence } from './blueprint-methodology.ts';
 import type { GraphEntity, Id, ServiceFrameLayerKey, ServiceGraph, WhiteboardItem } from '../domain/model.ts';
 import { serviceFrameLayerForItem, serviceFrameStageForItem } from './service-frame.ts';
 
@@ -32,7 +33,7 @@ function ids(value: unknown): Id[] {
 }
 
 export function serviceVisibilityForLayer(layer: ServiceFrameLayerKey): ServiceVisibility {
-  return layer === 'customer' || layer === 'frontstage' ? 'customer-visible' : 'internal';
+  return layer === 'evidence' || layer === 'customer' || layer === 'frontstage' ? 'customer-visible' : 'internal';
 }
 
 export function operationalLinkField(kind: OperationalEntityKind): OperationalLinkField {
@@ -81,7 +82,7 @@ function linkedCount(graph: ServiceGraph, entity: GraphEntity | undefined, kind:
 }
 
 function stageEvidence(graph: ServiceGraph, stageId: Id, media: EvidenceMedium[]): number {
-  return Object.values(graph.entities?.evidence ?? {}).filter(entity => entity.stageId === stageId && media.includes(evidenceMedium(entity))).length;
+  return Object.values(graph.entities?.evidence ?? {}).filter(entity => entity.stageId === stageId && isCustomerServiceEvidence(entity) && media.includes(evidenceMedium(entity))).length;
 }
 
 export type FrontstageBackstageGap = {
@@ -136,7 +137,7 @@ export function buildFrontstageBackstageReport(graph: ServiceGraph, boardId: Id)
     const channels = frontstageItems.map(item => entityForItem(graph, item)).filter(Boolean).reduce((sum, entity) => sum + linkedCount(graph, entity, 'channel'), 0);
     const dependencies = [...backstageItems, ...processItems, ...enablementItems].map(item => entityForItem(graph, item)).filter(Boolean).reduce((sum, entity) => sum + linkedCount(graph, entity, 'dependency'), 0);
     const policies = [...backstageItems, ...processItems].map(item => entityForItem(graph, item)).filter(Boolean).reduce((sum, entity) => sum + linkedCount(graph, entity, 'policy'), 0);
-    const visibleEvidence = stageEvidence(graph, stage.id, ['physical', 'digital']);
+    const visibleEvidence = stageEvidence(graph, stage.id, ['physical', 'digital', 'documentary', 'human']);
     const gaps: FrontstageBackstageGap[] = [];
     const push = (id: string, area: FrontstageBackstageGap['area'], label: string, detail: string) => gaps.push({ id: `${stage.id}.${id}`, stageId: stage.id, area, label, detail });
     if (!frontstageItems.length) push('frontstage', 'frontstage', 'Frontstage ausente', 'Mapeie pelo menos uma interação visível ao cliente.');

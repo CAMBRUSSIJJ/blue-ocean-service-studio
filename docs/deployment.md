@@ -32,6 +32,7 @@ npm run editor:selection:test
 npm run journey:layout:test
 npm run journey:browser
 npm run editor:browser
+npm run blueprint:methodology:browser
 npm run e2e:visual
 ```
 
