@@ -52,6 +52,7 @@ type JourneyHomeApi = {
   create?(options: { name: string; status?: 'draft' | 'active'; priority?: string; templateId?: string }): { id: string } | null;
   open?(id: string): Promise<boolean> | boolean;
   selectInWorkspace?(id: string): boolean;
+  remove?(id: string): { ok: boolean; message?: string };
 };
 
 // H7.22 legacy contract: type WorkspaceTab = 'overview' | 'journey' | 'blueprint' | 'whiteboard'
@@ -138,6 +139,7 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
   const [journeyViewMode, setJourneyViewMode] = useState<LibraryViewMode>('cards');
   const [journeyEditorOpen, setJourneyEditorOpen] = useState(false);
   const [journeyCreateOpen, setJourneyCreateOpen] = useState(false);
+  const [journeyToDelete, setJourneyToDelete] = useState<{ id: string; name: string } | null>(null);
   const [designStartOpen, setDesignStartOpen] = useState(false);
   const [journeyDraftName, setJourneyDraftName] = useState('');
   const [journeyStartTemplate, setJourneyStartTemplate] = useState('blank');
@@ -260,6 +262,18 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
     const opened = runtime.selectInWorkspace ? runtime.selectInWorkspace(created.id) : await runtime.open?.(created.id);
     if (!opened) { showToast('Jornada criada. Abra-a na biblioteca para editar.'); return; }
     setJourneyEditorOpen(true);
+  };
+
+  const deleteJourney = () => {
+    if (!journeyToDelete) return;
+    const result = journeyApi()?.remove?.(journeyToDelete.id);
+    if (!result?.ok) {
+      showToast(result?.message || 'Não foi possível excluir a Jornada.');
+      return;
+    }
+    setJourneyToDelete(null);
+    setJourneyEditorOpen(false);
+    showToast('Jornada excluída e alterações salvas.');
   };
 
   const selectWorkspaceTab = (id: WorkspaceTab) => {
@@ -789,7 +803,7 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
     {workspaceTab === 'journey' && !journeyEditorOpen && !journeyCreateOpen && <div className="bo-h722-blueprint-pane bo-h724-journey-pane" data-journey-library="1">
       <div className="bo-h722-library-head"><div><small>EXPERIÊNCIA DO SERVIÇO</small><h2>Journeys</h2><p>Crie, encontre e abra jornadas do serviço. O mapa só é carregado depois que você escolher uma Journey.</p></div></div>
       <div className="bo1205h3-list-toolbar bo-h722-library-toolbar"><strong>{filteredJourneys.length} {filteredJourneys.length === 1 ? 'resultado' : 'resultados'}</strong><div><label className="bo1205h3-icon-search"><Search size={15}/><input value={journeyQuery} onChange={(event) => setJourneyQuery(event.target.value)} placeholder="Buscar Journey"/></label><button type="button" title="Filtros"><Filter size={16}/></button><button type="button" className={journeyViewMode === 'cards' ? 'active' : ''} onClick={() => setJourneyViewMode('cards')}><LayoutTemplate size={16}/><span>Cards</span></button><button type="button" className={journeyViewMode === 'table' ? 'active' : ''} onClick={() => setJourneyViewMode('table')}><Table2 size={16}/><span>Tabela</span></button><button type="button"><Settings2 size={16}/></button><button type="button" className="primary" onClick={() => setJourneyCreateOpen(true)}><Plus size={16}/> Criar Journey</button></div></div>
-      {journeyViewMode === 'cards' ? <div className="bo-h724-journey-grid">{filteredJourneys.map((journey) => <article key={journey.id} className="bo-h724-journey-card"><img src={journeyPreviewSrc(journey, graph)} alt=""/><div className="bo-h724-journey-card__copy"><small>JOURNEY</small><strong>{journey.name}</strong><span>{journey.stageIds.length} etapas · {journey.status === 'active' ? 'Ativa' : journey.status === 'archived' ? 'Arquivada' : 'Em construção'}</span><time>{formatDate(journey.updatedAt || graph.service.updatedAt)}</time></div><button type="button" className="bo-h722-open" onClick={() => void openJourney(journey.id)}>Abrir Journey <ArrowRight size={14}/></button></article>)}</div> : <div className="bo1205h3-table-wrap"><table className="bo1205h3-table"><thead><tr><th>NOME</th><th>STATUS</th><th>ETAPAS</th><th>ATUALIZADO</th><th></th></tr></thead><tbody>{filteredJourneys.map((journey) => <tr key={journey.id}><td><div className="bo1205h3-name-cell"><span><BlueOceanObjectIcon kind="journey" size={14}/></span><button type="button" onClick={() => void openJourney(journey.id)}>{journey.name}</button></div></td><td>{journey.status === 'active' ? 'Ativa' : journey.status === 'archived' ? 'Arquivada' : 'Em construção'}</td><td>{journey.stageIds.length}</td><td>{formatDate(journey.updatedAt || graph.service.updatedAt)}</td><td><button type="button" onClick={() => void openJourney(journey.id)}>Abrir</button></td></tr>)}</tbody></table></div>}
+      {journeyViewMode === 'cards' ? <div className="bo-h724-journey-grid">{filteredJourneys.map((journey) => <article key={journey.id} className="bo-h724-journey-card"><img src={journeyPreviewSrc(journey, graph)} alt=""/><div className="bo-h724-journey-card__copy"><small>JOURNEY</small><strong>{journey.name}</strong><span>{journey.stageIds.length} etapas · {journey.status === 'active' ? 'Ativa' : journey.status === 'archived' ? 'Arquivada' : 'Em construção'}</span><time>{formatDate(journey.updatedAt || graph.service.updatedAt)}</time></div><button type="button" className="bo-h722-open" onClick={() => void openJourney(journey.id)}>Abrir Journey <ArrowRight size={14}/></button><button type="button" className="bo-h722-journey-delete" aria-label={`Excluir Jornada ${journey.name}`} onClick={() => setJourneyToDelete({ id: journey.id, name: journey.name })}>Excluir</button></article>)}</div> : <div className="bo1205h3-table-wrap"><table className="bo1205h3-table"><thead><tr><th>NOME</th><th>STATUS</th><th>ETAPAS</th><th>ATUALIZADO</th><th></th></tr></thead><tbody>{filteredJourneys.map((journey) => <tr key={journey.id}><td><div className="bo1205h3-name-cell"><span><BlueOceanObjectIcon kind="journey" size={14}/></span><button type="button" onClick={() => void openJourney(journey.id)}>{journey.name}</button></div></td><td>{journey.status === 'active' ? 'Ativa' : journey.status === 'archived' ? 'Arquivada' : 'Em construção'}</td><td>{journey.stageIds.length}</td><td>{formatDate(journey.updatedAt || graph.service.updatedAt)}</td><td><button type="button" onClick={() => void openJourney(journey.id)}>Abrir</button> <button type="button" className="bo-h722-journey-delete" aria-label={`Excluir Jornada ${journey.name}`} onClick={() => setJourneyToDelete({ id: journey.id, name: journey.name })}>Excluir</button></td></tr>)}</tbody></table></div>}
       {!filteredJourneys.length && <div className="bo1205h3-empty bo-h724-journey-empty"><BlueOceanObjectIcon kind="journey" size={30}/><strong>{journeys.length ? 'Nenhuma Journey encontrada' : 'Nenhuma Journey ainda'}</strong><p>{journeys.length ? 'Ajuste a busca para encontrar outra Journey.' : 'Crie a primeira Journey para mapear a experiência do cliente antes de estruturar a operação.'}</p>{!journeys.length && <button type="button" className="primary" onClick={() => setJourneyCreateOpen(true)}><Plus size={14}/> Criar Journey</button>}</div>}
     </div>}
 
@@ -817,6 +831,13 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
         <footer><button type="button" onClick={() => setJourneyCreateOpen(false)}>Cancelar</button><button type="button" className="primary" onClick={() => void createJourney()}>Criar e abrir mapa <ArrowRight size={16}/></button></footer>
       </div>
     </section>}
+
+    {journeyToDelete && <div className="bo-h168-choice-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setJourneyToDelete(null); }}>
+      <div className="bo-h168-choice-modal" role="dialog" aria-modal="true" aria-labelledby="bo-delete-journey-title" data-delete-journey-dialog="1">
+        <header><div><small>EXCLUSÃO DE JORNADA</small><h2 id="bo-delete-journey-title">Excluir “{journeyToDelete.name}”?</h2><p>Essa ação remove a Jornada e suas etapas vinculadas. Blueprints associados impedem a exclusão até terem o vínculo alterado. Faça um backup se precisar preservar o conteúdo.</p></div><button type="button" aria-label="Cancelar exclusão" onClick={() => setJourneyToDelete(null)}><X size={18}/></button></header>
+        <footer><button type="button" onClick={() => setJourneyToDelete(null)}>Cancelar</button><button type="button" className="danger" onClick={deleteJourney}>Confirmar exclusão</button></footer>
+      </div>
+    </div>}
 
     <span className="sr-only" data-unified-legacy-targets="Journey maps|Whiteboards|Blueprints">Journey maps · Whiteboards · Blueprints continuam disponíveis dentro do Service Workspace. Um serviço, três perspectivas. Whiteboard permite explorar e conectar livremente.</span>
   </section>;
