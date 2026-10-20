@@ -1794,7 +1794,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       const stage=btn('＋ Adicionar etapa',()=>addJourneyStage({returnTo:'service'}),'primary bo-editor-add-stage');
       stage.setAttribute('aria-label','Adicionar etapa');mid.appendChild(stage);
     }
-    if(!mobileReadOnly()){
+    if(!mobileReadOnly()&&!(kind==='blueprint'&&blueprintLearningState().mode==='guided')){
       const undo=btn('↶',undoEdit,'icon rt150-undo');undo.title='Desfazer · Ctrl/Cmd Z';undo.setAttribute('aria-label','Desfazer');
       const redo=btn('↷',redoEdit,'icon rt150-redo');redo.title='Refazer · Ctrl/Cmd Shift Z';redo.setAttribute('aria-label','Refazer');actions.append(undo,redo);
     }
@@ -1963,7 +1963,9 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   function toolbarIcon(name){const paths={Selecionar:'M4 3l13 7-6 2-3 6z',Mão:'M7 10V5a1 1 0 012 0v4V3a1 1 0 012 0v6V4a1 1 0 012 0v6V6a1 1 0 012 0v7c0 4-2 6-5 6s-4-2-6-5l-2-3a1 1 0 012-1z',Adicionar:'M10 3v14M3 10h14',Texto:'M3 4h14M10 4v13M7 17h6', 'Post-it':'M3 3h14v10l-4 4H3zM13 13h4M13 13v4',Card:'M3 4h14v12H3zM6 7h8M6 10h5',Conexão:'M3 16L16 3M8 3h8v8',Frame:'M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4',Buscar:'M13 13l4 4M14 8a6 6 0 11-12 0 6 6 0 0112 0',Camadas:'M10 2l8 4-8 4-8-4zM2 10l8 4 8-4M2 14l8 4 8-4'};return `<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="${paths[name]||paths.Adicionar}"/></svg>`}
 
   function renderToolbar(parent){
-    const bar=document.createElement('aside');bar.className='rt144-tools rt181-tools rt190-tools bo1174-toolrail';bar.setAttribute('aria-label','Ferramentas do quadro');parent.appendChild(bar);
+    const bar=document.createElement('aside');bar.className='rt144-tools rt181-tools rt190-tools bo1174-toolrail';bar.setAttribute('aria-label','Ferramentas do quadro');
+    const dock=editorContextKind()==='blueprint'&&blueprintLearningState().mode==='guided'?$('.bo1174-statusbar',parent):null;
+    if(dock)dock.prepend(bar);else parent.appendChild(bar);
     let defs=[
       {label:'Selecionar',shortcut:'V',group:'navigate',run:()=>{tool='select';connectFrom=null;renderAll()}},
       {label:'Mão',shortcut:'H',group:'navigate',run:()=>{tool='hand';connectFrom=null;renderAll()}},
@@ -2340,6 +2342,11 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const d=document.createElement('div');d.className='rt144-bottom rt148-bottom rt1410-bottom bo1174-statusbar';d.setAttribute('role','toolbar');d.setAttribute('aria-label','Navegação e estado do quadro');
     const group=cls=>{const x=document.createElement('div');x.className='bo1174-status-group '+cls;d.appendChild(x);return x};
     const nav=group('navigation');const back=btn('←',()=>navigateHistory(-1),'nav');back.disabled=navIndex<=0;back.title='Voltar na navegação · Alt+←';const fwd=btn('→',()=>navigateHistory(1),'nav');fwd.disabled=navIndex<0||navIndex>=navHistory.length-1;fwd.title='Avançar na navegação · Alt+→';nav.append(back,fwd);
+    if(editorContextKind()==='blueprint'&&blueprintLearningState().mode==='guided'&&!mobileReadOnly()){
+      const history=group('history');
+      const undo=btn('↶',undoEdit,'icon rt150-undo');undo.title='Desfazer · Ctrl/Cmd Z';undo.setAttribute('aria-label','Desfazer');
+      const redo=btn('↷',redoEdit,'icon rt150-redo');redo.title='Refazer · Ctrl/Cmd Shift Z';redo.setAttribute('aria-label','Refazer');history.append(undo,redo);
+    }
     const zoomGroup=group('zoom');zoomGroup.classList.add('bo1193-zoom');const minus=btn('−',()=>zoomAtClient(zoom/1.15,window.innerWidth/2,window.innerHeight/2,true));minus.title='Reduzir zoom';const slider=document.createElement('input');slider.type='range';slider.min=String(Math.round(ZOOM_MIN*100));slider.max=String(Math.round(ZOOM_MAX*100));slider.step='5';slider.value=String(Math.round(zoom*100));slider.className='bo1193-zoom-slider';slider.setAttribute('aria-label','Zoom do quadro');const z=btn(Math.round(zoom*100)+'%',setZoom100,'zoom');z.title='Voltar para 100% · Ctrl+1';const plus=btn('+',()=>zoomAtClient(zoom*1.15,window.innerWidth/2,window.innerHeight/2,true));plus.title='Aumentar zoom';slider.oninput=()=>{const v=$('.rt144-view',overlay),r=v?.getBoundingClientRect();if(!r)return;zoomAtClient(Number(slider.value)/100,r.left+r.width/2,r.top+r.height/2,false)};slider.onchange=()=>pushNavigationSnapshot('Zoom');zoomGroup.append(minus,slider,z,plus);
     const fitGroup=group('fit');const contentFit=btn('Ajustar tudo',()=>{fitContent();pushNavigationSnapshot('Ajustar conteúdo')});contentFit.title='Ajustar todo o conteúdo · Ctrl+0';const selectionFit=btn('Ajustar seleção',()=>{fitSelection();pushNavigationSnapshot('Ajustar seleção')});selectionFit.title='Ajustar a seleção · Ctrl+2';if(editorContextKind()==='blueprint'&&blueprintLearningState().mode==='guided'&&!selected.length)selectionFit.hidden=true;fitGroup.append(contentFit,selectionFit);
     const densityLabel={compact:'Compacta',normal:'Normal',detailed:'Detalhada'}[p.cardDensity||'normal'];

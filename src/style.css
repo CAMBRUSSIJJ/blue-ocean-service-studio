@@ -82,6 +82,7 @@
 @import './runtime/journey-free-canvas-h1705.css';
 @import './runtime/journey-canvas-free.css';
 @import './runtime/editor-simplification.css';
+@import './runtime/focused-editor.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -93,7 +94,3 @@ button, input, textarea, select { font: inherit; }
 
 /* V1.17.8 — account affordance inside authenticated workspace */
 .bo1178-account{position:relative}.bo1178-account__trigger{height:34px;min-width:38px;padding:0 8px;border:1px solid var(--bo-border,#e3e7ed);border-radius:8px;background:#fff;color:#475467;display:flex;align-items:center;gap:6px;cursor:pointer}.bo1178-account__trigger>span{width:22px;height:22px;border-radius:6px;background:#0b1f3b;color:#fff;display:grid;place-items:center;font-size:11px;font-weight:800}.bo1178-account__menu{position:absolute;right:0;top:42px;z-index:130;width:220px;padding:8px;border:1px solid #e3e7ed;border-radius:10px;background:#fff;box-shadow:0 16px 36px rgba(16,24,40,.12)}.bo1178-account__menu>div{padding:8px 9px 10px;border-bottom:1px solid #eef1f4}.bo1178-account__menu strong,.bo1178-account__menu small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bo1178-account__menu strong{font-size:12px;color:#172033}.bo1178-account__menu small{font-size:11px;color:#667085;margin-top:3px}.bo1178-account__menu button{width:100%;margin-top:6px;border:0;background:transparent;border-radius:7px;padding:8px 9px;display:flex;align-items:center;gap:8px;font-size:11px;color:#475467;cursor:pointer}.bo1178-account__menu button:hover{background:#f7f8fa;color:#172033}
-
-
-
-

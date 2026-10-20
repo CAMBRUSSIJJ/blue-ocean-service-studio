@@ -21,6 +21,7 @@ import { Save, Upload, Download, KanbanSquare, X, Sparkles, Search, CheckCircle2
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
 import { useStudioController } from './state/useStudioController';
 import { JourneyView } from './views/JourneyView';
+import { EditorSurface } from './views/EditorSurface';
 import { BlueprintWorkspaceView } from './views/BlueprintWorkspaceView';
 import { ActionPlanView } from './views/ActionPlanView';
 import { ProjectHomeView, type ProjectHomeSection } from './views/ProjectHomeView';
@@ -582,7 +583,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
           {!hasService && activeTab !== 'home' && !externalNav && <section className="bo-h740h2-service-gate" data-requested-view={activeTab}><div className="bo-h740h2-service-gate__icon"><BlueOceanObjectIcon kind="service" size={34}/></div><small>COMECE PELO SERVIÇO</small><h2>{activeViewTitle} está pronta para você</h2><p>Você pode navegar por toda a plataforma. Para criar, editar ou conectar objetos nesta área, crie primeiro o serviço que será desenhado.</p><div><button type="button" className="primary" onClick={requestServiceCreation}>Criar meu primeiro serviço</button><button type="button" onClick={() => { loadDemoService(); setExternalNav(null); }}>Explorar serviço de exemplo</button></div></section>}
           {hasService && activeTab === 'context' && !externalNav && <WorkspaceLibraryView studio={studio} page={libraryPage} />}
           {hasService && activeTab === 'whiteboards' && !externalNav && <WhiteboardsView studio={studio} />}
-          {hasService && activeTab === 'journey' && !externalNav && <JourneyView studio={studio} />}
+          {hasService && activeTab === 'journey' && !externalNav && <EditorSurface><JourneyView studio={studio} onBack={() => { selectCore('canvas'); window.setTimeout(() => window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'journey' })), 0); }}/></EditorSurface>}
           {hasService && activeTab === 'canvas' && !externalNav && <BlueprintWorkspaceView studio={studio} />}
           {hasService && activeTab === 'action' && !externalNav && <ActionPlanView studio={studio} />}
         </main>

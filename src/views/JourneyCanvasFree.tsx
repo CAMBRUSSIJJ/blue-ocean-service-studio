@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, DragEvent } from 'react';
 import type { StudioController } from '../state/useStudioController';
 import type { Emotion, JourneyLane, JourneyLaneTone, JourneyLaneType } from '../domain/model';
@@ -7,8 +7,8 @@ import { journeyContextItems } from '../services/journey-map-studio';
 import { cardsInCell, addCellCard, editCellCard, removeCellCard, moveJourneyCard, duplicateCellCard, formatCardText, setCellCards } from '../domain/journey-card-operations';
 import {
   ArrowLeft, ArrowRight, Check, ChevronDown, GripVertical, LayoutGrid,
-  Maximize2, Minimize2, Minus, Plus, RotateCcw,
-  Trash2, X, ZoomIn,
+  Hand, Minus, Plus, RotateCcw,
+  Trash2, X,
 } from '../design-system/icons';
 
 type ContextKind = 'persona' | 'need' | 'pain' | 'evidence';
@@ -25,13 +25,15 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
   onBack?: () => void;
 }) {
   const {
-    graph, setGraph, journey, orderedStages, visibleStages, selectedStage, saveStatus,
+    graph, setGraph, setActiveTab, journey, orderedStages, visibleStages, selectedStage, saveStatus,
     setSelectedStageId, updateStageCore, updateStageExperience, 
     createStage, handleStageDragStart, handleStageDrop, moveStage, removeStage,
     canUndo, canRedo, undo, redo, newTouchpointName, setNewTouchpointName, addTouchpointToStage,
     removeTouchpointFromStage, showToast, setStageContextLink,
   } = studio;
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [handMode, setHandMode] = useState(false);
+  const [spaceHeld, setSpaceHeld] = useState(false);
+  const panStart = useRef<{ x: number; y: number; left: number; top: number } | null>(null);
   const [inlineStageTitle, setInlineStageTitle] = useState('');
   const [showViews, setShowViews] = useState(false);
   const [showLaneMenu, setShowLaneMenu] = useState(false);
@@ -43,18 +45,13 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
   const [showNewStage, setShowNewStage] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const surfaceRef = useRef<HTMLDivElement>(null);
-  const [surfaceHeight, setSurfaceHeight] = useState(600);
-  useLayoutEffect(() => {
-    const resize = () => {
-      const top = (surfaceRef.current?.getBoundingClientRect().top ?? 0) + window.scrollY;
-      const bottomNavigation = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--rt-mobile-nav')) || 0;
-      setSurfaceHeight(Math.max(160, window.innerHeight - top - bottomNavigation - 12));
-    };
-    resize(); window.addEventListener('resize', resize);
-    const observer = new ResizeObserver(resize);
-    if (surfaceRef.current?.parentElement) observer.observe(surfaceRef.current.parentElement);
-    return () => { window.removeEventListener('resize', resize); observer.disconnect(); };
-  }, [isExpanded]);
+  useEffect(() => {
+    const release = () => { setSpaceHeld(false); panStart.current = null; };
+    const keyup = (event: KeyboardEvent) => { if (event.code === 'Space') release(); };
+    window.addEventListener('keyup', keyup);
+    window.addEventListener('blur', release);
+    return () => { window.removeEventListener('keyup', keyup); window.removeEventListener('blur', release); };
+  }, []);
   const [selectedLaneId, setSelectedLaneId] = useState<string | null>(null);
   const [laneMenuId, setLaneMenuId] = useState<string | null>(null);
   const [stageMenuId, setStageMenuId] = useState<string | null>(null);
@@ -203,9 +200,9 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
     setShowContextForm(false);
   };
   const closeJourney = () => {
-    setIsExpanded(false);
     setSelectedStageId(null);
-    window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'overview' }));
+    setActiveTab('canvas');
+    requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'overview' })));
   };
   const updateThoughts = (value: string) => {
     if (!selectedStage) return;
@@ -225,38 +222,54 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
   const removeSelected = () => { if (selectedStage) removeStageSafely(selectedStage.id); };
 
   return <div ref={surfaceRef} tabIndex={-1} onKeyDown={event => {
-    if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z' || (event.target as HTMLElement).closest('input,textarea,select,[contenteditable=true]')) return;
-    event.preventDefault(); event.stopPropagation(); if (event.shiftKey) redo(); else undo();
-  }} style={{ height: isExpanded ? '100dvh' : surfaceHeight, minHeight: 0 }} className={`bo-h1705-journey ${isExpanded ? 'is-expanded' : ''}`} data-journey-canvas="H17.0.8" data-journey-free-map="1">
+    if ((event.target as HTMLElement).closest('input,textarea,select,[contenteditable=true]')) return;
+    const key = event.key.toLowerCase();
+    if ((event.ctrlKey || event.metaKey) && (key === 'z' || key === 'y')) {
+      event.preventDefault(); event.stopPropagation(); if (event.shiftKey || key === 'y') redo(); else undo();
+    } else if (!(event.ctrlKey || event.metaKey || event.altKey)) {
+      if (event.code === 'Space') { event.preventDefault(); setSpaceHeld(true); }
+      if (key === 'h') { event.preventDefault(); setHandMode(true); }
+      if (key === 'v' || key === 'escape') { setHandMode(false); setSpaceHeld(false); }
+      if (key === '+' || key === '=' || key === '-') { event.preventDefault(); event.stopPropagation(); setZoom(value => Math.max(60, Math.min(150, value + (key === '-' ? -10 : 10)))); }
+    }
+  }} className="bo-h1705-journey is-expanded bo-focused-journey" data-journey-canvas="H17.0.8" data-journey-free-map="1">
     <header className="bo-h1705-topbar">
       <button type="button" className="bo-h1705-back" onClick={onBack ?? closeJourney} title={onBack ? 'Todas as Jornadas' : 'Voltar ao serviço'} aria-label={onBack ? 'Todas as Jornadas' : 'Voltar ao serviço'}><ArrowLeft size={18}/><span>{onBack ? 'Jornadas' : 'Serviço'}</span></button>
-      <div className="bo-h1705-heading"><span>JORNADA DO CLIENTE</span><input aria-label="Nome da Jornada" value={journeyName} onChange={event => setJourneyName(event.target.value)} onBlur={saveJourneyName} onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur(); if (event.key === 'Escape') { cancelNameEdit.current = true; event.currentTarget.blur(); } }}/></div>
+      <div className="bo-h1705-heading"><input aria-label="Nome da Jornada" value={journeyName} onChange={event => setJourneyName(event.target.value)} onBlur={saveJourneyName} onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur(); if (event.key === 'Escape') { cancelNameEdit.current = true; event.currentTarget.blur(); } }}/></div>
       <span className="bo-h1705-saving" aria-live="polite" title="As alterações ficam neste navegador. Exporte um backup para guardar outra cópia.">{saveStatus === 'saved' ? '● Salvo neste dispositivo' : saveStatus === 'saving' ? '◌ Salvando…' : '⚠ Erro ao salvar'}</span>
-      <div className="bo-h1705-top-actions">
-        <button type="button" disabled={!orderedStages.length} title="Compartilhar etapas e ações do cliente com um Blueprint em rascunho" onClick={() => { if (window.confirm('Abrir um Blueprint em rascunho com estas etapas? As ações do cliente são compartilhadas; suas faixas e cartões permanecem na Jornada.')) void onBlueprintDraft(); }}>Blueprint</button>
-        <button type="button" onClick={() => setIsExpanded((value) => !value)} title={isExpanded ? 'Ver dentro do serviço' : 'Ampliar mapa'} aria-label={isExpanded ? 'Ver dentro do serviço' : 'Ampliar mapa'}>{isExpanded ? <Minimize2 size={17}/> : <Maximize2 size={17}/>}</button>
-        <button type="button" className="bo-h1705-primary" onClick={openNewStage}><Plus size={16}/> Nova etapa</button>
-      </div>
-    </header>
     <nav className="bo-h1705-menubar" aria-label="Ferramentas da Jornada">
       <div className="bo-h1705-menu-wrap">
         <button type="button" className={showViews ? 'is-active' : ''} onClick={() => { setShowViews(!showViews);  }} aria-expanded={showViews}><LayoutGrid size={16}/> Visualizações <ChevronDown size={13}/></button>
         {showViews && <div className="bo-h1705-dropdown bo-h1705-views">
           <button type="button" onClick={dismissMenus}><Check size={15}/> Mapa livre <small>Poucos elementos, edição no quadro</small></button>
           <button type="button" onClick={() => { dismissMenus(); onMatrix(); }}><LayoutGrid size={15}/> Matriz detalhada <small>Visualização completa anterior</small></button>
+          <button type="button" disabled={!orderedStages.length} onClick={() => { dismissMenus(); if (window.confirm('Abrir um Blueprint em rascunho com estas etapas? As ações do cliente são compartilhadas; suas faixas e cartões permanecem na Jornada.')) void onBlueprintDraft(); }}>Blueprint <small>Abrir as etapas no Blueprint do serviço</small></button>
           <button type="button" onClick={closeJourney}>Voltar ao serviço</button>
           <label className="bo-j2-column-width">Largura das etapas<select aria-label="Largura das etapas" value={columnWidth} onChange={event => { const width = Number(event.target.value); setGraph(current => updateJourneyLayout(current, journey.id, layout => ({ ...layout, stageWidth: width })), 'Journey: ajustar largura das etapas'); }}><option value={240}>Compacta</option><option value={288}>Normal</option><option value={360}>Ampla</option><option value={440}>Extra ampla</option></select></label>
         </div>}
       </div>
       <div className="bo-h1705-menu-wrap"><button type="button" aria-expanded={showLaneMenu} onClick={() => { setShowLaneMenu(!showLaneMenu); setShowViews(false); }}><Plus size={15}/> Adicionar faixa</button>{showLaneMenu && renderLaneMenu()}</div>
-      <div className="bo-h1705-menu-spacer"/>
-      <span className="bo-h1705-stage-count">{orderedStages.length} {orderedStages.length === 1 ? 'etapa' : 'etapas'}</span>
-      <button type="button" onClick={undo} disabled={!canUndo} title="Desfazer" aria-label="Desfazer"><RotateCcw size={16}/></button>
-      <button type="button" onClick={redo} disabled={!canRedo} title="Refazer" aria-label="Refazer"><RotateCcw size={16} style={{ transform: 'scaleX(-1)' }}/></button>
     </nav>
+      <div className="bo-h1705-top-actions"><button type="button" className="bo-h1705-primary" aria-label="Nova etapa" onClick={openNewStage}><Plus size={16}/><span>Nova etapa</span></button></div>
+    </header>
 
     <div className="bo-h1705-body">
-      <main className="bo-h1705-scroll" ref={scrollRef} onClick={() => { if (showViews) dismissMenus(); }} aria-label="Mapa horizontal da Jornada">
+      <main className="bo-h1705-scroll" ref={scrollRef} data-pan-mode={handMode || spaceHeld ? 'hand' : 'select'}
+        onPointerDownCapture={event => {
+          if (!(handMode || spaceHeld) || event.button !== 0) return;
+          const map = event.currentTarget;
+          panStart.current = { x: event.clientX, y: event.clientY, left: map.scrollLeft, top: map.scrollTop };
+          map.setPointerCapture(event.pointerId); event.preventDefault(); event.stopPropagation();
+          surfaceRef.current?.focus({ preventScroll: true });
+        }}
+        onPointerMove={event => {
+          const start = panStart.current;
+          if (start) { event.currentTarget.scrollLeft = start.left - event.clientX + start.x; event.currentTarget.scrollTop = start.top - event.clientY + start.y; }
+        }}
+        onPointerUp={event => { if (panStart.current) { panStart.current = null; event.currentTarget.releasePointerCapture(event.pointerId); } }}
+        onPointerCancel={() => { panStart.current = null; }}
+        onClickCapture={event => { if (handMode || spaceHeld) { event.preventDefault(); event.stopPropagation(); } }}
+        onClick={() => { if (showViews) dismissMenus(); }} aria-label="Mapa horizontal da Jornada">
         <div className="bo-h1706-map" style={{ zoom: zoom / 100, gridTemplateColumns: gridColumns }} data-configurable-lanes="1">
           <div className="bo-h1706-corner"><b>Etapas principais</b><small>Uma coluna para cada momento da experiência</small></div>
           {activeStages.map((stage, index) => <div key={stage.id} className={`bo-h1706-stage${stageMenuId === stage.id ? ' is-menu-open' : ''}`} data-journey-stage-id={stage.id} onDragOver={(event) => event.preventDefault()} onDrop={(event) => handleStageDrop(event, stage.id)}>
@@ -300,7 +313,6 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
             {lanes.some(lane => lane.hidden) && <div className="bo-h1706-hidden"><small>Faixas ocultas</small>{lanes.filter(lane => lane.hidden).map(lane => <button type="button" key={lane.id} onClick={() => changeLane(lane.id, { hidden: false })}>Mostrar {lane.label}</button>)}</div>}
           </div>
         </div>
-        {orderedStages.length > 0 && <p className="bo-h1705-help">Edite o nome na própria etapa. Cada coluna é uma etapa. Adicione informações nas faixas e use ••• para organizar seu mapa.</p>}
       </main>
       {selectedLane && <aside className="bo-h1705-inspector bo-j2-lane-inspector" aria-label={`Propriedades da faixa ${selectedLane.label}`}>
         <header><div><small>FAIXA DE CONTEÚDO</small><strong>{selectedLane.label}</strong></div><button type="button" aria-label="Fechar propriedades da faixa" onClick={() => setSelectedLaneId(null)}><X size={19}/></button></header>
@@ -331,9 +343,17 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
         <footer className="bo-h1705-inspector-footer"><button type="button" title="Mover etapa para esquerda" disabled={activeStageIndex <= 0} onClick={() => moveStage(selectedStage.id, 'prev')}><ArrowLeft size={16}/></button><button type="button" title="Mover etapa para direita" disabled={activeStageIndex >= orderedStages.length - 1} onClick={() => moveStage(selectedStage.id, 'next')}><ArrowRight size={16}/></button><button type="button" className="bo-h1705-delete" title="Excluir etapa" onClick={removeSelected}><Trash2 size={16}/></button><span className="bo-h1705-drag-hint"><GripVertical size={14}/> Edite ou reorganize</span></footer>
       </aside>}
     </div>
-    <footer className="bo-h1705-bottom-bar">
-      <div className="bo-h1705-zoom"><button type="button" title="Diminuir zoom" aria-label="Diminuir zoom" disabled={zoom <= 60} onClick={() => setZoom((value) => Math.max(60, value - 10))}><Minus size={18}/></button><span>{zoom}%</span><button type="button" title="Aumentar zoom" aria-label="Aumentar zoom" disabled={zoom >= 150} onClick={() => setZoom((value) => Math.min(150, value + 10))}><ZoomIn size={17}/></button><button type="button" title="Restaurar zoom" onClick={() => { setZoom(100); scrollRef.current?.scrollTo({ left: 0, behavior: 'smooth' }); }}>100%</button></div>
-      <small>Mesmo modelo do serviço · Sem pesquisa obrigatória</small>
+    <footer className="bo-h1705-bottom-bar" aria-label="Navegação do mapa">
+      <div className="bo-h1705-zoom" role="toolbar" aria-label="Mover, desfazer e ampliar">
+        <button type="button" aria-label="Mover mapa" title="Mover mapa · H · mantenha Espaço pressionado" aria-pressed={handMode} className={handMode ? 'is-active' : ''} onClick={() => { setHandMode(value => !value); surfaceRef.current?.focus({ preventScroll: true }); }}><Hand size={18}/></button>
+        <span className="bo-editor-dock-separator" aria-hidden="true"/>
+        <button type="button" onClick={undo} disabled={!canUndo} title="Desfazer · Ctrl/Cmd Z" aria-label="Desfazer"><RotateCcw size={17}/></button>
+        <button type="button" onClick={redo} disabled={!canRedo} title="Refazer · Ctrl/Cmd Shift Z" aria-label="Refazer"><RotateCcw size={17} style={{ transform: 'scaleX(-1)' }}/></button>
+        <span className="bo-editor-dock-separator" aria-hidden="true"/>
+        <button type="button" title="Diminuir zoom" aria-label="Diminuir zoom" disabled={zoom <= 60} onClick={() => setZoom(value => Math.max(60, value - 10))}><Minus size={18}/></button>
+        <button type="button" className="bo-editor-zoom-value" title="Restaurar zoom para 100%" aria-label={`Zoom ${zoom}%. Restaurar para 100%`} onClick={() => setZoom(100)}>{zoom}%</button>
+        <button type="button" title="Aumentar zoom" aria-label="Aumentar zoom" disabled={zoom >= 150} onClick={() => setZoom(value => Math.min(150, value + 10))}><Plus size={18}/></button>
+      </div>
     </footer>
   </div>;
 }

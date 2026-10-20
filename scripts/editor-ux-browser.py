@@ -182,6 +182,8 @@ def blueprint_flow(page):
     page.get_by_role('button', name='Blueprints', exact=True).click()
     page.get_by_role('button', name='Criar Blueprint', exact=True).first.click()
     expect(page.locator('.bo1174-board')).to_be_visible()
+    check('Blueprint uses the entire viewport and hides application chrome', page.locator('.bo1174-board').bounding_box()['y'] == 0 and page.locator('.bo1174-board').bounding_box()['width'] == page.viewport_size['width'] and page.locator('#root').evaluate('e => e.inert && getComputedStyle(e).visibility === "hidden"'))
+    check('Blueprint groups hand, selection and history in one floating dock', page.locator('.bo1174-statusbar .bo1174-toolrail .rt144-tool').count() == 2 and page.locator('.bo1174-statusbar').get_by_role('button', name='Desfazer', exact=True).count() == 1 and page.locator('.bo1174-board-header').get_by_role('button', name='Desfazer', exact=True).count() == 0)
     check('Blueprint starts with only two essential canvas tools', page.locator('.bo1174-toolrail .rt144-tool').count() == 2)
     check('Blueprint header groups secondary actions in one menu', page.locator('.bo1174-board-header button').count() <= 7 and page.get_by_role('button', name='Opções', exact=True).is_visible())
     page.get_by_role('button', name='Opções', exact=True).click()

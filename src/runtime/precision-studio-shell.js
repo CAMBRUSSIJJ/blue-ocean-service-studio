@@ -80,7 +80,7 @@ function boot(){
   apply();
   ['rt-app-ready','rt-runtime-registered','rt-navigation','rt-graph-changed'].forEach(name=>window.addEventListener(name,schedule));
   window.addEventListener('resize',()=>updateMetrics(document.body.classList.contains('bo1152-sidebar-collapsed')),{passive:true});
-  document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='\\'){event.preventDefault();setCollapsed(!sidebarCollapsed())}},true);
+  document.addEventListener('keydown',event=>{if(document.getElementById('root')?.inert)return;if((event.ctrlKey||event.metaKey)&&event.key==='\\'){event.preventDefault();setCollapsed(!sidebarCollapsed())}},true);
   setTimeout(apply,100);setTimeout(apply,500);setTimeout(apply,1200);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

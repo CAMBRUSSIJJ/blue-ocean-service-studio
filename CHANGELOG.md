@@ -1,3 +1,12 @@
+## Editor exclusivo em tela inteira
+
+- Abre a Jornada diretamente em uma superfície de tela inteira, ocultando sidebar, cabeçalho do projeto, abas e breadcrumbs, com isolamento e restauração do foco.
+- Reúne os comandos essenciais em uma barra compacta e move mão, histórico e zoom para um grupo flutuante no canto inferior esquerdo.
+- Adiciona navegação com mão e Espaço temporário, preservando a edição direta e o conteúdo dos mapas.
+- Mantém matriz detalhada, Blueprint e retorno ao serviço acessíveis em Visualizações.
+- Alinha o Blueprint guiado ao mesmo padrão de cabeçalho compacto e controles flutuantes, com recursos avançados sob demanda.
+- Amplia a validação de tela inteira, navegação, teclado, acessibilidade, persistência e uso em telas menores.
+
 ## Edição simplificada e sidebar recolhível
 
 - Torna o recolhimento da sidebar visível e sincroniza botão, atalho e preferência salva.

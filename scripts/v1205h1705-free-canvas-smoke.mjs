@@ -15,7 +15,7 @@ const checks = [
  ['editor novo selecionado como padrão', parent.includes('const [showCanvasMatrix, setShowCanvasMatrix] = useState(false)')],
  ['componente funcional integrado', parent.includes('return <JourneyCanvasFree')],
  ['modo antigo ainda acessível', parent.includes('setShowCanvasMatrix(true)') && parent.includes('setShowCanvasMatrix(false)')],
- ['mapa integrado pode ser ampliado sob demanda', free.includes('const [isExpanded, setIsExpanded] = useState(false)') && free.includes('setIsExpanded((value) => !value)') && css.includes('.bo-h1705-journey.is-expanded{position:fixed')],
+ ['editor abre em tela inteira por padrão', workspace.includes('<EditorSurface>') && free.includes('is-expanded bo-focused-journey') && !free.includes('setIsExpanded') && read('src/views/EditorSurface.tsx').includes('root.inert = true')],
  ['voltar ao serviço dispara rota', free.includes("detail: 'overview'") && workspace.includes("window.addEventListener('bo-service-workspace-tab'")],
  ['mapa livre possui identificação própria', free.includes('data-journey-free-map="1"')],
  ['painel horizontal com faixas configuráveis', free.includes('bo-h1706-map') && free.includes('data-configurable-lanes="1"') && css.includes('.bo-h1706-lane-name')],

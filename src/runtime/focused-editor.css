@@ -1,0 +1,75 @@
+/* Dedicated document surfaces: the application shell is outside the editing flow. */
+body.bo-journey-editor-open #root{visibility:hidden}
+.bo-document-editor{position:fixed;inset:0;z-index:10000;width:100%;height:100dvh;overflow:hidden;background:#fff;color:#263448}
+.bo-document-editor-frame{height:100%;overflow:auto;outline:none}
+.bo-document-editor .bo-h724-journey-editor-shell,.bo-document-editor .bo-h722-embedded--journey{display:block!important;width:100%!important;max-width:none!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;background:#fff!important}
+.bo-document-editor .bo-focused-journey{position:relative!important;inset:auto!important;z-index:auto!important;width:100%!important;height:100dvh!important;min-height:0!important;--journey-rail:190px}
+.bo-focused-journey .bo-h1705-topbar{height:56px;min-height:56px;padding:0 16px;gap:10px;position:relative;z-index:30;flex-wrap:nowrap}
+.bo-focused-journey .bo-h1705-back{width:32px;min-width:32px;height:34px;padding:6px;justify-content:center}
+.bo-focused-journey .bo-h1705-back>span{display:none}
+.bo-focused-journey .bo-h1705-heading{flex:1;max-width:560px;min-width:80px}
+.bo-focused-journey .bo-h1705-heading>input{width:100%;min-width:0;background:transparent;border:1px solid transparent!important;font-size:15px;font-weight:650;padding:6px 8px;border-radius:5px}
+.bo-focused-journey .bo-h1705-heading>input:hover{border-color:#e2e8f0!important}
+.bo-focused-journey .bo-h1705-saving{margin-left:auto;color:#52647b;font-size:11px}
+.bo-focused-journey .bo-h1705-menubar{position:static;height:auto;min-height:0;padding:0;gap:4px;border:0;flex-shrink:0}
+.bo-focused-journey .bo-h1705-menu-wrap>button{height:34px;font-size:12px;border:0;background:transparent;box-shadow:none}
+.bo-focused-journey .bo-h1705-menu-wrap .bo-h1705-dropdown,.bo-focused-journey .bo-h1705-menu-wrap .bo-h1706-lane-menu{top:44px;left:auto;right:0;max-height:calc(100dvh - 80px);overflow:auto;z-index:40}
+.bo-focused-journey .bo-h1705-top-actions{flex-shrink:0}
+.bo-focused-journey .bo-h1705-body{position:relative;min-height:0;flex:1;overflow:hidden}
+.bo-focused-journey .bo-h1705-scroll{height:100%;background:#fff!important;padding-bottom:90px;overscroll-behavior:contain;scroll-padding:10px 0 85px}
+.bo-focused-journey .bo-h1705-scroll[data-pan-mode="hand"]{cursor:grab;touch-action:none;user-select:none}
+.bo-focused-journey .bo-h1705-scroll[data-pan-mode="hand"] *{cursor:inherit!important;user-select:none}
+.bo-focused-journey .bo-h1705-scroll[data-pan-mode="hand"]:active{cursor:grabbing}
+.bo-focused-journey .bo-h1706-corner,.bo-focused-journey .bo-h1706-stage,.bo-focused-journey .bo-h1706-new-stage{min-height:96px;background:#f8fafb}
+.bo-focused-journey .bo-h1706-corner{padding:18px 16px}
+.bo-focused-journey .bo-h1706-corner>small{font-size:11px;color:#52647b}
+.bo-focused-journey .bo-h1706-stage{padding:12px 16px}
+.bo-focused-journey .bo-h1706-stage>input{border-color:transparent;background:transparent;box-shadow:none;font-weight:600;padding-left:0}
+.bo-focused-journey .bo-h1706-stage>input:hover,.bo-focused-journey .bo-h1706-stage>input:focus{background:#fff;border-color:#dbe3ed;padding-left:8px}
+.bo-focused-journey .bo-h1706-stage-tools>small{color:#52647b}
+.bo-focused-journey .bo-h1706-stage-tools>button{border-color:transparent;box-shadow:none;background:transparent}
+.bo-focused-journey .bo-h1706-new-stage>button{border-color:transparent;background:transparent;box-shadow:none}
+.bo-focused-journey .bo-h1706-lane-name{background:#fafbfc}
+.bo-focused-journey .bo-h1705-bottom-bar{position:absolute;left:16px;bottom:max(16px,env(safe-area-inset-bottom));z-index:18;height:auto;min-height:0;padding:0;border:0;background:transparent}
+.bo-focused-journey .bo-h1705-zoom{display:flex;gap:2px;padding:5px;border:1px solid #253341;border-radius:9px;background:#20282e;box-shadow:0 4px 15px #17203326}
+.bo-focused-journey .bo-h1705-zoom>button{display:grid;place-items:center;width:34px;height:34px;min-width:34px;padding:0;border:0!important;background:transparent;color:#fff;border-radius:5px;font-size:11px}
+.bo-focused-journey .bo-h1705-zoom>button:hover,.bo-focused-journey .bo-h1705-zoom>button.is-active{background:#46565f;color:#fff}
+.bo-focused-journey .bo-h1705-zoom>button:disabled{opacity:.45}
+.bo-focused-journey .bo-h1705-zoom>button:focus-visible{outline:2px solid #a5c9ff;outline-offset:-2px}
+.bo-focused-journey .bo-h1705-zoom>.bo-editor-zoom-value{width:46px}
+.bo-focused-journey .bo-editor-dock-separator{align-self:center;width:1px;min-width:1px;padding:0;height:22px;margin:0 3px;background:#56616a}
+.bo-focused-journey:has(.bo-h1705-inspector) .bo-h1705-bottom-bar{z-index:10}
+.bo-focused-journey .bo-h1709-card:not(:focus-within) .bo-h1706-format{visibility:hidden}
+/* The Blueprint uses the same compact header and a single floating navigation dock. */
+.bo1174-board.bo-simple-blueprint .bo1174-board-header{height:56px!important;min-height:56px!important;padding:0 16px!important;gap:10px!important}
+.bo-simple-blueprint .bo1174-board-crumb{display:none!important}
+.bo-simple-blueprint .rt190-context-copy{min-width:0}
+.bo-simple-blueprint .rt190-doc-title b{font-size:15px!important}
+.bo-simple-blueprint .rt144-body{height:calc(100% - 56px)!important}
+.bo-simple-blueprint .rt144-view{left:0!important;inset-inline-start:0!important}
+.bo1174-board.bo-simple-blueprint .bo1174-statusbar{position:absolute!important;left:16px!important;right:auto!important;bottom:max(16px,env(safe-area-inset-bottom))!important;transform:none!important;width:auto!important;max-width:calc(100% - 32px)!important;min-height:44px!important;padding:5px!important;gap:2px!important;border:1px solid #253341!important;border-radius:9px!important;background:#20282e!important;color:#fff!important;box-shadow:0 4px 15px #17203326!important;overflow:visible!important}
+.bo1174-board.bo-simple-blueprint .bo1174-statusbar .bo1174-toolrail{position:static!important;inset:auto!important;transform:none!important;display:flex!important;flex-direction:row!important;align-items:center!important;width:auto!important;height:34px!important;min-height:0!important;padding:0 4px 0 0!important;margin:0 2px 0 0!important;border:0!important;border-right:1px solid #56616a!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;gap:2px!important}
+.bo1174-board.bo-simple-blueprint .bo1174-statusbar .bo1174-toolrail .rt144-tool{width:32px!important;height:34px!important;min-height:34px!important;padding:6px!important;gap:0!important;border:0!important;color:#fff!important;background:transparent!important;border-radius:5px!important}
+.bo1174-board.bo-simple-blueprint .bo1174-statusbar .bo1174-toolrail .rt144-tool em{display:none!important}
+.bo1174-board.bo-simple-blueprint .bo1174-statusbar button{height:34px!important;min-height:34px!important;min-width:30px!important;padding:5px!important;border:0!important;background:transparent!important;color:#fff!important;box-shadow:none!important;border-radius:5px!important}
+.bo1174-board.bo-simple-blueprint .bo1174-statusbar button.active,.bo1174-board.bo-simple-blueprint .bo1174-statusbar button:hover{background:#46565f!important;color:#fff!important}
+.bo1174-board.bo-simple-blueprint .bo1174-statusbar button:focus-visible{outline:2px solid #a5c9ff!important;outline-offset:-2px!important}
+.bo-simple-blueprint .bo1174-statusbar .bo1174-status-group{padding:0 3px!important;gap:2px!important;border-color:#56616a!important}
+.bo-simple-blueprint .bo1174-statusbar .bo1193-zoom-slider,.bo-simple-blueprint .bo1174-statusbar .bo1174-status-group.fit{display:none!important}
+.rt144.bo1174-board.bo-simple-blueprint .bo1174-statusbar .zoom>button.rt144-btn.zoom{color:#fff!important;min-width:44px!important;font-size:11px!important}
+@media(max-width:880px){.bo-focused-journey .bo-h1705-saving{display:none}.bo-focused-journey .bo-h1705-menubar{margin-left:auto}.bo-focused-journey .bo-h1705-inspector{z-index:25}}
+@media(max-width:530px){
+ .bo-focused-journey .bo-h1705-topbar{height:52px;min-height:52px;padding:0 8px;gap:2px}
+ .bo-focused-journey .bo-h1705-heading{min-width:64px}
+ .bo-focused-journey .bo-h1705-heading>input{font-size:13px;padding-inline:4px}
+ .bo-focused-journey .bo-h1705-menu-wrap>button{width:32px;padding:0;justify-content:center;font-size:0;gap:0}
+ .bo-focused-journey .bo-h1705-menu-wrap>button>svg{width:17px;height:17px}
+ .bo-focused-journey .bo-h1705-menu-wrap>button>svg:last-child:not(:first-child){display:none}
+ .bo-focused-journey .bo-h1705-menu-wrap{position:static}
+ .bo-focused-journey .bo-h1705-menu-wrap .bo-h1705-dropdown,.bo-focused-journey .bo-h1705-menu-wrap .bo-h1706-lane-menu{position:absolute;left:8px;right:8px;top:48px;width:auto;max-width:none}
+ .bo-focused-journey .bo-h1705-top-actions>button{width:32px;min-width:32px;padding:0;justify-content:center}
+ .bo-focused-journey .bo-h1705-top-actions>button>span{display:none}
+ .bo-focused-journey{--journey-rail:140px!important}
+ .bo-focused-journey .bo-h1705-bottom-bar{left:10px;bottom:max(10px,env(safe-area-inset-bottom))}
+ .bo1174-board.bo-simple-blueprint .bo1174-statusbar{left:8px!important;bottom:max(10px,env(safe-area-inset-bottom))!important;max-width:calc(100% - 16px)!important}
+}
