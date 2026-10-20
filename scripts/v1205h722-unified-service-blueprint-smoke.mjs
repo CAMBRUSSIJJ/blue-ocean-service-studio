@@ -38,7 +38,7 @@ check(view.includes('data-unified-whiteboard-pane="1"'),'pane Whiteboard possui 
 check(journey.includes('data-journey-workspace="3.0"'),'Journey Workspace 3.0 preservada');
 check(whiteboards.includes('data-whiteboard-2="1"'),'Whiteboard 2.0 preservado');
 
-check(view.includes('journeyCoverSrc(journey)'),'overview usa capa canônica da Journey');
+check(view.includes('journeyPreviewSrc(journey, graph)') && read('src/services/journey-preview.ts').includes('if (hasCustomJourneyCover(journey)) return journeyCoverSrc(journey)'),'overview mostra mapa salvo e preserva capa personalizada da Journey');
 check(view.includes("board.viewKind === 'blueprint'"),'Blueprints continuam derivados de boards canônicos');
 check(view.includes("board.viewKind === 'free'"),'Whiteboards livres continuam derivados do graph');
 check(view.includes('graph.service.journeyIds'),'Journeys derivam do serviço atual');

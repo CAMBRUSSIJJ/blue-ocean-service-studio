@@ -23,7 +23,7 @@ check(view.includes('EXPERIÊNCIA DO SERVIÇO') && view.includes('<h2>Journeys</
 check(view.includes('Buscar Journey'),'Journey library possui busca');
 check(view.includes("setJourneyViewMode('cards')") && view.includes("setJourneyViewMode('table')"),'Journey alterna Cards/Tabela');
 check(view.includes('bo-h724-journey-grid'),'Journey possui grid de cards');
-check(view.includes('journeyCoverSrc(journey)'),'cards usam capa canônica da Journey');
+check(view.includes('journeyPreviewSrc(journey, graph)') && read('src/services/journey-preview.ts').includes('if (hasCustomJourneyCover(journey)) return journeyCoverSrc(journey)'),'cards mostram mapa salvo e preservam capas personalizadas');
 check(view.includes('Nenhuma Journey ainda'),'Journey possui estado vazio');
 check(view.includes('Criar Journey'),'Journey pode ser criada no próprio tab');
 check(view.includes('journeyApi') && view.includes("api<JourneyHomeApi>('journeyHome')"),'criação/abertura usa runtime canônico journeyHome');

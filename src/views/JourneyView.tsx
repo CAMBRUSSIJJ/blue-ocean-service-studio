@@ -2,7 +2,8 @@
 import { useMemo, useRef, useState } from 'react';
 import type { Emotion, JourneyMomentType, TaskStatus } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
-import { buildJourneyMapReport, prepareBlueprintFromJourney } from '../services/journey-map-studio';
+import { buildJourneyMapReport, prepareBlueprintFromJourney, prepareJourneyBlueprintDraft } from '../services/journey-map-studio';
+import { runtimeApi } from '../runtime/client';
 import {
   Map as MapIcon, Undo2, Redo2, Copy, ClipboardPaste, Layers3, Trash2, Focus, Keyboard, ListFilter,
   ZoomIn, ZoomOut, Plus, GripVertical, PanelRightOpen, ArrowLeft, ArrowRight, X, LayoutTemplate,
@@ -39,7 +40,7 @@ const entityDescription = (entity: { description?: unknown } | undefined) => Str
 
 export function JourneyView({ studio }: { studio: StudioController }) {
   const {
-    selectedCount, orderedStages, history, undo, redo, copySelected, clipboard, insertBundles,
+    selectedCount, orderedStages, canUndo, canRedo, undo, redo, copySelected, clipboard, insertBundles,
     duplicateSelected, removeSelected, focusedStageId, selectedStageId, focusSelected, setShowShortcuts,
     detailMode, setDetailMode, showRowControls, setShowRowControls, rowVisible, toggleRow,
     stageWidth, setStageWidth, zoom, setZoom, scrollRef, setIsCreateStageOpen, visibleStages, graph,
@@ -181,6 +182,15 @@ export function JourneyView({ studio }: { studio: StudioController }) {
       studio={studio}
       onMatrix={() => setShowCanvasMatrix(true)}
       onCaptureContext={(kind, title) => captureContextDuringJourney(kind, title)}
+      onBlueprintDraft={async () => {
+        const prepared = prepareJourneyBlueprintDraft(graph, journey.id);
+        if (!prepared.boardId) { showToast('Adicione uma etapa antes de abrir o Blueprint.'); return; }
+        if (prepared.created) setGraph(current => prepareJourneyBlueprintDraft(current, journey.id, { id: prepared.boardId! }).graph, 'Journey: criar Blueprint em rascunho');
+        const runtime = runtimeApi<{ open(id: string): Promise<boolean> }>('serviceBlueprintFrame');
+        setActiveTab('canvas');
+        window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'blueprint' }));
+        if (runtime) await runtime.open(prepared.boardId);
+      }}
     />;
   }
 
@@ -227,8 +237,8 @@ export function JourneyView({ studio }: { studio: StudioController }) {
             <span className="bo-h723-selection-summary">{selectedCount ? `${selectedCount} ${selectedCount === 1 ? 'selecionada' : 'selecionadas'}` : `${orderedStages.length} etapas`}</span>
           </div>
           <div className="bo-h723-toolbar-actions">
-            <button type="button" onClick={undo} disabled={!history.past.length} className="tool-button" title="Desfazer (Ctrl+Z)" aria-label="Desfazer"><Undo2 size={15}/></button>
-            <button type="button" onClick={redo} disabled={!history.future.length} className="tool-button" title="Refazer (Ctrl+Y)" aria-label="Refazer"><Redo2 size={15}/></button>
+            <button type="button" onClick={undo} disabled={!canUndo} className="tool-button" title="Desfazer (Ctrl+Z)" aria-label="Desfazer"><Undo2 size={15}/></button>
+            <button type="button" onClick={redo} disabled={!canRedo} className="tool-button" title="Refazer (Ctrl+Y)" aria-label="Refazer"><Redo2 size={15}/></button>
             <span className="bo-h723-toolbar-divider"/>
             <button type="button" onClick={() => setZoom((value) => Math.max(70, value - 10))} disabled={zoom === 70} className="tool-button" aria-label="Diminuir zoom"><ZoomOut size={15}/></button>
             <button type="button" onClick={() => setZoom(100)} className="tool-button bo-h723-zoom-value" title="Restaurar zoom">{zoom}%</button>

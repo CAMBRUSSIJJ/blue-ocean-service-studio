@@ -76,3 +76,75 @@
 
 /* H17.0.9 Preview 3: explicit card actions and markdown toolbar */
 .bo-h1709-card{padding-top:26px}.bo-h1709-card .bo-h1709-duplicate-card{position:absolute;top:2px;right:32px;font-size:15px;color:#60718e;padding:2px 6px;border-radius:4px}.bo-h1709-card .bo-h1709-duplicate-card:hover{background:#edf1fb}.bo-h1709-card .bo-h1706-format{position:static;margin-top:5px;flex-wrap:wrap;width:max-content;max-width:100%;align-items:center}.bo-h1709-card .bo-h1706-format button:focus-visible{outline:2px solid #3b6ed1;outline-offset:1px}
+
+/* Configurable Journey: stable grid, contextual properties and explicit storage. */
+.bo-h1705-heading input{width:100%;min-width:120px;max-width:460px;padding:5px 7px;border:1px solid transparent;border-radius:6px;color:#24364b;background:transparent;font-size:15px;font-weight:700}
+.bo-h1705-heading input:hover,.bo-h1705-heading input:focus{border-color:#cbd5e1;background:#fff}
+.bo-h1705-saving{color:#475569;font-size:11px;white-space:nowrap}
+.bo-h1705-menubar{height:auto;min-height:48px;flex-wrap:wrap;gap:4px;padding:6px 14px}
+.bo-h1705-menu-wrap{position:relative}
+.bo-h1705-menu-wrap>.bo-h1706-lane-menu{top:38px;max-height:min(540px,65vh);width:270px}
+.bo-h1705-menu-wrap>.bo-h1706-lane-menu button{min-height:36px;color:#334155}
+.bo-j2-column-width{display:grid;gap:7px;padding:12px 8px;border-top:1px solid #e2e8f0;color:#475569;font-size:12px}
+.bo-j2-column-width select{padding:8px;border:1px solid #cbd5e1;border-radius:6px;background:#fff}
+.bo-h1706-corner,.bo-h1706-stage,.bo-h1706-new-stage{height:auto;min-height:118px;position:sticky;top:0;z-index:6;align-self:stretch}
+.bo-h1706-corner{left:0;z-index:8;justify-content:center;width:var(--journey-rail,190px);min-width:0;white-space:normal;overflow:hidden}
+.bo-h1706-corner small{line-height:1.5;color:#52647b;font-size:11px}
+.bo-h1706-new-stage{padding:12px;background:#f8f9fb}
+.bo-h1706-new-stage .bo-h1705-stage-draft{padding:12px;box-shadow:none}
+.bo-h1706-stage-tools button{min-width:30px;min-height:30px;color:#475569}
+.bo-h1706-stage-tools small{color:#52647b}
+.bo-h1706-lane-row{min-height:var(--lane-height,164px)}
+.bo-h1706-lane-name{background:var(--lane-color,#f8fafc);padding:15px 12px;gap:9px}
+.bo-h1706-lane-name>input{color:#24364b;padding:5px 0;font-size:13px;line-height:1.4}
+.bo-h1706-lane-name>small{color:#52647b;font-size:11px;line-height:1.5}
+.bo-h1706-lane-tools{gap:6px;align-items:center}
+.bo-h1706-lane-tools button{min-height:32px;padding:5px 9px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:11px}
+.bo-h1706-lane-row.is-selected .bo-h1706-lane-name{box-shadow:inset 3px 0 #2563eb}
+.bo-h1706-lane-name:has(.bo-j2-lane-actions){z-index:22}
+.bo-j2-lane-actions{position:absolute;left:8px;top:100%;min-width:184px;display:grid;gap:3px;padding:6px;background:#fff;border:1px solid #cbd5e1;border-radius:8px;box-shadow:0 10px 28px #0b1f3b22;z-index:24}
+.bo-j2-lane-actions button{padding:9px;text-align:left;font-size:12px;min-height:34px;color:#334155;border-radius:5px}
+.bo-j2-lane-actions button:hover{background:#eff6ff}
+.bo-j2-lane-actions button:disabled{opacity:.45}
+.bo-j2-danger{color:#b42318!important}
+.bo-j2-hint{font-size:12px;line-height:1.6;color:#52647b}
+.bo-j2-colors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.bo-j2-colors button{height:38px;border:1px solid #cbd5e1;border-radius:7px;color:#334155;font-size:12px}
+.bo-j2-colors button[aria-pressed=true]{outline:2px solid #2563eb;outline-offset:2px}
+.bo-j2-lane-inspector .bo-h1705-inspector-body>button{min-height:38px;text-align:left;padding:9px;border:1px solid #cbd5e1;border-radius:7px;color:#334155;font-size:12px}
+.bo-j2-empty{max-width:620px;padding:16px 0 20px;color:#334155}
+.bo-j2-empty strong{font-size:15px}
+.bo-j2-empty p{font-size:12px;line-height:1.6;margin:8px 0 14px;color:#52647b}
+.bo-j2-empty>div{display:flex;flex-wrap:wrap;gap:8px}
+.bo-j2-empty button{min-height:36px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;font-size:12px;color:#334155}
+.bo-j2-check,.bo-j2-icon{display:flex;align-items:center;gap:8px;margin:3px 0 8px;font-size:12px;color:#475569}
+.bo-j2-check input{width:18px;height:18px;accent-color:#2563eb}
+.bo-j2-icon select{max-width:100%;padding:6px;border:1px solid #cbd5e1;border-radius:6px;background:#fff}
+.bo-j2-substage{display:block;margin:3px 0 8px;color:#52647b;font-size:11px;font-weight:650}
+.bo-h1709-card.is-checked textarea{color:#64748b;text-decoration:line-through}
+.bo-j2-context-links summary{cursor:pointer;font-size:12px;font-weight:650;color:#334155;line-height:1.6}
+.bo-j2-context-links fieldset{display:grid;gap:8px;margin-top:12px}
+.bo-j2-context-links label{display:flex;align-items:center;gap:8px;font-size:12px;line-height:1.5;color:#475569}
+.bo-j2-context-links label input{width:18px;height:18px;accent-color:#2563eb;padding:0}
+.bo-j2-context-links p{font-size:12px;color:#52647b;line-height:1.5}
+.bo-h1705-heading>span,.bo-h1705-inspector header small,.bo-h1705-stage-count,.bo-h1705-bottom-bar>small,.bo-h1705-zoom>span,.bo-h1706-new-stage>button{color:#52647b}
+.bo-h1705-inspector{z-index:30}
+.bo-h724-journey-card>img[src^="data:image/svg+xml"],.bo-h1704-recent-cover>img[src^="data:image/svg+xml"]{object-fit:contain;background:#f8fafc}
+.bo-h1705-journey button:focus-visible,.bo-h1705-journey input:focus-visible,.bo-h1705-journey select:focus-visible,.bo-h1705-journey textarea:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+@media(max-width:880px){
+  .bo-h1705-journey{--journey-rail:160px}
+  .bo-h1705-heading{min-width:0;flex:1;max-width:none}
+  .bo-h1705-heading input{min-width:0;font-size:14px}
+  .bo-h1705-stage-count{display:none}
+  .bo-h1705-menu-wrap>.bo-h1706-lane-menu{width:250px;max-height:60vh}
+  .bo-h1705-inspector{max-height:100%;width:min(358px,92vw)}
+}
+@media(max-width:530px){
+  .bo-h1705-journey{--journey-rail:140px}
+  .bo-h1705-menubar{padding:6px;gap:2px}
+  .bo-h1705-menu-wrap>button{font-size:11px;padding:0 6px}
+  .bo-h1706-lane-name{padding:10px 8px}
+  .bo-h1706-lane-tools button{padding:5px;font-size:10px}
+  .bo-h1706-stage,.bo-h1706-new-stage{padding:10px}
+  .bo-h1705-heading input,.bo-h1706-lane-name input{font-size:16px}
+}

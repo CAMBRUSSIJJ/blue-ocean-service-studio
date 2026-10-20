@@ -829,8 +829,11 @@ export function useStudioController() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   });
+  const bridgeHistory = dataBridge()?.historyState?.();
+  const canUndo = bridgeHistory?.canUndo ?? history.past.length > 0;
+  const canRedo = bridgeHistory?.canRedo ?? history.future.length > 0;
   return {
-    activeTab, setActiveTab, toast, setToast, loaded, history, setHistory,
+    activeTab, setActiveTab, toast, setToast, loaded, history, setHistory, canUndo, canRedo,
     saveStatus, setSaveStatus, graph, setGraph, hasService, projects, archivedProjects, activeProjectId, createWorkspaceProject, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, createService, loadDemoService, undo, redo, selectedStageIds,
     setSelectedStageIds, selectedStageId, setSelectedStageId, selectionAnchorId, setSelectionAnchorId, clipboard, setClipboard,
     focusedStageId, setFocusedStageId, zoom, setZoom, stageWidth, setStageWidth, collapsedRows,

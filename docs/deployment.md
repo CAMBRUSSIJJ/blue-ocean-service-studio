@@ -29,6 +29,8 @@ O aviso **Node.js Version Override** indica uma diferença entre a configuraçã
 npm ci
 npm run release:verify
 npm run editor:selection:test
+npm run journey:layout:test
+npm run journey:browser
 npm run editor:browser
 npm run e2e:visual
 ```
@@ -41,4 +43,4 @@ O workflow `.github/workflows/quality.yml` executa as verificações e os testes
 
 O erro original `TS6133` era uma variável `selectedStageId` não utilizada em `JourneyCanvasFree.tsx`. A correção mantém as demais variáveis recebidas de `studio`. Apagar a linha inteira também remove `graph`, `journey`, `orderedStages` e outros valores necessários, causando diversos erros `TS2304` em cascata.
 
-O commit `5ee161c` restaura essas declarações e remove somente a variável sem uso. As melhorias de Whiteboard/Blueprint ficam em um commit separado, para facilitar revisão e recuperação.
+O commit `5ee161c` restaura essas declarações e remove somente a variável sem uso. As melhorias de Whiteboard/Blueprint e da [Jornada configurável](journey-editor-2.md) preservam essa correção. Esta versão é publicada no repositório existente, mantendo seu histórico.

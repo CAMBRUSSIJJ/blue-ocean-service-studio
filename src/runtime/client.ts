@@ -7,6 +7,7 @@ export interface DataBridgeApi {
   transact(updater: (graph: ServiceGraph) => ServiceGraph, label?: string): ServiceGraph;
   undo(): void;
   redo(): void;
+  historyState?(): { canUndo: boolean; canRedo: boolean };
   export(): void;
   import(data: unknown): Promise<ServiceGraph>;
   recovery(): Promise<unknown>;

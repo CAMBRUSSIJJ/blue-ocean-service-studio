@@ -1,3 +1,15 @@
+# Blue Ocean Service Studio
+
+Construa Jornadas, explore ideias no Whiteboard e detalhe a operação no Blueprint sobre os mesmos dados do serviço. Comece em branco ou por um modelo editável, sem pesquisa obrigatória. O fluxo local salva no navegador; exporte um backup para guardar outra cópia.
+
+Use Node 22 e execute `npm ci` e `npm run dev`. Para gerar e verificar a distribuição, execute `npm run release:verify`.
+
+- [Jornada configurável: recursos, auditoria e testes](docs/journey-editor-2.md)
+- [Whiteboard e Blueprint: melhorias de UX](docs/whiteboard-blueprint-ux.md)
+- [Publicação no GitHub e Vercel](docs/deployment.md)
+
+As notas históricas abaixo descrevem as versões que deram origem à plataforma.
+
 # BLUE OCEAN Service Studio — V1.19.6
 
 ## Service Project Foundation

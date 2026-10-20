@@ -21,6 +21,7 @@ jobs:
           npm run journey:h1709:move:test
           npm run journey:h1709:test
           npm run journey:h1709:p3:test
+          npm run journey:layout:test
       - name: Upload reproducible dist
         uses: actions/upload-artifact@v4
         with:
@@ -68,9 +69,12 @@ jobs:
       - run: python -m pip install playwright
       - run: python -m playwright install --with-deps chromium
       - run: npm run editor:browser
+      - run: npm run journey:browser
       - name: Upload editor UX evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: blue-ocean-editor-${{ github.sha }}
-          path: artifacts/editor-ux
+          path: |
+            artifacts/editor-ux
+            artifacts/journey-editor

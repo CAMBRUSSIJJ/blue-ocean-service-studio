@@ -2863,6 +2863,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     save:()=>{if(!graph)load();return save(false,{label:'Salvar projeto',checkpoint:true})},
     transact:(updater,label='Editar projeto')=>{if(!graph)load();const collab=runtime.api('collaboration');if(!collab?.internalWrite?.()&&collab?.can&&!collab.can('edit'))throw Error('Seu papel atual permite somente leitura/comentários.');if(!historyReady)resetEditHistory('Antes da edição');const before=clone(graph),next=updater(clone(graph));if(!next?.service||!next?.journeys||!next?.views)throw Error('Projeto inválido');const hardened=repairGraphIntegrity(migrateGraphV3(next));if(!hardened.report.ok)throw Error('Operação bloqueada por integridade: '+(hardened.report.errors[0]?.message||'referência inválida'));graph=hardened.graph;if(!save(false,{label})){graph=before;throw Error(persistence.error||'Falha ao salvar')}if(overlay)renderAll();return clone(graph)},
     undo:()=>{if(!graph)load();undoEdit()},redo:()=>{if(!graph)load();redoEdit()},
+    historyState:()=>({canUndo:editIndex>0,canRedo:editIndex>=0&&editIndex<editHistory.length-1}),
     export:()=>{if(!graph)load();exportFullBackup()},
     import:async data=>{if(!graph)load();await importFullProject(data);return clone(graph)},
     recovery:validatePersistence,

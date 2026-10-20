@@ -191,7 +191,9 @@
     "journey:a2:test": "node scripts/h1708-audit-a2-behavior.mjs",
     "journey:h1709:move:test": "node --experimental-strip-types scripts/h1709-card-movement.mjs",
     "journey:h1709:test": "node --experimental-strip-types scripts/h1709-card-behavior.mjs",
-    "journey:h1709:p3:test": "node --experimental-strip-types scripts/h1709-preview3-behavior.mjs"
+    "journey:h1709:p3:test": "node --experimental-strip-types scripts/h1709-preview3-behavior.mjs",
+    "journey:layout:test": "node --experimental-strip-types scripts/journey-layout-test.mjs",
+    "journey:browser": "python3 scripts/journey-editor-browser.py"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

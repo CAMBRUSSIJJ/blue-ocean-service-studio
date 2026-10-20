@@ -174,6 +174,23 @@ const generatedId = (prefix: string): Id => typeof crypto !== 'undefined' && 'ra
   ? `${prefix}-${crypto.randomUUID()}`
   : `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
+/** A draft shares the Journey stages without claiming research or operational readiness. */
+export function prepareJourneyBlueprintDraft(graph: ServiceGraph, journeyId: Id, options: { id?: Id; now?: string } = {}) {
+  const journey = graph.journeys[journeyId];
+  if (!journey || !journey.stageIds.some(id => Boolean(graph.stages[id]))) {
+    return { graph, boardId: null as Id | null, created: false };
+  }
+  const existing = Object.values(graph.views.whiteboards).find(board => board.viewKind === 'blueprint' && board.journeyId === journeyId);
+  if (existing) return { graph, boardId: existing.id, created: false };
+  const id = options.id ?? generatedId('blueprint'), now = options.now ?? new Date().toISOString();
+  if (graph.views.whiteboards[id]) return { graph, boardId: null as Id | null, created: false };
+  const board: WhiteboardView = { id, serviceId: graph.service.id, journeyId, name: `${journey.name} · Blueprint`,
+    viewKind: 'blueprint', layoutMode: 'service', items: {}, edges: {}, gridVisible: false,
+    designContext: journey.designContext ? { ...structuredClone(journey.designContext), createdAt: now } : undefined, updatedAt: now };
+  return { graph: { ...graph, views: { ...graph.views, whiteboards: { ...graph.views.whiteboards, [id]: board } },
+    service: { ...graph.service, updatedAt: now } }, boardId: id, created: true };
+}
+
 export function prepareBlueprintFromJourney(graph: ServiceGraph, journeyId: Id, options: { id?: Id; now?: string; name?: string } = {}) {
   const report = buildJourneyMapReport(graph, journeyId);
   if (!report?.readyForBlueprint) {

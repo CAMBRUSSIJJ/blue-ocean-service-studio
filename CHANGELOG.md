@@ -1,3 +1,12 @@
+## Jornada configurável 2.0
+
+- Corrige a disponibilidade de desfazer/refazer, o bloqueio da primeira etapa por sobreposição e o deslocamento de controles ao sair da edição de um cartão.
+- Adiciona propriedades de faixa, duplicação independente de cartões, cores, altura mínima e largura persistida das etapas.
+- Define comportamentos de checklist, ícones, subetapas, imagem, referência externa, divisor e emoções.
+- Melhora nomes, miniaturas da biblioteca, menus, contexto do serviço, telas menores e indicação de armazenamento local.
+- Abre ou reutiliza um Blueprint em rascunho com as etapas e ações compartilhadas da Jornada.
+- Acrescenta testes de domínio e aceitação no navegador. Consulte `docs/journey-editor-2.md`.
+
 ## V1.20.5-H17.0.5 — Journey Free Canvas (referência de interação Smaply)
 - Restaura a base de navegação H17.0.4; altera apenas a apresentação da Jornada.
 - Jornada abre em um mapa amplo com colunas horizontais, cartões de etapas, espaço de construção e zoom.
