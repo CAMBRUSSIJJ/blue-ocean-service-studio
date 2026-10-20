@@ -21,7 +21,7 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext }: {
   onCaptureContext: (kind: ContextKind, title: string) => void;
 }) {
   const {
-    graph, setGraph, journey, orderedStages, visibleStages, selectedStage, selectedStageId, saveStatus,
+   
     setSelectedStageId, updateStageCore, updateStageExperience, 
     createStage, handleStageDragStart, handleStageDrop, moveStage, removeStage,
     history, undo, redo, newTouchpointName, setNewTouchpointName, addTouchpointToStage,
