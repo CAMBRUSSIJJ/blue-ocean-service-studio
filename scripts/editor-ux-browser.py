@@ -7,6 +7,7 @@ otherwise serve this checkout's dist in a temporary local HTTP server.
 import functools
 import json
 import os
+import re
 import shutil
 import threading
 import traceback
@@ -144,7 +145,8 @@ def whiteboard_flow(page):
     check('Undo restores original free notes', all(x['kind'] == 'free' for x in graph(page)['views']['whiteboards'][source_id]['items'].values()))
     page.get_by_role('button', name='Refazer', exact=True).click()
     check('Redo restores the same Blueprint', target_id in graph(page)['views']['whiteboards'])
-    page.get_by_role('button', name='Quadro de origem', exact=True).click()
+    page.get_by_role('button', name='Opções', exact=True).click()
+    page.get_by_role('button', name=re.compile('Quadro de origem')).click()
     expect(page.locator('.bo1174-board')).to_be_visible()
     first = page.locator(f'.rt144-item[data-id="{ids[0]}"]')
     first.dblclick()
@@ -180,6 +182,24 @@ def blueprint_flow(page):
     page.get_by_role('button', name='Blueprints', exact=True).click()
     page.get_by_role('button', name='Criar Blueprint', exact=True).first.click()
     expect(page.locator('.bo1174-board')).to_be_visible()
+    check('Blueprint starts with only two essential canvas tools', page.locator('.bo1174-toolrail .rt144-tool').count() == 2)
+    check('Blueprint header groups secondary actions in one menu', page.locator('.bo1174-board-header button').count() <= 7 and page.get_by_role('button', name='Opções', exact=True).is_visible())
+    page.get_by_role('button', name='Opções', exact=True).click()
+    options = page.get_by_role('dialog', name='Ferramentas do editor', exact=True)
+    check('Advanced Blueprint tools start collapsed', not options.locator('.bo-simple-advanced').evaluate('e => e.open'))
+    options.get_by_role('button', name=re.compile('^.*Como montar o Blueprint')).click()
+    guide = page.get_by_role('dialog', name='Como montar o Blueprint', exact=True)
+    check('A short guide explains stages, visible service and backstage', guide.locator('li').count() == 3)
+    guide.get_by_role('button', name='Entendi, começar', exact=True).click()
+    page.get_by_role('button', name='Opções', exact=True).click()
+    page.locator('.bo-simple-advanced > summary').click()
+    page.get_by_role('button', name=re.compile('Modo profissional')).click()
+    check('Advanced tools remain available on request', page.locator('.bo1174-toolrail .rt144-tool').count() == 9)
+    page.get_by_role('button', name='Opções', exact=True).click()
+    page.locator('.bo-simple-advanced > summary').click()
+    page.get_by_role('button', name=re.compile('Modo guiado')).click()
+    check('User can return to the essential tools', page.locator('.bo1174-toolrail .rt144-tool').count() == 2)
+
     check('Fresh Blueprint has a visible canvas', page.locator('.rt144-view').bounding_box()['height'] > 650)
     check('Empty Blueprint offers a next step', page.get_by_role('button', name='Adicionar primeira etapa', exact=True).is_visible())
     page.get_by_role('button', name='Adicionar etapa', exact=True).click()
@@ -187,7 +207,7 @@ def blueprint_flow(page):
     dialog.get_by_placeholder('Ex.: Pagamento', exact=True).fill('Solicitar atendimento')
     dialog.get_by_placeholder('Ex.: escolhe uma forma de pagamento', exact=True).fill('Envia uma mensagem')
     dialog.get_by_role('button', name='Criar etapa', exact=True).click()
-    page.locator('.bo1203-service-cell[data-layer=frontstage] .bo1203-cell-add').click()
+    page.locator('.bo1203-service-cell[data-layer=frontstage]').click(position={'x': 80, 'y': 90})
     entry = page.get_by_role('textbox', name='Frontstage · Solicitar atendimento', exact=True)
     entry.fill('Atendente confirma recebimento')
     entry.press('Enter')
@@ -199,7 +219,16 @@ def blueprint_flow(page):
     entry.press('Escape')
     check('Escape cancels a cell edit', not any(x.get('title') == 'Verificar cadastro' for x in graph(page)['entities'].get('backstage', {}).values()))
     check('No diagnostic percentage in the shared header', 'Readiness' not in page.locator('.bo1174-board-header').inner_text())
-    page.get_by_role('button', name='Vista operacional ▾', exact=True).click()
+    page.keyboard.press('Escape')
+    page.screenshot(path=str(OUT / 'blueprint-simple.png'), full_page=False)
+    if os.environ.get('AXE_PATH'):
+        page.add_script_tag(path=os.environ['AXE_PATH'])
+        violations = page.evaluate("async () => (await axe.run({include:[['.bo1174-board']]},{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v => ({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))")
+        (OUT / 'blueprint-accessibility.json').write_text(json.dumps(violations, ensure_ascii=False, indent=2))
+        check('Simplified Blueprint has no automated WCAG A/AA violations', not violations)
+
+    page.get_by_role('button', name='Opções', exact=True).click()
+    page.get_by_role('button', name=re.compile('Visualizações Trocar')).click()
     views = page.get_by_role('dialog', name='Vistas do Blueprint', exact=True)
     expect(views).to_be_visible()
     check('Blueprint picker uses two clearly named views', views.locator('.rt154-view-card').count() == 2 and 'Matriz detalhada' in views.inner_text() and 'Service Frame' not in views.inner_text())

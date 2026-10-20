@@ -9,7 +9,9 @@ const safeText=(v,fallback='')=>v==null?fallback:String(v);
 
 function readCollapsed(){try{return localStorage.getItem(STORAGE_KEY)==='1'}catch{return false}}
 function writeCollapsed(value){try{localStorage.setItem(STORAGE_KEY,value?'1':'0')}catch{}}
+function sidebarCollapsed(){const native=q('aside[data-bo-precision-sidebar-native="1"]');return native?native.dataset.sidebarCollapsed==='1':document.body.classList.contains('bo1152-sidebar-collapsed')}
 function updateMetrics(collapsed){
+  if(q('aside[data-bo-precision-sidebar-native="1"]'))return;
   const mobile=matchMedia('(max-width:720px)').matches;
   const medium=matchMedia('(max-width:1120px)').matches;
   const width=mobile?0:(medium||collapsed?60:216);
@@ -21,6 +23,7 @@ function updateMetrics(collapsed){
 }
 function setCollapsed(value){
   const collapsed=Boolean(value);
+  if(q('aside[data-bo-precision-sidebar-native="1"]')){window.dispatchEvent(new CustomEvent('bo-native-sidebar',{detail:{collapsed}}));return}
   writeCollapsed(collapsed);
   document.body.classList.toggle('bo1152-sidebar-collapsed',collapsed);
   updateMetrics(collapsed);
@@ -31,7 +34,7 @@ function setCollapsed(value){
 function ensureToggle(aside){
   if(aside?.dataset?.boPrecisionSidebarNative==='1')return;
   const brand=q('.rt182-host-brand',aside);if(!brand||q('.bo1152-sidebar-toggle',brand))return;
-  const button=document.createElement('button');button.type='button';button.className='bo1152-sidebar-toggle';button.addEventListener('click',()=>setCollapsed(!document.body.classList.contains('bo1152-sidebar-collapsed')));
+  const button=document.createElement('button');button.type='button';button.className='bo1152-sidebar-toggle';button.addEventListener('click',()=>setCollapsed(!sidebarCollapsed()));
   brand.appendChild(button);
 }
 function ensureInspector(){
@@ -70,18 +73,18 @@ function annotateShell(){
 }
 function apply(){
   document.body.classList.add('bo-v1120','bo-v1130','bo-v1140','bo-v1150','bo-v1153','bo-v1152');
-  annotateShell();ensureInspector();ensureToolbar();setCollapsed(readCollapsed());
+  annotateShell();ensureInspector();ensureToolbar();if(!q('aside[data-bo-precision-sidebar-native="1"]'))setCollapsed(readCollapsed());
 }
 function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;apply()})}
 function boot(){
   apply();
   ['rt-app-ready','rt-runtime-registered','rt-navigation','rt-graph-changed'].forEach(name=>window.addEventListener(name,schedule));
   window.addEventListener('resize',()=>updateMetrics(document.body.classList.contains('bo1152-sidebar-collapsed')),{passive:true});
-  document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='\\'){event.preventDefault();setCollapsed(!document.body.classList.contains('bo1152-sidebar-collapsed'))}},true);
+  document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key==='\\'){event.preventDefault();setCollapsed(!sidebarCollapsed())}},true);
   setTimeout(apply,100);setTimeout(apply,500);setTimeout(apply,1200);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-const api={version:VERSION,refresh:apply,setSidebarCollapsed:setCollapsed,toggleSidebar:()=>setCollapsed(!document.body.classList.contains('bo1152-sidebar-collapsed')),openInspector,closeInspector,showToolbar,hideToolbar};
+const api={version:VERSION,refresh:apply,setSidebarCollapsed:setCollapsed,toggleSidebar:()=>setCollapsed(!sidebarCollapsed()),openInspector,closeInspector,showToolbar,hideToolbar};
 window.BlueOceanPrecisionStudio=api;
 (window.BlueOceanRuntime||window.RealTalentRuntime)?.register?.('precisionStudio',api,VERSION);
 })();

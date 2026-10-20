@@ -6,6 +6,7 @@ Use Node 22 e execute `npm ci` e `npm run dev`. Para gerar e verificar a distrib
 
 - [Jornada configurável: recursos, auditoria e testes](docs/journey-editor-2.md)
 - [Whiteboard e Blueprint: melhorias de UX](docs/whiteboard-blueprint-ux.md)
+- [Edição simplificada e sidebar recolhível](docs/editor-simplicity.md)
 - [Publicação no GitHub e Vercel](docs/deployment.md)
 
 As notas históricas abaixo descrevem as versões que deram origem à plataforma.

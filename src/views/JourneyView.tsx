@@ -38,7 +38,7 @@ const entityTitle = (entity: { title?: unknown; name?: unknown; description?: un
   String(entity?.title ?? entity?.name ?? entity?.description ?? fallback);
 const entityDescription = (entity: { description?: unknown } | undefined) => String(entity?.description ?? '');
 
-export function JourneyView({ studio }: { studio: StudioController }) {
+export function JourneyView({ studio, onBack }: { studio: StudioController; onBack?: () => void }) {
   const {
     selectedCount, orderedStages, canUndo, canRedo, undo, redo, copySelected, clipboard, insertBundles,
     duplicateSelected, removeSelected, focusedStageId, selectedStageId, focusSelected, setShowShortcuts,
@@ -180,6 +180,7 @@ export function JourneyView({ studio }: { studio: StudioController }) {
   if (!showCanvasMatrix) {
     return <JourneyCanvasFree
       studio={studio}
+      onBack={onBack}
       onMatrix={() => setShowCanvasMatrix(true)}
       onCaptureContext={(kind, title) => captureContextDuringJourney(kind, title)}
       onBlueprintDraft={async () => {
@@ -205,6 +206,7 @@ export function JourneyView({ studio }: { studio: StudioController }) {
             <div className="bo-h723-bar-meta" aria-label="Resumo da Journey"><span><b>Responsável</b>{journey.owner?.trim() || 'Não definido'}</span><span><b>Evidências</b>{stageEvidenceTotal}</span><span><b>Problemas</b>{stageProblemTotal}</span><span><b>Touchpoints</b>{stageTouchpointTotal}</span></div>
           </div>
           <div className="bo-h721-hero-actions bo-h723-bar-actions">
+            {onBack && <button type="button" onClick={onBack}>Todas as Jornadas</button>}
             <button type="button" onClick={() => { setCoverError(''); setShowCoverEditor(true); }} title="Alterar capa"><ImageIcon size={15}/><span>Alterar capa</span></button>
             <button type="button" className={journey.favorite ? 'is-favorite' : ''} onClick={toggleJourneyFavorite} title={journey.favorite ? 'Remover dos favoritos' : 'Favoritar'}><Star size={15} fill={journey.favorite ? 'currentColor' : 'none'}/><span>{journey.favorite ? 'Favorita' : 'Favoritar'}</span></button>
           </div>

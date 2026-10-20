@@ -81,6 +81,7 @@
 @import './runtime/direct-journey-reference-h1704.css';
 @import './runtime/journey-free-canvas-h1705.css';
 @import './runtime/journey-canvas-free.css';
+@import './runtime/editor-simplification.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

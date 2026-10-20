@@ -17,7 +17,7 @@
 // V1.17 legacy shell copy: Próximo passo, saúde, continuidade e atenção do serviço
 // H7.40-H3 legacy sidebar labels: Blueprints · Portfólio · Métricas
 import React, { useEffect, useRef, useState } from 'react';
-import { Save, Upload, Download, KanbanSquare, X, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, PanelLeftClose, PanelLeftOpen, ChevronsUpDown } from './design-system/icons';
+import { Save, Upload, Download, KanbanSquare, X, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, PanelLeftClose, PanelLeftOpen, ChevronsUpDown } from './design-system/icons';
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
 import { useStudioController } from './state/useStudioController';
 import { JourneyView } from './views/JourneyView';
@@ -159,8 +159,28 @@ export default function App({ authUser, onSignOut }: AppProps) {
   useEffect(() => {
     try { localStorage.setItem('bo-sidebar-collapsed', isSidebarCollapsed ? '1' : '0'); } catch { /* local preference only */ }
     document.body.classList.toggle('bo-h724-sidebar-collapsed', isSidebarCollapsed);
-    return () => document.body.classList.remove('bo-h724-sidebar-collapsed');
+    const resize = () => {
+      const width = window.innerWidth <= 700 ? 0 : isSidebarCollapsed ? 64 : 216;
+      for (const name of ['--bo-sidebar-w', '--rt-sidebar']) document.documentElement.style.setProperty(name, `${width}px`);
+    };
+    resize(); window.addEventListener('resize', resize);
+    const change = (event: Event) => setIsSidebarCollapsed(Boolean((event as CustomEvent<{ collapsed: boolean }>).detail.collapsed));
+    window.addEventListener('bo-native-sidebar', change);
+    return () => { document.body.classList.remove('bo-h724-sidebar-collapsed'); window.removeEventListener('resize', resize); window.removeEventListener('bo-native-sidebar', change); };
   }, [isSidebarCollapsed]);
+
+  useEffect(() => {
+    const dismiss = (event: MouseEvent | KeyboardEvent) => {
+      if (event instanceof KeyboardEvent && event.key !== 'Escape') return;
+      document.querySelectorAll<HTMLDetailsElement>('.bo-simple-project-actions[open]').forEach(menu => {
+        if (event instanceof MouseEvent && menu.contains(event.target as Node)) return;
+        menu.open = false;
+        if (event instanceof KeyboardEvent) menu.querySelector<HTMLElement>('summary')?.focus();
+      });
+    };
+    document.addEventListener('click', dismiss); document.addEventListener('keydown', dismiss);
+    return () => { document.removeEventListener('click', dismiss); document.removeEventListener('keydown', dismiss); };
+  }, []);
 
   useEffect(() => {
     try { localStorage.setItem('bo-sidebar-sections', JSON.stringify(collapsedSidebarSections)); } catch { /* local preference only */ }
@@ -381,9 +401,6 @@ export default function App({ authUser, onSignOut }: AppProps) {
               Service Studio
             </p>
           </div>
-          <button type="button" className="bo-h724-sidebar-toggle" onClick={() => setIsSidebarCollapsed((value) => !value)} aria-label={isSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'} title={isSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'}>
-            {isSidebarCollapsed ? <PanelLeftOpen size={16}/> : <PanelLeftClose size={16}/>}
-          </button>
         </div>
 
         <div className="bo1163-service-context relative px-2.5 pt-2.5" data-project-context="7.40-H10" data-persistent-switcher="7.40-H13">
@@ -392,6 +409,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
             <span className="bo1163-service-switcher__copy"><small>{projectShellOpen ? 'Projeto atual' : 'Serviço'}</small><strong>{currentProject?.serviceName || graph.service.name || 'Serviço'}</strong><em>{projectShellOpen ? projectTitle : 'Abrir projetos'}</em></span>
             <ChevronsUpDown size={14} />
           </button>
+          <button type="button" className="bo-h724-sidebar-toggle" onClick={() => setIsSidebarCollapsed(value => !value)} aria-label={isSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'} aria-expanded={!isSidebarCollapsed} aria-controls="bo-primary-navigation" title={isSidebarCollapsed ? 'Expandir navegação · Ctrl+\\' : 'Recolher navegação · Ctrl+\\'}>{isSidebarCollapsed ? <PanelLeftOpen size={18}/> : <PanelLeftClose size={18}/>}</button>
           {isServiceMenuOpen && <div className="bo1163-service-menu bo-h740h13-project-menu" role="menu">
             <div className="bo1163-service-menu__label">Projetos do serviço</div>
             {projects.slice(0, 6).map((project) => <button type="button" role="menuitem" key={project.id} className={project.id === activeProjectId ? 'active' : ''} onClick={() => { setIsServiceMenuOpen(false); if (project.id !== activeProjectId) studio.openWorkspaceProject(project.id); window.setTimeout(() => openCurrentProjectHome('overview'), 0); }}><span><strong>{project.title}</strong><small>{project.serviceName}</small></span>{project.id === activeProjectId && <CheckCircle2 size={15}/>}</button>)}
@@ -400,8 +418,8 @@ export default function App({ authUser, onSignOut }: AppProps) {
           </div>}
           <span className="sr-only bo-h740h11-legacy-switcher"><strong>Serviço</strong><em>Projetos de serviço</em></span>
         </div>
-        <nav className="bo-h701-sidebar-nav flex-1 overflow-y-auto" aria-label="Navegação principal" onClickCapture={handleSidebarWaveInteraction}>
-          <button type="button" className={`bo1205h3-nav-root bo-h701-dashboard-link ${isGlobalHome && projectHomeSection === 'home' ? 'is-active' : ''}`} onClick={() => openGlobalHome('home')} aria-current={isGlobalHome && projectHomeSection === 'home' ? 'page' : undefined}>
+        <nav id="bo-primary-navigation" className="bo-h701-sidebar-nav flex-1 overflow-y-auto" aria-label="Navegação principal" onClickCapture={handleSidebarWaveInteraction}>
+          <button type="button" aria-label="Home" title="Home" className={`bo1205h3-nav-root bo-h701-dashboard-link ${isGlobalHome && projectHomeSection === 'home' ? 'is-active' : ''}`} onClick={() => openGlobalHome('home')} aria-current={isGlobalHome && projectHomeSection === 'home' ? 'page' : undefined}>
             <span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="dashboard"><BlueOceanUtilityIcon kind="dashboard" size={16}/></span><span className="hidden md:inline">Home</span>
           </button>
 
@@ -429,7 +447,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
             <div className={experience.level === 'foundation' ? 'bo-h161-standard-nav is-hidden' : 'bo-h161-standard-nav'}>
             <div className={`bo-h701-nav-section bo-h740h12-primary-design ${collapsedSidebarSections.design ? 'is-section-collapsed' : ''}`} data-sidebar-section="design">
               <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.design} onClick={() => toggleSidebarSection('design')}><span>Desenho do serviço</span><span aria-hidden="true">{collapsedSidebarSections.design ? '+' : '−'}</span></button>
-              <div className="bo-h740h14-section-items" hidden={collapsedSidebarSections.design}>
+              <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.design}>
               <button type="button" data-service-projects-nav="1" data-unified-service-workspace-nav="1" title="Serviço" aria-label="Serviço" aria-current={isGlobalHome && projectHomeSection === 'projects' ? 'page' : undefined} className={`bo1205h3-nav-child ${isGlobalHome && projectHomeSection === 'projects' ? 'is-active' : ''}`} onClick={() => openGlobalHome('projects')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="service" size={16}/></span><span className="hidden md:inline">Serviço</span></button>
               <span className="sr-only" data-unified-service-workspace-legacy="1"><span>Journey maps</span><span>Whiteboards</span><span>Blueprints</span></span>
               <button type="button" data-experience-nav="expanded" title="Hierarquias" aria-label="Hierarquias" aria-current={isPrimaryLibrary && libraryPage === 'hierarchies' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'hierarchies' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('hierarchies')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="hierarchy" size={16}/></span><span className="hidden md:inline">Hierarquias</span></button>
@@ -438,7 +456,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
 
             <div className={`bo-h701-nav-section bo-h740h12-primary-context ${collapsedSidebarSections.context ? 'is-section-collapsed' : ''}`} data-sidebar-section="context">
               <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.context} onClick={() => toggleSidebarSection('context')}><span>Público-alvo</span><span aria-hidden="true">{collapsedSidebarSections.context ? '+' : '−'}</span></button>
-              <div className="bo-h740h14-section-items" hidden={collapsedSidebarSections.context}>
+              <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.context}>
               <button type="button" title="Personas" aria-label="Personas" aria-current={isPrimaryLibrary && libraryPage === 'personas' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'personas' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('personas')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="persona" size={16}/></span><span className="hidden md:inline">Personas</span></button>
               <button type="button" title="Necessidades" aria-label="Necessidades" aria-current={isPrimaryLibrary && libraryPage === 'needs' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'needs' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('needs')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="need" size={16}/></span><span className="hidden md:inline">Necessidades</span></button>
               <button type="button" data-experience-nav="expanded" title="Jobs" aria-label="Jobs" aria-current={isPrimaryLibrary && libraryPage === 'jobs' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'jobs' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('jobs')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="job" size={16}/></span><span className="hidden md:inline">Jobs</span></button>
@@ -451,7 +469,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
 
             <div className={`bo-h701-nav-section bo-h740h12-primary-management ${collapsedSidebarSections.management ? 'is-section-collapsed' : ''}`} data-sidebar-section="management">
               <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.management} onClick={() => toggleSidebarSection('management')}><span>Gestão</span><span aria-hidden="true">{collapsedSidebarSections.management ? '+' : '−'}</span></button>
-              <div className="bo-h740h14-section-items" hidden={collapsedSidebarSections.management}>
+              <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.management}>
               <button type="button" title="Oportunidades" aria-label="Oportunidades" aria-current={isPrimaryLibrary && libraryPage === 'portfolio' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'portfolio' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('portfolio')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="portfolio" size={16}/></span><span className="hidden md:inline">Oportunidades</span></button>
               <button type="button" data-experience-nav="expanded" title="Catálogo de métricas" aria-label="Catálogo de métricas" aria-current={isPrimaryLibrary && libraryPage === 'metrics' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'metrics' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('metrics')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="metric" size={16}/></span><span className="hidden md:inline">Catálogo de métricas</span></button>
               {/* Pesquisa histórica preservada no grafo, mas retirada da navegação principal. */}
@@ -528,9 +546,14 @@ export default function App({ authUser, onSignOut }: AppProps) {
                 {saveStatus === 'saving' ? <Loader2 size={13} className="animate-spin" /> : saveStatus === 'error' ? <AlertCircle size={13} /> : <CheckCircle2 size={13} />}
                 <span>{saveStatus === 'saving' ? 'Salvando…' : saveStatus === 'error' ? 'Não foi possível salvar' : 'Salvo neste dispositivo'}</span>
               </button>
+              <details className="bo-simple-project-actions" onClick={event => { if ((event.target as HTMLElement).closest('button')) event.currentTarget.open = false; }}>
+                <summary aria-label="Ações do projeto" title="Backup e salvamento"><MoreHorizontal size={18}/></summary>
+                <div role="group" aria-label="Backup e salvamento do projeto">
               <button type="button" onClick={() => importInputRef.current?.click()} className="tool-button text-xs" title="Importar backup completo"><Upload size={15} /><span className="hidden sm:inline">Importar</span></button>
               <button type="button" onClick={handleExport} className="tool-button text-xs" title="Exportar backup completo"><Download size={15} /><span className="hidden sm:inline">Exportar</span></button>
               <button type="button" onClick={handleSave} className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold shadow-sm whitespace-nowrap" title="Salvar agora"><Save size={17} /><span className="hidden sm:inline">Salvar</span></button>
+                </div>
+              </details>
               {authUser && <div className="bo1178-account">
                 <button type="button" className="bo1178-account__trigger" onClick={() => setIsAccountMenuOpen((value) => !value)} aria-haspopup="menu" aria-expanded={isAccountMenuOpen} title={authUser.email || authUser.name}><span>{authUser.name.slice(0, 1).toUpperCase()}</span><UserRound size={14} /></button>
                 {isAccountMenuOpen && <div className="bo1178-account__menu" role="menu"><div><strong>{authUser.name}</strong><small>{authUser.email || 'Sessão local'}</small></div><button type="button" role="menuitem" onClick={() => { setIsAccountMenuOpen(false); onSignOut?.(); }}><LogOut size={14} /> Sair</button></div>}

@@ -792,7 +792,7 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
       {!filteredJourneys.length && <div className="bo1205h3-empty bo-h724-journey-empty"><BlueOceanObjectIcon kind="journey" size={30}/><strong>{journeys.length ? 'Nenhuma Journey encontrada' : 'Nenhuma Journey ainda'}</strong><p>{journeys.length ? 'Ajuste a busca para encontrar outra Journey.' : 'Crie a primeira Journey para mapear a experiência do cliente antes de estruturar a operação.'}</p>{!journeys.length && <button type="button" className="primary" onClick={() => setJourneyCreateOpen(true)}><Plus size={14}/> Criar Journey</button>}</div>}
     </div>}
 
-    {workspaceTab === 'journey' && journeyEditorOpen && <div className="bo-h724-journey-editor-shell"><div className="bo-h724-journey-backbar"><button type="button" onClick={() => setJourneyEditorOpen(false)}><ArrowLeft size={15}/> Todas as Journeys</button><span>Você está editando <strong>{studio.journey.name || 'Journey'}</strong></span></div><div className="bo-h722-embedded bo-h722-embedded--journey" data-unified-journey-pane="1"><JourneyView studio={studio}/></div></div>}
+    {workspaceTab === 'journey' && journeyEditorOpen && <div className="bo-h724-journey-editor-shell"><div className="bo-h722-embedded bo-h722-embedded--journey" data-unified-journey-pane="1"><JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/></div></div>}
 
     {workspaceTab === 'whiteboard' && <div className="bo-h722-embedded bo-h722-embedded--whiteboard" data-unified-whiteboard-pane="1"><WhiteboardsView studio={studio}/></div>}
 

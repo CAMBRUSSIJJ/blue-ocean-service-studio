@@ -1,3 +1,11 @@
+## Edição simplificada e sidebar recolhível
+
+- Torna o recolhimento da sidebar visível e sincroniza botão, atalho e preferência salva.
+- Reúne ações de etapas e faixas em menus contextuais, reduz controles repetidos e remove a barra de retorno duplicada.
+- Abre o Blueprint com duas ferramentas essenciais, nomes de camadas mais claros, edição por clique na célula e um guia curto.
+- Agrupa visualizações, backups e ferramentas avançadas sob demanda, mantendo as operações existentes.
+- Acrescenta verificações reais de recolhimento, persistência, menus e alternância entre modos guiado e profissional.
+
 ## Jornada configurável 2.0
 
 - Corrige a disponibilidade de desfazer/refazer, o bloqueio da primeira etapa por sobreposição e o deslocamento de controles ao sair da edição de um cartão.

@@ -17,11 +17,12 @@ const selectedEmotionLabels: Record<Emotion, string> = {
 };
 
 // H17.0.5: minimalist, directly editable Journey map. All mutations go through StudioController.
-export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBlueprintDraft }: {
+export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBlueprintDraft, onBack }: {
   studio: StudioController;
   onMatrix: () => void;
   onCaptureContext: (kind: ContextKind, title: string) => void;
   onBlueprintDraft: () => void | Promise<void>;
+  onBack?: () => void;
 }) {
   const {
     graph, setGraph, journey, orderedStages, visibleStages, selectedStage, saveStatus,
@@ -56,13 +57,16 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
   }, [isExpanded]);
   const [selectedLaneId, setSelectedLaneId] = useState<string | null>(null);
   const [laneMenuId, setLaneMenuId] = useState<string | null>(null);
+  const [stageMenuId, setStageMenuId] = useState<string | null>(null);
   const [journeyName, setJourneyName] = useState(journey.name);
   const cancelNameEdit = useRef(false);
   useEffect(() => setJourneyName(journey.name), [journey.name]);
   useEffect(() => {
-    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') { setLaneMenuId(null); setShowLaneMenu(false); setShowViews(false); } };
+    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') { setLaneMenuId(null); setStageMenuId(null); setShowLaneMenu(false); setShowViews(false); } };
+    const dismiss = (event: MouseEvent) => { if (!(event.target as HTMLElement).closest('.bo-h1706-stage,.bo-h1706-lane-name,.bo-h1705-menu-wrap,.bo-h1706-add-button')) { setStageMenuId(null); setLaneMenuId(null); setShowLaneMenu(false); setShowViews(false); } };
     document.addEventListener('keydown', close);
-    return () => document.removeEventListener('keydown', close);
+    document.addEventListener('click', dismiss);
+    return () => { document.removeEventListener('keydown', close); document.removeEventListener('click', dismiss); };
   }, []);
 
 
@@ -176,6 +180,7 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
     <hr/><b>Informações do serviço</b>{([['customerAction', 'Ações do cliente'], ['thoughts', 'Pensamentos'], ['touchpoints', 'Pontos de contato'], ['needs', 'Necessidades'], ['pains', 'Dores']] as const).map(([binding, label]) => <button key={binding} type="button" onClick={() => addLane('text', binding)}>+ {label}</button>)}
   </div>;
   const activeStages = visibleStages.length ? visibleStages : orderedStages;
+  const gridColumns = ['var(--journey-rail, 190px)', ...activeStages.map(() => `${columnWidth}px`), '250px'].join(' ');
   const activeStageIndex = selectedStage ? journey.stageIds.indexOf(selectedStage.id) : -1;
   const dismissMenus = () => setShowViews(false);
   const openNewStage = () => {
@@ -224,7 +229,7 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
     event.preventDefault(); event.stopPropagation(); if (event.shiftKey) redo(); else undo();
   }} style={{ height: isExpanded ? '100dvh' : surfaceHeight, minHeight: 0 }} className={`bo-h1705-journey ${isExpanded ? 'is-expanded' : ''}`} data-journey-canvas="H17.0.8" data-journey-free-map="1">
     <header className="bo-h1705-topbar">
-      <button type="button" className="bo-h1705-back" onClick={closeJourney} title="Voltar ao serviço"><ArrowLeft size={18}/><span>Serviço</span></button>
+      <button type="button" className="bo-h1705-back" onClick={onBack ?? closeJourney} title={onBack ? 'Todas as Jornadas' : 'Voltar ao serviço'} aria-label={onBack ? 'Todas as Jornadas' : 'Voltar ao serviço'}><ArrowLeft size={18}/><span>{onBack ? 'Jornadas' : 'Serviço'}</span></button>
       <div className="bo-h1705-heading"><span>JORNADA DO CLIENTE</span><input aria-label="Nome da Jornada" value={journeyName} onChange={event => setJourneyName(event.target.value)} onBlur={saveJourneyName} onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur(); if (event.key === 'Escape') { cancelNameEdit.current = true; event.currentTarget.blur(); } }}/></div>
       <span className="bo-h1705-saving" aria-live="polite" title="As alterações ficam neste navegador. Exporte um backup para guardar outra cópia.">{saveStatus === 'saved' ? '● Salvo neste dispositivo' : saveStatus === 'saving' ? '◌ Salvando…' : '⚠ Erro ao salvar'}</span>
       <div className="bo-h1705-top-actions">
@@ -239,6 +244,7 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
         {showViews && <div className="bo-h1705-dropdown bo-h1705-views">
           <button type="button" onClick={dismissMenus}><Check size={15}/> Mapa livre <small>Poucos elementos, edição no quadro</small></button>
           <button type="button" onClick={() => { dismissMenus(); onMatrix(); }}><LayoutGrid size={15}/> Matriz detalhada <small>Visualização completa anterior</small></button>
+          <button type="button" onClick={closeJourney}>Voltar ao serviço</button>
           <label className="bo-j2-column-width">Largura das etapas<select aria-label="Largura das etapas" value={columnWidth} onChange={event => { const width = Number(event.target.value); setGraph(current => updateJourneyLayout(current, journey.id, layout => ({ ...layout, stageWidth: width })), 'Journey: ajustar largura das etapas'); }}><option value={240}>Compacta</option><option value={288}>Normal</option><option value={360}>Ampla</option><option value={440}>Extra ampla</option></select></label>
         </div>}
       </div>
@@ -251,11 +257,17 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
 
     <div className="bo-h1705-body">
       <main className="bo-h1705-scroll" ref={scrollRef} onClick={() => { if (showViews) dismissMenus(); }} aria-label="Mapa horizontal da Jornada">
-        <div className="bo-h1706-map" style={{ zoom: zoom / 100, gridTemplateColumns: `var(--journey-rail, 190px) repeat(${activeStages.length}, ${columnWidth}px) 250px` }} data-configurable-lanes="1">
+        <div className="bo-h1706-map" style={{ zoom: zoom / 100, gridTemplateColumns: gridColumns }} data-configurable-lanes="1">
           <div className="bo-h1706-corner"><b>Etapas principais</b><small>Uma coluna para cada momento da experiência</small></div>
-          {activeStages.map((stage, index) => <div key={stage.id} className="bo-h1706-stage" data-journey-stage-id={stage.id} onDragOver={(event) => event.preventDefault()} onDrop={(event) => handleStageDrop(event, stage.id)}>
-            <div className="bo-h1706-stage-tools"><small>{String(index + 1).padStart(2, '0')}</small><button draggable onDragStart={(event) => handleStageDragStart(event, stage.id)} title="Arrastar etapa"><GripVertical size={14}/></button><button type="button" onClick={() => moveStage(stage.id, 'prev')} disabled={index === 0} title="Mover etapa para esquerda" aria-label={`Mover ${stage.title} para esquerda`}>←</button><button type="button" onClick={() => moveStage(stage.id, 'next')} disabled={index === activeStages.length - 1} title="Mover etapa para direita" aria-label={`Mover ${stage.title} para direita`}>→</button><button type="button" onClick={() => { setSelectedLaneId(null); setSelectedStageId(stage.id); }} title="Detalhes da etapa" aria-label={`Detalhes de ${stage.title}`}>•••</button><button type="button" onClick={() => removeStageSafely(stage.id)} title="Remover etapa" aria-label={`Remover ${stage.title}`}><Trash2 size={13}/></button></div>
+          {activeStages.map((stage, index) => <div key={stage.id} className={`bo-h1706-stage${stageMenuId === stage.id ? ' is-menu-open' : ''}`} data-journey-stage-id={stage.id} onDragOver={(event) => event.preventDefault()} onDrop={(event) => handleStageDrop(event, stage.id)}>
+            <div className="bo-h1706-stage-tools"><small>Etapa {String(index + 1).padStart(2, '0')}</small><button className="bo-simple-stage-grip" draggable onDragStart={(event) => handleStageDragStart(event, stage.id)} title="Arrastar etapa" aria-label={`Arrastar ${stage.title}`}><GripVertical size={14}/></button><button type="button" aria-label={`Ações da etapa ${stage.title}`} title="Ações da etapa" aria-expanded={stageMenuId === stage.id} onClick={() => { setStageMenuId(stageMenuId === stage.id ? null : stage.id); setLaneMenuId(null); }}>•••</button></div>
             <input aria-label={`Nome da etapa ${index + 1}`} value={stage.title} onChange={(event) => updateStageCore(stage.id, 'title', event.target.value)}/>
+            {stageMenuId === stage.id && <div className="bo-simple-stage-actions" role="group" aria-label={`Ações de ${stage.title}`}>
+              <button type="button" onClick={() => { setEditingCard(null); setSelectedLaneId(null); setSelectedStageId(stage.id); setStageMenuId(null); }} aria-label={`Detalhes de ${stage.title}`}>Editar detalhes</button>
+              <button type="button" disabled={index === 0} onClick={() => { moveStage(stage.id, 'prev'); setStageMenuId(null); }} aria-label={`Mover ${stage.title} para esquerda`}>Mover para esquerda</button>
+              <button type="button" disabled={index === activeStages.length - 1} onClick={() => { moveStage(stage.id, 'next'); setStageMenuId(null); }} aria-label={`Mover ${stage.title} para direita`}>Mover para direita</button>
+              <button type="button" className="bo-j2-danger" onClick={() => { setStageMenuId(null); removeStageSafely(stage.id); }} aria-label={`Remover ${stage.title}`}>Excluir etapa…</button>
+            </div>}
           </div>)}
           <div className="bo-h1706-new-stage">{showNewStage || !orderedStages.length ? <div className="bo-h1705-stage-draft"><label>Nova etapa</label><input autoFocus value={inlineStageTitle} onChange={(event) => setInlineStageTitle(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') createInlineStage(); if (event.key === 'Escape') setShowNewStage(false); }} placeholder="Nome da etapa"/><button className="bo-h1705-primary" disabled={!inlineStageTitle.trim()} onClick={createInlineStage}>Criar etapa</button></div> : <button onClick={openNewStage}><Plus size={17}/> Adicionar etapa</button>}</div>
           {lanes.filter((lane) => !lane.hidden).map((lane) => <div key={lane.id} data-lane-id={lane.id} className={`bo-h1706-lane-row${selectedLaneId === lane.id ? ' is-selected' : ''}`} style={{ gridColumn: `1 / span ${activeStages.length + 2}`, gridTemplateColumns: 'subgrid', '--lane-height': `${lane.height ?? (lane.type === 'divider' ? 64 : 164)}px`, '--lane-color': palette[lane.tone ?? 'neutral']?.color ?? palette.neutral.color } as CSSProperties}>
@@ -263,7 +275,6 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
               <input value={lane.label} aria-label="Nome da faixa" onChange={event => changeLane(lane.id, { label: event.target.value })}/>
               <small>{lane.binding ? 'Conteúdo vinculado ao serviço' : JOURNEY_LANE_LABELS[lane.type]}</small>
               <div className="bo-h1706-lane-tools">
-                <button type="button" title="Configurar faixa" aria-label={`Configurar faixa ${lane.label}`} onClick={() => selectLane(lane.id)}>Configurar</button>
                 <button type="button" title="Ações da faixa" aria-label={`Ações da faixa ${lane.label}`} aria-expanded={laneMenuId === lane.id} onClick={() => setLaneMenuId(laneMenuId === lane.id ? null : lane.id)}>•••</button>
               </div>
               {laneMenuId === lane.id && <div className="bo-j2-lane-actions" role="group" aria-label={`Ações de ${lane.label}`}>
@@ -280,7 +291,7 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
                 {lane.type === 'stage' && <small className="bo-j2-substage">Subetapa {cardIndex + 1}</small>}
                 {lane.type === 'grid' && <label className="bo-j2-check"><input type="checkbox" aria-label={`Concluir item ${cardIndex + 1} de ${lane.label} em ${stage.title}`} checked={Boolean(card.checked)} onChange={event => checkFreeCard(lane, stage.id, card.id, event.target.checked)}/><span>{card.checked ? 'Concluído' : 'A fazer'}</span></label>}
                 {lane.type === 'icons' && <label className="bo-j2-icon">Ícone<select aria-label={`Ícone do cartão ${cardIndex + 1} em ${stage.title}`} value={card.icon ?? '💬'} onChange={event => editLane(lane.id, current => setCellCards(current, stage.id, cardsInCell(current, stage.id).map(item => item.id === card.id ? { ...item, icon: event.target.value } : item)), 'Journey: escolher ícone')}>{[['💬','Mensagem'],['📞','Telefone'],['💻','Digital'],['📦','Entrega'],['😊','Positivo'],['😐','Neutro'],['😞','Negativo'],['⚠️','Atenção'],['✅','Concluído']].map(([value, label]) => <option key={value} value={value}>{value} {label}</option>)}</select></label>}
-                <textarea aria-label={`${lane.label} em ${stage.title}, cartão`} rows={lane.type === 'grid' ? 4 : 2} placeholder="Escrever..." value={card.content} onKeyDown={(event) => { if (event.altKey && event.key === 'ArrowUp') { event.preventDefault(); moveCardByKeyboard(lane, stage.id, card.id, -1); } else if (event.altKey && event.key === 'ArrowDown') { event.preventDefault(); moveCardByKeyboard(lane, stage.id, card.id, 1); } }} onFocus={() => setEditingCard(card.id)} onChange={(event) => changeFreeCard(lane, stage.id, card.id, event.target.value)}/><button type="button" className="bo-h1709-duplicate-card" aria-label="Duplicar cartão" title="Duplicar cartão" onClick={() => duplicateFreeCard(lane, stage.id, card.id)}>⧉</button><button type="button" className="bo-h1709-remove-card" aria-label="Remover cartão" title="Remover cartão" onClick={() => deleteFreeCard(lane, stage.id, card.id)}><Trash2 size={12}/></button>{editingCard === card.id && <div className="bo-h1706-format"><span>Editar cartão</span>{(['bold', 'italic', 'list', 'link'] as const).map((kind) => <button key={kind} type="button" onMouseDown={(event) => event.preventDefault()} title={{bold:'Negrito',italic:'Itálico',list:'Lista',link:'Link'}[kind]} onClick={(event) => formatFreeCard(lane, stage.id, card.id, kind, event.currentTarget.closest('.bo-h1709-card')?.querySelector('textarea') ?? null)}>{({bold:'B',italic:'I',list:'≡ Lista',link:'↗ Link'} as const)[kind]}</button>)}<button type="button" onMouseDown={(event) => event.preventDefault()} aria-label="Mover cartão para cima" onClick={() => moveCardByKeyboard(lane, stage.id, card.id, -1)}>↑</button><button type="button" onMouseDown={(event) => event.preventDefault()} aria-label="Mover cartão para baixo" onClick={() => moveCardByKeyboard(lane, stage.id, card.id, 1)}>↓</button></div>}</div>)}<button type="button" className="bo-h1709-add-card" onClick={() => addFreeCard(lane, stage.id)}><Plus size={13}/> Adicionar cartão</button></>}</div>}</div>)}
+                <textarea aria-label={`${lane.label} em ${stage.title}, cartão`} rows={lane.type === 'grid' ? 4 : 2} placeholder="Escrever..." value={card.content} onKeyDown={(event) => { if (event.altKey && event.key === 'ArrowUp') { event.preventDefault(); moveCardByKeyboard(lane, stage.id, card.id, -1); } else if (event.altKey && event.key === 'ArrowDown') { event.preventDefault(); moveCardByKeyboard(lane, stage.id, card.id, 1); } }} onFocus={() => setEditingCard(card.id)} onChange={(event) => changeFreeCard(lane, stage.id, card.id, event.target.value)}/><button type="button" className="bo-h1709-duplicate-card" aria-label="Duplicar cartão" title="Duplicar cartão" onClick={() => duplicateFreeCard(lane, stage.id, card.id)}>⧉</button><button type="button" className="bo-h1709-remove-card" aria-label="Remover cartão" title="Remover cartão" onClick={() => deleteFreeCard(lane, stage.id, card.id)}><Trash2 size={12}/></button>{editingCard === card.id && <div className="bo-h1706-format"><span>Editar cartão</span>{(['bold', 'italic', 'list', 'link'] as const).map((kind) => <button key={kind} type="button" onMouseDown={(event) => event.preventDefault()} title={{bold:'Negrito',italic:'Itálico',list:'Lista',link:'Link'}[kind]} onClick={(event) => formatFreeCard(lane, stage.id, card.id, kind, event.currentTarget.closest('.bo-h1709-card')?.querySelector('textarea') ?? null)}>{({bold:'B',italic:'I',list:'≡ Lista',link:'↗ Link'} as const)[kind]}</button>)}<button type="button" onMouseDown={(event) => event.preventDefault()} aria-label="Mover cartão para cima" onClick={() => moveCardByKeyboard(lane, stage.id, card.id, -1)}>↑</button><button type="button" onMouseDown={(event) => event.preventDefault()} aria-label="Mover cartão para baixo" onClick={() => moveCardByKeyboard(lane, stage.id, card.id, 1)}>↓</button></div>}</div>)}<button type="button" className="bo-h1709-add-card" onClick={() => addFreeCard(lane, stage.id)}><Plus size={13}/><span>Adicionar cartão</span></button></>}</div>}</div>)}
             <div className="bo-h1706-cell bo-h1706-empty"/>
           </div>)}
           <div className="bo-h1706-add-lane" style={{ gridColumn: `1 / span ${activeStages.length + 2}` }}>
@@ -289,7 +300,7 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
             {lanes.some(lane => lane.hidden) && <div className="bo-h1706-hidden"><small>Faixas ocultas</small>{lanes.filter(lane => lane.hidden).map(lane => <button type="button" key={lane.id} onClick={() => changeLane(lane.id, { hidden: false })}>Mostrar {lane.label}</button>)}</div>}
           </div>
         </div>
-        {orderedStages.length > 0 && <p className="bo-h1705-help">Edite o nome na própria etapa. Use as setas para reorganizar, e “Adicionar faixa” para construir seu mapa.</p>}
+        {orderedStages.length > 0 && <p className="bo-h1705-help">Edite o nome na própria etapa. Cada coluna é uma etapa. Adicione informações nas faixas e use ••• para organizar seu mapa.</p>}
       </main>
       {selectedLane && <aside className="bo-h1705-inspector bo-j2-lane-inspector" aria-label={`Propriedades da faixa ${selectedLane.label}`}>
         <header><div><small>FAIXA DE CONTEÚDO</small><strong>{selectedLane.label}</strong></div><button type="button" aria-label="Fechar propriedades da faixa" onClick={() => setSelectedLaneId(null)}><X size={19}/></button></header>

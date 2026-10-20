@@ -31,7 +31,7 @@ check(view.includes('Whiteboard permite explorar e conectar livremente'),'Whiteb
 check(view.includes('bo-h722-flow'),'overview possui fluxo visual');
 check(view.includes('perspectivas conectadas'),'overview informa maturidade das três perspectivas');
 
-check(view.includes('<JourneyView studio={studio}/>'),'Journey real é incorporada no workspace');
+check(view.includes('<JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/>'),'Journey real é incorporada no workspace');
 check(view.includes('<WhiteboardsView studio={studio}/>'),'Whiteboard real é incorporado no workspace');
 check(view.includes('data-unified-journey-pane="1"'),'pane Journey possui contrato próprio');
 check(view.includes('data-unified-whiteboard-pane="1"'),'pane Whiteboard possui contrato próprio');
