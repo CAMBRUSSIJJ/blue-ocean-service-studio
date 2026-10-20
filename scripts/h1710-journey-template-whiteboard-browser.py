@@ -58,7 +58,7 @@ def deletion_and_whiteboard(page):
     page.locator('.bo-h722-journey-delete').first.click()
     dialog = page.locator('[data-delete-journey-dialog="1"]')
     expect(dialog).to_be_visible()
-    dialog.get_by_role('button', name='Cancelar').click()
+    dialog.get_by_role('button', name='Cancelar', exact=True).click()
     check(len(graph(page)['journeys']) == 2, 'Cancel deletion preserves the Journeys')
     page.locator('.bo-h722-journey-delete').first.click()
     page.locator('[data-delete-journey-dialog="1"]').get_by_role('button', name='Confirmar exclusão').click()
