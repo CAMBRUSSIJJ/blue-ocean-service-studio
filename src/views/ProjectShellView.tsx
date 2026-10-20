@@ -9,12 +9,13 @@ type Props = {
   studio: StudioController;
   section: ProjectShellSection;
   openService: () => void;
+  openWhiteboards: () => void;
   openLibraryPage: (page: 'hierarchies' | 'personas' | 'needs' | 'jobs' | 'pains' | 'hypotheses' | 'problems' | 'evidence' | 'portfolio' | 'metrics' | 'templates' | 'archive') => void;
 };
 
 const count = (value: Record<string, unknown> | undefined) => Object.keys(value ?? {}).length;
 
-export function ProjectShellView({ studio, section, openService, openLibraryPage }: Props) {
+export function ProjectShellView({ studio, section, openService, openWhiteboards, openLibraryPage }: Props) {
   const { graph, projects, activeProjectId } = studio;
   const project = projects.find((item) => item.id === activeProjectId) ?? projects[0] ?? null;
   const serviceName = graph.service.name || project?.serviceName || 'Serviço ainda não definido';
@@ -80,6 +81,7 @@ export function ProjectShellView({ studio, section, openService, openLibraryPage
           ['Métricas', metrics, 'metrics', Object.values(graph.entities?.metric ?? {}).slice(0, 2).map((item) => item.title || 'Métrica')],
         ] as const).map(([label, total, page, examples]) => <button type="button" key={page} onClick={() => openLibraryPage(page)}><span><BookOpen size={18}/></span><strong>{label}</strong><small>{total} {total === 1 ? 'registro' : 'registros'}</small><small>{examples.length ? examples.join(' · ') : 'Nenhum registro criado ainda'}</small><em>Visualizar ou criar <ArrowRight size={12}/></em></button>)}
         <button type="button" onClick={openService}><span><FolderKanban size={18}/></span><strong>Jornadas e Blueprints</strong><small>{journeys} Jornadas · {blueprints} Blueprints</small><em>Visualizar ou criar no serviço <ArrowRight size={12}/></em></button>
+        <button type="button" data-project-whiteboard="1" onClick={openWhiteboards}><span><FolderKanban size={18}/></span><strong>Whiteboard</strong><small>{whiteboards} quadros de exploração</small><em>Abrir ou criar Whiteboard <ArrowRight size={12}/></em></button>
       </div>
     </section>
     <section className="bo-h740h10-shell__section"><header><div><small>ATIVIDADE RECENTE</small><h2>Resumo do projeto</h2></div></header><div className="bo-h740h10-summary-grid"><article><strong>{journeys}</strong><span>Journeys</span></article><article><strong>{researchEvidence}</strong><span>Evidências</span></article><article><strong>{problems}</strong><span>Problemas</span></article><article><strong>{metrics}</strong><span>Métricas</span></article></div></section>
