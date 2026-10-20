@@ -13,6 +13,16 @@ O código-fonte fica em `src/`. Os arquivos `public/v*.js`, `public/v*.css`, `sr
 
 Os comandos de instalação, build e diretório já estão definidos em `vercel.json`. Na integração Git da Vercel, um novo commit na `main` deve iniciar um novo deploy. Confira o hash em **Source** para verificar qual código está sendo compilado. A opção **Redeploy** de uma tentativa anterior reutiliza o commit daquela tentativa.
 
+## Deploy bloqueado antes do build
+
+Quando o status é **Blocked** e não existem logs de compilação, abra **Deployment Checks** para consultar o motivo. Isso é diferente de um erro do TypeScript durante o build.
+
+Se a mensagem informar que o autor Git não tem acesso ao projeto, confira a conta GitHub conectada à Vercel, as permissões do projeto e a identidade configurada no repositório. O plano Hobby pode restringir deploys de autores que não pertencem à conta autorizada. Acesso de escrita no GitHub não garante acesso ao projeto na Vercel.
+
+Use `git config --local user.name` e `git config --local user.email` para conferir a identidade deste repositório. O e-mail deve pertencer à sua própria conta GitHub autorizada, incluindo seu endereço `noreply` quando aplicável. Ambientes na nuvem podem herdar configurações Git diferentes; confira esses dados antes de publicar. Corrigir essa configuração não exige reescrever commits anteriores.
+
+O aviso **Node.js Version Override** indica uma diferença entre a configuração do painel e o campo `engines`. Configure **22.x** no projeto da Vercel para alinhar os dois; esse aviso, isoladamente, não identifica a causa de um deploy bloqueado.
+
 ## Verificações antes de publicar
 
 ```sh
