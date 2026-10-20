@@ -72,6 +72,8 @@ jobs:
       - run: npm run journey:browser
       - run: npm run blueprint:methodology:browser
       - run: npm run entry:browser
+      - name: Verify Journey, templates, and Whiteboard in Chromium
+        run: python3 scripts/h1710-journey-template-whiteboard-browser.py
       - name: Upload editor UX evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -82,3 +84,4 @@ jobs:
             artifacts/journey-editor
             artifacts/blueprint-methodology
             artifacts/entry-journey
+            artifacts/journey-template-whiteboard
