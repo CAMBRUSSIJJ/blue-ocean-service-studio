@@ -66,9 +66,10 @@ ok('touchpoint criado pelo Assistant é tagueado na sessão',core.includes('assi
 ok('operação criada pelo Assistant é tagueada na sessão',core.match(/function addBlueprintEntity[\s\S]{0,2400}assistantTagSmartItem/));
 ok('customer action reorganiza visual',core.includes('if(options.fromAssistant)assistantArrangeVisualBoard();save(false)'));
 ok('handoff reorganiza conexões',core.match(/function editStageHandoff[\s\S]{0,2600}assistantArrangeVisualBoard/));
-ok('blank Whiteboard não mostra readiness herdado',core.includes("blank.textContent='Quadro em branco'"));
-ok('sessão ativa mostra Construção em vez de Readiness',core.includes('`Construção ${progress.percent}%`'));
-ok('empty state some com assistant ativo',core.includes("!serviceBuilderAssistantState().active)emptyState(wrap)"));
+const sharedHeader=core.slice(core.indexOf('  function renderTop(){'),core.indexOf('  function showEditorToolsMenu(){'));
+ok('Whiteboard prioriza documento e salvamento no cabeçalho',sharedHeader.includes('bo1174-board-crumb')&&sharedHeader.includes('rt190-save')&&!sharedHeader.includes('readiness'));
+ok('progresso do Assistant permanece no painel contextual',core.includes('function renderServiceBuilderAssistant(')&&!sharedHeader.includes('progress.percent'));
+ok('empty state some com assistant ativo',/!serviceBuilderAssistantState\(\)\.active[^;]+emptyState\(wrap\)/.test(core));
 ok('campos principais do Assistant desligam autocomplete nativo',core.includes('autocomplete="off"'));
 ok('API expõe session',core.includes('session:()=>clone(assistantSessionState())'));
 ok('API expõe restart',core.includes('restart:()=>'));

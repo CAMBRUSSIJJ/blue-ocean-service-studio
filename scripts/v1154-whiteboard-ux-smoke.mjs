@@ -16,6 +16,6 @@ check('piso tipográfico 11px',css.includes('Whiteboard Visual Integrity & UX Re
 check('menu Ferramentas agrupado',js.includes("addSection('EDITAR')")&&js.includes("addSection('ANALISAR')")&&js.includes("addSection('GERENCIAR')"));
 check('mobile isola o editor da sidebar',js.includes("document.body.classList.add('bo-whiteboard-open')")&&css.includes('body.bo-whiteboard-open aside.rt182-host-sidebar'));
 check('marca usa blue-ocean-mark.svg',shell.includes('/blue-ocean-mark.svg'));
-check('build visível usa APP_VERSION',js.includes('build.textContent=`V${APP_VERSION}`'));
+check('versão canônica disponível nas informações do editor',js.includes('Versão V${APP_VERSION}')&&js.includes('Sobre este editor'));
 check('blue estrutural antigo removido do Whiteboard',!/#2563eb/i.test(css));
 const failed=checks.filter(x=>!x.ok).length;console.log(`\nV1.15.4+ Whiteboard UX Recovery: ${checks.length-failed}/${checks.length}`);if(failed)process.exit(1);

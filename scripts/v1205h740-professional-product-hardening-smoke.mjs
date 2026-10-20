@@ -20,7 +20,7 @@ for(const [label,needle] of [
 ok('style imports H7.40',style.includes("@import './runtime/product-hardening-h740.css';"));
 ok('H7.40 CSS after H7.39',style.indexOf('executive-service-cockpit-h739.css')<style.indexOf('product-hardening-h740.css'));
 ok('main host H7.40',main.includes("'bo-h740'"));
-ok('data bridge already enforces RBAC',whiteboard.includes("!collab.can('edit')&&!collab.internalWrite?.()"));
+ok('data bridge enforces RBAC after checking internal mutations',whiteboard.includes("!collab?.internalWrite?.()&&collab?.can&&!collab.can('edit')"));
 ok('collaboration deny mutation exists',collaboration.includes('function denyMutation(event)'));
 ok('collaboration roles exist',collaboration.includes("const roleOrder={viewer:0,commenter:1,editor:2,owner:3}"));
 ok('whiteboard persistence recovery exists',whiteboard.includes('createRecoveryStore'));

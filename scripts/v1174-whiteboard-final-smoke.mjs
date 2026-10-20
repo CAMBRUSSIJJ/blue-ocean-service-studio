@@ -11,7 +11,7 @@ const v=pkg.version.split('.').map(Number);const atLeast1174=v[0]>1||(v[0]===1&&
 check('versão V1.17.4 ou superior',atLeast1174);
 check('overlay registra finalização do board',js.includes('bo1174-board'));
 check('header do board possui classe dedicada',js.includes('bo1174-board-header')&&css.includes('height:48px!important'));
-check('breadcrumb do board usa Workspace',js.includes('bo1174-board-crumb')&&js.includes('Workspace <i>›</i>'));
+check('breadcrumb identifica documento e serviço',js.includes('bo1174-board-crumb')&&js.includes('${label} <i>·</i> ${esc(graph.service.name)}'));
 check('tool rail mostra Mão e atalhos reais',js.includes("label:'Mão',shortcut:'H'")&&js.includes("label:'Selecionar',shortcut:'V'")&&js.includes("label:'Conexão',shortcut:'C'"));
 check('tooltips do rail exibem kbd',js.includes('<kbd>${entry.shortcut}</kbd>')&&css.includes('.bo1174-toolrail .rt144-tool em kbd'));
 check('barra inferior única existe',js.includes('bo1174-statusbar')&&js.includes("role','toolbar"));
@@ -21,7 +21,7 @@ check('card hierarchy 11 14 12',css.includes('.itemmeta small{font-size:11px!imp
 check('densidades possuem comportamento visual distinto',css.includes('rt1811-density-compact')&&css.includes('rt1811-density-normal')&&css.includes('rt1811-density-detailed'));
 check('Inspector universal consolidado 320px',css.includes('.rt144-inspector{width:320px!important;max-width:320px!important'));
 check('guia não compete com superfícies ativas',js.includes('showLibrary||showLayers||showOutline||showInspector||showBlueprintDocument||selected.length||selectedEdge'));
-check('status salvo usa linguagem local',js.includes("'Salvo · local'"));
+check('status salvo usa linguagem local',js.includes("'Salvo neste dispositivo'"));
 check('CSS mantém piso de 11 px',![...css.matchAll(/font-size\s*:\s*([0-9.]+)px/g)].some(m=>Number(m[1])<11));
 check('asset entra no prepare-assets',prep.includes("['runtime/whiteboard-finalization.css', 'v1174-whiteboard-final.css']"));
 check('index carrega asset final após workspaces',index.indexOf('/v1174-whiteboard-final.css')>index.indexOf('/v1173-unified-workspaces.css'));

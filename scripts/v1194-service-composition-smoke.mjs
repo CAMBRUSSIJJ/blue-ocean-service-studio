@@ -27,14 +27,14 @@ t('composition layout API preserved',core.includes('function serviceCompositionL
 t('composition render API preserved',core.includes('function renderServiceCompositionStructure(canvas)'));
 t('service mode applies composition layout',core.includes("if(mode==='service')serviceCompositionLayout()"));
 t('five view engine preserved',core.includes("['free','service','journey','blueprint','flow']"));
-t('Context Library top action preserved',core.includes("'Contexto do serviço',openServiceContextHome"));
-t('Service Frame tool replaces old composition label',core.includes("'Service Frame','Etapas × Cliente × Frontstage × Backstage"));
+t('Context Library remains available in secondary editor tools',core.includes("'Contexto do serviço'")&&core.includes('openServiceContextHome,true'));
+t('operational Blueprint tool describes its semantic layers',core.includes("'Blueprint operacional','Etapas × Cliente × Frontstage × Backstage"));
 t('composition runtime registry preserved',core.includes("runtime.register('serviceComposition'"));
 t('composition runtime upgraded v2',core.includes("frameMode:'structured',showLines:true"));
 t('smart card v2 preserved',core.includes('bo1194-smart-card'));
 t('smart cards remain white',core.includes("it.kind==='smart'?'#ffffff'"));
 t('smart card css preserved',css.includes('Smart Cards V2'));
 t('new structured service frame css present',css.includes('V1.20.3 — Structured Service Frame'));
-t('free mode onboarding rule preserved',core.includes("serviceCompositionState().experienceMode!=='free'"));
+t('free mode can dismiss onboarding',core.includes("comp.experienceMode==='free'&&!comp.showRecipePrompt")&&core.includes("comp.showRecipePrompt=false"));
 console.log(`\nService Composition compatibility V1.19.4+: ${ok} OK / ${fail} FAIL`);
 if(fail)process.exit(1);

@@ -167,6 +167,14 @@ export function useStudioController() {
 
   useEffect(() => {
     graphRef.current = graph;
+    // Runtime transactions have already saved before publishing rt-graph-changed.
+    // Save only the library snapshot here; saving the bridge again emits another
+    // graph event and starts an endless autosave cycle.
+    if (dataBridge()) {
+      try { saveProjectSnapshot(graph); setSaveStatus('saved'); }
+      catch { setSaveStatus('error'); }
+      return;
+    }
     if (!autosaveReadyRef.current) { autosaveReadyRef.current = true; return; }
     setSaveStatus('saving');
     if (autosaveTimerRef.current !== null) window.clearTimeout(autosaveTimerRef.current);

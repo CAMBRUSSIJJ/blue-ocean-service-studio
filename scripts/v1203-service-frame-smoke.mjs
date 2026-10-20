@@ -80,7 +80,7 @@ for(const marker of [
   'SERVICE_FRAME_LAYERS','function serviceFrameMetrics()','function serviceCompositionLayout(','function renderServiceCompositionStructure(canvas)',
   'LINHA DE INTERAÇÃO','LINHA DE VISIBILIDADE','cliente ↕ frontstage','acima visível · abaixo invisível',
   "serviceStageId",'serviceLayer','applyStructuredDrop(ids)','function serviceFrameCoverageReport()','function createServiceFrameWhiteboard',
-  "createServiceFrame:createServiceFrameWhiteboard", "['free','service','journey','blueprint','flow']", "['Service Frame','service'", 'Ver Blueprint',
+  "createServiceFrame:createServiceFrameWhiteboard", "['free','service','journey','blueprint','flow']", "['Service Frame','service'", 'Vista operacional', 'Matriz detalhada',
   "runtime.register('serviceComposition'", "frameMode:'structured',showLines:true"
 ]) ok(core.includes(marker),`runtime marker ${marker}`);
 ok(!core.includes('SERVICE_COMPOSITION_LANES'),'legacy 12-lane composition constant removed');

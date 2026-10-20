@@ -41,7 +41,7 @@ ok('assistant returns from stage flow',core.includes('← Voltar ao assistente')
 ok('assistant API registered',core.includes("runtime.register('serviceBuilderAssistant'"));
 ok('assistant start requires free board',core.includes("board().viewKind!=='free'"));
 ok('blank board remains empty',core.includes("createBoard(clean,{viewKind:'free',layoutMode:'free',items:{},edges:{}})"));
-ok('empty state offers assistant or Discovery-first service builder',core.includes('Montar com assistente')||core.includes("btn('Montar serviço'"));
+ok('empty Whiteboard starts with a note and keeps the assistant optional',core.includes("btn('Adicionar post-it'")&&core.includes("if(board()?.viewKind==='free'&&!serviceBuilderAssistantState().active)return"));
 ok('empty state preserves free exploration and points structured design to Blueprints',whiteboards.includes('Ir para Blueprints')&&whiteboards.includes('livre'));
 ok('home guided creates blank board first',home.includes("core?.createBlank") && home.includes("serviceBuilderAssistant"));
 ok('home guided uses service named board',home.includes("`${graph.service.name || 'Serviço'} · construção`"));

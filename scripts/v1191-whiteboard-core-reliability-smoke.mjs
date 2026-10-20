@@ -34,7 +34,7 @@ ok('shortcut guard detecta controles interativos',core.includes('function isUiCo
 ok('shortcut guard detecta contenteditable',core.includes('target?.isContentEditable')&&core.includes('[contenteditable]'));
 ok('atalho global ignora controles UI',core.includes('if(isTypingTarget(e.target))')&&core.includes('if(isUiControlTarget(e.target))'));
 ok('itens possuem tabindex',core.includes('el.tabIndex=0'));
-ok('itens possuem role button',core.includes("el.setAttribute('role','button')"));
+ok('itens agrupam controles sem botões aninhados',core.includes("el.setAttribute('role','group')"));
 ok('itens possuem aria-label',core.includes("el.setAttribute('aria-label'"));
 ok('toast possui aria-live',core.includes("setAttribute('aria-live','polite')"));
 ok('toast possui role status',core.includes("setAttribute('role','status')"));

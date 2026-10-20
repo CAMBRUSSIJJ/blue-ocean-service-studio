@@ -10,7 +10,9 @@ check('Inspector abre ao concluir seleção',js.includes("whiteboardUxState().au
 check('preferência do Inspector é configurável',js.includes("Abrir Inspector ao selecionar")&&js.includes('whiteboardUxState().autoInspector'));
 check('toolbar contextual reduzida',js.includes("const edit=btn('Editar'")&&!js.includes("d.appendChild(btn('Comentários',()=>runtime.api('collaboration')?.show?.('comments'),'rt190-context-action'))"));
 check('ações secundárias migradas para menu',js.includes("add('Propriedades'")&&js.includes("add('Comentários'"));
-check('Readiness único no cabeçalho',js.includes('serviceReadinessReport()')&&js.includes('Readiness ${readiness.score}%'));
+check('diagnósticos ficam na revisão solicitada',js.includes("'Revisão do serviço'")&&js.includes('showReadinessDetails'));
+const header=js.slice(js.indexOf('function renderTop()'),js.indexOf('function showEditorToolsMenu()'));
+check('cabeçalho prioriza o estado de salvamento',header.includes('updateSaveIndicator')&&!header.includes('Readiness'));
 check('fórmula do Readiness explícita',js.includes('8 blocos: Serviço, Cliente, Etapas, Experiência, Operação, Problemas, Melhorias e Métricas'));
 check('diagnósticos específicos não confundem progresso',js.includes('Completude da Jornada')&&js.includes('Saúde do Blueprint')&&js.includes('não substituem o Readiness'));
 check('Readiness pode ser ocultado',js.includes('Mostrar Readiness no cabeçalho'));

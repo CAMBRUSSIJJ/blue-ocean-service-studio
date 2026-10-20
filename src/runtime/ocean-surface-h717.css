@@ -72,7 +72,7 @@
 .bo-h717 .bo-auth-panel__footer{color:rgba(225,240,251,.66)!important}
 
 /* ---------- Workspace canvas: a single light-ocean surface instead of isolated tinted panels. ---------- */
-body.bo-h717.rt182-host main{
+body.bo-h717.rt182-host #root main{
   position:relative;
   background-color:#f7fbff!important;
   background-image:
@@ -166,7 +166,7 @@ body.bo-h717.rt182-host main{
 
 @media(max-width:900px){
   .bo-h717 .bo-auth-shell::before{background-size:auto 100%;background-position:38% bottom}
-  body.bo-h717.rt182-host main{background-size:720px 440px,620px 360px,150% 260px!important}
+  body.bo-h717.rt182-host #root main{background-size:720px 440px,620px 360px,150% 260px!important}
 }
 @media(max-width:600px){
   .bo-h717 .bo-auth-shell::before{opacity:.70;background-position:30% bottom}

@@ -107,7 +107,7 @@ for(const marker of ['OperationalEntityKind','ServiceVisibility','EvidenceMedium
 const model=read('src/domain/model.ts');
 for(const marker of ["'role'","'dependency'","'policy'"]) ok(model.includes(marker),`model supports ${marker}`);
 const runtime=read('src/runtime/whiteboard-core.js');
-for(const marker of ['SERVICE_OPERATION_DEFS','showServiceOperations','showOperationalLinks','Contexto operacional','Meio da evidência','Operação ${op.percent}%','data-operation','serviceVisibilityForLayer','roleIds','dependencyIds','policyIds']) ok(runtime.includes(marker),`whiteboard runtime marker ${marker}`);
+for(const marker of ['SERVICE_OPERATION_DEFS','showServiceOperations','showOperationalLinks','Contexto operacional','Meio da evidência','Detalhes da etapa',"col.querySelector('.bo1205-stage-operation').onclick",'serviceVisibilityForLayer','roleIds','dependencyIds','policyIds']) ok(runtime.includes(marker),`whiteboard runtime marker ${marker}`);
 const css=read('src/runtime/whiteboard-core.css');
 for(const marker of ['V1.20.5 — Frontstage / Backstage Advanced System','.bo1205-stage-operation','.bo1205-operation-summary','.bo1205-link-list','.bo1205-inspector-operation']) ok(css.includes(marker),`whiteboard css marker ${marker}`);
 const integrity=read('src/runtime/data-integrity.js');

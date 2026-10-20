@@ -39,7 +39,7 @@ t('modal gigante Preparar o serviço foi removido', !core.includes("modalShell('
 t('API legada showServiceRecipe redireciona para contexto', core.includes('function showServiceRecipe(){') && core.includes('openServiceContextHome()'));
 t('ação Contexto do serviço existe', core.includes('Contexto do serviço'));
 t('builder estruturado exige Discovery quando serviço está vazio', core.includes('Antes de montar o serviço, registre ao menos 1 Persona e 1 Problema/Hipótese'));
-t('empty state oferece Voltar ao contexto sem contexto mínimo', core.includes("btn('Voltar ao contexto',openServiceContextHome"));
+t('empty Whiteboard permits a first idea without mandatory context', core.includes('Qual é a primeira ideia?') && core.includes("btn('Adicionar post-it'"));
 t('copy técnica antiga de exclusão foi removida', !core.includes('representação(ões) visuais'));
 t('copy de exclusão explica remoção do quadro', core.includes('será removido permanentemente'));
 t('create service orienta Discovery primeiro', controller.includes('cliente, necessidade e problema'));

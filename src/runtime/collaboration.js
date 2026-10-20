@@ -29,7 +29,12 @@ function ensureState(){
   try{bridge().transact(next=>{next.service.collaboration=defaultState(next);return next},'Preparar colaboração')}finally{internalMutation=false}
   return state();
 }
-function currentMember(s=ensureState()){return s?.members?.[s.currentUserId]||Object.values(s?.members||{})[0]||null}
+// Permission checks must never initialize collaboration through a transaction.
+// A new local workspace starts with its local owner until state is persisted.
+function currentMember(s=state()){
+  if(!s)return graph()?.service?{id:'member-local-owner',name:'Usuário local',role:'owner',status:'active'}:null;
+  return s.members?.[s.currentUserId]||Object.values(s.members||{})[0]||null;
+}
 function currentRole(){return currentMember()?.role||'viewer'}
 function can(action){
   const r=currentRole(),level=roleOrder[r]??0;

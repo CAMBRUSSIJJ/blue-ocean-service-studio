@@ -8,7 +8,7 @@ const checks=[]; const check=(label,ok)=>{checks.push({label,ok});console.log(`$
 check('fundação V1.16+ preservada',(()=>{const [a,b]=pkg.version.split('.').map(Number);return a>1||(a===1&&b>=16)})());
 check('source React canônico existe',existsSync('src/main.tsx')&&existsSync('src/App.tsx')&&existsSync('src/domain/schema.ts'));
 check('versão React vem do gerador',app.includes("from './generated/app-version'")&&app.includes('V${APP_VERSION}'));
-check('Whiteboard não fixa versão de produto',wb.includes("const APP_VERSION = '__APP_VERSION__'")&&wb.includes('`V${APP_VERSION}`'));
+check('Whiteboard usa versão gerada nos detalhes do editor',wb.includes("const APP_VERSION = '__APP_VERSION__'")&&wb.includes('Versão V${APP_VERSION}')&&wb.includes('Sobre este editor'));
 check('prepare-assets injeta versão',prep.includes("replaceAll('__APP_VERSION__', appVersion)"));
 check('build tem provenance',pkg.scripts?.build?.includes('build-provenance.mjs'));
 check('verify source authority',pkg.scripts?.['source:authority']?.includes('v1160-source-authority'));

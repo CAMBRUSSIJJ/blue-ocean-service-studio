@@ -1,6 +1,88 @@
 /* BLUE OCEAN Service Studio V1.17.4 — Whiteboard Interface Finalization
    Final interface layer only. No graph/schema/persistence changes. */
 
+/* Shared editor shell. The application surface and legacy two-row header must
+   not change the positioning or available height of the drawing viewport. */
+/* The app is a grid child of body; its intrinsic nav width must not enlarge the
+   mobile layout viewport or move modal actions outside the visible screen. */
+#root{min-width:0;width:100%;max-width:100%}
+body.bo-whiteboard-open #root{visibility:hidden}
+.bo1174-board{--bo-editor-header-height:56px;isolation:isolate}
+.rt144.bo1174-board .rt144-top.bo1174-board-header{
+  height:var(--bo-editor-header-height)!important;min-height:var(--bo-editor-header-height)!important;
+  grid-template-columns:minmax(180px,1fr) auto auto!important;grid-template-rows:1fr!important;
+}
+.bo1174-board .rt144-body{position:relative;flex:1 1 0%;min-height:0;overflow:hidden;overflow:clip}
+.bo1174-board .rt144-view{position:absolute;inset:0;min-height:0;overflow:hidden;overflow:clip}
+.rt144.bo1174-board .bo1174-statusbar{left:50%!important;right:auto!important;transform:translateX(-50%)!important;overflow-x:auto}
+.rt144.bo1174-board:has(.rt144-inspector) .bo1174-statusbar{left:calc((100% - 334px)/2)!important;max-width:calc(100% - 420px)}
+.bo-editor-structure-summary{font-size:12px;color:#52647b;margin:8px 0}
+.bo1174-board .bo1203-cell-add{opacity:1;color:#425b76;min-height:32px}
+.bo1174-board .rt190-context{grid-column:1;grid-row:1}
+.bo1174-board .rt190-topmid{grid-column:2;grid-row:1;display:flex;align-items:center;gap:6px}
+.bo1174-board .rt190-actions{grid-column:3;grid-row:1;display:flex;align-items:center;gap:5px}
+.bo1174-board .rt190-doc-title b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bo1174-board .rt190-save{color:#475569;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+.bo1174-board .rt190-save.error{color:#b42318}
+.bo1174-board .rt144-item.card .itemmeta small{color:#475569!important}
+.bo1174-board .rt144-field>span{color:#475569!important}
+body.bo-whiteboard-open #rt1101-presence>em{color:#475569}
+.bo1174-board .rt144-colors button[aria-pressed="true"]{box-shadow:0 0 0 2px #172033}
+.bo1174-board button:focus-visible,.bo1174-board summary:focus-visible{outline:3px solid #2563eb;outline-offset:3px}
+.bo1174-board .bo1193-inline-rename{display:block;width:100%;min-height:64px;max-height:100%;padding:6px;resize:none;white-space:pre-wrap;background:#fffef5;color:#172033;border:2px solid #2563eb;border-radius:5px;font:inherit;line-height:1.4}
+.bo1174-board .bo-editor-empty{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);z-index:5;width:min(420px,calc(100% - 160px));padding:24px;background:#fff;border:1px solid #d7e2ee;border-radius:14px;box-shadow:0 8px 32px #0b1f3b0a;display:flex;flex-direction:column;gap:10px;text-align:left}
+.bo-editor-empty>small{color:#2563eb;font-size:11px;font-weight:750;letter-spacing:.08em}
+.bo-editor-empty>b{font-size:21px;line-height:1.2;color:#172033}
+.bo-editor-empty>span,.bo-editor-hint{font-size:12px;line-height:1.6;color:#52647b}
+.bo-editor-empty .emptyactions{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px}
+.bo-editor-details{margin:18px 0;padding:12px 0;border-top:1px solid #e2e8f0}
+.bo-editor-details summary{cursor:pointer;font-size:12px;font-weight:650;color:#334155;padding:4px 0 12px}
+.bo-editor-preview.rt144-modalbox{width:min(940px,calc(100vw - 32px));max-width:940px}
+.bo-editor-preview-form{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;max-height:75vh;overflow:auto}
+.bo-editor-preview-form>label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:650;color:#334155}
+.bo-editor-preview-form input,.bo-editor-preview-form select,.bo-editor-preview-form textarea{min-height:38px;width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:7px;background:white;color:#172033;font:inherit}
+.bo-editor-preview-form label small{font-size:11px;font-weight:400;color:#52647b}
+.bo-editor-preview-form>.bo-editor-hint,.bo-editor-preview-table,.bo-editor-form-error,.bo-editor-preview-form>footer{grid-column:1/-1}
+.bo-editor-preview-table{overflow:auto;border:1px solid #dbe3ee;border-radius:8px}
+.bo-editor-preview-table table{width:100%;border-collapse:collapse}
+.bo-editor-preview-table th,.bo-editor-preview-table td{padding:10px;text-align:left;border-bottom:1px solid #e2e8f0;font-size:12px}
+.bo-editor-preview-table th{background:#f7f9fc;color:#475569;font-weight:650}
+.bo-editor-preview-table td:first-child{max-width:260px;white-space:pre-wrap}
+.bo-editor-preview-table td small{display:block;margin-top:5px;color:#64748b}
+.bo-editor-preview-table select{min-width:145px;font-size:12px}
+.bo-editor-form-error{padding:10px;background:#fff1f0;color:#b42318;border-radius:7px;font-size:12px}
+.bo-editor-preview-form>footer{display:flex;justify-content:flex-end;gap:8px}
+.bo-editor-preview-form [hidden]{display:none}
+.bo-editor-cell-entry{position:relative;z-index:4;margin:8px 12px 8px 22px;padding:10px;border:2px solid #2563eb;background:white;border-radius:8px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 16px #0b1f3b12}
+.bo-editor-cell-entry textarea{display:block;width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:5px;resize:vertical;color:#172033;background:#fff;font:14px/1.4 var(--bo-font-sans)}
+.bo-editor-cell-entry small{font-size:11px;color:#52647b}
+.bo-editor-cell-entry>div{display:flex;justify-content:flex-end;gap:6px}
+.bo-editor-sticky-guides{position:absolute;inset:0;pointer-events:none;z-index:35}
+.bo-editor-sticky-stage,.bo-editor-sticky-lane{position:absolute;padding:10px 12px;border:1px solid #dbe3ee;border-radius:7px;background:#fffffff5;box-shadow:0 3px 10px #0b1f3b0d;color:#243b53;font-size:12px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bo-editor-sticky-stage{top:8px;min-height:42px}
+.bo-editor-sticky-lane{left:76px;width:160px}
+.bo-editor-board-preview{display:block;width:100%;height:146px;padding:12px;border:0;border-bottom:1px solid #e2e8f0;border-radius:12px 12px 0 0;background:#f7f9fc;cursor:pointer;overflow:hidden}
+.bo-editor-board-preview svg{display:block;width:100%;height:100%}
+.bo-editor-preview-empty{display:grid;place-items:center;height:100%;color:#64748b;font-size:12px}
+@media(max-width:1100px){
+  .rt144.bo1174-board .rt144-top.bo1174-board-header{grid-template-columns:minmax(160px,1fr) auto auto!important}
+  .bo1174-board .rt190-actions .rt194-present-btn{display:none}
+}
+@media(max-width:900px){
+  .bo1174-board{--bo-editor-header-height:100px}
+  .rt144.bo1174-board .rt144-top.bo1174-board-header{grid-template-columns:minmax(140px,1fr) auto!important;grid-template-rows:50px 50px!important;gap:0 8px!important}
+  .bo1174-board .rt190-actions{grid-column:2;grid-row:1}
+  .bo1174-board .rt190-topmid{grid-column:1/-1;grid-row:2}
+  .bo-editor-preview-form{grid-template-columns:1fr}
+}
+@media(max-width:599px){
+  .bo1174-board{--bo-editor-header-height:56px}
+  .rt144.bo1174-board .rt144-top.bo1174-board-header{grid-template-rows:1fr!important}
+  .bo1174-board .rt190-topmid{display:none!important}
+  .bo1174-board .rt190-tools-menu{display:none}
+  .bo1174-board .bo-editor-empty{display:none}
+}
+
 /* E1 — The board header follows the same 48px shell rhythm. */
 .bo1174-board .rt144-top.bo1174-board-header{height:48px!important;min-height:48px!important;padding:0 10px!important;grid-template-columns:minmax(210px,1fr) auto minmax(250px,1fr)!important;gap:10px!important;background:rgba(255,255,255,.985)!important;border-bottom:1px solid var(--bo-color-border)!important;box-shadow:none!important}
 .bo1174-board .rt190-context{min-width:0}.bo1174-board .rt190-back{width:30px!important;height:30px!important;border-radius:7px!important}

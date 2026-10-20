@@ -186,6 +186,8 @@
     "v1205h17031:guidance-typecheck-smoke": "node scripts/v1205h17031-guidance-typecheck-smoke.mjs",
     "v1205h1704:reference-workflow-smoke": "node scripts/v1205h1704-reference-workflow-smoke.mjs",
     "v1205h1705:free-canvas-smoke": "node scripts/v1205h1705-free-canvas-smoke.mjs",
+    "editor:selection:test": "node scripts/editor-selection-test.mjs",
+    "editor:browser": "python3 scripts/editor-ux-browser.py",
     "journey:a2:test": "node scripts/h1708-audit-a2-behavior.mjs",
     "journey:h1709:move:test": "node --experimental-strip-types scripts/h1709-card-movement.mjs",
     "journey:h1709:test": "node --experimental-strip-types scripts/h1709-card-behavior.mjs",

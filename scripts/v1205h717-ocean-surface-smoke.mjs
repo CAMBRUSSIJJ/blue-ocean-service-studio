@@ -21,7 +21,7 @@ check(css.includes('.bo-h717 .bo-auth-story__veil'),'story veil preserva contras
 check(css.includes('.bo-h717 .bo-auth-card'),'card de login preserva superfície legível');
 check(css.includes('.bo-h717 .bo-auth-panel__footer'),'footer do login é compatível com fundo escuro');
 
-check(css.includes('body.bo-h717.rt182-host main{'),'workspace possui fundo oceânico global');
+check(css.includes('body.bo-h717.rt182-host #root main{'),'workspace possui fundo oceânico sem alterar viewport dos editores');
 check(css.includes("url('/blue-ocean-surface-light-h717.svg')"),'workspace usa onda vetorial leve contínua');
 check(css.includes('.bo1215-dashboard[data-ocean-home="7.15"]'),'H7.17 respeita a Home H7.15');
 check(css.includes('background:transparent!important'),'dashboard não cria placa branca sobre a superfície');

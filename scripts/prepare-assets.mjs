@@ -16,6 +16,7 @@ for (const [source, target] of [
   ['runtime/data-integrity.js', 'v1102-data-integrity.js'],
   ['runtime/view-config.js', 'v1102-view-config.js'],
   ['runtime/journey-templates.js', 'v1102-journey-templates.js'],
+  ['runtime/blueprint-from-selection.js', 'v1102-blueprint-from-selection.js'],
   ['runtime/research-workspace.js', 'v1102-research-workspace.js'],
   ['runtime/research-workspace.css', 'v1102-research-workspace.css'],
   ['runtime/service-layers.js', 'v1102-service-layers.js'],
@@ -78,6 +79,7 @@ for (const [source, target] of [
       './persistence-kernel.js':'./v1102-persistence-kernel.js',
       './view-config.js':'./v1102-view-config.js',
       './journey-templates.js':'./v1102-journey-templates.js',
+      './blueprint-from-selection.js':'./v1102-blueprint-from-selection.js',
       './guidance-engine.js':'./v1188-guidance-engine.js',
       './practical-simulation-data.js':'./v1102-practical-simulation-data.js',
     };
