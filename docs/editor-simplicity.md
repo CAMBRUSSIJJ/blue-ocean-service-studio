@@ -27,6 +27,14 @@ O menu **Visualizações** reúne o mapa livre, a matriz detalhada, a abertura d
 
 O grupo flutuante no canto inferior esquerdo reúne mão, desfazer/refazer e zoom. **H** ativa a mão, **V** retorna à edição e segurar **Espaço** permite mover o mapa temporariamente. Arrastar com a mão altera apenas a navegação. Clicar no percentual restaura 100%. O mapa continua utilizável por rolagem e toque; os formulários preservam seus atalhos de texto.
 
+## Cartões e escolha de faixas
+
+Os cartões usam uma superfície única, com borda leve, sombra baixa e espaçamento uniforme. Os campos de texto ficam integrados ao cartão, crescem com o conteúdo e voltam à altura compacta quando o texto diminui. A formatação permanece contextual, e as ações de arraste, cópia e exclusão usam ícones da mesma família. O foco e o hover mudam a aparência sem deslocar o cartão.
+
+O seletor de faixas organiza os oito tipos de conteúdo em duas colunas, com pictogramas e descrições curtas. As cinco informações compartilhadas do serviço aparecem em uma seção própria, no mesmo painel. Ao abrir, o foco vai para a primeira opção; setas, Home e End percorrem as escolhas, e Escape fecha o painel e devolve o foco ao botão. Ao escolher uma faixa, seu nome recebe foco para facilitar a personalização.
+
+As transições duram entre 120 e 160 ms. A preferência por movimento reduzido desativa as animações e transições novas. O painel se adapta à largura e à altura disponíveis, com rolagem para manter todas as opções alcançáveis.
+
 ## Blueprint
 
 O modo guiado abre com duas ferramentas: **Selecionar** e **Mão**. A criação de atividades acontece diretamente nas células; não exige escolher um objeto na biblioteca.

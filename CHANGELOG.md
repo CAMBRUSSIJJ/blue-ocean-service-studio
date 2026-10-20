@@ -1,3 +1,11 @@
+## Cartões mais suaves e seletor de faixas padronizado
+
+- Integra o texto à superfície do cartão, com bordas leves, sombras discretas e ajuste automático da altura.
+- Padroniza os ícones de tipos de faixa, vínculos do serviço, ações do cartão e formatação.
+- Organiza os tipos de conteúdo em duas colunas, com descrições curtas e uma seção própria para informações do serviço.
+- Acrescenta navegação do seletor por teclado, restauração de foco e suporte a movimento reduzido.
+- Verifica textos longos, compactação, estabilidade do cartão, alcance das opções em telas menores e acessibilidade do seletor aberto.
+
 ## Editor exclusivo em tela inteira
 
 - Abre a Jornada diretamente em uma superfície de tela inteira, ocultando sidebar, cabeçalho do projeto, abas e breadcrumbs, com isolamento e restauração do foco.

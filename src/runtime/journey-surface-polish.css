@@ -1,0 +1,54 @@
+/* Quiet paper surfaces. Hover and focus change depth, never card geometry. */
+.bo-focused-journey .bo-h1706-cell{padding:14px}
+.bo-focused-journey .bo-h1709-card-stack{gap:12px}
+.bo-focused-journey .bo-h1706-edit-card{padding:14px;border:1px solid #e2e7ed;border-radius:10px;background:#fff;box-shadow:0 1px 2px #17203305,0 3px 8px #17203304;transition:border-color 160ms ease,box-shadow 160ms ease;animation:bo-card-reveal 160ms ease-out}
+.bo-focused-journey .bo-h1709-card{padding:34px 13px 11px}
+.bo-focused-journey .bo-h1706-edit-card:hover{border-color:#cfd7e1;box-shadow:0 2px 4px #17203307,0 5px 12px #17203306}
+.bo-focused-journey .bo-h1706-edit-card:focus-within{border-color:#b5c4d9;box-shadow:0 0 0 3px #3563a80b,0 2px 5px #17203307}
+.bo-focused-journey .bo-h1706-edit-card textarea{display:block;width:100%;min-height:68px;box-sizing:border-box;padding:0!important;border:0!important;border-radius:0;background:transparent!important;box-shadow:none!important;outline:none!important;resize:none;overflow:hidden;font-size:13px;line-height:1.65;letter-spacing:0;color:#354154;caret-color:#2452ad}
+.bo-focused-journey .bo-h1706-edit-card textarea::placeholder{color:#687589;opacity:1}
+.bo-focused-journey .bo-h1709-card>.bo-h1709-drag-handle,.bo-focused-journey .bo-h1709-card>.bo-h1709-duplicate-card,.bo-focused-journey .bo-h1709-card>.bo-h1709-remove-card{position:absolute;top:5px;display:grid;place-items:center;width:26px;height:24px;min-width:26px;min-height:24px;padding:3px!important;border:0!important;border-radius:5px;background:transparent!important;box-shadow:none!important;color:#667386;transition:opacity 120ms ease,background-color 120ms ease,color 120ms ease}
+.bo-focused-journey .bo-h1709-card>.bo-h1709-drag-handle{left:6px}
+.bo-focused-journey .bo-h1709-card>.bo-h1709-duplicate-card{right:33px}
+.bo-focused-journey .bo-h1709-card>.bo-h1709-remove-card{right:6px}
+.bo-focused-journey .bo-h1709-card>.bo-h1709-drag-handle:hover,.bo-focused-journey .bo-h1709-card>.bo-h1709-duplicate-card:hover{background:#f0f3f7!important;color:#34455d}
+.bo-focused-journey .bo-h1709-card>.bo-h1709-remove-card:hover{background:#fff1f0!important;color:#ac3d39}
+.bo-focused-journey .bo-h1709-card .bo-h1706-format{position:static;display:flex;align-items:center;flex-wrap:nowrap;gap:3px;width:100%;max-width:none;height:31px;min-height:31px;margin:8px 0 0;padding:5px 0 0;border:0!important;border-top:1px solid #edf0f4!important;border-radius:0;background:transparent;box-shadow:none}
+.bo-focused-journey .bo-h1709-card .bo-h1706-format>button{display:grid;place-items:center;flex:none;width:26px;min-width:26px;height:24px;min-height:24px;padding:4px;border:0!important;border-radius:5px;background:transparent;box-shadow:none;color:#576579}
+.bo-focused-journey .bo-h1709-card .bo-h1706-format>button:hover{background:#f0f3f7;color:#263c59}
+.bo-focused-journey .bo-h1709-add-card{min-height:32px;border-radius:6px;transition:background-color 140ms ease,color 140ms ease,opacity 140ms ease}
+.bo-focused-journey .bo-h1706-stage-tools button,.bo-focused-journey .bo-h1706-lane-tools button{display:grid;place-items:center}
+/* One chooser, with consistent pictograms and two levels of information. */
+.bo-focused-journey .bo-h1705-menu-wrap>.bo-refined-picker{display:block;width:388px;max-width:calc(100vw - 24px);max-height:calc(100dvh - 76px);padding:8px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;border:1px solid #e1e6ec;border-radius:13px;background:#fff;box-shadow:0 3px 8px #18223807,0 16px 40px #18223818;animation:bo-picker-reveal 140ms ease-out;transform-origin:top right;scrollbar-width:thin;scroll-padding:8px}
+.bo-refined-picker .bo-picker-heading{display:grid;gap:4px;padding:10px 10px 16px}
+.bo-refined-picker .bo-picker-heading>strong{font-size:14px;font-weight:650;letter-spacing:-.01em;color:#2c394c}
+.bo-refined-picker .bo-picker-heading>span{font-size:12px;line-height:1.5;color:#647083}
+.bo-refined-picker .bo-picker-content{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.bo-focused-journey .bo-refined-picker .bo-picker-content>button{display:flex;align-items:flex-start;gap:10px;min-width:0;min-height:76px;padding:12px 10px;border:1px solid #e9edf2!important;border-radius:8px;background:#fafbfc!important;box-shadow:none!important;text-align:left;color:#344155;transition:background-color 140ms ease,border-color 140ms ease,box-shadow 140ms ease}
+.bo-focused-journey .bo-refined-picker .bo-picker-content>button:hover,.bo-focused-journey .bo-refined-picker .bo-picker-content>button:focus-visible{border-color:#cbd5e1!important;background:#fff!important;box-shadow:0 2px 5px #17203308!important}
+.bo-refined-picker .bo-picker-content .bo-picker-icon{display:flex;align-items:center;justify-content:center;flex:0 0 21px;width:21px;height:22px;margin-top:1px;color:#536b89;font-weight:400}
+.bo-refined-picker .bo-picker-content .bo-picker-copy{display:grid;gap:4px;min-width:0;width:auto;color:inherit;font-weight:400}
+.bo-refined-picker .bo-picker-copy>strong{font-size:12px;font-weight:600;line-height:1.45;color:#334155}
+.bo-refined-picker .bo-picker-copy>small{font-size:11px;line-height:1.45;font-weight:400;color:#637084}
+.bo-refined-picker .bo-picker-service{margin-top:12px;padding-top:10px;border-top:1px solid #edf0f4}
+.bo-refined-picker .bo-picker-section{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:3px 10px 8px}
+.bo-refined-picker .bo-picker-section>strong{font-size:12px;font-weight:600;color:#3b485b}
+.bo-refined-picker .bo-picker-section>span{font-size:11px;color:#687587}
+.bo-refined-picker .bo-picker-links{display:grid;gap:2px}
+.bo-focused-journey .bo-refined-picker .bo-picker-links>button{display:flex;align-items:center;gap:11px;width:100%;min-height:36px;padding:8px 10px;border:0!important;border-radius:6px;background:transparent!important;box-shadow:none!important;color:#596d87;font-size:12px}
+.bo-refined-picker .bo-picker-links>button>span{flex:1;width:auto;color:#425067;font-weight:400}
+.bo-refined-picker .bo-picker-links>button>svg:last-child{color:#8190a2}
+.bo-focused-journey .bo-refined-picker .bo-picker-links>button:hover{background:#f3f5f8!important}
+.bo-refined-picker button:focus-visible{outline:2px solid #59799f!important;outline-offset:-2px!important}
+@keyframes bo-card-reveal{from{opacity:0}to{opacity:1}}
+@keyframes bo-picker-reveal{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:530px){
+ .bo-focused-journey .bo-h1705-menu-wrap>.bo-refined-picker{left:8px;right:8px;width:auto;max-width:none;max-height:calc(100dvh - 66px)}
+ .bo-focused-journey .bo-h1706-cell{padding:11px}
+ .bo-refined-picker .bo-picker-copy>strong{font-size:12px}
+ .bo-refined-picker .bo-picker-copy>small{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ .bo-focused-journey .bo-h1706-edit-card,.bo-focused-journey .bo-refined-picker{animation:none;transition:none}
+ .bo-focused-journey .bo-h1709-card button,.bo-focused-journey .bo-h1709-add-card,.bo-focused-journey .bo-refined-picker button{transition:none}
+}
