@@ -1,3 +1,11 @@
+## Entrada contínua e início guiado da Jornada
+
+- Remove a seção duplicada de ferramentas da visão geral do projeto.
+- Corrige o login para ocupar toda a largura, com ondas animadas, fundo contínuo e campos sem bordas duplicadas.
+- Isola o estilo da entrada das regras do workspace e respeita movimento reduzido.
+- Dá ao mapa uma superfície própria, direção nos cabeçalhos, ícones nas faixas e áreas de escrita mais convidativas.
+- Oferece uma estrutura inicial opcional com etapas e faixas essenciais, preservando os mapas existentes e o histórico em uma única ação.
+
 ## Blueprint: estrutura e revisão da entrega
 
 - Completa a vista operacional com evidências do serviço e as linhas de interação, visibilidade e interação interna.

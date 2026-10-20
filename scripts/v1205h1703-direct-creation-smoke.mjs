@@ -16,7 +16,7 @@ const checks=[
  ['sem Pesquisa como aba principal de Entender',!group.includes("{ id: 'research', label: 'Pesquisa'")],
  ['sem Pesquisa no menu de Gestão',!menu.includes('title="Pesquisa"')],
  ['Público-alvo na sidebar',app.includes('<span>Público-alvo</span>')],
- ['Projeto abre Público-alvo',shell.includes('<strong>Público-alvo</strong>')],
+ ['Público-alvo permanece acessível pela navegação do projeto',app.includes('openPrimaryLibraryPage') && app.includes('personas') && !shell.includes('Ferramentas e configurações')],
  ['Jornada em branco ou guiada',ws.includes('journeyStartTemplate') && ws.includes('Em branco') && (ws.includes('Com orientação') || ws.includes('starterTemplates.map'))],
  ['Jornada nova abre editor',ws.includes('setJourneyEditorOpen(true)')],
  ['Persona nova abre construtor',persona.includes("bo-workspace-create-page") && persona.includes('setCreateOpen(true)')],

@@ -71,6 +71,7 @@ jobs:
       - run: npm run editor:browser
       - run: npm run journey:browser
       - run: npm run blueprint:methodology:browser
+      - run: npm run entry:browser
       - name: Upload editor UX evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -80,3 +81,4 @@ jobs:
             artifacts/editor-ux
             artifacts/journey-editor
             artifacts/blueprint-methodology
+            artifacts/entry-journey

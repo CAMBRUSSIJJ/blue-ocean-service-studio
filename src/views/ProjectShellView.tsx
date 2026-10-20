@@ -1,5 +1,5 @@
 import {
-  ArrowRight, Archive, BookOpen, FileText, FolderKanban, Settings2, UsersRound,
+  ArrowRight, BookOpen, FolderKanban,
 } from '../design-system/icons';
 import type { StudioController } from '../state/useStudioController';
 
@@ -9,16 +9,12 @@ type Props = {
   studio: StudioController;
   section: ProjectShellSection;
   openService: () => void;
-  openResearch: () => void;
-  openLibraryHub: () => void;
   openLibraryPage: (page: 'hierarchies' | 'personas' | 'needs' | 'jobs' | 'pains' | 'hypotheses' | 'problems' | 'evidence' | 'portfolio' | 'metrics' | 'templates' | 'archive') => void;
-  openTeam: () => void;
-  openSettings: () => void;
 };
 
 const count = (value: Record<string, unknown> | undefined) => Object.keys(value ?? {}).length;
 
-export function ProjectShellView({ studio, section, openService, openResearch, openLibraryHub, openLibraryPage, openTeam, openSettings }: Props) {
+export function ProjectShellView({ studio, section, openService, openLibraryPage }: Props) {
   const { graph, projects, activeProjectId } = studio;
   const project = projects.find((item) => item.id === activeProjectId) ?? projects[0] ?? null;
   const serviceName = graph.service.name || project?.serviceName || 'Serviço ainda não definido';
@@ -86,17 +82,6 @@ export function ProjectShellView({ studio, section, openService, openResearch, o
         <button type="button" onClick={openService}><span><FolderKanban size={18}/></span><strong>Jornadas e Blueprints</strong><small>{journeys} Jornadas · {blueprints} Blueprints</small><em>Visualizar ou criar no serviço <ArrowRight size={12}/></em></button>
       </div>
     </section>
-    <section className="bo-h740h10-shell__section"><header><div><small>GESTÃO DO PROJETO</small><h2>Ferramentas e configurações</h2></div></header>
-      <div className="bo-h740h10-area-grid">
-        <button type="button" onClick={openResearch}><span><UsersRound size={18}/></span><strong>Público-alvo</strong><small>Explorar e relacionar pessoas e necessidades</small><em>Abrir público-alvo <ArrowRight size={12}/></em></button>
-        <button type="button" onClick={openLibraryHub}><span><BookOpen size={18}/></span><strong>Biblioteca</strong><small>Todos os elementos do projeto</small><em>Abrir biblioteca <ArrowRight size={12}/></em></button>
-        <button type="button" onClick={() => openLibraryPage('archive')}><span><Archive size={18}/></span><strong>Arquivos</strong><small>Backups e conteúdo preservado</small><em>Abrir arquivos <ArrowRight size={12}/></em></button>
-        <button type="button" onClick={openTeam}><span><UsersRound size={18}/></span><strong>Equipe</strong><small>Colaboração e membros</small><em>Abrir equipe <ArrowRight size={12}/></em></button>
-        <button type="button" onClick={openSettings}><span><Settings2 size={18}/></span><strong>Configurações</strong><small>Preferências do projeto</small><em>Configurar <ArrowRight size={12}/></em></button>
-        <button type="button" onClick={() => openLibraryPage('templates')}><span><FileText size={18}/></span><strong>Templates</strong><small>Modelos reutilizáveis</small><em>Ver templates <ArrowRight size={12}/></em></button>
-      </div>
-    </section>
-
     <section className="bo-h740h10-shell__section"><header><div><small>ATIVIDADE RECENTE</small><h2>Resumo do projeto</h2></div></header><div className="bo-h740h10-summary-grid"><article><strong>{journeys}</strong><span>Journeys</span></article><article><strong>{researchEvidence}</strong><span>Evidências</span></article><article><strong>{problems}</strong><span>Problemas</span></article><article><strong>{metrics}</strong><span>Métricas</span></article></div></section>
   </section>;
 }
