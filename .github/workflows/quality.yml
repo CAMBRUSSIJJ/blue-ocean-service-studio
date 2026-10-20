@@ -15,6 +15,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run release:verify
+      - name: Verify Journey behavior
+        run: |
+          npm run journey:a2:test
+          npm run journey:h1709:move:test
+          npm run journey:h1709:test
+          npm run journey:h1709:p3:test
       - name: Upload reproducible dist
         uses: actions/upload-artifact@v4
         with:

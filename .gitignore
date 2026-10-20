@@ -8,6 +8,8 @@ public/v*.js
 public/v*.css
 .DS_Store
 npm-debug.log*
+*.tsbuildinfo
+__pycache__/
 
 # GitHub deployment safeguards
 .env

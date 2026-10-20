@@ -27,7 +27,7 @@ const checks = [
  ['opção mapa em branco',workspace.includes("journeyStartTemplate === 'blank'")],
  ['opções de modelos reais',workspace.includes('starterTemplates.map')],
  ['modelos usam dados existentes',workspace.includes('journeyApi()?.model?.()?.templates')],
- ['modelo escolhido chega ao runtime',workspace.includes('{ templateId: journeyStartTemplate }')],
+ ['modelo escolhido ou solicitado chega ao runtime',workspace.includes('{ templateId: requestedTemplate ?? journeyStartTemplate }')&&workspace.includes("(requestedTemplate ?? journeyStartTemplate) !== 'blank'")],
  ['runtime aceita templateId',runtime.includes('opts.templateId') && runtime.includes('t.stages.entries()')],
  ['modelos têm etapas reais editáveis',templates.includes("id:'essential'") && templates.includes('stages:')],
  ['modelo é identificado como exemplo editável',workspace.includes('nenhuma etapa representa um fato confirmado')],

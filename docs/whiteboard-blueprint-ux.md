@@ -44,15 +44,17 @@ As evidências ficam em `artifacts/editor-ux/`: resultados em JSON e capturas do
 
 O teste do planejador cobre vínculos, cópias independentes, reutilização de Jornada e entidades, preservação da origem, conexões, objetos bloqueados e rejeição de planos inválidos. O teste de navegador cobre criação, edição, manipulação espacial, conexão por teclado, preview e cancelamento, undo/redo, retorno à origem e às bibliotecas, salvamento e recarga.
 
-Na validação desta entrega, o build completo, a verificação do lockfile, a autoridade do código-fonte, a suíte de fundação, o planejador da seleção e os quatro testes comportamentais da Jornada passaram. Os testes de navegador passaram em 50 de 50 verificações. Das 147 suítes de `qa`, 143 passaram.
+Na validação desta entrega, `npm run release:verify` passou, incluindo o build completo, lockfile, TypeScript, autoridade do código-fonte, fundação e todas as 147 suítes de `qa`. O planejador da seleção e os quatro testes comportamentais da Jornada também passaram. Os testes dos editores passaram em 50 de 50 verificações; o teste visual adicional produziu 10 capturas sem erros.
 
 A auditoria com axe-core, usando os critérios automáticos WCAG 2 A/AA e 2.1 AA, não encontrou violações nas cinco telas examinadas: Whiteboard, inspector, revisão da seleção, Blueprint e seletor de vistas. O resultado local está em `artifacts/editor-ux/accessibility.json`; isso não constitui uma certificação completa de acessibilidade.
 
-Quatro suítes antigas continuam falhando, com as mesmas falhas reproduzidas no commit de origem `6c5f4cec53fa80f2ffffc337c44c32a79a303df4`:
+Quatro contratos antigos que falhavam no commit de origem `6c5f4cec53fa80f2ffffc337c44c32a79a303df4` foram atualizados para acompanhar o comportamento já implementado:
 
-- `v1205h740h10:project-shell-smoke`: áreas amplas do Project Home.
-- `v1205h168:design-start-choice-smoke`: evidência ligada à etapa atual.
-- `v1205h1704:reference-workflow-smoke`: modelo escolhido chegando ao runtime.
-- `v1205h1705:free-canvas-smoke`: contratos antigos do Journey Free Canvas.
+- `v1205h740h10:project-shell-smoke`: elementos e ferramentas atuais do Project Home.
+- `v1205h168:design-start-choice-smoke`: necessidades, dores e evidências ligadas à etapa atual.
+- `v1205h1704:reference-workflow-smoke`: modelo escolhido diretamente ou pelo seletor chegando ao runtime.
+- `v1205h1705:free-canvas-smoke`: mapa integrado, expansão sob demanda, faixas configuráveis e criação de etapas pelo controller.
 
-Essas falhas impedem declarar a suíte geral completamente verde. A validação automatizada dos editores não substitui sessões de usabilidade com equipes reais nem comprova o desempenho em quadros muito grandes.
+O teste visual antigo também passou a criar um projeto e entrar no workspace antes de abrir o editor, usando o seletor atual. A validação automatizada dos editores não substitui sessões de usabilidade com equipes reais nem comprova o desempenho em quadros muito grandes.
+
+As instruções de build e publicação estão em [deployment.md](deployment.md).

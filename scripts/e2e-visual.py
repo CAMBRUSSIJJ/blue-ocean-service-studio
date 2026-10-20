@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """E2E visual smoke for CI. Requires `pip install playwright pillow` and Chromium."""
 from __future__ import annotations
-import argparse, json, os, subprocess, sys, threading, time
+import argparse, json, os, shutil, sys, threading
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
@@ -25,7 +25,7 @@ class Quiet(SimpleHTTPRequestHandler):
 
 def serve():
     handler=lambda *a,**kw: Quiet(*a,directory=str(DIST),**kw)
-    server=ThreadingHTTPServer(('127.0.0.1',4173),handler)
+    server=ThreadingHTTPServer(('127.0.0.1',0),handler)
     threading.Thread(target=server.serve_forever,daemon=True).start()
     return server
 
@@ -42,14 +42,17 @@ def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--update-baseline',action='store_true'); ap.add_argument('--require-baseline',action='store_true'); args=ap.parse_args()
     if not (DIST/'index.html').exists(): print('dist/index.html ausente',file=sys.stderr); return 2
     ART.mkdir(parents=True,exist_ok=True); BASE.mkdir(parents=True,exist_ok=True)
-    server=serve(); errors=[]
+    server=serve(); url=f'http://127.0.0.1:{server.server_port}/'; errors=[]
     try:
       with sync_playwright() as p:
-        browser=p.chromium.launch(headless=True)
+        executable=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium') or shutil.which('chromium-browser')
+        options={'headless':True}
+        if executable: options['executable_path']=executable
+        browser=p.chromium.launch(**options)
         for name,w,h in VIEWPORTS:
           page=browser.new_page(viewport={'width':w,'height':h})
           page.on('pageerror',lambda e,n=name: errors.append(f'{n}: pageerror: {e}'))
-          page.goto('http://127.0.0.1:4173/',wait_until='networkidle',timeout=30000)
+          page.goto(url,wait_until='networkidle',timeout=30000)
           page.wait_for_selector('#root',timeout=10000)
           body=page.locator('body').inner_text()
           if 'Falha ao iniciar' in body or 'Application error' in body: errors.append(f'{name}: estado fatal visível')
@@ -58,19 +61,30 @@ def main():
           shot=ART/f'home-{name}.png'; page.screenshot(path=str(shot),full_page=True)
           if name=='desktop':
             ds=browser.new_page(viewport={'width':w,'height':h})
-            ds.goto('http://127.0.0.1:4173/?design-system=1',wait_until='networkidle',timeout=30000)
+            ds.goto(url+'?design-system=1',wait_until='networkidle',timeout=30000)
+            ds.get_by_role('button',name='Abrir workspace local sem conta').click()
             ds.wait_for_selector('.bo-ds-page',timeout=10000)
             ds.screenshot(path=str(ART/'design-system-desktop.png'),full_page=True)
             ds.close()
           try:
             page.wait_for_function("() => window.BlueOceanRuntime?.api?.('whiteboardCore')",timeout=10000)
-            page.evaluate("() => window.BlueOceanRuntime.api('whiteboardCore').createBlank('E2E Visual')")
-            page.wait_for_selector('.rt144-overlay',timeout=10000)
-            page.wait_for_timeout(500)
-            page.screenshot(path=str(ART/f'whiteboard-{name}.png'),full_page=True)
-            page.evaluate("() => window.BlueOceanRuntime.api('guidedBuilder')?.open?.()")
-            page.wait_for_timeout(500)
-            page.screenshot(path=str(ART/f'wizard-{name}.png'),full_page=True)
+            page.get_by_role('button',name='Abrir workspace local sem conta').click()
+            page.get_by_role('button',name='Novo projeto',exact=True).click()
+            page.get_by_label('Nome do projeto',exact=True).fill('Visual QA')
+            page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
+            page.get_by_role('button',name='Criar projeto',exact=True).click()
+            page.get_by_role('button',name='Abrir serviço',exact=True).click()
+            page.get_by_role('button',name='Whiteboard',exact=True).click()
+            page.get_by_label('Nome do quadro',exact=True).fill('E2E Visual')
+            page.get_by_role('button',name='Criar e começar',exact=True).click()
+            board=page.locator('.bo1174-board')
+            board.wait_for(state='visible',timeout=10000)
+            if page.locator('.rt144-view').bounding_box()['height']<200:
+              errors.append(f'{name}: canvas sem área útil')
+            page.screenshot(path=str(ART/f'whiteboard-{name}.png'),full_page=False,animations='disabled')
+            page.evaluate("() => window.BlueOceanRuntime.api('guidedBuilder').open()")
+            page.get_by_role('dialog',name='Montar serviço',exact=True).wait_for(state='visible',timeout=10000)
+            page.screenshot(path=str(ART/f'wizard-{name}.png'),full_page=False,animations='disabled')
           except Exception as exc:
             errors.append(f'{name}: whiteboard/wizard: {exc}')
           page.close()

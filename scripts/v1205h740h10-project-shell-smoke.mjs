@@ -20,7 +20,7 @@ const checks=[
  [app.includes('bo-h740h10-legacy-project-nav'),'Navegação antiga fica apenas como marcador legado'],
  [css.includes('.bo-h740h10-legacy-project-nav{display:none!important}'),'Marcadores antigos não aparecem visualmente'],
  [shell.includes('SERVIÇO PRINCIPAL') && shell.includes('Abrir serviço'),'Project Home trata Serviço como módulo explícito'],
- [shell.includes('Continue trabalhando') && shell.includes('Público-alvo') && shell.includes('Biblioteca') && shell.includes('Arquivos') && shell.includes('Equipe') && shell.includes('Configurações'),'Project Home expõe áreas amplas do projeto'],
+ [shell.includes('Elementos do projeto') && shell.includes('Ferramentas e configurações') && shell.includes('Público-alvo') && shell.includes('Biblioteca') && shell.includes('Arquivos') && shell.includes('Equipe') && shell.includes('Configurações'),'Project Home expõe elementos e ferramentas do projeto'],
  [shell.includes('BIBLIOTECA DO PROJETO') && shell.includes('Pessoas & contexto') && shell.includes('Descoberta') && shell.includes('Gestão'),'Biblioteca consolida entidades por grupos'],
  [shell.includes("openLibraryHub") ,'Project Home abre hub da Biblioteca'],
  [app.includes("openProjectLibraryHub") && app.includes("openCurrentProjectHome('library')"),'Shell roteia Biblioteca sem expor entidades na sidebar'],

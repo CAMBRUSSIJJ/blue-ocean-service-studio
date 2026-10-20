@@ -41,7 +41,7 @@ check('Whiteboard não vira etapa no fluxo Foundation',!profile.includes("flow: 
 check('Journey usa Registrar descoberta',journey.includes('Registrar descoberta'));
 check('Journey captura Persona Need Pain Evidence',journey.includes("'persona' | 'need' | 'pain' | 'evidence'"));
 check('Journey possui opção Evidência',journey.includes('<option value="evidence">Evidência</option>'));
-check('Evidência pode ligar à etapa atual',journey.includes("kind === 'need' || kind === 'evidence'")&&journey.includes('evidenceIds'));
+check('Evidência e dor podem ligar à etapa atual',journey.includes("kind === 'need' || kind === 'pain' || kind === 'evidence'")&&journey.includes('evidenceIds')&&journey.includes('painIds'));
 check('Journey evita rótulo contexto no seletor',journey.includes('aria-label="Tipo de descoberta"'));
 check('Necessidade explica significado na etapa',journey.includes('O que a pessoa precisa nesta etapa'));
 check('Whiteboard escuta entrada do chooser',whiteboard.includes('bo-whiteboard-start-from-design'));
