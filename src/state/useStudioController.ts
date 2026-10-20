@@ -260,6 +260,43 @@ export function useStudioController() {
     const template = input.template ?? 'blank';
     const serviceName = input.serviceName.trim() || projectName;
     const nextGraph = template === 'demo' ? createDemoGraph() : createServiceGraph(serviceName, input.description ?? '');
+    // Starter templates must generate editable structures, not just label an empty project.
+    // No factual customer actions, channels or research evidence are invented here.
+    if (template === 'redesign' || template === 'blueprint' || template === 'omnichannel') {
+      const now = nowIso();
+      const addJourney = (title: string, steps: string[]) => {
+        const id = makeId('journey');
+        const stageIds = steps.map((step) => {
+          const stageId = makeId('stage');
+          nextGraph.stages[stageId] = {
+            id: stageId, journeyId: id, title: step, customerAction: '',
+            emotion: 'neutral', touchpointIds: [], problemIds: [], opportunityIds: [],
+            needIds: [], evidenceIds: [], validatedProblemIds: [],
+          };
+          return stageId;
+        });
+        nextGraph.journeys[id] = {
+          id, serviceId: nextGraph.service.id, name: title,
+          stageIds, status: 'draft', createdAt: now, updatedAt: now,
+        };
+        nextGraph.service.journeyIds.push(id);
+        return id;
+      };
+      if (template === 'redesign') {
+        addJourney('Jornada atual · mapear', ['Antes do serviço', 'Durante o serviço', 'Após o serviço']);
+        addJourney('Jornada futura · projetar', ['Antes do serviço', 'Durante o serviço', 'Após o serviço']);
+      } else if (template === 'omnichannel') {
+        addJourney('Jornada omnichannel', ['Descoberta', 'Primeiro contato', 'Troca de canal', 'Continuidade', 'Conclusão']);
+      } else {
+        const journeyId = addJourney('Jornada base do Blueprint', ['Antes do serviço', 'Durante o serviço', 'Após o serviço']);
+        const boardId = makeId('blueprint');
+        nextGraph.views.whiteboards[boardId] = {
+          id: boardId, serviceId: nextGraph.service.id, name: 'Blueprint inicial',
+          viewKind: 'blueprint', journeyId, items: {}, edges: {},
+        };
+      }
+      nextGraph.service.updatedAt = now;
+    }
     const projectId = nextGraph.service.project?.id || `project-${nextGraph.service.id}`;
     saveProjectSnapshot(nextGraph, { id: projectId, title: projectName, serviceName, description: input.description ?? '', template, favorite: false, archived: false, lastOpenedAt: nowIso() });
     markProjectOpened(projectId);
