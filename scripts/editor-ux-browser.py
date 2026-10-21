@@ -42,7 +42,12 @@ def project(page):
 
 def open_whiteboard(page):
     project(page)
-    page.locator('[data-blue-ocean-whiteboard-nav="standard"]').click()
+    if page.viewport_size['width'] <= 700:
+        page.get_by_role('navigation', name='Navegação rápida').get_by_role('button', name='Abrir Whiteboard pelo atalho móvel').click()
+    else:
+        page.locator('[data-blue-ocean-whiteboard-nav="standard"]').click()
+    expect(page.locator('[data-whiteboard-library="1"]')).to_be_visible()
+    page.get_by_role('button', name='Novo whiteboard', exact=True).click()
     page.get_by_label('Nome do quadro', exact=True).fill('Ideias do atendimento')
     page.get_by_role('button', name='Criar e começar', exact=True).click()
     expect(page.locator('.bo1174-board')).to_be_visible()
@@ -171,13 +176,13 @@ def whiteboard_flow(page):
     page.locator('[data-blue-ocean-whiteboard-nav="standard"]').click()
     if page.get_by_role('button', name='Cancelar', exact=True).is_visible():
         page.get_by_role('button', name='Cancelar', exact=True).click()
-    page.get_by_role('button', name='Ir para Blueprints', exact=True).click()
+    page.locator('[data-service-blueprint-nav="1"]').click()
     expect(page.get_by_role('button', name='Criar Blueprint', exact=True).first).to_be_visible()
     check('Library shortcut opens the Blueprint tab', page.get_by_role('button', name='Criar Blueprint', exact=True).first.is_visible())
 
 def blueprint_flow(page):
     project(page)
-    page.get_by_role('button', name='Blueprints', exact=True).click()
+    page.locator('[data-service-blueprint-nav="1"]').click()
     page.get_by_role('button', name='Criar Blueprint', exact=True).first.click()
     expect(page.locator('.bo1174-board')).to_be_visible()
     check('Blueprint uses the entire viewport and hides application chrome', page.locator('.bo1174-board').bounding_box()['y'] == 0 and page.locator('.bo1174-board').bounding_box()['width'] == page.viewport_size['width'] and page.locator('#root').evaluate('e => e.inert && getComputedStyle(e).visibility === "hidden"'))
