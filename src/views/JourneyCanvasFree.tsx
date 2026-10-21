@@ -296,7 +296,8 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
           <button type="button" onClick={dismissMenus}><Check size={15}/> Mapa livre <small>Poucos elementos, edição no quadro</small></button>
           <button type="button" onClick={() => { dismissMenus(); onMatrix(); }}><LayoutGrid size={15}/> Matriz detalhada <small>Visualização completa anterior</small></button>
           <button type="button" disabled={!orderedStages.length} onClick={() => { dismissMenus(); if (window.confirm('Abrir um Blueprint em rascunho com estas etapas? As ações do cliente são compartilhadas; suas faixas e cartões permanecem na Jornada.')) void onBlueprintDraft(); }}>Blueprint <small>Abrir as etapas no Blueprint do serviço</small></button>
-          <button type="button" onClick={closeJourney}>Voltar ao serviço</button>
+          <button type="button" onClick={() => { dismissMenus(); setActiveTab('canvas'); window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'whiteboard' })); }}><LayoutGrid size={15}/> Whiteboard <small>Explorar ideias livremente, sem copiar a Jornada</small></button>
+          <button type="button" onClick={closeJourney}>Voltar às Jornadas</button>
           <label className="bo-j2-column-width">Largura das etapas<select aria-label="Largura das etapas" value={columnWidth} onChange={event => { const width = Number(event.target.value); setGraph(current => updateJourneyLayout(current, journey.id, layout => ({ ...layout, stageWidth: width })), 'Journey: ajustar largura das etapas'); }}><option value={240}>Compacta</option><option value={288}>Normal</option><option value={360}>Ampla</option><option value={440}>Extra ampla</option></select></label>
         </div>}
       </div>
