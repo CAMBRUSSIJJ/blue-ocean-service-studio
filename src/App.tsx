@@ -25,7 +25,7 @@ import { EditorSurface } from './views/EditorSurface';
 import { BlueprintWorkspaceView } from './views/BlueprintWorkspaceView';
 import { ActionPlanView } from './views/ActionPlanView';
 import { ProjectHomeView, type ProjectHomeSection } from './views/ProjectHomeView';
-import { ProjectShellView, type ProjectShellSection } from './views/ProjectShellView';
+import type { ProjectShellSection } from './views/ProjectShellView';
 import { WhiteboardsView } from './views/WhiteboardsView';
 import { WorkspaceLibraryView, type WorkspaceLibraryPage } from './views/WorkspaceLibraryView';
 import { Toast } from './components/Toast';
@@ -134,7 +134,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
         : activeTab === 'journey' && !externalNav
           ? 'Jornadas'
           : activeTab === 'canvas' && !externalNav
-          ? 'Design do serviço'
+          ? ({ journey: 'Jornadas', blueprint: 'Blueprints', whiteboard: 'Whiteboard', channels: 'Canais', overview: 'Design do serviço' } as Record<string, string>)[serviceWorkspaceTab] ?? 'Design do serviço'
           : 'Plano de Ação'
   );
 
@@ -340,21 +340,18 @@ export default function App({ authUser, onSignOut }: AppProps) {
     window.setTimeout(() => window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: tab })), 0);
   };
 
+  // The project summary is no longer an intermediate navigation surface.
+  // Preserve callers of the old project-home action, but open a real workspace.
   const openCurrentProjectHome = (section: ProjectShellSection = 'overview') => {
-    setProjectShellSection(section);
-    setProjectShellOpen(true);
-    setExternalNav(null);
-    setIsMobileNavOpen(false);
-    hideLegacyPageSurfaces();
-    window.dispatchEvent(new CustomEvent('rt-navigation', { detail: 'home' }));
+    if (section === 'library') { openLibraryPage('personas'); return; }
+    openServiceWorkspaceTab('journey');
   };
 
-  const openProjectLibraryHub = () => openCurrentProjectHome('library');
+  const openProjectLibraryHub = () => openLibraryPage('personas');
 
   const openCurrentProjectWorkspace = () => {
-    setProjectShellOpen(true);
     setProjectHomeSection('home');
-    openServiceWorkspaceTab('overview');
+    openServiceWorkspaceTab('journey');
   };
 
   useEffect(() => {
@@ -413,7 +410,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
           <button type="button" className="bo-h724-sidebar-toggle" onClick={() => setIsSidebarCollapsed(value => !value)} aria-label={isSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'} aria-expanded={!isSidebarCollapsed} aria-controls="bo-primary-navigation" title={isSidebarCollapsed ? 'Expandir navegação · Ctrl+\\' : 'Recolher navegação · Ctrl+\\'}>{isSidebarCollapsed ? <PanelLeftOpen size={18}/> : <PanelLeftClose size={18}/>}</button>
           {isServiceMenuOpen && <div className="bo1163-service-menu bo-h740h13-project-menu" role="menu">
             <div className="bo1163-service-menu__label">Projetos do serviço</div>
-            {projects.slice(0, 6).map((project) => <button type="button" role="menuitem" key={project.id} className={project.id === activeProjectId ? 'active' : ''} onClick={() => { setIsServiceMenuOpen(false); if (project.id !== activeProjectId) studio.openWorkspaceProject(project.id); window.setTimeout(() => openCurrentProjectHome('overview'), 0); }}><span><strong>{project.title}</strong><small>{project.serviceName}</small></span>{project.id === activeProjectId && <CheckCircle2 size={15}/>}</button>)}
+            {projects.slice(0, 6).map((project) => <button type="button" role="menuitem" key={project.id} className={project.id === activeProjectId ? 'active' : ''} onClick={() => { setIsServiceMenuOpen(false); if (project.id !== activeProjectId) studio.openWorkspaceProject(project.id); window.setTimeout(() => openCurrentProjectWorkspace(), 0); }}><span><strong>{project.title}</strong><small>{project.serviceName}</small></span>{project.id === activeProjectId && <CheckCircle2 size={15}/>}</button>)}
             <button type="button" role="menuitem" onClick={() => { setIsServiceMenuOpen(false); openGlobalHome('projects'); }}><span><strong>Todos os projetos</strong><small>Abrir a área Serviço</small></span></button>
             <button type="button" role="menuitem" onClick={() => { setIsServiceMenuOpen(false); openGlobalHome('templates'); }}><span><strong>+ Novo projeto</strong><small>Comece vazio ou use um template.</small></span></button>
           </div>}
@@ -565,23 +562,12 @@ export default function App({ authUser, onSignOut }: AppProps) {
           </>}
         </header>
 
-        {isProjectContext && <nav className="bo-h740h13-project-context-nav" data-project-context-nav="7.40-H13" aria-label="Áreas do projeto">
-          <button type="button" aria-current={isProjectHome && projectShellSection === 'overview' ? 'page' : undefined} className={isProjectHome && projectShellSection === 'overview' ? 'is-active' : ''} onClick={() => openCurrentProjectHome('overview')}><BlueOceanUtilityIcon kind="dashboard" size={14}/><span>Visão geral</span></button>
-          <span className="sr-only" data-h155-nav-simplification="1">O Design do serviço está na navegação principal; Pesquisa histórica é preservada somente nos dados.</span>
-          {/* H15.5 simplifica a barra contextual do projeto; contratos históricos preservados apenas para regressão:
-              >Design do serviço</span>
-              aria-current={activeTab === 'canvas' && !externalNav && serviceWorkspaceTab !== 'research' ? 'page' : undefined}
-              onClick={() => openServiceWorkspaceTab('overview')}
-          */}
-          <button type="button" className={(isProjectHome && projectShellSection === 'library') || (activeTab === 'context' && !externalNav && !['archive','templates'].includes(libraryPage)) ? 'is-active' : ''} onClick={openProjectLibraryHub}><BlueOceanUtilityIcon kind="learn" size={14}/><span>Biblioteca</span></button>
-          <button type="button" className={activeTab === 'context' && !externalNav && libraryPage === 'archive' ? 'is-active' : ''} onClick={() => openLibraryPage('archive')}><BlueOceanUtilityIcon kind="archive" size={14}/><span>Arquivos</span></button>
-          <button type="button" className={externalNav === 'collaboration' ? 'is-active' : ''} onClick={() => openExternal('collaboration', 'collaboration', 'workspace')}><BlueOceanUtilityIcon kind="collaboration" size={14}/><span>Equipe</span></button>
-          <button type="button" className={externalNav === 'settings' ? 'is-active' : ''} onClick={() => openExternal('settings', 'unifiedWorkspaces')}><BlueOceanUtilityIcon kind="settings" size={14}/><span>Configurações</span></button>
-        </nav>}
+        {/* A single sidebar owns navigation. Project-specific pages never render a second tab bar. */}
+        <span className="sr-only" data-project-navigation-single-source="1">Jornadas, Blueprints, Whiteboard, Biblioteca, Arquivo, Equipe e Configurações disponíveis na navegação principal.</span>
 
         <main id="bo-main-content" data-bo-precision-workspace-native="1" data-bo-active-view={externalNav ?? activeTab} className={`flex-1 flex flex-col min-w-0 ${activeTab === 'canvas' && !externalNav ? 'overflow-hidden p-0' : activeTab === 'home' && !externalNav ? 'overflow-y-auto p-0' : 'px-4 md:px-6 overflow-y-auto'}`}>
-          {isGlobalHome && <ProjectHomeView studio={studio} section={projectHomeSection} setSection={setProjectHomeSection} openProjectHome={() => openCurrentProjectHome('overview')} />}
-          {isProjectHome && <ProjectShellView studio={studio} section={projectShellSection} openService={openCurrentProjectWorkspace} openWhiteboards={() => openServiceWorkspaceTab('whiteboard')} openLibraryPage={openLibraryPage} />}
+          {isGlobalHome && <ProjectHomeView studio={studio} section={projectHomeSection} setSection={setProjectHomeSection} openProjectWorkspace={openCurrentProjectWorkspace} />}
+          {/* No project overview/intermediate shell: opening a project takes the user directly to a working editor. */}
           {!hasService && activeTab !== 'home' && !externalNav && <section className="bo-h740h2-service-gate" data-requested-view={activeTab}><div className="bo-h740h2-service-gate__icon"><BlueOceanObjectIcon kind="service" size={34}/></div><small>COMECE PELO SERVIÇO</small><h2>{activeViewTitle} está pronta para você</h2><p>Você pode navegar por toda a plataforma. Para criar, editar ou conectar objetos nesta área, crie primeiro o serviço que será desenhado.</p><div><button type="button" className="primary" onClick={requestServiceCreation}>Criar meu primeiro serviço</button><button type="button" onClick={() => { loadDemoService(); setExternalNav(null); }}>Explorar serviço de exemplo</button></div></section>}
           {hasService && activeTab === 'context' && !externalNav && <WorkspaceLibraryView studio={studio} page={libraryPage} />}
           {hasService && activeTab === 'whiteboards' && !externalNav && <WhiteboardsView studio={studio} />}
@@ -593,7 +579,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
       <nav className="bo1175-mobile-nav" aria-label="Navegação rápida">
         <button type="button" onClick={() => openGlobalHome('home')} aria-current={isGlobalHome && projectHomeSection === 'home' ? 'page' : undefined}><BlueOceanUtilityIcon kind="dashboard" size={18}/><span>Home</span></button>
         <button type="button" onClick={() => openGlobalHome('projects')} aria-current={isGlobalHome && projectHomeSection === 'projects' ? 'page' : undefined}><BlueOceanObjectIcon kind="service" size={18}/><span>Serviço</span></button>
-        {hasService && <button type="button" onClick={() => openCurrentProjectHome('overview')} aria-current={isProjectHome ? 'page' : undefined}><BlueOceanUtilityIcon kind="portfolio" size={18}/><span>Projeto</span></button>}
+        {hasService && <button type="button" onClick={openCurrentProjectWorkspace} aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' ? 'page' : undefined}><BlueOceanUtilityIcon kind="portfolio" size={18}/><span>Jornadas</span></button>}
         {hasService && <button type="button" aria-label="Abrir Whiteboard pelo atalho móvel" onClick={() => openServiceWorkspaceTab('whiteboard')} aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'page' : undefined}><BlueOceanObjectIcon kind="whiteboard" size={18}/><span>Whiteboard</span></button>}
         {hasService && <button type="button" onClick={openCurrentProjectWorkspace} aria-current={activeTab === 'canvas' && !externalNav ? 'page' : undefined}><BlueOceanObjectIcon kind="service" size={18}/><span>Serviço</span></button>}
         {hasService && <button type="button" onClick={() => selectCore('action')} aria-current={activeTab === 'action' && !externalNav ? 'page' : undefined}><KanbanSquare size={18} /><span>Ações</span></button>}
