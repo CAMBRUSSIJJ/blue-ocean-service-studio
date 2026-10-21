@@ -112,8 +112,8 @@ function metricRows(studio: StudioController): BasicRow[] {
 
 function templateRows(studio: StudioController): BasicRow[] {
   const records = Object.values(studio.graph.entities?.template ?? {});
-  if (records.length) return records.map((entity) => ({ id: entity.id, name: String(entity.title || 'Template'), created: formatDate(entity.createdAt), owner: String(entity.owner || 'Você'), raw: entity }));
-  return [
+  const own = records.map((entity) => ({ id: entity.id, name: String(entity.title || 'Template'), created: formatDate(entity.createdAt), owner: String(entity.owner || 'Você'), raw: entity }));
+  return [...own,
     { id: 'template-service-blueprint', name: 'Service Blueprint — Frontstage / Backstage', created: 'Padrão', owner: 'BLUE OCEAN' },
     { id: 'template-journey-discovery', name: 'Journey map — Discovery', created: 'Padrão', owner: 'BLUE OCEAN' },
     { id: 'template-research', name: 'Pesquisa e evidências', created: 'Padrão', owner: 'BLUE OCEAN' },
@@ -156,7 +156,7 @@ function PortfolioView({ studio, onCreate }: { studio: StudioController; onCreat
 }
 
 export function WorkspaceLibraryView({ studio, page }: { studio: StudioController; page: WorkspaceLibraryPage }) {
-  const { graph, setGraph, touchUpdatedAt, showToast } = studio;
+  const { graph, setGraph, setActiveTab, touchUpdatedAt, showToast } = studio;
   const meta = pageMeta[page];
   const [query, setQuery] = useState('');
   const [showFilter, setShowFilter] = useState(false);
@@ -181,7 +181,68 @@ export function WorkspaceLibraryView({ studio, page }: { studio: StudioControlle
     sessionStorage.removeItem('bo-workspace-create-page');
     setModal({ mode: 'create', page, title: '', description: '', owner: '' });
   }, [page]);
-  const openEdit = (row: BasicRow) => setModal({ mode: 'edit', page, id: row.id, title: row.name, description: String(row.raw?.description || ''), owner: String(row.raw?.owner || '') });
+  const applyTemplate = async (row: BasicRow) => {
+    if (page !== 'templates') return;
+    const runtime = window.BlueOceanRuntime;
+    if (row.id === 'template-research') {
+      const now = new Date().toISOString();
+      const projectId = makeId('research-project');
+      setGraph((current) => ({
+        ...current,
+        research: {
+          ...current.research,
+          activeProjectId: projectId,
+          projects: {
+            ...(current.research?.projects ?? {}),
+            [projectId]: {
+              id: projectId, serviceId: current.service.id, title: 'Pesquisa da experiência',
+              goal: 'Registrar evidências e entender necessidades antes de tirar conclusões.',
+              status: 'draft', methodIds: [], sourceIds: [], observationIds: [],
+              createdAt: now, updatedAt: now,
+            },
+          },
+          updatedAt: now,
+        },
+      }), 'workspace:apply-research-template');
+      setActiveTab('context');
+      window.dispatchEvent(new CustomEvent('bo-open-context-page', { detail: 'evidence' }));
+      showToast('Projeto de pesquisa criado. Registre evidências reais para preenchê-lo.');
+      return;
+    }
+    if (row.id === 'template-service-blueprint') {
+      const api = runtime?.api<{ create?(name?: string): Promise<{ id: string } | null> | { id: string } | null }>('serviceBlueprintFrame');
+      if (!api?.create) { showToast('Editor do Blueprint indisponível. Recarregue a página e tente novamente.'); return; }
+      try {
+        const created = await api.create('Blueprint de serviço · modelo inicial');
+        if (!created?.id) throw new Error('O Blueprint não foi criado.');
+        setActiveTab('canvas');
+        window.setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'blueprint' }));
+          window.dispatchEvent(new CustomEvent('bo-service-object-focus', { detail: { kind: 'blueprint', id: created.id } }));
+        }, 50);
+        showToast('Blueprint criado. Adicione etapas, atividades e relações reais.');
+      } catch { showToast('Não foi possível aplicar o template de Blueprint.'); }
+      return;
+    }
+    const api = runtime?.api<{ create?(options: { name: string; status: string; templateId?: string; objective?: string }): { id: string } | null }>('journeyHome');
+    if (!api?.create) { showToast('Editor de Jornadas indisponível. Recarregue a página e tente novamente.'); return; }
+    const created = api.create({
+      name: row.id === 'template-journey-discovery' ? 'Jornada de descoberta' : row.name,
+      status: 'draft',
+      ...(row.id === 'template-journey-discovery' ? { templateId: 'essential' } : { objective: String(row.raw?.description || '') }),
+    });
+    if (!created?.id) { showToast('Não foi possível aplicar o template de Jornada.'); return; }
+    setActiveTab('canvas');
+    window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'journey' }));
+      window.dispatchEvent(new CustomEvent('bo-service-object-focus', { detail: { kind: 'journey', id: created.id } }));
+    }, 50);
+    showToast('Jornada criada a partir do template.');
+  };
+  const openEdit = (row: BasicRow) => {
+    if (page === 'templates' && row.id.startsWith('template-')) { void applyTemplate(row); return; }
+    setModal({ mode: 'edit', page, id: row.id, title: row.name, description: String(row.raw?.description || ''), owner: String(row.raw?.owner || '') });
+  };
 
   const createPortfolio = (type: 'opportunity' | 'pain' | 'solution') => {
     if (type === 'pain') { setModal({ mode: 'create', page: 'pains', title: '', description: '', owner: '' }); return; }
@@ -221,9 +282,10 @@ export function WorkspaceLibraryView({ studio, page }: { studio: StudioControlle
   };
 
   const removeRow = (row: BasicRow) => {
+    if (page === 'templates' && row.id.startsWith('template-')) { setRowMenu(null); showToast('Templates oficiais não podem ser removidos.'); return; }
     if (row.kind) setGraph((current) => removeContextEntity(current, row.kind!, row.id), `workspace:remove-${row.kind}`);
     else if (page === 'metrics') setGraph((current) => { const next = { ...(current.entities?.metric || {}) }; delete next[row.id]; return touchUpdatedAt({ ...current, entities: { ...current.entities, metric: next } }); }, 'workspace:remove-metric');
-    else if (page === 'templates' && !row.id.startsWith('template-')) setGraph((current) => { const next = { ...(current.entities?.template || {}) }; delete next[row.id]; return touchUpdatedAt({ ...current, entities: { ...current.entities, template: next } }); }, 'workspace:remove-template');
+    else if (page === 'templates') setGraph((current) => { const next = { ...(current.entities?.template || {}) }; delete next[row.id]; return touchUpdatedAt({ ...current, entities: { ...current.entities, template: next } }); }, 'workspace:remove-template');
     setRowMenu(null); showToast('Item removido.');
   };
 
@@ -243,7 +305,7 @@ export function WorkspaceLibraryView({ studio, page }: { studio: StudioControlle
     {page === 'metrics' && <div className="bo-h740h4-metrics-bridge"><div><strong>Catálogo de métricas</strong><p>Defina aqui o que medir. Em <b>Resultados</b>, acompanhe baseline, valor atual, meta e se a melhoria realmente produziu outcome.</p></div><button type="button" onClick={() => window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'outcomes' }))}>Acompanhar Resultados →</button></div>}
     <div className="bo1205h3-list-toolbar"><strong>{filtered.length} {filtered.length === 1 ? 'resultado' : 'resultados'}</strong><div><label className="bo1205h3-icon-search"><Search size={15}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar"/></label><button type="button" className={showFilter ? 'active' : ''} onClick={() => setShowFilter((value) => !value)} title="Filtros"><Filter size={16}/></button><button type="button" className="active" title="Tabela"><Table2 size={16}/><span>Tabela</span></button><button type="button" title="Configurações da tabela"><Settings2 size={16}/></button>{page !== 'archive' && <button type="button" className="primary" onClick={openCreate}><Plus size={16}/>{meta.create}</button>}</div></div>
     {showFilter && <div className="bo1205h3-filterbar"><span>Filtros rápidos</span><button type="button" onClick={() => setQuery('')}>Todos</button><button type="button" onClick={() => setQuery('ativo')}>Ativos</button><button type="button" onClick={() => setQuery('não usado')}>Não usados</button></div>}
-    <div className="bo1205h3-table-wrap"><table className="bo1205h3-table"><thead><tr><th></th><th>NOME</th>{page === 'metrics' ? <><th>FONTE</th><th>TIPO</th></> : <><th>ATUALIZADO</th><th>ATUALIZADO POR</th></>}<th>CRIADO</th><th>{page === 'metrics' ? 'USADO EM' : 'CRIADOR'}</th><th>TAGS</th>{page !== 'metrics' && <th>USADO EM</th>}</tr></thead><tbody>{filtered.map((row) => <tr key={row.id}><td className="menu-cell"><button type="button" onClick={() => setRowMenu(rowMenu === row.id ? null : row.id)}><MoreVertical size={15}/></button>{rowMenu === row.id && <div className="bo1205h3-row-menu"><button type="button" onClick={() => openEdit(row)}>Editar</button><button type="button" className="danger" onClick={() => removeRow(row)}>Remover</button></div>}</td><td><div className="bo1205h3-name-cell"><span data-page={page}>{page === 'metrics' ? <BarChart3 size={14}/> : page === 'templates' ? <FolderKanban size={14}/> : page === 'archive' ? <Archive size={14}/> : <Target size={14}/>}</span><button type="button" onClick={() => openEdit(row)}>{row.name}</button></div></td>{page === 'metrics' ? <><td>{row.source}</td><td>{row.type}</td></> : <><td>{row.updated || '—'}</td><td>{row.owner || 'Você'}</td></>}<td>{row.created || '—'}</td><td>{page === 'metrics' ? row.usedIn : row.owner || 'Você'}</td><td>{row.tags || 'Sem tags'}</td>{page !== 'metrics' && <td>{row.usedIn || 'Não usado'}</td>}</tr>)}</tbody></table>{!filtered.length && <div className="bo1205h3-empty"><BriefcaseBusiness size={24}/><strong>Nenhum resultado</strong><p>{query ? 'A busca não encontrou itens.' : `Crie o primeiro item de ${meta.title.toLowerCase()}.`}</p>{page !== 'archive' && <button type="button" onClick={openCreate}><Plus size={14}/>{meta.create}</button>}</div>}</div>
+    <div className="bo1205h3-table-wrap"><table className="bo1205h3-table"><thead><tr><th></th><th>NOME</th>{page === 'metrics' ? <><th>FONTE</th><th>TIPO</th></> : <><th>ATUALIZADO</th><th>ATUALIZADO POR</th></>}<th>CRIADO</th><th>{page === 'metrics' ? 'USADO EM' : 'CRIADOR'}</th><th>TAGS</th>{page !== 'metrics' && <th>USADO EM</th>}{page === 'templates' && <th>AÇÃO</th>}</tr></thead><tbody>{filtered.map((row) => <tr key={row.id}><td className="menu-cell"><button type="button" onClick={() => setRowMenu(rowMenu === row.id ? null : row.id)}><MoreVertical size={15}/></button>{rowMenu === row.id && <div className="bo1205h3-row-menu"><button type="button" onClick={() => openEdit(row)}>Editar</button><button type="button" className="danger" onClick={() => removeRow(row)}>Remover</button></div>}</td><td><div className="bo1205h3-name-cell"><span data-page={page}>{page === 'metrics' ? <BarChart3 size={14}/> : page === 'templates' ? <FolderKanban size={14}/> : page === 'archive' ? <Archive size={14}/> : <Target size={14}/>}</span><button type="button" onClick={() => openEdit(row)}>{row.name}</button></div></td>{page === 'metrics' ? <><td>{row.source}</td><td>{row.type}</td></> : <><td>{row.updated || '—'}</td><td>{row.owner || 'Você'}</td></>}<td>{row.created || '—'}</td><td>{page === 'metrics' ? row.usedIn : row.owner || 'Você'}</td><td>{row.tags || 'Sem tags'}</td>{page !== 'metrics' && <td>{row.usedIn || 'Não usado'}</td>}{page === 'templates' && <td><button type="button" className="bo-h722-open" onClick={() => void applyTemplate(row)}>Usar template</button></td>}</tr>)}</tbody></table>{!filtered.length && <div className="bo1205h3-empty"><BriefcaseBusiness size={24}/><strong>Nenhum resultado</strong><p>{query ? 'A busca não encontrou itens.' : `Crie o primeiro item de ${meta.title.toLowerCase()}.`}</p>{page !== 'archive' && <button type="button" onClick={openCreate}><Plus size={14}/>{meta.create}</button>}</div>}</div>
     {modal && <WorkspaceModal modal={modal} setModal={setModal} onSave={saveModal}/>} 
   </section>;
 }
