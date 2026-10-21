@@ -51,7 +51,7 @@ def flow(page, width):
     expect(cards).to_have_count(2)
     # Long names must not push actions outside the footer.
     cards.first.get_by_role('button', name='Abrir Jornada', exact=True).click()
-    welcome = page.get_by_role('button', name='Continuar em branco', exact=True)
+    welcome = page.get_by_role('button', name='Criar primeira etapa', exact=True)
     if welcome.is_visible():
         welcome.click()
     page.get_by_label('Nome da Jornada', exact=True).fill('Jornada de atendimento com um nome suficientemente longo para validar a organização do card')
@@ -83,7 +83,7 @@ def flow(page, width):
     expect(pane).to_be_visible()
     page.get_by_role('button', name='Criar Jornada', exact=True).click()
     page.get_by_role('button', name=re.compile('^Em branco')).click()
-    page.get_by_role('button', name='Continuar em branco', exact=True).click()
+    page.get_by_role('button', name='Criar primeira etapa', exact=True).click()
     page.get_by_role('button', name='Todas as Jornadas', exact=True).click()
     expect(cards).to_have_count(3)
     check(f'{width}: ações dos cards ficam dentro de seus rodapés', pane.locator('.bo-map-card-actions').evaluate_all("""footers=>footers.every(f=>{const r=f.getBoundingClientRect();return [...f.querySelectorAll('button')].every(b=>{const x=b.getBoundingClientRect();return x.left>=r.left && x.right<=r.right+1 && x.top>=r.top && x.bottom<=r.bottom+1})})"""))

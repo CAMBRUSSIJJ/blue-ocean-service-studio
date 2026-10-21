@@ -82,6 +82,11 @@ Confere rodapés com nomes longos, busca, Cards/Tabela, confirmação de exclus�
 criação de etapas, foco de teclado e a continuidade entre os dois editores.
 Executa axe-core na Jornada e nas bibliotecas e salva capturas em `artifacts/map-actions/`.
 
+`entry:browser` também valida o início guiado em três larguras: prévia sem dados
+automáticos, retorno ao mapa vazio, foco e criação por Enter, faixa vinculada
+e Ajustar à tela sem alteração do conteúdo. Para incluir as auditorias desse
+runner, use `AXE_PATH=node_modules/axe-core/axe.min.js npm run entry:browser`.
+
 ## Visual e acessibilidade
 
 `npm run e2e:visual` produz capturas e executa os checks definidos pelo runner.

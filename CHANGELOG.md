@@ -1,5 +1,14 @@
 # Histórico de mudanças
 
+## Início guiado e navegação da Jornada — 21/10/2026
+
+- Redesenha o estado vazio com uma prévia ampla e duas ações: criar a primeira etapa ou aplicar a estrutura inicial opcional.
+- Recupera o ponto de partida de mapas vazios cuja introdução já havia sido dispensada.
+- Oferece faixas de ações, pensamentos e emoções com ícones, descrições e vínculos reais ao serviço.
+- Melhora a hierarquia das etapas e faixas, o foco do formulário e a criação por Enter.
+- Acrescenta Ajustar à tela ao controle de zoom, preservando o conteúdo e a opção de restaurar 100%.
+- Amplia a regressão de entrada para validar os dois caminhos e o enquadramento em computador, tablet e celular.
+
 ## Botões e ações dos mapas — 21/10/2026
 
 - Padroniza cores, altura, bordas, ícones e estados de foco, seleção e indisponibilidade nas bibliotecas e nos cabeçalhos de Jornada e Blueprint.
