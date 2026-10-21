@@ -379,7 +379,7 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" className="bo-j-trend"><path d={trendPath(emotionValues, stageIndex, -2, 2)}/></svg>
                 <div className="bo-j-score-choices" role="group" aria-label={`Emoção em ${stage.title}`}>{scoreChoices.map(score =>
                   <button key={score} type="button" aria-pressed={emotionValues[stageIndex] === score}
-                    aria-label={`${scoreLabels[score]} em ${stage.title}`} title={scoreLabels[score]}
+                    aria-label={scoreLabels[score]} title={scoreLabels[score]}
                     onClick={() => changeEmotionScore(stage.id, score)}>{scoreSymbols[score + 2]}</button>
                 )}</div></div> : lane.type === 'metric' ? <div className="bo-j-visual-cell bo-j-metric">
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" className="bo-j-trend">
