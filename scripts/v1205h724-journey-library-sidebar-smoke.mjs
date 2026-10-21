@@ -45,7 +45,7 @@ check(css.includes('@media(max-width:767px){.bo-h724-sidebar-toggle{display:none
 
 check(view.includes("workspaceTab === 'blueprint' && <>{handoff.readyForJourney"),'ações globais de Blueprint ficam restritas ao tab Blueprint');
 check(view.includes('bo-h722-library-toolbar') && view.includes('> Criar Journey</button>') && !view.includes("workspaceTab === 'journey' && !journeyEditorOpen && <button"),'Journey tem uma ação principal na barra de biblioteca, sem duplicar no header');
-check(view.includes('O mapa só é carregado depois que você escolher uma Journey'),'biblioteca explica o novo fluxo');
+check(view.includes('continue no Blueprint para desenhar como a operação entrega') && view.includes('data-journey-to-blueprint={journey.id}'),'biblioteca explica e oferece continuidade para o Blueprint');
 check(view.includes('<JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/>'),'editor Journey canônico permanece incorporado');
 check(view.includes('<WhiteboardsView studio={studio}/>'),'Whiteboard permanece incorporado');
 check(view.includes('data-unified-legacy-targets'),'contratos legados continuam documentados');
