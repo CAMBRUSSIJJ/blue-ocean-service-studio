@@ -25,7 +25,7 @@ const checks = [
  ['etapa edita título real', free.includes("updateStageCore(selectedStage.id, 'title'")],
  ['ação do cliente editável', free.includes("updateStageCore(selectedStage.id, 'customerAction'")],
  ['pensamentos via modelo existente', free.includes('updateStageExperience(selectedStage.id, { thoughts: value })')],
- ['emoções reais', free.includes("updateStageCore(selectedStage.id, 'emotion', emotion)")],
+ ['emoções reais', free.includes('changeEmotionScore(selectedStage.id, score)') && free.includes('emotionFromScore(score)') && studio.includes("field === 'emotion'")],
  ['touchpoint real', free.includes('addTouchpointToStage(selectedStage.id, newTouchpointName)')],
  ['remoção de touchpoint real', free.includes('removeTouchpointFromStage(selectedStage.id, id)')],
  ['criação de primeira etapa e seguintes', free.includes('createStage(inlineStageTitle)') && free.includes('showNewStage || !orderedStages.length')],
