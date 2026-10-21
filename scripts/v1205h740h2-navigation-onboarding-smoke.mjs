@@ -8,7 +8,7 @@ const main=readFileSync('src/main.tsx','utf8');
 const checks=[]; let fail=0;
 const check=(label,ok)=>{console.log(`${ok?'OK  ':'FAIL'} ${label}`);checks.push([label,ok]);if(!ok)fail++};
 check('sidebar não bloqueia por hasService',!appWithoutLegacy.includes('disabled={!hasService}'));
-check('Service Workspace sempre navegável',app.includes("onClick={() => openServiceWorkspaceTab('overview')}")&&app.includes('data-unified-service-workspace-nav="1"'));
+check('Service Workspace abre diretamente as Jornadas',app.includes("openServiceWorkspaceTab('journey')")&&app.includes('data-unified-service-workspace-nav="1"'));
 check('listener bo-create-service no shell',app.includes("window.addEventListener('bo-create-service'"));
 check('modal novo serviço no shell',app.includes('bo-h740h2-service-modal'));
 check('criação usa controller canônico',app.includes('createService(serviceName, serviceDescription)'));

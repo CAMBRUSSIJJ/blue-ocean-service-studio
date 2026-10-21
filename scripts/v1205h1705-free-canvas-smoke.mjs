@@ -16,7 +16,7 @@ const checks = [
  ['componente funcional integrado', parent.includes('return <JourneyCanvasFree')],
  ['modo antigo ainda acessível', parent.includes('setShowCanvasMatrix(true)') && parent.includes('setShowCanvasMatrix(false)')],
  ['editor abre em tela inteira por padrão', workspace.includes('<EditorSurface>') && free.includes('is-expanded bo-focused-journey') && !free.includes('setIsExpanded') && read('src/views/EditorSurface.tsx').includes('root.inert = true')],
- ['voltar ao serviço dispara rota', free.includes("detail: 'overview'") && workspace.includes("window.addEventListener('bo-service-workspace-tab'")],
+ ['voltar ao serviço retorna à biblioteca de Jornadas', free.includes("detail: 'journey'") && workspace.includes("window.addEventListener('bo-service-workspace-tab'")],
  ['mapa livre possui identificação própria', free.includes('data-journey-free-map="1"')],
  ['painel horizontal com faixas configuráveis', free.includes('bo-h1706-map') && free.includes('data-configurable-lanes="1"') && css.includes('.bo-h1706-lane-name')],
  ['colunas vinculadas a etapas canônicas', free.includes('activeStages.map((stage, index)') && free.includes('data-journey-stage-id={stage.id}')],
