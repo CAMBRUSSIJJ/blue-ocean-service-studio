@@ -44,7 +44,7 @@ check(css.includes('.bo-h724-sidebar.is-collapsed .rt182-host-footer'),'footer s
 check(css.includes('@media(max-width:767px){.bo-h724-sidebar-toggle{display:none}'),'collapse desktop não conflita com navegação móvel');
 
 check(view.includes("workspaceTab === 'blueprint' && <>{handoff.readyForJourney"),'ações globais de Blueprint ficam restritas ao tab Blueprint');
-check(view.includes("workspaceTab === 'journey' && !journeyEditorOpen && <button") && view.includes('Criar Journey'),'CTA do header muda para Journey no tab Journey');
+check(view.includes('bo-h722-library-toolbar') && view.includes('> Criar Journey</button>') && !view.includes("workspaceTab === 'journey' && !journeyEditorOpen && <button"),'Journey tem uma ação principal na barra de biblioteca, sem duplicar no header');
 check(view.includes('O mapa só é carregado depois que você escolher uma Journey'),'biblioteca explica o novo fluxo');
 check(view.includes('<JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/>'),'editor Journey canônico permanece incorporado');
 check(view.includes('<WhiteboardsView studio={studio}/>'),'Whiteboard permanece incorporado');
