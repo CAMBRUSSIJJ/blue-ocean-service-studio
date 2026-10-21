@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, DragEvent } from 'react';
 import type { StudioController } from '../state/useStudioController';
-import type { Emotion, JourneyLane, JourneyLaneTone, JourneyLaneType } from '../domain/model';
+import type { JourneyLane, JourneyLaneTone, JourneyLaneType } from '../domain/model';
+import { emotionScore, emotionFromScore, metricRange, metricValue, trendPath } from '../domain/journey-visualization';
+import type { EmotionScore } from '../domain/journey-visualization';
 import { JOURNEY_LANE_LABELS, updateJourneyLayout, duplicateJourneyLane, reorderJourneyLane } from '../domain/journey-layout-operations';
 import { JourneyCardText } from '../components/JourneyCardText';
 import { applyJourneyStarter } from '../domain/journey-starter';
@@ -17,9 +19,12 @@ import {
 } from '../design-system/icons';
 
 type ContextKind = 'persona' | 'need' | 'pain' | 'evidence';
-const selectedEmotionLabels: Record<Emotion, string> = {
-  negative: 'Frustrado', neutral: 'Neutro', positive: 'Satisfeito',
+const scoreChoices: EmotionScore[] = [-2, -1, 0, 1, 2];
+const scoreLabels: Record<EmotionScore, string> = {
+  [-2]: 'Muito insatisfeito', [-1]: 'Insatisfeito', 0: 'Neutro',
+  1: 'Satisfeito', 2: 'Muito satisfeito',
 };
+const scoreSymbols = ['😣', '😟', '😐', '🙂', '🤩'];
 
 // H17.0.5: minimalist, directly editable Journey map. All mutations go through StudioController.
 export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBlueprintDraft, onBack }: {
@@ -92,7 +97,8 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
     { type: 'icons', label: 'Ícones', hint: 'Sinais e pontos de atenção', icon: Shapes },
     { type: 'grid', label: 'Lista de verificação', hint: 'Itens para acompanhar', icon: ListChecks },
     { type: 'divider', label: 'Divisor', hint: 'Organize as seções', icon: SeparatorHorizontal },
-    { type: 'emotion', label: 'Emoções', hint: 'Como o cliente se sente', icon: Activity },
+    { type: 'emotion', label: 'Emoções', hint: 'Curva de emoções por etapa', icon: Activity },
+    { type: 'metric', label: 'Métricas', hint: 'Números e tendência por etapa', icon: Activity },
     { type: 'embed', label: 'Link de referência', hint: 'Materiais de apoio', icon: Link2 },
   ];
   const serviceLanes: { binding: NonNullable<JourneyLane['binding']>; label: string; icon: LucideIcon }[] = [
@@ -229,6 +235,21 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
   };
   const dismissIntro = () => setGraph(current => updateJourneyLayout(current, journey.id, layout => ({ ...layout, introDismissed: true })), 'Journey: continuar em branco');
   const activeStages = visibleStages.length ? visibleStages : orderedStages;
+  const emotionValues = activeStages.map(stage => emotionScore(stage.emotionScore, stage.emotion));
+  const metricValues = (lane: JourneyLane) => activeStages.map(stage => metricValue(lane.cards[stage.id]));
+  const changeEmotionScore = (stageId: string, score: EmotionScore) => setGraph(current => {
+    const stage = current.stages[stageId], relatedJourney = stage && current.journeys[stage.journeyId];
+    if (!stage || !relatedJourney) return current;
+    const now = new Date().toISOString();
+    return {
+      ...current,
+      service: { ...current.service, updatedAt: now },
+      stages: { ...current.stages, [stageId]: {
+        ...stage, emotionScore: score, emotion: emotionFromScore(score), updatedAt: now,
+      } },
+      journeys: { ...current.journeys, [relatedJourney.id]: { ...relatedJourney, updatedAt: now } },
+    };
+  }, 'Journey: ajustar curva de emoções');
   const gridColumns = ['var(--journey-rail, 190px)', ...activeStages.map(() => `${columnWidth}px`), '250px'].join(' ');
   const activeStageIndex = selectedStage ? journey.stageIds.indexOf(selectedStage.id) : -1;
   const dismissMenus = () => setShowViews(false);
@@ -353,8 +374,21 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
                 <button type="button" className="bo-j2-danger" onClick={() => removeLane(lane)}>Excluir faixa…</button>
               </div>}
             </div>
-            {activeStages.map((stage) => <div key={stage.id} data-stage-id={stage.id} className={`bo-h1706-cell type-${lane.type}`}>
-              {lane.type === 'divider' ? <hr/> : lane.type === 'emotion' ? <div className="bo-h1706-emotions">{(['negative', 'neutral', 'positive'] as Emotion[]).map((emotion) => <button key={emotion} aria-pressed={stage.emotion === emotion} title={selectedEmotionLabels[emotion]} aria-label={selectedEmotionLabels[emotion]} onClick={() => updateStageCore(stage.id, 'emotion', emotion)}>{emotion === 'positive' ? '😊' : emotion === 'negative' ? '😞' : '😐'}</button>)}</div> : lane.binding === 'touchpoints' || lane.binding === 'needs' || lane.binding === 'pains' ? <div className="bo-h1706-linked"><span>{cardValue(lane, stage) || 'Sem registros vinculados'}</span><button onClick={() => { setSelectedLaneId(null); setSelectedStageId(stage.id); setShowContextForm(lane.binding !== 'touchpoints'); setNewContextKind(lane.binding === 'pains' ? 'pain' : 'need'); }} title={lane.binding === 'touchpoints' ? 'Editar pontos de contato nos detalhes da etapa' : 'Criar e vincular elemento do serviço'}>{lane.binding === 'touchpoints' ? '+ Editar pontos de contato' : '+ Criar e vincular'}</button></div> : lane.type === 'image' || lane.type === 'embed' ? <div className="bo-h1706-media"><input aria-label={`${lane.label} em ${stage.title}`} placeholder={lane.type === 'image' ? 'URL da imagem' : 'URL do conteúdo'} value={cardValue(lane, stage)} onChange={(event) => updateCard(lane, stage.id, event.target.value)}/>{lane.type === 'image' && /^https?:\/\//.test(cardValue(lane, stage)) && <img loading="lazy" src={cardValue(lane, stage)} alt="Imagem do cartão"/>}{lane.type === 'embed' && /^https?:\/\//.test(cardValue(lane, stage)) && <a href={cardValue(lane, stage)} target="_blank" rel="noreferrer">Abrir conteúdo ↗</a>}</div> : <div className="bo-h1709-card-stack" onDragOver={(event) => { if (event.dataTransfer.types.includes('application/x-blue-ocean-card')) { event.preventDefault(); event.stopPropagation(); } }} onDrop={(event) => dropCard(event, lane.id, stage.id)}>{lane.binding ? <div className="bo-h1706-edit-card"><JourneyCardText aria-label={`${lane.label} em ${stage.title}`} rows={3} placeholder={lane.binding === 'customerAction' ? 'O que a pessoa faz neste momento?' : lane.binding === 'thoughts' ? 'O que passa pela cabeça da pessoa?' : 'Escrever...'} value={cardValue(lane, stage)} onChange={(event) => updateCard(lane, stage.id, event.target.value)}/></div> : <>{cardsInCell(lane, stage.id).map((card, cardIndex) => <div className={`bo-h1706-edit-card bo-h1709-card${card.checked ? ' is-checked' : ''}`} data-card-id={card.id} key={card.id} onDragOver={(event) => { if (event.dataTransfer.types.includes('application/x-blue-ocean-card')) { event.preventDefault(); event.stopPropagation(); } }} onDrop={(event) => dropCard(event, lane.id, stage.id, cardsInCell(lane, stage.id).findIndex((item) => item.id === card.id))}><button type="button" className="bo-h1709-drag-handle" draggable onDragStart={(event) => startCardDrag(event, lane.id, stage.id, card.id)} aria-label="Arrastar cartão" title="Arrastar cartão"><GripVertical size={14} aria-hidden="true"/></button>
+            {activeStages.map((stage, stageIndex) => <div key={stage.id} data-stage-id={stage.id} className={`bo-h1706-cell type-${lane.type}`}>
+              {lane.type === 'divider' ? <hr/> : lane.type === 'emotion' ? <div className="bo-j-visual-cell bo-j-emotion">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" className="bo-j-trend"><path d={trendPath(emotionValues, stageIndex, -2, 2)}/></svg>
+                <div className="bo-j-score-choices" role="group" aria-label={`Emoção em ${stage.title}`}>{scoreChoices.map(score =>
+                  <button key={score} type="button" aria-pressed={emotionValues[stageIndex] === score}
+                    aria-label={`${scoreLabels[score]} em ${stage.title}`} title={scoreLabels[score]}
+                    onClick={() => changeEmotionScore(stage.id, score)}>{scoreSymbols[score + 2]}</button>
+                )}</div></div> : lane.type === 'metric' ? <div className="bo-j-visual-cell bo-j-metric">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" className="bo-j-trend">
+                  <path d={trendPath(metricValues(lane), stageIndex, metricRange(metricValues(lane)).min, metricRange(metricValues(lane)).max)}/>
+                </svg>
+                <label><span>Valor em {stage.title}</span><input type="number" step="any" inputMode="decimal"
+                  aria-label={`${lane.label} em ${stage.title}`} placeholder="Sem valor"
+                  value={lane.cards[stage.id] ?? ''} onChange={event => updateCard(lane, stage.id, event.target.value)}/></label>
+              </div> : lane.binding === 'touchpoints' || lane.binding === 'needs' || lane.binding === 'pains' ? <div className="bo-h1706-linked"><span>{cardValue(lane, stage) || 'Sem registros vinculados'}</span><button onClick={() => { setSelectedLaneId(null); setSelectedStageId(stage.id); setShowContextForm(lane.binding !== 'touchpoints'); setNewContextKind(lane.binding === 'pains' ? 'pain' : 'need'); }} title={lane.binding === 'touchpoints' ? 'Editar pontos de contato nos detalhes da etapa' : 'Criar e vincular elemento do serviço'}>{lane.binding === 'touchpoints' ? '+ Editar pontos de contato' : '+ Criar e vincular'}</button></div> : lane.type === 'image' || lane.type === 'embed' ? <div className="bo-h1706-media"><input aria-label={`${lane.label} em ${stage.title}`} placeholder={lane.type === 'image' ? 'URL da imagem' : 'URL do conteúdo'} value={cardValue(lane, stage)} onChange={(event) => updateCard(lane, stage.id, event.target.value)}/>{lane.type === 'image' && /^https?:\/\//.test(cardValue(lane, stage)) && <img loading="lazy" src={cardValue(lane, stage)} alt="Imagem do cartão"/>}{lane.type === 'embed' && /^https?:\/\//.test(cardValue(lane, stage)) && <a href={cardValue(lane, stage)} target="_blank" rel="noreferrer">Abrir conteúdo ↗</a>}</div> : <div className="bo-h1709-card-stack" onDragOver={(event) => { if (event.dataTransfer.types.includes('application/x-blue-ocean-card')) { event.preventDefault(); event.stopPropagation(); } }} onDrop={(event) => dropCard(event, lane.id, stage.id)}>{lane.binding ? <div className="bo-h1706-edit-card"><JourneyCardText aria-label={`${lane.label} em ${stage.title}`} rows={3} placeholder={lane.binding === 'customerAction' ? 'O que a pessoa faz neste momento?' : lane.binding === 'thoughts' ? 'O que passa pela cabeça da pessoa?' : 'Escrever...'} value={cardValue(lane, stage)} onChange={(event) => updateCard(lane, stage.id, event.target.value)}/></div> : <>{cardsInCell(lane, stage.id).map((card, cardIndex) => <div className={`bo-h1706-edit-card bo-h1709-card${card.checked ? ' is-checked' : ''}`} data-card-id={card.id} key={card.id} onDragOver={(event) => { if (event.dataTransfer.types.includes('application/x-blue-ocean-card')) { event.preventDefault(); event.stopPropagation(); } }} onDrop={(event) => dropCard(event, lane.id, stage.id, cardsInCell(lane, stage.id).findIndex((item) => item.id === card.id))}><button type="button" className="bo-h1709-drag-handle" draggable onDragStart={(event) => startCardDrag(event, lane.id, stage.id, card.id)} aria-label="Arrastar cartão" title="Arrastar cartão"><GripVertical size={14} aria-hidden="true"/></button>
                 {lane.type === 'stage' && <small className="bo-j2-substage">Subetapa {cardIndex + 1}</small>}
                 {lane.type === 'grid' && <label className="bo-j2-check"><input type="checkbox" aria-label={`Concluir item ${cardIndex + 1} de ${lane.label} em ${stage.title}`} checked={Boolean(card.checked)} onChange={event => checkFreeCard(lane, stage.id, card.id, event.target.checked)}/><span>{card.checked ? 'Concluído' : 'A fazer'}</span></label>}
                 {lane.type === 'icons' && <label className="bo-j2-icon">Ícone<select aria-label={`Ícone do cartão ${cardIndex + 1} em ${stage.title}`} value={card.icon ?? '💬'} onChange={event => editLane(lane.id, current => setCellCards(current, stage.id, cardsInCell(current, stage.id).map(item => item.id === card.id ? { ...item, icon: event.target.value } : item)), 'Journey: escolher ícone')}>{[['💬','Mensagem'],['📞','Telefone'],['💻','Digital'],['📦','Entrega'],['😊','Positivo'],['😐','Neutro'],['😞','Negativo'],['⚠️','Atenção'],['✅','Concluído']].map(([value, label]) => <option key={value} value={value}>{value} {label}</option>)}</select></label>}
@@ -391,7 +425,9 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
           <label>Nome da etapa<input value={selectedStage.title} onChange={(event) => updateStageCore(selectedStage.id, 'title', event.target.value)}/></label>
           <label>O que o cliente faz?<textarea rows={3} value={selectedStage.customerAction} onChange={(event) => updateStageCore(selectedStage.id, 'customerAction', event.target.value)} placeholder="Ex.: Envia uma mensagem pelo WhatsApp"/></label>
           <label>O que o cliente pensa ou espera?<textarea rows={2} value={selectedStage.thoughts ?? ''} onChange={(event) => updateThoughts(event.target.value)} placeholder="Opcional"/></label>
-          <fieldset><legend>Como o cliente se sente?</legend><div className="bo-h1705-emotion-list">{(['negative','neutral','positive'] as Emotion[]).map((emotion) => <button type="button" key={emotion} aria-pressed={selectedStage.emotion === emotion} className={selectedStage.emotion === emotion ? 'active' : ''} onClick={() => updateStageCore(selectedStage.id, 'emotion', emotion)}>{emotion === 'positive' ? '😊' : emotion === 'negative' ? '😞' : '😐'}<small>{selectedEmotionLabels[emotion]}</small></button>)}</div></fieldset>
+          <fieldset><legend>Como o cliente se sente?</legend><div className="bo-h1705-emotion-list bo-j-score-inspector">{scoreChoices.map(score => <button type="button" key={score} aria-pressed={emotionScore(selectedStage.emotionScore, selectedStage.emotion) === score}
+  className={emotionScore(selectedStage.emotionScore, selectedStage.emotion) === score ? 'active' : ''}
+  aria-label={scoreLabels[score]} title={scoreLabels[score]} onClick={() => changeEmotionScore(selectedStage.id, score)}>{scoreSymbols[score + 2]}<small>{scoreLabels[score]}</small></button>)}</div></fieldset>
           <details className="bo-h1705-inspector-section bo-j2-context-links"><summary>Relacionar informações existentes</summary>
             {([['need', 'Necessidades', contextItems.needs, selectedStage.needIds ?? []], ['problem', 'Problemas validados', contextItems.problems, selectedStage.validatedProblemIds ?? []], ['evidence', 'Evidências', contextItems.evidence, selectedStage.evidenceIds ?? []]] as const).map(([kind, title, items, selectedIds]) => <fieldset key={kind}><legend>{title}</legend>{items.length ? items.map(item => <label key={item.id}><input type="checkbox" checked={selectedIds.includes(item.id)} onChange={event => setStageContextLink(selectedStage.id, kind, item.id, event.target.checked)}/><span>{String(item.title || item.name || 'Sem título')}</span></label>) : <p>Não há registros deste tipo vinculados à Jornada.</p>}</fieldset>)}
           </details>
