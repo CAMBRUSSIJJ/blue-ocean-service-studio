@@ -152,6 +152,15 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
   const duplicate = (id: string) => { api<WhiteboardCoreApi>('whiteboardCore')?.duplicateBoard?.(id); setMenuBoardId(null); };
   const remove = async (id: string) => { await api<WhiteboardCoreApi>('whiteboardCore')?.deleteBoard?.(id); setMenuBoardId(null); };
   const open = async (id: string) => { const runtime = api<WhiteboardCoreApi>('whiteboardCore'); if (runtime?.openBoard) await runtime.openBoard(id); };
+  const openJourneys = (journeyId?: string) => {
+    setActiveTab('canvas');
+    window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'journey' }));
+    if (journeyId && graph.journeys[journeyId]) {
+      window.setTimeout(() => window.dispatchEvent(new CustomEvent('bo-service-object-focus', {
+        detail: { kind: 'journey', id: journeyId },
+      })), 40);
+    }
+  };
   const openBlueprints = () => {
     try { sessionStorage.setItem('bo-service-workspace-tab', 'blueprint'); } catch { /* local navigation preference */ }
     setActiveTab('canvas');
@@ -161,8 +170,9 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
   if (!hasService) return <section className="bo1189-module-empty"><LayoutTemplate size={30}/><h2>Crie um serviço antes de abrir quadros</h2><p>Whiteboards pertencem a um serviço. Volte à Visão geral e crie o primeiro serviço.</p><button type="button" onClick={() => setActiveTab('home')}>Ir para a Visão geral</button></section>;
 
   return <section className="bo1189-whiteboards bo-h711-whiteboards" data-whiteboard-library="1" data-whiteboard-2="1">
-    <header><div><span>WORKSPACE</span><h1>Whiteboard</h1><p>Use o Whiteboard para pensar livremente. Você pode trazer Personas, Necessidades, Dores, Problemas e Evidências já registrados ou criá-los no próprio quadro enquanto desenha.</p></div><div className="bo1190-whiteboard-actions"><button type="button" onClick={openBlueprints}><LayoutTemplate size={16}/> Ir para Blueprints</button>{handoff.readyForWhiteboard && <button type="button" onClick={createFromDefinition}><Plus size={16}/> Com contexto</button>}<button type="button" className="primary" onClick={() => setShowCreate(true)}><Plus size={16}/> Novo whiteboard</button></div></header>
+    <header><div><span>WORKSPACE</span><h1>Whiteboard</h1><p>Explore possibilidades sem precisar seguir uma etapa obrigatória. Quando quiser estruturar a experiência ou a operação, continue nas Jornadas ou Blueprints.</p></div><div className="bo1190-whiteboard-actions"><button type="button" onClick={() => openJourneys()}>Ir para Jornadas</button><button type="button" onClick={openBlueprints}><LayoutTemplate size={16}/> Ir para Blueprints</button>{handoff.readyForWhiteboard && <button type="button" onClick={createFromDefinition}><Plus size={16}/> Com contexto</button>}<button type="button" className="primary" onClick={() => setShowCreate(true)}><Plus size={16}/> Novo whiteboard</button></div></header>
 
+    <div className="bo-h1711-flow-hint" data-design-flow="whiteboard" role="note"><span><strong>Whiteboard</strong><span>·</span><span>Espaço livre para explorar. Leve o aprendizado para Jornada ou Blueprint quando fizer sentido.</span></span><div><button type="button" onClick={() => openJourneys()}>Organizar em Jornadas <ArrowRight size={13}/></button><button type="button" onClick={openBlueprints}>Desenhar operação no Blueprint <ArrowRight size={13}/></button></div></div>
     {boards.length > 0 && <div className="bo-h711-summary" data-whiteboard-health-summary="1">
       <div><span>QUADROS</span><strong>{summary.total}</strong><small>Whiteboards livres</small></div>
       <div><span>OBJETOS VINCULADOS</span><strong>{summary.smart}</strong><small>Usados em outros contextos</small></div>
@@ -193,6 +203,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
       <div className="bo1193-board-copy"><span>WHITEBOARD · {statusLabel(board.report?.status ?? 'blank')}</span><strong>{board.name}</strong><small>{board.itemCount} objetos · {board.edgeCount} conexões{board.contextCount ? ` · ${board.contextCount} vínculos de contexto` : ''}</small></div>
       {board.report && board.report.danglingSmartObjects > 0 && <div className="bo-h711-health"><span><ShieldCheck size={13}/> Referências para revisar</span><strong>{board.report.danglingSmartObjects}</strong><div><i style={{ width: `${board.report.qualityScore}%` }}/></div><small>{board.report.contextTotal ? `${board.report.contextCoverage}% do contexto representado` : 'Quadro livre sem contexto obrigatório'}{board.report.danglingSmartObjects ? ` · ${board.report.danglingSmartObjects} referência(s) ausente(s)` : ''}</small></div>}
       <button type="button" onClick={() => void open(board.id)}>Abrir <ArrowRight size={14}/></button>
+      {board.journeyId && graph.journeys[board.journeyId] && <button type="button" className="bo-h1711-link" data-whiteboard-to-journey={board.id} onClick={() => openJourneys(board.journeyId)}>Jornada vinculada: {graph.journeys[board.journeyId].name} <ArrowRight size={13}/></button>}
     </article>)}</div> : <div className="bo1189-board-empty"><LayoutTemplate size={28}/><strong>{boards.length ? 'Nenhum Whiteboard corresponde aos filtros' : 'Nenhum Whiteboard ainda'}</strong><p>{boards.length ? 'Ajuste a busca ou os filtros para voltar a exibir seus quadros.' : 'Crie um quadro livre ou comece diretamente do Contexto validado do serviço.'}</p><div className="bo1190-empty-actions"><button type="button" onClick={openBlueprints}><LayoutTemplate size={15}/> Abrir Blueprints</button><button type="button" className="secondary" onClick={() => setShowCreate(true)}><Plus size={15}/> Criar whiteboard</button></div></div>}
 
     {renameBoard && <div className="bo1189-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) setRenameBoard(null); }}><form className="bo1189-modal bo1193-rename-modal" onSubmit={(e) => { e.preventDefault(); rename(); }}><header><div><span>WHITEBOARD</span><h2>Renomear quadro</h2><p>O novo nome será usado na biblioteca e no cabeçalho do Whiteboard.</p></div><button type="button" aria-label="Fechar" onClick={() => setRenameBoard(null)}><X size={18}/></button></header><label>Nome do quadro<input autoFocus value={renameValue} onChange={(e) => setRenameValue(e.target.value)} /></label><footer><button type="button" onClick={() => setRenameBoard(null)}>Cancelar</button><button type="submit">Salvar nome</button></footer></form></div>}
