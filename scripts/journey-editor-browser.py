@@ -239,7 +239,7 @@ def desktop(page):
     page.get_by_role('button', name='Todas as Jornadas', exact=True).click()
     page.get_by_role('button', name='Abrir Journey', exact=True).click()
     editor.get_by_role('button', name=re.compile('^Visualizações')).click()
-    editor.get_by_role('button', name='Voltar ao serviço', exact=True).click()
+    editor.get_by_role('button', name='Voltar às Jornadas', exact=True).click()
     page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir Journey', exact=True).click()
     check('Library and service navigation retain the latest map', current(page)['mapLayout'] == before_reload)
     editor.get_by_role('button', name=re.compile('^Visualizações')).click()
