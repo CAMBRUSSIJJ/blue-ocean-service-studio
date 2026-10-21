@@ -157,7 +157,7 @@ h+='</div><svg class="lk" id="lk" aria-hidden="true"></svg></div></div><aside cl
 function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();document.getElementById('dx').innerHTML=dx()}
 function focusNew(sel){const e=app.querySelector(sel);if(e)e.focus()}
 app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
-if(HOSTED&&(a==='lib'||a==='professional')){window.parent.postMessage({boBlueprintHost:1,type:a==='lib'?'library':'professional'},location.origin);return}
+if(HOSTED&&(a==='lib'||a==='professional'||a==='back')){window.parent.postMessage({boBlueprintHost:1,type:a==='lib'?'library':a==='back'?'back':'professional'},location.origin);return}
 if(a=='cv'){cv=!cv}
 else if(a=='lk'){lk=!lk;pick=null}
 else if(a=='pk'){if(!pick)pick=d.nid;else if(pick==d.nid)pick=null;else{const L=S.links=S.links||[],x=L.findIndex(l=>l.a==pick&&l.b==d.nid);if(x>=0)L.splice(x,1);else L.push({a:pick,b:d.nid});pick=null;save()}}
@@ -216,6 +216,20 @@ const d='M'+x1+' '+y1+' C'+c1.join(' ')+' '+c2.join(' ')+' '+x2+' '+y2;
 h+='<path d="'+d+'" fill="none" style="stroke:var(--ac)" stroke-width="1.75" marker-end="url(#ar)"/><path d="'+d+'" fill="none" stroke="transparent" stroke-width="14" style="pointer-events:stroke;cursor:pointer" data-act="ul" data-n="'+n+'"><title>Remover ligação</title></path>'});
 sv.innerHTML=h}
 window.addEventListener('resize',drawLinks);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawLinks);
+const originalBlueprintRender=render;
+render=function(){
+  originalBlueprintRender();
+  if(HOSTED){
+    const anchor=app.querySelector('.hd .bk');
+    if(anchor&&!anchor.querySelector('[data-act="back"]')){
+      const back=document.createElement('button');
+      back.type='button';back.className='tb';back.dataset.act='back';
+      back.textContent='‹ Voltar para Blueprints';
+      back.style.cssText='min-height:30px;padding:0 8px;font-size:11px;margin-right:8px';
+      anchor.prepend(back);
+    }
+  }
+};
 render();
 if(HOSTED){
   window.addEventListener('message',event=>{

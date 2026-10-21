@@ -250,7 +250,7 @@ def desktop(page):
     check('Blueprint draft shares Journey identity and stages', len(boards) == 1 and boards[0]['journeyId'] == jid and graph(page)['journeys'][jid]['stageIds'] == stages)
     check('Opening a draft preserves custom lanes and canonical action', graph(page)['journeys'][jid]['mapLayout'] == before_reload and graph(page)['stages'][stages[0]]['customerAction'] == 'Cliente solicita ajuda')
     page.screenshot(path=str(OUT / 'journey-blueprint.png'))
-    page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
+    page.frame_locator('.bo-blueprint-reference-frame').get_by_role('button', name='Voltar para Blueprints', exact=True).click()
     page.locator('[data-service-journey-nav="1"]').click()
     page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir Jornada', exact=True).click()
     check('Reopened map still fits the viewport', editor.bounding_box()['y'] == 0 and editor.bounding_box()['height'] == page.viewport_size['height'])

@@ -1244,6 +1244,9 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       }else if(type==='professional'){
         blueprintReferenceState().mode='professional';
         save(false,{content:false,history:false,label:'Abrir ferramentas profissionais'});renderAll();
+      }else if(type==='back'){
+        close(false);window.dispatchEvent(new CustomEvent('rt-navigation',{detail:'canvas'}));
+        setTimeout(()=>window.dispatchEvent(new CustomEvent('bo-service-workspace-tab',{detail:'blueprint'})),0);
       }else if(type==='library'){
         close(false);window.dispatchEvent(new CustomEvent('rt-navigation',{detail:'journeys'}));
       }
