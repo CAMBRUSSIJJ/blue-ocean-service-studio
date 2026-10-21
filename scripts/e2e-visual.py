@@ -79,7 +79,7 @@ def main():
               page.locator('[data-blue-ocean-whiteboard-nav="standard"]').click()
             page.get_by_role('button',name='Novo whiteboard',exact=True).click()
             page.get_by_label('Nome do quadro',exact=True).fill('E2E Visual')
-            page.get_by_role('button',name='Criar e começar',exact=True).click()
+            page.get_by_role('button',name='Começar livre',exact=True).click()
             board=page.locator('.bo1174-board')
             board.wait_for(state='visible',timeout=10000)
             if page.locator('.rt144-view').bounding_box()['height']<200:
