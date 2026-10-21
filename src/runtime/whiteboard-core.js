@@ -1083,6 +1083,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       readOnly:mobileReadOnly(),state,
       refresh:()=>{save(false,{content:false,history:false,label:'Exibição do Blueprint'});renderAll()},
       professional:()=>{state.mode='professional';save(false,{content:false,history:false,label:'Modo profissional'});renderAll()},
+      back:()=>{close(false);window.dispatchEvent(new CustomEvent('rt-navigation',{detail:'canvas'}));setTimeout(()=>window.dispatchEvent(new CustomEvent('bo-service-workspace-tab',{detail:'blueprint'})),0)},
       undo:undoEdit,redo:redoEdit,stage:()=>addJourneyStage({returnTo:'service'}),
       review:()=>showBlueprintDeliveryReview(),
       summary:id=>{const st=graph.stages[id];if(st)editText('O que acontece',st.thoughts||st.customerAction,text=>{st.thoughts=text;st.updatedAt=new Date().toISOString()})},
