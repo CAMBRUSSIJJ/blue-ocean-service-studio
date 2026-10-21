@@ -111,6 +111,8 @@ def flow(page, width):
     cards.first.locator('[data-journey-to-blueprint]').click()
     board = page.locator('.bo1174-board')
     expect(board).to_be_visible()
+    check(f'{width}: Blueprint abre no mapa visual fiel à referência', page.locator('.bo-ref-root').count() == 1)
+    page.get_by_role('button', name='Editor avançado', exact=True).click()
     if width >= 600:
         add = page.get_by_role('button', name='Adicionar etapa', exact=True).first
         page.mouse.move(0, page.viewport_size['height'] - 1)
