@@ -254,7 +254,7 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
   const closeJourney = () => {
     setSelectedStageId(null);
     setActiveTab('canvas');
-    requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'overview' })));
+    requestAnimationFrame(() => window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'journey' })));
   };
   const updateThoughts = (value: string) => {
     if (!selectedStage) return;
