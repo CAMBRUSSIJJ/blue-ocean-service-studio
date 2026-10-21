@@ -111,6 +111,15 @@ def flow(page, width):
     cards.first.locator('[data-journey-to-blueprint]').click()
     board = page.locator('.bo1174-board')
     expect(board).to_be_visible()
+    if page.locator('.bo-ref-root').count() != 1:
+        state = page.evaluate("""() => ({ view:document.querySelector('.bo1174-board')?.dataset.view,
+          title:document.querySelector('.bo1174-board')?.getAttribute('aria-label'),
+          controls:[...document.querySelectorAll('.bo1174-board button')].slice(0,12).map(b=>b.getAttribute('aria-label')||b.textContent?.trim()),
+          boards:Object.values(window.BlueOceanRuntime?.api('dataBridge')?.get()?.views?.whiteboards||{}).filter(b=>b.viewKind==='blueprint').map(b=>({id:b.id,name:b.name,kind:b.viewKind})),
+          ref:document.querySelectorAll('.bo-ref-root').length})""")
+        print(f'Blueprint reference route diagnostic {width}: '+json.dumps(state,ensure_ascii=False),flush=True)
+    check(f'{width}: Blueprint abre no mapa visual fiel à referência', page.locator('.bo-ref-root').count() == 1)
+    page.get_by_role('button', name='Editor avançado', exact=True).click()
     if width >= 600:
         add = page.get_by_role('button', name='Adicionar etapa', exact=True).first
         page.mouse.move(0, page.viewport_size['height'] - 1)

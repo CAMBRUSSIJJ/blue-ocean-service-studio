@@ -39,6 +39,7 @@ for (const [source, target] of [
   ['runtime/practical-simulation.css', 'v1102-practical-simulation.css'],
   ['runtime/guidance-engine.js', 'v1188-guidance-engine.js'],
   ['runtime/guidance-engine.css', 'v1188-guidance-engine.css'],
+  ['runtime/blueprint-reference.js', 'v1102-blueprint-reference.js'],
   ['runtime/whiteboard-core.js', 'v1102-whiteboard.js'],
   ['runtime/whiteboard-core.css', 'v1102-whiteboard.css'],
   ['runtime/shell.js', 'v1102-shell.js'],
@@ -86,6 +87,7 @@ for (const [source, target] of [
       './blueprint-methodology.js':'./v1102-blueprint-methodology.js',
       '../services/blueprint-guided-reading.js':'./v1102-blueprint-guided-reading.js',
       './guidance-engine.js':'./v1188-guidance-engine.js',
+      './blueprint-reference.js':'./v1102-blueprint-reference.js',
       './practical-simulation-data.js':'./v1102-practical-simulation-data.js',
     };
     for (const [a,b] of Object.entries(rewrites)) text=text.split(a).join(b);
