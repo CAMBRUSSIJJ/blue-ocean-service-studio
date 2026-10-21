@@ -98,6 +98,8 @@ jobs:
       - run: npm run journey:browser
       - run: npm run blueprint:methodology:browser
       - run: npm run entry:browser
+      - run: npm run product:browser
+      - run: npm run maps:browser
       - name: Verificar Jornada, modelos e Whiteboard no Chromium
         run: python3 scripts/h1710-journey-template-whiteboard-browser.py
       - name: Armazenar evidências dos editores
@@ -112,3 +114,5 @@ jobs:
             artifacts/blueprint-methodology
             artifacts/entry-journey
             artifacts/journey-template-whiteboard
+            artifacts/product-experience
+            artifacts/map-actions

@@ -1902,6 +1902,8 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const commands=btn('⌘ K',openCommandPalette,'rt190-command');commands.title='Buscar comandos';commands.setAttribute('aria-label','Buscar comandos');actions.appendChild(commands);
     }
     const tools=btn(kind==='blueprint'?'Opções':'Mais',showEditorToolsMenu,'rt190-tools-menu');tools.title='Visualizações, ajuda e ferramentas';actions.appendChild(tools);
+    // Shared action variants also apply to the runtime editor header.
+    top.querySelectorAll('button').forEach(button=>{button.classList.add('bo-button',button.classList.contains('primary')?'bo-button--primary':button.classList.contains('icon')?'bo-button--ghost':'bo-button--secondary');if(button.classList.contains('icon'))button.classList.add('bo-button--icon')});
     if(kind!=='blueprint'){const menu=btn('•••',()=>{showBoardMenu=!showBoardMenu;showBlueprintDocument=false;renderAll()},'icon menu rt190-more');menu.title='Ações do documento';menu.setAttribute('aria-label',menu.title);actions.appendChild(menu);}
   }
   function showEditorToolsMenu(){

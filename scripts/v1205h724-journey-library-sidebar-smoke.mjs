@@ -19,13 +19,13 @@ check(app.includes('data-journey-library-sidebar="7.24"'),'shell declara H7.24')
 check(view.includes('data-journey-library-workspace="7.24"'),'Service Workspace declara H7.24');
 
 check(view.includes('data-journey-library="1"'),'Journey possui biblioteca própria');
-check(view.includes('EXPERIÊNCIA DO SERVIÇO') && view.includes('<h2>Journeys</h2>'),'Journey library possui cabeçalho equivalente ao Blueprint');
-check(view.includes('Buscar Journey'),'Journey library possui busca');
+check(view.includes('EXPERIÊNCIA DO SERVIÇO') && view.includes('<h2>Jornadas</h2>'),'Journey library possui cabeçalho equivalente ao Blueprint');
+check(view.includes('Buscar Jornada'),'Journey library possui busca');
 check(view.includes("setJourneyViewMode('cards')") && view.includes("setJourneyViewMode('table')"),'Journey alterna Cards/Tabela');
 check(view.includes('bo-h724-journey-grid'),'Journey possui grid de cards');
 check(view.includes('journeyPreviewSrc(journey, graph)') && read('src/services/journey-preview.ts').includes('if (hasCustomJourneyCover(journey)) return journeyCoverSrc(journey)'),'cards mostram mapa salvo e preservam capas personalizadas');
-check(view.includes('Nenhuma Journey ainda'),'Journey possui estado vazio');
-check(view.includes('Criar Journey'),'Journey pode ser criada no próprio tab');
+check(view.includes('Crie sua primeira Jornada'),'Journey possui estado vazio');
+check(view.includes('Criar Jornada'),'Journey pode ser criada no próprio tab');
 check(view.includes('journeyApi') && view.includes("api<JourneyHomeApi>('journeyHome')"),'criação/abertura usa runtime canônico journeyHome');
 check(view.includes('setJourneyEditorOpen(true)'),'Journey só abre editor após seleção/criação');
 check(view.includes('onBack={() => setJourneyEditorOpen(false)}') && read('src/views/JourneyCanvasFree.tsx').includes('Todas as Jornadas'),'editor possui retorno para biblioteca no cabeçalho do mapa');
@@ -44,7 +44,7 @@ check(css.includes('.bo-h724-sidebar.is-collapsed .rt182-host-footer'),'footer s
 check(css.includes('@media(max-width:767px){.bo-h724-sidebar-toggle{display:none}'),'collapse desktop não conflita com navegação móvel');
 
 check(view.includes("workspaceTab === 'blueprint' && <>{handoff.readyForJourney"),'ações globais de Blueprint ficam restritas ao tab Blueprint');
-check(view.includes('bo-h722-library-toolbar') && view.includes('> Criar Journey</button>') && !view.includes("workspaceTab === 'journey' && !journeyEditorOpen && <button"),'Journey tem uma ação principal na barra de biblioteca, sem duplicar no header');
+check(view.includes('bo-h722-library-toolbar') && view.includes('journeys.length > 0 && <div>') && view.includes('!journeys.length && <button') && view.includes('> Criar Jornada</button>') && !view.includes("workspaceTab === 'journey' && !journeyEditorOpen && <button"),'Jornada tem uma ação principal contextual, sem duplicar no header');
 check(view.includes('continue no Blueprint para desenhar como a operação entrega') && view.includes('data-journey-to-blueprint={journey.id}'),'biblioteca explica e oferece continuidade para o Blueprint');
 check(view.includes('<JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/>'),'editor Journey canônico permanece incorporado');
 check(view.includes('<WhiteboardsView studio={studio}/>'),'Whiteboard permanece incorporado');

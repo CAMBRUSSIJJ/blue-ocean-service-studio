@@ -1,5 +1,32 @@
 # Histórico de mudanças
 
+## Início guiado e navegação da Jornada — 21/10/2026
+
+- Redesenha o estado vazio com uma prévia ampla e duas ações: criar a primeira etapa ou aplicar a estrutura inicial opcional.
+- Recupera o ponto de partida de mapas vazios cuja introdução já havia sido dispensada.
+- Oferece faixas de ações, pensamentos e emoções com ícones, descrições e vínculos reais ao serviço.
+- Melhora a hierarquia das etapas e faixas, o foco do formulário e a criação por Enter.
+- Acrescenta Ajustar à tela ao controle de zoom, preservando o conteúdo e a opção de restaurar 100%.
+- Amplia a regressão de entrada para validar os dois caminhos e o enquadramento em computador, tablet e celular.
+
+## Botões e ações dos mapas — 21/10/2026
+
+- Padroniza cores, altura, bordas, ícones e estados de foco, seleção e indisponibilidade nas bibliotecas e nos cabeçalhos de Jornada e Blueprint.
+- Agrupa Cards/Tabela em um seletor e organiza as ações dos cards em rodapés alinhados, com exclusão identificada por ícone e confirmação.
+- Ajusta busca e controles para celular e tablet, preservando as ações e os vínculos entre Jornada e Blueprint.
+- Acrescenta regressão no Chromium para três larguras, incluindo nomes longos, navegação, criação de etapas e acessibilidade das bibliotecas.
+
+## Navegação confiável e experiência local clara — 21/10/2026
+
+- Impede que Colaboração continue capturando cliques depois de sair da área.
+- Alinha páginas de Colaboração e Configurações ao cabeçalho real, incluindo sidebar recolhida.
+- Torna a entrada sem conta a ação principal e explica que perfis locais compartilham projetos neste navegador.
+- Identifica os logins sociais indisponíveis antes do clique e mantém o acesso a perfis existentes como opção secundária.
+- Acrescenta backup do projeto no editor de Jornada e uma regressão que verifica o arquivo exportado com as edições atuais.
+- Corrige nomes acessíveis, contraste e legibilidade nos fluxos auditados, com validação automática de acessibilidade em desktop e celular.
+- Simplifica a biblioteca de Jornadas vazia e comunica o modo de leitura de Whiteboard/Blueprint no celular.
+- Apresenta colaboração e sincronização conforme as capacidades locais disponíveis; a operação remota depende de um backend ainda não provisionado.
+
 ## Organização do repositório — 21/10/2026
 
 - Reestrutura a apresentação e os guias atuais em português.

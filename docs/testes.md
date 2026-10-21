@@ -58,6 +58,8 @@ npm run entry:browser
 npm run journey:browser
 npm run editor:browser
 npm run blueprint:methodology:browser
+npm run product:browser
+npm run maps:browser
 python3 scripts/h1710-journey-template-whiteboard-browser.py
 ```
 
@@ -68,6 +70,22 @@ Chromium instalado no sistema. Consulte o início do runner para suas opções.
 
 As evidências ficam em `artifacts/`, que não deve ser versionado. A integração
 contínua publica as evidências dos testes como artefatos da execução no GitHub Actions.
+
+`product:browser` verifica a navegação Colaboração → Configurações → Jornada,
+o alinhamento com sidebar expandida/recolhida, a entrada local, os estados
+indisponíveis de nuvem e o conteúdo real do backup baixado durante a edição.
+Também executa axe-core nas páginas inteiras dos cenários auditados em desktop
+e celular. O pacote axe-core é instalado por `npm ci`; essa suíte não depende de AXE_PATH.
+
+`maps:browser` verifica os botões de Jornada e Blueprint em 1440, 834 e 390 px.
+Confere rodapés com nomes longos, busca, Cards/Tabela, confirmação de exclusão,
+criação de etapas, foco de teclado e a continuidade entre os dois editores.
+Executa axe-core na Jornada e nas bibliotecas e salva capturas em `artifacts/map-actions/`.
+
+`entry:browser` também valida o início guiado em três larguras: prévia sem dados
+automáticos, retorno ao mapa vazio, foco e criação por Enter, faixa vinculada
+e Ajustar à tela sem alteração do conteúdo. Para incluir as auditorias desse
+runner, use `AXE_PATH=node_modules/axe-core/axe.min.js npm run entry:browser`.
 
 ## Visual e acessibilidade
 

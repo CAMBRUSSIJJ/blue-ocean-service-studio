@@ -1,10 +1,11 @@
 :root{--bo1173-content-max:1440px;--bo1173-page-pad:32px;--bo1173-section-gap:20px}
 body.bo-v1173{background:var(--bo-color-canvas)}
 /* Unified page geometry */
-body.bo-v1173 :is(.rt192-research-home,.rt195-intelligence-home,.rt196-benefits-home,.rt197-review-home,.bo1173-settings-home){top:48px;left:var(--bo-sidebar-w,216px);right:0;bottom:0;inset:auto 0 0 var(--bo-sidebar-w,216px);z-index:805;background:var(--bo-color-canvas);overflow:auto}
+body.bo-v1173 :is(.rt192-research-home,.rt195-intelligence-home,.rt196-benefits-home,.rt197-review-home,.bo1173-settings-home){position:fixed;inset:var(--bo-workspace-top,48px) var(--bo-workspace-right,0px) 0 var(--bo-workspace-left,var(--bo-sidebar-w,216px));z-index:805;background:var(--bo-color-canvas);overflow:auto}
 body.bo-v1173 :is(.rt192-shell,.rt195-shell,.rt196-shell,.rt197-shell,.bo1173-settings-shell){max-width:var(--bo1173-content-max);margin:0 auto;padding:30px var(--bo1173-page-pad) 72px}
 /* Collaboration becomes a workspace, not a drawer */
-body.bo-v1173 .rt1101-collaboration{inset:48px 0 0 var(--bo-sidebar-w,216px);z-index:806;background:var(--bo-color-canvas);backdrop-filter:none;display:block;overflow:auto}
+body.bo-v1173 .rt1101-collaboration{inset:var(--bo-workspace-top,48px) var(--bo-workspace-right,0px) 0 var(--bo-workspace-left,var(--bo-sidebar-w,216px));z-index:806;background:var(--bo-color-canvas);backdrop-filter:none;display:block;overflow:auto}
+body.bo-v1173 :is(.rt192-research-home,.rt195-intelligence-home,.rt196-benefits-home,.rt197-review-home,.rt1101-collaboration,.bo1173-settings-home)[hidden]{display:none!important;pointer-events:none!important}
 body.bo-v1173 .rt1101-shell{width:auto;max-width:var(--bo1173-content-max);min-height:100%;height:auto;margin:0 auto;border:0;box-shadow:none;background:var(--bo-color-canvas);display:block;overflow:visible;padding:30px var(--bo1173-page-pad) 72px}
 /* Page heads */
 body.bo-v1173 :is(.rt192-header,.rt195-header,.rt196-header,.rt197-header,.rt1101-shell>header,.bo1173-page-head){display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin:0 0 22px;padding:0;background:transparent;border:0}

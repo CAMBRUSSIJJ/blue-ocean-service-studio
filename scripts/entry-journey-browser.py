@@ -15,7 +15,8 @@ def journey(page):
 def audit(page,selector,name):
  if not os.environ.get('AXE_PATH'):return
  # Audit the settled surface; entry/card fades temporarily blend text colors.
- page.evaluate("async selector => {const root=document.querySelector(selector);await Promise.allSettled(root.getAnimations({subtree:true}).filter(a=>Number.isFinite(a.effect.getComputedTiming().endTime)).map(a=>a.finished));}",selector)
+ page.emulate_media(reduced_motion='reduce')
+ page.evaluate("async selector => {const root=document.querySelector(selector);await Promise.race([Promise.allSettled(root.getAnimations({subtree:true}).filter(a=>Number.isFinite(a.effect.getComputedTiming().endTime)).map(a=>a.finished)),new Promise(resolve=>setTimeout(resolve,1000))]);}",selector)
  page.add_script_tag(path=os.environ['AXE_PATH'])
  data=page.evaluate("async selector => (await axe.run({include:[[selector]]},{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}})).violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))",selector)
  (OUT/(name+'-accessibility.json')).write_text(json.dumps(data,ensure_ascii=False,indent=2))
@@ -32,7 +33,7 @@ def entry(page):
  check('Login inputs use one consistent border',page.locator('.bo-auth-input input').first.evaluate("e=>getComputedStyle(e).borderTopWidth==='0px'"))
  audit(page,'.bo-auth-shell','entry-'+str(width))
  page.screenshot(path=str(OUT/f'entry-{width}.png'),full_page=True,animations='disabled')
- page.get_by_role('button',name='Criar workspace',exact=True).click()
+ page.get_by_role('button',name='Criar perfil local',exact=True).click()
  expect(page.get_by_role('heading',name='Comece com o essencial',exact=True)).to_be_visible()
  check('Signup remains reachable and within the viewport',page.locator('.bo-auth-card').bounding_box()['x']>=0 and page.get_by_placeholder('Seu nome',exact=True).is_visible())
  page.get_by_role('button',name='Voltar',exact=True).click()
@@ -44,7 +45,7 @@ def entry(page):
  check('Project opens directly into the Journey library',page.locator('[data-journey-library="1"]').is_visible())
  check('Project does not display a duplicate top navigation bar',page.locator('[data-project-context-nav]').count()==0)
  page.screenshot(path=str(OUT/'project-journey-entry.png'),full_page=True,animations='disabled')
- page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Journey',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
+ page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
  expect(page.get_by_role('region',name='Começar a mapear')).to_be_visible()
  before=journey(page)
  check('The visual example does not create stages or cards automatically',not before['stageIds'] and not before.get('mapLayout',{}).get('lanes'))
@@ -70,7 +71,7 @@ def custom(page):
  # This flow uses the visible blank-map controls and then adopts the starter.
  page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta',exact=True).click()
  page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Mapa próprio');page.get_by_label('Serviço principal',exact=True).fill('Suporte');page.get_by_role('button',name='Criar projeto',exact=True).click();
- page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Journey',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
+ page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
  page.get_by_role('button',name='Nova etapa',exact=True).click();page.get_by_placeholder('Nome da etapa',exact=True).fill('Conversa');page.get_by_role('button',name='Criar etapa',exact=True).click()
  page.locator('.bo-h1705-menubar').get_by_role('button',name='Adicionar faixa',exact=True).click();page.locator('.bo-refined-picker').get_by_role('button',name='Texto',exact=True).click()
  page.get_by_label('Nome da faixa',exact=True).fill('Minhas anotações')
@@ -91,14 +92,66 @@ def small(page):
  if width==390:
   page.get_by_role('button',name='Abrir workspace local sem conta',exact=True).click()
   page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Jornada no celular');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click();
-  page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Journey',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
+  page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
   welcome=page.get_by_role('region',name='Começar a mapear');expect(welcome).to_be_visible()
   check('The Journey introduction fits a phone',welcome.bounding_box()['x']>=0 and welcome.bounding_box()['x']+welcome.bounding_box()['width']<=391)
-  page.get_by_role('button',name='Continuar em branco',exact=True).click()
+  page.get_by_role('button',name='Criar primeira etapa',exact=True).click()
   check('Continuing in blank mode creates no stages or lanes',not journey(page)['stageIds'] and not journey(page).get('mapLayout',{}).get('lanes'))
   expect(page.get_by_placeholder('Nome da etapa',exact=True)).to_be_visible()
   page.reload(wait_until='networkidle')
   check('Choosing blank mode remains saved after reload',journey(page)['mapLayout']['introDismissed'])
+
+def starting_map(page):
+ page.emulate_media(reduced_motion='reduce')
+ page.goto(URL,wait_until='networkidle')
+ page.get_by_role('button',name='Abrir workspace local sem conta',exact=True).click()
+ page.get_by_role('button',name='Novo projeto',exact=True).click()
+ page.get_by_label('Nome do projeto',exact=True).fill('Novo início da Jornada')
+ page.get_by_label('Serviço principal',exact=True).fill('Atendimento ao cliente')
+ page.get_by_role('button',name='Criar projeto',exact=True).click()
+ page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click()
+ page.get_by_role('button',name=re.compile(r'^Em branco')).click()
+ width=page.viewport_size['width']
+ welcome=page.get_by_role('region',name='Começar a mapear')
+ expect(welcome).to_be_visible()
+ check(f'{width}: início oferece duas decisões e prévia sem preencher dados',welcome.get_by_role('button').count()==2 and not journey(page)['stageIds'] and not journey(page).get('mapLayout',{}).get('lanes'))
+ check(f'{width}: início cabe na largura disponível',welcome.bounding_box()['x']>=0 and welcome.bounding_box()['x']+welcome.bounding_box()['width']<=width)
+ check(f'{width}: ajustar à tela aguarda um mapa real',page.get_by_role('button',name='Ajustar à tela',exact=True).is_disabled())
+ audit(page,'.bo-focused-journey',f'novo-inicio-{width}')
+ page.screenshot(path=str(OUT/f'novo-inicio-{width}.png'),animations='disabled')
+ page.get_by_role('button',name='Criar primeira etapa',exact=True).click()
+ field=page.get_by_placeholder('Nome da etapa',exact=True)
+ expect(field).to_be_focused()
+ check(f'{width}: primeira etapa começa com foco e impede título vazio',page.get_by_role('button',name='Criar etapa',exact=True).is_disabled())
+ page.keyboard.press('Escape')
+ expect(welcome).to_be_visible()
+ page.get_by_role('button',name='Todas as Jornadas',exact=True).click()
+ page.get_by_role('button',name='Abrir Jornada',exact=True).click()
+ expect(welcome).to_be_visible()
+ check(f'{width}: mapa vazio dispensado continua oferecendo um ponto de partida',journey(page)['mapLayout']['introDismissed'] and not journey(page)['stageIds'])
+ page.get_by_role('button',name='Criar primeira etapa',exact=True).click()
+ field.fill('Descobrir o serviço');field.press('Enter')
+ expect(page.get_by_role('textbox',name='Nome da etapa 1',exact=True)).to_have_value('Descobrir o serviço')
+ suggestions=page.get_by_role('region',name='Faixas sugeridas')
+ expect(suggestions).to_be_visible()
+ check(f'{width}: faixas sugeridas têm nomes e explicações',all(suggestions.get_by_role('button',name=name,exact=True).is_visible() for name in ['Ações do cliente','Pensamentos','Emoções']))
+ audit(page,'.bo-focused-journey',f'primeira-etapa-{width}')
+ page.screenshot(path=str(OUT/f'primeira-etapa-{width}.png'),animations='disabled')
+ suggestions.get_by_role('button',name='Pensamentos',exact=True).click()
+ lane=journey(page)['mapLayout']['lanes'][0]
+ check(f'{width}: sugestão cria faixa com vínculo correto',lane['binding']=='thoughts' and lane['label']=='Pensamentos')
+ page.get_by_label('Pensamentos em Descobrir o serviço',exact=True).fill('Será que resolve meu problema?')
+ first_stage=journey(page)['stageIds'][0]
+ for label in ['Solicitar atendimento','Receber ajuda','Avaliar solução','Retornar']:
+  page.locator('.bo-h1705-top-actions').get_by_role('button',name='Nova etapa',exact=True).click()
+  field.fill(label);field.press('Enter')
+ before=json.dumps({'journey':journey(page),'stages':graph(page)['stages']},sort_keys=True)
+ page.get_by_role('button',name='Ajustar à tela',exact=True).click()
+ page.wait_for_function("""() => {const v=document.querySelector('.bo-h1705-scroll'),m=v.querySelector('.bo-h1706-map'),r=m.getBoundingClientRect(),b=v.getBoundingClientRect(),s=getComputedStyle(v);return r.left>=b.left && r.top>=b.top && r.right<=b.right-parseFloat(s.paddingRight)+1 && r.bottom<=b.bottom-parseFloat(s.paddingBottom)+1;}""")
+ check(f'{width}: ajustar à tela enquadra as duas dimensões sem alterar conteúdo',before==json.dumps({'journey':journey(page),'stages':graph(page)['stages']},sort_keys=True))
+ page.get_by_role('button',name=re.compile(r'^Zoom .*Restaurar')).click()
+ expect(page.get_by_role('button',name='Zoom 100%. Restaurar para 100%',exact=True)).to_be_visible()
+ check(f'{width}: conteúdo permanece editável depois de restaurar zoom',graph(page)['stages'][first_stage]['thoughts']=='Será que resolve meu problema?')
 
 class Quiet(SimpleHTTPRequestHandler):
  def log_message(self,*args):pass
@@ -108,7 +161,7 @@ if not URL:
 try:
  with sync_playwright() as p:
   browser=p.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
-  for name,flow,w,h in [('desktop',entry,1440,1000),('custom',custom,1440,1000),('tablet',small,820,1180),('mobile',small,390,844)]:
+  for name,flow,w,h in [('desktop',entry,1440,1000),('custom',custom,1440,1000),('tablet',small,820,1180),('mobile',small,390,844),('inicio-desktop',starting_map,1440,1000),('inicio-tablet',starting_map,834,1000),('inicio-celular',starting_map,390,844)]:
    context=browser.new_context(viewport={'width':w,'height':h});page=context.new_page();page.set_default_timeout(12000);errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
    try:flow(page);check(name+' has no JavaScript errors',not errors)
    except Exception:

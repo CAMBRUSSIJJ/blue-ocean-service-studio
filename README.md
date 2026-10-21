@@ -51,6 +51,10 @@ dados ou credenciais externas. Exporte um backup para preservar outra cópia
 e antes de limpar os dados do navegador ou trocar de dispositivo. A entrada
 local não equivale a autenticação de um serviço remoto.
 
+Perfis locais compartilham os projetos deste navegador. Login social e acesso
+entre dispositivos ainda não estão disponíveis. Os pré-requisitos para uma
+oferta de equipe estão descritos em [colaboração remota](docs/colaboracao-remota.md).
+
 Para outros ambientes, consulte o [guia de desenvolvimento](docs/desenvolvimento.md),
 as [instruções para Linux](README-LINUX.md) ou a
 [configuração da nuvem](.cloud-environment/README.md).
@@ -73,6 +77,7 @@ build de produção e integridade da distribuição em `dist/`.
 | `npm run build` | Build de produção e verificação do `dist`. |
 | `npm run preview` | Inspeção local do build já gerado. |
 | `npm run entry:browser` | Fluxo de entrada e criação de Jornada em Chromium. |
+| `npm run product:browser` | Navegação entre áreas, backup e acessibilidade em desktop e celular. |
 
 Os testes de navegador requerem Python, Playwright e Chromium. Consulte os
 [níveis de teste e seus pré-requisitos](docs/testes.md). Conclua build e QA

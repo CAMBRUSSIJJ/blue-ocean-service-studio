@@ -187,8 +187,6 @@ export function AuthExperience() {
     }
   };
 
-  const oauthUnavailable = (provider: string) => setMessage({ kind: 'info', text: `${provider} está preparado visualmente. A autenticação real será habilitada quando o backend cloud for conectado.` });
-
   return (
     <main className="bo-auth-shell">
       <WaveBackdrop />
@@ -213,8 +211,11 @@ export function AuthExperience() {
       <section className="bo-auth-panel">
         <div className="bo-auth-card">
           {screen === 'login' && <>
-            <div className="bo-auth-heading"><span>V{APP_VERSION}</span><h2>Bem-vindo de volta</h2><p>Entre para continuar no seu workspace.</p></div>
-            {!accountsAvailable && <div className="bo-auth-first-use"><strong>Primeiro acesso?</strong><span>Crie seu workspace abaixo. Depois, este mesmo e-mail e senha passam a funcionar no login local.</span></div>}
+            <div className="bo-auth-heading"><span>V{APP_VERSION}</span><h2>Bem-vindo de volta</h2><p>Abra seus projetos neste navegador. Não é necessário criar uma conta.</p></div>
+            {!accountsAvailable && <div className="bo-auth-first-use"><strong>Primeiro acesso?</strong><span>Comece sem conta e crie sua primeira Jornada em branco ou por um modelo.</span></div>}
+            <button className="bo-auth-primary bo-auth-demo bo-auth-local-entry" type="button" onClick={() => beginWorkspace(enterLocalWorkspace())}>Abrir workspace local sem conta <ArrowRight size={16} /></button>
+            <div className="bo-local-scope"><strong>Um workspace compartilhado neste navegador</strong>Perfis locais compartilham os mesmos projetos. Eles não criam espaços privados separados. Exporte um backup para levar seu trabalho a outro dispositivo.</div>
+            <details className="bo-auth-profile"><summary>Entrar com um perfil local existente</summary>
             <form onSubmit={submitLogin} className="bo-auth-form">
               <label>E-mail<div className="bo-auth-input"><Mail size={17} /><input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="voce@empresa.com" required /></div></label>
               <label>Senha<div className="bo-auth-input"><LockKeyhole size={17} /><input type={showPassword ? 'text' : 'password'} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Sua senha" required /><button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></div></label>
@@ -222,14 +223,16 @@ export function AuthExperience() {
               {message && <div className={`bo-auth-message ${message.kind}`}>{message.text}</div>}
               <button className="bo-auth-primary" type="submit" disabled={pending}>{pending ? 'Entrando…' : <>Entrar na BLUE OCEAN <ArrowRight size={17} /></>}</button>
             </form>
-            <div className="bo-auth-divider"><span>ou continue com</span></div>
-            <div className="bo-auth-oauth"><button type="button" onClick={() => oauthUnavailable('Google')}><b>G</b> Google</button><button type="button" onClick={() => oauthUnavailable('Microsoft')}><b className="ms">⊞</b> Microsoft</button></div>
-            <p className="bo-auth-switch">Não possui conta? <button type="button" onClick={() => { setSignup(emptyDraft); setScreen('signup'); setMessage(null); }}>Criar workspace</button></p>
+            </details>
+            <p className="bo-auth-switch">Perfil opcional neste navegador: <button type="button" onClick={() => { setSignup(emptyDraft); setScreen('signup'); setMessage(null); }}>Criar perfil local</button></p>
+            <div className="bo-auth-divider"><span>Acesso em nuvem indisponível nesta versão</span></div>
+            <div className="bo-auth-oauth"><button type="button" disabled title="Login com Google indisponível: serviço de nuvem não conectado"><b aria-hidden="true">G</b> Google</button><button type="button" disabled title="Login com Microsoft indisponível: serviço de nuvem não conectado"><b className="ms" aria-hidden="true">⊞</b> Microsoft</button></div>
+            <p className="bo-auth-oauth-note">Login remoto e acesso em outros dispositivos precisam de um serviço de nuvem conectado.</p>
           </>}
 
           {screen === 'signup' && <>
             <button className="bo-auth-back" type="button" onClick={() => { setScreen('login'); setMessage(null); }}><ArrowLeft size={15} /> Voltar</button>
-            <div className="bo-auth-heading"><span>CRIAR CONTA</span><h2>Comece com o essencial</h2><p>Seu primeiro workspace fica pronto em menos de um minuto.</p></div>
+            <div className="bo-auth-heading"><span>PERFIL LOCAL OPCIONAL</span><h2>Comece com o essencial</h2><p>Este perfil usa o workspace compartilhado deste navegador. Não cria uma conta em nuvem nem separa os projetos.</p></div>
             <form onSubmit={continueSignup} className="bo-auth-form">
               <label>Nome<div className="bo-auth-input"><UserRound size={17} /><input autoComplete="name" value={signup.name} onChange={(event) => setSignup((draft) => ({ ...draft, name: event.target.value }))} placeholder="Seu nome" required /></div></label>
               <label>E-mail<div className="bo-auth-input"><Mail size={17} /><input type="email" autoComplete="email" value={signup.email} onChange={(event) => setSignup((draft) => ({ ...draft, email: event.target.value }))} placeholder="voce@empresa.com" required /></div></label>
@@ -241,7 +244,7 @@ export function AuthExperience() {
 
           {screen === 'workspace' && <>
             <button className="bo-auth-back" type="button" onClick={() => { setScreen('signup'); setMessage(null); }}><ArrowLeft size={15} /> Voltar</button>
-            <div className="bo-auth-heading"><span>SEU WORKSPACE</span><h2>Como você vai usar a BLUE OCEAN?</h2><p>Isso prepara a entrada sem limitar o que você poderá fazer depois.</p></div>
+            <div className="bo-auth-heading"><span>PREFERÊNCIAS DO PERFIL</span><h2>Como você vai usar a BLUE OCEAN?</h2><p>Estas preferências são locais. Todos os perfis deste navegador continuam usando os mesmos projetos.</p></div>
             <form onSubmit={submitSignup} className="bo-auth-form">
               <div className="bo-auth-usage">
                 {([['personal', UserRound, 'Meu próprio trabalho'], ['company', Building2, 'Minha empresa'], ['agency', UsersRound, 'Consultoria / agência'], ['education', GraduationCap, 'Ensino / pesquisa']] as const).map(([value, Icon, label]) => <button key={value} type="button" className={signup.usage === value ? 'active' : ''} onClick={() => setSignup((draft) => ({ ...draft, usage: value }))}><Icon size={18} /><span>{label}</span>{signup.usage === value && <Check size={15} />}</button>)}
@@ -254,7 +257,7 @@ export function AuthExperience() {
 
           {screen === 'recover' && <>
             <button className="bo-auth-back" type="button" onClick={() => { setScreen('login'); setMessage(null); }}><ArrowLeft size={15} /> Voltar</button>
-            <div className="bo-auth-heading"><span>RECUPERAÇÃO LOCAL</span><h2>Redefinir senha</h2><p>Como esta versão é local-first, a recuperação acontece somente neste dispositivo.</p></div>
+            <div className="bo-auth-heading"><span>RECUPERAÇÃO LOCAL</span><h2>Redefinir senha</h2><p>Altere a senha do perfil neste navegador. Esta operação não confirma identidade por e-mail e não protege espaços privados.</p></div>
             <form onSubmit={submitRecovery} className="bo-auth-form">
               <label>E-mail<div className="bo-auth-input"><Mail size={17} /><input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required /></div></label>
               <label>Nova senha<div className="bo-auth-input"><LockKeyhole size={17} /><input type="password" value={recoverPassword} onChange={(event) => setRecoverPassword(event.target.value)} placeholder="Mínimo de 8 caracteres" required /></div></label>
@@ -263,8 +266,8 @@ export function AuthExperience() {
             </form>
           </>}
 
-          <div className="bo-auth-local"><ShieldCheck size={16} /><span><strong>Modo local seguro</strong> Esta versão ainda não envia credenciais para servidores externos.</span></div>
-          <button className="bo-auth-demo" type="button" onClick={() => beginWorkspace(enterLocalWorkspace())}>Abrir workspace local sem conta <ArrowRight size={14} /></button>
+          <div className="bo-auth-local"><ShieldCheck size={16} /><span><strong>Armazenamento neste navegador</strong> Seus projetos não são sincronizados com outros dispositivos.</span></div>
+          {screen !== 'login' && <button className="bo-auth-demo" type="button" onClick={() => beginWorkspace(enterLocalWorkspace())}>Abrir workspace local sem conta <ArrowRight size={14} /></button>}
         </div>
         <div className="bo-auth-panel__footer">BLUE OCEAN Service Studio · V{APP_VERSION}</div>
       </section>
