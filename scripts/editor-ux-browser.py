@@ -151,6 +151,8 @@ def whiteboard_flow(page):
     check('Undo restores original free notes', all(x['kind'] == 'free' for x in graph(page)['views']['whiteboards'][source_id]['items'].values()))
     page.get_by_role('button', name='Refazer', exact=True).click()
     check('Redo restores the same Blueprint', target_id in graph(page)['views']['whiteboards'])
+    if page.get_by_role('button',name='Modo profissional ↗').count():
+        page.get_by_role('button',name='Modo profissional ↗').click()
     page.get_by_role('button', name='Opções', exact=True).click()
     page.get_by_role('button', name=re.compile('Quadro de origem')).click()
     expect(page.locator('.bo1174-board')).to_be_visible()
