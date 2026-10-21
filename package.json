@@ -199,7 +199,8 @@
     "blueprint:methodology:browser": "python3 scripts/blueprint-methodology-browser.py",
     "journey:starter:test": "node --experimental-strip-types scripts/journey-starter-test.mjs",
     "entry:browser": "python3 scripts/entry-journey-browser.py",
-    "product:browser": "python3 scripts/product-experience-browser.py"
+    "product:browser": "python3 scripts/product-experience-browser.py",
+    "maps:browser": "python3 scripts/map-actions-browser.py"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

@@ -12,8 +12,8 @@ body.bo-v1130 ::selection{background:var(--bo-color-primary-200);color:var(--bo-
 .bo-toolbar{display:flex;align-items:center;gap:var(--bo-space-2);min-height:44px}
 
 .bo-button{min-height:var(--bo-control-h-md);display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 12px;border:1px solid transparent;border-radius:var(--bo-radius-md);font-size:var(--bo-font-size-sm);font-weight:var(--bo-weight-semibold);line-height:1;cursor:pointer;transition:background var(--bo-transition-fast),border-color var(--bo-transition-fast),color var(--bo-transition-fast),box-shadow var(--bo-transition-fast),transform var(--bo-transition-fast);white-space:nowrap}
-.bo-button:hover:not(:disabled){transform:translateY(-1px)}
-.bo-button:active:not(:disabled){transform:translateY(0)}
+.bo-button:hover:not(:disabled){transform:none}
+.bo-button:active:not(:disabled){transform:none}
 .bo-button:disabled{opacity:.45;cursor:not-allowed;transform:none}
 .bo-button--primary{background:var(--bo-color-primary-600);border-color:var(--bo-color-primary-600);color:#fff;box-shadow:var(--bo-shadow-xs)}
 .bo-button--primary:hover:not(:disabled){background:var(--bo-color-primary-700);border-color:var(--bo-color-primary-700)}
@@ -25,6 +25,8 @@ body.bo-v1130 ::selection{background:var(--bo-color-primary-200);color:var(--bo-
 .bo-button--danger:hover:not(:disabled){background:#fff5f4;border-color:#efaaa4}
 .bo-button--sm{min-height:var(--bo-control-h-sm);padding:0 9px;font-size:var(--bo-font-size-xs)}
 .bo-button--lg{min-height:var(--bo-control-h-lg);padding:0 16px;font-size:var(--bo-font-size-md)}
+.bo-button>svg{width:16px;height:16px;flex:none;stroke-width:1.8}
+.bo-button--icon{width:var(--bo-control-h-md);min-width:var(--bo-control-h-md);padding:0}
 .bo-icon-button{width:var(--bo-control-h-md);height:var(--bo-control-h-md);padding:0;display:inline-grid;place-items:center;border:1px solid transparent;border-radius:var(--bo-radius-md);background:transparent;color:var(--bo-color-text-muted);cursor:pointer;transition:all var(--bo-transition-fast)}
 .bo-icon-button:hover{background:var(--bo-color-surface-muted);color:var(--bo-color-primary-900)}
 

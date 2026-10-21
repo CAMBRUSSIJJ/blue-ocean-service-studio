@@ -1,5 +1,12 @@
 # Histórico de mudanças
 
+## Botões e ações dos mapas — 21/10/2026
+
+- Padroniza cores, altura, bordas, ícones e estados de foco, seleção e indisponibilidade nas bibliotecas e nos cabeçalhos de Jornada e Blueprint.
+- Agrupa Cards/Tabela em um seletor e organiza as ações dos cards em rodapés alinhados, com exclusão identificada por ícone e confirmação.
+- Ajusta busca e controles para celular e tablet, preservando as ações e os vínculos entre Jornada e Blueprint.
+- Acrescenta regressão no Chromium para três larguras, incluindo nomes longos, navegação, criação de etapas e acessibilidade das bibliotecas.
+
 ## Navegação confiável e experiência local clara — 21/10/2026
 
 - Impede que Colaboração continue capturando cliques depois de sair da área.
