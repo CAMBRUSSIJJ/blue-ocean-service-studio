@@ -27,6 +27,7 @@ try:
         page.get_by_role('button',name='Criar projeto',exact=True).click()
         page.locator('[data-service-blueprint-nav="1"]').click()
         page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
+        page.get_by_role('button',name='Modo profissional ↗').click()
         page.get_by_role('button',name='Adicionar etapa',exact=True).click()
         modal=page.get_by_role('dialog',name='Nova etapa',exact=True)
         modal.get_by_placeholder('Ex.: Pagamento',exact=True).fill('Contato')
