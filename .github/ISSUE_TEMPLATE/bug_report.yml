@@ -1,0 +1,38 @@
+name: Relatar um problema
+description: Informe um defeito reproduzível na aplicação ou na documentação.
+title: "[Problema]: "
+body:
+  - type: markdown
+    attributes:
+      value: Use dados fictícios. Para vulnerabilidades, consulte SECURITY.md antes de publicar detalhes.
+  - type: textarea
+    id: problema
+    attributes:
+      label: O que aconteceu?
+      description: Descreva o resultado observado e o comportamento esperado.
+    validations:
+      required: true
+  - type: textarea
+    id: reproducao
+    attributes:
+      label: Como reproduzir
+      description: Liste os passos a partir da abertura da aplicação.
+    validations:
+      required: true
+  - type: input
+    id: versao
+    attributes:
+      label: Versão ou commit
+      description: Informe a versão visível na aplicação ou o hash do commit testado.
+  - type: input
+    id: ambiente
+    attributes:
+      label: Ambiente
+      placeholder: "Ex.: Chromium, Linux, desktop; execução local ou Vercel."
+    validations:
+      required: true
+  - type: textarea
+    id: evidencias
+    attributes:
+      label: Evidências e contexto
+      description: Inclua capturas ou mensagens de erro sem credenciais, dados pessoais ou backups privados.

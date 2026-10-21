@@ -5,7 +5,7 @@ const launcher=read('start-linux.sh');
 const pkg=JSON.parse(read('package.json'));
 const preflight=read('preflight-linux.sh');
 const changelog=read('CHANGELOG.md');
-const notes=read('RELEASE_NOTES_V1.20.5-H17.0.3.1.md');
+const notes=read('docs/archive/releases/RELEASE_NOTES_V1.20.5-H17.0.3.1.md');
 const checks=[
  ['sem comparação impossível de research',!view.includes("understandNextTarget === 'research'")],
  ['target deriva de público-alvo',view.includes("const understandNextTarget: GuidedWorkspaceTarget = foundationContextCounts.personas === 0")],

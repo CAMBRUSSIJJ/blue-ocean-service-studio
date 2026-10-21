@@ -21,6 +21,6 @@ check('QA encadeia smoke',pkg.scripts.qa.includes('v1205h1701:icon-typecheck-smo
 check('preflight verifica smoke',preflight.includes('node scripts/v1205h1701-icon-typecheck-smoke.mjs'));
 check('launcher identifica H17.0.1',launcher.includes('RELEASE="H17.0.3.1"') || (launcher.includes('RELEASE="H17.0.5"') || launcher.includes('RELEASE="H17.0.4"')) || launcher.includes('RELEASE="H17.0.3"') || launcher.includes('RELEASE="H17.0.2"') || launcher.includes('RELEASE="H17.0.1"'));
 check('changelog registra hotfix',changelog.includes('# V1.20.5-H17.0.1'));
-check('notes presentes',fs.existsSync('RELEASE_NOTES_V1.20.5-H17.0.1.md'));
+check('notes presentes',fs.existsSync('docs/archive/releases/RELEASE_NOTES_V1.20.5-H17.0.1.md'));
 console.log(`\nV1.20.5-H17.0.1 Sidebar Icon Typecheck Hotfix: ${passed}/${passed+failed} PASS`);
 process.exit(failed ? 1 : 0);

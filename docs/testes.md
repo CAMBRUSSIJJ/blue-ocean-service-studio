@@ -1,0 +1,88 @@
+# Testes e critérios de validação
+
+Execute os comandos na raiz do repositório com Node.js 22 e as dependências
+instaladas por `npm ci`. As suítes têm escopos diferentes: um contrato estático
+não comprova que uma interação funciona no navegador.
+
+## Verificações principais
+
+| Comando | O que verifica |
+| --- | --- |
+| `npm run docs:check` | Destinos dos links locais da documentação atual. |
+| `npm run doctor` | Versões de ferramentas, lockfile e presença das dependências. |
+| `npm run lock:verify` | Coerência de versão e dependências entre manifest e lockfile. |
+| `npm run typecheck` | Tipos TypeScript. |
+| `npm run qa` | Regressões estáticas, contratuais e de domínio. |
+| `npm run release:verify` | Doctor, verificações de source, QA, build e integridade do `dist`. |
+
+`source:verify` requer dependências instaladas, pois inclui TypeScript e suítes
+que importam módulos da aplicação. Um diagnóstico de DNS isolado no doctor
+não comprova falha de instalação quando o registro está acessível pelo proxy.
+
+## Comportamento de Jornada e Blueprint
+
+```bash
+npm run editor:selection:test
+npm run journey:a2:test
+npm run journey:h1709:move:test
+npm run journey:h1709:test
+npm run journey:h1709:p3:test
+npm run journey:layout:test
+npm run blueprint:methodology:test
+npm run journey:starter:test
+```
+
+Esses testes exercitam operações como seleção, criação e movimentação de cartões,
+imutabilidade, referências, layout, revisão operacional e serialização.
+
+## Testes no navegador
+
+Para instalar as ferramentas de teste em um ambiente Python isolado:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install playwright pillow
+python -m playwright install --with-deps chromium
+```
+
+A instalação das bibliotecas de sistema do Chromium pode exigir permissões
+administrativas no seu sistema. No ambiente de nuvem preparado, Python,
+Playwright, Pillow e Chromium já estão disponíveis.
+
+Depois de gerar o build:
+
+```bash
+npm run build
+npm run entry:browser
+npm run journey:browser
+npm run editor:browser
+npm run blueprint:methodology:browser
+python3 scripts/h1710-journey-template-whiteboard-browser.py
+```
+
+Esses runners podem servir o `dist/` em um servidor temporário. Para os que
+suportam `BLUE_OCEAN_URL`, defina essa variável quando quiser validar uma
+instância já iniciada. `CHROMIUM_PATH` permite selecionar o executável do
+Chromium instalado no sistema. Consulte o início do runner para suas opções.
+
+As evidências ficam em `artifacts/`, que não deve ser versionado. A integração
+contínua publica as evidências dos testes como artefatos da execução no GitHub Actions.
+
+## Visual e acessibilidade
+
+`npm run e2e:visual` produz capturas e executa os checks definidos pelo runner.
+Uma comparação visual só ocorre quando existe uma imagem de referência aplicável;
+produzir capturas não significa ter passado em uma comparação com baseline.
+Atualize referências com `e2e:visual:baseline` apenas após revisão das imagens.
+
+Alguns runners aceitam `AXE_PATH` apontando para uma cópia confiável de
+`axe.min.js`. Sem essa variável, não afirme que a auditoria automática de
+acessibilidade foi executada. A auditoria automática não substitui a verificação manual.
+
+## Como relatar resultados
+
+Informe o commit, o comando, o resultado e os cenários executados. Separe falhas,
+checks não executados e pré-requisitos ausentes. Relatórios históricos em
+`docs/archive/validacoes/` descrevem suas próprias versões; não validam uma
+alteração atual. Não sobrescreva esses registros com resultados de uma execução nova.

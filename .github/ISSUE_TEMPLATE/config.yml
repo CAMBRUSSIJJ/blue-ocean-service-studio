@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Consultar a documentação
+    url: https://github.com/CAMBRUSSIJJ/blue-ocean-service-studio/tree/main/docs
+    about: Guias de instalação, arquitetura, uso dos editores e testes.
+  - name: Comunicar um problema de segurança
+    url: https://github.com/CAMBRUSSIJJ/blue-ocean-service-studio/blob/main/SECURITY.md
+    about: Leia as orientações antes de publicar informações sensíveis.

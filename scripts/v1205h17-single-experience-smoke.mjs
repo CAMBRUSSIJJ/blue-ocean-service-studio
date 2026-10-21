@@ -38,6 +38,6 @@ check('QA inclui H17', String(pkg.scripts?.qa||'').includes('v1205h17:single-exp
 check('launcher é H17', launcher.includes('RELEASE="H17.0.3.1"') || (launcher.includes('RELEASE="H17.0.5"') || launcher.includes('RELEASE="H17.0.4"')) || launcher.includes('RELEASE="H17.0.3"') || launcher.includes('RELEASE="H17.0.2"') || launcher.includes('RELEASE="H17.0.1"') || launcher.includes('RELEASE="H17"'));
 check('preflight inclui H17', preflight.includes('v1205h17-single-experience-smoke.mjs'));
 check('changelog inicia H17', changelog.includes('# V1.20.5-H17 — Single Experience Baseline'));
-check('release notes H17 existem', exists('RELEASE_NOTES_V1.20.5-H17.md'));
+check('release notes H17 existem', exists('docs/archive/releases/RELEASE_NOTES_V1.20.5-H17.md'));
 console.log(`\nV1.20.5-H17 Single Experience Baseline: ${ok}/${ok+fail} PASS`);
 process.exit(fail?1:0);

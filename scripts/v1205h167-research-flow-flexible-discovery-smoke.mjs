@@ -73,6 +73,6 @@ check('launcher preserva série H16',launcher.includes('RELEASE="H16.')||launche
 check('preflight exige CSS H16.7',preflight.includes('research-flow-interaction-h167.css'));
 check('preflight executa H16.7',preflight.includes('v1205h167-research-flow-flexible-discovery-smoke.mjs'));
 check('changelog registra H16.7',changelog.includes('# V1.20.5-H16.7'));
-check('release notes H16.7 existem',fs.existsSync(path.join(root,'RELEASE_NOTES_V1.20.5-H16.7.md')));
+check('release notes H16.7 existem',fs.existsSync(path.join(root,'docs/archive/releases/RELEASE_NOTES_V1.20.5-H16.7.md')));
 console.log(`\nH16.7 Research Flow & Flexible Discovery: ${pass}/${total} PASS`);
 if(failed) process.exit(1);

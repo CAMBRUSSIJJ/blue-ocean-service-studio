@@ -46,7 +46,7 @@ const checks = [
  ['metadata do release', pkg.description.includes('H17.0.5 Journey Free Canvas')],
  ['QA chama a nova regressão', pkg.scripts.qa.includes('v1205h1705:free-canvas-smoke')],
  ['preflight chama regressão', preflight.includes('node scripts/v1205h1705-free-canvas-smoke.mjs')],
- ['changelog e notas de entrega', changelog.includes('H17.0.5') && fs.existsSync('RELEASE_NOTES_V1.20.5-H17.0.5.md')],
+ ['changelog e notas de entrega', changelog.includes('H17.0.5') && fs.existsSync('docs/archive/releases/RELEASE_NOTES_V1.20.5-H17.0.5.md')],
 ];
 let passed=0;
 for (const [label,ok] of checks) { if(ok) passed++; else console.error('FAIL',label); }

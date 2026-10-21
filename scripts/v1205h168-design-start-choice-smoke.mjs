@@ -58,6 +58,6 @@ check('launcher aponta H16.8',launcher.includes('RELEASE="H16.8"')||launcher.inc
 check('preflight exige CSS H16.8',preflight.includes('design-start-choice-h168.css'));
 check('preflight executa smoke H16.8',preflight.includes('v1205h168-design-start-choice-smoke.mjs'));
 check('changelog registra H16.8',changelog.includes('# V1.20.5-H16.8'));
-check('release notes H16.8 existem',fs.existsSync(path.join(root,'RELEASE_NOTES_V1.20.5-H16.8.md')));
+check('release notes H16.8 existem',fs.existsSync(path.join(root,'docs/archive/releases/RELEASE_NOTES_V1.20.5-H16.8.md')));
 console.log(`\nH16.8 Design Start Choice & In-Flow Discovery: ${pass}/${total} PASS`);
 if(failed) process.exit(1);

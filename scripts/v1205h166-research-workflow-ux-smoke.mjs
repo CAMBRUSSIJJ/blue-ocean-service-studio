@@ -56,7 +56,7 @@ check('launcher aponta H16.6 ou posterior',/RELEASE="H16\.(?:6(?:\.[0-9]+)?|[7-9
 check('preflight exige CSS H16.6',preflight.includes('research-workflow-ux-h166.css'));
 check('preflight executa smoke H16.6',preflight.includes('v1205h166-research-workflow-ux-smoke.mjs'));
 check('changelog registra H16.6',changelog.includes('# V1.20.5-H16.6 — Research Workflow UX'));
-check('release notes H16.6 existem',fs.existsSync('RELEASE_NOTES_V1.20.5-H16.6.md'));
+check('release notes H16.6 existem',fs.existsSync('docs/archive/releases/RELEASE_NOTES_V1.20.5-H16.6.md'));
 
 console.log(`\nH16.6 Research Workflow UX: ${ok}/${ok+fail} PASS`);
 process.exit(fail?1:0);

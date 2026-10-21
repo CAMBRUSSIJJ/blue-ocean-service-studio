@@ -77,7 +77,7 @@ const css=read('src/runtime/service-project-home.css');
 for(const marker of ['V1.20.4 — Service Readiness','.bo1204-readiness{','.bo1204-readiness-sections','.bo1204-readiness-next','.bo1204-readiness-mini']) ok(css.includes(marker),`readiness css marker ${marker}`);
 const model=read('src/domain/model.ts');
 ok(!/readiness\??\s*:/.test(model.split('export type ServiceProjectState')[1]?.split('};')[0]||''),'readiness score is derived, not persisted in ServiceProjectState');
-const roadmap=read('ROADMAP_SERVICE_PROJECT_V1.19.5_A_V1.21.2.md');
+const roadmap=read('docs/archive/roadmaps/ROADMAP_SERVICE_PROJECT_V1.19.5_A_V1.21.2.md');
 ok(roadmap.includes('| V1.20.4 | Service Readiness |'),'roadmap keeps V1.20.4 as Service Readiness');
 const pkg=JSON.parse(read('package.json'));
 ok(pkg.version==='1.20.4'||/^1\.20\.[5-9]$/.test(pkg.version)||/^1\.(2[1-9]|[3-9][0-9])\./.test(pkg.version),'package version is 1.20.4 or superior');

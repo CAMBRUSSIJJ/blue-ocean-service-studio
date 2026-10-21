@@ -29,6 +29,6 @@ check('Metadata H17.0.2',pkg.description.includes('V1.20.5-H17.0.2'));
 check('QA encadeia o novo teste',pkg.scripts.qa.includes('v1205h1702:overview-focus-smoke'));
 check('Preflight encadeia o novo teste',pre.includes('node scripts/v1205h1702-overview-focus-smoke.mjs'));
 check('Changelog começa em H17.0.2',ch.includes('V1.20.5-H17.0.2'));
-check('Release notes existem',fs.existsSync('RELEASE_NOTES_V1.20.5-H17.0.2.md'));
+check('Release notes existem',fs.existsSync('docs/archive/releases/RELEASE_NOTES_V1.20.5-H17.0.2.md'));
 console.log(`\nH17.0.2 Design Overview Focus: ${ok}/${ok+fail} PASS`);
 process.exit(fail?1:0);

@@ -1,4 +1,4 @@
-# Source Authority — BLUE OCEAN Service Studio
+# Código-fonte e artefatos — Blue Ocean Service Studio
 
 A partir da **V1.16.0**, a autoridade do produto é a pasta `src/` junto de `index.html`, `package.json`, `package-lock.json` e `vite.config.ts`.
 
@@ -19,12 +19,18 @@ npm run release:verify
 
 O build grava `dist/build-manifest.json` com versão, build ID, hash do source e hash do lockfile.
 
-## Gate offline
+## Verificações e pré-requisitos
 
-Sem acesso ao registro npm, ainda é possível validar a estrutura e os contratos que não exigem dependências instaladas:
+Para verificar o código-fonte com as dependências instaladas:
 
 ```bash
 npm run source:verify
 ```
 
-O `typecheck` completo e o `vite build` exigem as dependências do `package-lock.json`.
+`source:verify` inclui TypeScript e suítes que importam dependências da aplicação.
+Ele não é um gate independente de instalação. O `typecheck` completo e o
+`vite build` também exigem as dependências do `package-lock.json`.
+
+As verificações atuais estão no [guia de testes](docs/testes.md).
+Notas de versão, hashes e baselines antigos foram preservados no
+[arquivo histórico](docs/archive/README.md); eles não substituem a validação do commit atual.

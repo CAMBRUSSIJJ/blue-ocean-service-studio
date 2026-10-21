@@ -22,7 +22,7 @@ check('QA preserva H16.6.1',String(pkg.scripts?.qa||'').includes('npm run v1205h
 check('launcher aponta H16.6.1 ou posterior',/RELEASE="H16\.(?:6\.1|7|8|9)/.test(launcher)||launcher.includes('RELEASE="H17'));
 check('preflight executa smoke H16.6.1',preflight.includes('v1205h1661-css-build-hotfix-smoke.mjs'));
 check('changelog registra H16.6.1',changelog.includes('# V1.20.5-H16.6.1 — CSS Build Hotfix'));
-check('release notes H16.6.1 existem',fs.existsSync('RELEASE_NOTES_V1.20.5-H16.6.1.md'));
+check('release notes H16.6.1 existem',fs.existsSync('docs/archive/releases/RELEASE_NOTES_V1.20.5-H16.6.1.md'));
 
 console.log(`\nH16.6.1 CSS Build Hotfix: ${ok}/${ok+fail} PASS`);
 process.exit(fail?1:0);

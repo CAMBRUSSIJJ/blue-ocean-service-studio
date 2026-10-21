@@ -1,3 +1,17 @@
+# Histórico de mudanças
+
+## Organização do repositório — 21/10/2026
+
+- Reestrutura a apresentação e os guias atuais em português.
+- Arquiva 670 notas, relatórios e documentos históricos por assunto, preservando seu conteúdo.
+- Atualiza os caminhos consultados pelos contratos de regressão, mantendo as verificações.
+- Acrescenta orientações de contribuição, segurança e convivência, além de modelos de issues e pull requests.
+- Adiciona verificação de links da documentação e padroniza versão do Node, finais de linha e configurações do editor.
+- Reutiliza o build validado entre os jobs de CI e limita permissões, duração e execuções concorrentes.
+
+Consulte o [índice da documentação](docs/README.md) para os guias atuais e o
+[arquivo histórico](docs/archive/README.md) para registros por versão.
+
 ## Entrada contínua e início guiado da Jornada
 
 - Remove a seção duplicada de ferramentas da visão geral do projeto.

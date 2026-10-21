@@ -11,6 +11,8 @@ public/v*.css
 npm-debug.log*
 *.tsbuildinfo
 __pycache__/
+.venv/
+.pytest_cache/
 
 # GitHub deployment safeguards
 .env
