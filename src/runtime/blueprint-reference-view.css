@@ -5,3 +5,7 @@
 @media(prefers-color-scheme:dark){.bo-ref{--bo-ref-bg:#0b1220;--bo-ref-surface:#121b2e;--bo-ref-ink:#e8edf7;--bo-ref-muted:#a3b0c8;--bo-ref-line:#24324d;--bo-ref-accent:#5b8cff;--bo-ref-soft:#1a2a52}.bo-ref-note,.bo-ref-card,.bo-ref-bar{background:#192640}.bo-ref-issue{background:#3a2118;color:#ffc5a8}.bo-ref-crumb,.bo-ref-insight{color:#a9c3ff}}
 
 .bo-ref-back{border:0;background:transparent;color:inherit;font-size:11px;font-weight:750;letter-spacing:inherit;padding:2px 4px;min-height:32px;border-radius:6px}.bo-ref-back:hover{background:var(--bo-ref-soft)}
+
+/* Canonical primary CTA remains consistent with Journey while the matrix matches the supplied reference. */
+.bo-ref-actions button[data-action="stage"]{height:var(--bo-control-h-md,36px);min-height:var(--bo-control-h-md,36px);border-radius:var(--bo-radius-md,8px);background:var(--bo-color-primary-600,#1e63f0);border-color:var(--bo-color-primary-600,#1e63f0);color:#fff;font-size:var(--bo-font-size-sm,12px);font-weight:var(--bo-weight-semibold,600)}
+.bo-ref-actions button[data-action="options"]:focus{outline:2px solid var(--bo-color-primary-600,#1e63f0);outline-offset:3px}
