@@ -11,7 +11,7 @@ type Props = {
   studio: StudioController;
   section: ProjectHomeSection;
   setSection: (section: ProjectHomeSection) => void;
-  openProjectHome: () => void;
+  openProjectWorkspace: () => void;
 };
 
 const PHASE_LABELS: Record<string, string> = {
@@ -60,7 +60,7 @@ function ProjectCard({ project, active, onOpen, onFavorite, onRename, onArchive 
   </article>;
 }
 
-export function ProjectHomeView({ studio, section, setSection, openProjectHome }: Props) {
+export function ProjectHomeView({ studio, section, setSection, openProjectWorkspace }: Props) {
   const { projects, archivedProjects, activeProjectId, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, createWorkspaceProject } = studio;
   const [query, setQuery] = useState('');
   const [dialog, setDialog] = useState<ProjectTemplate | null>(null);
@@ -79,8 +79,8 @@ export function ProjectHomeView({ studio, section, setSection, openProjectHome }
   }, [projects, query]);
 
   const openProject = (project: ProjectLibraryEntry) => {
-    if (project.id === activeProjectId) openProjectHome();
-    else if (openWorkspaceProject(project.id)) window.setTimeout(openProjectHome, 0);
+    if (project.id === activeProjectId) openProjectWorkspace();
+    else if (openWorkspaceProject(project.id)) window.setTimeout(openProjectWorkspace, 0);
   };
 
   const startTemplate = (template: ProjectTemplate) => {
@@ -93,7 +93,7 @@ export function ProjectHomeView({ studio, section, setSection, openProjectHome }
     const ok = createWorkspaceProject({ projectName, serviceName: serviceName.trim() || projectName, description, template: dialog });
     if (!ok) return;
     setDialog(null);
-    window.setTimeout(openProjectHome, 0);
+    window.setTimeout(openProjectWorkspace, 0);
   };
 
   const beginRename = (project: ProjectLibraryEntry) => {
@@ -124,14 +124,14 @@ export function ProjectHomeView({ studio, section, setSection, openProjectHome }
   // H7.40-H8 legacy contract: Um projeto organiza o trabalho; o serviço é o que você desenha dentro dele.
   return <section className="bo-h740h8-home bo-h740h9-home" data-project-home="7.40-H8" data-project-architecture-hardening="7.40-H9" data-service-first-navigation="7.40-H11" data-home-section={section}>
     <header className="bo-h740h8-hero">
-      <div><small>BLUE OCEAN</small><h1>{section === 'home' ? 'Seu trabalho começa aqui' : section === 'projects' ? 'Projetos do serviço' : 'Comece com uma estrutura pronta'}</h1><p>{section === 'home' ? 'Abra um projeto, continue de onde parou ou crie um novo espaço para desenhar um serviço.' : section === 'projects' ? 'Escolha um projeto para abrir a área de trabalho do serviço. Cada projeto preserva seu próprio snapshot.' : 'Templates globais criam um novo projeto; dentro do projeto, o Guided Service Workspace organiza o serviço.'}</p></div>
+      <div><small>BLUE OCEAN</small><h1>{section === 'home' ? 'Seu trabalho começa aqui' : section === 'projects' ? 'Projetos do serviço' : 'Comece com uma estrutura pronta'}</h1><p>{section === 'home' ? 'Abra um projeto ou crie um novo. Você entra diretamente nas Jornadas, sem telas intermediárias.' : section === 'projects' ? 'Escolha um projeto para abrir as Jornadas e continuar a desenhar o serviço. Cada projeto preserva seus dados.' : 'Templates globais criam um novo projeto; dentro do projeto, o Guided Service Workspace organiza o serviço.'}</p></div>
       <button type="button" className="primary" onClick={() => startTemplate('blank')}><Plus size={16}/> Novo projeto</button>
     </header>
 
     {section === 'home' && <>
       {current && <section className="bo-h740h8-continue"><div><small>CONTINUE DE ONDE PAROU</small><h2>{current.title}</h2><p><strong>Serviço:</strong> {current.serviceName}</p><div><span>{PHASE_LABELS[current.phase] || 'Em construção'}</span><span>{current.journeyCount} Journeys</span><span>{current.blueprintCount} Blueprints</span><span>{current.whiteboardCount} Whiteboards</span></div></div><button type="button" className="primary" onClick={() => openProject(current)}>Continuar projeto <ArrowRight size={14}/></button></section>}
 
-      <section className="bo-h740h8-section bo-h740h11-service-hub" data-service-project-hub="1"><header><div><small>SERVIÇO</small><h2>Projetos do serviço</h2><p>Entre em Serviço para escolher, criar ou retomar um projeto. Depois abra o projeto para trabalhar no serviço.</p></div><button type="button" onClick={() => setSection('projects')}>Ver projetos <ArrowRight size={13}/></button></header>
+      <section className="bo-h740h8-section bo-h740h11-service-hub" data-service-project-hub="1"><header><div><small>SERVIÇO</small><h2>Projetos do serviço</h2><p>Entre em Serviço para escolher, criar ou retomar um projeto e começar diretamente pelas Jornadas.</p></div><button type="button" onClick={() => setSection('projects')}>Ver projetos <ArrowRight size={13}/></button></header>
         <div className="bo-h740h11-service-summary"><span><FolderKanban size={20}/></span><div><strong>{projects.length} projeto{projects.length === 1 ? '' : 's'} ativo{projects.length === 1 ? '' : 's'}</strong><small>{current ? `Último: ${current.title} · serviço ${current.serviceName}` : 'Nenhum projeto criado ainda'}</small></div><button type="button" className="primary" onClick={() => setSection('projects')}>Abrir Serviço <ArrowRight size={13}/></button></div>
       </section>
 
