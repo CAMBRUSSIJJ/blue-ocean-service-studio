@@ -151,6 +151,9 @@ def whiteboard_flow(page):
     check('Undo restores original free notes', all(x['kind'] == 'free' for x in graph(page)['views']['whiteboards'][source_id]['items'].values()))
     page.get_by_role('button', name='Refazer', exact=True).click()
     check('Redo restores the same Blueprint', target_id in graph(page)['views']['whiteboards'])
+    # Undo/redo restores the document view as well as its canonical data.
+    if page.locator('.bo-ref-root').count():
+        page.get_by_role('button', name='Editor avançado', exact=True).click()
     page.get_by_role('button', name='Opções', exact=True).click()
     page.get_by_role('button', name=re.compile('Quadro de origem')).click()
     expect(page.locator('.bo1174-board')).to_be_visible()
