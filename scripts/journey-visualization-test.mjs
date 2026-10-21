@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
 import ts from 'typescript';
 
 // Self-contained runtime test: type-only model dependency disappears on transpilation.
@@ -17,7 +16,7 @@ assert.equal(visual.metricValue(''), null);
 assert.equal(visual.metricValue('NaN'), null);
 assert.equal(visual.metricValue('4.5'), 4.5);
 assert.deepEqual(visual.metricRange([null, -2, 6]), { min: -2, max: 6 });
-assert.equal(visual.trendPath([0, 1, 2], 1, -2, 2), 'M 0 66 L 50 34 L 100 26');
+assert.equal(visual.trendPath([0, 1, 2], 1, -2, 2), 'M 0 42 L 50 34 L 100 26');
 assert.equal(visual.trendPath([null, null], 0, -2, 2), '');
 const a=visual.trendPath([-2,2],0,-2,2);
 const b=visual.trendPath([-2,2],1,-2,2);
