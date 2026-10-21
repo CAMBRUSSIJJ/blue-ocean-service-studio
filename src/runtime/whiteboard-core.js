@@ -1,5 +1,6 @@
 import { BLUEPRINT_FRAME_LAYERS, BLUEPRINT_BOUNDARIES, BLUEPRINT_MARKETING_DIMENSIONS, BLUEPRINT_QUALITY_DIMENSIONS, buildBlueprintDeliveryReport, blueprintServicePromise, validateActivityNumbers, isCustomerServiceEvidence } from './blueprint-methodology.js';
 import { runtime } from './runtime-registry.js';
+import { renderBlueprintReference } from './blueprint-reference-view.js';
 import { buildBlueprintGuidedReading, BLUEPRINT_EMOTION_LABELS } from '../services/blueprint-guided-reading.js';
 import { migrateGraphV3, validateGraphDeep, repairGraphIntegrity, deletePlan, applyDeletePlan, isSafeImageDataUrl } from './data-integrity.js';
 import { createRecoveryStore, createSessionManager, hashString, safeParse } from './persistence-kernel.js';
@@ -1040,8 +1041,80 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   function selectorAttr(value){return String(value??'').replace(/\\/g,'\\\\').replace(/"/g,'\\"').replace(/[\n\r]/g,' ')}
   function focusDescriptor(el){if(!el||!overlay?.contains(el))return null;const tag=el.tagName?.toLowerCase();if(el.matches?.('.rt144-tool')&&el.getAttribute('aria-label'))return{selector:`.rt144-tool[aria-label="${selectorAttr(el.getAttribute('aria-label'))}"]`};if(el.id)return{selector:`[id="${selectorAttr(el.id)}"]`};if(el.getAttribute?.('data-focus-key'))return{selector:`[data-focus-key="${selectorAttr(el.getAttribute('data-focus-key'))}"]`};if(el.matches?.('button')&&el.getAttribute('title'))return{selector:`button[title="${selectorAttr(el.getAttribute('title'))}"]`};if(['input','textarea','select'].includes(tag)){const parent=el.closest?.('.rt144-field');const label=parent?.querySelector('span')?.textContent?.trim();if(label)return{fieldLabel:label,tag,selectionStart:el.selectionStart,selectionEnd:el.selectionEnd}}return null}
   function restoreFocusDescriptor(desc){if(!desc||!overlay)return;let el=null;if(desc.selector){try{el=overlay.querySelector(desc.selector)}catch{}}else if(desc.fieldLabel){for(const f of $$('.rt144-field',overlay)){if(f.querySelector('span')?.textContent?.trim()===desc.fieldLabel){el=f.querySelector(desc.tag);break}}}if(el){el.focus?.();if(typeof desc.selectionStart==='number'&&el.setSelectionRange)try{el.setSelectionRange(desc.selectionStart,desc.selectionEnd??desc.selectionStart)}catch{}}}
+
+  // The reference view is the default presentation of an existing canonical Blueprint.
+  // Switching to professional mode never deletes, migrates or duplicates Service Graph records.
+  function blueprintReferenceState(){
+    meta.blueprintReference ||= {version:1,boards:{}};
+    return meta.blueprintReference.boards[boardId||'global'] ||= {mode:'reference',client:false};
+  }
+  function renderReferenceCanvas(){
+    const state=blueprintReferenceState(),host=document.createElement('div');
+    host.className='bo-reference-host';host.style.cssText='position:absolute;inset:0;z-index:200;background:#f5f7fb';
+    overlay.appendChild(host);
+    const stages=serviceFrameStages(),mapped={};
+    stages.forEach(st=>mapped[st.id]={evidence:[],customer:[],frontstage:[],backstage:[],process:[],enablement:[]});
+    Object.values(board()?.items||{}).forEach(it=>{
+      if(isContainer(it)||it.kind==='smart'&&it.objectKind==='stage')return;
+      const stageId=serviceFrameStageForItem(it),lane=serviceFrameLayerForItem(it);
+      if(!mapped[stageId]?.[lane])return;
+      const rec=it.kind==='smart'?entityRecord(it.objectKind,it.objectId):null;
+      const title=it.kind==='smart'?entityTitle(it.objectKind,rec):String(it.text||'');
+      if(title&&title.trim())mapped[stageId][lane].push({id:it.id,text:title});
+    });
+    const review=buildBlueprintDeliveryReport(graph,boardId);
+    const issues=(review?.issues||[]).map(issue=>({...issue,stageId:issue.stageId||null}));
+    const editText=(title,initial,onSave)=>{
+      if(mobileReadOnly())return;
+      const modal=modalShell(title,'A alteração será registrada no Blueprint e poderá ser desfeita.');
+      const form=document.createElement('form');form.className='rt1811-builder-form';
+      const label=document.createElement('label'),area=document.createElement('textarea');
+      label.textContent='Descrição';area.value=initial||'';area.rows=4;area.required=true;area.maxLength=1000;label.appendChild(area);
+      const foot=document.createElement('footer');const cancel=btn('Cancelar',()=>modal.root.remove());
+      const submit=btn('Salvar',()=>{},'primary');submit.type='submit';foot.append(cancel,submit);
+      form.append(label,foot);modal.box.appendChild(form);
+      form.onsubmit=e=>{e.preventDefault();const text=area.value.trim();if(!text)return;markEdit(title);onSave(text);save();modal.root.remove();renderAll()};
+      area.focus();
+    };
+    const editCustomer=stageId=>{const st=graph.stages[stageId];if(!st)return;editText('Ação do cliente',st.customerAction,text=>{st.customerAction=text;st.updatedAt=new Date().toISOString()})};
+    renderBlueprintReference(host,{
+      stages,boardName:board()?.name||'Blueprint de serviço',
+      personaName:activeJourney()?.name||graph.service?.name||'',items:mapped,issues,
+      readOnly:mobileReadOnly(),state,
+      refresh:()=>{save(false,{content:false,history:false,label:'Exibição do Blueprint'});renderAll()},
+      professional:()=>{state.mode='professional';save(false,{content:false,history:false,label:'Modo profissional'});renderAll()},
+      undo:undoEdit,redo:redoEdit,stage:()=>addJourneyStage({returnTo:'service'}),
+      review:()=>showBlueprintDeliveryReview(),
+      summary:id=>{const st=graph.stages[id];if(st)editText('O que acontece',st.thoughts||st.customerAction,text=>{st.thoughts=text;st.updatedAt=new Date().toISOString()})},
+      customer:editCustomer,
+      add:(stageId,lane)=>{
+        if(lane==='customer'){editCustomer(stageId);return}
+        const kind=({evidence:'evidence',frontstage:'frontstage',backstage:'backstage',process:'process',enablement:'system'})[lane];
+        if(kind&&!mobileReadOnly())addBlueprintEntity(kind,stageId);
+      },
+      edit:itemId=>{const it=board().items[itemId];if(!it)return;
+        if(it.kind==='smart'){const rec=entityRecord(it.objectKind,it.objectId);if(!rec)return;
+          editText('Editar '+smartLabel(it.objectKind),entityTitle(it.objectKind,rec),text=>{
+            if(it.objectKind==='touchpoint')rec.name=text;
+            else if(it.objectKind==='problem')rec.description=text;
+            else rec.title=text;
+            rec.updatedAt=new Date().toISOString()
+          });
+        }else editText('Editar nota',String(it.text||''),text=>{it.text=text});
+      },
+      remove:itemId=>{if(mobileReadOnly()||!board().items[itemId])return;
+        const ok=window.confirm('Remover esta nota do Blueprint? Os dados de origem vinculados serão preservados.');
+        if(!ok)return;selected=[itemId];selectedEdge=null;removeSelection();renderAll()
+      },
+      createIssue:(stageId,kind)=>{if(!mobileReadOnly())addBlueprintEntity(kind,stageId)},
+      emotion:(stageId,value)=>{const st=graph.stages?.[stageId];if(!st||mobileReadOnly()||!Number.isInteger(value)||value< -2||value>2)return;
+        markEdit('Emoção da Jornada');st.emotionScore=value;st.emotion=value<0?'negative':value>0?'positive':'neutral';st.updatedAt=new Date().toISOString();save();renderAll()
+      }
+    });
+  }
+
   function renderAll(){
-    if(!overlay)return;const focusBefore=focusDescriptor(document.activeElement);const renderStarted=performance.now(); overlay.innerHTML='';overlay.dataset.view=pref().layoutMode||'free';overlay.classList.toggle('bo-simple-blueprint',editorContextKind()==='blueprint'&&blueprintLearningState().mode==='guided');overlay.dataset.cardDensity=pref().cardDensity||'normal';overlay.classList.toggle('rt1811-density-compact',pref().cardDensity==='compact');overlay.classList.toggle('rt1811-density-normal',pref().cardDensity==='normal');overlay.classList.toggle('rt1811-density-detailed',pref().cardDensity==='detailed');overlay.classList.toggle('zoom-far',zoom<.58);overlay.classList.toggle('zoom-near',zoom>1.18);overlay.classList.toggle('rt159-performance',Object.keys(board()?.items||{}).length>perf.cullThreshold);overlay.classList.toggle('rt183-blueprint-editor',(pref().layoutMode||'free')==='blueprint');const __learn=blueprintLearningState();overlay.classList.toggle('rt185-guided',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='guided');overlay.classList.toggle('rt185-professional',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='professional');overlay.classList.toggle('rt185-show-tips',__learn.showTips!==false);if(showInspector&&(selected.length||selectedEdge))showBlueprintDocument=false;overlay.classList.toggle('rt183-document-open',!!showBlueprintDocument&&(pref().layoutMode||'free')==='blueprint');renderTop();
+    if(!overlay)return;const focusBefore=focusDescriptor(document.activeElement);const renderStarted=performance.now(); overlay.innerHTML='';overlay.dataset.view=pref().layoutMode||'free';overlay.classList.toggle('bo-simple-blueprint',editorContextKind()==='blueprint'&&blueprintLearningState().mode==='guided');overlay.dataset.cardDensity=pref().cardDensity||'normal';overlay.classList.toggle('rt1811-density-compact',pref().cardDensity==='compact');overlay.classList.toggle('rt1811-density-normal',pref().cardDensity==='normal');overlay.classList.toggle('rt1811-density-detailed',pref().cardDensity==='detailed');overlay.classList.toggle('zoom-far',zoom<.58);overlay.classList.toggle('zoom-near',zoom>1.18);overlay.classList.toggle('rt159-performance',Object.keys(board()?.items||{}).length>perf.cullThreshold);overlay.classList.toggle('rt183-blueprint-editor',(pref().layoutMode||'free')==='blueprint');const __learn=blueprintLearningState();overlay.classList.toggle('rt185-guided',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='guided');overlay.classList.toggle('rt185-professional',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='professional');overlay.classList.toggle('rt185-show-tips',__learn.showTips!==false);if(showInspector&&(selected.length||selectedEdge))showBlueprintDocument=false;overlay.classList.toggle('rt183-document-open',!!showBlueprintDocument&&(pref().layoutMode||'free')==='blueprint');if(editorContextKind()==='blueprint'&&blueprintReferenceState().mode!=='professional'){renderReferenceCanvas();return}renderTop();
     const body=document.createElement('div');body.className='rt144-body';overlay.appendChild(body);
     renderViewport(body); renderToolbar(body);
     if(showLibrary)renderLibrary(body);
@@ -2012,6 +2085,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       const organize=btn('Organizar em Blueprint',showBlueprintSelectionPreview,'bo-editor-organize');
       organize.disabled=!selected.length;organize.title=selected.length?'Revisar etapas, camadas e vínculos da seleção':'Selecione as ideias que deseja organizar';mid.appendChild(organize);
     }else if(kind==='blueprint'&&!mobileReadOnly()){
+      const simple=btn('Visão simplificada',()=>{blueprintReferenceState().mode='reference';save(false,{content:false,history:false,label:'Visão simplificada'});renderAll()},'bo-guided-reading-trigger');mid.appendChild(simple);
       const stage=btn('＋ Adicionar etapa',()=>addJourneyStage({returnTo:'service'}),'primary bo-editor-add-stage');
       stage.setAttribute('aria-label','Adicionar etapa');mid.appendChild(stage);
     }
