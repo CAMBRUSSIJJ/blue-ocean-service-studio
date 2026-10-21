@@ -25,6 +25,7 @@ jobs:
       - run: npm ci
       - run: npm run docs:check
       - run: node scripts/journey-visualization-test.mjs
+      - run: node scripts/blueprint-guided-reading-test.mjs
       - run: npm run release:verify
       - name: Verificar comportamento da Jornada
         run: |
@@ -97,6 +98,7 @@ jobs:
       - run: npm run editor:browser
       - run: npm run journey:browser
       - run: npm run blueprint:methodology:browser
+      - run: python3 scripts/blueprint-guided-reading-browser.py
       - run: npm run entry:browser
       - run: npm run product:browser
       - run: npm run maps:browser
