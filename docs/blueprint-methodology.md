@@ -39,6 +39,16 @@ As seções opcionais permitem descrever os **7 Ps**: serviço/proposta de valor
 
 Essas descrições apoiam a análise de marketing e qualidade. Elas não executam pesquisa de expectativas e percepções nem constituem uma avaliação SERVQUAL. Não são obrigatórias para desenhar um Blueprint.
 
+## Leitura guiada opcional (21/10/2026)
+
+O botão **Leitura guiada** no editor real do Blueprint abre um painel opcional com **Passo a passo**, **Visão do cliente** e **Qualidade**. A vista operacional, a matriz detalhada, as seis camadas, as três linhas, os controles profissionais, o histórico, os vínculos e as entidades permanecem intactos. Fechar o painel devolve toda a área ao canvas.
+
+O checklist e as prioridades utilizam a cobertura real das camadas e as pendências da revisão da entrega. **Visão do cliente** apresenta uma leitura derivada das ações, interações visíveis e evidências de serviço classificadas, sem ocultar nem alterar os bastidores. A curva emocional lê as etapas existentes da Journey e grava alterações no `emotionScore` canônico (−2 a +2) e na emoção legada, numa transação reversível. No celular, a curva é somente leitura.
+
+A aba **Qualidade** mostra a documentação dos cinco critérios perceptivos já associados ao Blueprint, não resultados de SERVQUAL ou pesquisa com clientes. O painel não cria automaticamente dores, oportunidades, métricas, atividades ou perfis fictícios. A experiência demonstrativa do arquivo HTML enviado foi incorporada como padrão de interação, **não como nova fonte de dados**.
+
+Verifique com `node scripts/blueprint-guided-reading-test.mjs` e `python3 scripts/blueprint-guided-reading-browser.py` (depois de `npm run build`).
+
 ## Revisão da entrega
 
 **Opções → Revisar entrega** analisa conteúdo e relações. Os detalhes de uma etapa também abrem a revisão daquela etapa. A revisão verifica:

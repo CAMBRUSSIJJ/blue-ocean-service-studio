@@ -1,5 +1,6 @@
 import { BLUEPRINT_FRAME_LAYERS, BLUEPRINT_BOUNDARIES, BLUEPRINT_MARKETING_DIMENSIONS, BLUEPRINT_QUALITY_DIMENSIONS, buildBlueprintDeliveryReport, blueprintServicePromise, validateActivityNumbers, isCustomerServiceEvidence } from './blueprint-methodology.js';
 import { runtime } from './runtime-registry.js';
+import { buildBlueprintGuidedReading, BLUEPRINT_EMOTION_LABELS } from '../services/blueprint-guided-reading.js';
 import { migrateGraphV3, validateGraphDeep, repairGraphIntegrity, deletePlan, applyDeletePlan, isSafeImageDataUrl } from './data-integrity.js';
 import { createRecoveryStore, createSessionManager, hashString, safeParse } from './persistence-kernel.js';
 import { blueprintLanes, VIEW_DEFS, journeyLanes, JOURNEY_LANE_PRESETS, tone, toneBg } from './view-config.js';
@@ -438,6 +439,128 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   function renderEmotionCurve(root,m){
     const state=journeyPrimitiveState();if(state.showEmotionCurve===false||viewVisibility('journey').hiddenLanes.includes('emotion'))return;const r=journeyLanes.findIndex(x=>x.key==='emotion');if(r<0)return;const top=m.rowTops[r]-70,height=m.laneHeights[r],left=m.left-90,w=Math.max(1,m.stages.length*m.colW),personaId=state.activePersonaId,points=m.stages.map((st,i)=>{const e=emotionForStage(st.id,personaId),score=Number(e?.score||0),x=i*m.colW+m.colW/2,y=height/2-score*(height*.24);return{x,y,score,label:e?.title||emotionLabel(score),id:e?.id||'',stageId:st.id}});
     const wrap=document.createElement('div');wrap.className='rt157-emotion-curve';wrap.style.left=left+'px';wrap.style.top=top+'px';wrap.style.width=w+'px';wrap.style.height=height+'px';const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox',`0 0 ${w} ${height}`);svg.setAttribute('preserveAspectRatio','none');const path=document.createElementNS(svg.namespaceURI,'path');path.setAttribute('class','rt157-emotion-line');path.setAttribute('d',points.map((p,i)=>(i?'L':'M')+p.x+' '+p.y).join(' '));svg.appendChild(path);points.forEach(p=>{const g=document.createElementNS(svg.namespaceURI,'g');g.setAttribute('class','rt157-emotion-point');const c=document.createElementNS(svg.namespaceURI,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r','7');g.appendChild(c);const t=document.createElementNS(svg.namespaceURI,'text');t.setAttribute('x',p.x);t.setAttribute('y',p.y-13);t.setAttribute('text-anchor','middle');t.textContent=emotionGlyph(p.score)+' '+p.label;g.appendChild(t);svg.appendChild(g)});wrap.appendChild(svg);root.appendChild(wrap)
+  }
+
+
+  // The guided interpretation is additive: the actual Service Frame and canonical objects never change views.
+  function guidedBlueprintUiState(){
+    meta.blueprintGuidedUi ||= {version:1,boards:{}};
+    const id=boardId||'global';
+    return meta.blueprintGuidedUi.boards[id] ||= {open:false,tab:'steps'};
+  }
+  function toggleGuidedBlueprintPanel(){
+    const state=guidedBlueprintUiState();state.open=!state.open;
+    if(state.open){closeEditorSidePanels();showBoardMenu=false;showLibrary=false;showLayers=false;showOutline=false;}
+    save(false,{content:false,history:false,label:'Leitura guiada do Blueprint'});renderAll();
+  }
+  function renderGuidedBlueprintPanel(parent){
+    if(editorContextKind()!=='blueprint')return;
+    const ui=guidedBlueprintUiState();if(!ui.open)return;
+    const stages=serviceFrameStages(),rows=stages.map(st=>({stage:st,...serviceFrameStageCoverage(st.id)}));
+    const delivery=buildBlueprintDeliveryReport(graph,boardId);
+    const model=buildBlueprintGuidedReading({
+      stages,lanes:SERVICE_FRAME_LAYERS,rows,issues:delivery.issues,
+      qualityDimensions:BLUEPRINT_QUALITY_DIMENSIONS,
+      qualityCriteria:board()?.serviceStrategy?.qualityCriteria||{}
+    });
+    const panel=document.createElement('aside');panel.className='bo-guided-reading';
+    panel.setAttribute('aria-label','Leitura guiada do Blueprint');
+    panel.innerHTML='<header><div><small>BLUE OCEAN · BLUEPRINT</small><strong>Leitura guiada</strong><small>O mesmo serviço, sem duplicar objetos</small></div><button class="bo-guided-close" type="button" aria-label="Fechar leitura guiada">×</button></header><nav class="bo-guided-tabs" role="tablist" aria-label="Visões da leitura guiada"></nav><div class="bo-guided-body"></div>';
+    parent.appendChild(panel);
+    $('.bo-guided-close',panel).onclick=toggleGuidedBlueprintPanel;
+    const tabs=$('.bo-guided-tabs',panel),body=$('.bo-guided-body',panel);
+    [['steps','Passo a passo'],['customer','Visão do cliente'],['quality','Qualidade']].forEach(([key,label])=>{
+      const b=btn(label,()=>{ui.tab=key;save(false,{content:false,history:false,label:'Guia: alterar leitura'});renderAll()},'');
+      b.setAttribute('role','tab');b.setAttribute('aria-selected',String(ui.tab===key));tabs.appendChild(b);
+    });
+    const heading=(label,description='')=>{const section=document.createElement('section');section.innerHTML='<h3>'+esc(label)+'</h3>'+(description?'<p>'+esc(description)+'</p>':'');body.appendChild(section);return section;};
+    const gotoCell=(stageId,laneKey)=>{
+      ui.open=false;save(false,{content:false,history:false,label:'Abrir etapa do Blueprint'});
+      renderAll();
+      setTimeout(()=>{
+        if(pref().layoutMode==='service'){
+          const cell=$('.bo1203-service-cell',overlay).find(el=>el.dataset.stageId===stageId&&el.dataset.layer===laneKey);
+          if(cell){cell.scrollIntoView({block:'center',inline:'center'});if(!mobileReadOnly())beginBlueprintCellEntry(cell,laneKey,stageId);return}
+        }
+        if(!mobileReadOnly()&&pref().layoutMode==='blueprint'&&stageId&&laneKey)showBlueprintCellAdd(stageId,laneKey);
+      },40);
+    };
+    if(ui.tab==='steps'){
+      const intro=heading('Preenchimento por camadas','Comece pelo cliente e pelo atendimento visível; depois aprofunde operação, evidências e suporte.');
+      intro.innerHTML+='<div class="bo-guided-note"><strong>'+model.coverage+'% de cobertura estrutural</strong><br>Contagem de etapas com conteúdo por camada. Não é satisfação medida nem validação de qualidade.</div>';
+      const progress=heading('O que falta preencher');
+      const list=document.createElement('div');list.className='bo-guided-progress';
+      model.checklist.forEach(item=>{
+        const row=document.createElement('div');row.className='bo-guided-row';
+        const proportion=item.total?Math.round(item.covered/item.total*100):0;
+        row.innerHTML='<span><b>'+esc(item.label)+'</b><small>'+item.covered+' de '+item.total+' etapas<div class="bo-guided-progress-meter"><i style="width:'+proportion+'%"></i></div></small></span><em>'+proportion+'%</em>';
+        list.appendChild(row);
+      });
+      progress.appendChild(list);
+      const next=heading('Próximo passo');
+      if(!model.steps)next.innerHTML+='<p>Adicione a primeira etapa para começar. As etapas são compartilhadas com a Jornada.</p>';
+      else if(model.next){
+        const first=rows.find(row=>row.missing.some(lane=>lane.key===model.next.key));
+        next.innerHTML+='<div class="bo-guided-note">'+esc(model.next.label)+' · '+esc(first?.stage?.title||'Próxima etapa')+'</div>';
+        if(first&&!mobileReadOnly()){
+          const actions=document.createElement('div');actions.className='bo-guided-actions';
+          actions.append(btn('Preencher esta célula',()=>gotoCell(first.stage.id,model.next.key),'bo-guided-action'));
+          next.appendChild(actions);
+        }
+      }else next.innerHTML+='<p>Todas as etapas têm conteúdo nas camadas obrigatórias. Revise relações e operação antes de validar.</p>';
+      const priority=heading('Prioridades de revisão','Ordenadas por severidade dos gaps reais. Não são pontuações simuladas de satisfação.');
+      if(!model.priorities.length)priority.innerHTML+='<p>Nenhuma pendência listada na revisão. Confirme o serviço com a equipe e os clientes.</p>';
+      model.priorities.forEach(issue=>{
+        const item=document.createElement('div');item.className='bo-guided-priority';
+        item.innerHTML='<i class="bo-guided-tag '+(issue.severity==='critical'?'critical':'')+'">'+(issue.severity==='critical'?'Crítico':'Revisar')+'</i><span><b>'+esc(issue.stageTitle||'Serviço')+'</b><small>'+esc(issue.message)+'</small></span>';
+        priority.appendChild(item);
+      });
+      const check=document.createElement('div');check.className='bo-guided-actions';check.append(btn('Revisar entrega completa',()=>{ui.open=false;renderAll();showBlueprintDeliveryReview()},'bo-guided-action'));priority.appendChild(check);
+    }else if(ui.tab==='customer'){
+      const focus=heading('Experiência percebida','Esta é uma leitura resumida. Frontstage, bastidores, processos, sistemas e vínculos continuam intactos no mapa.');
+      if(!model.steps)focus.innerHTML+='<p>Adicione etapas à Jornada para construir esta leitura.</p>';
+      stages.forEach(stage=>{
+        const evidence=serviceFrameItemsFor(stage.id,'evidence').filter(it=>it.kind==='smart'&&isCustomerServiceEvidence(entityRecord(it.objectKind,it.objectId))).map(it=>entityTitle(it.objectKind,entityRecord(it.objectKind,it.objectId)));
+        const visible=serviceFrameItemsFor(stage.id,'frontstage').map(it=>it.kind==='smart'?entityTitle(it.objectKind,entityRecord(it.objectKind,it.objectId)):it.text).filter(Boolean);
+        const card=document.createElement('div');card.className='bo-guided-row';
+        card.innerHTML='<span><b>'+esc(stage.title)+'</b><small>Cliente: '+esc(stage.customerAction||'Ação ainda não definida')+'</small><small>Interação visível: '+esc(visible.join(' · ')||'Sem atividade registrada')+'</small><small>Evidências percebidas: '+esc(evidence.join(' · ')||'Sem evidência classificada')+'</small></span>';
+        focus.appendChild(card);
+      });
+      const curve=heading('Curva de emoções','Estados registrados na Jornada (−2 a +2). Trata-se de um mapa de percepção, não de uma pesquisa de satisfação.');
+      if(model.emotion.length){
+        const points=model.emotion.map((entry,index)=>[model.emotion.length===1?180:24+index*312/(model.emotion.length-1),55-entry.value*17]);
+        const svg=document.createElement('div');svg.className='bo-guided-emotion-chart';
+        svg.innerHTML='<svg role="img" aria-label="Curva de emoções da Jornada" viewBox="0 0 360 110"><line x1="12" y1="55" x2="348" y2="55" stroke="#cddcec" stroke-dasharray="4 4"/><polyline points="'+points.map(p=>p.join(',')).join(' ')+'"/>'+points.map(p=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="4"/>').join('')+'</svg>';
+        curve.appendChild(svg);
+        model.emotion.forEach(entry=>{
+          const row=document.createElement('label');row.className='bo-guided-emotion-row';
+          row.innerHTML='<span>'+esc(entry.stageTitle)+'</span><input type="range" min="-2" max="2" step="1" value="'+entry.value+'" aria-label="Emoção · '+esc(entry.stageTitle)+'" '+(mobileReadOnly()?'disabled':'')+'><small>'+esc(BLUEPRINT_EMOTION_LABELS[entry.value+2])+'</small>';
+          const slider=$('input',row);slider.onchange=()=>{
+            if(mobileReadOnly())return;
+            const target=graph.stages?.[entry.stageId];if(!target)return;
+            const next=Number(slider.value);if(!Number.isInteger(next)||next < -2||next>2)return;
+            markEdit('Ajustar emoção na Jornada');
+            target.emotionScore=next;target.emotion=next<0?'negative':next>0?'positive':'neutral';
+            target.updatedAt=new Date().toISOString();
+            if(graph.journeys?.[target.journeyId])graph.journeys[target.journeyId].updatedAt=target.updatedAt;
+            graph.service.updatedAt=target.updatedAt;
+            save();
+            renderAll();
+          };
+          curve.appendChild(row);
+        });
+      }else curve.innerHTML+='<p>Sem etapas para representar.</p>';
+    }else{
+      const quality=heading('Critérios de qualidade percebida','O Blueprint conserva seus critérios de Confiabilidade, Responsividade, Segurança, Empatia e Tangibilidade.');
+      quality.innerHTML+='<div class="bo-guided-note">'+model.qualityConfigured+' de '+model.quality.length+' critérios descritos. Indicador de documentação — não é SERVQUAL medido com clientes.</div>';
+      const list=document.createElement('div');list.className='bo-guided-progress';
+      model.quality.forEach(item=>{const row=document.createElement('div');row.className='bo-guided-row';row.innerHTML='<span><b>'+esc(item.label)+'</b><small>'+(item.configured?'Critério documentado':'Defina como observar esta dimensão')+'</small></span><em>'+(item.configured?'✓':'—')+'</em>';list.appendChild(row)});
+      quality.appendChild(list);
+      const actions=document.createElement('div');actions.className='bo-guided-actions';
+      if(!mobileReadOnly())actions.append(btn('Editar critérios do serviço',()=>{ui.open=false;renderAll();showBlueprintServiceStrategy()},'bo-guided-action'));
+      actions.append(btn('Revisão de entrega',()=>{ui.open=false;renderAll();showBlueprintDeliveryReview()},'bo-guided-action'));
+      quality.appendChild(actions);
+    }
   }
 
   function blueprintLearningState(){
@@ -927,6 +1050,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     if(showInspector&&(selected.length||selectedEdge||inspectorMode==='board'))renderInspector(body);
     renderInspectorHandle(body);
     if(showBlueprintDocument&&(pref().layoutMode||'free')==='blueprint'&&!showInspector)renderBlueprintDocumentPanel(body);
+    if(editorContextKind()==='blueprint')renderGuidedBlueprintPanel(body);
     if(showBoardMenu)renderBoardMenu();
     if(showEditHistory)renderEditHistory();
     if(quickCreate)renderQuickCreate();
@@ -1897,6 +2021,10 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     }
     const saved=document.createElement('span');saved.className='rt1410-save rt181-save rt190-save';saved.setAttribute('role','status');saved.setAttribute('aria-live','polite');saved.textContent='Salvando…';actions.appendChild(saved);setTimeout(updateSaveIndicator,0);
     if(mobileReadOnly()){const badge=document.createElement('span');badge.className='bo1175-mobile-read-badge';badge.textContent='Modo leitura';actions.appendChild(badge);const comment=btn('Comentar',()=>runtime.api('collaboration')?.show?.('comments'),'bo1175-mobile-comment');comment.title='Abrir comentários';actions.appendChild(comment)}
+    if(kind==='blueprint'){
+      const guide=btn('Leitura guiada',toggleGuidedBlueprintPanel,'bo-guided-reading-trigger');
+      guide.setAttribute('aria-pressed',String(guidedBlueprintUiState().open));guide.title='Passo a passo, visão do cliente e critérios de qualidade';mid.appendChild(guide);
+    }
     if(kind!=='blueprint'){
     const present=btn('Apresentar',()=>runtime.api('presentationWorkshop')?.show?.('presentation'),'rt194-present-btn');present.title='Apresentar o conteúdo deste documento';actions.appendChild(present);
     const commands=btn('⌘ K',openCommandPalette,'rt190-command');commands.title='Buscar comandos';commands.setAttribute('aria-label','Buscar comandos');actions.appendChild(commands);

@@ -1,0 +1,26 @@
+/* Guided reading augments, but never replaces, the six-layer Service Blueprint editor. */
+.bo-guided-reading-trigger{min-height:34px!important;font-size:12px!important;border:1px solid #cbd9ec!important;background:#f8fbff!important;color:#1c5096!important;border-radius:8px!important;padding:0 12px!important}
+.bo-guided-reading-trigger[aria-pressed="true"]{background:#eaf1ff!important;border-color:#77a3ec!important}
+.bo-guided-reading{position:absolute;right:0;top:0;bottom:0;width:min(388px,94vw);z-index:220;background:var(--bo-color-surface,#fff);border-left:1px solid #dbe3ed;box-shadow:-14px 0 36px rgba(15,23,42,.10);display:flex;flex-direction:column;color:#17243c;font-size:13px}
+.bo-guided-reading header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 18px 12px;border-bottom:1px solid #e5eaf2}
+.bo-guided-reading header strong{font-size:17px;display:block}.bo-guided-reading header small{font-size:11px;color:#52657d}
+.bo-guided-reading button{cursor:pointer}.bo-guided-reading .bo-guided-close{border:1px solid #dbe3ed;border-radius:7px;background:white;color:#42556d;font-size:18px;min-width:34px;min-height:34px}
+.bo-guided-tabs{display:flex;gap:5px;padding:9px 14px;border-bottom:1px solid #e5eaf2;overflow:auto}
+.bo-guided-tabs button{border:1px solid transparent;border-radius:7px;background:transparent;padding:8px 10px;font-size:12px;color:#52657d;white-space:nowrap}
+.bo-guided-tabs button[aria-selected="true"]{color:#1c5096;border-color:#b9ccef;background:#eff5ff;font-weight:650}
+.bo-guided-body{overflow:auto;flex:1;padding:16px 18px 28px}.bo-guided-body section{margin-bottom:20px}.bo-guided-body h3{font-size:12px;font-weight:700;color:#203f66;margin:0 0 8px}.bo-guided-body p{line-height:1.5;color:#53647a;margin:6px 0 12px;font-size:12px}
+.bo-guided-progress{display:grid;gap:8px}.bo-guided-row{padding:9px 10px;border:1px solid #e4eaf2;border-radius:9px;background:#fbfcff;display:flex;align-items:center;gap:10px}
+.bo-guided-row>span{flex:1;min-width:0}.bo-guided-row b{display:block;font-size:12px}.bo-guided-row small{display:block;font-size:10px;color:#68788f}.bo-guided-row em{font-style:normal;color:#285b9e;font-size:11px;font-weight:700}
+.bo-guided-progress-meter{height:6px;background:#e8eef8;border-radius:10px;overflow:hidden;margin-top:8px}.bo-guided-progress-meter i{display:block;height:100%;background:#2b6ac8}
+.bo-guided-note{padding:11px 12px;background:#eef5ff;border-radius:9px;color:#285087;font-size:12px;line-height:1.55}
+.bo-guided-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.bo-guided-action{padding:8px 11px;border:1px solid #b9d0f5;border-radius:8px;background:#fff;color:#1d59a5;font-weight:650;font-size:12px}
+.bo-guided-priority{display:flex;align-items:flex-start;gap:8px;border-bottom:1px solid #edf0f4;padding:10px 0}.bo-guided-priority b{font-size:12px;display:block}.bo-guided-priority small{display:block;color:#64758a;font-size:11px;line-height:1.4;margin-top:3px}
+.bo-guided-priority>span{flex:1}.bo-guided-tag{flex:none;font-size:10px;font-weight:700;color:#9a5610;background:#fff4e2;border-radius:5px;padding:3px 6px}
+.bo-guided-tag.critical{color:#ad3434;background:#fff0f0}
+.bo-guided-emotion-chart{padding:10px 8px;border:1px solid #dfebf7;border-radius:10px;background:#f9fcff}
+.bo-guided-emotion-chart svg{display:block;width:100%;height:112px;overflow:visible}.bo-guided-emotion-chart polyline{fill:none;stroke:#2665c2;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.bo-guided-emotion-chart circle{fill:#2665c2}.bo-guided-emotion-row{display:grid;grid-template-columns:minmax(70px,1fr) minmax(90px,1fr) auto;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #eaf0f7;font-size:12px}
+.bo-guided-emotion-row input{width:100%;accent-color:#2665c2}.bo-guided-emotion-row small{font-size:10px;color:#64758a;max-width:96px;text-align:right}
+.bo-guided-reading button:focus-visible,.bo-guided-reading input:focus-visible{outline:2px solid #2b6ac8;outline-offset:2px}
+@media(max-width:640px){.bo-guided-reading{width:100vw;top:0}.bo-guided-reading header{padding:14px}}
