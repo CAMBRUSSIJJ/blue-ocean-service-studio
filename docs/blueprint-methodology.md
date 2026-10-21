@@ -77,3 +77,10 @@ npm run blueprint:methodology:browser
 O teste de domínio cobre coerência, cálculos, vínculos, classificação, dados legados e o ciclo real de backup pelo schema. O teste de navegador cobre criação, formulários, cancelamento, histórico, classificação de evidência, revisão, recarga e telas menores. Ele requer Python com Playwright e Chromium. `AXE_PATH` permite indicar o arquivo `axe.min.js` para auditar os diálogos com critérios automáticos WCAG A/AA. Os resultados ficam em `artifacts/blueprint-methodology`.
 
 Na entrega de 20/10/2026, `release:verify` passou com 148 suítes de QA, TypeScript e build completo. Passaram também 40 verificações de domínio do Blueprint, 42 de navegador para os novos fluxos, 59 dos editores compartilhados e 94 da Jornada. O teste visual produziu 10 capturas. Os cinco diálogos auditados com axe-core não apresentaram violações automáticas WCAG A/AA; essa auditoria não substitui a verificação manual de acessibilidade.
+
+
+## Blueprint: interface original como vista principal (21/10/2026)
+
+A interface principal utiliza **o próprio HTML de referência fornecido pelo usuário**, servido como `public/blueprint-reference-original.html`, com visual, faixas, curva de emoções, interações e painel de diagnóstico originais. Abre por padrão em qualquer Blueprint. A ação **Modo profissional** retorna ao editor completo sem excluir informações do Service Graph. A interface referencia os dados canônicos via mensagens restritas à mesma origem; não mantém outra base de dados em localStorage quando incorporada à aplicação. As notas operacionais são sincronizadas com as entidades do Service Graph; faixas personalizadas ficam em metadados do próprio Blueprint. O protótipo aberto separadamente continua funcionando com seu armazenamento local.
+
+O teste `scripts/blueprint-reference-exact-browser.py` verifica a interface e a persistência canônica, inclusive após alternar de modo. Não publicar se algum editor perder seus dados.

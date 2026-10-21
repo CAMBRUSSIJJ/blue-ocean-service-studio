@@ -99,6 +99,7 @@ jobs:
       - run: npm run journey:browser
       - run: npm run blueprint:methodology:browser
       - run: python3 scripts/blueprint-guided-reading-browser.py
+      - run: python3 scripts/blueprint-reference-exact-browser.py
       - run: npm run entry:browser
       - run: npm run product:browser
       - run: npm run maps:browser
@@ -118,3 +119,4 @@ jobs:
             artifacts/journey-template-whiteboard
             artifacts/product-experience
             artifacts/map-actions
+            artifacts/blueprint-reference-exact

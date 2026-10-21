@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blue Ocean · Blueprint de Serviço</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f5f7fb;--sf:#fff;--ink:#0f1b2d;--mut:#51607a;--ln:#e1e7f1;--ac:#1f5eff;--onac:#fff;--acs:#e8f0ff;--act:#0b3fb5;--cd:#f1f5fc;--pn:#fff1ea;--pnt:#7a3210}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--sf:#121b2e;--ink:#e8edf7;--mut:#a3b0c8;--ln:#24324d;--ac:#5b8cff;--onac:#0b1220;--acs:#1a2a52;--act:#a9c3ff;--cd:#192640;--pn:#3a2118;--pnt:#ffc5a8}}
+:root[data-theme="dark"]{--bg:#0b1220;--sf:#121b2e;--ink:#e8edf7;--mut:#a3b0c8;--ln:#24324d;--ac:#5b8cff;--onac:#0b1220;--acs:#1a2a52;--act:#a9c3ff;--cd:#192640;--pn:#3a2118;--pnt:#ffc5a8}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,sans-serif}
+button,select,input{font:inherit;color:var(--ink)}button{cursor:pointer}
+.hd{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding:18px 24px 8px}
+.bk{width:100%;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--act)}
+.ti{flex:1 1 280px;font-size:22px;font-weight:600;background:transparent;border:1px solid transparent;border-radius:8px;padding:6px 8px}
+.ti:hover,.ti:focus{border-color:var(--ln);background:var(--sf)}
+.pi{margin:0 24px 12px;width:calc(100% - 48px);max-width:560px;font-size:13px;background:var(--sf);border:1px solid var(--ln);border-radius:8px;padding:8px 12px}
+.sv{font-size:12px;color:var(--mut)}
+.tb{font-size:13px;font-weight:600;background:var(--sf);border:1px solid var(--ln);border-radius:8px;min-height:44px;padding:0 14px}
+.tb.p{background:var(--ac);border-color:var(--ac);color:var(--onac)}
+.tb[aria-pressed=true]{background:var(--acs);border-color:var(--ac);color:var(--act)}
+.wrap{display:flex;flex-wrap:wrap;gap:16px;padding:0 24px 32px;align-items:flex-start}
+.bd{flex:1 1 760px;min-width:0;overflow-x:auto;background:var(--sf);border:1px solid var(--ln);border-radius:12px}
+.r{display:grid;grid-template-columns:var(--cols)}
+.lb{position:sticky;left:0;z-index:1;background:var(--sf);padding:16px;font-size:13px;font-weight:600}
+.lb small{display:block;margin-top:2px;font-size:12px;font-weight:400;color:var(--mut)}
+.c{padding:8px;border-top:1px solid var(--ln);min-width:0}
+.n,.tx,.sn{outline:none}
+.n{background:var(--cd);border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:6px;min-height:44px}
+.n:empty::before,.tx:empty::before{content:"Escreva…";color:var(--mut)}
+.n:focus,.tx:focus,.sn:focus{box-shadow:0 0 0 2px var(--ac)}
+.ad{width:100%;min-height:36px;border:1.5px dashed var(--ln);border-radius:8px;background:transparent;color:var(--act);font-size:13px}
+.dv{display:flex;align-items:center;gap:12px;padding:8px 16px;border-top:1px solid var(--ln);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.dv::after{content:"";flex:1;border-top:1.5px dashed var(--mut);opacity:.5}
+.sh{display:flex;align-items:center;gap:8px;padding:14px 8px}
+.sh i{flex:none;font-style:normal;width:24px;height:24px;border-radius:50%;background:var(--ac);color:var(--onac);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.sn{flex:1;font-weight:600;font-size:14px;border-radius:4px;padding:2px 4px}
+.x{border:0;background:transparent;color:var(--mut);min-width:32px;min-height:32px;border-radius:6px;font-size:16px}
+.cvb{position:relative;height:110px}
+.cvb svg{position:absolute;inset:0;width:100%;height:100%}
+.dt{position:absolute;width:12px;height:12px;margin:-6px;border-radius:50%;background:var(--ac)}
+.dl{position:absolute;transform:translateX(-50%);font-size:12px;color:var(--mut);white-space:nowrap}
+.sl{display:grid;padding:4px 0 2px}
+.sl input{width:80%;margin:0 10%;min-height:24px;accent-color:var(--ac)}
+.it{border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:13px}
+.it.d{background:var(--pn);color:var(--pnt)}.it.i{background:var(--acs);color:var(--act)}
+.it b{font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.mt{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.mt button,.mt select{font-size:12px;background:var(--sf);border:1px solid var(--ln);border-radius:6px;min-height:32px;padding:0 8px}
+.bt{display:flex;gap:6px}.bt button{flex:1;min-height:36px;font-size:12px;font-weight:600;border:1.5px dashed var(--ln);background:transparent;border-radius:8px}
+.pnl{flex:1 1 300px;max-width:420px;background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:18px}
+.pnl h2{margin:0 0 10px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--mut)}
+.pnl h2:not(:first-child){margin-top:22px}
+.rk{margin-bottom:10px;font-size:13px}.rk div:first-child{display:flex;justify-content:space-between;gap:8px}.rk span{color:var(--mut)}
+.bar{height:6px;border-radius:3px;background:var(--cd);margin-top:4px}.bar i{display:block;height:100%;border-radius:3px;background:var(--ac)}
+.ins{background:var(--acs);color:var(--act);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px}
+.hint{font-size:12px;color:var(--mut);margin:14px 0 0}
+.tb:disabled{opacity:.5;cursor:not-allowed}
+.sh{flex-wrap:wrap}.sa{display:flex;flex:none;width:calc(100% - 30px);margin-left:30px}.sa .x{min-width:30px}.x:disabled{opacity:.3;cursor:default}
+.nw{position:relative;display:flex;align-items:flex-start;gap:2px;margin-bottom:6px}.nw .n{flex:1;margin:0}
+.gh{cursor:grab;color:var(--mut);padding:10px 0;width:14px;text-align:center;user-select:none;line-height:1;font-size:14px}
+.nx{position:absolute;top:-8px;min-width:28px;min-height:28px;font-size:12px;border:1px solid var(--ln);background:var(--sf);border-radius:6px;opacity:0;padding:0}.nx.a{right:24px}.nx.b{right:-4px}
+.nw:hover .nx,.nw:focus-within .nx{opacity:1}@media(hover:none){.nx{opacity:1}}
+.c.ov{outline:2px dashed var(--ac);outline-offset:-2px}
+.lk{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}.nx.c{right:52px;opacity:1}.nw.pk .n{box-shadow:0 0 0 2px var(--ac)}
+.h1{width:100%;margin:0;font-size:26px}
+.st{max-width:720px;margin:0 auto;padding:8px 24px 40px;display:grid;gap:16px}
+.st section{background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:20px;display:grid;gap:12px}
+.st h2{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+.st label{display:grid;gap:6px;font-size:13px;font-weight:600}
+.st input{font-size:14px;font-weight:400;background:var(--bg);border:1px solid var(--ln);border-radius:8px;padding:11px 12px;min-height:44px}
+.chips,.row{display:flex;flex-wrap:wrap;gap:8px}
+.row input{flex:1 1 220px}
+.chip{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--ln);background:var(--sf);font-size:13px}
+.chip[aria-pressed=true]{background:var(--acs);border-color:var(--ac);color:var(--act);font-weight:600}
+.sg{display:block;width:100%;text-align:left;margin-bottom:6px;min-height:36px;padding:8px 12px;border:1px solid var(--ln);border-radius:8px;background:var(--sf);color:var(--act);font-size:13px}
+.ck{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:var(--mut)}
+.ck span{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ln);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.ck.on{color:var(--ink);font-weight:600}.ck.on span{background:var(--ac);border-color:var(--ac);color:var(--onac)}
+.ck em{margin-left:auto;font-style:normal;font-size:12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const HOSTED=new URLSearchParams(location.search).get('service-graph')==='1';let applyingHost=false;
+const KEY='bo-blueprint-v1',DIMS=['Tangíveis','Confiabilidade','Presteza','Segurança','Empatia'],EM=['Frustrada','Ansiosa','Neutra','Animada','Satisfeita'];
+const LANES=[{id:'ev',n:'Evidência física',h:'O que o cliente vê ou toca'},{id:'ac',n:'Ações do cliente',h:'O que a pessoa faz'},{id:'em',n:'Emoções',h:'Como ela se sente',emo:1},{id:'fl',n:'Linha de frente',h:'Ações visíveis da equipe',d:'Linha de interação'},{id:'bk',n:'Bastidores',h:'Ações que o cliente não vê',d:'Linha de visibilidade',o:1},{id:'sy',n:'Sistemas e apoio',h:'Ferramentas e processos',d:'Linha de interação interna',o:1}];
+const seed=()=>({title:'Pedido de café para retirar',persona:'Marina, trabalha em home office · pede pelo app e retira no balcão',steps:[{n:'Descobrir',e:1,d:'Marina vê o café nas redes sociais e decide pedir.'},{n:'Pedir',e:-1,d:'Ela monta o pedido no app e paga com Pix.'},{n:'Retirar',e:-2,d:'Ela vai ao balcão e espera o pedido ficar pronto.'},{n:'Avaliar',e:2,d:'Depois, responde à pesquisa e recebe um cupom.'}],
+c:{'ev|0':['Cardápio no Instagram'],'ev|1':['Tela do app de pedidos'],'ev|2':['Copo com o nome da cliente'],'ev|3':['Cupom por e-mail'],'ac|0':['Vê o cardápio e escolhe a bebida'],'ac|1':['Faz o pedido e paga com Pix'],'ac|2':['Chega ao balcão e retira'],'ac|3':['Responde à pesquisa'],'fl|0':['Responde dúvidas no direct'],'fl|1':['Confirma o pedido no tablet'],'fl|2':['Chama a cliente pelo nome'],'fl|3':['Envia a pesquisa por e-mail'],'bk|0':['Atualiza o cardápio do dia'],'bk|1':['Barista recebe o ticket impresso'],'bk|2':['Prepara e confere o pedido'],'bk|3':['Analisa as avaliações da semana'],'sy|0':['Instagram e planilha de estoque'],'sy|1':['App de pedidos e Pix'],'sy|2':['Impressora de tickets'],'sy|3':['CRM de clientes']},
+iss:[{s:1,t:'d',x:'Pix às vezes falha sem aviso',v:2,d:1},{s:2,t:'d',x:'Espera sem estimativa',v:3,d:2},{s:2,t:'i',x:'Avisar quando o pedido ficar pronto',v:0,d:2},{s:3,t:'i',x:'Cupom na segunda compra',v:0,d:4}]});
+const blank=()=>({title:'',persona:'',steps:[],c:{},iss:[],start:1});
+const DEF=['Descobrir','Escolher','Pedir e pagar','Aguardar','Retirar','Avaliar'];
+const newST=()=>({title:'',persona:'',new:'',steps:DEF.map(n=>({n,on:1}))});
+let ST=newST();
+const PR={ev:'O que ela vê ou toca?',ac:'O que ela faz aqui?',fl:'O que a equipe faz à vista?',bk:'O que acontece por trás?',sy:'Que ferramenta apoia?'};
+const SG={'descobrir':{ev:['Cardápio no Instagram','Placa na porta'],ac:['Vê uma foto ou indicação'],fl:['Responde dúvidas no direct'],bk:['Atualiza o cardápio do dia'],sy:['Instagram e planilha de estoque']},
+'escolher':{ev:['Cardápio digital'],ac:['Compara bebidas e preços','Escolhe a bebida'],fl:['Sugere o item do dia'],bk:['Confere o estoque de ingredientes'],sy:['App de pedidos']},
+'pedir e pagar':{ev:['Tela do app','Comprovante de pagamento'],ac:['Monta o pedido','Paga com Pix ou cartão'],fl:['Confirma o pedido no tablet'],bk:['Barista recebe o ticket'],sy:['Gateway de pagamento','Impressora de tickets']},
+'aguardar':{ev:['Notificação do app','Senha do pedido'],ac:['Acompanha o status do pedido'],fl:['Informa o tempo restante'],bk:['Prepara e confere o pedido'],sy:['Painel de pedidos']},
+'retirar':{ev:['Copo com o nome da cliente','Balcão de retirada'],ac:['Chega ao balcão e retira'],fl:['Chama a cliente pelo nome'],bk:['Separa o pedido pronto'],sy:['Painel de pedidos']},
+'avaliar':{ev:['Cupom ou pesquisa por e-mail'],ac:['Responde à pesquisa de satisfação'],fl:['Agradece e convida a voltar'],bk:['Analisa as avaliações da semana'],sy:['CRM de clientes']}};
+function sug(l,i,a){if(!S.guide)return '';const g=((SG[S.steps[i].n.toLowerCase()]||{})[l]||[]).map((t,n)=>[t,n]).filter(x=>!a.some(n=>n.t==x[0]));return g.map(x=>'<button class="sg" data-act="sg" data-l="'+l+'" data-i="'+i+'" data-n="'+x[1]+'">+ '+esc(x[0])+'</button>').join('')}
+function chk(){const b=document.getElementById('go');if(!b)return;const on=ST.steps.filter(s=>s.on).length;b.disabled=!ST.title.trim()||on<2;b.textContent='Criar blueprint ('+on+' etapas)'}
+function startScreen(){return '<div class="hd"><div class="bk">Blue Ocean · Blueprint de serviço</div><h1 class="h1">Vamos montar um blueprint</h1></div><div class="st"><section><h2>1 · Quem e o quê</h2><label>O que o cliente quer fazer?<input data-f="st:title" value="'+esc(ST.title)+'" placeholder="Ex.: Pedir um café para retirar"></label><label>Quem é o cliente e em que contexto?<input data-f="st:persona" value="'+esc(ST.persona)+'" placeholder="Ex.: Marina, trabalha em home office e tem pouco tempo"></label><div class="row"><button class="tb" data-act="ex">Preencher com o exemplo do café</button></div></section><section><h2>2 · Etapas da jornada</h2><p class="hint" style="margin:0">Um momento por etapa, na ordem em que o cliente vive. Desmarque o que não se aplica ou adicione as suas.</p><div class="chips">'+ST.steps.map((s,i)=>'<button class="chip" data-act="chip" data-i="'+i+'" aria-pressed="'+!!s.on+'">'+(s.on?'✓ ':'')+esc(s.n)+'</button>').join('')+'</div><div class="row"><input data-f="st:new" placeholder="Nova etapa, ex.: Receber o cupom" aria-label="Nova etapa" value="'+esc(ST.new)+'"><button class="tb" data-act="addst">Adicionar</button></div></section><div class="row"><button class="tb p" id="go" data-act="go">Criar blueprint</button><button class="tb" data-act="demo">Ver exemplo pronto</button><button class="tb" data-act="lib">Minhas jornadas</button>'+(HOSTED?'<button class="tb" data-act="professional">Modo profissional</button>':'')+'</div><p class="hint" style="margin:0">Dê um nome à jornada e escolha ao menos 2 etapas. Depois, o painel lateral guia o que preencher em cada faixa e sugere ideias para as etapas conhecidas.</p></div>'}
+function coach(){const N=S.steps.length,L=[['sd','O que acontece'],['ac','Ações do cliente'],['em','Emoções'],['ev','Evidência física'],['fl','Linha de frente'],['bk','Bastidores'],['sy','Sistemas e apoio']];const cnt=id=>id=='sd'?S.steps.filter(s=>s.d&&s.d.trim()).length:id=='em'?S.steps.filter(s=>s.e!=0).length:S.steps.filter((_,i)=>(S.c[id+'|'+i]||[]).length).length;const r=L.map(x=>[x[1],cnt(x[0]),N]);r.push(['Dores e ideias',Math.min(S.iss.length,2),2]);const nx=r.findIndex(x=>x[1]<x[2]);if(nx<0)return '';return '<h2>Passo a passo</h2>'+r.map((x,k)=>'<div class="ck'+(k==nx?' on':'')+'"><span>'+(x[1]>=x[2]?'✓':k+1)+'</span>'+x[0]+'<em>'+x[1]+' de '+x[2]+'</em></div>').join('')+'<div class="ins" style="margin-top:8px">Próximo: “'+r[nx][0]+'”. Emoção neutra conta como não preenchida.</div>'}
+const KEY2='bo-blueprint-v2',uid=()=>Math.random().toString(36).slice(2,9);
+let lk=false,pick=null,DB,S,cv=false,armed=false,lib=false,dr='',msg='',U=[],R=[],last='',lt=0;
+try{DB=JSON.parse(localStorage.getItem(KEY2))}catch(e){}
+if(!DB||!Array.isArray(DB.js)||!DB.js.length){let o;try{o=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!o||!o.steps)o=seed();o.id=uid();DB={cur:o.id,js:[o]}}
+function mig(j){const ok=/^[a-z0-9]{3,12}$/,seen=new Set();for(const k in j.c)j.c[k]=j.c[k].map(n=>{const o=typeof n=='object'&&n,t=o?String(n.t==null?'':n.t):String(n),i=o&&ok.test(n.i)&&!seen.has(n.i)?n.i:uid();seen.add(i);return{i,t}});j.links=(Array.isArray(j.links)?j.links:[]).filter(l=>l&&seen.has(l.a)&&seen.has(l.b)&&l.a!=l.b).map(l=>({a:l.a,b:l.b}))}
+if(HOSTED){const o=blank();o.id='host';DB={cur:o.id,js:[o]}}
+DB.js.forEach(mig);S=DB.js.find(j=>j.id==DB.cur)||DB.js[0];last=JSON.stringify(S);
+function commit(){const j=JSON.stringify(S);if(j===last)return;if(Date.now()-lt>700||!U.length){U.push(last);if(U.length>60)U.shift()}lt=Date.now();last=j;R=[]}
+const save=()=>{if(S.links){const q=new Set();for(const k in S.c)S.c[k].forEach(n=>q.add(n.i));S.links=S.links.filter(l=>q.has(l.a)&&q.has(l.b))}commit();DB.cur=S.id;if(HOSTED){S.steps.forEach(st=>{st.hostLocalId ||= uid()});S.iss.forEach(it=>{it.hostLocalId ||= uid()});if(!applyingHost)window.parent.postMessage({boBlueprintHost:1,type:'patch',state:JSON.parse(JSON.stringify(S))},location.origin);return;}try{localStorage.setItem(KEY2,JSON.stringify(DB))}catch(e){}};
+function setS(o){o.id=S.id;Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,o)}
+function sw(j){S=j;DB.cur=j.id;lib=false;U=[];R=[];last=JSON.stringify(S);lt=0;save()}
+function undo(d){const A=d?R:U,B=d?U:R;if(!A.length)return;B.push(JSON.stringify(S));const p=JSON.parse(A.pop());Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,p);last=JSON.stringify(S);lt=0;save()}
+function libView(){return '<div class="hd"><div class="bk">Blue Ocean · Blueprint de serviço</div><h1 class="h1">Minhas jornadas</h1></div><div class="st" style="max-width:860px"><div class="row"><button class="tb p" data-act="new">+ Nova jornada</button><button class="tb" data-act="dl">Baixar backup (.json)</button><button class="tb" data-act="imp">Importar backup</button><input type="file" id="fi" accept=".json,application/json" hidden aria-label="Arquivo de backup"><button class="tb" data-act="back">Voltar</button></div>'+(msg?'<div class="ins" role="status">'+esc(msg)+'</div>':'')+DB.js.map(j=>{const n=Object.values(j.c||{}).reduce((a,x)=>a+x.length,0);return '<section><div class="row" style="align-items:center"><div style="flex:1 1 240px"><b>'+esc(j.title||'(sem nome)')+'</b>'+(j.id==S.id?' <span class="sv">· aberta agora</span>':'')+'<div class="sv">'+(j.steps||[]).length+' etapas · '+n+' notas · '+(j.iss||[]).length+' dores e ideias'+(j.start?' · em criação':'')+'</div>'+(j.persona?'<div class="sv">'+esc(j.persona)+'</div>':'')+'</div><button class="tb" data-act="open" data-id="'+j.id+'">Abrir</button><button class="tb" data-act="dup" data-id="'+j.id+'">Duplicar</button><button class="tb" data-act="rm" data-id="'+j.id+'">'+(dr==j.id?'Confirmar exclusão':'Excluir')+'</button></div></section>'}).join('')+'<p class="hint" style="margin:0">As jornadas ficam salvas só neste navegador e neste dispositivo. Baixe um backup de vez em quando e use “Importar backup” para trazer jornadas de outro aparelho.</p></div>'}
+function impF(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result),a=Array.isArray(o.js)?o.js:o.steps?[o]:[];const ok=a.filter(j=>j&&Array.isArray(j.steps)&&j.steps.every(s=>s&&typeof s.n=='string'&&s.e>=-2&&s.e<=2)&&j.c&&typeof j.c=='object'&&Object.values(j.c).every(Array.isArray)&&Array.isArray(j.iss)&&j.iss.every(x=>x&&x.s>=0&&x.s<j.steps.length&&(x.t=='d'||x.t=='i')));ok.forEach(j=>{j.id=uid();j.steps=j.steps.map(s=>({n:s.n,e:Math.round(+s.e),d:typeof s.d=='string'?s.d:''}));j.iss=j.iss.map(x=>({s:+x.s,t:x.t,x:String(x.x),v:Math.min(3,Math.max(0,+x.v||0)),d:Math.min(4,Math.max(0,+x.d||0))}));j.lanes=(Array.isArray(j.lanes)?j.lanes:[]).filter(L=>L&&/^x[a-z0-9]{1,12}$/.test(L.id)&&typeof L.n=='string');mig(j);DB.js.push(j)});msg=ok.length?ok.length+' jornada(s) importada(s).':'O arquivo não tem jornadas válidas.';if(ok.length)save()}catch(e){msg='Não consegui ler esse arquivo.'}render()};r.readAsText(f)}
+async function dl(){try{const d=await claude.use('downloads');if(!d){msg='Download indisponível nesta tela. Abra o link no navegador ou no app do Claude.';render();return}await d.save({filename:'blueprints-blue-ocean.json',data:JSON.stringify({v:1,js:DB.js},null,1)});msg='Backup salvo.'}catch(e){msg=e&&e.code=='declined'?'Download cancelado.':'Não foi possível baixar o backup.'}render()}
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const app=document.getElementById('app');
+function score(i){const e=S.steps[i].e,I=S.iss.filter(x=>x.s==i),p=I.filter(x=>x.t=='d').reduce((a,x)=>a+x.v,0),n=I.filter(x=>x.t=='i').length;return Math.max(0,(2-e)*1.5+p*2-n*1.5)}
+function curve(){const N=S.steps.length,W=N*100,y=e=>16+(2-e)*16,P=S.steps.map((s,i)=>[i*100+50,y(s.e)]);
+let d='M'+P[0].join(' ');for(let i=1;i<N;i++){const a=P[i-1],b=P[i],m=(a[0]+b[0])/2;d+=' C'+m+' '+a[1]+' '+m+' '+b[1]+' '+b[0]+' '+b[1]}
+return '<svg viewBox="0 0 '+W+' 110" preserveAspectRatio="none" role="img" aria-label="Curva de emoções ao longo das etapas"><line x1="0" x2="'+W+'" y1="48" y2="48" stroke="var(--ln)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/><path d="'+d+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+P.map((p,i)=>'<span class="dt" style="left:'+p[0]/W*100+'%;top:'+p[1]+'px"></span><span class="dl" style="left:'+p[0]/W*100+'%;top:'+(p[1]+9)+'px">'+EM[S.steps[i].e+2]+'</span>').join('')}
+function dx(){const N=S.steps.length,sc=S.steps.map((_,i)=>score(i)),mx=Math.max(...sc,1),ord=sc.map((_,i)=>i).sort((a,b)=>sc[b]-sc[a]);
+const nd=i=>S.iss.filter(x=>x.s==i&&x.t=='d').length,ni=i=>S.iss.filter(x=>x.s==i&&x.t=='i').length;
+let h=coach()+'<h2>Prioridade de melhoria</h2>'+ord.map(i=>'<div class="rk"><div><b>'+(i+1)+'. '+esc(S.steps[i].n)+'</b><span>'+EM[S.steps[i].e+2]+' · '+nd(i)+' dor(es)</span></div><div class="bar"><i style="width:'+sc[i]/mx*100+'%"></i></div></div>').join('');
+const top=ord[0],ins=[];
+ins.push(sc[top]>0?'Comece por “'+esc(S.steps[top].n)+'”: humor '+EM[S.steps[top].e+2].toLowerCase()+' e '+nd(top)+' dor(es) dão a maior pontuação.':'Registre dores e ideias para ver as prioridades.');
+const open=S.steps.map((s,i)=>nd(i)&&!ni(i)?esc(s.n):'').filter(Boolean);
+if(open.length)ins.push('Dores sem nenhuma ideia ainda: '+open.join(', ')+'.');else if(S.iss.some(x=>x.t=='d'))ins.push('Toda etapa com dor já tem uma ideia de melhoria.');
+const miss=DIMS.filter((m,k)=>!S.iss.some(x=>x.d==k));
+if(S.iss.length)ins.push(miss.length?'Nenhum item toca em: '+miss.join(', ')+'. Vale revisar a jornada por essa lente.':'Todas as dimensões de qualidade têm itens.');
+h+='<h2>Leitura automática</h2>'+ins.map(t=>'<div class="ins">'+t+'</div>').join('');
+const tot=DIMS.map((_,k)=>S.iss.filter(x=>x.d==k).length),mt=Math.max(...tot,1);
+h+='<h2>Cobertura da qualidade (SERVQUAL)</h2>'+DIMS.map((m,k)=>'<div class="rk"><div><b>'+m+'</b><span>'+S.iss.filter(x=>x.d==k&&x.t=='d').length+' dor · '+S.iss.filter(x=>x.d==k&&x.t=='i').length+' ideia</span></div><div class="bar"><i style="width:'+tot[k]/mt*100+'%"></i></div></div>').join('');
+return h+'<p class="hint">Pontuação = humor baixo × 1,5 + gravidade das dores × 2 − ideias × 1,5.</p>'}
+function cell(l,i){const k=l+'|'+i,a=S.c[k]||[];return '<div class="c" data-cell="'+k+'">'+a.map((t,j)=>'<div class="nw'+(pick==t.i?' pk':'')+'" data-j="'+j+'" data-nid="'+t.i+'"><span class="gh" draggable="true" data-k="'+k+'" data-j="'+j+'" title="Arrastar" aria-hidden="true">⠿</span><div class="n" contenteditable="true" role="textbox" aria-label="Nota" data-ed="c" data-k="'+k+'" data-j="'+j+'">'+esc(t.t)+'</div>'+(lk?'<button class="nx c" data-act="pk" data-nid="'+t.i+'" aria-label="Ligar esta nota" title="Ligar">●</button>':'')+'<button class="nx a" data-act="dn" data-k="'+k+'" data-j="'+j+'" aria-label="Duplicar nota" title="Duplicar">⧉</button><button class="nx b" data-act="rn" data-k="'+k+'" data-j="'+j+'" aria-label="Remover nota" title="Remover">×</button></div>').join('')+sug(l,i,a)+'<button class="ad" data-act="add" data-k="'+k+'" aria-label="Adicionar nota">'+(a.length?'+':'+ '+(PR[l]||'Adicionar'))+'</button></div>'}
+function item(x,ii){return '<div class="it '+x.t+'"><b>'+(x.t=='d'?'Dor':'Ideia')+'</b><div class="tx" contenteditable="true" role="textbox" aria-label="Texto" data-ed="ix" data-ii="'+ii+'">'+esc(x.x)+'</div><div class="mt">'+(x.t=='d'?'<button data-act="sev" data-ii="'+ii+'">Gravidade '+x.v+'/3</button>':'')+'<select data-act="dim" data-ii="'+ii+'" aria-label="Dimensão de qualidade">'+DIMS.map((m,k)=>'<option value="'+k+'"'+(k==x.d?' selected':'')+'>'+m+'</option>').join('')+'</select><button class="x" data-act="deli" data-ii="'+ii+'" aria-label="Remover item">×</button></div></div>'}
+function render(){if(lib){app.innerHTML=libView();return}if(S.start){app.innerHTML=startScreen();chk();return}const N=S.steps.length;
+let h='<div class="hd"><div class="bk">Blue Ocean · Blueprint de serviço</div><input class="ti" data-f="title" value="'+esc(S.title)+'" aria-label="Nome da jornada"><span class="sv">Salvo neste dispositivo</span><button class="tb" data-act="cv" aria-pressed="'+cv+'">Visão do cliente</button><button class="tb" data-act="lk" aria-pressed="'+lk+'">↗ Ligar notas</button><button class="tb" data-act="undo"'+(U.length?'':' disabled')+'>↶ Desfazer</button><button class="tb" data-act="redo"'+(R.length?'':' disabled')+'>↷ Refazer</button><button class="tb" data-act="lib">Minhas jornadas ('+DB.js.length+')</button>'+(HOSTED?'<button class="tb" data-act="professional">Modo profissional</button>':'')+'<button class="tb p" data-act="step">+ Nova etapa</button></div>';
+h+=(lk?'<div class="ins" role="status" style="margin:0 24px 8px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois em ● na de destino. Clique numa seta para removê-la.')+'</div>':'')+'<input class="pi" data-f="persona" value="'+esc(S.persona)+'" placeholder="Persona e cenário: quem é o cliente e o que ele quer?" aria-label="Persona e cenário"><div class="wrap"><div class="bd"><div style="position:relative;min-width:'+(260+N*200)+'px;--cols:200px repeat('+N+',minmax(200px,1fr)) 56px">';
+h+='<div class="r"><div class="lb">Etapas<small>Um momento da experiência</small></div>'+S.steps.map((s,i)=>'<div class="sh"><i>'+(i+1)+'</i><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da etapa" data-ed="sn" data-si="'+i+'">'+esc(s.n)+'</span>'+'<div class="sa"><button class="x" data-act="mv" data-si="'+i+'" data-d="-1" aria-label="Mover etapa para a esquerda"'+(i?'':' disabled')+'>‹</button><button class="x" data-act="mv" data-si="'+i+'" data-d="1" aria-label="Mover etapa para a direita"'+(i<N-1?'':' disabled')+'>›</button><button class="x" data-act="ds" data-si="'+i+'" aria-label="Duplicar etapa" title="Duplicar etapa">⧉</button>'+(N>1?'<button class="x" data-act="del" data-si="'+i+'" aria-label="Remover etapa">×</button>':'')+'</div></div>').join('')+'</div>';
+h+='<div class="r"><div class="lb">O que acontece<small>Resumo da etapa</small></div>'+S.steps.map((s,i)=>'<div class="c"><div class="n" contenteditable="true" role="textbox" aria-label="O que acontece em '+esc(s.n)+'" data-ed="sd" data-si="'+i+'">'+esc(s.d||'')+'</div></div>').join('')+'</div>';LANES.forEach(L=>{if(cv&&L.o)return;if(L.d)h+='<div class="dv">'+L.d+'</div>';h+='<div class="r"><div class="lb">'+L.n+'<small>'+L.h+'</small></div>';
+if(L.emo)h+='<div class="c" style="grid-column:2/'+(N+2)+'"><div class="cvb" id="curve">'+curve()+'</div><div class="sl" style="grid-template-columns:repeat('+N+',1fr)">'+S.steps.map((s,i)=>'<input type="range" min="-2" max="2" step="1" value="'+s.e+'" data-act="emo" data-si="'+i+'" aria-label="Emoção em '+esc(s.n)+'">').join('')+'</div></div>';
+else for(let i=0;i<N;i++)h+=cell(L.id,i);h+='</div>'});
+(S.lanes||[]).forEach(L=>{h+='<div class="r"><div class="lb"><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da faixa" data-ed="ln" data-id="'+esc(L.id)+'">'+esc(L.n)+'</span><button class="x" data-act="dlane" data-id="'+esc(L.id)+'" aria-label="Remover faixa">×</button><small>Faixa personalizada</small></div>';for(let i=0;i<N;i++)h+=cell(L.id,i);h+='</div>'});h+='<div class="r"><div class="c" style="grid-column:1/-1"><button class="ad" data-act="alane" style="width:auto;padding:0 16px">+ Adicionar faixa</button></div></div>';h+='<div class="dv">Melhorias</div><div class="r"><div class="lb">Dores e ideias<small>Marque a dimensão de qualidade</small></div>';
+for(let i=0;i<N;i++)h+='<div class="c">'+S.iss.map((x,ii)=>x.s==i?item(x,ii):'').join('')+'<div class="bt"><button data-act="addi" data-si="'+i+'" data-t="d">+ Dor</button><button data-act="addi" data-si="'+i+'" data-t="i">+ Ideia</button></div></div>';
+h+='</div><svg class="lk" id="lk" aria-hidden="true"></svg></div></div><aside class="pnl" id="dx">'+dx()+'</aside></div>';app.innerHTML=h;requestAnimationFrame(drawLinks)}
+function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();document.getElementById('dx').innerHTML=dx()}
+function focusNew(sel){const e=app.querySelector(sel);if(e)e.focus()}
+app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
+if(HOSTED&&(a==='lib'||a==='professional')){window.parent.postMessage({boBlueprintHost:1,type:a==='lib'?'library':'professional'},location.origin);return}
+if(a=='cv'){cv=!cv}
+else if(a=='lk'){lk=!lk;pick=null}
+else if(a=='pk'){if(!pick)pick=d.nid;else if(pick==d.nid)pick=null;else{const L=S.links=S.links||[],x=L.findIndex(l=>l.a==pick&&l.b==d.nid);if(x>=0)L.splice(x,1);else L.push({a:pick,b:d.nid});pick=null;save()}}
+else if(a=='ul'){S.links.splice(+d.n,1);save()}
+else if(a=='dn'){const A=S.c[d.k];A.splice(+d.j+1,0,{i:uid(),t:A[+d.j].t})}
+else if(a=='rn'){S.c[d.k].splice(+d.j,1)}
+else if(a=='mv'){const i=+d.si,j=i+(+d.d);if(S.steps[j]){[S.steps[i],S.steps[j]]=[S.steps[j],S.steps[i]];remap(x=>x==i?j:x==j?i:x);save()}}
+else if(a=='ds'){const i=+d.si,cc=JSON.parse(JSON.stringify(S.c)),ii=JSON.parse(JSON.stringify(S.iss.filter(x=>x.s==i))),s=S.steps[i];remap(x=>x>i?x+1:x);for(const k in cc){const p=k.split('|');if(+p[1]==i){cc[k].forEach(n=>n.i=uid());S.c[p[0]+'|'+(i+1)]=cc[k]}}ii.forEach(x=>{x.s=i+1;S.iss.push(x)});S.steps.splice(i+1,0,{n:s.n+' (cópia)',e:s.e,d:s.d});save()}
+else if(a=='alane'){(S.lanes=S.lanes||[]).push({id:'x'+uid(),n:'Nova faixa'});save()}
+else if(a=='dlane'){S.lanes=(S.lanes||[]).filter(x=>x.id!=d.id);for(const k in S.c)if(k.split('|')[0]==d.id)delete S.c[k];save()}
+else if(a=='undo'){undo(0)}
+else if(a=='redo'){undo(1)}
+else if(a=='lib'){lib=true}
+else if(a=='back'){lib=false}
+else if(a=='new'){const o=blank();o.id=uid();DB.js.push(o);ST=newST();sw(o)}
+else if(a=='open'){const j=DB.js.find(x=>x.id==d.id);if(j)sw(j)}
+else if(a=='dup'){const j=DB.js.find(x=>x.id==d.id);if(j){const c=JSON.parse(JSON.stringify(j));c.id=uid();c.title=(c.title||'Jornada')+' (cópia)';DB.js.splice(DB.js.indexOf(j)+1,0,c);msg='Jornada duplicada.';save()}}
+else if(a=='rm'){if(dr!=d.id){dr=d.id}else{dr='';DB.js=DB.js.filter(x=>x.id!=d.id);if(!DB.js.length){const o=blank();o.id=uid();DB.js.push(o)}if(!DB.js.some(x=>x.id==S.id)){ST=newST();sw(DB.js[0]);lib=true}else save()}}
+else if(a=='dl'){dl();return}
+else if(a=='imp'){document.getElementById('fi').click();return}
+else if(a=='step'){S.steps.push({n:'Etapa '+(S.steps.length+1),e:0});save()}
+else if(a=='del'){const s=+d.si,c={};for(const k in S.c){const[l,i]=k.split('|');if(+i==s)continue;c[l+'|'+(+i>s?i-1:i)]=S.c[k]}S.c=c;S.iss=S.iss.filter(x=>x.s!=s).map(x=>({...x,s:x.s>s?x.s-1:x.s}));S.steps.splice(s,1);save()}
+else if(a=='add'){(S.c[d.k]=S.c[d.k]||[]).push({i:uid(),t:''});save();render();focusNew('[data-k="'+d.k+'"][data-j="'+(S.c[d.k].length-1)+'"]');return}
+else if(a=='addi'){S.iss.push({s:+d.si,t:d.t,x:'',v:d.t=='d'?2:0,d:1});save();render();focusNew('[data-ii="'+(S.iss.length-1)+'"][data-ed]');return}
+else if(a=='sg'){const k=d.l+'|'+d.i;(S.c[k]=S.c[k]||[]).push({i:uid(),t:SG[S.steps[+d.i].n.toLowerCase()][d.l][+d.n]});save()}
+else if(a=='chip'){const s=ST.steps[+d.i];s.on=s.on?0:1}
+else if(a=='addst'){const v=(ST.new||'').trim();if(v){ST.steps.push({n:v,on:1});ST.new=''}}
+else if(a=='ex'){ST.title='Pedir um café para retirar';ST.persona='Marina, trabalha em home office e tem pouco tempo'}
+else if(a=='go'){if(!ST.title.trim()||ST.steps.filter(s=>s.on).length<2)return;setS({title:ST.title.trim(),persona:ST.persona,steps:ST.steps.filter(s=>s.on).map(s=>({n:s.n,e:0})),c:{},iss:[],guide:1});save()}
+else if(a=='demo'){setS(seed());mig(S);save()}
+else if(a=='sev'){const x=S.iss[+d.ii];x.v=x.v%3+1;save()}
+else if(a=='deli'){S.iss.splice(+d.ii,1);save()}
+render()});
+app.addEventListener('focusout',e=>{const el=e.target,t=el.dataset&&el.dataset.ed,f=el.dataset&&el.dataset.f;
+if(f){if(!f.startsWith('st:')){S[f]=el.value;save()}return}if(!t||!el.isConnected)return;const v=el.innerText.replace(/\s+$/,'').trim();
+if(t=='c'){const a=S.c[el.dataset.k],j=+el.dataset.j;if(a[j]===undefined)return;if(v)a[j].t=v;else a.splice(j,1);save();if(!v)render()}
+else if(t=='sd'){S.steps[+el.dataset.si].d=v;save()}
+else if(t=='ln'){const l=(S.lanes||[]).find(x=>x.id==el.dataset.id);if(l){l.n=v||'Faixa';save()}}
+else if(t=='sn'){S.steps[+el.dataset.si].n=v||'Etapa';save();live()}
+else if(t=='ix'){const ii=+el.dataset.ii;if(!S.iss[ii])return;if(v){S.iss[ii].x=v;save();live()}else{S.iss.splice(ii,1);save();render()}}});
+app.addEventListener('input',e=>{const el=e.target;if(el.isContentEditable)drawLinks();if(el.dataset.f){const f=el.dataset.f;if(f.startsWith('st:')){ST[f.slice(3)]=el.value;chk()}else{S[f]=el.value;save()}}else if(el.dataset.act=='emo'){S.steps[+el.dataset.si].e=+el.value;save();live()}});
+app.addEventListener('change',e=>{const el=e.target;if(el.id=='fi'){impF(el.files[0]);return}if(el.dataset.act=='dim'){S.iss[+el.dataset.ii].d=+el.value;save();live()}});
+app.addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.dataset.f=='st:new'){e.preventDefault();document.querySelector('[data-act=addst]').click()}if(e.key=='Enter'&&e.target.isContentEditable){e.preventDefault();e.target.blur()}});
+function remap(f){const c={};for(const k in S.c){const p=k.split('|'),n=f(+p[1]);if(n!=null)c[p[0]+'|'+n]=S.c[k]}S.c=c;S.iss=S.iss.map(x=>({...x,s:f(x.s)})).filter(x=>x.s!=null)}
+let dg=null;
+app.addEventListener('dragstart',e=>{const h=e.target.closest&&e.target.closest('.gh');if(!h)return;dg={k:h.dataset.k,j:+h.dataset.j};e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain','n')}catch(x){}});
+app.addEventListener('dragover',e=>{const c=e.target.closest('[data-cell]');if(!dg||!c||c.dataset.cell.split('|')[0]!=dg.k.split('|')[0])return;e.preventDefault();app.querySelectorAll('.ov').forEach(x=>x.classList.remove('ov'));c.classList.add('ov')});
+app.addEventListener('drop',e=>{const c=e.target.closest('[data-cell]');if(!dg||!c)return;e.preventDefault();const k2=c.dataset.cell;if(k2.split('|')[0]!=dg.k.split('|')[0]){dg=null;return}const w=e.target.closest('.nw'),dst=S.c[k2]=S.c[k2]||[];let j2=w?+w.dataset.j:dst.length;const t=S.c[dg.k].splice(dg.j,1)[0];if(k2==dg.k&&dg.j<j2)j2--;dst.splice(j2,0,t);dg=null;save();render()});
+app.addEventListener('dragend',()=>{dg=null;app.querySelectorAll('.ov').forEach(x=>x.classList.remove('ov'))});
+function drawLinks(){const sv=document.getElementById('lk');if(!sv)return;const o=sv.getBoundingClientRect(),P=el=>{const r=el.getBoundingClientRect();return{l:r.left-o.left,r:r.right-o.left,t:r.top-o.top,b:r.bottom-o.top}};
+let h='<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--ac)"/></marker></defs>';
+(S.links||[]).forEach((l,n)=>{const A=app.querySelector('.nw[data-nid="'+l.a+'"]'),B=app.querySelector('.nw[data-nid="'+l.b+'"]');if(!A||!B)return;const a=P(A),b=P(B),dx=(b.l+b.r)/2-(a.l+a.r)/2,dy=(b.t+b.b)/2-(a.t+a.b)/2;let x1,y1,x2,y2,c1,c2;
+if(Math.abs(dy)>Math.abs(dx)*.3){const dn=dy>0;x1=(a.l+a.r)/2;x2=(b.l+b.r)/2;y1=dn?a.b:a.t;y2=dn?b.t:b.b;const k=Math.max(30,Math.abs(y2-y1)/2)*(dn?1:-1);c1=[x1,y1+k];c2=[x2,y2-k]}
+else{const rt=dx>0;y1=(a.t+a.b)/2;y2=(b.t+b.b)/2;x1=rt?a.r:a.l;x2=rt?b.l:b.r;const k=Math.max(30,Math.abs(x2-x1)/2)*(rt?1:-1);c1=[x1+k,y1];c2=[x2-k,y2]}
+const d='M'+x1+' '+y1+' C'+c1.join(' ')+' '+c2.join(' ')+' '+x2+' '+y2;
+h+='<path d="'+d+'" fill="none" style="stroke:var(--ac)" stroke-width="1.75" marker-end="url(#ar)"/><path d="'+d+'" fill="none" stroke="transparent" stroke-width="14" style="pointer-events:stroke;cursor:pointer" data-act="ul" data-n="'+n+'"><title>Remover ligação</title></path>'});
+sv.innerHTML=h}
+window.addEventListener('resize',drawLinks);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawLinks);
+render();
+if(HOSTED){
+  window.addEventListener('message',event=>{
+    if(event.source!==window.parent||event.origin!==location.origin||event.data?.boBlueprintHost!==1)return;
+    if(event.data.type==='hydrate'){
+      applyingHost=true;
+      try{
+        const state=event.data.state;
+        if(!state||!Array.isArray(state.steps)||typeof state.c!=='object')throw Error('Invalid host state');
+        S=JSON.parse(JSON.stringify(state));S.id='host';DB={cur:'host',js:[S]};
+        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;render();
+      }catch(e){console.error('Blueprint: cannot hydrate service graph',e)}
+      finally{applyingHost=false}
+    }
+  });
+  window.parent.postMessage({boBlueprintHost:1,type:'ready'},location.origin);
+}
+</script>
+</body>
+</html>

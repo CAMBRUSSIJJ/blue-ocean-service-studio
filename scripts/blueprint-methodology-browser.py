@@ -30,8 +30,8 @@ def create(page):
     page.locator('[data-service-blueprint-nav="1"]').click()
     page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
     expect(page.locator('.bo1174-board')).to_be_visible()
-    expect(page.locator('.bo-ref-matrix')).to_be_visible()
-    page.get_by_role('button',name='Modo profissional ↗').click()
+    expect(page.frame_locator('.bo-blueprint-reference-frame').locator('#app')).to_be_visible()
+    page.frame_locator('.bo-blueprint-reference-frame').get_by_role('button',name='Modo profissional').click()
 def options(page,name):
     page.get_by_role('button',name='Opções',exact=True).click()
     page.get_by_role('dialog',name='Ferramentas do editor',exact=True).get_by_role('button',name=re.compile('^.*'+re.escape(name))).click()
