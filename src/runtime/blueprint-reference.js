@@ -114,7 +114,7 @@ function setupHtml(model){
  return '<div class="bo-ref-header bo-ref-onboard"><div class="bo-ref-breadcrumb">Blue Ocean · Blueprint de serviço</div><h1>Vamos montar um blueprint</h1></div>'+
  '<div class="bo-ref-start"><section><h2>1 · Quem e o quê</h2><label>O que o cliente quer fazer?<input id="br-setup-title" value="'+esc(initial.title||model.name||'')+'" placeholder="Ex.: Pedir um café para retirar"></label><label>Quem é o cliente e em que contexto?<input id="br-setup-persona" value="'+esc(initial.persona||model.persona||'')+'" placeholder="Ex.: Marina, trabalha em home office e tem pouco tempo"></label></section>'+
  '<section><h2>2 · Etapas da jornada</h2><p>Um momento por etapa, na ordem em que o cliente vive. Desmarque as que não se aplicam.</p><div class="bo-ref-setup-chips">'+(initial.steps||defaults.map(name=>({name,on:true}))).map((s,i)=>button('setup-chip',(s.on?'✓ ':'')+esc(s.name),'class="bo-ref-chip" aria-pressed="'+String(s.on)+'" data-index="'+i+'"')).join('')+'</div><div class="bo-ref-setup-add"><input id="br-setup-next" placeholder="Nova etapa, ex.: Receber cupom">'+button('setup-add','Adicionar')+'</div></section>'+
- '<div class="bo-ref-start-actions">'+button('setup-create','Criar blueprint','class="primary"')+button('advanced','Editor avançado')+button('back','Meus Blueprints')+'</div><p>Escolha ao menos duas etapas para começar. O guia lateral acompanhará o preenchimento do seu Blueprint.</p></div>';
+ '<div class="bo-ref-start-actions">'+button('setup-create','Criar blueprint','class="primary"')+button('advanced','Editor avançado')+button('back','Meus Blueprints','aria-label="Voltar para Blueprints"')+'</div><p>Escolha ao menos duas etapas para começar. O guia lateral acompanhará o preenchimento do seu Blueprint.</p></div>';
 }
 export function mountBlueprintReference(root,model,actions){
  const readOnly=!!model.readOnly,ui=model.ui||{},link={active:!!ui.linking,readOnly};
@@ -142,7 +142,7 @@ export function mountBlueprintReference(root,model,actions){
  (readOnly?'':button('link-mode','↗ Ligar notas','aria-pressed="'+String(!!ui.linking)+'"'))+
  (readOnly?'':button('undo','↶ Desfazer')+button('redo','↷ Refazer'))+
  button('advanced','Editor avançado')+
- button('back','Meus Blueprints')+
+ button('back','Meus Blueprints','aria-label="Voltar para Blueprints"')+
  (readOnly?'':button('stage-add','+ Nova etapa','class="primary"'))+
  '</div></div><input class="bo-ref-persona" data-edit="persona" aria-label="Persona e cenário" value="'+esc(model.persona||'')+'" placeholder="Persona e cenário: quem é o cliente e o que ele quer?">'+
  (ui.linking?'<p class="bo-ref-link-guide">Selecione a primeira nota e depois a de destino para criar ou remover uma conexão.</p>':'');
