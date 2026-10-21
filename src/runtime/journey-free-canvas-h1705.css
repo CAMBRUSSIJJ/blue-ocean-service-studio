@@ -148,3 +148,19 @@
   .bo-h1706-stage,.bo-h1706-new-stage{padding:10px}
   .bo-h1705-heading input,.bo-h1706-lane-name input{font-size:16px}
 }
+
+
+/* Journey visual series: a readable Smaply-inspired experience with Blue Ocean's own UI. */
+.bo-h1706-cell.type-emotion,.bo-h1706-cell.type-metric{padding:0;overflow:hidden}
+.bo-j-visual-cell{position:relative;box-sizing:border-box;min-height:var(--lane-height,164px);display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:16px;background:linear-gradient(180deg,#f7faff 0%,#fff 100%)}
+.bo-j-trend{position:absolute;left:0;top:6px;width:100%;height:96px;pointer-events:none}
+.bo-j-trend path{fill:none;stroke:#4278c1;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.bo-j-score-choices{position:relative;z-index:1;display:flex;justify-content:space-evenly;gap:3px;margin:99px 8px 0}
+.bo-j-score-choices button{flex:1;min-width:0;max-width:46px;padding:7px 2px;border:1px solid #dae3ef;border-radius:8px;background:rgba(255,255,255,.95);font-size:19px;line-height:1.2;opacity:.65;transition:background-color .15s,border-color .15s}
+.bo-j-score-choices button[aria-pressed="true"]{opacity:1;background:#e7f1ff;border-color:#5e92d1;box-shadow:0 1px 5px #4278c120}
+.bo-j-score-choices button:focus-visible,.bo-j-metric input:focus-visible{outline:2px solid #285cbb;outline-offset:2px}
+.bo-j-metric label{z-index:1;position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:100px 14px 0;font-size:11px;color:#52627a}
+.bo-j-metric input{width:98px;min-width:0;padding:8px;border:1px solid #d5deeb;border-radius:7px;background:white;font:inherit;font-size:13px;color:#253c5e;text-align:right}
+.bo-j-score-inspector button{font-size:17px}
+.bo-j-score-inspector button small{font-size:9px;line-height:1.25;min-height:24px}
+@media(max-width:760px){.bo-j-score-choices{gap:2px;margin-inline:5px}.bo-j-score-choices button{font-size:17px}.bo-j-score-inspector{flex-wrap:wrap}}
