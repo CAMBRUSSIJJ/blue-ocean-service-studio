@@ -60,7 +60,7 @@ def project(page):
     page.get_by_label('Nome do projeto', exact=True).fill('Jornada configurável QA')
     page.get_by_label('Serviço principal', exact=True).fill('Atendimento')
     page.get_by_role('button', name='Criar projeto', exact=True).click()
-    page.get_by_role('button', name=re.compile(r'^\+ Nova Jornada')).click()
+    page.locator('.bo-h724-journey-pane').get_by_role('button', name='Criar Journey', exact=True).click()
     page.get_by_role('button', name=re.compile(r'^Em branco')).click()
     expect(page.locator('.bo-h1705-journey')).to_be_visible()
 
