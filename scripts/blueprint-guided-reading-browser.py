@@ -42,7 +42,7 @@ try:
         guide.get_by_role('tab',name='Visão do cliente').click()
         expect(guide.get_by_text('Curva de emoções')).to_be_visible()
         slider=guide.get_by_role('slider',name='Emoção · Contato')
-        slider.fill('2')
+        slider.evaluate("el => {el.value='2';el.dispatchEvent(new Event('change',{bubbles:true}))}")
         saved=page.evaluate("""() => {const g=window.BlueOceanRuntime.api('dataBridge').get();return {stage:Object.values(g.stages).find(s=>s.title==='Contato'),items:JSON.stringify(Object.values(g.views.whiteboards).find(x=>x.viewKind==='blueprint').items)} }""")
         assert saved['stage']['emotionScore']==2 and saved['stage']['emotion']=='positive'
         assert saved['items']==before['items'], 'Guidance must not change operational cards'
