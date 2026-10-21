@@ -24,6 +24,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run docs:check
+      - run: node scripts/journey-visualization-test.mjs
       - run: npm run release:verify
       - name: Verificar comportamento da Jornada
         run: |
