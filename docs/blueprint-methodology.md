@@ -2,6 +2,18 @@
 
 A vista operacional representa a entrega do serviço em seis camadas. A edição direta continua no canvas; informações operacionais e estratégicas ficam disponíveis quando necessárias.
 
+## Mapa visual como experiência principal (21/10/2026)
+
+A tela principal segue a referência HTML recebida: cabeçalho editável, cenário da Persona, etapas em colunas, resumo por etapa, evidência física, ações do cliente, curva de emoções em cinco níveis, linha de frente, bastidores, processos, sistemas e apoio, faixas personalizadas e dores/ideias. O painel lateral mantém checklist, prioridade de melhoria, leitura automática e cobertura de qualidade. Notas são editáveis, duplicáveis, conectáveis e arrastáveis entre etapas da mesma faixa; o mapa pode mostrar só a visão do cliente.
+
+Ao criar um Blueprint sem etapas, surge o assistente **Vamos montar um blueprint**, com objetivo, contexto, etapas sugeridas e possibilidade de personalizar. Dados exemplificativos não são inseridos sem ação explícita. A página de projetos/Blueprints continua sendo a biblioteca canônica do aplicativo.
+
+A integração reutiliza registros reais do Service Graph: os cartões de operação são entidades do serviço; as Dores são registros de `pain` com etapa e metadados de gravidade/dimensão; as Ideias são `opportunity` associadas à etapa. Emoções escrevem nas etapas da Journey e na representação de emoção existente. Cobertura da qualidade conta dores/ideias por dimensão, **não mede SERVQUAL**. A pontuação de prioridade é uma heurística de triagem, não uma predição de satisfação. Nada é importado de um conjunto de dados fictícios.
+
+**Editor avançado** oferece o editor antigo com seis camadas operacionais, governança, revisão da entrega, marketing de serviços e 7 Ps, vínculos, inspeção, bibliotecas, exportação, histórico e o restante das ferramentas existentes. **Mapa visual** retorna à nova tela. Os registros persistidos continuam compartilhados.
+
+Teste novo: `python3 scripts/blueprint-reference-browser.py` após `npm run build`.
+
 ## Estrutura do mapa
 
 | Camada | Conteúdo |

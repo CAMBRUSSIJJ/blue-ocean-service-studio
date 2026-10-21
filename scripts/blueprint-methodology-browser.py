@@ -30,6 +30,9 @@ def create(page):
     page.locator('[data-service-blueprint-nav="1"]').click()
     page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
     expect(page.locator('.bo1174-board')).to_be_visible()
+    # The reference HTML now opens as the default map. Existing deep operational checks
+    # intentionally switch to the preserved advanced editor.
+    page.get_by_role('button',name='Editor avançado',exact=True).click()
 def options(page,name):
     page.get_by_role('button',name='Opções',exact=True).click()
     page.get_by_role('dialog',name='Ferramentas do editor',exact=True).get_by_role('button',name=re.compile('^.*'+re.escape(name))).click()
