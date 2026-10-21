@@ -11,3 +11,14 @@
 .bo-h722-embedded{padding:0 30px 60px;min-height:0}.bo-h722-embedded--journey .bo-h79-journey{margin-left:0!important;margin-right:0!important;border:1px solid #dde6ef;border-radius:0 0 16px 16px;overflow:hidden;background:#fff}.bo-h722-embedded--whiteboard .bo1189-whiteboards{padding-top:22px}.bo-h722-embedded--whiteboard .bo1189-whiteboards>header{margin-top:0}.bo-h722-embedded--whiteboard .bo1189-whiteboards>header>div:first-child span{display:none}
 @media(max-width:1000px){.bo-h722-workspace-head{padding:22px}.bo-h722-tabs{padding:0 22px}.bo-h722-overview,.bo-h722-blueprint-pane{padding-left:22px;padding-right:22px}.bo-h722-embedded{padding-left:22px;padding-right:22px}.bo-h722-flow{grid-template-columns:1fr}.bo-h722-flow-link{height:24px;transform:rotate(90deg)}.bo-h722-flow-link--branch{transform:rotate(90deg)}}
 @media(max-width:720px){.bo-h722-workspace-head{flex-direction:column;padding:18px}.bo-h722-head-copy h1{font-size:22px}.bo-h722-head-actions{width:100%;justify-content:flex-start}.bo-h722-tabs{padding:0 10px;overflow-x:auto}.bo-h722-tabs button{padding:0 10px;white-space:nowrap}.bo-h722-overview,.bo-h722-blueprint-pane,.bo-h722-embedded{padding-left:14px;padding-right:14px}.bo-h722-current-map,.bo-h722-artifact-strip{padding:16px}.bo-h722-blueprint-grid{grid-template-columns:1fr}.bo-h722-library-toolbar{align-items:flex-start!important;gap:10px}.bo-h722-library-toolbar>div{flex-wrap:wrap}}
+
+
+/* H17.1 — Contextual design handoff. A lightweight guide, not a second navigation bar. */
+.bo-h1711-flow-hint{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 16px;padding:11px 14px;border:1px solid #cde2ee;border-radius:12px;background:#f1f8fc;color:#275370;font-size:12px}
+.bo-h1711-flow-hint>span,.bo-h1711-flow-hint>div{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.bo-h1711-flow-hint strong{font-size:12px;color:#123e5d}
+.bo-h1711-flow-hint button,.bo-h1711-link{display:inline-flex;align-items:center;justify-content:flex-start;gap:5px;border:0;background:transparent;color:#12618c;font-weight:700;font-size:12px;cursor:pointer;text-align:left}
+.bo-h1711-flow-hint button:hover,.bo-h1711-link:hover{text-decoration:underline}
+.bo-h1711-link{margin:5px 0 0;padding:5px 8px;border-radius:6px}
+.bo-h1711-link:focus-visible,.bo-h1711-flow-hint button:focus-visible{outline:2px solid #0871af;outline-offset:2px}
+@media(max-width:700px){.bo-h1711-flow-hint{align-items:flex-start}.bo-h1711-flow-hint>div{width:100%}}
