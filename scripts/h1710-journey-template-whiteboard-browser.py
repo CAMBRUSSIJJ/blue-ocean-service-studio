@@ -103,6 +103,47 @@ def blueprint_template(page):
     check(any(x.get('viewKind') == 'blueprint' for x in current['views']['whiteboards'].values()),
           'Blueprint project template creates an editable Blueprint document')
 
+
+def contextual_design_continuity(page):
+    create_from_project_template(page, 'Redesenho de serviço', 'QA Fluxo Contínuo')
+    before = graph(page)
+    journey_id = before['service']['journeyIds'][0]
+    stage_ids = before['journeys'][journey_id]['stageIds']
+    check(len(stage_ids) == 3 and not before['views']['whiteboards'],
+          'Design flow starts with a Journey and no invented Blueprint')
+    page.locator(f'[data-journey-to-blueprint="{journey_id}"]').click()
+    expect(page.locator('.bo1174-board')).to_be_visible()
+    linked = [(id, b) for id, b in graph(page)['views']['whiteboards'].items() if b.get('viewKind') == 'blueprint']
+    check(len(linked) == 1 and linked[0][1]['journeyId'] == journey_id,
+          'Continue in Blueprint creates a linked document without copying the Journey')
+    blueprint_id = linked[0][0]
+    check(graph(page)['journeys'][journey_id]['stageIds'] == stage_ids,
+          'Blueprint handoff preserves canonical stage identities')
+    page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
+    expect(page.locator('[data-blueprint-library="1"]')).to_be_visible()
+    page.locator(f'[data-blueprint-to-journey="{blueprint_id}"]').click()
+    expect(page.locator('.bo-h1705-journey')).to_be_visible()
+    check(page.evaluate("() => window.BlueOceanRuntime.api('dataBridge').currentJourneyId()") == journey_id,
+          'Blueprint returns to its own source Journey')
+    page.get_by_role('button', name='Todas as Jornadas', exact=True).click()
+    expect(page.locator('[data-journey-library="1"]')).to_be_visible()
+    page.locator(f'[data-journey-to-blueprint="{journey_id}"]').click()
+    expect(page.locator('.bo1174-board')).to_be_visible()
+    check(blueprint_id in graph(page)['views']['whiteboards'] and len([b for b in graph(page)['views']['whiteboards'].values() if b.get('viewKind') == 'blueprint']) == 1,
+          'Repeating Journey handoff reuses the existing linked Blueprint')
+    page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
+    page.locator('[data-design-flow="blueprint"]').get_by_role('button', name='Explorar no Whiteboard').click()
+    expect(page.locator('[data-whiteboard-library="1"]')).to_be_visible()
+    check(page.locator('[data-design-flow="whiteboard"]').is_visible(),
+          'Whiteboard explains free exploration and links back to structured maps')
+    page.locator('[data-design-flow="whiteboard"]').get_by_role('button', name='Organizar em Jornadas').click()
+    expect(page.locator('[data-journey-library="1"]')).to_be_visible()
+    page.reload(wait_until='networkidle')
+    after = graph(page)
+    check(blueprint_id in after['views']['whiteboards'] and after['journeys'][journey_id]['stageIds'] == stage_ids,
+          'Linked flow survives reload without duplicating stages or documents')
+
+
 URL = os.environ.get('BLUE_OCEAN_URL')
 server = None
 if not URL:
@@ -116,7 +157,8 @@ try:
         browser = p.chromium.launch(headless=True, executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),
                                     args=['--no-sandbox', '--disable-dev-shm-usage'])
         for name, flow in [('deletion-whiteboard', deletion_and_whiteboard),
-                           ('library-templates', library_templates), ('blueprint-template', blueprint_template)]:
+                           ('library-templates', library_templates), ('blueprint-template', blueprint_template),
+                           ('contextual-design-continuity', contextual_design_continuity)]:
             context = browser.new_context(viewport={'width': 1440, 'height': 960})
             page = context.new_page()
             page.set_default_timeout(12000)
