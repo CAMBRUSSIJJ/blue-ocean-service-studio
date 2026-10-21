@@ -39,11 +39,10 @@ def project(page):
     page.get_by_label('Nome do projeto', exact=True).fill('Editor UX QA')
     page.get_by_label('Serviço principal', exact=True).fill('Atendimento ao cliente')
     page.get_by_role('button', name='Criar projeto', exact=True).click()
-    page.get_by_role('button', name='Abrir serviço', exact=True).click()
 
 def open_whiteboard(page):
     project(page)
-    page.get_by_role('button', name='Whiteboard', exact=True).click()
+    page.locator('[data-blue-ocean-whiteboard-nav="standard"]').click()
     page.get_by_label('Nome do quadro', exact=True).fill('Ideias do atendimento')
     page.get_by_role('button', name='Criar e começar', exact=True).click()
     expect(page.locator('.bo1174-board')).to_be_visible()
@@ -163,14 +162,13 @@ def whiteboard_flow(page):
     check('Application becomes interactive after leaving the editor', not page.locator('#root').evaluate('e => e.inert'))
     page.reload(wait_until='domcontentloaded')
     page.get_by_role('button', name='Continuar projeto', exact=True).click()
-    page.get_by_role('button', name='Abrir serviço', exact=True).click()
     restored = graph(page)
     check('Both documents survive browser reload', source_id in restored['views']['whiteboards'] and target_id in restored['views']['whiteboards'])
     check('Linked content survives browser reload', restored['entities'][entity['objectKind']][entity['objectId']]['title'] == 'Cliente envia mensagem')
     # Queries of permissions must not initialize state or trigger writes.
     check('Permission queries are read-only', page.evaluate("""() => {const bridge=window.BlueOceanRuntime.api('dataBridge'),c=window.BlueOceanRuntime.api('collaboration');const before=bridge.get().persistenceRevision;for(let i=0;i<20;i++){c.can('edit');c.currentRole()}return bridge.get().persistenceRevision===before;}"""))
     # The library shortcut must select Blueprints even if the workspace was on Whiteboard.
-    page.get_by_role('button', name='Whiteboard', exact=True).click()
+    page.locator('[data-blue-ocean-whiteboard-nav="standard"]').click()
     if page.get_by_role('button', name='Cancelar', exact=True).is_visible():
         page.get_by_role('button', name='Cancelar', exact=True).click()
     page.get_by_role('button', name='Ir para Blueprints', exact=True).click()
