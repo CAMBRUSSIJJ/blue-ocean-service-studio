@@ -13,8 +13,8 @@ const checks = [
   ['PBKDF2', service.includes('PBKDF2') && service.includes('120_000')],
   ['salt aleatório', service.includes('crypto.getRandomValues')],
   ['sessão local/session', service.includes('localStorage') && service.includes('sessionStorage')],
-  ['Google preparado sem OAuth falso', auth.includes("oauthUnavailable('Google')")],
-  ['Microsoft preparado sem OAuth falso', auth.includes("oauthUnavailable('Microsoft')")],
+  ['Google preparado sem OAuth falso', auth.includes('disabled title="Login com Google indisponível')],
+  ['Microsoft preparado sem OAuth falso', auth.includes('disabled title="Login com Microsoft indisponível')],
   ['workspace local sem conta', auth.includes('Abrir workspace local sem conta')],
   ['loading de workspace', auth.includes('Preparando seu workspace') && auth.includes('Service Graph')],
   ['sign out no shell', app.includes('onSignOut') && app.includes('bo1178-account')],
@@ -23,7 +23,7 @@ const checks = [
   ['reduced motion', css.includes('prefers-reduced-motion')],
   ['sem alert nativo', !auth.includes('alert(') && !auth.includes('confirm(') && !auth.includes('prompt(')],
   ['AuthExperience é entry point', main.includes('<AuthExperience />')],
-  ['modo local explicitado', auth.includes('Modo local seguro')],
+  ['modo local explicitado', auth.includes('Perfis locais compartilham os mesmos projetos')],
 ];
 let failed=0; for (const [label, ok] of checks){ console.log(`${ok?'OK  ':'FAIL'} ${label}`); if(!ok) failed++; }
 console.log(`\nV1.17.8 Professional Entry & Authentication Experience — ${checks.length-failed}/${checks.length}`);

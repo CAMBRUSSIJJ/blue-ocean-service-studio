@@ -31,7 +31,7 @@ body.bo1179-auth-visible .bo-auth-primary{color:#fff!important;background:#1766d
 body.bo1179-auth-visible .bo-auth-primary:hover{background:#1059c0!important}
 body.bo1179-auth-visible .bo-auth-divider{margin:18px 0 12px;color:#667085}
 body.bo1179-auth-visible .bo-auth-link,body.bo1179-auth-visible .bo-auth-switch button,body.bo1179-auth-visible .bo-auth-back{padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;color:#2463a6!important;min-height:30px}
-body.bo1179-auth-visible .bo-auth-demo{min-height:40px!important;background:#f5f8fc!important;border:1px solid #e2e9f1!important;border-radius:7px!important;box-shadow:none!important;color:#37536f!important;font-size:12px}
+body.bo1179-auth-visible .bo-auth-demo:not(.bo-auth-local-entry){min-height:40px!important;background:#f5f8fc!important;border:1px solid #e2e9f1!important;border-radius:7px!important;box-shadow:none!important;color:#37536f!important;font-size:12px}
 body.bo1179-auth-visible .bo-auth-oauth button{color:#344054!important;box-shadow:none!important}
 body.bo1179-auth-visible .bo-auth-panel__footer{bottom:-26px;color:#bdcfdd!important}
 body.bo1179-auth-visible .bo-auth-local{margin-top:18px}

@@ -198,7 +198,8 @@
     "blueprint:methodology:test": "node --experimental-strip-types scripts/blueprint-methodology-test.mjs",
     "blueprint:methodology:browser": "python3 scripts/blueprint-methodology-browser.py",
     "journey:starter:test": "node --experimental-strip-types scripts/journey-starter-test.mjs",
-    "entry:browser": "python3 scripts/entry-journey-browser.py"
+    "entry:browser": "python3 scripts/entry-journey-browser.py",
+    "product:browser": "python3 scripts/product-experience-browser.py"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
@@ -211,6 +212,7 @@
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.7.0",
     "autoprefixer": "^10.4.21",
+    "axe-core": "4.14.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",

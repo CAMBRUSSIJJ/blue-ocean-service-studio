@@ -9,7 +9,7 @@ import type { LucideIcon } from '../design-system/icons';
 import { journeyContextItems } from '../services/journey-map-studio';
 import { cardsInCell, addCellCard, editCellCard, removeCellCard, moveJourneyCard, duplicateCellCard, formatCardText, setCellCards } from '../domain/journey-card-operations';
 import {
-  ArrowLeft, ArrowRight, Check, ChevronDown, GripVertical, LayoutGrid,
+  ArrowLeft, ArrowRight, Check, ChevronDown, Download, GripVertical, LayoutGrid,
   Hand, Minus, Plus, RotateCcw,
   Trash2, X, Type, Image as ImageIcon, ListTree, Shapes, ListChecks,
   SeparatorHorizontal, Activity, Link2, MousePointer2, MessageCircle,
@@ -34,7 +34,7 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
     setSelectedStageId, updateStageCore, updateStageExperience, 
     createStage, handleStageDragStart, handleStageDrop, moveStage, removeStage,
     canUndo, canRedo, undo, redo, newTouchpointName, setNewTouchpointName, addTouchpointToStage,
-    removeTouchpointFromStage, showToast, setStageContextLink,
+    removeTouchpointFromStage, showToast, setStageContextLink, handleExport,
   } = studio;
   const [handMode, setHandMode] = useState(false);
   const [spaceHeld, setSpaceHeld] = useState(false);
@@ -289,6 +289,7 @@ export function JourneyCanvasFree({ studio, onMatrix, onCaptureContext, onBluepr
       <button type="button" className="bo-h1705-back" onClick={onBack ?? closeJourney} title={onBack ? 'Todas as Jornadas' : 'Voltar ao serviço'} aria-label={onBack ? 'Todas as Jornadas' : 'Voltar ao serviço'}><ArrowLeft size={18}/><span>{onBack ? 'Jornadas' : 'Serviço'}</span></button>
       <div className="bo-h1705-heading"><input aria-label="Nome da Jornada" value={journeyName} onChange={event => setJourneyName(event.target.value)} onBlur={saveJourneyName} onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur(); if (event.key === 'Escape') { cancelNameEdit.current = true; event.currentTarget.blur(); } }}/></div>
       <span className="bo-h1705-saving" aria-live="polite" title="As alterações ficam neste navegador. Exporte um backup para guardar outra cópia.">{saveStatus === 'saved' ? '● Salvo neste dispositivo' : saveStatus === 'saving' ? '◌ Salvando…' : '⚠ Erro ao salvar'}</span>
+      <button type="button" className="bo-journey-backup" onClick={handleExport} aria-label="Baixar backup do projeto" title="Baixar backup com todas as Jornadas, Blueprints e quadros deste projeto"><Download size={16}/><span>Backup</span></button>
     <nav className="bo-h1705-menubar" aria-label="Ferramentas da Jornada">
       <div className="bo-h1705-menu-wrap">
         <button type="button" className={showViews ? 'is-active' : ''} onClick={() => { setShowViews(!showViews);  }} aria-expanded={showViews}><LayoutGrid size={16}/> Visualizações <ChevronDown size={13}/></button>

@@ -157,6 +157,39 @@ export default function App({ authUser, onSignOut }: AppProps) {
   }, [isMobileNavOpen]);
 
   useEffect(() => {
+    let frame = 0;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const header = document.querySelector<HTMLElement>('header[data-bo-precision-header-native]');
+        if (!header) return;
+        const rect = header.getBoundingClientRect();
+        const properties = {
+          '--bo-workspace-left': Math.max(0, rect.left),
+          '--bo-workspace-top': Math.max(0, rect.bottom),
+          '--bo-workspace-right': Math.max(0, window.innerWidth - rect.right),
+        };
+        for (const [name, value] of Object.entries(properties)) {
+          document.documentElement.style.setProperty(name, `${value}px`);
+        }
+      });
+    };
+    const observer = new ResizeObserver(measure);
+    for (const element of document.querySelectorAll('#root,header[data-bo-precision-header-native]')) observer.observe(element);
+    window.addEventListener('resize', measure);
+    window.addEventListener('scroll', measure, true);
+    measure();
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener('resize', measure);
+      window.removeEventListener('scroll', measure, true);
+    };
+  }, [isSidebarCollapsed, externalNav, activeTab]);
+
+  useEffect(() => () => hideLegacyPageSurfaces(), []);
+
+  useEffect(() => {
     try { localStorage.setItem('bo-sidebar-collapsed', isSidebarCollapsed ? '1' : '0'); } catch { /* local preference only */ }
     document.body.classList.toggle('bo-h724-sidebar-collapsed', isSidebarCollapsed);
     const resize = () => {
@@ -487,8 +520,8 @@ export default function App({ authUser, onSignOut }: AppProps) {
           {/* H7.40-H12 compatibility markers only: {!isProjectContext && <> · {isProjectContext && <> · bo-h740h10-project-nav */}
 
           <div className="bo1205h3-sidebar-bottom bo-h701-sidebar-bottom">
-            <button type="button" data-rt-collab-nav="1" className={externalNav === 'collaboration' ? 'is-active' : ''} onClick={() => openExternal('collaboration', 'collaboration', 'workspace')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="collaboration"><BlueOceanUtilityIcon kind="collaboration" size={16}/></span><span className="hidden md:inline">Colaboração</span></button>
-            <button type="button" data-bo1173-settings-nav="1" className={externalNav === 'settings' ? 'is-active' : ''} onClick={() => openExternal('settings', 'unifiedWorkspaces')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="settings"><BlueOceanUtilityIcon kind="settings" size={16}/></span><span className="hidden md:inline">Configurações</span></button>
+            <button type="button" data-rt-collab-nav="1" aria-label="Colaboração" className={externalNav === 'collaboration' ? 'is-active' : ''} onClick={() => openExternal('collaboration', 'collaboration', 'workspace')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="collaboration"><BlueOceanUtilityIcon kind="collaboration" size={16}/></span><span className="hidden md:inline">Colaboração</span></button>
+            <button type="button" data-bo1173-settings-nav="1" aria-label="Configurações" className={externalNav === 'settings' ? 'is-active' : ''} onClick={() => openExternal('settings', 'unifiedWorkspaces')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="settings"><BlueOceanUtilityIcon kind="settings" size={16}/></span><span className="hidden md:inline">Configurações</span></button>
           </div>
         </nav>
 

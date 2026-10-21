@@ -1,5 +1,16 @@
 # Histórico de mudanças
 
+## Navegação confiável e experiência local clara — 21/10/2026
+
+- Impede que Colaboração continue capturando cliques depois de sair da área.
+- Alinha páginas de Colaboração e Configurações ao cabeçalho real, incluindo sidebar recolhida.
+- Torna a entrada sem conta a ação principal e explica que perfis locais compartilham projetos neste navegador.
+- Identifica os logins sociais indisponíveis antes do clique e mantém o acesso a perfis existentes como opção secundária.
+- Acrescenta backup do projeto no editor de Jornada e uma regressão que verifica o arquivo exportado com as edições atuais.
+- Corrige nomes acessíveis, contraste e legibilidade nos fluxos auditados, com validação automática de acessibilidade em desktop e celular.
+- Simplifica a biblioteca de Jornadas vazia e comunica o modo de leitura de Whiteboard/Blueprint no celular.
+- Apresenta colaboração e sincronização conforme as capacidades locais disponíveis; a operação remota depende de um backend ainda não provisionado.
+
 ## Organização do repositório — 21/10/2026
 
 - Reestrutura a apresentação e os guias atuais em português.

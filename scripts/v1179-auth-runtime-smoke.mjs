@@ -23,7 +23,7 @@ const checks = [
   ['onda animada na entrada', auth.includes('WaveBackdrop') && (css.includes('bo1179-wave-one') || css.includes('bo1180-ocean-one') || css.includes('bo1181-ocean-scroll'))],
   ['onda também no loading', auth.includes('mode="loading"') && (css.includes('.bo-auth-loading .bo-auth-wave') || css.includes('.bo-auth-wave--loading'))],
   ['reduced motion preservado', css.includes('@media(prefers-reduced-motion:reduce)') && css.includes('animation:none!important')],
-  ['primeiro acesso orienta cadastro', auth.includes('Primeiro acesso?') && auth.includes('Criar workspace')],
+  ['primeiro acesso orienta cadastro', auth.includes('Primeiro acesso?') && auth.includes('Criar perfil local')],
   ['login local continua real', auth.includes('signInLocal') && auth.includes('createLocalAccount')],
   ['guest continua disponível', auth.includes('enterLocalWorkspace') && auth.includes('Abrir workspace local sem conta')],
   ['QA encadeia gate 1.17.9', pkg.scripts.qa.includes('auth:runtime:smoke')],

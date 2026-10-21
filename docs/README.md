@@ -13,6 +13,7 @@ o fluxo local. Os guias abaixo descrevem o funcionamento atual.
 | Configurar build e publicação na Vercel | [Publicação](deployment.md) |
 | Trabalhar no Linux | [Instruções Linux](../README-LINUX.md) |
 | Reproduzir o ambiente da nuvem | [Configuração da nuvem](../.cloud-environment/README.md) |
+| Planejar identidade e colaboração entre dispositivos | [Colaboração remota](colaboracao-remota.md) |
 
 ## Usar e evoluir os editores
 
