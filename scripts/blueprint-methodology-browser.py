@@ -30,6 +30,8 @@ def create(page):
     page.locator('[data-service-blueprint-nav="1"]').click()
     page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
     expect(page.locator('.bo1174-board')).to_be_visible()
+    expect(page.locator('.bo-ref-matrix')).to_be_visible()
+    page.get_by_role('button',name='Modo profissional ↗').click()
 def options(page,name):
     page.get_by_role('button',name='Opções',exact=True).click()
     page.get_by_role('dialog',name='Ferramentas do editor',exact=True).get_by_role('button',name=re.compile('^.*'+re.escape(name))).click()
@@ -81,7 +83,7 @@ def desktop(page):
     for _ in range(3): page.locator('.bo1174-statusbar button[title="Reduzir zoom"]').click()
     check('Operational Blueprint has six structural layers',page.locator('.bo1203-service-lane').count()==6)
     check('All three conceptual boundaries appear in the operational view',page.locator('.bo1203-service-line').count()==3 and page.locator('.bo1203-service-line.internal').count()==1)
-    check('The canvas keeps one compact header',page.locator('.bo1174-board-header button').count()<=4)
+    check('The canvas keeps one compact header',page.locator('.bo1174-board-header button').count()<=5)
     add(page,'evidence','Comprovante digital de solicitação')
     artifact=record(page,'evidence')
     check('Evidence created in its row has an explicit service purpose and medium',artifact['evidencePurpose']=='service' and artifact['evidenceMedium']=='digital')
