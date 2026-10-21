@@ -93,7 +93,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const [libraryPage, setLibraryPage] = useState<WorkspaceLibraryPage>('personas');
   const [projectHomeSection, setProjectHomeSection] = useState<ProjectHomeSection>('home');
   const [projectShellOpen, setProjectShellOpen] = useState(false);
-  const [projectShellSection, setProjectShellSection] = useState<ProjectShellSection>('overview');
+  const [projectShellSection] = useState<ProjectShellSection>('overview');
   const { activeTab, graph, hasService, projects, activeProjectId, saveStatus, handleSave, handleImport, handleExport, createService, loadDemoService,
     isCreateStageOpen, setIsCreateStageOpen, stageDraft, setStageDraft, createStage,
     showShortcuts, setShowShortcuts, toast } = studio;
@@ -104,7 +104,6 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const isGlobalScope = !projectShellOpen;
   const isGlobalHome = isGlobalScope && activeTab === 'home' && !externalNav;
   const isProjectHome = activeTab === 'home' && !externalNav && projectShellOpen;
-  const isProjectContext = Boolean(currentProject) && projectShellOpen;
   const isPrimaryLibrary = activeTab === 'context' && !externalNav;
   const isPrimaryResearch = activeTab === 'canvas' && !externalNav && serviceWorkspaceTab === 'research';
 
@@ -347,12 +346,15 @@ export default function App({ authUser, onSignOut }: AppProps) {
     openServiceWorkspaceTab('journey');
   };
 
-  const openProjectLibraryHub = () => openLibraryPage('personas');
-
   const openCurrentProjectWorkspace = () => {
     setProjectHomeSection('home');
     openServiceWorkspaceTab('journey');
   };
+
+  useEffect(() => {
+    // Restore older sessions that previously saved the removed project-home state.
+    if (isProjectHome && hasService) openServiceWorkspaceTab('journey');
+  }, [isProjectHome, hasService]);
 
   useEffect(() => {
     const changed = (event: Event) => { const target = String((event as CustomEvent<string>).detail || 'overview'); setServiceWorkspaceTab(target === 'research' ? 'overview' : target); };
