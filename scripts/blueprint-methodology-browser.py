@@ -27,7 +27,6 @@ def create(page):
     page.get_by_label('Nome do projeto',exact=True).fill('Blueprint e promessa QA')
     page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
     page.get_by_role('button',name='Criar projeto',exact=True).click()
-    page.get_by_role('button',name='Abrir serviço',exact=True).click()
     page.get_by_role('button',name='Blueprints',exact=True).click()
     page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
     expect(page.locator('.bo1174-board')).to_be_visible()
