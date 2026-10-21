@@ -191,6 +191,7 @@ def blueprint_flow(page):
     expect(page.locator('.bo1174-board')).to_be_visible()
     check('Blueprint uses the entire viewport and hides application chrome', page.locator('.bo1174-board').bounding_box()['y'] == 0 and page.locator('.bo1174-board').bounding_box()['width'] == page.viewport_size['width'] and page.locator('#root').evaluate('e => e.inert && getComputedStyle(e).visibility === "hidden"'))
     frame = page.frame_locator('.bo-blueprint-reference-frame')
+    expect(frame.locator('#app .st, #app .bd')).to_have_count(1)
     check('Blueprint opens the exact supplied HTML, including its wizard or matrix', frame.locator('#app').count()==1 and (frame.locator('.st').count()==1 or frame.locator('.bd').count()==1))
     frame.get_by_role('button',name='Modo profissional').click()
     expect(page.locator('.bo1174-statusbar')).to_be_visible()
