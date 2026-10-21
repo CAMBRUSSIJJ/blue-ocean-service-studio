@@ -117,7 +117,7 @@ export type Service = {
   operationsBridge?: ServiceOperationsBridgeState;
 };
 
-export type JourneyLaneType = 'text' | 'image' | 'stage' | 'icons' | 'grid' | 'divider' | 'emotion' | 'embed';
+export type JourneyLaneType = 'text' | 'image' | 'stage' | 'icons' | 'grid' | 'divider' | 'emotion' | 'metric' | 'embed';
 export type JourneyCard = { id: string; content: string; checked?: boolean; icon?: string };
 export type JourneyLaneTone = 'neutral' | 'blue' | 'emerald' | 'amber' | 'rose' | 'violet';
 export type JourneyLane = { id: string; type: JourneyLaneType; label: string; hidden?: boolean; tone?: JourneyLaneTone; height?: number; binding?: 'customerAction' | 'thoughts' | 'touchpoints' | 'needs' | 'pains'; cards: Record<string, string>; cardItems?: Record<string, JourneyCard[]>; };
@@ -152,6 +152,8 @@ export type Stage = {
   customerAction: string;
   thoughts?: string;
   emotion: Emotion;
+  /** Optional five-level sentiment (-2 to +2); compatible with the canonical 3-level emotion. */
+  emotionScore?: -2 | -1 | 0 | 1 | 2;
   needIds?: Id[];
   painIds?: Id[];
   touchpointIds: Id[];

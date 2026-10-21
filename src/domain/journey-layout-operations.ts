@@ -2,7 +2,7 @@ import type { JourneyLane, JourneyLaneType, JourneyMapLayout, ServiceGraph } fro
 
 export const JOURNEY_LANE_LABELS: Record<JourneyLaneType, string> = {
   text: 'Texto', image: 'Imagem', stage: 'Subetapas', icons: 'Ícones',
-  grid: 'Lista de verificação', divider: 'Divisor', emotion: 'Emoções', embed: 'Link de referência',
+  grid: 'Lista de verificação', divider: 'Divisor', emotion: 'Emoções', metric: 'Métricas', embed: 'Link de referência',
 };
 
 /** Apply against the latest graph, preserving settings and unrelated journeys. */

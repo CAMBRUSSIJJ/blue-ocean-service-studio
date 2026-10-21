@@ -403,6 +403,7 @@ export function useStudioController() {
       const nextStage: Stage = {
         ...stage,
         [field]: field === 'emotion' ? (value as Emotion) : value,
+        ...(field === 'emotion' ? { emotionScore: value === 'negative' ? -1 as const : value === 'positive' ? 1 as const : 0 as const } : {}),
       };
 
       return touchUpdatedAt({
