@@ -193,6 +193,7 @@ def blueprint_flow(page):
     frame = page.frame_locator('.bo-blueprint-reference-frame')
     check('Blueprint opens the exact supplied HTML, including its wizard or matrix', frame.locator('#app').count()==1 and (frame.locator('.st').count()==1 or frame.locator('.bd').count()==1))
     frame.get_by_role('button',name='Modo profissional').click()
+    expect(page.locator('.bo1174-statusbar')).to_be_visible()
     check('Blueprint groups hand, selection and history in one floating dock', page.locator('.bo1174-statusbar .bo1174-toolrail .rt144-tool').count() == 2 and page.locator('.bo1174-statusbar').get_by_role('button', name='Desfazer', exact=True).count() == 1 and page.locator('.bo1174-board-header').get_by_role('button', name='Desfazer', exact=True).count() == 0)
     check('Blueprint starts with only two essential canvas tools', page.locator('.bo1174-toolrail .rt144-tool').count() == 2)
     check('Blueprint header groups secondary actions in one menu', page.locator('.bo1174-board-header button').count() <= 7 and page.get_by_role('button', name='Opções', exact=True).is_visible())
