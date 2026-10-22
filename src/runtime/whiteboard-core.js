@@ -1057,7 +1057,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   let journeyPrimaryEditor=false;
   function hostedBlueprintDocument(){
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
-    const ref={id:'host',title:b.name||'Blueprint de serviço',persona:saved.persona||j?.name||'',
+    const ref={id:'host',title:journeyPrimaryEditor?(j?.name||'Jornada'):b.name||'Blueprint de serviço',persona:saved.persona||j?.name||'',
       guide:journeyPrimaryEditor?0:1,start:stages.length?0:1,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
     const order=new Map(stages.map((stage,index)=>[stage.id,index]));
@@ -1221,6 +1221,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       if(edge.blueprintHostedLink&&!referenced.has(id))delete b.edges[id];
     });
     b.name=String(doc.title||b.name||'Blueprint de serviço').slice(0,240);
+    if(journeyPrimaryEditor&&j){j.name=b.name;j.updatedAt=timestamp;}
     const customCells={};Object.entries(doc.c).forEach(([key,value])=>{
       if(/^x[a-z0-9]{1,12}\|\d+$/.test(key)&&Array.isArray(value))
         customCells[key]=value.slice(0,100).map(n=>({i:String(n.i||uid('note')),t:String(n.t||'').slice(0,1000)}));
