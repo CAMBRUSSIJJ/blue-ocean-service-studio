@@ -307,7 +307,7 @@ if(HOSTED){
     if(event.source!==window.parent||event.origin!==location.origin||event.data?.boBlueprintHost!==1)return;
     if(event.data.history){H=event.data.history;const u=app.querySelector('[data-act="undo"]'),r=app.querySelector('[data-act="redo"]');if(u)u.disabled=!H.canUndo;if(r)r.disabled=!H.canRedo}
     if(event.data.type==='plan-result'){growthPlanResult(event.data);return}
-    if(event.data.type==='saved'){if(!event.data.ok)growthLastPatch='';if(event.data.plans)S.plans=event.data.plans;announceSave(event.data.ok);return}
+    if(event.data.type==='saved'){if(!event.data.ok)growthLastPatch='';if(event.data.plans)S.plans=event.data.plans;if(event.data.serviceElements){S.serviceElements=event.data.serviceElements;pickerRefreshReferences()}announceSave(event.data.ok);return}
     if(event.data.type==='hydrate'){
       applyingHost=true;
       try{

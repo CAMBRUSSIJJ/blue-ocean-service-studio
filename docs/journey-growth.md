@@ -145,3 +145,35 @@ Os cartões acompanham status, responsável, prazo e valores medidos sem duplica
 iniciativas ou indicadores. Uma ação do cliente não recebe o nome de um indicador
 só porque um cartão foi colocado na mesma célula. Registros removidos aparecem
 como indisponíveis e podem ser vinculados novamente em Editar elemento.
+
+
+### Ferramentas e elementos do serviço
+
+No catálogo de **Adicionar faixa** ou **Adicionar conteúdo**, a seção
+**Elementos do serviço** oferece Canal, Persona, Dor, Necessidade, Evidência e
+Oportunidade. Ao criar uma faixa de Canal, o conteúdo padrão é um vínculo de
+Canal; o modelo Canais usa esse mesmo padrão. Nas células, escolha o elemento e
+selecione um registro já criado no serviço. O título e a descrição exibidos
+acompanham o registro, enquanto a legenda pode ser adaptada apenas neste mapa.
+Isso não renomeia o registro original nem altera a persona principal ou as
+associações da etapa. Não há duplicação de entidades ou ações fictícias do cliente.
+
+Dores incluem tanto as registradas na pesquisa quanto os problemas registrados
+no mapa. Uma dor criada em **Dores e ideias** já pode ser selecionada sem recarga.
+Se ainda não houver elementos disponíveis, o seletor explica como criá-los na
+biblioteca do serviço; dores e oportunidades também oferecem acesso à faixa
+nativa. Uma referência removida da biblioteca aparece como indisponível no mapa,
+sem recriação automática. No documento avulso, os vínculos ao serviço ficam
+indisponíveis porque a biblioteca pertence ao projeto.
+
+Em **Ferramentas da jornada**, **Gráfico de emoções** reabre a faixa original de
+emoções, com a curva ao longo das etapas e o editor da etapa escolhida. A ação
+não registra neutralidade ou evidência e não cria faixas duplicadas. Sem etapas,
+a inclusão de uma etapa é aberta primeiro. **Dores e ideias** e as demais
+ferramentas também mostram as faixas existentes, mantendo conteúdo e a
+visibilidade das outras faixas. O gráfico conserva as distinções entre ausência,
+hipótese e emoção validada com fonte. Ele usa os registros emocionais das etapas;
+inserir um cartão de Persona não filtra ou substitui esses registros.
+
+Os vínculos sobrevivem à recarga, reordenação de etapas e desfazer/refazer e
+aparecem na apresentação e no resumo HTML com as informações atuais da biblioteca.

@@ -1,7 +1,7 @@
 import { BLUEPRINT_FRAME_LAYERS, BLUEPRINT_BOUNDARIES, BLUEPRINT_MARKETING_DIMENSIONS, BLUEPRINT_QUALITY_DIMENSIONS, buildBlueprintDeliveryReport, blueprintServicePromise, validateActivityNumbers, isCustomerServiceEvidence } from './blueprint-methodology.js';
 import { runtime } from './runtime-registry.js';
 import { renderBlueprintReference } from './blueprint-reference-view.js';
-import { validateMatrixDocument, matrixContentFromDocument, restoreMatrixContent } from '../services/journey-content.js';
+import { MATRIX_REFERENCE_TYPES, matrixServiceReferences, validateMatrixDocument, matrixContentFromDocument, restoreMatrixContent } from '../services/journey-content.js';
 import { ACQUISITION_ROWS, saveJourneyImprovement, journeyImprovementPlans, measureJourneyImprovement } from '../services/journey-growth.js';
 import { buildBlueprintGuidedReading, BLUEPRINT_EMOTION_LABELS } from '../services/blueprint-guided-reading.js';
 import { migrateGraphV3, validateGraphDeep, repairGraphIntegrity, deletePlan, applyDeletePlan, isSafeImageDataUrl } from './data-integrity.js';
@@ -1062,7 +1062,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
     const ref={id:'host',title:openedFromUnifiedJourney?(j?.name||'Jornada'):(b.name||'Blueprint de serviço'),persona:saved.persona||'',
       editorKind:openedFromUnifiedJourney?'journey':'blueprint',view:clone(j?.matrixView||b.matrixView||null),
-      serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
+      serviceElements:matrixServiceReferences(graph),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
       availableMetrics:Object.values(graph.entities?.metric||{}).filter(m=>!m.serviceId||m.serviceId===graph.service.id).map(m=>({id:m.id,name:m.title||m.name||'Indicador',unit:m.unit||'',current:typeof m.value==='number'?m.value:undefined,target:typeof m.target==='number'?m.target:undefined})),
       guide:0,start:0,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
@@ -1084,7 +1084,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     });
     stages.forEach((st,index)=>{
       const savedActions=saved.customerCells?.[st.id];
-      if(Array.isArray(savedActions)&&savedActions.filter(n=>!['plan','metric'].includes(n.type)).map(n=>n.t).filter(Boolean).join(' · ')===String(st.customerAction||'')){
+      if(Array.isArray(savedActions)&&savedActions.filter(n=>!MATRIX_REFERENCE_TYPES.includes(n.type)).map(n=>n.t).filter(Boolean).join(' · ')===String(st.customerAction||'')){
         ref.c['ac|'+index]=clone(savedActions);return;
       }
       if(!(ref.c['ac|'+index]?.length)&&st.customerAction)
@@ -1165,13 +1165,13 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       const [,lane,indexString]=match,index=Number(indexString),sid=stageIds[index];
       if(!sid)continue;
       if(lane==='ac'){
-        graph.stages[sid].customerAction=notes.filter(n=>!['plan','metric'].includes(n.type)).map(x=>String(x?.t||'').trim()).filter(Boolean).join(' · ').slice(0,1500);
-        for(const note of notes){if(['plan','metric'].includes(note.type))continue;const id=note.hostItemId||note.i,item=b.items[id];if(item){nextShown.add(id);if(item.kind==='smart'){const rec=entityRecord(item.objectKind,item.objectId);if(rec)rec.title=String(note.t||'').slice(0,1000)}else item.text=String(note.t||'').slice(0,1000)}}
+        graph.stages[sid].customerAction=notes.filter(n=>!MATRIX_REFERENCE_TYPES.includes(n.type)).map(x=>String(x?.t||'').trim()).filter(Boolean).join(' · ').slice(0,1500);
+        for(const note of notes){if(MATRIX_REFERENCE_TYPES.includes(note.type))continue;const id=note.hostItemId||note.i,item=b.items[id];if(item){nextShown.add(id);if(item.kind==='smart'){const rec=entityRecord(item.objectKind,item.objectId);if(rec)rec.title=String(note.t||'').slice(0,1000)}else item.text=String(note.t||'').slice(0,1000)}}
         continue;
       }
       if(!kindFor[lane])continue;
       for(const note of notes){
-        if(['plan','metric'].includes(note.type))continue;
+        if(MATRIX_REFERENCE_TYPES.includes(note.type))continue;
         const value=String(note?.t||'').trim().slice(0,1000),nid=String(note?.i||'');
         if(!value||!nid)continue;
         let itemId=(note.hostItemId&&b.items[note.hostItemId])?note.hostItemId:
@@ -1319,7 +1319,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       else if(type==='patch'){
         try{
           const ok=applyHostedBlueprintPatch(state);
-          respond('saved',{ok:ok===true,plans:journeyImprovementPlans(graph,activeJourney()?.id)});
+          respond('saved',{ok:ok===true,serviceElements:matrixServiceReferences(graph),plans:journeyImprovementPlans(graph,activeJourney()?.id)});
         }catch(error){
           respond('saved',{ok:false});
           console.error('Falha ao editar Blueprint da referência',error);
