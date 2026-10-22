@@ -32,6 +32,7 @@ npm run blueprint:methodology:test
 npm run journey:starter:test
 npm run journey:growth:test
 npm run journey:content:test
+npm run journey:picker:test
 ```
 
 Esses testes exercitam operações como seleção, criação e movimentação de cartões,
@@ -66,6 +67,7 @@ python3 scripts/h1710-journey-template-whiteboard-browser.py
 python3 scripts/journey-progressive-browser.py
 npm run journey:growth:browser
 npm run journey:content:browser
+npm run journey:picker:browser
 ```
 
 Esses runners podem servir o `dist/` em um servidor temporário. Para os que
@@ -100,6 +102,13 @@ e links, modelos e configuração de faixas, movimentação, histórico, projeç
 canônicas, persistência, backup e HTML independente. Audita os novos menus,
 formulários e apresentação com axe-core nas três larguras. Evidências em
 `artifacts/journey-content/`.
+
+`journey:picker:browser` verifica catálogo contextual, busca, teclado, criação
+direta de faixa, escala não preenchida/zero, embeds com carregamento explícito,
+vínculos canônicos de planejamento e métrica, medição, histórico e reabertura.
+Audita catálogo e mapa em 1440, 834 e 390 px e valida criação por toque. O player
+externo usa uma resposta de teste; a disponibilidade real dos provedores não é
+verificada pelo runner. Evidências em `artifacts/journey-picker/`.
 
 `maps:browser` verifica os botões de Jornada e Blueprint em 1440, 834 e 390 px.
 Confere rodapés com nomes longos, busca, Cards/Tabela, confirmação de exclusão,

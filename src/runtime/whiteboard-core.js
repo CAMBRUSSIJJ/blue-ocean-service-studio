@@ -1063,7 +1063,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const ref={id:'host',title:openedFromUnifiedJourney?(j?.name||'Jornada'):(b.name||'Blueprint de serviço'),persona:saved.persona||'',
       editorKind:openedFromUnifiedJourney?'journey':'blueprint',view:clone(j?.matrixView||b.matrixView||null),
       serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
-      availableMetrics:Object.values(graph.entities?.metric||{}).filter(m=>!m.serviceId||m.serviceId===graph.service.id).map(m=>({id:m.id,name:m.title||m.name||'Indicador'})),
+      availableMetrics:Object.values(graph.entities?.metric||{}).filter(m=>!m.serviceId||m.serviceId===graph.service.id).map(m=>({id:m.id,name:m.title||m.name||'Indicador',unit:m.unit||'',current:typeof m.value==='number'?m.value:undefined,target:typeof m.target==='number'?m.target:undefined})),
       guide:0,start:0,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
     const order=new Map(stages.map((stage,index)=>[stage.id,index]));
@@ -1084,7 +1084,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     });
     stages.forEach((st,index)=>{
       const savedActions=saved.customerCells?.[st.id];
-      if(Array.isArray(savedActions)&&savedActions.map(n=>n.t).filter(Boolean).join(' · ')===String(st.customerAction||'')){
+      if(Array.isArray(savedActions)&&savedActions.filter(n=>!['plan','metric'].includes(n.type)).map(n=>n.t).filter(Boolean).join(' · ')===String(st.customerAction||'')){
         ref.c['ac|'+index]=clone(savedActions);return;
       }
       if(!(ref.c['ac|'+index]?.length)&&st.customerAction)
@@ -1165,12 +1165,13 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       const [,lane,indexString]=match,index=Number(indexString),sid=stageIds[index];
       if(!sid)continue;
       if(lane==='ac'){
-        graph.stages[sid].customerAction=notes.map(x=>String(x?.t||'').trim()).filter(Boolean).join(' · ').slice(0,1500);
-        for(const note of notes){const id=note.hostItemId||note.i,item=b.items[id];if(item){nextShown.add(id);if(item.kind==='smart'){const rec=entityRecord(item.objectKind,item.objectId);if(rec)rec.title=String(note.t||'').slice(0,1000)}else item.text=String(note.t||'').slice(0,1000)}}
+        graph.stages[sid].customerAction=notes.filter(n=>!['plan','metric'].includes(n.type)).map(x=>String(x?.t||'').trim()).filter(Boolean).join(' · ').slice(0,1500);
+        for(const note of notes){if(['plan','metric'].includes(note.type))continue;const id=note.hostItemId||note.i,item=b.items[id];if(item){nextShown.add(id);if(item.kind==='smart'){const rec=entityRecord(item.objectKind,item.objectId);if(rec)rec.title=String(note.t||'').slice(0,1000)}else item.text=String(note.t||'').slice(0,1000)}}
         continue;
       }
       if(!kindFor[lane])continue;
       for(const note of notes){
+        if(['plan','metric'].includes(note.type))continue;
         const value=String(note?.t||'').trim().slice(0,1000),nid=String(note?.i||'');
         if(!value||!nid)continue;
         let itemId=(note.hostItemId&&b.items[note.hostItemId])?note.hostItemId:
@@ -1252,7 +1253,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       if(/^x[a-z0-9]{1,12}\|\d+$/.test(key)&&Array.isArray(value))
         customCells[key]=value.slice(0,100).map(n=>({i:String(n.i||uid('note')),t:String(n.t||'').slice(0,1000)}));
     });
-    const customerCells={};stageIds.forEach((sid,index)=>{customerCells[sid]=(doc.c['ac|'+index]||[]).map(n=>({i:String(n.i),t:String(n.t||'').slice(0,1000),...(n.hostItemId?{hostItemId:n.hostItemId}:{}),...(n.hostKind?{hostKind:n.hostKind}:{}),...(n.hostAction?{hostAction:true}:{})}))});
+    const customerCells={};stageIds.forEach((sid,index)=>{customerCells[sid]=(doc.c['ac|'+index]||[]).map(n=>({i:String(n.i),t:String(n.t||'').slice(0,1000),...(n.type?{type:n.type}:{}),...(n.hostItemId?{hostItemId:n.hostItemId}:{}),...(n.hostKind?{hostKind:n.hostKind}:{}),...(n.hostAction?{hostAction:true}:{})}))});
     b.blueprintHosted={persona:String(doc.persona||'').slice(0,400),customerCells,lanes:Array.isArray(doc.lanes)?clone(doc.lanes):[],
       customCells};
     j.matrixContent=matrixContentFromDocument(doc,stageIds,sync);

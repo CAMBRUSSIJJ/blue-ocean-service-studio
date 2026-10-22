@@ -105,6 +105,7 @@ jobs:
       - run: python3 scripts/journey-progressive-browser.py
       - run: npm run journey:growth:browser
       - run: npm run journey:content:browser
+      - run: npm run journey:picker:browser
       - run: npm run entry:browser
       - run: npm run product:browser
       - run: npm run maps:browser
@@ -128,3 +129,4 @@ jobs:
             artifacts/journey-progressive
             artifacts/journey-growth
             artifacts/journey-content
+            artifacts/journey-picker

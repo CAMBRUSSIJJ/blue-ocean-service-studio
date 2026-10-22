@@ -28,7 +28,7 @@ def audit(p,label):
  fr=frame(p);fr.add_script_tag(content=(ROOT/'node_modules/axe-core/axe.min.js').read_text());result=fr.evaluate("async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});return r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))}")
  (OUT/(label+'-axe.json')).write_text(json.dumps(result,indent=2));check('No axe violations: '+label,not result)
 def row(f,template):
- f.get_by_role('button',name='+ Adicionar faixa',exact=True).click();f.get_by_role('button',name=template,exact=False).click();f.get_by_role('button',name='Salvar faixa',exact=True).click();saved(f)
+ f.get_by_role('button',name='+ Adicionar faixa',exact=True).click();f.get_by_role('button',name='Modelos de faixa →',exact=True).click();f.get_by_role('button',name=template,exact=False).click();saved(f)
 try:
  with sync_playwright() as pw:
   browser=pw.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
@@ -60,7 +60,7 @@ try:
   check('Keyboard movement preserves type and icon under the destination stage identity',graph(page)['journeys'][jid]['matrixContent']['cells'][sid2][lane][0]['icon']=='📱')
   f.get_by_role('button',name='Configurar faixa Canais',exact=True).click();dialog=f.get_by_role('dialog',name='Configurar faixa',exact=True);dialog.get_by_label('Nome da faixa',exact=True).fill('Canais e referências');dialog.get_by_label('Descrição da faixa',exact=True).fill('Onde o relacionamento acontece');dialog.get_by_label('Conteúdo padrão',exact=True).select_option('emoji');audit(page,'row-dialog-desktop');dialog.get_by_role('button',name='Salvar faixa',exact=True).click();saved(f)
   check('Changing lane settings preserves existing mixed content',f.locator(f'[data-cell="{key}"] img').count()==1 and f.locator(f'[data-cell="{key}"] a').count()==1)
-  f.locator(f'[data-cell="{key}"]>.content-add').click();expect(f.locator('.content-choice').first).to_have_attribute('data-type','emoji');audit(page,'type-picker-desktop');f.get_by_role('button',name='Fechar tipos de conteúdo',exact=True).click()
+  f.locator(f'[data-cell="{key}"]>.content-add').click();expect(f.locator('.content-choice[data-type="emoji"] .picker-default')).to_be_visible();audit(page,'type-picker-desktop');f.get_by_role('button',name='Fechar tipos de conteúdo',exact=True).click()
   f.locator('.sh').first.get_by_role('button',name='Mover etapa para a direita',exact=True).click();saved(f);check('Reordering stages carries every content type and row settings',graph(page)['journeys'][jid]['stageIds'][1]==sid and graph(page)['journeys'][jid]['matrixContent']['cells'][sid][lane][0]['type']=='link');f.get_by_role('button',name='Desfazer',exact=True).click();expect(f.locator('.sh [data-ed="sn"]').first).to_have_text('Descobrir')
   check('Image captions keep the available card width instead of collapsing beside the image',f.locator('.content-block.type-image').first.evaluate('e=>e.querySelector(".n").getBoundingClientRect().width>=e.getBoundingClientRect().width*.8'))
   source=f.locator(f'[data-cell="{key}"] .content-block.type-link .gh');destination=f.locator(f'[data-cell="{lane}|1"] .content-block .n').first;expect(f.locator('.content-block.type-image img')).to_be_visible();f.locator('.content-block.type-image img').evaluate('img=>img.decode()');source.hover();source.drag_to(destination);saved(f)

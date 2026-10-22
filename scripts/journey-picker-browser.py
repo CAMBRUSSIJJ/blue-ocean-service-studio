@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Acceptance of mixed matrix content, canonical projections and responsive composition."""
+import base64,functools,json,os,shutil,threading,tempfile
+from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
+from pathlib import Path
+from playwright.sync_api import sync_playwright,expect
+ROOT=Path(__file__).resolve().parents[1]
+OUT=ROOT/'artifacts/journey-picker';OUT.mkdir(parents=True,exist_ok=True)
+class Quiet(SimpleHTTPRequestHandler):
+ def log_message(self,*_): pass
+ def copyfile(self,source,output):
+  try: super().copyfile(source,output)
+  except (BrokenPipeError,ConnectionResetError): pass
+server=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT/'dist')));threading.Thread(target=server.serve_forever,daemon=True).start()
+URL=f'http://127.0.0.1:{server.server_port}';checks=[]
+def check(name,ok):
+ assert ok,name
+ checks.append(name);print('PASS '+name,flush=True)
+def graph(p): return p.evaluate("()=>window.BlueOceanRuntime.api('dataBridge').get()")
+def saved(f): expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+def frame(p): return p.locator('.bo-blueprint-reference-frame').element_handle().content_frame()
+def add(f,key,kind):
+ f.locator(f'[data-cell="{key}"]>.content-add').click();f.get_by_role('button',name='Adicionar '+kind,exact=True).click()
+def inline(f,key,value,kind='Texto'):
+ add(f,key,kind);field=f.locator(f'[data-cell="{key}"] [data-ed="c"]').last;expect(field).to_be_focused();field.fill(value);field.press('Tab');saved(f)
+def menu(f,key,index=0): f.locator(f'[data-cell="{key}"] .note-menu summary').nth(index).click()
+def audit(p,label):
+ fr=frame(p);fr.add_script_tag(content=(ROOT/'node_modules/axe-core/axe.min.js').read_text());result=fr.evaluate("async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});return r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))}")
+ (OUT/(label+'-axe.json')).write_text(json.dumps(result,indent=2));check('No axe violations: '+label,not result)
+def row(f,template):
+ f.get_by_role('button',name='+ Adicionar faixa',exact=True).click();f.get_by_role('button',name='Modelos de faixa →',exact=True).click();f.get_by_role('button',name=template,exact=False).click();saved(f)
+try:
+ with sync_playwright() as pw:
+  browser=pw.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
+  page=browser.new_page(viewport={'width':1440,'height':1000},accept_downloads=True);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.add_locator_handler(page.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click())
+  page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click();page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('QA Catálogo de tipos');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click();page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name='Em branco').first.click()
+  f=page.frame_locator('.bo-blueprint-reference-frame');expect(f.get_by_role('button',name='Adicionar etapa',exact=True)).to_be_visible();jid=next(iter(graph(page)['journeys']))
+  trigger=f.get_by_role('button',name='+ Adicionar faixa',exact=True);trigger.click();search=f.get_by_role('searchbox',name='Buscar tipo de conteúdo',exact=True);expect(search).to_be_focused()
+  check('Adding a lane uses a compact contextual catalog without opening the settings modal',f.locator('#content-picker').bounding_box()['width']<=290 and f.locator('#content-row-dialog[open]').count()==0)
+  check('The catalog exposes a stage action plus basic and advanced groups',f.get_by_role('heading',name='Básicos',exact=True).is_visible() and f.get_by_role('heading',name='Avançados',exact=True).is_visible() and f.get_by_role('button',name='Adicionar etapa pelo menu',exact=True).is_visible())
+  search.fill('metrica');expect(f.locator('.picker-option:visible')).to_have_count(1);check('Search ignores accents and filters actual types',f.locator('.picker-option:visible').get_attribute('data-type')=='metric');search.press('Escape');expect(trigger).to_be_focused();check('Escape cancels the catalog without creating a lane',not graph(page)['journeys'][jid].get('matrixContent'))
+  trigger.click();search.fill('etapa');search.press('Enter');f.get_by_role('textbox',name='Nome da nova etapa',exact=True).fill('Descobrir');f.get_by_role('button',name='Adicionar etapa ao mapa',exact=True).click();saved(f)
+  check('The stage item creates a real canonical stage',len(graph(page)['journeys'][jid]['stageIds'])==1);sid=graph(page)['journeys'][jid]['stageIds'][0]
+  trigger.click();search.fill('texto');search.press('Enter');name=f.locator('[data-ed="ln"]').last;expect(name).to_be_focused();lane=f.locator('.r[data-row^="x"]').last.get_attribute('data-row');name.fill('Observações');name.press('Tab');saved(f);key=lane+'|0'
+  check('Choosing a lane type creates it immediately and focuses its editable name',graph(page)['journeys'][jid]['matrixContent']['rows'][lane]['defaultType']=='text' and graph(page)['journeys'][jid]['matrixContent']['rows'][lane]['n']=='Observações')
+  inline(f,'ac|0','Pesquisar atendimento','Cartão')
+  f.locator(f'[data-cell="{key}"]>.content-add').click();search.fill('escala');search.press('ArrowDown');expect(f.get_by_role('button',name='Adicionar Escala',exact=True)).to_be_focused();page.screenshot(path=str(OUT/'search-desktop.png'),animations='disabled');search.focus();search.press('Enter')
+  dialog=f.get_by_role('dialog',name='Adicionar escala',exact=True);dialog.get_by_label('O que esta escala avalia?',exact=True).fill('Esforço percebido');dialog.get_by_role('button',name='Salvar elemento',exact=True).click();saved(f)
+  expect(f.locator('.scale-value')).to_have_text('Não preenchida');check('A new scale is unset and does not create a measured result',not graph(page)['stages'][sid]['emotionRecorded'] and not graph(page)['service'].get('outcomes',{}).get('measurements'))
+  slider=f.get_by_role('slider',name='Esforço percebido',exact=True);slider.press('ArrowRight');slider.press('Home');saved(f);check('Scale keyboard editing records an explicit zero',graph(page)['journeys'][jid]['matrixContent']['cells'][sid][lane][0]['scale']['value']==0)
+  add(f,key,'Embed');dialog=f.get_by_role('dialog',name='Adicionar embed',exact=True);dialog.get_by_label('Título do conteúdo').fill('Vídeo de referência');dialog.get_by_label('Endereço para incorporar').fill('https://example.com/not-an-embed');dialog.get_by_role('button',name='Salvar elemento',exact=True).click();expect(dialog.locator('.form-error')).to_contain_text('YouTube');dialog.get_by_label('Endereço para incorporar').fill('https://youtu.be/abcdefghijk');dialog.get_by_role('button',name='Salvar elemento',exact=True).click();saved(f)
+  check('Embeds are stored without loading third-party frames until requested',f.locator('.embed-preview iframe').count()==0 and graph(page)['journeys'][jid]['matrixContent']['cells'][sid][lane][1]['type']=='embed')
+  page.route('https://www.youtube-nocookie.com/**',lambda route:route.fulfill(status=200,content_type='text/html',body='<!doctype html><title>Provider fixture</title><p>Embed de QA</p>'));f.get_by_role('button',name='▶ Carregar conteúdo',exact=True).click();expect(f.locator('.embed-preview iframe')).to_have_attribute('src','https://www.youtube-nocookie.com/embed/abcdefghijk');check('Explicit preview uses a titled sandboxed provider frame',f.locator('.embed-preview iframe').get_attribute('title')=='Vídeo de referência' and 'allow-scripts' in f.locator('.embed-preview iframe').get_attribute('sandbox'))
+  f.locator('.toolbar>.menu').first.locator('summary').click();f.get_by_role('button',name='Jornada detalhada',exact=False).click();f.locator('[data-act="addi"][data-t="d"]').first.click();field=f.locator('.it.d [data-ed="ix"]').first;field.fill('Espera sem previsão');field.press('Tab');saved(f);f.get_by_role('button',name='Planejar melhoria',exact=True).click();dialog=f.get_by_role('dialog',name='Planejar melhoria',exact=True);dialog.get_by_label('Ação proposta').fill('Informar previsão no contato');dialog.get_by_label('Responsável',exact=True).fill('Equipe');dialog.locator('summary').click();dialog.get_by_label('Nome do indicador').fill('Tempo de espera');dialog.get_by_label('Unidade',exact=True).fill('min');dialog.get_by_label('Meta',exact=True).fill('10');dialog.get_by_role('button',name='Salvar plano',exact=True).click();expect(dialog).not_to_be_visible();saved(f)
+  state=graph(page);plan_id=next(iter(state['service']['improvementPortfolio']['initiatives']));metric_id=next(iter(state['entities']['metric']))
+  add(f,key,'Planejamento');dialog=f.get_by_role('dialog',name='Adicionar planejamento',exact=True);dialog.get_by_label('Registro do serviço',exact=True).select_option(plan_id);dialog.get_by_role('button',name='Salvar elemento',exact=True).click();saved(f)
+  add(f,'ac|0','Métrica');dialog=f.get_by_role('dialog',name='Adicionar métrica',exact=True);dialog.get_by_label('Registro do serviço',exact=True).select_option(metric_id);dialog.get_by_role('button',name='Salvar elemento',exact=True).click();saved(f)
+  check('Advanced cards link to existing plans and metrics without copying records or polluting customer actions',len(graph(page)['entities']['metric'])==1 and len(graph(page)['service']['improvementPortfolio']['initiatives'])==1 and graph(page)['stages'][sid]['customerAction']=='Pesquisar atendimento')
+  expect(f.locator('.metric-reference b')).to_have_text('Sem medição');f.get_by_role('button',name='Acompanhar plano',exact=True).click();dialog=f.get_by_role('dialog',name='Acompanhar melhoria',exact=True);dialog.get_by_label('Novo valor medido').fill('5');dialog.get_by_role('button',name='Registrar medição',exact=True).click();expect(dialog).not_to_be_visible();expect(f.locator('.metric-reference b')).to_have_text('5 min');check('A canonical measurement refreshes the linked metric card',graph(page)['entities']['metric'][metric_id]['value']==5)
+  f.get_by_role('button',name='Desfazer',exact=True).click();expect(f.locator('.metric-reference b')).to_have_text('Sem medição');f.get_by_role('button',name='Refazer',exact=True).click();expect(f.locator('.metric-reference b')).to_have_text('5 min');check('Undo and redo preserve canonical references and measured state',True)
+  f.get_by_role('button',name='Apresentar',exact=True).click();check('Presentation includes scales and real plan and metric state',f.locator('.report-content.type-scale').count()==1 and f.locator('.metric-reference b').inner_text()=='5 min' and f.get_by_text('Informar previsão no contato',exact=False).count()>0)
+  with page.expect_download() as download:f.get_by_role('button',name='Baixar resumo HTML',exact=True).click()
+  exported=Path(download.value.path()).read_text();check('Standalone HTML exports embed links rather than active third-party frames','youtu.be/abcdefghijk' in exported and '<iframe' not in exported and '5 min' in exported)
+  f.get_by_role('button',name='Voltar ao mapa',exact=True).click();f.get_by_role('button',name='Voltar para Jornadas',exact=True).click();page.reload(wait_until='networkidle');page.get_by_role('button',name='Abrir Jornadas',exact=True).click();page.get_by_role('button',name='Abrir Jornada',exact=True).first.click();f=page.frame_locator('.bo-blueprint-reference-frame');expect(f.locator('.metric-reference b')).to_have_text('5 min');check('Reload retains scales, embeds and canonical references',graph(page)['journeys'][jid]['matrixContent']['cells'][sid][lane][0]['scale']['value']==0 and graph(page)['stages'][sid]['customerAction']=='Pesquisar atendimento')
+  for width in [1440,834,390]:
+   page.set_viewport_size({'width':width,'height':1000});page.wait_for_timeout(250);trigger=f.get_by_role('button',name='+ Adicionar faixa',exact=True);trigger.click();audit(page,f'catalog-{width}');box=f.locator('#content-picker').bounding_box();check(f'Catalog stays inside the viewport at {width}px',box['x']>=0 and box['x']+box['width']<=width and box['y']>=0 and box['y']+box['height']<=1000);page.screenshot(path=str(OUT/f'catalog-{width}.png'),animations='disabled');f.get_by_role('button',name='Cancelar',exact=True).click();audit(page,f'map-{width}');check(f'Advanced cards do not overflow the page at {width}px',frame(page).evaluate('document.documentElement.scrollWidth<=innerWidth'))
+  f.get_by_role('button',name='Voltar para Jornadas',exact=True).click();touch=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,storage_state=page.context.storage_state());mobile=touch.new_page();mobile.on('pageerror',lambda e:errors.append(str(e)));mobile.add_locator_handler(mobile.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click());mobile.goto(URL,wait_until='networkidle');mobile.get_by_role('button',name='Abrir workspace local sem conta').click();mobile.get_by_role('button',name='Abrir navegação',exact=True).click();mobile.get_by_role('button',name='Abrir Jornadas',exact=True).click();mobile.get_by_role('button',name='Abrir Jornada',exact=True).first.click();mf=mobile.frame_locator('.bo-blueprint-reference-frame');saved(mf);mobile.wait_for_function("async()=>{const r=await window.BlueOceanRuntime.api('dataBridge').recovery();return r.durableOk&&r.durableRevision>=r.revision}");mf.locator('.lb').first.click();mf.get_by_role('button',name='+ Adicionar faixa',exact=True).tap();ms=mf.get_by_role('searchbox',name='Buscar tipo de conteúdo',exact=True);ms.fill('imagem');mf.get_by_role('button',name='Criar faixa de Imagem',exact=True).tap();saved(mf);check('A touch device creates a typed lane directly without a configuration modal',any(row['defaultType']=='image' for row in graph(mobile)['journeys'][jid]['matrixContent']['rows'].values()));audit(mobile,'map-touch');touch.close()
+  check('No uncaught browser errors',not errors);(OUT/'results.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2));browser.close()
+except Exception:
+ print('Browser errors:',errors if 'errors' in globals() else [],flush=True)
+ raise
+finally:server.shutdown();server.server_close()

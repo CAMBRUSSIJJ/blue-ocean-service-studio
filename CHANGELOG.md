@@ -1,5 +1,13 @@
 # Histórico de mudanças
 
+## Catálogo contextual da Jornada — 22/10/2026
+
+- Substitui o formulário inicial de faixa por um catálogo com busca e grupos Básicos/Avançados, junto ao ponto de inclusão.
+- Cria a faixa pelo tipo e permite renomeá-la no mapa, mantendo configuração e modelos como opções secundárias.
+- Acrescenta escalas, embeds por clique e cartões vinculados a planos e indicadores existentes.
+- Preserva referências e ordem nas faixas nativas; cartões de métrica não viram ações do cliente.
+- Amplia regressões de teclado, toque, persistência, apresentação e acessibilidade.
+
 ## Conteúdos e composição de faixas — 22/10/2026
 
 - Acrescenta texto, cartão, emoji, imagem e link por célula, com edição, duplicação e movimentação.
