@@ -87,7 +87,9 @@ button,select,input{font:inherit;color:var(--ink)}button{cursor:pointer}
 <body>
 <div id="app"></div>
 <script>
-const HOSTED=new URLSearchParams(location.search).get('service-graph')==='1';let applyingHost=false;
+const HOSTED=new URLSearchParams(location.search).get('service-graph')==='1';
+const JOURNEY_HOSTED=HOSTED&&new URLSearchParams(location.search).has('journey');
+let applyingHost=false;
 const KEY='bo-blueprint-v1',DIMS=['Tangíveis','Confiabilidade','Presteza','Segurança','Empatia'],EM=['Frustrada','Ansiosa','Neutra','Animada','Satisfeita'];
 const LANES=[{id:'ev',n:'Evidência física',h:'O que o cliente vê ou toca'},{id:'ac',n:'Ações do cliente',h:'O que a pessoa faz'},{id:'em',n:'Emoções',h:'Como ela se sente',emo:1},{id:'fl',n:'Linha de frente',h:'Ações visíveis da equipe',d:'Linha de interação'},{id:'bk',n:'Bastidores',h:'Ações que o cliente não vê',d:'Linha de visibilidade',o:1},{id:'sy',n:'Sistemas e apoio',h:'Ferramentas e processos',d:'Linha de interação interna',o:1}];
 const seed=()=>({title:'Pedido de café para retirar',persona:'Marina, trabalha em home office · pede pelo app e retira no balcão',steps:[{n:'Descobrir',e:1,d:'Marina vê o café nas redes sociais e decide pedir.'},{n:'Pedir',e:-1,d:'Ela monta o pedido no app e paga com Pix.'},{n:'Retirar',e:-2,d:'Ela vai ao balcão e espera o pedido ficar pronto.'},{n:'Avaliar',e:2,d:'Depois, responde à pesquisa e recebe um cupom.'}],
@@ -157,7 +159,14 @@ h+='</div><svg class="lk" id="lk" aria-hidden="true"></svg></div></div><aside cl
 function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();document.getElementById('dx').innerHTML=dx()}
 function focusNew(sel){const e=app.querySelector(sel);if(e)e.focus()}
 app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
-if(HOSTED&&(a==='lib'||a==='tools'||a==='back')){window.parent.postMessage({boBlueprintHost:1,type:a==='tools'?'tools':'back'},location.origin);return}
+if(JOURNEY_HOSTED&&a==='first-journey-stage'){
+  const title=String(app.querySelector('#journey-first-stage')?.value||'').trim();
+  if(!title){app.querySelector('#journey-first-stage')?.focus();return}
+  S.steps=[{n:title,e:0,d:'',hostLocalId:uid()}];S.start=0;S.guide=0;save();render();return;
+}
+if(HOSTED&&(a==='lib'||a==='tools'||a==='back'||a==='blueprint')){
+  window.parent.postMessage({boBlueprintHost:1,type:a==='blueprint'?'blueprint':a==='tools'?'tools':'back'},location.origin);return
+}
 if(a=='cv'){cv=!cv}
 else if(a=='lk'){lk=!lk;pick=null}
 else if(a=='pk'){if(!pick)pick=d.nid;else if(pick==d.nid)pick=null;else{const L=S.links=S.links||[],x=L.findIndex(l=>l.a==pick&&l.b==d.nid);if(x>=0)L.splice(x,1);else L.push({a:pick,b:d.nid});pick=null;save()}}
@@ -218,7 +227,24 @@ sv.innerHTML=h}
 window.addEventListener('resize',drawLinks);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawLinks);
 const originalBlueprintRender=render;
 render=function(){
-  originalBlueprintRender();
+  if(JOURNEY_HOSTED&&S.start){
+    app.innerHTML='<div class="hd"><div class="bk">Blue Ocean · Jornada</div></div>'+
+      '<div class="st"><section><h1 class="h1">'+esc(S.title||'Nova jornada')+'</h1>'+
+      '<h2>Sua primeira etapa</h2><label>Como começa a experiência?'+
+      '<input id="journey-first-stage" placeholder="Nome da etapa" aria-label="Nome da primeira etapa"></label>'+
+      '<button class="tb p" type="button" data-act="first-journey-stage">Criar etapa</button></section></div>';
+    const input=app.querySelector('#journey-first-stage');
+    if(input)input.addEventListener('keydown',ev=>{
+      if(ev.key==='Enter'){ev.preventDefault();app.querySelector('[data-act="first-journey-stage"]')?.click()}
+    });
+  }else originalBlueprintRender();
+  if(JOURNEY_HOSTED){
+    app.querySelectorAll('.bk').forEach(node=>{for(const child of [...node.childNodes])if(child.nodeType===Node.TEXT_NODE)child.textContent='Blue Ocean · Jornada'});
+    const tools=app.querySelector('[data-act="tools"]');
+    if(tools){tools.textContent='Blueprint opcional';tools.dataset.act='blueprint'}
+    const title=app.querySelector('.ti');
+    if(title)title.setAttribute('aria-label','Nome da Jornada');
+  }
   if(HOSTED){
     const anchor=app.querySelector('.hd .bk');
     if(anchor&&!anchor.querySelector('[data-act="back"]')){
@@ -239,7 +265,7 @@ if(HOSTED){
       try{
         const state=event.data.state;
         if(!state||!Array.isArray(state.steps)||typeof state.c!=='object')throw Error('Invalid host state');
-        S=JSON.parse(JSON.stringify(state));S.id='host';DB={cur:'host',js:[S]};
+        S=JSON.parse(JSON.stringify(state));S.id='host';if(JOURNEY_HOSTED)S.guide=0;DB={cur:'host',js:[S]};
         last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;render();
       }catch(e){console.error('Blueprint: cannot hydrate service graph',e)}
       finally{applyingHost=false}

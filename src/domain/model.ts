@@ -129,6 +129,15 @@ export type Journey = {
   name: string;
   stageIds: Id[];
   mapLayout?: JourneyMapLayout;
+  /** The original HTML Journey canvas, stored on the canonical Journey (not in browser-only storage). */
+  referenceCanvas?: {
+    version: 1; persona: string;
+    cells: Record<string, Array<{ i: string; t: string; hostEntityId?: string }>>;
+    issues: Array<{ stageId: Id; t: 'd' | 'i'; x: string; v: number; d: number; hostEntityId?: Id; hostLocalId?: string }>;
+    lanes: Array<{ id: string; n: string }>;
+    links: Array<{ a: string; b: string }>;
+    hiddenIssueIds?: string[];
+  };
   owner?: string;
   status?: 'draft' | 'active' | 'archived';
   favorite?: boolean;

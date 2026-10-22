@@ -97,6 +97,7 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - run: npm run editor:browser
       - run: npm run journey:browser
+      - run: python3 scripts/journey-reference-original-browser.py
       - run: npm run blueprint:methodology:browser
       - run: python3 scripts/blueprint-guided-reading-browser.py
       - run: python3 scripts/blueprint-reference-exact-browser.py
@@ -114,6 +115,7 @@ jobs:
           path: |
             artifacts/editor-ux
             artifacts/journey-editor
+            artifacts/journey-reference-original
             artifacts/blueprint-methodology
             artifacts/entry-journey
             artifacts/journey-template-whiteboard

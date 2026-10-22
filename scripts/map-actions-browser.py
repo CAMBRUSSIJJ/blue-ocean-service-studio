@@ -147,6 +147,7 @@ if not URL:
     server = ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Quiet, directory=str(ROOT / 'dist')))
     threading.Thread(target=server.serve_forever, daemon=True).start()
     URL = f'http://127.0.0.1:{server.server_port}'
+URL += ('&' if '?' in URL else '?') + '__qa_legacy_journey=1'
 # Exercise the retired editor only in localhost regression runs, never in Production.
 URL += ('&' if '?' in URL else '?') + '__qa_legacy_blueprint=1'
 

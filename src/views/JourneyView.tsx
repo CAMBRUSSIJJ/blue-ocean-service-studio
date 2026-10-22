@@ -13,6 +13,7 @@ import { hasCustomJourneyCover, journeyCoverSrc, prepareJourneyCoverFile } from 
 import { buildChannelContinuityReport } from '../services/channel-continuity';
 import { createContextEntity } from '../services/context-library';
 import { JourneyCanvasFree } from './JourneyCanvasFree';
+import { JourneyReferenceCanvas } from './JourneyReferenceCanvas';
 
 const JOURNEY_ROWS = [
   { id: 'customerAction', label: 'Ações do cliente' },
@@ -178,6 +179,25 @@ export function JourneyView({ studio, onBack }: { studio: StudioController; onBa
   };
 
   if (!showCanvasMatrix) {
+    const legacyQa = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+      && new URLSearchParams(window.location.search).has('__qa_legacy_journey');
+    if (!legacyQa) {
+      return <JourneyReferenceCanvas
+        studio={studio}
+        onBack={onBack}
+        onBlueprintDraft={async () => {
+          const prepared = prepareJourneyBlueprintDraft(graph, journey.id);
+          if (!prepared.boardId) { showToast('Crie pelo menos uma etapa antes de continuar no Blueprint.'); return; }
+          if (prepared.created) setGraph(current => prepareJourneyBlueprintDraft(current, journey.id, { id: prepared.boardId! }).graph, 'Jornada: criar Blueprint opcional');
+          setActiveTab('canvas');
+          window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'blueprint' }));
+          window.setTimeout(async () => {
+            const bridge = runtimeApi<{ open(id: string): Promise<boolean> }>('serviceBlueprintFrame');
+            if (bridge) await bridge.open(prepared.boardId!);
+          }, prepared.created ? 90 : 0);
+        }}
+      />;
+    }
     return <JourneyCanvasFree
       studio={studio}
       onBack={onBack}
