@@ -137,3 +137,14 @@ Informe o commit, o comando, o resultado e os cenários executados. Separe falha
 checks não executados e pré-requisitos ausentes. Relatórios históricos em
 `docs/archive/validacoes/` descrevem suas próprias versões; não validam uma
 alteração atual. Não sobrescreva esses registros com resultados de uma execução nova.
+
+
+O comando `npm run journey:elements:browser` verifica a inserção de Canal,
+Persona, Dor, Necessidade, Evidência e Oportunidade já existentes, a independência
+da legenda local, a atualização da fonte, biblioteca vazia ou fonte removida,
+reordenação, recarga, histórico e resumo HTML. Também exercita a restauração da
+curva de emoções pelo catálogo, com etapas ausentes e dados não informados,
+hipóteses e acesso pela célula selecionada. Usa registros fictícios no Service
+Graph e a interação real dos seletores, com axe em 1440, 834 e 390 px e em
+um dispositivo com toque. As capturas
+ficam em `artifacts/journey-elements/` e são publicadas na CI.

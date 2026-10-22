@@ -122,7 +122,7 @@ export type JourneyCard = { id: string; content: string; checked?: boolean; icon
 export type JourneyLaneTone = 'neutral' | 'blue' | 'emerald' | 'amber' | 'rose' | 'violet';
 export type JourneyLane = { id: string; type: JourneyLaneType; label: string; hidden?: boolean; tone?: JourneyLaneTone; height?: number; binding?: 'customerAction' | 'thoughts' | 'touchpoints' | 'needs' | 'pains'; cards: Record<string, string>; cardItems?: Record<string, JourneyCard[]>; };
 export type JourneyMapLayout = { version: 1; lanes: JourneyLane[]; stageWidth?: number; introDismissed?: boolean };
-export type JourneyMatrixBlock = { id: Id; type: 'text' | 'card' | 'emoji' | 'image' | 'link' | 'scale' | 'embed' | 'plan' | 'metric'; text: string; icon?: string; url?: string; credit?: string; referenceId?: Id; scale?: { min: number; max: number; step: number; value?: number; minLabel: string; maxLabel: string } };
+export type JourneyMatrixBlock = { id: Id; type: 'text' | 'card' | 'emoji' | 'image' | 'link' | 'scale' | 'embed' | 'plan' | 'metric' | 'channel' | 'persona' | 'pain' | 'need' | 'evidence' | 'opportunity'; text: string; icon?: string; url?: string; credit?: string; referenceId?: Id; scale?: { min: number; max: number; step: number; value?: number; minLabel: string; maxLabel: string } };
 export type JourneyMatrixContent = {
   version: 1;
   rows: Record<string, { n: string; h: string; icon: string; defaultType: JourneyMatrixBlock['type'] }>;

@@ -1,8 +1,25 @@
 /** Shared document validation for the matrix and its canonical host. No DOM dependencies. */
-export const MATRIX_CONTENT_TYPES = ['text', 'card', 'emoji', 'image', 'link', 'scale', 'embed', 'plan', 'metric'];
+export const MATRIX_REFERENCE_TYPES = ['plan', 'metric', 'channel', 'persona', 'pain', 'need', 'evidence', 'opportunity'];
+export const MATRIX_CONTENT_TYPES = ['text', 'card', 'emoji', 'image', 'link', 'scale', 'embed', ...MATRIX_REFERENCE_TYPES];
 export const MATRIX_IMAGE_LIMIT = 500 * 1024;
 export const MATRIX_IMAGE_BUDGET = 2 * 1024 * 1024;
 const clipped = (v, n) => typeof v === 'string' ? v.trim().slice(0, n) : '';
+/** Read-only summaries of existing service records for the insertion catalog. */
+export function matrixServiceReferences(graph) {
+  const result = {};
+  for (const type of ['channel', 'persona', 'pain', 'need', 'evidence', 'opportunity']) {
+    const records = { ...(graph.entities?.[type] || {}), ...(type === 'pain' ? graph.problems : type === 'opportunity' ? graph.opportunities : {}) };
+    result[type] = Object.values(records).filter(record => !record.serviceId || record.serviceId === graph.service.id).map(record => ({
+      id: record.id,
+      title: clipped(record.title || record.name || record.description, 1000) || 'Sem nome',
+      description: clipped(record.description || record.context, 1000),
+      category: clipped(record.category, 160),
+      source: clipped(record.source, 1000),
+      stageName: clipped(graph.stages?.[record.stageId]?.title, 240)
+    }));
+  }
+  return result;
+}
 export function matrixSafeUrl(value, image = false) {
   const valueString = typeof value === 'string' ? value.trim() : '';
   if (image && /^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(valueString)) {
@@ -61,7 +78,7 @@ export function normalizeMatrixBlock(note) {
     if (!matrixEmbedUrl(normalized.url)) throw Error('Use um endereço de YouTube, Vimeo ou Figma.');
     if (!normalized.text) throw Error('Dê um título ao conteúdo incorporado.');
   }
-  if (['plan', 'metric'].includes(type)) {
+  if (MATRIX_REFERENCE_TYPES.includes(type)) {
     normalized.referenceId = clipped(note.referenceId, 160);
     if (!normalized.referenceId) throw Error('Selecione um registro do serviço.');
   }
@@ -118,7 +135,7 @@ export function restoreMatrixContent(ref, stored, stageIds) {
           const { id: _id, text: _text, ...metadata } = block;
           return [{ ...note, ...metadata }];
         }
-        if (['plan', 'metric'].includes(block.type)) return [{ ...block, i: block.id, t: block.text }];
+        if (MATRIX_REFERENCE_TYPES.includes(block.type)) return [{ ...block, i: block.id, t: block.text }];
         return [];
       });
       ref.c[key].push(...existing.filter(note => !included.has(note.i)));

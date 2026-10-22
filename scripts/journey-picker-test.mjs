@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { matrixEmbedUrl, normalizeMatrixScale, normalizeMatrixBlock, matrixContentFromDocument, restoreMatrixContent } from '../src/services/journey-content.js';
+import { MATRIX_REFERENCE_TYPES, matrixServiceReferences, matrixEmbedUrl, normalizeMatrixScale, normalizeMatrixBlock, matrixContentFromDocument, restoreMatrixContent } from '../src/services/journey-content.js';
 let count=0;const check=(name,fn)=>{fn();count++;console.log('PASS '+name)};
 check('Provider URLs normalize to embeds without carrying arbitrary query parameters',()=>{assert.equal(matrixEmbedUrl('https://youtu.be/abcdefghijk?t=60'),'https://www.youtube-nocookie.com/embed/abcdefghijk');assert.equal(matrixEmbedUrl('https://vimeo.com/12345'),'https://player.vimeo.com/video/12345');assert.ok(matrixEmbedUrl('https://www.figma.com/design/abc/test').startsWith('https://www.figma.com/embed?'))});
 check('Arbitrary HTML, insecure URLs and lookalike domains cannot become embeds',()=>{for(const url of ['javascript:alert(1)','<iframe src=x>','https://youtube.com.evil.example/watch?v=abcdefghijk','http://youtu.be/abcdefghijk','https://example.com/video','data:image/png;base64,AAA='])assert.equal(matrixEmbedUrl(url),'')});
@@ -10,4 +10,13 @@ const doc={c:{'fl|0':[{i:'a',t:'Ação B',type:'card'},{i:'b',t:'Ação A',type:
 const before=structuredClone(doc),stored=matrixContentFromDocument(doc,['s'],{notes:{a:'canonical-b',b:'canonical-a',scale:'canonical-scale',embed:'canonical-embed'}});
 check('Composition preserves scale, embed and references without mutating the draft',()=>{assert.deepEqual(doc,before);assert.equal(stored.cells.s.fl[3].scale.value,0);assert.equal(stored.cells.s.fl[2].referenceId,'initiative-1')});
 check('Native rows restore visual order and reference-only cards beside canonical notes',()=>{const ref={c:{'fl|0':[{i:'canonical-a',t:'Texto revisado',hostItemId:'canonical-a'},{i:'canonical-b',t:'Ação B',hostItemId:'canonical-b'},{i:'canonical-scale',t:'Esforço'},{i:'canonical-embed',t:'Vídeo'}]}};restoreMatrixContent(ref,stored,['s']);assert.deepEqual(ref.c['fl|0'].map(n=>n.i),['canonical-b','canonical-a','plan','canonical-scale','canonical-embed']);assert.equal(ref.c['fl|0'][1].t,'Texto revisado');assert.equal(ref.c['fl|0'][3].scale.value,0);assert.equal(ref.c['fl|0'][2].referenceId,'initiative-1')});
+check('Service elements project current canonical records without mutation or cross-service leakage',()=>{
+  const graph={service:{id:'s'},stages:{stage:{title:'Uso'}},entities:{persona:{p:{id:'p',title:'Marina',description:'Tem pouco tempo',serviceId:'s'}},channel:{c:{id:'c',title:'App',serviceId:'s'},other:{id:'other',title:'Outro projeto',serviceId:'other'}},pain:{old:{id:'old',title:'Dor de pesquisa'}}},problems:{problem:{id:'problem',description:'Espera',stageId:'stage'}},opportunities:{idea:{id:'idea',title:'Avisar o prazo'}}},before=structuredClone(graph),sources=matrixServiceReferences(graph);
+  assert.deepEqual(graph,before);assert.deepEqual(sources.channel.map(r=>r.id),['c']);assert.equal(sources.persona[0].description,'Tem pouco tempo');assert.equal(sources.pain.find(r=>r.id==='problem').stageName,'Uso');assert.equal(sources.pain.length,2);assert.equal(sources.opportunity[0].title,'Avisar o prazo');
+  graph.entities.persona.p.title='Nome atualizado';assert.equal(matrixServiceReferences(graph).persona[0].title,'Nome atualizado');
+});
+check('All service reference types survive native row rehydration without creating canonical activities',()=>{
+  const types=MATRIX_REFERENCE_TYPES.filter(t=>!['plan','metric'].includes(t)),draft={c:{'fl|0':types.map((type,i)=>({i:'note'+i,t:'Legenda',type,referenceId:'record'+i}))}},stored=matrixContentFromDocument(draft,['s']),ref={c:{}};
+  restoreMatrixContent(ref,JSON.parse(JSON.stringify(stored)),['s']);assert.equal(ref.c['fl|0'].length,types.length);assert.deepEqual(ref.c['fl|0'].map(n=>n.type),types);assert.ok(ref.c['fl|0'].every(n=>!n.hostItemId));for(const type of types)assert.throws(()=>normalizeMatrixBlock({type,t:'Sem origem'}));
+});
 console.log(`Journey picker: ${count}/${count} PASS`);

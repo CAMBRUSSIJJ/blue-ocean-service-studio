@@ -206,7 +206,8 @@
     "journey:content:test": "node scripts/journey-content-test.mjs",
     "journey:content:browser": "python3 scripts/journey-content-browser.py",
     "journey:picker:test": "node scripts/journey-picker-test.mjs",
-    "journey:picker:browser": "python3 scripts/journey-picker-browser.py"
+    "journey:picker:browser": "python3 scripts/journey-picker-browser.py",
+    "journey:elements:browser": "python3 scripts/journey-elements-browser.py"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

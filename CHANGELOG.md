@@ -1,5 +1,12 @@
 # Histórico de mudanças
 
+## 2026-10-22 · Ferramentas e elementos do serviço no catálogo
+
+- Gráfico de emoções, dores e ideias e demais faixas nativas acessíveis pelo catálogo contextual, preservando os dados e as preferências das outras faixas.
+- Canal, Persona, Dor, Necessidade, Evidência e Oportunidade vinculam os registros existentes, com título e descrição atuais e legenda local independente.
+- Dores registradas no mapa ficam disponíveis imediatamente para vincular; referências não criam ações do cliente nem duplicam entidades.
+- Regressão automatizada de persistência, histórico, reordenação, exportação e acessibilidade em três larguras.
+
 ## Catálogo contextual da Jornada — 22/10/2026
 
 - Substitui o formulário inicial de faixa por um catálogo com busca e grupos Básicos/Avançados, junto ao ponto de inclusão.
