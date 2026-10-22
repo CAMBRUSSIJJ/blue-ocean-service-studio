@@ -82,6 +82,59 @@ button,select,input{font:inherit;color:var(--ink)}button{cursor:pointer}
 .ck span{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ln);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
 .ck.on{color:var(--ink);font-weight:600}.ck.on span{background:var(--ac);border-color:var(--ac);color:var(--onac)}
 .ck em{margin-left:auto;font-style:normal;font-size:12px}
+
+/* UX progressiva: mesmo conteúdo canônico, menos ruído na visualização. */
+.hd{padding:12px 20px 10px;gap:8px}
+.bk{font-size:10px;letter-spacing:.06em;display:flex;align-items:center}
+.ti{flex:1 1 270px;font-size:19px;min-height:38px;padding:3px 6px}
+.sv{white-space:nowrap}.hd .tb{min-height:36px;padding:0 11px}
+.hd .tb.p{font-weight:700}.hd .tb--icon{padding:0 9px;min-width:36px}
+.hd .tb:focus-visible,summary:focus-visible,.ad:focus-visible,.nx:focus-visible,.emotion-toggle:focus-visible,.emotion-point:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.wrap{padding:0 20px 24px;gap:12px;flex-wrap:nowrap}
+.bd{flex:1 1 0;min-width:0}
+.r .lb{padding:10px 12px;font-size:12px}
+.lb small{font-size:11px}
+.c{padding:5px 7px}
+.n{padding:8px 10px;min-height:34px}
+.sh{padding:7px 6px}
+.sa{opacity:0;transition:opacity .14s}.sh:hover .sa,.sh:focus-within .sa{opacity:1}
+.ad{border:1px solid transparent;background:transparent;min-height:29px;max-height:32px;color:var(--mut);font-size:12px;opacity:.55;transition:background .14s,border-color .14s,color .14s,opacity .14s}
+.ad .ad-hint{display:none}.ad .ad-idle{display:inline}
+.c:hover .ad,.c:focus-within .ad,.ad:focus-visible{border-color:var(--ln);background:var(--bg);color:var(--act);opacity:1}
+.c:hover .ad .ad-hint,.c:focus-within .ad .ad-hint,.ad:focus-visible .ad-hint{display:inline}
+.c:hover .ad .ad-idle,.c:focus-within .ad .ad-idle,.ad:focus-visible .ad-idle{display:none}
+.c:has(.nw) .ad{opacity:.85}
+.dv{padding:5px 12px;font-size:10px;background:var(--bg)}
+.cvb{height:68px}.cvb svg{height:68px}
+.dt{border:2px solid var(--sf);width:13px;height:13px;margin:-7px;cursor:pointer;z-index:2}
+.emotion-point{position:absolute;width:24px;height:24px;transform:translate(-50%,-50%);border-radius:50%;border:0;background:transparent;cursor:pointer;z-index:3}
+.emotion-point::after{content:"";position:absolute;top:6px;left:6px;width:12px;height:12px;background:var(--ac);border:2px solid var(--sf);border-radius:50%;box-shadow:0 1px 3px #0002}
+.emotion-toggle{background:none;border:0;padding:4px 2px;color:var(--act);font-size:11px;cursor:pointer}
+.cvb.is-expanded{height:110px}.cvb.is-expanded svg{height:110px}
+.sl{padding:2px 0}.sl input{min-height:28px}
+.bt button{border:1px solid transparent;min-height:30px;color:var(--mut);font-weight:500}
+.bt button:hover,.bt button:focus-visible{border-color:var(--ln);color:var(--act);background:var(--bg)}
+.pi{margin:0 20px 10px;width:calc(100% - 40px)}
+.bo-ux-menu{position:relative;display:inline-block}
+.bo-ux-menu summary{list-style:none;cursor:pointer;user-select:none}
+.bo-ux-menu summary::-webkit-details-marker{display:none}
+.bo-ux-dropdown{position:absolute;z-index:20;right:0;top:calc(100% + 6px);min-width:280px;max-width:min(90vw,360px);max-height:70vh;overflow:auto;padding:10px;background:var(--sf);border:1px solid var(--ln);border-radius:12px;box-shadow:0 12px 35px #0f1b2d24}
+.bo-ux-dropdown h3{font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin:8px 6px;color:var(--mut)}
+.bo-ux-dropdown button,.bo-ux-dropdown label{display:flex;gap:8px;align-items:center;text-align:left;width:100%;min-height:36px;padding:6px 10px;border:0;border-radius:7px;background:transparent;color:var(--ink);font-size:12px}
+.bo-ux-dropdown button:hover,.bo-ux-dropdown label:hover{background:var(--bg)}
+.bo-ux-dropdown button[aria-pressed="true"]{background:var(--acs);color:var(--act);font-weight:700}
+.bo-ux-dropdown input{accent-color:var(--ac)}
+.bo-ux-dropdown .bo-ux-divider{height:1px;background:var(--ln);margin:8px 2px}
+.bo-ux-compact{font-size:11px;color:var(--mut);margin:6px}
+.pnl{flex:0 0 310px;max-width:310px;padding:14px;position:relative}
+.bo-ux-panel-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bo-ux-tabs{display:flex;gap:4px;border-bottom:1px solid var(--ln);margin:12px 0}
+.bo-ux-tabs button{flex:1;padding:8px 4px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--mut);font-size:11px;cursor:pointer}
+.bo-ux-tabs button[aria-selected="true"]{color:var(--act);border-color:var(--ac);font-weight:700}
+.bo-ux-panel-empty{padding:12px 0;color:var(--mut);font-size:12px}
+@media(max-width:980px){.wrap{flex-wrap:wrap}.bd{flex:1 1 100%}.pnl{flex:1 1 100%;max-width:none}.hd{padding:10px 12px}.wrap{padding:0 12px 18px}.pi{margin:0 12px 10px;width:calc(100% - 24px)}}
+@media(hover:none){.sa{opacity:1}.ad{opacity:1;border-color:var(--ln)}.ad .ad-hint{display:inline}.ad .ad-idle{display:none}}
+@media(prefers-reduced-motion:reduce){.ad,.sa{transition:none}}
 </style>
 </head>
 <body>
@@ -125,44 +178,66 @@ function impF(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const o
 async function dl(){try{const d=await claude.use('downloads');if(!d){msg='Download indisponível nesta tela. Abra o link no navegador ou no app do Claude.';render();return}await d.save({filename:'blueprints-blue-ocean.json',data:JSON.stringify({v:1,js:DB.js},null,1)});msg='Backup salvo.'}catch(e){msg=e&&e.code=='declined'?'Download cancelado.':'Não foi possível baixar o backup.'}render()}
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const app=document.getElementById('app');
+const UX_MODES={essential:['sd','ac','em'],detailed:['sd','ac','em','ev','iss','custom'],operations:['sd','ac','em','ev','fl','bk','sy','iss','custom'],full:['sd','ac','em','ev','fl','bk','sy','iss','custom']};
+const UX_LABELS={essential:'Essencial',detailed:'Detalhada',operations:'Operacional',full:'Completa'};
+const UX_LANE_LABELS={sd:'O que acontece',ac:'Ações do cliente',em:'Emoções',ev:'Evidência física',fl:'Linha de frente',bk:'Bastidores',sy:'Sistemas e apoio',iss:'Dores e ideias'};
+const uxKey=()=> 'bo-journey-display-v1:'+(HOSTED?'project:'+String(S.title||'jornada').trim():S.id);
+function loadUx(){try{const a=JSON.parse(localStorage.getItem(uxKey())||'{}');return {mode:UX_MODES[a.mode]?a.mode:'essential',lanes:a.lanes&&typeof a.lanes==='object'?a.lanes:{},panel:!!a.panel,tab:['guide','analysis','quality'].includes(a.tab)?a.tab:'guide',emotionsOpen:!!a.emotionsOpen,detailsOpen:!!a.detailsOpen}}catch(e){return {mode:'essential',lanes:{},panel:false,tab:'guide',emotionsOpen:false,detailsOpen:false}}}
+let UX=loadUx();
+function storeUx(){try{localStorage.setItem(uxKey(),JSON.stringify(UX))}catch(e){}}
+const laneShown=id=>{const type=id.startsWith('x')?'custom':id;return Object.prototype.hasOwnProperty.call(UX.lanes,id)?!!UX.lanes[id]:UX_MODES[UX.mode].includes(type)};
+const UX_CLASSES=['sd',...LANES.map(l=>l.id),'iss'];
+function viewMenu(){return '<details class="bo-ux-menu" data-ux-menu="view"><summary class="tb" aria-label="Personalizar visualização">Visualização: '+UX_LABELS[UX.mode]+' ▾</summary><div class="bo-ux-dropdown"><h3>Visualização</h3>'+Object.keys(UX_LABELS).map(key=>'<button type="button" data-act="mode" data-mode="'+key+'" aria-pressed="'+(UX.mode===key)+'">'+UX_LABELS[key]+'</button>').join('')+'<div class="bo-ux-divider"></div><h3>Mostrar faixas</h3>'+UX_CLASSES.map(id=>'<label><input type="checkbox" data-act="lane" data-lane="'+id+'" '+(laneShown(id)?'checked':'')+'>'+UX_LANE_LABELS[id]+'</label>').join('')+(S.lanes||[]).map(l=>'<label><input type="checkbox" data-act="lane" data-lane="'+esc(l.id)+'" '+(laneShown(l.id)?'checked':'')+'>'+esc(l.n)+'</label>').join('')+'<p class="bo-ux-compact">Ocultar uma faixa não exclui seu conteúdo. As escolhas ficam salvas neste navegador.</p></div></details>'}
+function actionsMenu(){return '<details class="bo-ux-menu" data-ux-menu="actions"><summary class="tb" aria-label="Mais ações da Jornada">Mais ▾</summary><div class="bo-ux-dropdown"><button data-act="cv" aria-pressed="'+cv+'">Visão do cliente</button><button data-act="lk" aria-pressed="'+lk+'">Ligar notas</button><button data-act="details" aria-pressed="'+UX.detailsOpen+'">Persona e cenário</button><button data-act="lib">Minhas jornadas ('+DB.js.length+')</button></div></details>'}
+function uxHeader(){return '<span class="sv">'+(HOSTED?'Salvo no projeto':'Salvo neste dispositivo')+'</span>'+viewMenu()+'<button class="tb" data-act="panel" aria-expanded="'+UX.panel+'" aria-controls="dx">Insights'+(S.iss.length?' · '+S.iss.length:'')+'</button><button class="tb tb--icon" data-act="undo" aria-label="Desfazer" title="Desfazer"'+(U.length?'':' disabled')+'>↶</button><button class="tb tb--icon" data-act="redo" aria-label="Refazer" title="Refazer"'+(R.length?'':' disabled')+'>↷</button>'+actionsMenu()+(HOSTED?'<button class="tb" data-act="tools">Ferramentas</button>':'')+'<button class="tb p" data-act="step">+ Nova etapa</button>'}
+
 function score(i){const e=S.steps[i].e,I=S.iss.filter(x=>x.s==i),p=I.filter(x=>x.t=='d').reduce((a,x)=>a+x.v,0),n=I.filter(x=>x.t=='i').length;return Math.max(0,(2-e)*1.5+p*2-n*1.5)}
 function curve(){const N=S.steps.length,W=N*100,y=e=>16+(2-e)*16,P=S.steps.map((s,i)=>[i*100+50,y(s.e)]);
 let d='M'+P[0].join(' ');for(let i=1;i<N;i++){const a=P[i-1],b=P[i],m=(a[0]+b[0])/2;d+=' C'+m+' '+a[1]+' '+m+' '+b[1]+' '+b[0]+' '+b[1]}
-return '<svg viewBox="0 0 '+W+' 110" preserveAspectRatio="none" role="img" aria-label="Curva de emoções ao longo das etapas"><line x1="0" x2="'+W+'" y1="48" y2="48" stroke="var(--ln)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/><path d="'+d+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+P.map((p,i)=>'<span class="dt" style="left:'+p[0]/W*100+'%;top:'+p[1]+'px"></span><span class="dl" style="left:'+p[0]/W*100+'%;top:'+(p[1]+9)+'px">'+EM[S.steps[i].e+2]+'</span>').join('')}
-function dx(){const N=S.steps.length,sc=S.steps.map((_,i)=>score(i)),mx=Math.max(...sc,1),ord=sc.map((_,i)=>i).sort((a,b)=>sc[b]-sc[a]);
-const nd=i=>S.iss.filter(x=>x.s==i&&x.t=='d').length,ni=i=>S.iss.filter(x=>x.s==i&&x.t=='i').length;
-let h=coach()+'<h2>Prioridade de melhoria</h2>'+ord.map(i=>'<div class="rk"><div><b>'+(i+1)+'. '+esc(S.steps[i].n)+'</b><span>'+EM[S.steps[i].e+2]+' · '+nd(i)+' dor(es)</span></div><div class="bar"><i style="width:'+sc[i]/mx*100+'%"></i></div></div>').join('');
+return '<svg viewBox="0 0 '+W+' 110" preserveAspectRatio="none" role="img" aria-label="Curva de emoções ao longo das etapas"><line x1="0" x2="'+W+'" y1="48" y2="48" stroke="var(--ln)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/><path d="'+d+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+P.map((p,i)=>'<button type="button" class="emotion-point" data-act="emotions" style="left:'+p[0]/W*100+'%;top:'+p[1]+'px" aria-label="Editar emoção em '+esc(S.steps[i].n)+'" title="'+EM[S.steps[i].e+2]+'"></button><span class="dl" style="left:'+p[0]/W*100+'%;top:'+(p[1]+9)+'px">'+EM[S.steps[i].e+2]+'</span>').join('')}
+function dx(){
+const N=S.steps.length,sc=S.steps.map((_,i)=>score(i)),mx=Math.max(...sc,1),ord=sc.map((_,i)=>i).sort((a,b)=>sc[b]-sc[a]);
+const nd=i=>S.iss.filter(x=>x.s===i&&x.t==='d').length,ni=i=>S.iss.filter(x=>x.s===i&&x.t==='i').length;
+let out='<div class="bo-ux-panel-head"><strong>Insights da Jornada</strong><button class="x" data-act="panel" aria-label="Fechar insights">×</button></div><div class="bo-ux-tabs" role="tablist" aria-label="Tipos de insights">'+[['guide','Orientações'],['analysis','Análise'],['quality','Qualidade']].map(([key,title])=>'<button role="tab" aria-selected="'+(UX.tab===key)+'" data-act="paneltab" data-tab="'+key+'">'+title+'</button>').join('')+'</div>';
+if(UX.tab==='guide')return out+(coach()||'<p class="bo-ux-panel-empty">Todos os pontos foram revisados.</p>');
+if(UX.tab==='analysis'){
+if(!N)return out+'<p class="bo-ux-panel-empty">Adicione uma etapa para começar a análise.</p>';
+let h='<h2>Prioridade de melhoria</h2>'+ord.map(i=>'<div class="rk"><div><b>'+(i+1)+'. '+esc(S.steps[i].n)+'</b><span>'+EM[S.steps[i].e+2]+' · '+nd(i)+' dor(es)</span></div><div class="bar"><i style="width:'+sc[i]/mx*100+'%"></i></div></div>').join('');
 const top=ord[0],ins=[];
 ins.push(sc[top]>0?'Comece por “'+esc(S.steps[top].n)+'”: humor '+EM[S.steps[top].e+2].toLowerCase()+' e '+nd(top)+' dor(es) dão a maior pontuação.':'Registre dores e ideias para ver as prioridades.');
 const open=S.steps.map((s,i)=>nd(i)&&!ni(i)?esc(s.n):'').filter(Boolean);
-if(open.length)ins.push('Dores sem nenhuma ideia ainda: '+open.join(', ')+'.');else if(S.iss.some(x=>x.t=='d'))ins.push('Toda etapa com dor já tem uma ideia de melhoria.');
-const miss=DIMS.filter((m,k)=>!S.iss.some(x=>x.d==k));
-if(S.iss.length)ins.push(miss.length?'Nenhum item toca em: '+miss.join(', ')+'. Vale revisar a jornada por essa lente.':'Todas as dimensões de qualidade têm itens.');
-h+='<h2>Leitura automática</h2>'+ins.map(t=>'<div class="ins">'+t+'</div>').join('');
-const tot=DIMS.map((_,k)=>S.iss.filter(x=>x.d==k).length),mt=Math.max(...tot,1);
-h+='<h2>Cobertura da qualidade (SERVQUAL)</h2>'+DIMS.map((m,k)=>'<div class="rk"><div><b>'+m+'</b><span>'+S.iss.filter(x=>x.d==k&&x.t=='d').length+' dor · '+S.iss.filter(x=>x.d==k&&x.t=='i').length+' ideia</span></div><div class="bar"><i style="width:'+tot[k]/mt*100+'%"></i></div></div>').join('');
-return h+'<p class="hint">Pontuação = humor baixo × 1,5 + gravidade das dores × 2 − ideias × 1,5.</p>'}
-function cell(l,i){const k=l+'|'+i,a=S.c[k]||[];return '<div class="c" data-cell="'+k+'">'+a.map((t,j)=>'<div class="nw'+(pick==t.i?' pk':'')+'" data-j="'+j+'" data-nid="'+t.i+'"><span class="gh" draggable="true" data-k="'+k+'" data-j="'+j+'" title="Arrastar" aria-hidden="true">⠿</span><div class="n" contenteditable="true" role="textbox" aria-label="Nota" data-ed="c" data-k="'+k+'" data-j="'+j+'">'+esc(t.t)+'</div>'+(lk?'<button class="nx c" data-act="pk" data-nid="'+t.i+'" aria-label="Ligar esta nota" title="Ligar">●</button>':'')+'<button class="nx a" data-act="dn" data-k="'+k+'" data-j="'+j+'" aria-label="Duplicar nota" title="Duplicar">⧉</button><button class="nx b" data-act="rn" data-k="'+k+'" data-j="'+j+'" aria-label="Remover nota" title="Remover">×</button></div>').join('')+sug(l,i,a)+'<button class="ad" data-act="add" data-k="'+k+'" aria-label="Adicionar nota">'+(a.length?'+':'+ '+(PR[l]||'Adicionar'))+'</button></div>'}
+if(open.length)ins.push('Dores sem nenhuma ideia ainda: '+open.join(', ')+'.');else if(S.iss.some(x=>x.t==='d'))ins.push('Toda etapa com dor já tem uma ideia de melhoria.');
+return out+h+'<h2>Leitura automática</h2>'+ins.map(t=>'<div class="ins">'+t+'</div>').join('');
+}
+const tot=DIMS.map((_,k)=>S.iss.filter(x=>x.d===k).length),mt=Math.max(...tot,1);
+return out+'<h2>Cobertura da qualidade (SERVQUAL)</h2>'+DIMS.map((m,k)=>'<div class="rk"><div><b>'+m+'</b><span>'+S.iss.filter(x=>x.d===k&&x.t==='d').length+' dor · '+S.iss.filter(x=>x.d===k&&x.t==='i').length+' ideia</span></div><div class="bar"><i style="width:'+tot[k]/mt*100+'%"></i></div></div>').join('')+'<p class="hint">Pontuação = humor baixo × 1,5 + gravidade das dores × 2 − ideias × 1,5.</p>';
+}
+function cell(l,i){const k=l+'|'+i,a=S.c[k]||[];return '<div class="c" data-cell="'+k+'">'+a.map((t,j)=>'<div class="nw'+(pick==t.i?' pk':'')+'" data-j="'+j+'" data-nid="'+t.i+'"><span class="gh" draggable="true" data-k="'+k+'" data-j="'+j+'" title="Arrastar" aria-hidden="true">⠿</span><div class="n" contenteditable="true" role="textbox" aria-label="Nota" data-ed="c" data-k="'+k+'" data-j="'+j+'">'+esc(t.t)+'</div>'+(lk?'<button class="nx c" data-act="pk" data-nid="'+t.i+'" aria-label="Ligar esta nota" title="Ligar">●</button>':'')+'<button class="nx a" data-act="dn" data-k="'+k+'" data-j="'+j+'" aria-label="Duplicar nota" title="Duplicar">⧉</button><button class="nx b" data-act="rn" data-k="'+k+'" data-j="'+j+'" aria-label="Remover nota" title="Remover">×</button></div>').join('')+sug(l,i,a)+'<button class="ad" data-act="add" data-k="'+k+'" aria-label="Adicionar nota: '+esc(PR[l]||'Adicionar')+'"><span class="ad-idle">+</span><span class="ad-hint">+ '+(PR[l]||'Adicionar')+'</span></button></div>'}
 function item(x,ii){return '<div class="it '+x.t+'"><b>'+(x.t=='d'?'Dor':'Ideia')+'</b><div class="tx" contenteditable="true" role="textbox" aria-label="Texto" data-ed="ix" data-ii="'+ii+'">'+esc(x.x)+'</div><div class="mt">'+(x.t=='d'?'<button data-act="sev" data-ii="'+ii+'">Gravidade '+x.v+'/3</button>':'')+'<select data-act="dim" data-ii="'+ii+'" aria-label="Dimensão de qualidade">'+DIMS.map((m,k)=>'<option value="'+k+'"'+(k==x.d?' selected':'')+'>'+m+'</option>').join('')+'</select><button class="x" data-act="deli" data-ii="'+ii+'" aria-label="Remover item">×</button></div></div>'}
 function render(){if(lib){app.innerHTML=libView();return}if(S.start){app.innerHTML=startScreen();chk();return}const N=S.steps.length;
 if(HOSTED&&N===0){
   app.innerHTML='<div class="hd"><div class="bk">Blue Ocean · Jornada</div><input class="ti" data-f="title" aria-label="Nome da jornada" value="'+esc(S.title||'Jornada')+'"><span class="sv">Salvo no projeto</span><button class="tb" data-act="tools">Ferramentas</button><button class="tb p" data-act="step">+ Nova etapa</button></div><main class="st" data-empty-journey="1"><section><h2>Jornada vazia</h2><p class="hint">Adicione uma etapa para começar o mapa.</p><button class="tb p" data-act="step">+ Nova etapa</button></section></main>';
   return;
 }
-let h='<div class="hd"><div class="bk">Blue Ocean · '+(HOSTED?'Jornada':'Blueprint de serviço')+'</div><input class="ti" data-f="title" value="'+esc(S.title)+'" aria-label="Nome da jornada"><span class="sv">'+(HOSTED?'Salvo no projeto':'Salvo neste dispositivo')+'</span><button class="tb" data-act="cv" aria-pressed="'+cv+'">Visão do cliente</button><button class="tb" data-act="lk" aria-pressed="'+lk+'">↗ Ligar notas</button><button class="tb" data-act="undo"'+(U.length?'':' disabled')+'>↶ Desfazer</button><button class="tb" data-act="redo"'+(R.length?'':' disabled')+'>↷ Refazer</button><button class="tb" data-act="lib">Minhas jornadas ('+DB.js.length+')</button>'+(HOSTED?'<button class="tb" data-act="tools">Ferramentas</button>':'')+'<button class="tb p" data-act="step">+ Nova etapa</button></div>';
-h+=(lk?'<div class="ins" role="status" style="margin:0 24px 8px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois em ● na de destino. Clique numa seta para removê-la.')+'</div>':'')+'<input class="pi" data-f="persona" value="'+esc(S.persona)+'" placeholder="Persona e cenário: quem é o cliente e o que ele quer?" aria-label="Persona e cenário"><div class="wrap"><div class="bd"><div style="position:relative;min-width:'+(260+N*200)+'px;--cols:200px repeat('+N+',minmax(200px,1fr)) 56px">';
+let h='<div class="hd"><div class="bk">Blue Ocean · '+(HOSTED?'Jornada':'Blueprint de serviço')+'</div><input class="ti" data-f="title" value="'+esc(S.title)+'" aria-label="Nome da jornada">'+uxHeader()+'</div>';
+h+=(lk?'<div class="ins" role="status" style="margin:0 24px 8px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois em ● na de destino. Clique numa seta para removê-la.')+'</div>':'')+(UX.detailsOpen?'<input class="pi" data-f="persona" value="'+esc(S.persona)+'" placeholder="Persona e cenário: quem é o cliente e o que ele quer?" aria-label="Persona e cenário">':'')+'<div class="wrap"><div class="bd"><div style="position:relative;min-width:'+(260+N*200)+'px;--cols:200px repeat('+N+',minmax(200px,1fr)) 56px">';
 h+='<div class="r"><div class="lb">Etapas<small>Um momento da experiência</small></div>'+S.steps.map((s,i)=>'<div class="sh"><i>'+(i+1)+'</i><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da etapa" data-ed="sn" data-si="'+i+'">'+esc(s.n)+'</span>'+'<div class="sa"><button class="x" data-act="mv" data-si="'+i+'" data-d="-1" aria-label="Mover etapa para a esquerda"'+(i?'':' disabled')+'>‹</button><button class="x" data-act="mv" data-si="'+i+'" data-d="1" aria-label="Mover etapa para a direita"'+(i<N-1?'':' disabled')+'>›</button><button class="x" data-act="ds" data-si="'+i+'" aria-label="Duplicar etapa" title="Duplicar etapa">⧉</button>'+(N>1?'<button class="x" data-act="del" data-si="'+i+'" aria-label="Remover etapa">×</button>':'')+'</div></div>').join('')+'</div>';
-h+='<div class="r"><div class="lb">O que acontece<small>Resumo da etapa</small></div>'+S.steps.map((s,i)=>'<div class="c"><div class="n" contenteditable="true" role="textbox" aria-label="O que acontece em '+esc(s.n)+'" data-ed="sd" data-si="'+i+'">'+esc(s.d||'')+'</div></div>').join('')+'</div>';LANES.forEach(L=>{if(cv&&L.o)return;if(L.d)h+='<div class="dv">'+L.d+'</div>';h+='<div class="r"><div class="lb">'+L.n+'<small>'+L.h+'</small></div>';
-if(L.emo)h+='<div class="c" style="grid-column:2/'+(N+2)+'"><div class="cvb" id="curve">'+curve()+'</div><div class="sl" style="grid-template-columns:repeat('+N+',1fr)">'+S.steps.map((s,i)=>'<input type="range" min="-2" max="2" step="1" value="'+s.e+'" data-act="emo" data-si="'+i+'" aria-label="Emoção em '+esc(s.n)+'">').join('')+'</div></div>';
+if(laneShown('sd'))h+='<div class="r"><div class="lb">O que acontece<small>Resumo da etapa</small></div>'+S.steps.map((s,i)=>'<div class="c"><div class="n" contenteditable="true" role="textbox" aria-label="O que acontece em '+esc(s.n)+'" data-ed="sd" data-si="'+i+'">'+esc(s.d||'')+'</div></div>').join('')+'</div>';LANES.forEach(L=>{if(!laneShown(L.id)||(cv&&L.o))return;if(L.d)h+='<div class="dv">'+L.d+'</div>';h+='<div class="r"><div class="lb">'+L.n+'<small>'+L.h+'</small></div>';
+if(L.emo)h+='<div class="c" style="grid-column:2/'+(N+2)+'"><div class="cvb'+(UX.emotionsOpen?' is-expanded':'')+'" id="curve">'+curve()+'</div>'+(UX.emotionsOpen?'<div class="sl" style="grid-template-columns:repeat('+N+',1fr)">'+S.steps.map((s,i)=>'<input type="range" min="-2" max="2" step="1" value="'+s.e+'" data-act="emo" data-si="'+i+'" aria-label="Emoção em '+esc(s.n)+'">').join('')+'</div>':'<button class="emotion-toggle" data-act="emotions" aria-expanded="false">Editar emoções ▾</button>')+'</div>';
 else for(let i=0;i<N;i++)h+=cell(L.id,i);h+='</div>'});
-(S.lanes||[]).forEach(L=>{h+='<div class="r"><div class="lb"><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da faixa" data-ed="ln" data-id="'+esc(L.id)+'">'+esc(L.n)+'</span><button class="x" data-act="dlane" data-id="'+esc(L.id)+'" aria-label="Remover faixa">×</button><small>Faixa personalizada</small></div>';for(let i=0;i<N;i++)h+=cell(L.id,i);h+='</div>'});h+='<div class="r"><div class="c" style="grid-column:1/-1"><button class="ad" data-act="alane" style="width:auto;padding:0 16px">+ Adicionar faixa</button></div></div>';h+='<div class="dv">Melhorias</div><div class="r"><div class="lb">Dores e ideias<small>Marque a dimensão de qualidade</small></div>';
+(S.lanes||[]).forEach(L=>{if(!laneShown(L.id))return;h+='<div class="r"><div class="lb"><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da faixa" data-ed="ln" data-id="'+esc(L.id)+'">'+esc(L.n)+'</span><button class="x" data-act="dlane" data-id="'+esc(L.id)+'" aria-label="Remover faixa">×</button><small>Faixa personalizada</small></div>';for(let i=0;i<N;i++)h+=cell(L.id,i);h+='</div>'});h+='<div class="r"><div class="c" style="grid-column:1/-1"><button class="ad" data-act="alane" style="width:auto;padding:0 16px">+ Adicionar faixa</button></div></div>';if(laneShown('iss')){h+='<div class="dv">Melhorias</div><div class="r"><div class="lb">Dores e ideias<small>Marque a dimensão de qualidade</small></div>';
 for(let i=0;i<N;i++)h+='<div class="c">'+S.iss.map((x,ii)=>x.s==i?item(x,ii):'').join('')+'<div class="bt"><button data-act="addi" data-si="'+i+'" data-t="d">+ Dor</button><button data-act="addi" data-si="'+i+'" data-t="i">+ Ideia</button></div></div>';
-h+='</div><svg class="lk" id="lk" aria-hidden="true"></svg></div></div><aside class="pnl" id="dx">'+dx()+'</aside></div>';app.innerHTML=h;requestAnimationFrame(drawLinks)}
-function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();document.getElementById('dx').innerHTML=dx()}
+h+='</div>';}h+='<svg class="lk" id="lk" aria-hidden="true"></svg></div></div>'+(UX.panel?'<aside class="pnl" id="dx" aria-label="Insights da Jornada">'+dx()+'</aside>':'')+'</div>';app.innerHTML=h;requestAnimationFrame(drawLinks)}
+function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();{const p=document.getElementById('dx');if(p)p.innerHTML=dx()}}
 function focusNew(sel){const e=app.querySelector(sel);if(e)e.focus()}
 app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
 if(HOSTED&&(a==='lib'||a==='tools'||a==='back')){window.parent.postMessage({boBlueprintHost:1,type:a==='tools'?'tools':'back'},location.origin);return}
-if(a=='cv'){cv=!cv}
+if(a=='mode'){UX.mode=d.mode;UX.lanes={};storeUx()}
+ else if(a=='panel'){UX.panel=!UX.panel;storeUx()}
+ else if(a=='paneltab'){UX.tab=d.tab;storeUx()}
+ else if(a=='emotions'){UX.emotionsOpen=!UX.emotionsOpen;storeUx()}
+ else if(a=='details'){UX.detailsOpen=!UX.detailsOpen;storeUx()}
+ else if(a=='cv'){cv=!cv}
 else if(a=='lk'){lk=!lk;pick=null}
 else if(a=='pk'){if(!pick)pick=d.nid;else if(pick==d.nid)pick=null;else{const L=S.links=S.links||[],x=L.findIndex(l=>l.a==pick&&l.b==d.nid);if(x>=0)L.splice(x,1);else L.push({a:pick,b:d.nid});pick=null;save()}}
 else if(a=='ul'){S.links.splice(+d.n,1);save()}
@@ -203,7 +278,7 @@ else if(t=='ln'){const l=(S.lanes||[]).find(x=>x.id==el.dataset.id);if(l){l.n=v|
 else if(t=='sn'){S.steps[+el.dataset.si].n=v||'Etapa';save();live()}
 else if(t=='ix'){const ii=+el.dataset.ii;if(!S.iss[ii])return;if(v){S.iss[ii].x=v;save();live()}else{S.iss.splice(ii,1);save();render()}}});
 app.addEventListener('input',e=>{const el=e.target;if(el.isContentEditable)drawLinks();if(el.dataset.f){const f=el.dataset.f;if(f.startsWith('st:')){ST[f.slice(3)]=el.value;chk()}else{S[f]=el.value;save()}}else if(el.dataset.act=='emo'){S.steps[+el.dataset.si].e=+el.value;save();live()}});
-app.addEventListener('change',e=>{const el=e.target;if(el.id=='fi'){impF(el.files[0]);return}if(el.dataset.act=='dim'){S.iss[+el.dataset.ii].d=+el.value;save();live()}});
+app.addEventListener('change',e=>{const el=e.target;if(el.dataset.act==='lane'){UX.lanes[el.dataset.lane]=el.checked;storeUx();render();return}if(el.id=='fi'){impF(el.files[0]);return}if(el.dataset.act=='dim'){S.iss[+el.dataset.ii].d=+el.value;save();live()}});
 app.addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.dataset.f=='st:new'){e.preventDefault();document.querySelector('[data-act=addst]').click()}if(e.key=='Enter'&&e.target.isContentEditable){e.preventDefault();e.target.blur()}});
 function remap(f){const c={};for(const k in S.c){const p=k.split('|'),n=f(+p[1]);if(n!=null)c[p[0]+'|'+n]=S.c[k]}S.c=c;S.iss=S.iss.map(x=>({...x,s:f(x.s)})).filter(x=>x.s!=null)}
 let dg=null;
@@ -244,7 +319,7 @@ if(HOSTED){
         const state=event.data.state;
         if(!state||!Array.isArray(state.steps)||typeof state.c!=='object')throw Error('Invalid host state');
         S=JSON.parse(JSON.stringify(state));S.id='host';DB={cur:'host',js:[S]};
-        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;render();
+        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;UX=loadUx();render();
       }catch(e){console.error('Blueprint: cannot hydrate service graph',e)}
       finally{applyingHost=false}
     }
