@@ -175,9 +175,9 @@ const generatedId = (prefix: string): Id => typeof crypto !== 'undefined' && 'ra
   : `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
 /** A draft shares the Journey stages without claiming research or operational readiness. */
-export function prepareJourneyBlueprintDraft(graph: ServiceGraph, journeyId: Id, options: { id?: Id; now?: string } = {}) {
+export function prepareJourneyBlueprintDraft(graph: ServiceGraph, journeyId: Id, options: { id?: Id; now?: string; allowEmpty?: boolean } = {}) {
   const journey = graph.journeys[journeyId];
-  if (!journey || !journey.stageIds.some(id => Boolean(graph.stages[id]))) {
+  if (!journey || (!options.allowEmpty && !journey.stageIds.some(id => Boolean(graph.stages[id])))) {
     return { graph, boardId: null as Id | null, created: false };
   }
   const existing = Object.values(graph.views.whiteboards).find(board => board.viewKind === 'blueprint' && board.journeyId === journeyId);

@@ -26,11 +26,10 @@ try:
         page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
         exact=page.frame_locator('.bo-blueprint-reference-frame')
         expect(exact.locator('#app')).to_be_visible()
-        if exact.locator('.st').count():
-            expect(exact.get_by_text('Vamos montar um blueprint')).to_be_visible()
-            exact.locator('input[data-f="st:title"]').fill('Serviço real de atendimento')
-            exact.locator('input[data-f="st:persona"]').fill('Cliente da plataforma')
-            exact.locator('#go').click()
+        expect(exact.locator('[data-empty-journey="1"], .bd')).to_be_visible(timeout=15000)
+        # A new hosted map starts empty; no compulsory coffee demo or stage suggestions.
+        while exact.locator('.sh').count() < 2:
+            exact.locator('button[data-act="step"]').first.click()
         expect(exact.locator('.bd')).to_be_visible()
         expect(exact.locator('.pnl')).to_be_visible()
         assert exact.locator('.hd').count()==1
