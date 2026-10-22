@@ -8,6 +8,8 @@ mkdirSync('src/generated', { recursive: true });
 writeFileSync('public/v1102-blueprint-methodology.js', transpileModule(readFileSync('src/services/blueprint-methodology.ts', 'utf8'), { compilerOptions: { module: ModuleKind.ESNext, target: ScriptTarget.ES2022 } }).outputText);
 copyFileSync('src/services/blueprint-guided-reading.js', 'public/v1102-blueprint-guided-reading.js');
 copyFileSync('src/runtime/blueprint-reference-view.js', 'public/v1102-blueprint-reference-view.js');
+copyFileSync('src/runtime/journey-matrix.html', 'public/blueprint-reference-original.html');
+copyFileSync('src/runtime/journey-matrix.css', 'public/journey-matrix.css');
 writeFileSync('src/generated/app-version.ts', `// Gerado por scripts/prepare-assets.mjs. Não edite manualmente.\nexport const APP_VERSION = ${JSON.stringify(appVersion)} as const;\nexport const APP_VERSION_LABEL = ${JSON.stringify('V'+appVersion)} as const;\n`);
 writeFileSync('public/app-version.json', JSON.stringify({product:'BLUE OCEAN Service Studio',version:appVersion}, null, 2)+'\n');
 writeFileSync('VERSION', appVersion+'\n');

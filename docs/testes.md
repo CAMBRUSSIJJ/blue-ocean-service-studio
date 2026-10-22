@@ -61,6 +61,7 @@ npm run blueprint:methodology:browser
 npm run product:browser
 npm run maps:browser
 python3 scripts/h1710-journey-template-whiteboard-browser.py
+python3 scripts/journey-progressive-browser.py
 ```
 
 Esses runners podem servir o `dist/` em um servidor temporário. Para os que
@@ -76,6 +77,12 @@ o alinhamento com sidebar expandida/recolhida, a entrada local, os estados
 indisponíveis de nuvem e o conteúdo real do backup baixado durante a edição.
 Também executa axe-core nas páginas inteiras dos cenários auditados em desktop
 e celular. O pacote axe-core é instalado por `npm ci`; essa suíte não depende de AXE_PATH.
+
+`journey-progressive-browser.py` cobre a matriz integrada: visão essencial,
+faixas ocultas sem perda de conteúdo, ordem e preferências por Jornada, desfazer
+e refazer, emoções e observações, painel de Insights, reabertura e edição por
+toque. Executa axe-core em 1440, 834 e 390 px e salva as evidências em
+`artifacts/journey-progressive/`.
 
 `maps:browser` verifica os botões de Jornada e Blueprint em 1440, 834 e 390 px.
 Confere rodapés com nomes longos, busca, Cards/Tabela, confirmação de exclusão,

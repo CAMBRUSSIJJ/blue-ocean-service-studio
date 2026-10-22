@@ -122,6 +122,15 @@ export type JourneyCard = { id: string; content: string; checked?: boolean; icon
 export type JourneyLaneTone = 'neutral' | 'blue' | 'emerald' | 'amber' | 'rose' | 'violet';
 export type JourneyLane = { id: string; type: JourneyLaneType; label: string; hidden?: boolean; tone?: JourneyLaneTone; height?: number; binding?: 'customerAction' | 'thoughts' | 'touchpoints' | 'needs' | 'pains'; cards: Record<string, string>; cardItems?: Record<string, JourneyCard[]>; };
 export type JourneyMapLayout = { version: 1; lanes: JourneyLane[]; stageWidth?: number; introDismissed?: boolean };
+export type JourneyMatrixView = {
+  version: 1;
+  preset: 'essential' | 'detailed' | 'operational' | 'complete' | 'custom';
+  hiddenRows: string[];
+  rowOrder: string[];
+  insightsOpen: boolean;
+  insightsTab: 'guidance' | 'analysis' | 'quality';
+  emotionsExpanded: boolean;
+};
 
 export type Journey = {
   id: Id;
@@ -129,6 +138,7 @@ export type Journey = {
   name: string;
   stageIds: Id[];
   mapLayout?: JourneyMapLayout;
+  matrixView?: JourneyMatrixView;
   owner?: string;
   status?: 'draft' | 'active' | 'archived';
   favorite?: boolean;
@@ -154,6 +164,8 @@ export type Stage = {
   emotion: Emotion;
   /** Optional five-level sentiment (-2 to +2); compatible with the canonical 3-level emotion. */
   emotionScore?: -2 | -1 | 0 | 1 | 2;
+  emotionNote?: string;
+  emotionRecorded?: boolean;
   needIds?: Id[];
   painIds?: Id[];
   touchpointIds: Id[];

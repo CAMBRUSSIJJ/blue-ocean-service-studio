@@ -38,8 +38,9 @@ try:
     page.wait_for_function("id => window.BlueOceanRuntime.api('dataBridge').get().journeys[id].stageIds.length===1",arg=journey_id)
     stage=page.evaluate("""id => {const g=window.BlueOceanRuntime.api('dataBridge').get();return g.stages[g.journeys[id].stageIds[0]]}""",journey_id)
     assert stage['title']=='Etapa 1'
-    iframe.locator('button[data-act="tools"]').click()
-    expect(page.get_by_role('dialog',name='Ferramentas do Blueprint')).to_be_visible()
+    iframe.locator('.tools-menu summary').click()
+    iframe.get_by_role('button',name='Recursos avançados').click()
+    expect(page.get_by_role('dialog',name='Ferramentas da Jornada')).to_be_visible()
     assert not errors,errors
     print('Unified Journey original HTML: OK')
     browser.close()
