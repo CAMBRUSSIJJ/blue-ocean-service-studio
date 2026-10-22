@@ -4,6 +4,19 @@ export const MATRIX_CONTENT_TYPES = ['text', 'card', 'emoji', 'image', 'link', '
 export const MATRIX_IMAGE_LIMIT = 500 * 1024;
 export const MATRIX_IMAGE_BUDGET = 2 * 1024 * 1024;
 const clipped = (v, n) => typeof v === 'string' ? v.trim().slice(0, n) : '';
+export function insertMatrixBlock(notes, note, beforeId = null) {
+  if (!Array.isArray(notes) || notes.length >= 100) throw Error('Cada célula pode ter até 100 elementos.');
+  if (notes.some(value => value.i === note.i)) throw Error('O elemento já está nesta célula.');
+  const index = beforeId === null ? notes.length : notes.findIndex(value => value.i === beforeId);
+  if (index < 0) throw Error('O ponto de inclusão mudou. Abra a inclusão novamente.');
+  return [...notes.slice(0, index), note, ...notes.slice(index)];
+}
+export function duplicateMatrixBlock(note, id) {
+  const copy = structuredClone(note);
+  copy.i = id;
+  for (const field of ['id', 'hostItemId', 'hostAction']) delete copy[field];
+  return copy;
+}
 /** Read-only summaries of existing service records for the insertion catalog. */
 export function matrixServiceReferences(graph) {
   const result = {};

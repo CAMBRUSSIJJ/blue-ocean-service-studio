@@ -9,6 +9,8 @@ const markdownFiles = (directory) => readdirSync(resolve(root, directory), { wit
 const files = [
   ...markdownFiles('.'),
   ...markdownFiles('docs'),
+  ...markdownFiles('docs/research'),
+  ...markdownFiles('docs/specs'),
   ...markdownFiles('.github'),
   ...markdownFiles('.cloud-environment'),
   resolve(root, 'docs/archive/README.md'),

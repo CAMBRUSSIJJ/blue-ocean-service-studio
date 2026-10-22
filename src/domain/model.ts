@@ -146,6 +146,7 @@ export type Journey = {
   stageIds: Id[];
   mapLayout?: JourneyMapLayout;
   matrixView?: JourneyMatrixView;
+  savedMatrixViews?: Array<{ id: Id; name: string; personaId: Id | ''; view: JourneyMatrixView; createdAt: string; updatedAt: string }>;
   matrixContent?: JourneyMatrixContent;
   personaId?: Id;
   acquisitionCells?: Record<Id, Record<string, Array<{ id: Id; text: string }>>>;

@@ -51,6 +51,7 @@ function growthPlanResult(data){const old=S.iss[growthPlanIssue],key=old&&growth
 }
 function growthCloseDialog(id){app.querySelector('#'+id)?.close();focusNew('[data-act="plan"][data-ii="'+growthPlanIssue+'"]')}
 function growthSummaryBody(){
+  if(growthPresentationMode==='view')return viewsSummaryBody();
   const pains=S.iss.filter(i=>i.t==='d'&&i.x.trim()),plans=S.plans||[],known=S.steps.filter(growthEmotionKnown),validated=known.filter(s=>s.emotionStatus==='validated'&&s.emotionSource?.trim());
   const section=(title,body)=>'<section><h2>'+title+'</h2>'+body+'</section>';
   let body='<article class="executive-report"><header><small>BLUE OCEAN · RESUMO EXECUTIVO</small><h1>'+esc(S.title||'Jornada')+'</h1><p>'+esc(S.serviceName||'Serviço')+'</p></header>';
@@ -67,8 +68,8 @@ function growthAction(action,data){
   if(action==='cancel-stage'){growthStageOpen=false;growthStageTitle='';rerender();focusNew('[data-act="step"]');return true}
   if(action==='emotion-cancel'){growthEmotionDrafts.delete(growthEmotionKey(Number(data.si)));emotionEdit=null;V.emotionsExpanded=false;rerender();focusNew('[data-act="emotion-edit"][data-si="'+data.si+'"]');return true}
   if(action==='fit'){changeView({fitToScreen:!V.fitToScreen},'[data-act="fit"]');return true}
-  if(action==='present'){growthShowPresentation();return true}
-  if(action==='close-presentation'){growthPresent=false;document.body.classList.remove('is-presenting');rerender();focusNew('[data-act="present"]');return true}
+  if(action==='present'){growthPresentationMode='executive';growthShowPresentation();return true}
+  if(action==='close-presentation'){growthPresentationMode='executive';growthPresent=false;document.body.classList.remove('is-presenting');rerender();focusNew('[data-act="present"]');return true}
   if(action==='print-summary'){window.print();return true}
   if(action==='download-summary'){growthDownloadSummary();return true}
   if(action==='backup'){window.parent.postMessage({boBlueprintHost:1,type:'backup'},location.origin);return true}

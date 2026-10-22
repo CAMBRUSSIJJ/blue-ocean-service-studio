@@ -1,6 +1,7 @@
 import { BLUEPRINT_FRAME_LAYERS, BLUEPRINT_BOUNDARIES, BLUEPRINT_MARKETING_DIMENSIONS, BLUEPRINT_QUALITY_DIMENSIONS, buildBlueprintDeliveryReport, blueprintServicePromise, validateActivityNumbers, isCustomerServiceEvidence } from './blueprint-methodology.js';
 import { runtime } from './runtime-registry.js';
 import { renderBlueprintReference } from './blueprint-reference-view.js';
+import { manageJourneySavedView } from '../services/journey-views.js';
 import { selectJourneyPersona, readJourneyEmotion, writeJourneyEmotion, journeyPainContexts, saveJourneyPainEvidence } from '../services/journey-context.js';
 import { MATRIX_REFERENCE_TYPES, matrixServiceReferences, validateMatrixDocument, matrixContentFromDocument, restoreMatrixContent } from '../services/journey-content.js';
 import { ACQUISITION_ROWS, saveJourneyImprovement, journeyImprovementPlans, measureJourneyImprovement } from '../services/journey-growth.js';
@@ -1063,7 +1064,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
     const ref={id:'host',title:openedFromUnifiedJourney?(j?.name||'Jornada'):(b.name||'Blueprint de serviço'),persona:saved.persona||'',
       editorKind:openedFromUnifiedJourney?'journey':'blueprint',view:clone(j?.matrixView||b.matrixView||null),
-      personaId:j?.personaId||'',painContexts:j?journeyPainContexts(graph,j.id):[],serviceElements:matrixServiceReferences(graph),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
+      savedViews:clone(j?.savedMatrixViews||[]),personaId:j?.personaId||'',painContexts:j?journeyPainContexts(graph,j.id):[],serviceElements:matrixServiceReferences(graph),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
       availableMetrics:Object.values(graph.entities?.metric||{}).filter(m=>!m.serviceId||m.serviceId===graph.service.id).map(m=>({id:m.id,name:m.title||m.name||'Indicador',unit:m.unit||'',current:typeof m.value==='number'?m.value:undefined,target:typeof m.target==='number'?m.target:undefined})),
       guide:0,start:0,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
@@ -1339,6 +1340,16 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
           if(!save(false,{label:type==='plan-save'?'Planejar melhoria da Jornada':'Registrar medição da Jornada'}))throw Error('Não foi possível salvar neste navegador.');
           respond('plan-result',{ok:true,state:hostedBlueprintDocument()});
         }catch(error){graph=before;respond('plan-result',{ok:false,error:String(error?.message||error)})}
+      }else if(type==='saved-view'){
+        if(!canEditHostedMatrix())return;
+        const before=clone(graph);
+        try{
+          const journey=activeJourney();if(!journey)throw Error('Jornada indisponível.');
+          const action=String(event.data.action||'');if(action!=='apply')markEdit('Editar visualização salva');
+          graph=manageJourneySavedView(clone(graph),journey.id,action,event.data.input||{});
+          if(!save(false,{label:'Editar visualização salva',...(action==='apply'?{content:false,history:false}:{})}))throw Error('Não foi possível salvar a visualização.');
+          respond('saved-view-result',{ok:true,state:hostedBlueprintDocument(),action});
+        }catch(error){graph=before;respond('saved-view-result',{ok:false,error:String(error?.message||error)})}
       }else if(type==='persona-select'||type==='pain-evidence'){
         if(!canEditHostedMatrix())return;
         const before=clone(graph);
