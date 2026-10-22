@@ -89,7 +89,7 @@ try:
             unified.get_by_role('button',name='Abrir workspace local sem conta').click()
         unified.locator('[data-service-journey-nav="1"]').click()
         unified.get_by_role('button',name='Criar Jornada',exact=True).first.click()
-        unified.get_by_role('button',name='Criar e abrir mapa').click()
+        unified.get_by_role('button',name='Criar e abrir Jornada').click()
         journey=unified.frame_locator('.bo-blueprint-reference-frame')
         expect(journey.get_by_role('heading',name='Sua primeira etapa')).to_be_visible()
         assert journey.get_by_text('Preencher com o exemplo do café').count()==0
