@@ -177,7 +177,7 @@ const generatedId = (prefix: string): Id => typeof crypto !== 'undefined' && 'ra
 /** A draft shares the Journey stages without claiming research or operational readiness. */
 export function prepareJourneyBlueprintDraft(graph: ServiceGraph, journeyId: Id, options: { id?: Id; now?: string } = {}) {
   const journey = graph.journeys[journeyId];
-  if (!journey || !journey.stageIds.some(id => Boolean(graph.stages[id]))) {
+  if (!journey) {
     return { graph, boardId: null as Id | null, created: false };
   }
   const existing = Object.values(graph.views.whiteboards).find(board => board.viewKind === 'blueprint' && board.journeyId === journeyId);
