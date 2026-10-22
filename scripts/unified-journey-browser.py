@@ -34,6 +34,8 @@ try:
     board=[b for b in graph['views']['whiteboards'].values() if b['viewKind']=='blueprint']
     assert len(board)==1 and board[0]['journeyId']==journey_id
     iframe.locator('button[data-act="step"]').first.click()
+    iframe.get_by_role('textbox',name='Nome da nova etapa').fill('Etapa 1')
+    iframe.get_by_role('button',name='Adicionar etapa ao mapa',exact=True).click()
     expect(iframe.locator('.bd')).to_be_visible()
     page.wait_for_function("id => window.BlueOceanRuntime.api('dataBridge').get().journeys[id].stageIds.length===1",arg=journey_id)
     stage=page.evaluate("""id => {const g=window.BlueOceanRuntime.api('dataBridge').get();return g.stages[g.journeys[id].stageIds[0]]}""",journey_id)

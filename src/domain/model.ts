@@ -124,12 +124,13 @@ export type JourneyLane = { id: string; type: JourneyLaneType; label: string; hi
 export type JourneyMapLayout = { version: 1; lanes: JourneyLane[]; stageWidth?: number; introDismissed?: boolean };
 export type JourneyMatrixView = {
   version: 1;
-  preset: 'essential' | 'detailed' | 'operational' | 'complete' | 'custom';
+  preset: 'essential' | 'detailed' | 'operational' | 'acquisition' | 'complete' | 'custom';
   hiddenRows: string[];
   rowOrder: string[];
   insightsOpen: boolean;
   insightsTab: 'guidance' | 'analysis' | 'quality';
   emotionsExpanded: boolean;
+  fitToScreen?: boolean;
 };
 
 export type Journey = {
@@ -139,6 +140,7 @@ export type Journey = {
   stageIds: Id[];
   mapLayout?: JourneyMapLayout;
   matrixView?: JourneyMatrixView;
+  acquisitionCells?: Record<Id, Record<string, Array<{ id: Id; text: string }>>>;
   owner?: string;
   status?: 'draft' | 'active' | 'archived';
   favorite?: boolean;
@@ -166,6 +168,8 @@ export type Stage = {
   emotionScore?: -2 | -1 | 0 | 1 | 2;
   emotionNote?: string;
   emotionRecorded?: boolean;
+  emotionStatus?: 'hypothesis' | 'validated';
+  emotionSource?: string;
   needIds?: Id[];
   painIds?: Id[];
   touchpointIds: Id[];

@@ -1,5 +1,15 @@
 # Histórico de mudanças
 
+## Jornada, aquisição e acompanhamento de melhorias — 22/10/2026
+
+- Organiza a matriz em colunas confortáveis, com ajuste à tela opcional, criação de etapas por rascunho e ações de nota em menu contextual.
+- Separa contexto e ação do cliente e distingue emoção não informada, hipótese e validação com fonte.
+- Acrescenta Aquisição e relacionamento na mesma Jornada, preservando as notas ao reordenar etapas.
+- Conecta dores a planos com responsável, prazo e indicadores canônicos; o resultado depende de medição registrada.
+- Oferece apresentação executiva, download HTML, impressão e backup do projeto, com persistência local descrita na interface.
+- Preserva cartões de ação, transações de histórico e a origem dos planos ao duplicar etapas; amplia testes de navegador, toque e acessibilidade.
+- Documenta a hipótese de posicionamento e um roteiro de piloto comercial ainda não executado.
+
 ## Início guiado e navegação da Jornada — 21/10/2026
 
 - Redesenha o estado vazio com uma prévia ampla e duas ações: criar a primeira etapa ou aplicar a estrutura inicial opcional.
