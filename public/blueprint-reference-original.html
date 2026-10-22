@@ -250,7 +250,7 @@ render=function(){
     if(anchor&&!anchor.querySelector('[data-act="back"]')){
       const back=document.createElement('button');
       back.type='button';back.className='tb';back.dataset.act='back';
-      back.textContent='‹ Voltar para Blueprints';back.setAttribute('aria-label','Voltar para Blueprints');
+      back.textContent=JOURNEY_HOSTED?'‹ Voltar às Jornadas':'‹ Voltar para Blueprints';back.setAttribute('aria-label',JOURNEY_HOSTED?'Voltar às Jornadas':'Voltar para Blueprints');
       back.style.cssText='min-height:30px;padding:0 8px;font-size:11px;margin-right:8px';
       anchor.prepend(back);
     }
