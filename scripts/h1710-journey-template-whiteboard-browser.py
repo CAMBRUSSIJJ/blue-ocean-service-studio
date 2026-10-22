@@ -153,7 +153,7 @@ if not URL:
 
 failures = []
 # Exercise the retired editor only in localhost regression runs, never in Production.
-URL += ('&' if '?' in URL else '?') + '__qa_legacy_blueprint=1'
+URL += ('&' if '?' in URL else '?') + '__qa_legacy_blueprint=1&__qa_legacy_journey=1'
 
 try:
     with sync_playwright() as p:
