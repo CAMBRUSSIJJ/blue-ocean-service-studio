@@ -164,3 +164,9 @@
 .bo-j-score-inspector button{font-size:17px}
 .bo-j-score-inspector button small{font-size:9px;line-height:1.25;min-height:24px}
 @media(max-width:760px){.bo-j-score-choices{gap:2px;margin-inline:5px}.bo-j-score-choices button{font-size:17px}.bo-j-score-inspector{flex-wrap:wrap}}
+
+/* Always-visible navigation from Journey to the actual original Blueprint editor. */
+.bo-h1705-top-actions .bo-h1705-blueprint-cta{background:#edf4ff;color:#184995;border-color:#bdd0ee;font-weight:650}
+.bo-h1705-top-actions .bo-h1705-blueprint-cta:hover{background:#e2edff;border-color:#8eafe9}
+.bo-h1705-top-actions .bo-h1705-blueprint-cta:focus-visible{outline:2px solid #1f5eff;outline-offset:2px}
+@media(max-width:530px){.bo-h1705-top-actions .bo-h1705-blueprint-cta{padding:0 10px;min-width:36px}.bo-h1705-top-actions .bo-h1705-blueprint-cta span{display:none}}

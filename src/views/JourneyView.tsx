@@ -184,13 +184,23 @@ export function JourneyView({ studio, onBack }: { studio: StudioController; onBa
       onMatrix={() => setShowCanvasMatrix(true)}
       onCaptureContext={(kind, title) => captureContextDuringJourney(kind, title)}
       onBlueprintDraft={async () => {
-        const prepared = prepareJourneyBlueprintDraft(graph, journey.id);
-        if (!prepared.boardId) { showToast('Adicione uma etapa antes de abrir o Blueprint.'); return; }
-        if (prepared.created) setGraph(current => prepareJourneyBlueprintDraft(current, journey.id, { id: prepared.boardId! }).graph, 'Journey: criar Blueprint em rascunho');
-        const runtime = runtimeApi<{ open(id: string): Promise<boolean> }>('serviceBlueprintFrame');
+        // Open the exact uploaded Blueprint build, not the Journey editor. With no
+        // stages it starts the original Blueprint wizard linked to this Journey.
+        const prepared = prepareJourneyBlueprintDraft(graph, journey.id, { allowEmpty: true });
+        if (!prepared.boardId) { showToast('Não foi possível abrir o Blueprint desta Jornada.'); return; }
+        if (prepared.created) {
+          setGraph(current => prepareJourneyBlueprintDraft(current, journey.id, {
+            id: prepared.boardId!, allowEmpty: true,
+          }).graph, 'Jornada: criar Blueprint vinculado');
+        }
         setActiveTab('canvas');
         window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'blueprint' }));
-        if (runtime) await runtime.open(prepared.boardId);
+        // The application must persist the linked board before the runtime can
+        // open it. This avoids displaying the old Journey after a failed handoff.
+        await new Promise(resolve => window.setTimeout(resolve, prepared.created ? 150 : 30));
+        const runtime = runtimeApi<{ open(id: string): Promise<boolean> }>('serviceBlueprintFrame');
+        const opened = await runtime?.open(prepared.boardId);
+        if (!opened) showToast('O Blueprint não abriu. Acesse Blueprints no menu do projeto.');
       }}
     />;
   }
