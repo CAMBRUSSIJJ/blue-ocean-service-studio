@@ -24,16 +24,17 @@ try:
     page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click()
     page.get_by_role('button',name='Em branco',exact=False).click()
     iframe=page.frame_locator('.bo-blueprint-reference-frame')
-    expect(iframe.locator('.bd')).to_be_visible(timeout=15000)
+    expect(iframe.locator('[data-empty-journey="1"]')).to_be_visible(timeout=15000)
     assert page.locator('.bo-h1705-journey').count()==0,'Old Journey appeared instead of HTML map'
-    assert iframe.locator('.st').count()==0,'Example-heavy setup is still visible'
+    assert iframe.get_by_text('Preencher com o exemplo do café').count()==0,'Example-heavy setup is still visible'
     assert iframe.locator('.sg').count()==0,'Stage-specific suggested demo content leaked into editor'
     graph=page.evaluate("() => window.BlueOceanRuntime.api('dataBridge').get()")
     assert len(graph['journeys'])==1
     journey_id=next(iter(graph['journeys']))
     board=[b for b in graph['views']['whiteboards'].values() if b['viewKind']=='blueprint']
     assert len(board)==1 and board[0]['journeyId']==journey_id
-    iframe.locator('button[data-act="step"]').click()
+    iframe.locator('button[data-act="step"]').first.click()
+    expect(iframe.locator('.bd')).to_be_visible()
     page.wait_for_function("id => window.BlueOceanRuntime.api('dataBridge').get().journeys[id].stageIds.length===1",arg=journey_id)
     stage=page.evaluate("""id => {const g=window.BlueOceanRuntime.api('dataBridge').get();return g.stages[g.journeys[id].stageIds[0]]}""",journey_id)
     assert stage['title']=='Etapa 1'
