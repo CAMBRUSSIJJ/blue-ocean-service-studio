@@ -52,6 +52,7 @@ try:
         exact.get_by_role('button',name='Concluir',exact=True).click()
         page.wait_for_function("""id=>window.BlueOceanRuntime.api('dataBridge').get().stages[id].emotionScore===-2""",arg=stages[0]['id'],timeout=10000)
         exact.get_by_role('button',name='+ Adicionar faixa',exact=True).click()
+        exact.get_by_role('button',name='Faixa personalizada →',exact=True).click()
         exact.get_by_role('button',name='Criar faixa de Texto',exact=True).click()
         exact.locator('[data-ed="ln"]').fill('Observações')
         exact.locator('[data-ed="ln"]').press('Tab')

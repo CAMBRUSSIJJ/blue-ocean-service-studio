@@ -18,22 +18,24 @@ function pickerTools(){return pickerToolCache ||= {
   'tool-im':{row:'im',name:'Dores e ideias',icon:'⚡',hint:'Registrar dores e planejar melhorias'},
   ...Object.fromEntries(BASE_ROWS.filter(row=>!['em','im'].includes(row.id)).map(row=>['tool-'+row.id,{row:row.id,name:row.n,icon:'▤',hint:row.h}]))
 }}
-const pickerGroups=[{label:'Básicos',types:['text','image','emoji','scale','card','link']},{label:'Elementos do serviço',types:['channel','persona','pain','need','evidence','opportunity']},{label:'Ferramentas da jornada',types:()=>Object.keys(pickerTools())},{label:'Avançados',types:['embed','plan','metric']}];
+const pickerGroups=[{label:'Básicos',types:['text','image','emoji','scale','card','link']},{label:'Elementos do serviço',types:['channel','persona','pain','need','evidence','opportunity']},{label:'Avançados',types:['embed','plan','metric']}];
 const pickerNames={emoji:'Ícones e emojis'};
 const pickerRowDefaults={text:{n:'Texto',h:'Registre uma descrição ou observação',icon:'',defaultType:'text'},image:{n:'Imagens',h:'Registros visuais da experiência',icon:'',defaultType:'image'},emoji:{n:'Ícones',h:'Símbolos e seus significados',icon:'',defaultType:'emoji'},scale:{n:'Escala',h:'Avaliação definida pela equipe',icon:'',defaultType:'scale'},card:{n:'Cartões',h:'Anotações da experiência',icon:'',defaultType:'card'},link:{n:'Referências',h:'Links para consultar',icon:'',defaultType:'link'},embed:{n:'Conteúdos incorporados',h:'Vídeos e protótipos',icon:'',defaultType:'embed'},plan:{n:'Planejamento',h:'Ações vinculadas às dores do serviço',icon:'',defaultType:'plan'},metric:{n:'Métricas',h:'Indicadores vinculados ao serviço',icon:'',defaultType:'metric'}};
 for(const [type,name] of Object.entries({channel:'Canais',persona:'Personas',pain:'Dores',need:'Necessidades',evidence:'Evidências',opportunity:'Oportunidades'}))pickerRowDefaults[type]={n:name,h:contentTypes[type][2],icon:contentTypes[type][0],defaultType:type};
 let pickerContext={mode:'cell',anchor:null,templates:false};
+function pickerLaneMode(){return pickerContext.mode!=='cell'}
+function pickerVisibleGroups(){return pickerContext.mode==='row'?[{label:'Experiência',types:['tool-sd','tool-ac','tool-em','tool-im','persona','channel','need','evidence','opportunity']},{label:'Operação',types:['tool-ev','tool-fl','tool-bk','tool-sy']},{label:'Negócio',types:['tool-go','tool-ch','tool-pr','tool-br','tool-rr','tool-ki']}]:pickerGroups}
 const pickerFold=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 function pickerPosition(panel,anchor){const rect=anchor?.getBoundingClientRect()||{left:12,bottom:80};panel.style.width=Math.min(276,innerWidth-24)+'px';panel.style.left=Math.max(12,Math.min(rect.left,innerWidth-panel.offsetWidth-12))+'px';panel.style.top=Math.max(12,Math.min(rect.bottom+5,innerHeight-panel.offsetHeight-12))+'px'}
 function pickerOption(type,label,extra=''){
-  const tool=pickerTools()[type],lane=pickerContext.mode==='row',title=label||tool?.name||pickerNames[type]||contentTypes[type]?.[1]||'Etapa',icon=tool?.icon||(type==='stage'?'⇥':contentTypes[type]?.[0]),row=rowDefs().find(r=>r.id===contentCellKey.split('|')[0]);
+  const tool=pickerTools()[type],lane=pickerLaneMode(),title=label||tool?.name||pickerNames[type]||contentTypes[type]?.[1]||'Etapa',icon=tool?.icon||(type==='stage'?'⇥':contentTypes[type]?.[0]),row=rowDefs().find(r=>r.id===contentCellKey.split('|')[0]);
   const name=tool?'Mostrar '+tool.name:type==='stage'?'Adicionar etapa pelo menu':lane?'Criar faixa de '+(contentTypes[type]?.[1]||title):'Adicionar '+(contentTypes[type]?.[1]||title);
   return '<button type="button" class="content-choice picker-option" data-act="picker-type" data-type="'+type+'" data-search="'+esc(pickerFold(title+' '+(tool?.hint||contentTypes[type]?.[2]||'')+' '+extra))+'" aria-label="'+esc(name)+'"><span class="picker-type-icon type-'+type+'" aria-hidden="true">'+icon+'</span><span>'+esc(title)+'</span>'+(!lane&&type===row?.defaultType?'<small class="picker-default">Padrão</small>':'')+'</button>';
 }
 function pickerOpen(mode,key='',anchor=null){
   contentCellKey=key;pickerContext={mode,anchor:anchor||app.querySelector('[data-act="add"][data-k="'+key+'"]'),templates:false};
   const panel=app.querySelector('#content-picker');panel.classList.add('type-catalog');
-  panel.innerHTML='<div class="picker-title"><h2 id="content-picker-title">'+(mode==='row'?'Adicionar faixa':'Adicionar conteúdo')+'</h2><button type="button" class="x" data-act="content-close-picker" aria-label="'+(mode==='row'?'Cancelar':'Fechar tipos de conteúdo')+'">×</button></div><label class="sr-only" for="picker-search">Buscar tipo de conteúdo</label><input id="picker-search" type="search" placeholder="Buscar tipo de conteúdo" autocomplete="off"><div class="picker-list">'+pickerOption('stage','Etapa')+pickerGroups.map(group=>'<section class="picker-group"><h3>'+group.label+'</h3>'+(typeof group.types==='function'?group.types():group.types).map(type=>pickerOption(type)).join('')+'</section>').join('')+'<p class="picker-empty" role="status" hidden>Nenhum tipo encontrado.</p></div>'+(mode==='row'?'<button type="button" class="picker-models" data-act="picker-models">Modelos de faixa →</button>':'');
+  panel.innerHTML='<div class="picker-title"><h2 id="content-picker-title">'+(mode==='row'?'Adicionar faixa':mode==='row-custom'?'Faixa personalizada':'Adicionar conteúdo')+'</h2><button type="button" class="x" data-act="content-close-picker" aria-label="'+(mode!=='cell'?'Cancelar':'Fechar tipos de conteúdo')+'">×</button></div><label class="sr-only" for="picker-search">Buscar tipo de conteúdo</label><input id="picker-search" type="search" placeholder="Buscar tipo de conteúdo" autocomplete="off"><div class="picker-list">'+pickerVisibleGroups().map(group=>'<section class="picker-group"><h3>'+group.label+'</h3>'+(typeof group.types==='function'?group.types():group.types).map(type=>pickerOption(type)).join('')+'</section>').join('')+'<p class="picker-empty" role="status" hidden>Nenhum tipo encontrado.</p></div>'+(mode==='row'?'<button type="button" class="picker-models" data-act="picker-custom">Faixa personalizada →</button><button type="button" class="picker-models" data-act="picker-models">Modelos de faixa →</button>':mode==='row-custom'?'<button type="button" class="picker-models" data-act="picker-back">← Faixas da jornada</button>':'');
   panel.showPopover();pickerContext.anchor?.setAttribute('aria-expanded','true');pickerPosition(panel,pickerContext.anchor);panel.querySelector('input').focus();
 }
 function pickerFilter(input){const panel=input.closest('#content-picker'),query=pickerFold(input.value.trim());let count=0;
@@ -57,7 +59,7 @@ function pickerShowTool(row){
 function pickerChoose(type){
   if(pickerTools()[type]){pickerShowTool(pickerTools()[type].row);return}
   if(type==='stage'){contentClosePicker();growthOpenStage();return}
-  if(pickerContext.mode==='row'){pickerCreateRow(pickerRowDefaults[type]);return}
+  if(pickerLaneMode()){pickerCreateRow(pickerRowDefaults[type]);return}
   contentChoose(type);
 }
 function pickerSources(type){return type==='plan'?S.plans||[]:type==='metric'?S.availableMetrics||[]:S.serviceElements?.[type]||[]}
@@ -70,10 +72,13 @@ function pickerRefreshReferences(){
   });
 }
 function pickerReferenceMarkup(note,report=false){const source=pickerReference(note);if(!source)return '<p class="reference-missing">Registro indisponível. Selecione outro em Editar elemento.</p>';
-  if(note.type==='metric')return '<div class="metric-reference"><b>'+esc(source.current===undefined?'Sem medição':String(source.current)+(source.unit?' '+source.unit:''))+'</b><small>Meta: '+esc(source.target===undefined?'não informada':String(source.target)+(source.unit?' '+source.unit:''))+'</small></div>';
-  if(note.type!=='plan')return '<div class="service-reference"><small>'+esc(contentTypes[note.type][1])+' · vinculado ao serviço</small><b>'+esc(source.title)+'</b>'+(source.description?'<p>'+esc(source.description)+'</p>':'')+(source.category?'<p>'+esc(source.category)+'</p>':'')+(source.stageName?'<small>Etapa de origem: '+esc(source.stageName)+'</small>':'')+(source.source?'<small>Fonte: '+esc(source.source)+'</small>':'')+'</div>';
+  if(note.type==='metric')return '<div class="metric-reference"><strong>'+esc(source.name)+'</strong><b>'+esc(source.current===undefined?'Sem medição':String(source.current)+(source.unit?' '+source.unit:''))+'</b><small>Meta: '+esc(source.target===undefined?'não informada':String(source.target)+(source.unit?' '+source.unit:''))+'</small></div>';
+  if(note.type!=='plan'){
+    const details=(source.description&&source.description!==source.title?'<p>'+esc(source.description)+'</p>':'')+(source.category?'<p>'+esc(source.category)+'</p>':'')+(source.stageName?'<small>Etapa de origem: '+esc(source.stageName)+'</small>':'')+(source.source?'<small>Fonte: '+esc(source.source)+'</small>':'');
+    return '<div class="service-reference"><small>'+esc(contentTypes[note.type][1])+'</small><b>'+esc(source.title)+'</b>'+(details?(report?details:'<details class="reference-details"><summary>Ver detalhes</summary>'+details+'</details>'):'')+(note.type==='pain'&&!report?'<button class="tb" data-act="context-pain" data-source="'+esc(note.referenceId)+'">Analisar dor</button>':'')+'</div>';
+  }
   const index=(S.iss||[]).findIndex(issue=>growthIssueKey(issue)===source.problemId);
-  return '<div class="plan-reference"><small>'+esc(growthStatusLabels[source.status]||source.status)+'</small><p>'+esc(source.owner||'Responsável não informado')+(source.targetDate?' · '+esc(source.targetDate):'')+'</p>'+(source.expectedOutcome?'<p>'+esc(source.expectedOutcome)+'</p>':'')+(!report&&index>=0?'<button class="tb" data-act="picker-track" data-ii="'+index+'">Acompanhar plano</button>':'')+'</div>';
+  return '<div class="plan-reference"><strong>'+esc(source.title)+'</strong><small>'+esc(growthStatusLabels[source.status]||source.status)+'</small><p>'+esc(source.owner||'Responsável não informado')+(source.targetDate?' · '+esc(source.targetDate):'')+'</p>'+(source.expectedOutcome?'<p>'+esc(source.expectedOutcome)+'</p>':'')+(!report&&index>=0?'<button class="tb" data-act="picker-track" data-ii="'+index+'">Acompanhar plano</button>':'')+'</div>';
 }
 function pickerAdvancedMedia(note,key,index){const type=note.type;if(type==='scale'){
   let scale;try{scale=window.BlueOceanJourneyContent.normalizeMatrixScale(note.scale)}catch{return '<p>Escala indisponível. Revise em Editar elemento.</p>'}const value=scale.value;
@@ -98,13 +103,14 @@ function pickerOpenAdvanced(type,note=null){
 function pickerSubmitAdvanced(form){if(!form.reportValidity())return;const data=new FormData(form),type=form.dataset.type,notes=S.c[contentCellKey]||[],old=notes.find(n=>n.i===contentEditingId);let text=String(data.get('text')||'').trim();const note={...old,i:old?.i||uid(),type,t:text};
   if(type==='scale')note.scale={min:data.get('scaleMin'),max:data.get('scaleMax'),step:data.get('scaleStep'),value:data.get('scaleValue'),minLabel:data.get('minLabel'),maxLabel:data.get('maxLabel')};
   if(type==='embed')note.url=String(data.get('url')||'');
-  if(pickerReferenceTypes.includes(type)){note.referenceId=String(data.get('referenceId')||'');const source=pickerReference(note);if(!source){form.querySelector('.form-error').textContent='Selecione um registro disponível.';return}note.t=text||source.title||source.name}
-  try{if(!note.t)throw Error('Dê um nome ao elemento.');const normalized=window.BlueOceanJourneyContent.normalizeMatrixBlock(note);Object.assign(note,{scale:normalized.scale,url:normalized.url,referenceId:normalized.referenceId});const c={...S.c,[contentCellKey]:old?notes.map(n=>n.i===old.i?note:n):[...notes,note]};window.BlueOceanJourneyContent.validateMatrixDocument({c});S.c=c;save();dialogCloseAdvanced(note.i)}catch(error){form.querySelector('.form-error').textContent=error.message}
+  if(pickerReferenceTypes.includes(type)){note.referenceId=String(data.get('referenceId')||'');const source=pickerReference(note);if(!source){form.querySelector('.form-error').textContent='Selecione um registro disponível.';return}note.t=text}
+  try{if(!note.t&&!pickerReferenceTypes.includes(type))throw Error('Dê um nome ao elemento.');const normalized=window.BlueOceanJourneyContent.normalizeMatrixBlock(note);Object.assign(note,{scale:normalized.scale,url:normalized.url,referenceId:normalized.referenceId});const c={...S.c,[contentCellKey]:old?notes.map(n=>n.i===old.i?note:n):[...notes,note]};window.BlueOceanJourneyContent.validateMatrixDocument({c});S.c=c;save();dialogCloseAdvanced(note.i)}catch(error){form.querySelector('.form-error').textContent=error.message}
 }
 function dialogCloseAdvanced(id){app.querySelector('#content-editor').close();rerender();focusNew('[data-nid="'+id+'"] [data-ed="c"]')}
 function pickerAction(action,data,button){
   if(action==='alane'){pickerOpen('row','',button);return true}
   if(action==='picker-type'){pickerChoose(data.type);return true}
+  if(action==='picker-custom'){pickerOpen('row-custom','',pickerContext.anchor);return true}
   if(action==='picker-models'){pickerModels();return true}
   if(action==='picker-back'){pickerOpen('row','',pickerContext.anchor);return true}
   if(action==='picker-template'){const template=contentTemplates[data.template];pickerCreateRow({...template,n:template.n||'Anotações'});return true}

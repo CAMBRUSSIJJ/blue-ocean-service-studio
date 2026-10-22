@@ -43,9 +43,11 @@ export function saveJourneyImprovement(graph: ServiceGraph, journeyId: Id, probl
     linkedProblem = { id, serviceId: graph.service.id, sourceKey: `journey-problem:${problemId}`,
       sourceRefs: [{ kind: 'journey', sourceId: problemId, label: `${journey.name} · ${stage.title}`, detail: problem.description }],
       sourceActive: true, title: problem.description, description: problem.description, impact: 3, frequency: 3, effort: 3, risk: 3, urgency: 3,
-      status: 'new', evidenceIds: [...(stage.evidenceIds ?? [])], createdAt: now, updatedAt: now, lastSeenAt: now };
+      status: 'new', evidenceIds: [...(problem.evidenceIds ?? stage.evidenceIds ?? [])], createdAt: now, updatedAt: now, lastSeenAt: now };
     backlog.problems[id] = linkedProblem;
   }
+  linkedProblem.title = problem.description; linkedProblem.description = problem.description;
+  linkedProblem.evidenceIds = [...(problem.evidenceIds ?? stage.evidenceIds ?? [])];
   let next: ServiceGraph = { ...graph, service: { ...graph.service, improvementBacklog: backlog } };
   let initiativeId = Object.values(graph.service.improvementPortfolio?.initiatives ?? {}).find(i => i.problemIds.includes(linkedProblem.id))?.id;
   if (!initiativeId) {

@@ -140,7 +140,7 @@ export function restoreMatrixContent(ref, stored, stageIds) {
       });
       ref.c[key].push(...existing.filter(note => !included.has(note.i)));
       // Empty drafts have no canonical graph object yet.
-      for (const block of blocks) if (!block.text && !existing.some(n => (n.hostItemId || n.i) === block.id)) ref.c[key].push({ ...block, i: block.id, t: '' });
+      for (const block of blocks) if (!block.text && !MATRIX_REFERENCE_TYPES.includes(block.type) && !existing.some(n => (n.hostItemId || n.i) === block.id)) ref.c[key].push({ ...block, i: block.id, t: '' });
     }
   });
   return ref;
