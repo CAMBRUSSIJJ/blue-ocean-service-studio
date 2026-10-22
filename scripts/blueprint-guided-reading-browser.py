@@ -14,7 +14,7 @@ if not url:
     threading.Thread(target=server.serve_forever,daemon=True).start()
     url=f'http://127.0.0.1:{server.server_port}'
 # Exercise the retired editor only in localhost regression runs, never in Production.
-URL += ('&' if '?' in URL else '?') + '__qa_legacy_blueprint=1'
+url += ('&' if '?' in url else '?') + '__qa_legacy_blueprint=1'
 
 try:
     with sync_playwright() as p:
