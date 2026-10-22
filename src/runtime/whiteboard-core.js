@@ -1155,8 +1155,10 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
           b.items[itemId]=item;
         }
         sync.notes[nid]=itemId;nextShown.add(itemId);
-        item.serviceStageId=sid;item.blueprintStageId=sid;item.serviceLayer=serviceLane[lane];
-        item.blueprintLane=serviceLane[lane];
+        // The original UI groups processes and systems in one visual row. Keep their distinct canonical layers.
+        const canonicalLane=lane==='sy'&&item.serviceLayer==='process'?'process':serviceLane[lane];
+        item.serviceStageId=sid;item.blueprintStageId=sid;item.serviceLayer=canonicalLane;
+        item.blueprintLane=canonicalLane;
         if(item.kind==='smart'){
           const rec=entityRecord(item.objectKind,item.objectId);
           if(rec){
@@ -1164,7 +1166,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
             else if(item.objectKind==='problem')rec.description=value;
             else rec.title=value;
             rec.updatedAt=timestamp;
-            assignBlueprintEntityStage(item.objectKind,item.objectId,sid,serviceLane[lane]);
+            assignBlueprintEntityStage(item.objectKind,item.objectId,sid,canonicalLane);
           }
         }else item.text=value;
         newEdges.set(nid,itemId);
