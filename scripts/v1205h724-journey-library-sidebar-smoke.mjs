@@ -27,7 +27,7 @@ check(view.includes('journeyPreviewSrc(journey, graph)') && read('src/services/j
 check(view.includes('Crie sua primeira Jornada'),'Journey possui estado vazio');
 check(view.includes('Criar Jornada'),'Journey pode ser criada no próprio tab');
 check(view.includes('journeyApi') && view.includes("api<JourneyHomeApi>('journeyHome')"),'criação/abertura usa runtime canônico journeyHome');
-check(view.includes('setJourneyEditorOpen(true)'),'Journey só abre editor após seleção/criação');
+check(view.includes('setJourneyEditorOpen(true)') && view.includes('prepareJourneyBlueprintDraft(latest, id)') && view.includes('asJourney: true'),'Jornada abre a matriz unificada; editor anterior só em QA local');
 check(view.includes('onBack={() => setJourneyEditorOpen(false)}') && read('src/views/JourneyCanvasFree.tsx').includes('Todas as Jornadas'),'editor possui retorno para biblioteca no cabeçalho do mapa');
 check(view.includes("if (id === 'journey') setJourneyEditorOpen(false)"),'clicar no tab Journey retorna à biblioteca');
 check(view.includes("workspaceTab === 'journey' && !journeyEditorOpen") && view.includes("workspaceTab === 'journey' && journeyEditorOpen"),'library e editor têm estados separados');
@@ -45,7 +45,7 @@ check(css.includes('@media(max-width:767px){.bo-h724-sidebar-toggle{display:none
 
 check(view.includes("workspaceTab === 'blueprint' && <>{handoff.readyForJourney"),'ações globais de Blueprint ficam restritas ao tab Blueprint');
 check(view.includes('bo-h722-library-toolbar') && view.includes('journeys.length > 0 && <div>') && view.includes('!journeys.length && <button') && view.includes('> Criar Jornada</button>') && !view.includes("workspaceTab === 'journey' && !journeyEditorOpen && <button"),'Jornada tem uma ação principal contextual, sem duplicar no header');
-check(view.includes('continue no Blueprint para desenhar como a operação entrega') && view.includes('data-journey-to-blueprint={journey.id}'),'biblioteca explica e oferece continuidade para o Blueprint');
+check(view.includes('Mapeie a experiência e a operação na mesma Jornada') && view.includes('data-journey-to-blueprint={journey.id}'),'biblioteca apresenta Jornada como fluxo principal e Blueprint opcional');
 check(view.includes('<JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/>'),'editor Journey canônico permanece incorporado');
 check(view.includes('<WhiteboardsView studio={studio}/>'),'Whiteboard permanece incorporado');
 check(view.includes('data-unified-legacy-targets'),'contratos legados continuam documentados');
