@@ -97,8 +97,9 @@ export function applyJourneyReferencePatch(graph: ServiceGraph, journeyId: strin
     };
     st.title = text(step.n, 240) || 'Etapa sem nome';
     st.thoughts = text(step.d, 1500);
-    st.emotionScore = limit(step.e, -2, 2) as Stage['emotionScore'];
-    st.emotion = st.emotionScore < 0 ? 'negative' : st.emotionScore > 0 ? 'positive' : 'neutral';
+    const score = Math.round(limit(step.e, -2, 2));
+    st.emotionScore = score as Stage['emotionScore'];
+    st.emotion = score < 0 ? 'negative' : score > 0 ? 'positive' : 'neutral';
     (st as Stage & { journeyReferenceLocalId?: string }).journeyReferenceLocalId = local;
     st.archived = false; st.updatedAt = now;next.stages[sid] = st;
     idToStage.set(local, sid); stageIds.push(sid);
@@ -166,7 +167,7 @@ export function applyJourneyReferencePatch(graph: ServiceGraph, journeyId: strin
   const hiddenIssueIds = [...new Set([
     ...removedCanonical,
     ...(oldRef?.hiddenIssueIds || []),
-    ...(oldRef?.issues || []).map(issue => issue.hostEntityId).filter((eid): eid is string => Boolean(eid) && !knownIssueIds.has(eid)),
+    ...(oldRef?.issues || []).map(issue => issue.hostEntityId).filter((eid): eid is string => typeof eid === 'string' && !knownIssueIds.has(eid)),
   ])].filter(eid => !knownIssueIds.has(eid));
   journey.name = text(doc.title, 240) || journey.name;
   journey.referenceCanvas = {
