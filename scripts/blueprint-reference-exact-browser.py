@@ -29,7 +29,7 @@ try:
         expect(exact.locator('[data-empty-journey="1"], .bd')).to_be_visible(timeout=15000)
         # A new hosted map starts empty; no compulsory coffee demo or stage suggestions.
         while exact.locator('.sh').count() < 2:
-            exact.locator('button[data-act="step"]').click()
+            exact.locator('button[data-act="step"]').first.click()
         expect(exact.locator('.bd')).to_be_visible()
         expect(exact.locator('.pnl')).to_be_visible()
         assert exact.locator('.hd').count()==1
