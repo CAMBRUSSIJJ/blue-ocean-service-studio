@@ -100,6 +100,7 @@ jobs:
       - run: npm run blueprint:methodology:browser
       - run: python3 scripts/blueprint-guided-reading-browser.py
       - run: python3 scripts/blueprint-reference-exact-browser.py
+      - run: python3 scripts/journey-to-blueprint-original-browser.py
       - run: npm run entry:browser
       - run: npm run product:browser
       - run: npm run maps:browser
