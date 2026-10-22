@@ -61,7 +61,7 @@ def project(page):
     page.get_by_label('Serviço principal', exact=True).fill('Atendimento')
     page.get_by_role('button', name='Criar projeto', exact=True).click()
     page.locator('.bo-h724-journey-pane').get_by_role('button', name='Criar Jornada', exact=True).click()
-    page.get_by_role('button', name=re.compile(r'^Em branco')).click()
+    page.get_by_role('button', name='Criar e abrir Jornada', exact=True).click()
     expect(page.locator('.bo-h1705-journey')).to_be_visible()
 
 def card(page, lane_id, stage_id, text):
@@ -309,6 +309,7 @@ def templates(page):
     project(page)
     page.get_by_role('button', name='Todas as Jornadas', exact=True).click()
     page.get_by_role('button', name='Criar Jornada', exact=True).first.click()
+    page.get_by_role('button', name='Usar modelo (opcional)').click()
     page.locator('.bo-h1704-template-grid > button').nth(1).click()
     check('A chosen template supplies editable stages', len(current(page)['stageIds']) > 0)
     check('Default Journey names distinguish successive maps', current(page)['name'] == 'Nova Jornada (2)')
