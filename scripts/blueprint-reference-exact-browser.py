@@ -31,6 +31,9 @@ try:
             exact.locator('input[data-f="st:title"]').fill('Serviço real de atendimento')
             exact.locator('input[data-f="st:persona"]').fill('Cliente da plataforma')
             exact.locator('#go').click()
+        # A new hosted map starts empty; no compulsory coffee demo or stage suggestions.
+        while exact.locator('.sh').count() < 2:
+            exact.locator('button[data-act="step"]').click()
         expect(exact.locator('.bd')).to_be_visible()
         expect(exact.locator('.pnl')).to_be_visible()
         assert exact.locator('.hd').count()==1

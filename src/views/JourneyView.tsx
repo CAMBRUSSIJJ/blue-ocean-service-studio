@@ -1,5 +1,5 @@
 // H7.40-H4 legacy surface label: JOURNEY MAP 2.0
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Emotion, JourneyMomentType, TaskStatus } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { buildJourneyMapReport, prepareBlueprintFromJourney, prepareJourneyBlueprintDraft } from '../services/journey-map-studio';
@@ -61,6 +61,51 @@ export function JourneyView({ studio, onBack }: { studio: StudioController; onBa
   const [quickContextKind, setQuickContextKind] = useState<'persona' | 'need' | 'pain' | 'evidence'>('persona');
   const [quickContextTitle, setQuickContextTitle] = useState('');
   const coverInputRef = useRef<HTMLInputElement | null>(null);
+  // The original HTML is now the primary Journey editor. Legacy regression mode exists only locally.
+  const legacyJourneyQa = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    && new URLSearchParams(window.location.search).has('__qa_legacy_blueprint');
+  const unifiedOpenedFor = useRef<string | null>(null);
+  const returnHandler = useRef(onBack);
+  returnHandler.current = onBack;
+  useEffect(() => {
+    const goBack = () => returnHandler.current?.();
+    window.addEventListener('bo-return-from-unified-journey', goBack);
+    return () => window.removeEventListener('bo-return-from-unified-journey', goBack);
+  }, []);
+  useEffect(() => {
+    if (legacyJourneyQa || unifiedOpenedFor.current === journey.id) return;
+    unifiedOpenedFor.current = journey.id;
+    const runtime = runtimeApi<{ open(id: string, options?: { source?: string }): Promise<boolean> }>('serviceBlueprintFrame');
+    if (!runtime) {
+      showToast('Editor da Jornada indisponível. Atualize a página.');
+      unifiedOpenedFor.current = null;
+      return;
+    }
+    const latest = runtimeApi<{ get(): typeof graph }>('dataBridge')?.get() ?? graph;
+    const prepared = prepareJourneyBlueprintDraft(latest, journey.id, { allowEmpty: true });
+    if (!prepared.boardId) {
+      showToast('Não foi possível abrir a Jornada.');
+      unifiedOpenedFor.current = null;
+      return;
+    }
+    if (prepared.created) {
+      setGraph(current => prepareJourneyBlueprintDraft(current, journey.id, {
+        id: prepared.boardId!, allowEmpty: true,
+      }).graph, 'Jornada: criar mapa unificado');
+    }
+    const id = prepared.boardId;
+    const timer = window.setTimeout(() => {
+      void runtime.open(id, { source: 'journey' }).then(opened => {
+        if (!opened) {
+          unifiedOpenedFor.current = null;
+          showToast('Não foi possível abrir a Jornada deste serviço.');
+        }
+      });
+    }, prepared.created ? 180 : 40);
+    return () => window.clearTimeout(timer);
+  // Deliberately open only once per Journey editor mount.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [journey.id]);
   const designContext = journey.designContext;
   const definition = graph.service.project?.definition;
   const report = buildJourneyMapReport(graph, journey.id);
@@ -176,6 +221,10 @@ export function JourneyView({ studio, onBack }: { studio: StudioController; onBa
     setQuickContextTitle('');
     showToast(kind === 'persona' ? 'Pessoa registrada na Journey.' : kind === 'need' ? 'Necessidade registrada e ligada à etapa atual.' : kind === 'evidence' ? 'Evidência registrada e ligada à etapa atual.' : 'Dor registrada na Journey.');
   };
+
+  if (!showCanvasMatrix && !legacyJourneyQa) {
+    return <div data-unified-journey-editor="1" className="flex-1 min-h-0 bg-slate-50" aria-label="Mapa da Jornada" />;
+  }
 
   if (!showCanvasMatrix) {
     return <JourneyCanvasFree
