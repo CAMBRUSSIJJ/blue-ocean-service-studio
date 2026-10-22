@@ -119,7 +119,7 @@ def contextual_design_continuity(page):
     blueprint_id = linked[0][0]
     check(graph(page)['journeys'][journey_id]['stageIds'] == stage_ids,
           'Blueprint handoff preserves canonical stage identities')
-    page.frame_locator('.bo-blueprint-reference-frame').get_by_role('button', name='Voltar para Blueprints', exact=True).click()
+    page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
     expect(page.locator('[data-blueprint-library="1"]')).to_be_visible()
     page.locator(f'[data-blueprint-to-journey="{blueprint_id}"]').click()
     expect(page.locator('.bo-h1705-journey')).to_be_visible()
