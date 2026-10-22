@@ -1044,6 +1044,11 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
 
   // The reference view is the default presentation of an existing canonical Blueprint.
   // Switching to professional mode never deletes, migrates or duplicates Service Graph records.
+  // Regression-only escape hatch on localhost. Production has a single Blueprint UI.
+  function blueprintLegacyQaMode(){
+    return ['localhost','127.0.0.1'].includes(location.hostname)
+      && new URLSearchParams(location.search).has('__qa_legacy_blueprint');
+  }
   function blueprintReferenceState(){
     meta.blueprintReference ||= {version:1,boards:{}};
     return meta.blueprintReference.boards[boardId||'global'] ||= {mode:'reference',client:false};
@@ -1224,6 +1229,31 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     invalidateViewLayout('journey');invalidateViewLayout('blueprint');
     save(false,{label:'Editar matriz do Blueprint'});
   }
+  function showBlueprintReferenceTools(){
+    const dialog=modalShell('Ferramentas do Blueprint','Recursos avançados preservados sem trocar a tela do Blueprint.');
+    dialog.root.style.zIndex='999999';
+    const grid=document.createElement('div');grid.className='rt190-tools-grid';
+    dialog.box.appendChild(grid);
+    const add=(label,description,action)=>{
+      const button=document.createElement('button');button.type='button';
+      button.className='rt190-tool-card';
+      const content=document.createElement('div');
+      const title=document.createElement('b');title.textContent=label;
+      const hint=document.createElement('small');hint.textContent=description;
+      content.append(title,hint);button.append(content);
+      button.addEventListener('click',()=>{
+        dialog.root.remove();action();
+        // Native dialogs render above the unchanged reference iframe.
+        overlay?.querySelectorAll('.rt144-modal').forEach(node=>{node.style.zIndex='999999'});
+      });
+      grid.appendChild(button);
+    };
+    add('Revisar entrega','Lacunas, etapas, relações e integridade operacional',()=>showBlueprintDeliveryReview());
+    if(!mobileReadOnly())add('Estratégia e qualidade','Promessa, 7 Ps e critérios de qualidade',()=>showBlueprintServiceStrategy());
+    add('Importar / Exportar','Backup, documentos e dados estruturados',()=>showImportExportCenter());
+    add('Guia do Blueprint','Entenda etapas e camadas de entrega',()=>showBlueprintQuickStart());
+    add('Integridade do Service Graph','Auditar vínculos e registros existentes',()=>runtime.api('dataIntegrity')?.showReport?.());
+  }
   let hostedBlueprintListener=null;
   function renderReferenceCanvas(){
     if(hostedBlueprintListener){window.removeEventListener('message',hostedBlueprintListener);hostedBlueprintListener=null}
@@ -1243,9 +1273,8 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
           console.error('Falha ao editar Blueprint da referência',error);
           toast('Não foi possível atualizar o Blueprint. Verifique os dados.');
         }
-      }else if(type==='professional'){
-        blueprintReferenceState().mode='professional';
-        save(false,{content:false,history:false,label:'Abrir ferramentas profissionais'});renderAll();
+      }else if(type==='tools'){
+        showBlueprintReferenceTools();
       }else if(type==='back'){
         close(false);window.dispatchEvent(new CustomEvent('rt-navigation',{detail:'canvas'}));
         setTimeout(()=>window.dispatchEvent(new CustomEvent('bo-service-workspace-tab',{detail:'blueprint'})),0);
@@ -1258,7 +1287,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   }
 
   function renderAll(){
-    if(!overlay)return;const focusBefore=focusDescriptor(document.activeElement);const renderStarted=performance.now(); overlay.innerHTML='';overlay.dataset.view=pref().layoutMode||'free';overlay.classList.toggle('bo-simple-blueprint',editorContextKind()==='blueprint'&&blueprintLearningState().mode==='guided');overlay.dataset.cardDensity=pref().cardDensity||'normal';overlay.classList.toggle('rt1811-density-compact',pref().cardDensity==='compact');overlay.classList.toggle('rt1811-density-normal',pref().cardDensity==='normal');overlay.classList.toggle('rt1811-density-detailed',pref().cardDensity==='detailed');overlay.classList.toggle('zoom-far',zoom<.58);overlay.classList.toggle('zoom-near',zoom>1.18);overlay.classList.toggle('rt159-performance',Object.keys(board()?.items||{}).length>perf.cullThreshold);overlay.classList.toggle('rt183-blueprint-editor',(pref().layoutMode||'free')==='blueprint');const __learn=blueprintLearningState();overlay.classList.toggle('rt185-guided',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='guided');overlay.classList.toggle('rt185-professional',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='professional');overlay.classList.toggle('rt185-show-tips',__learn.showTips!==false);if(showInspector&&(selected.length||selectedEdge))showBlueprintDocument=false;overlay.classList.toggle('rt183-document-open',!!showBlueprintDocument&&(pref().layoutMode||'free')==='blueprint');if(editorContextKind()==='blueprint'&&blueprintReferenceState().mode!=='professional'){renderReferenceCanvas();return}renderTop();
+    if(!overlay)return;const focusBefore=focusDescriptor(document.activeElement);const renderStarted=performance.now(); overlay.innerHTML='';overlay.dataset.view=pref().layoutMode||'free';overlay.classList.toggle('bo-simple-blueprint',editorContextKind()==='blueprint'&&blueprintLearningState().mode==='guided');overlay.dataset.cardDensity=pref().cardDensity||'normal';overlay.classList.toggle('rt1811-density-compact',pref().cardDensity==='compact');overlay.classList.toggle('rt1811-density-normal',pref().cardDensity==='normal');overlay.classList.toggle('rt1811-density-detailed',pref().cardDensity==='detailed');overlay.classList.toggle('zoom-far',zoom<.58);overlay.classList.toggle('zoom-near',zoom>1.18);overlay.classList.toggle('rt159-performance',Object.keys(board()?.items||{}).length>perf.cullThreshold);overlay.classList.toggle('rt183-blueprint-editor',(pref().layoutMode||'free')==='blueprint');const __learn=blueprintLearningState();overlay.classList.toggle('rt185-guided',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='guided');overlay.classList.toggle('rt185-professional',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='professional');overlay.classList.toggle('rt185-show-tips',__learn.showTips!==false);if(showInspector&&(selected.length||selectedEdge))showBlueprintDocument=false;overlay.classList.toggle('rt183-document-open',!!showBlueprintDocument&&(pref().layoutMode||'free')==='blueprint');if(editorContextKind()==='blueprint'&&!blueprintLegacyQaMode()){renderReferenceCanvas();return}renderTop();
     const body=document.createElement('div');body.className='rt144-body';overlay.appendChild(body);
     renderViewport(body); renderToolbar(body);
     if(showLibrary)renderLibrary(body);
@@ -2229,7 +2258,6 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       const organize=btn('Organizar em Blueprint',showBlueprintSelectionPreview,'bo-editor-organize');
       organize.disabled=!selected.length;organize.title=selected.length?'Revisar etapas, camadas e vínculos da seleção':'Selecione as ideias que deseja organizar';mid.appendChild(organize);
     }else if(kind==='blueprint'&&!mobileReadOnly()){
-      const simple=btn('Visão simplificada',()=>{blueprintReferenceState().mode='reference';save(false,{content:false,history:false,label:'Visão simplificada'});renderAll()},'bo-guided-reading-trigger');mid.appendChild(simple);
       const stage=btn('＋ Adicionar etapa',()=>addJourneyStage({returnTo:'service'}),'primary bo-editor-add-stage');
       stage.setAttribute('aria-label','Adicionar etapa');mid.appendChild(stage);
     }

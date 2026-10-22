@@ -152,6 +152,9 @@ if not URL:
     URL = f'http://127.0.0.1:{server.server_port}'
 
 failures = []
+# Exercise the retired editor only in localhost regression runs, never in Production.
+URL += ('&' if '?' in URL else '?') + '__qa_legacy_blueprint=1'
+
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True, executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),

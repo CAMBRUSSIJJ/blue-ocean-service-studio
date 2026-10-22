@@ -30,8 +30,6 @@ def create(page):
     page.locator('[data-service-blueprint-nav="1"]').click()
     page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
     expect(page.locator('.bo1174-board')).to_be_visible()
-    expect(page.frame_locator('.bo-blueprint-reference-frame').locator('#app')).to_be_visible()
-    page.frame_locator('.bo-blueprint-reference-frame').get_by_role('button',name='Modo profissional').click()
 def options(page,name):
     page.get_by_role('button',name='Opções',exact=True).click()
     page.get_by_role('dialog',name='Ferramentas do editor',exact=True).get_by_role('button',name=re.compile('^.*'+re.escape(name))).click()
@@ -239,6 +237,9 @@ URL=os.environ.get('BLUE_OCEAN_URL')
 if not URL:
     server=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(QuietHandler,directory=str(ROOT/'dist')))
     threading.Thread(target=server.serve_forever,daemon=True).start();URL=f'http://127.0.0.1:{server.server_port}'
+# Exercise the retired editor only in localhost regression runs, never in Production.
+URL += ('&' if '?' in URL else '?') + '__qa_legacy_blueprint=1'
+
 try:
     with sync_playwright() as p:
         browser=p.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
