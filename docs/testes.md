@@ -33,6 +33,7 @@ npm run journey:starter:test
 npm run journey:growth:test
 npm run journey:content:test
 npm run journey:picker:test
+npm run journey:context:test
 ```
 
 Esses testes exercitam operações como seleção, criação e movimentação de cartões,
@@ -148,3 +149,13 @@ hipóteses e acesso pela célula selecionada. Usa registros fictícios no Servic
 Graph e a interação real dos seletores, com axe em 1440, 834 e 390 px e em
 um dispositivo com toque. As capturas
 ficam em `artifacts/journey-elements/` e são publicadas na CI.
+
+
+`npm run journey:context:test` verifica o isolamento de emoções por Persona,
+compatibilidade dos registros sem Persona, rejeição de fontes inválidas e o
+vínculo dor–evidência–ocorrência–backlog. `npm run journey:context:browser` executa
+os controles reais para separar faixas e conteúdo, selecionar Personas, trocar
+contextos emocionais, ligar evidências, planejar e exportar o resumo. Inclui
+histórico, recarga e axe em 1440, 834 e 390 px. Os registros de biblioteca são
+fictícios; isso não equivale a validar o produto com participantes. Capturas e
+resultados ficam em `artifacts/journey-context/`, publicados na CI.

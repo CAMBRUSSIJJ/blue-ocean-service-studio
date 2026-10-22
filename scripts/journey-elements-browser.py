@@ -27,10 +27,11 @@ def audit(p,label):
  fr=frame(p);fr.add_script_tag(content=(ROOT/'node_modules/axe-core/axe.min.js').read_text());result=fr.evaluate("async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});return r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))}")
  (OUT/(label+'-axe.json')).write_text(json.dumps(result,indent=2));check('No axe violations: '+label,not result)
 def tool(f,name,key=None):
- if key: f.locator(f'[data-cell="{key}"]>.content-add').click()
- else: f.get_by_role('button',name='+ Adicionar faixa',exact=True).click()
+ f.get_by_role('button',name='+ Adicionar faixa',exact=True).click()
  f.get_by_role('searchbox',name='Buscar tipo de conteúdo',exact=True).fill(name)
  f.get_by_role('button',name='Mostrar '+name,exact=True).click();saved(f)
+ if key and name=='Gráfico de emoções':
+  f.get_by_role('button',name='Cancelar',exact=True).click();f.locator('[data-act="emotion-edit"][data-si="'+key.split('|')[1]+'"]').click()
 def link(f,key,kind,record):
  add(f,key,kind);dialog=f.locator('#content-editor');dialog.get_by_label('Registro do serviço',exact=True).select_option(record);dialog.get_by_role('button',name='Salvar elemento',exact=True).click();saved(f)
 def reopen(page):
@@ -55,15 +56,15 @@ try:
   check('Canal creates a typed lane instead of a generic text card',graph(page)['journeys'][jid]['matrixContent']['rows'][lane]['defaultType']=='channel')
   link(f,key,'Canal','qa-channel');link(f,'ac|0','Persona','qa-persona');link(f,'ac|0','Necessidade','qa-need');link(f,key,'Dor','qa-pain');link(f,key,'Oportunidade','qa-opportunity')
   tool(f,'Evidência física');link(f,'ev|0','Evidência','qa-evidence')
-  check('Existing service elements render their current source and description',f.locator('.service-reference b').count()==6 and f.get_by_text('Tem pouco tempo',exact=True).is_visible())
+  check('Existing service elements render their current source and description',f.locator('.service-reference b').count()==6 and f.locator('.type-persona .reference-details').count()==1)
   check('Inserting references creates no extra canonical entities or fake customer actions',all(len(graph(page)['entities'][kind])==1 for kind in ['persona','channel','need','evidence','pain']) and graph(page)['stages'][sid]['customerAction']=='Pesquisar atendimento')
   caption=f.locator('[data-cell="ac|0"] .type-persona [data-ed="c"]');caption.fill('Cliente nesta experiência');caption.press('Tab');saved(f);check('A local persona caption does not rename or reassign the canonical persona',graph(page)['entities']['persona']['qa-persona']['title']=='Marina')
-  f.get_by_role('button',name='Desfazer',exact=True).click();expect(f.locator('[data-cell="ac|0"] .type-persona [data-ed="c"]')).to_have_text('Marina');f.get_by_role('button',name='Refazer',exact=True).click();expect(f.locator('[data-cell="ac|0"] .type-persona [data-ed="c"]')).to_have_text('Cliente nesta experiência');check('Undo and redo retain the reference identity and source data',graph(page)['entities']['persona']['qa-persona']['description']=='Tem pouco tempo')
+  f.get_by_role('button',name='Desfazer',exact=True).click();expect(f.locator('[data-cell="ac|0"] .type-persona [data-ed="c"]')).to_have_text('');f.get_by_role('button',name='Refazer',exact=True).click();expect(f.locator('[data-cell="ac|0"] .type-persona [data-ed="c"]')).to_have_text('Cliente nesta experiência');check('Undo and redo retain the reference identity and source data',graph(page)['entities']['persona']['qa-persona']['description']=='Tem pouco tempo')
   tool(f,'Dores e ideias');f.locator('[data-act="addi"][data-t="d"]').first.click();pain=f.locator('.it.d [data-ed="ix"]').first;pain.fill('Espera sem previsão');pain.press('Tab');saved(f);problem=next(iter(graph(page)['problems']));link(f,key,'Dor',problem)
   check('A newly recorded pain is immediately available in the same catalog',f.locator('.service-reference b').filter(has_text='Espera sem previsão').count()==1)
   f.locator('.it.d [data-ed="ix"]').first.fill('Espera com pouco retorno');f.locator('.it.d [data-ed="ix"]').first.press('Tab');saved(f);expect(f.locator('.service-reference b').filter(has_text='Espera com pouco retorno')).to_have_count(1);check('Editing a native pain refreshes its linked card without a reload',True)
   f.locator('.toolbar>.menu').first.locator('summary').click();f.get_by_role('button',name='Aquisição e relacionamento',exact=False).click();expect(f.locator('[data-row="em"]')).to_have_count(0)
-  tool(f,'Gráfico de emoções','ac|1');expect(f.get_by_role('combobox',name='Tipo de registro em Usar',exact=True)).to_be_focused();check('The catalog restores the real emotion graph at the selected stage without recording neutral values',f.locator('#curve').count()==1 and f.locator('.dt.unknown').count()==2 and f.locator('#curve path').get_attribute('d')=='')
+  tool(f,'Gráfico de emoções','ac|1');expect(f.get_by_role('slider',name='Intensidade em Usar',exact=True)).to_be_focused();check('The lane catalog restores the real emotion graph and a selected point remains editable without recording neutral values',f.locator('#curve').count()==1 and f.locator('.dt.unknown').count()==2 and f.locator('#curve path').get_attribute('d')=='')
   f.get_by_role('button',name='Cancelar',exact=True).click();tool(f,'Gráfico de emoções');f.get_by_role('slider',name='Intensidade em Descobrir',exact=True).press('Home');f.get_by_role('button',name='Concluir',exact=True).click();saved(f)
   tool(f,'Gráfico de emoções','ac|1');f.get_by_role('slider',name='Intensidade em Usar',exact=True).press('End');f.get_by_role('button',name='Concluir',exact=True).click();saved(f)
   check('Recorded stage emotions draw the original curve and stay hypotheses without evidence',f.locator('#curve').count()==1 and ' C' in f.locator('#curve path').get_attribute('d') and all(graph(page)['stages'][s]['emotionStatus']=='hypothesis' for s in [sid,second]))

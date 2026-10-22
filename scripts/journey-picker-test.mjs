@@ -16,7 +16,7 @@ check('Service elements project current canonical records without mutation or cr
   graph.entities.persona.p.title='Nome atualizado';assert.equal(matrixServiceReferences(graph).persona[0].title,'Nome atualizado');
 });
 check('All service reference types survive native row rehydration without creating canonical activities',()=>{
-  const types=MATRIX_REFERENCE_TYPES.filter(t=>!['plan','metric'].includes(t)),draft={c:{'fl|0':types.map((type,i)=>({i:'note'+i,t:'Legenda',type,referenceId:'record'+i}))}},stored=matrixContentFromDocument(draft,['s']),ref={c:{}};
+  const types=MATRIX_REFERENCE_TYPES.filter(t=>!['plan','metric'].includes(t)),draft={c:{'fl|0':types.map((type,i)=>({i:'note'+i,t:'',type,referenceId:'record'+i}))}},stored=matrixContentFromDocument(draft,['s']),ref={c:{}};
   restoreMatrixContent(ref,JSON.parse(JSON.stringify(stored)),['s']);assert.equal(ref.c['fl|0'].length,types.length);assert.deepEqual(ref.c['fl|0'].map(n=>n.type),types);assert.ok(ref.c['fl|0'].every(n=>!n.hostItemId));for(const type of types)assert.throws(()=>normalizeMatrixBlock({type,t:'Sem origem'}));
 });
 console.log(`Journey picker: ${count}/${count} PASS`);

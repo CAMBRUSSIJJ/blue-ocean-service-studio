@@ -97,6 +97,7 @@ try:
         for key, text in [('ev|0','Confirmação do pedido'), ('fl|0','Acolher a solicitação'), ('bk|0','Conferir o cadastro'), ('sy|0','Sistema de atendimento')]:
             note(f, key, text)
         f.get_by_role('button', name='+ Adicionar faixa', exact=True).click()
+        f.get_by_role('button',name='Faixa personalizada →',exact=True).click()
         f.get_by_role('button',name='Criar faixa de Texto',exact=True).click()
         f.locator('[data-ed="ln"]').fill('Necessidades')
         f.locator('[data-ed="ln"]').press('Tab')

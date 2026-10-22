@@ -1,5 +1,13 @@
 # Histórico de mudanças
 
+## 2026-10-22 · Contexto da jornada e caminho da melhoria
+
+- Separa o catálogo de faixas (Experiência, Operação, Negócio) da inserção de conteúdo nas células; preserva tipos livres e modelos como opções secundárias.
+- Destaca a Persona da jornada e isola os registros emocionais por Persona, preservando a curva histórica sem Persona vinculada.
+- Liga dores a evidências específicas e segue para o plano existente; dores de pesquisa podem ser usadas em uma etapa sem duplicar sua origem.
+- Mantém novos cartões vinculados com legenda opcional e detalhes recolhidos; corrige cliques perdidos ao sair do nome da etapa e preserva cartões de legenda vazia.
+- Inclui evidências e contexto da Persona no resumo executivo e cobre histórico, recarga, fontes e vínculos em testes de domínio e navegador.
+
 ## 2026-10-22 · Ferramentas e elementos do serviço no catálogo
 
 - Gráfico de emoções, dores e ideias e demais faixas nativas acessíveis pelo catálogo contextual, preservando os dados e as preferências das outras faixas.

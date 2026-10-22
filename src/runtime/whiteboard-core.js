@@ -1,6 +1,7 @@
 import { BLUEPRINT_FRAME_LAYERS, BLUEPRINT_BOUNDARIES, BLUEPRINT_MARKETING_DIMENSIONS, BLUEPRINT_QUALITY_DIMENSIONS, buildBlueprintDeliveryReport, blueprintServicePromise, validateActivityNumbers, isCustomerServiceEvidence } from './blueprint-methodology.js';
 import { runtime } from './runtime-registry.js';
 import { renderBlueprintReference } from './blueprint-reference-view.js';
+import { selectJourneyPersona, readJourneyEmotion, writeJourneyEmotion, journeyPainContexts, saveJourneyPainEvidence } from '../services/journey-context.js';
 import { MATRIX_REFERENCE_TYPES, matrixServiceReferences, validateMatrixDocument, matrixContentFromDocument, restoreMatrixContent } from '../services/journey-content.js';
 import { ACQUISITION_ROWS, saveJourneyImprovement, journeyImprovementPlans, measureJourneyImprovement } from '../services/journey-growth.js';
 import { buildBlueprintGuidedReading, BLUEPRINT_EMOTION_LABELS } from '../services/blueprint-guided-reading.js';
@@ -875,7 +876,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     else if(kind==='problem'){graph.problems[id]={id,stageId:stage0||'',description:t,createdAt:now,updatedAt:now};if(stage0){graph.stages[stage0].problemIds ||= [];if(!graph.stages[stage0].problemIds.includes(id))graph.stages[stage0].problemIds.push(id)}}
     else if(kind==='opportunity'){graph.opportunities[id]={id,stageId:stage0||'',title:t,description:description||'',problemIds:[],taskIds:[],createdAt:now,updatedAt:now};if(stage0){graph.stages[stage0].opportunityIds ||= [];if(!graph.stages[stage0].opportunityIds.includes(id))graph.stages[stage0].opportunityIds.push(id)}}
     else if(kind==='task')graph.tasks[id]={id,opportunityId:'',title:t,status:description||'todo',createdAt:now,updatedAt:now};
-    else if(kind==='persona'){graph.entities[kind][id]={id,type:kind,serviceId:graph.service.id,title:t,description:description||'',needs:[],jobs:[],createdAt:now,updatedAt:now};Object.values(graph.stages||{}).forEach(st=>{st.personaIds ||= [];if(!st.personaIds.includes(id))st.personaIds.push(id);const eid=uid('emotion');graph.entities.emotion[eid]={id:eid,type:'emotion',serviceId:graph.service.id,stageId:st.id,personaId:id,title:emotionLabel(0),score:0,note:'',createdAt:now,updatedAt:now};st.emotionIds ||= [];st.emotionIds.push(eid)})}
+    else if(kind==='persona'){graph.entities[kind][id]={id,type:kind,serviceId:graph.service.id,title:t,description:description||'',needs:[],jobs:[],createdAt:now,updatedAt:now};Object.values(graph.stages||{}).forEach(st=>{st.personaIds ||= [];if(!st.personaIds.includes(id))st.personaIds.push(id);const eid=uid('emotion');graph.entities.emotion[eid]={id:eid,type:'emotion',serviceId:graph.service.id,stageId:st.id,personaId:id,title:emotionLabel(0),score:0,note:'',emotionRecorded:false,createdAt:now,updatedAt:now};st.emotionIds ||= [];st.emotionIds.push(eid)})}
     else if(kind==='channel')graph.entities[kind][id]={id,type:kind,serviceId:graph.service.id,title:t,description:description||'',category:description||'',createdAt:now,updatedAt:now};
     else if(kind==='emotion'){const pid=journeyPrimitiveState().activePersonaId||Object.keys(entityCollection('persona'))[0]||'',score=0;graph.entities[kind][id]={id,type:kind,serviceId:graph.service.id,title:t||emotionLabel(score),stageId:stage0||'',personaId:pid,score,note:description||'',createdAt:now,updatedAt:now}}
     else if(kind==='metric'){graph.entities[kind][id]={id,type:kind,serviceId:graph.service.id,title:t,description:description||'',stageId:stage0||'',value:'',unit:'',target:'',direction:'higher',personaIds:journeyPrimitiveState().activePersonaId?[journeyPrimitiveState().activePersonaId]:[],createdAt:now,updatedAt:now}}
@@ -891,7 +892,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const primary=Object.values(personas)[0]||null;
     const channelByName=new Map(Object.values(channels).map(c=>[String(c.title||'').trim().toLowerCase(),c]));
     Object.values(graph.touchpoints||{}).forEach(tp=>{let name=String(tp.channel||'Canal não definido').trim()||'Canal não definido',key=name.toLowerCase(),ch=tp.channelId&&channels[tp.channelId];if(!ch){ch=channelByName.get(key);if(!ch){const id=uid('channel');ch={id,type:'channel',serviceId:graph.service.id,title:name,description:'',category:name,createdAt:now,updatedAt:now};channels[id]=ch;channelByName.set(key,ch)}tp.channelId=ch.id}tp.personaIds ||= primary?[primary.id]:[]});
-    const scoreMap={positive:1,neutral:0,negative:-1};Object.values(graph.stages||{}).forEach(st=>{st.personaIds ||= primary?[primary.id]:[];if(!primary)return;let emo=Object.values(emotions).find(e=>e.stageId===st.id&&e.personaId===primary.id);if(!emo){const score=scoreMap[st.emotion]??0,id=uid('emotion');emo={id,type:'emotion',serviceId:graph.service.id,stageId:st.id,personaId:primary.id,title:emotionLabel(score),score,note:'',experienceState:'current',createdAt:now,updatedAt:now};emotions[id]=emo}emo.experienceState ||= 'current';st.emotionIds ||= [];if(!st.emotionIds.includes(emo.id))st.emotionIds.push(emo.id)});
+    const scoreMap={positive:1,neutral:0,negative:-1};Object.values(graph.stages||{}).forEach(st=>{st.personaIds ||= primary?[primary.id]:[];if(!primary)return;let emo=Object.values(emotions).find(e=>e.stageId===st.id&&e.personaId===primary.id);if(!emo){const score=scoreMap[st.emotion]??0,id=uid('emotion');emo={id,type:'emotion',serviceId:graph.service.id,stageId:st.id,personaId:primary.id,title:emotionLabel(score),score,note:'',emotionRecorded:false,experienceState:'current',createdAt:now,updatedAt:now};emotions[id]=emo}emo.experienceState ||= 'current';st.emotionIds ||= [];if(!st.emotionIds.includes(emo.id))st.emotionIds.push(emo.id)});
     graph.journeyPrimitivesVersion=1;meta.journeyPrimitivesVersion=1;structuredState().journey ||= {};journeyPrimitiveState();
   }
 
@@ -1062,14 +1063,13 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
     const ref={id:'host',title:openedFromUnifiedJourney?(j?.name||'Jornada'):(b.name||'Blueprint de serviço'),persona:saved.persona||'',
       editorKind:openedFromUnifiedJourney?'journey':'blueprint',view:clone(j?.matrixView||b.matrixView||null),
-      serviceElements:matrixServiceReferences(graph),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
+      personaId:j?.personaId||'',painContexts:j?journeyPainContexts(graph,j.id):[],serviceElements:matrixServiceReferences(graph),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
       availableMetrics:Object.values(graph.entities?.metric||{}).filter(m=>!m.serviceId||m.serviceId===graph.service.id).map(m=>({id:m.id,name:m.title||m.name||'Indicador',unit:m.unit||'',current:typeof m.value==='number'?m.value:undefined,target:typeof m.target==='number'?m.target:undefined})),
       guide:0,start:0,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
     const order=new Map(stages.map((stage,index)=>[stage.id,index]));
     stages.forEach(st=>ref.steps.push({
-      n:st.title||'Etapa',e:Number.isInteger(st.emotionScore)?Math.max(-2,Math.min(2,st.emotionScore)):st.emotion==='positive'?1:st.emotion==='negative'?-1:0,
-      d:st.thoughts||'',note:st.emotionNote||'',emotionRecorded:st.emotionRecorded===true||(st.emotionRecorded===undefined&&(st.emotionScore!==undefined&&st.emotionScore!==0||st.emotion==='positive'||st.emotion==='negative'||!!st.emotionNote)),emotionStatus:st.emotionStatus||'hypothesis',emotionSource:st.emotionSource||'',hostStageId:st.id,hostLocalId:st.blueprintHostLocalId||st.id
+      n:st.title||'Etapa',...readJourneyEmotion(graph,j||{},st),d:st.thoughts||'',hostStageId:st.id,hostLocalId:st.blueprintHostLocalId||st.id
     }));
     const presented=new Set();
     Object.values(b.items||{}).forEach(it=>{
@@ -1127,6 +1127,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
         stageIds:[],createdAt:now,updatedAt:now};
       graph.service.journeyIds ||= [];graph.service.journeyIds.push(id);b.journeyId=id;j=graph.journeys[id];
     }
+    if(String(doc.personaId||'')!==String(j.personaId||''))throw Error('O contexto da Persona mudou. Reabra o mapa antes de editar.');
     const sync=b.blueprintHostedSync ||= {stages:{},notes:{},issues:{}};
     const previousShown=new Set(b.blueprintHostedShown||[]);
     markEdit('Editar matriz do Blueprint');
@@ -1138,13 +1139,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       if(!id)return;
       sync.stages[local]=id;const st=graph.stages[id];
       st.title=name;st.thoughts=String(step.d||'').slice(0,1000);
-      const emotion=Number(step.e);st.emotionScore=Number.isInteger(emotion)?Math.max(-2,Math.min(2,emotion)):0;
-      st.emotion=st.emotionScore<0?'negative':st.emotionScore>0?'positive':'neutral';
-      st.emotionNote=String(step.note||'').slice(0,1000);
-      st.emotionRecorded=step.emotionRecorded===true;
-      if(!st.emotionRecorded){delete st.emotionScore;st.emotion='neutral'}
-      st.emotionStatus=st.emotionRecorded?(step.emotionStatus==='validated'?'validated':'hypothesis'):undefined;
-      st.emotionSource=String(step.emotionSource||'').slice(0,1000);
+      writeJourneyEmotion(graph,j,st,step,timestamp);
       st.blueprintHostLocalId=local||id;st.updatedAt=timestamp;stageIds.push(id);
     });
     j.stageIds=stageIds;j.updatedAt=timestamp;
@@ -1319,7 +1314,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       else if(type==='patch'){
         try{
           const ok=applyHostedBlueprintPatch(state);
-          respond('saved',{ok:ok===true,serviceElements:matrixServiceReferences(graph),plans:journeyImprovementPlans(graph,activeJourney()?.id)});
+          respond('saved',{ok:ok===true,painContexts:journeyPainContexts(graph,activeJourney().id),serviceElements:matrixServiceReferences(graph),plans:journeyImprovementPlans(graph,activeJourney()?.id)});
         }catch(error){
           respond('saved',{ok:false});
           console.error('Falha ao editar Blueprint da referência',error);
@@ -1344,6 +1339,18 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
           if(!save(false,{label:type==='plan-save'?'Planejar melhoria da Jornada':'Registrar medição da Jornada'}))throw Error('Não foi possível salvar neste navegador.');
           respond('plan-result',{ok:true,state:hostedBlueprintDocument()});
         }catch(error){graph=before;respond('plan-result',{ok:false,error:String(error?.message||error)})}
+      }else if(type==='persona-select'||type==='pain-evidence'){
+        if(!canEditHostedMatrix())return;
+        const before=clone(graph);
+        try{
+          const journey=activeJourney();if(!journey)throw Error('Jornada indisponível.');
+          markEdit(type==='persona-select'?'Definir Persona da Jornada':'Vincular evidências da dor');
+          let problemId='';
+          if(type==='persona-select')graph=selectJourneyPersona(clone(graph),journey.id,event.data.personaId);
+          else{const result=saveJourneyPainEvidence(clone(graph),journey.id,String(event.data.sourceId||''),event.data.evidenceIds,event.data.stageId,event.data.planNext===true);graph=result.graph;problemId=result.problemId;if(event.data.planNext&&problemId&&graph.problems[problemId])graph.problems[problemId].blueprintHiddenOn=(graph.problems[problemId].blueprintHiddenOn||[]).filter(id=>id!==boardId)}
+          if(!save(false,{label:type==='persona-select'?'Definir Persona da Jornada':'Vincular evidências da dor'}))throw Error('Não foi possível salvar.');
+          respond('context-result',{ok:true,state:hostedBlueprintDocument(),problemId,planNext:event.data.planNext===true});
+        }catch(error){graph=before;respond('context-result',{ok:false,error:String(error?.message||error)})}
       }else if(type==='tools'){
         showBlueprintReferenceTools();
       }else if(type==='back'){

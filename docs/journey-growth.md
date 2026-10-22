@@ -100,8 +100,11 @@ mesma faixa. Desfazer e refazer preservam o tipo e o conteúdo completo.
 
 A engrenagem de cada faixa permite alterar nome, descrição, ícone e conteúdo
 padrão. O padrão é sinalizado no catálogo de inclusão e mantém os tipos dos
-elementos existentes. **Adicionar faixa** abre um catálogo contextual: escolher o tipo cria a faixa e
-foca seu nome para edição no mapa. **Modelos de faixa** mantém Canais, Falas do
+elementos existentes. **Adicionar faixa** organiza Experiência, Operação e Negócio.
+Escolher uma faixa nativa mostra seus controles existentes. Canal, Persona e
+outras faixas semânticas criam uma faixa com o conteúdo correspondente.
+**Faixa personalizada** oferece os tipos genéricos como opção secundária e
+foca o nome da nova faixa para edição no mapa. **Modelos de faixa** mantém Canais, Falas do
 cliente, Expectativas, Evidências e Responsáveis. Fechar o catálogo não cria dados.
 
 A faixa de Contexto mantém seu campo principal e admite elementos adicionais.
@@ -123,10 +126,12 @@ altura do cabeçalho e oferece criação contínua por Enter.
 
 ## Catálogo contextual e tipos avançados
 
-O mesmo catálogo atende células e novas faixas. A busca ignora acentos e filtra
-os tipos; setas movem o foco, Enter escolhe e Escape fecha devolvendo o foco ao
-botão de origem. Os grupos Básicos e Avançados mantêm posição estável. **Etapa**
-cria uma etapa real da Jornada, pela mesma entrada compacta do cabeçalho.
+Os catálogos compartilham busca e navegação, com opções próprias para cada
+contexto. A célula oferece Básicos, Elementos do serviço e Avançados; não inclui
+ações de etapa ou faixa. **Adicionar faixa** oferece Experiência, Operação e
+Negócio. A busca ignora acentos; setas movem o foco, Enter escolhe e Escape
+fecha devolvendo o foco ao botão de origem. **+ Etapa**, no cabeçalho ou à
+direita do mapa, continua criando uma etapa real da Jornada.
 Nome, descrição, ícone e padrão continuam disponíveis na engrenagem da faixa.
 
 **Escala** aceita limites, intervalo, rótulos e um valor opcional. Começa não
@@ -149,12 +154,13 @@ como indisponíveis e podem ser vinculados novamente em Editar elemento.
 
 ### Ferramentas e elementos do serviço
 
-No catálogo de **Adicionar faixa** ou **Adicionar conteúdo**, a seção
-**Elementos do serviço** oferece Canal, Persona, Dor, Necessidade, Evidência e
-Oportunidade. Ao criar uma faixa de Canal, o conteúdo padrão é um vínculo de
+No catálogo de **Adicionar conteúdo**, a seção **Elementos do serviço** oferece
+Canal, Persona, Dor, Necessidade, Evidência e Oportunidade. Em **Adicionar faixa**,
+as faixas correspondentes ficam no grupo Experiência. Ao criar uma faixa de Canal, o conteúdo padrão é um vínculo de
 Canal; o modelo Canais usa esse mesmo padrão. Nas células, escolha o elemento e
-selecione um registro já criado no serviço. O título e a descrição exibidos
-acompanham o registro, enquanto a legenda pode ser adaptada apenas neste mapa.
+selecione um registro já criado no serviço. O título acompanha o registro; descrição e contexto ficam em **Ver detalhes**.
+Novos cartões começam com a legenda local vazia e opcional, evitando repetir o
+título. A legenda de cartões antigos é preservada.
 Isso não renomeia o registro original nem altera a persona principal ou as
 associações da etapa. Não há duplicação de entidades ou ações fictícias do cliente.
 
@@ -166,14 +172,57 @@ nativa. Uma referência removida da biblioteca aparece como indisponível no map
 sem recriação automática. No documento avulso, os vínculos ao serviço ficam
 indisponíveis porque a biblioteca pertence ao projeto.
 
-Em **Ferramentas da jornada**, **Gráfico de emoções** reabre a faixa original de
-emoções, com a curva ao longo das etapas e o editor da etapa escolhida. A ação
+Em **Adicionar faixa → Experiência**, **Gráfico de emoções** reabre a faixa original de
+emoções, com a curva ao longo das etapas. Clique em um ponto para editar sua emoção. A ação
 não registra neutralidade ou evidência e não cria faixas duplicadas. Sem etapas,
 a inclusão de uma etapa é aberta primeiro. **Dores e ideias** e as demais
 ferramentas também mostram as faixas existentes, mantendo conteúdo e a
 visibilidade das outras faixas. O gráfico conserva as distinções entre ausência,
-hipótese e emoção validada com fonte. Ele usa os registros emocionais das etapas;
-inserir um cartão de Persona não filtra ou substitui esses registros.
+hipótese e emoção validada com fonte. O contexto emocional é definido pela **Persona da jornada** no cabeçalho.
+Inserir apenas um cartão de Persona continua sem alterar esse contexto.
 
 Os vínculos sobrevivem à recarga, reordenação de etapas e desfazer/refazer e
 aparecem na apresentação e no resumo HTML com as informações atuais da biblioteca.
+
+
+## Persona da jornada e caminho da melhoria
+
+**Persona da jornada**, sempre visível no cabeçalho, seleciona um registro da
+biblioteca. A seleção pertence à Jornada e não redefine a Persona principal do
+serviço. O campo anterior continua disponível como **Cenário da jornada**.
+
+A curva e o resumo usam os registros da Persona selecionada, associados à etapa
+e à Persona no Service Graph. Trocar a seleção não copia observações de outra
+pessoa. As observações antigas das etapas continuam acessíveis em **Sem Persona
+vinculada**. Uma Persona sem observações tem lacunas, e uma neutralidade explícita
+continua sendo um registro. Registros futuros não substituem os atuais. A origem
+da evidência permanece obrigatória ao confirmar uma emoção como validada.
+
+Na faixa Dores e ideias, **Ver evidências** abre a análise da dor com a etapa,
+os canais inseridos nela e uma seleção explícita de evidências da biblioteca.
+Em um cartão vinculado de Dor, use **Analisar dor**. **Salvar evidências** altera
+apenas os vínculos da dor; não classifica a fonte como validada e não atribui
+a mesma evidência a todas as dores da etapa. O backlog usado pelo plano acompanha
+as alterações desses vínculos.
+
+**Planejar melhoria** preserva o vínculo com a dor e segue para o formulário
+existente de ação, responsável, prazo, resultado esperado e indicador. Em uma
+dor de pesquisa, **Usar nesta etapa e planejar** cria uma ocorrência explícita na
+etapa escolhida, com referência à dor original. Repetir a ação reutiliza a mesma
+ocorrência; o registro de pesquisa permanece independente. Cancelar o formulário
+do plano mantém o vínculo à etapa já criado, mas não cria um plano vazio.
+
+O resumo HTML inclui Persona, cenário, dores, evidências vinculadas, responsáveis
+e indicadores. Uma evidência removida da biblioteca aparece como indisponível na
+análise; salvar novamente a seleção remove os vínculos indisponíveis indicados.
+Desfazer/refazer e o backup do projeto preservam o contexto e os vínculos.
+
+### Validação com participantes
+
+No piloto descrito acima, peça ao participante para: selecionar uma Persona,
+montar duas etapas e uma faixa de Canal, registrar uma dor, vincular a fonte,
+planejar uma ação e apresentar o resumo. Depois peça que troque a Persona e
+explique por que a curva muda. Observe dúvidas, cliques perdidos e pedidos de
+ajuda sem orientar o percurso. As suítes automatizadas verificam o funcionamento;
+o piloto com pessoas ainda precisa ser realizado antes de afirmar facilidade
+de uso ou valor comercial validado.

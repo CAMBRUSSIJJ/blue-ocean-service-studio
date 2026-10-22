@@ -147,6 +147,7 @@ export type Journey = {
   mapLayout?: JourneyMapLayout;
   matrixView?: JourneyMatrixView;
   matrixContent?: JourneyMatrixContent;
+  personaId?: Id;
   acquisitionCells?: Record<Id, Record<string, Array<{ id: Id; text: string }>>>;
   owner?: string;
   status?: 'draft' | 'active' | 'archived';
@@ -229,6 +230,8 @@ export type Touchpoint = {
 };
 
 export type Problem = {
+  evidenceIds?: Id[];
+  sourcePainId?: Id;
   id: Id;
   stageId: Id;
   description: string;

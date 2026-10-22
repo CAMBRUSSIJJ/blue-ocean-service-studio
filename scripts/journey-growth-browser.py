@@ -107,7 +107,7 @@ try:
     duplicated=graph(page);copy_sid=duplicated['journeys'][jid]['stageIds'][1]
     check('Duplicating a stage creates a distinct pain without moving the original plan source',len(duplicated['problems'])==2 and duplicated['problems'][next(iter(before_duplicate['problems']))]['stageId']==sid and duplicated['stages'][copy_sid]['problemIds']!=duplicated['stages'][sid]['problemIds'])
     f.get_by_role('button',name='Desfazer',exact=True).click();expect(f.locator('.sh')).to_have_count(3)
-    f.locator('.tools-menu summary').click();f.get_by_label('Persona e cenário').fill('Pessoa buscando atendimento');f.get_by_label('Objetivo da Jornada').fill('Dar clareza desde o primeiro contato');f.locator('.tools-menu summary').click();saved(f)
+    f.locator('.tools-menu summary').click();f.get_by_label('Cenário da jornada').fill('Pessoa buscando atendimento');f.get_by_label('Objetivo da Jornada').fill('Dar clareza desde o primeiro contato');f.locator('.tools-menu summary').click();saved(f)
     f.get_by_role('button',name='Apresentar',exact=True).click();expect(f.locator('.executive-report h1')).to_be_visible();check('Presentation is read-only and includes source-linked actions',f.locator('[contenteditable]').count()==0 and f.get_by_text('Dor de origem: Não recebe previsão de atendimento',exact=True).count()==1)
     audit(frame(page),'executive-desktop');page.screenshot(path=str(OUT/'executive-desktop.png'),animations='disabled')
     with page.expect_download() as download: f.get_by_role('button',name='Baixar resumo HTML',exact=True).click()
