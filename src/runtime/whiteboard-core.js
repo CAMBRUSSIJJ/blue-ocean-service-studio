@@ -1056,13 +1056,14 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
 
   function hostedBlueprintDocument(){
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
-    const ref={id:'host',title:b.name||'Blueprint de serviço',persona:saved.persona||j?.name||'',
+    const ref={id:'host',title:openedFromUnifiedJourney?(j?.name||'Jornada'):(b.name||'Blueprint de serviço'),persona:saved.persona||'',
+      editorKind:openedFromUnifiedJourney?'journey':'blueprint',view:clone(j?.matrixView||b.matrixView||null),
       guide:0,start:0,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
     const order=new Map(stages.map((stage,index)=>[stage.id,index]));
     stages.forEach(st=>ref.steps.push({
       n:st.title||'Etapa',e:Number.isInteger(st.emotionScore)?Math.max(-2,Math.min(2,st.emotionScore)):st.emotion==='positive'?1:st.emotion==='negative'?-1:0,
-      d:st.thoughts||st.customerAction||'',hostStageId:st.id,hostLocalId:st.blueprintHostLocalId||st.id
+      d:st.thoughts||st.customerAction||'',note:st.emotionNote||'',emotionRecorded:st.emotionRecorded===true||(st.emotionRecorded===undefined&&Number.isInteger(st.emotionScore)),hostStageId:st.id,hostLocalId:st.blueprintHostLocalId||st.id
     }));
     const presented=new Set();
     Object.values(b.items||{}).forEach(it=>{
@@ -1102,7 +1103,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     return ref;
   }
   function applyHostedBlueprintPatch(doc){
-    if(!doc||!Array.isArray(doc.steps)||!doc.c||typeof doc.c!=='object'||mobileReadOnly())return;
+    if(!doc||!Array.isArray(doc.steps)||!doc.c||typeof doc.c!=='object'||!canEditHostedMatrix())return false;
     if(doc.steps.length>90||Object.values(doc.c).some(x=>!Array.isArray(x)||x.length>100))return;
     const b=board();if(!b)return;
     let j=activeJourney();
@@ -1125,9 +1126,13 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       st.title=name;st.thoughts=String(step.d||'').slice(0,1000);
       const emotion=Number(step.e);st.emotionScore=Number.isInteger(emotion)?Math.max(-2,Math.min(2,emotion)):0;
       st.emotion=st.emotionScore<0?'negative':st.emotionScore>0?'positive':'neutral';
+      st.emotionNote=String(step.note||'').slice(0,1000);
+      st.emotionRecorded=step.emotionRecorded===true;
       st.blueprintHostLocalId=local||id;st.updatedAt=timestamp;stageIds.push(id);
     });
     j.stageIds=stageIds;j.updatedAt=timestamp;
+    if(openedFromUnifiedJourney)j.name=String(doc.title||j.name||'Jornada').trim().slice(0,240)||j.name;
+    if(!j.matrixView&&b.matrixView)j.matrixView=clone(b.matrixView);
     const kindFor={ev:'evidence',fl:'frontstage',bk:'backstage',sy:'system'};
     const serviceLane={ev:'evidence',fl:'frontstage',bk:'backstage',sy:'enablement'};
     const nextShown=new Set(),newEdges=new Map();
@@ -1227,10 +1232,24 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     b.blueprintHosted={persona:String(doc.persona||'').slice(0,400),lanes:Array.isArray(doc.lanes)?clone(doc.lanes):[],
       customCells};
     invalidateViewLayout('journey');invalidateViewLayout('blueprint');
-    save(false,{label:'Editar matriz do Blueprint'});
+    return save(false,{label:openedFromUnifiedJourney?'Editar matriz da Jornada':'Editar matriz do Blueprint'});
+  }
+  // Presentation changes never replay a document patch or remove hidden graph records.
+  function canEditHostedMatrix(){
+    const collaboration=runtime.api('collaboration');
+    return !collaboration?.can||collaboration.internalWrite?.()||collaboration.can('edit');
+  }
+  function saveHostedMatrixView(input){
+    if(!input||typeof input!=='object'||!board()||!canEditHostedMatrix())return false;
+    const strings=value=>Array.isArray(value)?[...new Set(value.filter(x=>typeof x==='string'&&/^[a-z][a-z0-9]{0,24}$/.test(x)))].slice(0,150):[];
+    const view={version:1,preset:['essential','detailed','operational','complete','custom'].includes(input.preset)?input.preset:'essential',
+      hiddenRows:strings(input.hiddenRows),rowOrder:strings(input.rowOrder),insightsOpen:input.insightsOpen===true,
+      insightsTab:['guidance','analysis','quality'].includes(input.insightsTab)?input.insightsTab:'guidance',emotionsExpanded:input.emotionsExpanded===true};
+    const target=activeJourney()||board();target.matrixView=view;
+    return save(false,{content:false,history:false,label:'Personalizar visualização da Jornada'});
   }
   function showBlueprintReferenceTools(){
-    const dialog=modalShell('Ferramentas do Blueprint','Recursos avançados preservados sem trocar a tela do Blueprint.');
+    const dialog=modalShell(openedFromUnifiedJourney?'Ferramentas da Jornada':'Ferramentas do Blueprint','Recursos avançados do serviço.');
     dialog.root.style.zIndex='999999';
     const grid=document.createElement('div');grid.className='rt190-tools-grid';
     dialog.box.appendChild(grid);
@@ -1249,7 +1268,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       grid.appendChild(button);
     };
     add('Revisar entrega','Lacunas, etapas, relações e integridade operacional',()=>showBlueprintDeliveryReview());
-    if(!mobileReadOnly())add('Estratégia e qualidade','Promessa, 7 Ps e critérios de qualidade',()=>showBlueprintServiceStrategy());
+    if(!mobileReadOnly()&&canEditHostedMatrix())add('Estratégia e qualidade','Promessa, 7 Ps e critérios de qualidade',()=>showBlueprintServiceStrategy());
     add('Importar / Exportar','Backup, documentos e dados estruturados',()=>showImportExportCenter());
     add('Guia do Blueprint','Entenda etapas e camadas de entrega',()=>showBlueprintQuickStart());
     add('Integridade do Service Graph','Auditar vínculos e registros existentes',()=>runtime.api('dataIntegrity')?.showReport?.());
@@ -1261,7 +1280,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const outer=document.createElement('section');outer.className='bo-blueprint-exact-host';
     outer.style.cssText='position:absolute;inset:0;z-index:210;background:#f5f7fb;overflow:hidden';
     const frame=document.createElement('iframe');frame.className='bo-blueprint-reference-frame';
-    frame.title='Blue Ocean · Blueprint de Serviço';frame.src='/blueprint-reference-original.html?service-graph=1';
+    frame.title=openedFromUnifiedJourney?'Blue Ocean · Jornada':'Blue Ocean · Blueprint de Serviço';frame.src='/blueprint-reference-original.html?service-graph=1';
     frame.style.cssText='width:100%;height:100%;border:0;display:block;background:#f5f7fb';
     const viewBoardId=boardId;
     hostedBlueprintListener=event=>{
@@ -1270,10 +1289,17 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       const {type,state}=event.data;
       if(type==='ready'){frame.contentWindow.postMessage({boBlueprintHost:1,type:'hydrate',state:hostedBlueprintDocument()},location.origin)}
       else if(type==='patch'){
-        try{applyHostedBlueprintPatch(state)}catch(error){
+        try{
+          const ok=applyHostedBlueprintPatch(state);
+          frame.contentWindow.postMessage({boBlueprintHost:1,type:'saved',ok:ok===true},location.origin);
+        }catch(error){
+          frame.contentWindow.postMessage({boBlueprintHost:1,type:'saved',ok:false},location.origin);
           console.error('Falha ao editar Blueprint da referência',error);
           toast('Não foi possível atualizar o Blueprint. Verifique os dados.');
         }
+      }else if(type==='preferences'){
+        const ok=saveHostedMatrixView(event.data.view);
+        frame.contentWindow.postMessage({boBlueprintHost:1,type:'saved',ok:ok===true},location.origin);
       }else if(type==='tools'){
         showBlueprintReferenceTools();
       }else if(type==='back'){

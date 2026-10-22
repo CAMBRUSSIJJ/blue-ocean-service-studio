@@ -43,7 +43,7 @@ import { listContextEntities } from '../services/context-library';
 
 type BlueprintApi = {
   create?(name?: string): Promise<{ id: string; name: string } | null> | { id: string; name: string } | null;
-  open?(id: string): Promise<boolean> | boolean;
+  open?(id: string, options?: { source?: 'journey' }): Promise<boolean> | boolean;
   list?(): Array<{ id: string; name: string; layoutMode?: string; itemCount?: number; updatedAt?: string }>;
 };
 
@@ -265,7 +265,7 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
       if (!saved?.views.whiteboards?.[targetId]) {
         showToast('Não foi possível salvar o mapa desta Jornada.'); return;
       }
-      const opened = await blueprintApi()?.open?.(targetId);
+      const opened = await blueprintApi()?.open?.(targetId, { source: 'journey' });
       if (!opened) showToast('Não foi possível abrir o mapa. Tente novamente pela biblioteca.');
     }, prepared.created ? 180 : 30);
   };

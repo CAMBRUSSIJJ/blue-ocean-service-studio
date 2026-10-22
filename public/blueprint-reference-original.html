@@ -4,8 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Blue Ocean · Blueprint de Serviço</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f5f7fb;--sf:#fff;--ink:#0f1b2d;--mut:#51607a;--ln:#e1e7f1;--ac:#1f5eff;--onac:#fff;--acs:#e8f0ff;--act:#0b3fb5;--cd:#f1f5fc;--pn:#fff1ea;--pnt:#7a3210}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--sf:#121b2e;--ink:#e8edf7;--mut:#a3b0c8;--ln:#24324d;--ac:#5b8cff;--onac:#0b1220;--acs:#1a2a52;--act:#a9c3ff;--cd:#192640;--pn:#3a2118;--pnt:#ffc5a8}}
@@ -83,6 +81,7 @@ button,select,input{font:inherit;color:var(--ink)}button{cursor:pointer}
 .ck.on{color:var(--ink);font-weight:600}.ck.on span{background:var(--ac);border-color:var(--ac);color:var(--onac)}
 .ck em{margin-left:auto;font-style:normal;font-size:12px}
 </style>
+<link rel="stylesheet" href="/journey-matrix.css">
 </head>
 <body>
 <div id="app"></div>
@@ -107,85 +106,143 @@ const SG={'descobrir':{ev:['Cardápio no Instagram','Placa na porta'],ac:['Vê u
 function sug(l,i,a){if(HOSTED||!S.guide)return '';const g=((SG[S.steps[i].n.toLowerCase()]||{})[l]||[]).map((t,n)=>[t,n]).filter(x=>!a.some(n=>n.t==x[0]));return g.map(x=>'<button class="sg" data-act="sg" data-l="'+l+'" data-i="'+i+'" data-n="'+x[1]+'">+ '+esc(x[0])+'</button>').join('')}
 function chk(){const b=document.getElementById('go');if(!b)return;const on=ST.steps.filter(s=>s.on).length;b.disabled=!ST.title.trim()||on<2;b.textContent='Criar blueprint ('+on+' etapas)'}
 function startScreen(){return '<div class="hd"><div class="bk">Blue Ocean · '+(HOSTED?'Jornada':'Blueprint de serviço')+'</div><h1 class="h1">Vamos montar um blueprint</h1></div><div class="st"><section><h2>1 · Quem e o quê</h2><label>O que o cliente quer fazer?<input data-f="st:title" value="'+esc(ST.title)+'" placeholder="Ex.: Pedir um café para retirar"></label><label>Quem é o cliente e em que contexto?<input data-f="st:persona" value="'+esc(ST.persona)+'" placeholder="Ex.: Marina, trabalha em home office e tem pouco tempo"></label><div class="row"><button class="tb" data-act="ex">Preencher com o exemplo do café</button></div></section><section><h2>2 · Etapas da jornada</h2><p class="hint" style="margin:0">Um momento por etapa, na ordem em que o cliente vive. Desmarque o que não se aplica ou adicione as suas.</p><div class="chips">'+ST.steps.map((s,i)=>'<button class="chip" data-act="chip" data-i="'+i+'" aria-pressed="'+!!s.on+'">'+(s.on?'✓ ':'')+esc(s.n)+'</button>').join('')+'</div><div class="row"><input data-f="st:new" placeholder="Nova etapa, ex.: Receber o cupom" aria-label="Nova etapa" value="'+esc(ST.new)+'"><button class="tb" data-act="addst">Adicionar</button></div></section><div class="row"><button class="tb p" id="go" data-act="go">Criar blueprint</button><button class="tb" data-act="demo">Ver exemplo pronto</button><button class="tb" data-act="lib">Minhas jornadas</button>'+(HOSTED?'<button class="tb" data-act="tools">Ferramentas</button>':'')+'</div><p class="hint" style="margin:0">Dê um nome à jornada e escolha ao menos 2 etapas. Depois, o painel lateral guia o que preencher em cada faixa e sugere ideias para as etapas conhecidas.</p></div>'}
-function coach(){const N=S.steps.length,L=[['sd','O que acontece'],['ac','Ações do cliente'],['em','Emoções'],['ev','Evidência física'],['fl','Linha de frente'],['bk','Bastidores'],['sy','Sistemas e apoio']];const cnt=id=>id=='sd'?S.steps.filter(s=>s.d&&s.d.trim()).length:id=='em'?S.steps.filter(s=>s.e!=0).length:S.steps.filter((_,i)=>(S.c[id+'|'+i]||[]).length).length;const r=L.map(x=>[x[1],cnt(x[0]),N]);r.push(['Dores e ideias',Math.min(S.iss.length,2),2]);const nx=r.findIndex(x=>x[1]<x[2]);if(nx<0)return '';return '<h2>Passo a passo</h2>'+r.map((x,k)=>'<div class="ck'+(k==nx?' on':'')+'"><span>'+(x[1]>=x[2]?'✓':k+1)+'</span>'+x[0]+'<em>'+x[1]+' de '+x[2]+'</em></div>').join('')+'<div class="ins" style="margin-top:8px">Próximo: “'+r[nx][0]+'”. Emoção neutra conta como não preenchida.</div>'}
+function coach(){
+const rows=orderedRows().filter(r=>!V.hiddenRows.includes(r.id)),N=S.steps.length;
+const count=r=>r.id==='sd'?S.steps.filter(s=>s.d?.trim()).length:r.id==='em'?S.steps.filter(s=>s.emotionRecorded||s.e!==0||s.note?.trim()).length:r.id==='im'?new Set(S.iss.map(x=>x.s)).size:S.steps.filter((_,i)=>(S.c[r.id+'|'+i]||[]).some(n=>n.t?.trim())).length;
+const progress=rows.map(r=>({...r,count:count(r)})),next=progress.find(r=>r.count<N);
+return '<h2>Passo a passo</h2>'+progress.map((r,i)=>'<div class="ck'+(r===next?' on':'')+'"><span>'+(r.count===N&&N?'✓':i+1)+'</span>'+esc(r.n)+'<em>'+r.count+' de '+N+'</em></div>').join('')+'<div class="ins">'+(!N?'Adicione a primeira etapa para começar.':next?'Próximo: “'+esc(next.n)+'”. Complete as etapas que faltam.':'As faixas visíveis estão preenchidas. Revise o mapa com sua equipe.')+'</div><p class="hint">Progresso das faixas visíveis. Uma emoção neutra registrada também conta.</p>';
+}
 const KEY2='bo-blueprint-v2',uid=()=>Math.random().toString(36).slice(2,9);
 let lk=false,pick=null,DB,S,cv=false,armed=false,lib=false,dr='',msg='',U=[],R=[],last='',lt=0;
+let V=null,emotionEdit=null,expandedNotes=new Set(),saveLabel=HOSTED?'Carregando…':'Salvo neste dispositivo';
+const BASE_ROWS=[{id:'sd',n:'O que acontece',h:'Resumo da etapa'},...LANES,{id:'im',n:'Dores e ideias',h:'Problemas e oportunidades'}];
+const PRESETS={essential:['sd','ac','em'],detailed:['sd','ev','ac','em','im'],operational:BASE_ROWS.map(r=>r.id),complete:BASE_ROWS.map(r=>r.id)};
+const PRESET_NAMES={essential:'Jornada essencial',detailed:'Jornada detalhada',operational:'Visão operacional',complete:'Matriz completa',custom:'Visualização personalizada'};
+const rowDefs=()=>[...BASE_ROWS,...(S.lanes||[]).map(l=>({...l,custom:true}))];
+function viewState(input){
+  const preset=Object.hasOwn(PRESETS,input?.preset)?input.preset:input?.preset==='custom'?'custom':S.editorKind==='blueprint'?'operational':'essential';
+  return {version:1,preset,hiddenRows:Array.isArray(input?.hiddenRows)?input.hiddenRows.filter(x=>typeof x==='string'):BASE_ROWS.filter(r=>!PRESETS[preset]?.includes(r.id)).map(r=>r.id),rowOrder:Array.isArray(input?.rowOrder)?[...new Set(input.rowOrder.filter(x=>typeof x==='string'))]:BASE_ROWS.map(r=>r.id),insightsOpen:input?.insightsOpen===true,insightsTab:['guidance','analysis','quality'].includes(input?.insightsTab)?input.insightsTab:'guidance',emotionsExpanded:input?.emotionsExpanded===true};
+}
+function orderedRows(){const rows=rowDefs();return [...V.rowOrder.map(id=>rows.find(r=>r.id===id)).filter(Boolean),...rows.filter(r=>!V.rowOrder.includes(r.id))]}
+function saveView(){
+  if(HOSTED){saveLabel='Salvando…';window.parent.postMessage({boBlueprintHost:1,type:'preferences',view:V},location.origin)}
+  else{S.view=V;save()}
+}
+function choosePreset(preset){V.preset=preset;V.hiddenRows=rowDefs().filter(r=>!(PRESETS[preset].includes(r.id)||r.custom&&preset!=='essential')).map(r=>r.id);saveView()}
+function announceSave(ok){saveLabel=ok==='pending'?'Salvando…':ok?(HOSTED?'Salvo no projeto':'Salvo neste dispositivo'):'Erro ao salvar';const el=app.querySelector('[data-save-status]');if(el)el.textContent=saveLabel}
+function rerender(){const bd=app.querySelector('.bd'),left=bd?.scrollLeft||0,top=window.scrollY;render();if(bd&&app.querySelector('.bd'))app.querySelector('.bd').scrollLeft=left;window.scrollTo(0,top)}
+function changeView(update,focus){Object.assign(V,update);saveView();rerender();if(focus)focusNew(focus)}
+function openCustomizer(){const dialog=document.getElementById('customize');dialog.showModal();dialog.querySelector('[data-act="close-customize"]').focus()}
+function closeCustomizer(){document.getElementById('customize')?.close();focusNew('[data-act="customize"]')}
+function redrawCustomizer(focus){const top=document.getElementById('customize').scrollTop;rerender();document.getElementById('customize').showModal();focusNew(focus);document.getElementById('customize').scrollTop=top}
 try{DB=JSON.parse(localStorage.getItem(KEY2))}catch(e){}
 if(!DB||!Array.isArray(DB.js)||!DB.js.length){let o;try{o=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!o||!o.steps)o=seed();o.id=uid();DB={cur:o.id,js:[o]}}
 function mig(j){const ok=/^[a-z0-9]{3,12}$/,seen=new Set();for(const k in j.c)j.c[k]=j.c[k].map(n=>{const o=typeof n=='object'&&n,t=o?String(n.t==null?'':n.t):String(n),i=o&&ok.test(n.i)&&!seen.has(n.i)?n.i:uid();seen.add(i);return{i,t}});j.links=(Array.isArray(j.links)?j.links:[]).filter(l=>l&&seen.has(l.a)&&seen.has(l.b)&&l.a!=l.b).map(l=>({a:l.a,b:l.b}))}
-if(HOSTED){const o=blank();o.id='host';DB={cur:o.id,js:[o]}}
+if(HOSTED){const o=blank();o.start=0;o.id='host';DB={cur:o.id,js:[o]}}
 DB.js.forEach(mig);S=DB.js.find(j=>j.id==DB.cur)||DB.js[0];last=JSON.stringify(S);
 function commit(){const j=JSON.stringify(S);if(j===last)return;if(Date.now()-lt>700||!U.length){U.push(last);if(U.length>60)U.shift()}lt=Date.now();last=j;R=[]}
-const save=()=>{if(S.links){const q=new Set();for(const k in S.c)S.c[k].forEach(n=>q.add(n.i));S.links=S.links.filter(l=>q.has(l.a)&&q.has(l.b))}commit();DB.cur=S.id;if(HOSTED){S.steps.forEach(st=>{st.hostLocalId ||= uid()});S.iss.forEach(it=>{it.hostLocalId ||= uid()});if(!applyingHost)window.parent.postMessage({boBlueprintHost:1,type:'patch',state:JSON.parse(JSON.stringify(S))},location.origin);return;}try{localStorage.setItem(KEY2,JSON.stringify(DB))}catch(e){}};
+const save=()=>{if(S.links){const q=new Set();for(const k in S.c)S.c[k].forEach(n=>q.add(n.i));S.links=S.links.filter(l=>q.has(l.a)&&q.has(l.b))}commit();DB.cur=S.id;if(HOSTED){S.steps.forEach(st=>{st.hostLocalId ||= uid()});S.iss.forEach(it=>{it.hostLocalId ||= uid()});if(!applyingHost){announceSave('pending');window.parent.postMessage({boBlueprintHost:1,type:'patch',state:JSON.parse(JSON.stringify(S))},location.origin)}return;}try{localStorage.setItem(KEY2,JSON.stringify(DB))}catch(e){}};
 function setS(o){o.id=S.id;Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,o)}
-function sw(j){S=j;DB.cur=j.id;lib=false;U=[];R=[];last=JSON.stringify(S);lt=0;save()}
+function sw(j){S=j;V=viewState(S.view);DB.cur=j.id;lib=false;U=[];R=[];last=JSON.stringify(S);lt=0;save()}
 function undo(d){const A=d?R:U,B=d?U:R;if(!A.length)return;B.push(JSON.stringify(S));const p=JSON.parse(A.pop());Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,p);last=JSON.stringify(S);lt=0;save()}
 function libView(){return '<div class="hd"><div class="bk">Blue Ocean · '+(HOSTED?'Jornada':'Blueprint de serviço')+'</div><h1 class="h1">Minhas jornadas</h1></div><div class="st" style="max-width:860px"><div class="row"><button class="tb p" data-act="new">+ Nova jornada</button><button class="tb" data-act="dl">Baixar backup (.json)</button><button class="tb" data-act="imp">Importar backup</button><input type="file" id="fi" accept=".json,application/json" hidden aria-label="Arquivo de backup"><button class="tb" data-act="back">Voltar</button></div>'+(msg?'<div class="ins" role="status">'+esc(msg)+'</div>':'')+DB.js.map(j=>{const n=Object.values(j.c||{}).reduce((a,x)=>a+x.length,0);return '<section><div class="row" style="align-items:center"><div style="flex:1 1 240px"><b>'+esc(j.title||'(sem nome)')+'</b>'+(j.id==S.id?' <span class="sv">· aberta agora</span>':'')+'<div class="sv">'+(j.steps||[]).length+' etapas · '+n+' notas · '+(j.iss||[]).length+' dores e ideias'+(j.start?' · em criação':'')+'</div>'+(j.persona?'<div class="sv">'+esc(j.persona)+'</div>':'')+'</div><button class="tb" data-act="open" data-id="'+j.id+'">Abrir</button><button class="tb" data-act="dup" data-id="'+j.id+'">Duplicar</button><button class="tb" data-act="rm" data-id="'+j.id+'">'+(dr==j.id?'Confirmar exclusão':'Excluir')+'</button></div></section>'}).join('')+'<p class="hint" style="margin:0">As jornadas ficam salvas só neste navegador e neste dispositivo. Baixe um backup de vez em quando e use “Importar backup” para trazer jornadas de outro aparelho.</p></div>'}
 function impF(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result),a=Array.isArray(o.js)?o.js:o.steps?[o]:[];const ok=a.filter(j=>j&&Array.isArray(j.steps)&&j.steps.every(s=>s&&typeof s.n=='string'&&s.e>=-2&&s.e<=2)&&j.c&&typeof j.c=='object'&&Object.values(j.c).every(Array.isArray)&&Array.isArray(j.iss)&&j.iss.every(x=>x&&x.s>=0&&x.s<j.steps.length&&(x.t=='d'||x.t=='i')));ok.forEach(j=>{j.id=uid();j.steps=j.steps.map(s=>({n:s.n,e:Math.round(+s.e),d:typeof s.d=='string'?s.d:''}));j.iss=j.iss.map(x=>({s:+x.s,t:x.t,x:String(x.x),v:Math.min(3,Math.max(0,+x.v||0)),d:Math.min(4,Math.max(0,+x.d||0))}));j.lanes=(Array.isArray(j.lanes)?j.lanes:[]).filter(L=>L&&/^x[a-z0-9]{1,12}$/.test(L.id)&&typeof L.n=='string');mig(j);DB.js.push(j)});msg=ok.length?ok.length+' jornada(s) importada(s).':'O arquivo não tem jornadas válidas.';if(ok.length)save()}catch(e){msg='Não consegui ler esse arquivo.'}render()};r.readAsText(f)}
 async function dl(){try{const d=await claude.use('downloads');if(!d){msg='Download indisponível nesta tela. Abra o link no navegador ou no app do Claude.';render();return}await d.save({filename:'blueprints-blue-ocean.json',data:JSON.stringify({v:1,js:DB.js},null,1)});msg='Backup salvo.'}catch(e){msg=e&&e.code=='declined'?'Download cancelado.':'Não foi possível baixar o backup.'}render()}
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const app=document.getElementById('app');
+if(HOSTED){app.inert=true;app.setAttribute('aria-busy','true')}
 function score(i){const e=S.steps[i].e,I=S.iss.filter(x=>x.s==i),p=I.filter(x=>x.t=='d').reduce((a,x)=>a+x.v,0),n=I.filter(x=>x.t=='i').length;return Math.max(0,(2-e)*1.5+p*2-n*1.5)}
-function curve(){const N=S.steps.length,W=N*100,y=e=>16+(2-e)*16,P=S.steps.map((s,i)=>[i*100+50,y(s.e)]);
-let d='M'+P[0].join(' ');for(let i=1;i<N;i++){const a=P[i-1],b=P[i],m=(a[0]+b[0])/2;d+=' C'+m+' '+a[1]+' '+m+' '+b[1]+' '+b[0]+' '+b[1]}
-return '<svg viewBox="0 0 '+W+' 110" preserveAspectRatio="none" role="img" aria-label="Curva de emoções ao longo das etapas"><line x1="0" x2="'+W+'" y1="48" y2="48" stroke="var(--ln)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/><path d="'+d+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+P.map((p,i)=>'<span class="dt" style="left:'+p[0]/W*100+'%;top:'+p[1]+'px"></span><span class="dl" style="left:'+p[0]/W*100+'%;top:'+(p[1]+9)+'px">'+EM[S.steps[i].e+2]+'</span>').join('')}
-function dx(){const N=S.steps.length,sc=S.steps.map((_,i)=>score(i)),mx=Math.max(...sc,1),ord=sc.map((_,i)=>i).sort((a,b)=>sc[b]-sc[a]);
-const nd=i=>S.iss.filter(x=>x.s==i&&x.t=='d').length,ni=i=>S.iss.filter(x=>x.s==i&&x.t=='i').length;
-let h=coach()+'<h2>Prioridade de melhoria</h2>'+ord.map(i=>'<div class="rk"><div><b>'+(i+1)+'. '+esc(S.steps[i].n)+'</b><span>'+EM[S.steps[i].e+2]+' · '+nd(i)+' dor(es)</span></div><div class="bar"><i style="width:'+sc[i]/mx*100+'%"></i></div></div>').join('');
-const top=ord[0],ins=[];
-ins.push(sc[top]>0?'Comece por “'+esc(S.steps[top].n)+'”: humor '+EM[S.steps[top].e+2].toLowerCase()+' e '+nd(top)+' dor(es) dão a maior pontuação.':'Registre dores e ideias para ver as prioridades.');
-const open=S.steps.map((s,i)=>nd(i)&&!ni(i)?esc(s.n):'').filter(Boolean);
-if(open.length)ins.push('Dores sem nenhuma ideia ainda: '+open.join(', ')+'.');else if(S.iss.some(x=>x.t=='d'))ins.push('Toda etapa com dor já tem uma ideia de melhoria.');
-const miss=DIMS.filter((m,k)=>!S.iss.some(x=>x.d==k));
-if(S.iss.length)ins.push(miss.length?'Nenhum item toca em: '+miss.join(', ')+'. Vale revisar a jornada por essa lente.':'Todas as dimensões de qualidade têm itens.');
-h+='<h2>Leitura automática</h2>'+ins.map(t=>'<div class="ins">'+t+'</div>').join('');
+function curve(){const N=S.steps.length,W=Math.max(100,N*100),y=e=>16+(2-e)*14,P=S.steps.map((s,i)=>[i*100+50,y(s.e)]);
+let d=P.length?'M'+P[0].join(' '):'';for(let i=1;i<N;i++){const a=P[i-1],b=P[i],m=(a[0]+b[0])/2;d+=' C'+m+' '+a[1]+' '+m+' '+b[1]+' '+b[0]+' '+b[1]}
+return '<svg viewBox="0 0 '+W+' 92" preserveAspectRatio="none" role="img" aria-label="Curva de emoções ao longo das etapas"><line x1="0" x2="'+W+'" y1="44" y2="44" stroke="var(--ln)" stroke-dasharray="4 4"/><path d="'+d+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+P.map((p,i)=>'<button type="button" class="dt" data-act="emotion-edit" data-si="'+i+'" style="left:'+p[0]/W*100+'%;top:'+p[1]+'px" aria-label="Editar emoção em '+esc(S.steps[i].n)+'" aria-expanded="'+(emotionEdit===i||V.emotionsExpanded)+'"></button><span class="dl" style="left:'+p[0]/W*100+'%;top:'+(p[1]+11)+'px">'+EM[S.steps[i].e+2]+'</span>').join('')}
+function emotionFields(i){const s=S.steps[i];return '<div class="emotion-editor" style="grid-column:'+(i+1)+'" role="group" aria-label="Emoção em '+esc(s.n)+'"><label>Emoção / intensidade: <output data-emotion-label="'+i+'">'+EM[s.e+2]+'</output><input type="range" min="-2" max="2" step="1" value="'+s.e+'" data-act="emo" data-si="'+i+'" aria-label="Intensidade em '+esc(s.n)+'"></label><label>Observação<textarea maxlength="1000" data-emotion-note="'+i+'" aria-label="Observação emocional em '+esc(s.n)+'">'+esc(s.note||'')+'</textarea></label><button class="tb" data-act="emotion-done" data-si="'+i+'">Concluir</button></div>'}
+function dx(){
+if(V.insightsTab==='guidance')return coach();
+if(V.insightsTab==='quality'){
 const tot=DIMS.map((_,k)=>S.iss.filter(x=>x.d==k).length),mt=Math.max(...tot,1);
-h+='<h2>Cobertura da qualidade (SERVQUAL)</h2>'+DIMS.map((m,k)=>'<div class="rk"><div><b>'+m+'</b><span>'+S.iss.filter(x=>x.d==k&&x.t=='d').length+' dor · '+S.iss.filter(x=>x.d==k&&x.t=='i').length+' ideia</span></div><div class="bar"><i style="width:'+tot[k]/mt*100+'%"></i></div></div>').join('');
-return h+'<p class="hint">Pontuação = humor baixo × 1,5 + gravidade das dores × 2 − ideias × 1,5.</p>'}
-function cell(l,i){const k=l+'|'+i,a=S.c[k]||[];return '<div class="c" data-cell="'+k+'">'+a.map((t,j)=>'<div class="nw'+(pick==t.i?' pk':'')+'" data-j="'+j+'" data-nid="'+t.i+'"><span class="gh" draggable="true" data-k="'+k+'" data-j="'+j+'" title="Arrastar" aria-hidden="true">⠿</span><div class="n" contenteditable="true" role="textbox" aria-label="Nota" data-ed="c" data-k="'+k+'" data-j="'+j+'">'+esc(t.t)+'</div>'+(lk?'<button class="nx c" data-act="pk" data-nid="'+t.i+'" aria-label="Ligar esta nota" title="Ligar">●</button>':'')+'<button class="nx a" data-act="dn" data-k="'+k+'" data-j="'+j+'" aria-label="Duplicar nota" title="Duplicar">⧉</button><button class="nx b" data-act="rn" data-k="'+k+'" data-j="'+j+'" aria-label="Remover nota" title="Remover">×</button></div>').join('')+sug(l,i,a)+'<button class="ad" data-act="add" data-k="'+k+'" aria-label="Adicionar nota">'+(a.length?'+':'+ '+(PR[l]||'Adicionar'))+'</button></div>'}
-function item(x,ii){return '<div class="it '+x.t+'"><b>'+(x.t=='d'?'Dor':'Ideia')+'</b><div class="tx" contenteditable="true" role="textbox" aria-label="Texto" data-ed="ix" data-ii="'+ii+'">'+esc(x.x)+'</div><div class="mt">'+(x.t=='d'?'<button data-act="sev" data-ii="'+ii+'">Gravidade '+x.v+'/3</button>':'')+'<select data-act="dim" data-ii="'+ii+'" aria-label="Dimensão de qualidade">'+DIMS.map((m,k)=>'<option value="'+k+'"'+(k==x.d?' selected':'')+'>'+m+'</option>').join('')+'</select><button class="x" data-act="deli" data-ii="'+ii+'" aria-label="Remover item">×</button></div></div>'}
-function render(){if(lib){app.innerHTML=libView();return}if(S.start){app.innerHTML=startScreen();chk();return}const N=S.steps.length;
-if(HOSTED&&N===0){
-  app.innerHTML='<div class="hd"><div class="bk">Blue Ocean · Jornada</div><input class="ti" data-f="title" aria-label="Nome da jornada" value="'+esc(S.title||'Jornada')+'"><span class="sv">Salvo no projeto</span><button class="tb" data-act="tools">Ferramentas</button><button class="tb p" data-act="step">+ Nova etapa</button></div><main class="st" data-empty-journey="1"><section><h2>Jornada vazia</h2><p class="hint">Adicione uma etapa para começar o mapa.</p><button class="tb p" data-act="step">+ Nova etapa</button></section></main>';
-  return;
+return '<h2>Cobertura da qualidade (SERVQUAL)</h2>'+DIMS.map((m,k)=>'<div class="rk"><div><b>'+m+'</b><span>'+S.iss.filter(x=>x.d==k&&x.t==='d').length+' dor · '+S.iss.filter(x=>x.d==k&&x.t==='i').length+' ideia</span></div><div class="bar"><i style="width:'+tot[k]/mt*100+'%"></i></div></div>').join('')+'<p class="hint">Cobertura dos registros pelas dimensões SERVQUAL. Não representa uma pesquisa de satisfação ou um resultado SERVQUAL medido.</p>';
 }
-let h='<div class="hd"><div class="bk">Blue Ocean · '+(HOSTED?'Jornada':'Blueprint de serviço')+'</div><input class="ti" data-f="title" value="'+esc(S.title)+'" aria-label="Nome da jornada"><span class="sv">'+(HOSTED?'Salvo no projeto':'Salvo neste dispositivo')+'</span><button class="tb" data-act="cv" aria-pressed="'+cv+'">Visão do cliente</button><button class="tb" data-act="lk" aria-pressed="'+lk+'">↗ Ligar notas</button><button class="tb" data-act="undo"'+(U.length?'':' disabled')+'>↶ Desfazer</button><button class="tb" data-act="redo"'+(R.length?'':' disabled')+'>↷ Refazer</button><button class="tb" data-act="lib">Minhas jornadas ('+DB.js.length+')</button>'+(HOSTED?'<button class="tb" data-act="tools">Ferramentas</button>':'')+'<button class="tb p" data-act="step">+ Nova etapa</button></div>';
-h+=(lk?'<div class="ins" role="status" style="margin:0 24px 8px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois em ● na de destino. Clique numa seta para removê-la.')+'</div>':'')+'<input class="pi" data-f="persona" value="'+esc(S.persona)+'" placeholder="Persona e cenário: quem é o cliente e o que ele quer?" aria-label="Persona e cenário"><div class="wrap"><div class="bd"><div style="position:relative;min-width:'+(260+N*200)+'px;--cols:200px repeat('+N+',minmax(200px,1fr)) 56px">';
-h+='<div class="r"><div class="lb">Etapas<small>Um momento da experiência</small></div>'+S.steps.map((s,i)=>'<div class="sh"><i>'+(i+1)+'</i><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da etapa" data-ed="sn" data-si="'+i+'">'+esc(s.n)+'</span>'+'<div class="sa"><button class="x" data-act="mv" data-si="'+i+'" data-d="-1" aria-label="Mover etapa para a esquerda"'+(i?'':' disabled')+'>‹</button><button class="x" data-act="mv" data-si="'+i+'" data-d="1" aria-label="Mover etapa para a direita"'+(i<N-1?'':' disabled')+'>›</button><button class="x" data-act="ds" data-si="'+i+'" aria-label="Duplicar etapa" title="Duplicar etapa">⧉</button>'+(N>1?'<button class="x" data-act="del" data-si="'+i+'" aria-label="Remover etapa">×</button>':'')+'</div></div>').join('')+'</div>';
-h+='<div class="r"><div class="lb">O que acontece<small>Resumo da etapa</small></div>'+S.steps.map((s,i)=>'<div class="c"><div class="n" contenteditable="true" role="textbox" aria-label="O que acontece em '+esc(s.n)+'" data-ed="sd" data-si="'+i+'">'+esc(s.d||'')+'</div></div>').join('')+'</div>';LANES.forEach(L=>{if(cv&&L.o)return;if(L.d)h+='<div class="dv">'+L.d+'</div>';h+='<div class="r"><div class="lb">'+L.n+'<small>'+L.h+'</small></div>';
-if(L.emo)h+='<div class="c" style="grid-column:2/'+(N+2)+'"><div class="cvb" id="curve">'+curve()+'</div><div class="sl" style="grid-template-columns:repeat('+N+',1fr)">'+S.steps.map((s,i)=>'<input type="range" min="-2" max="2" step="1" value="'+s.e+'" data-act="emo" data-si="'+i+'" aria-label="Emoção em '+esc(s.n)+'">').join('')+'</div></div>';
-else for(let i=0;i<N;i++)h+=cell(L.id,i);h+='</div>'});
-(S.lanes||[]).forEach(L=>{h+='<div class="r"><div class="lb"><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da faixa" data-ed="ln" data-id="'+esc(L.id)+'">'+esc(L.n)+'</span><button class="x" data-act="dlane" data-id="'+esc(L.id)+'" aria-label="Remover faixa">×</button><small>Faixa personalizada</small></div>';for(let i=0;i<N;i++)h+=cell(L.id,i);h+='</div>'});h+='<div class="r"><div class="c" style="grid-column:1/-1"><button class="ad" data-act="alane" style="width:auto;padding:0 16px">+ Adicionar faixa</button></div></div>';h+='<div class="dv">Melhorias</div><div class="r"><div class="lb">Dores e ideias<small>Marque a dimensão de qualidade</small></div>';
-for(let i=0;i<N;i++)h+='<div class="c">'+S.iss.map((x,ii)=>x.s==i?item(x,ii):'').join('')+'<div class="bt"><button data-act="addi" data-si="'+i+'" data-t="d">+ Dor</button><button data-act="addi" data-si="'+i+'" data-t="i">+ Ideia</button></div></div>';
-h+='</div><svg class="lk" id="lk" aria-hidden="true"></svg></div></div><aside class="pnl" id="dx">'+dx()+'</aside></div>';app.innerHTML=h;requestAnimationFrame(drawLinks)}
-function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();document.getElementById('dx').innerHTML=dx()}
+if(!S.steps.length)return '<h2>Análise</h2><p class="hint">Adicione etapas e registre dores e ideias para analisar a Jornada.</p>';
+const sc=S.steps.map((_,i)=>score(i)),mx=Math.max(...sc,1),ord=sc.map((_,i)=>i).sort((a,b)=>sc[b]-sc[a]);
+const nd=i=>S.iss.filter(x=>x.s===i&&x.t==='d').length,ni=i=>S.iss.filter(x=>x.s===i&&x.t==='i').length;
+let h='<h2>Prioridade de melhoria</h2>'+ord.map(i=>'<div class="rk"><div><b>'+(i+1)+'. '+esc(S.steps[i].n)+'</b><span>'+EM[S.steps[i].e+2]+' · '+nd(i)+' dor(es)</span></div><div class="bar"><i style="width:'+sc[i]/mx*100+'%"></i></div></div>').join('');
+const top=ord[0],ins=[sc[top]>0?'Comece por “'+esc(S.steps[top].n)+'”: humor '+EM[S.steps[top].e+2].toLowerCase()+' e '+nd(top)+' dor(es) dão a maior pontuação.':'Registre dores e ideias para ver as prioridades.'];
+const open=S.steps.map((s,i)=>nd(i)&&!ni(i)?esc(s.n):'').filter(Boolean);
+if(open.length)ins.push('Dores sem nenhuma ideia ainda: '+open.join(', ')+'.');else if(S.iss.some(x=>x.t==='d'))ins.push('Toda etapa com dor já tem uma ideia de melhoria.');
+const miss=DIMS.filter((_,k)=>!S.iss.some(x=>x.d===k));if(S.iss.length)ins.push(miss.length?'Nenhum item toca em: '+miss.join(', ')+'. Vale revisar a jornada por essa lente.':'Todas as dimensões de qualidade têm itens.');
+return h+'<h2>Leitura automática</h2>'+ins.map(t=>'<div class="ins">'+t+'</div>').join('')+'<p class="hint">Pontuação = humor baixo × 1,5 + gravidade das dores × 2 − ideias × 1,5. É uma sugestão para revisão.</p>';
+}
+function cell(l,i){const k=l+'|'+i,a=S.c[k]||[];return '<div class="c" data-cell="'+k+'">'+a.map((t,j)=>'<div class="nw'+(pick==t.i?' pk':'')+(expandedNotes.has(t.i)?' expanded':'')+'" data-j="'+j+'" data-nid="'+t.i+'"><span class="gh" draggable="true" data-k="'+k+'" data-j="'+j+'" title="Arrastar" aria-hidden="true">⠿</span><div class="n" contenteditable="true" role="textbox" aria-label="Nota" data-ed="c" data-k="'+k+'" data-j="'+j+'">'+esc(t.t)+'</div>'+(t.t.length>240?'<button class="expand-note" data-act="expand-note" data-nid="'+t.i+'" aria-expanded="'+expandedNotes.has(t.i)+'">'+(expandedNotes.has(t.i)?'Recolher':'Expandir')+'</button>':'')+(lk?'<button class="nx c" data-act="pk" data-nid="'+t.i+'" aria-label="Ligar esta nota" title="Ligar">●</button>':'')+'<button class="nx a" data-act="dn" data-k="'+k+'" data-j="'+j+'" aria-label="Duplicar nota" title="Duplicar">⧉</button><button class="nx b" data-act="rn" data-k="'+k+'" data-j="'+j+'" aria-label="Remover nota" title="Remover">×</button></div>').join('')+sug(l,i,a)+'<button class="ad" data-act="add" data-k="'+k+'" aria-label="Adicionar nota">'+(a.length?'+':'+ '+(PR[l]||'Adicionar'))+'</button></div>'}
+function item(x,ii){return '<div class="it '+x.t+'"><b>'+(x.t=='d'?'Dor':'Ideia')+'</b><div class="tx" contenteditable="true" role="textbox" aria-label="Texto" data-ed="ix" data-ii="'+ii+'">'+esc(x.x)+'</div><div class="mt">'+(x.t=='d'?'<button data-act="sev" data-ii="'+ii+'">Gravidade '+x.v+'/3</button>':'')+'<select data-act="dim" data-ii="'+ii+'" aria-label="Dimensão de qualidade">'+DIMS.map((m,k)=>'<option value="'+k+'"'+(k==x.d?' selected':'')+'>'+m+'</option>').join('')+'</select><button class="x" data-act="deli" data-ii="'+ii+'" aria-label="Remover item">×</button></div></div>'}
+function customizer(){
+return '<dialog class="customize" id="customize" aria-labelledby="customize-title"><div class="panel-head"><h2 id="customize-title">Personalizar visualização</h2><button class="x" data-act="close-customize" aria-label="Fechar personalização">×</button></div><p>Mostre apenas o que precisa agora. O conteúdo das faixas ocultas permanece salvo nesta Jornada.</p><div class="customize-row"><label><input type="checkbox" checked disabled>Etapas <small>(sempre visível)</small></label></div>'+orderedRows().map((r,i,a)=>'<div class="customize-row"><label><input type="checkbox" data-view-row="'+esc(r.id)+'" '+(!V.hiddenRows.includes(r.id)?'checked':'')+'>'+esc(r.n)+'</label><button class="x" data-act="row-move" data-id="'+esc(r.id)+'" data-d="-1" aria-label="Mover '+esc(r.n)+' para cima" '+(!i?'disabled':'')+'>↑</button><button class="x" data-act="row-move" data-id="'+esc(r.id)+'" data-d="1" aria-label="Mover '+esc(r.n)+' para baixo" '+(i===a.length-1?'disabled':'')+'>↓</button></div>').join('')+'<div class="footer"><button class="tb" data-act="show-all">Mostrar todas as faixas</button><button class="tb p" data-act="close-customize">Concluir</button></div></dialog>';
+}
+function editorHeader(){
+const kind=S.editorKind==='blueprint'?'Blueprint':'Jornada',opportunities=S.iss.filter(x=>x.t==='i').length;
+return '<header class="editor-head"><div class="hd"><button class="tb back" data-act="back" aria-label="'+(kind==='Jornada'?'Voltar para Jornadas':'Voltar para Blueprints')+'">← '+(kind==='Jornada'?'Jornadas':'Blueprints')+'</button><input class="ti" data-f="title" aria-label="Nome da jornada" value="'+esc(S.title||kind)+'"><span class="sv" role="status" data-save-status>'+saveLabel+'</span></div><nav class="toolbar" aria-label="Ferramentas da '+kind+'"><details class="menu"><summary>'+kind+' ▾</summary><div class="menu-body">'+Object.entries(PRESETS).map(([id])=>'<button class="tb" data-act="preset" data-preset="'+id+'" aria-pressed="'+(V.preset===id)+'">'+PRESET_NAMES[id]+'<small>'+({essential:'Quatro faixas para começar',detailed:'Evidências, dores e ideias',operational:'Linha de frente, bastidores e apoio',complete:'Todas as faixas, inclusive personalizadas'}[id])+'</small></button>').join('')+'</div></details><button class="tb" data-act="customize">Personalizar visualização</button><span class="spacer"></span><button class="tb icon" data-act="undo" aria-label="Desfazer" title="Desfazer" '+(!U.length?'disabled':'')+'>↶</button><button class="tb icon" data-act="redo" aria-label="Refazer" title="Refazer" '+(!R.length?'disabled':'')+'>↷</button><button class="tb" data-act="insights" aria-expanded="'+V.insightsOpen+'" aria-controls="insights-panel">Insights'+(opportunities?'<span class="insight-count"> · '+opportunities+' oportunidade'+(opportunities===1?'':'s')+'</span>':'')+'</button><details class="menu tools-menu"><summary>Ferramentas ▾</summary><div class="menu-body"><button class="tb" data-act="lk" aria-pressed="'+lk+'">↗ Ligar notas</button><button class="tb" data-act="cv" aria-pressed="'+cv+'">Visão do cliente</button><button class="tb" data-act="alane">Adicionar faixa</button><label>Persona e cenário<input data-f="persona" value="'+esc(S.persona||'')+'" aria-label="Persona e cenário" placeholder="Quem vive esta experiência?"></label>'+(HOSTED?'<button class="tb" data-act="tools">Recursos avançados<small>Revisão, qualidade, exportação e guias</small></button>':'<button class="tb" data-act="lib">Minhas jornadas</button>')+'</div></details><button class="tb p" data-act="step" aria-label="Adicionar etapa">+ Etapa</button></nav></header>';
+}
+function render(){
+if(lib){app.innerHTML=libView();return}if(S.start){app.innerHTML=startScreen();chk();return}
+if(!V)V=viewState(S.view);
+const N=S.steps.length,rows=orderedRows().filter(r=>!V.hiddenRows.includes(r.id));
+let h=editorHeader()+(lk?'<div class="ins" role="status" style="margin:12px 24px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois na de destino. Clique numa seta para removê-la.')+'</div>':'');
+h+='<main class="wrap'+(V.insightsOpen?' has-insights':'')+'"><div class="bd" tabindex="0" role="region" aria-label="Matriz da Jornada"><div class="matrix" style="--stage-count:'+Math.max(1,N)+'"><div class="r" data-row="st"><div class="lb">Etapas<small>Um momento da experiência</small></div>'+S.steps.map((s,i)=>'<div class="sh"><i>'+(i+1)+'</i><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da etapa" data-ed="sn" data-si="'+i+'">'+esc(s.n)+'</span><div class="sa"><button class="x" data-act="mv" data-si="'+i+'" data-d="-1" aria-label="Mover etapa para a esquerda" '+(!i?'disabled':'')+'>‹</button><button class="x" data-act="mv" data-si="'+i+'" data-d="1" aria-label="Mover etapa para a direita" '+(i===N-1?'disabled':'')+'>›</button><button class="x" data-act="ds" data-si="'+i+'" aria-label="Duplicar etapa">⧉</button><button class="x" data-act="del" data-si="'+i+'" aria-label="Remover etapa">×</button></div></div>').join('')+'</div>';
+if(!N)h+='<div class="empty-map" data-empty-journey="1">Adicione uma etapa para começar o mapa.</div>';
+rows.forEach(L=>{
+if(L.d)h+='<div class="dv">'+L.d+'</div>';
+h+='<div class="r" data-row="'+esc(L.id)+'" data-category="'+(['fl','bk','sy'].includes(L.id)?'operation':L.id==='ev'?'evidence':'experience')+'"><div class="lb">'+(L.custom?'<span class="sn" contenteditable="true" role="textbox" aria-label="Nome da faixa" data-ed="ln" data-id="'+esc(L.id)+'">'+esc(L.n)+'</span><button class="x" data-act="dlane" data-id="'+esc(L.id)+'" aria-label="Remover faixa">×</button>':esc(L.n))+'<small>'+esc(L.h||'Faixa personalizada')+'</small>'+(L.id==='em'?'<button class="emotion-toggle" data-act="emotion-expand" aria-expanded="'+V.emotionsExpanded+'">'+(V.emotionsExpanded?'Recolher detalhes':'Expandir detalhes')+'</button>':'')+'</div>';
+if(L.id==='sd')h+=S.steps.map((s,i)=>'<div class="c"><div class="n" contenteditable="true" role="textbox" aria-label="O que acontece em '+esc(s.n)+'" data-ed="sd" data-si="'+i+'">'+esc(s.d||'')+'</div></div>').join('');
+else if(L.id==='em'&&N)h+='<div class="c" style="grid-column:2/'+(N+2)+'"><div class="cvb" id="curve">'+curve()+'</div><div class="emotion-cells" style="grid-template-columns:repeat('+N+',minmax(0,1fr))">'+S.steps.map((_,i)=>V.emotionsExpanded||emotionEdit===i?emotionFields(i):'').join('')+'</div></div>';
+else if(L.id==='im')for(let i=0;i<N;i++)h+='<div class="c">'+S.iss.map((x,ii)=>x.s===i?item(x,ii):'').join('')+'<div class="bt"><button data-act="addi" data-si="'+i+'" data-t="d">+ Dor</button><button data-act="addi" data-si="'+i+'" data-t="i">+ Ideia</button></div></div>';
+else for(let i=0;i<N;i++)h+=cell(L.id,i);
+h+='</div>';
+});
+h+='<div class="row-tools"><button class="ad" data-act="alane">+ Adicionar faixa</button><button class="ad" data-act="customize">Mostrar outras faixas</button></div><svg class="lk" id="lk" aria-hidden="true"></svg></div></div>';
+if(V.insightsOpen)h+='<aside class="pnl" id="insights-panel" aria-label="Insights"><div class="panel-head"><h2>Insights</h2><button class="x" data-act="insights" aria-label="Fechar Insights">×</button></div><div class="panel-tabs" role="tablist" aria-label="Tipos de insights">'+[['guidance','Orientações'],['analysis','Análise'],['quality','Qualidade']].map(([id,label])=>'<button id="tab-'+id+'" role="tab" data-act="insight-tab" data-tab="'+id+'" aria-controls="dx" aria-selected="'+(V.insightsTab===id)+'" tabindex="'+(V.insightsTab===id?0:-1)+'">'+label+'</button>').join('')+'</div><div id="dx" role="tabpanel" aria-labelledby="tab-'+V.insightsTab+'">'+dx()+'</div></aside>';
+app.innerHTML=h+'</main>'+customizer();requestAnimationFrame(drawLinks);
+}
+function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();const dxEl=document.getElementById('dx');if(dxEl)dxEl.innerHTML=dx();app.querySelectorAll('[data-emotion-label]').forEach(el=>el.textContent=EM[S.steps[+el.dataset.emotionLabel].e+2]);const count=app.querySelector('.insight-count');if(count)count.textContent=' · '+S.iss.filter(x=>x.t==='i').length+' oportunidades'}
 function focusNew(sel){const e=app.querySelector(sel);if(e)e.focus()}
 app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
+if(a==='customize'){openCustomizer();return}
+if(a==='close-customize'){closeCustomizer();return}
+if(a==='preset'){cv=false;choosePreset(d.preset);rerender();focusNew('.toolbar .menu summary');return}
+if(a==='show-all'){cv=false;choosePreset('complete');redrawCustomizer('[data-act="show-all"]');return}
+if(a==='row-move'){
+  const ids=orderedRows().map(r=>r.id),i=ids.indexOf(d.id),j=i+Number(d.d);if(i>=0&&j>=0&&j<ids.length)[ids[i],ids[j]]=[ids[j],ids[i]];
+  V.rowOrder=ids;V.preset='custom';saveView();redrawCustomizer('[data-act="row-move"][data-id="'+d.id+'"][data-d="'+d.d+'"]');return;
+}
+if(a==='insights'){changeView({insightsOpen:!V.insightsOpen},V.insightsOpen?'[data-act="insights"]':'[role="tab"][aria-selected="true"]');return}
+if(a==='insight-tab'){changeView({insightsTab:d.tab},'#tab-'+d.tab);return}
+if(a==='emotion-expand'){emotionEdit=null;changeView({emotionsExpanded:!V.emotionsExpanded},'[data-act="emotion-expand"]');return}
+if(a==='emotion-edit'){emotionEdit=emotionEdit===Number(d.si)?null:Number(d.si);rerender();focusNew('[data-act="emo"][data-si="'+d.si+'"]');return}
+if(a==='emotion-done'){S.steps[Number(d.si)].emotionRecorded=true;save();emotionEdit=null;changeView({emotionsExpanded:false},'[data-act="emotion-edit"][data-si="'+d.si+'"]');return}
+if(a==='expand-note'){expandedNotes.has(d.nid)?expandedNotes.delete(d.nid):expandedNotes.add(d.nid);rerender();focusNew('[data-act="expand-note"][data-nid="'+d.nid+'"]');return}
+if(a==='cv'){cv=!cv;choosePreset(cv?'detailed':'operational');rerender();focusNew('.tools-menu summary');return}
 if(HOSTED&&(a==='lib'||a==='tools'||a==='back')){window.parent.postMessage({boBlueprintHost:1,type:a==='tools'?'tools':'back'},location.origin);return}
-if(a=='cv'){cv=!cv}
-else if(a=='lk'){lk=!lk;pick=null}
+if(a=='lk'){lk=!lk;pick=null}
 else if(a=='pk'){if(!pick)pick=d.nid;else if(pick==d.nid)pick=null;else{const L=S.links=S.links||[],x=L.findIndex(l=>l.a==pick&&l.b==d.nid);if(x>=0)L.splice(x,1);else L.push({a:pick,b:d.nid});pick=null;save()}}
 else if(a=='ul'){S.links.splice(+d.n,1);save()}
-else if(a=='dn'){const A=S.c[d.k];A.splice(+d.j+1,0,{i:uid(),t:A[+d.j].t})}
-else if(a=='rn'){S.c[d.k].splice(+d.j,1)}
+else if(a=='dn'){const A=S.c[d.k];A.splice(+d.j+1,0,{i:uid(),t:A[+d.j].t});save();rerender();focusNew('[data-ed="c"][data-k="'+d.k+'"][data-j="'+(+d.j+1)+'"]');return}
+else if(a=='rn'){S.c[d.k].splice(+d.j,1);save();rerender();focusNew('[data-act="add"][data-k="'+d.k+'"]');return}
 else if(a=='mv'){const i=+d.si,j=i+(+d.d);if(S.steps[j]){[S.steps[i],S.steps[j]]=[S.steps[j],S.steps[i]];remap(x=>x==i?j:x==j?i:x);save()}}
-else if(a=='ds'){const i=+d.si,cc=JSON.parse(JSON.stringify(S.c)),ii=JSON.parse(JSON.stringify(S.iss.filter(x=>x.s==i))),s=S.steps[i];remap(x=>x>i?x+1:x);for(const k in cc){const p=k.split('|');if(+p[1]==i){cc[k].forEach(n=>n.i=uid());S.c[p[0]+'|'+(i+1)]=cc[k]}}ii.forEach(x=>{x.s=i+1;S.iss.push(x)});S.steps.splice(i+1,0,{n:s.n+' (cópia)',e:s.e,d:s.d});save()}
-else if(a=='alane'){(S.lanes=S.lanes||[]).push({id:'x'+uid(),n:'Nova faixa'});save()}
+else if(a=='ds'){const i=+d.si,cc=JSON.parse(JSON.stringify(S.c)),ii=JSON.parse(JSON.stringify(S.iss.filter(x=>x.s==i))),s=S.steps[i];remap(x=>x>i?x+1:x);for(const k in cc){const p=k.split('|');if(+p[1]==i){cc[k].forEach(n=>n.i=uid());S.c[p[0]+'|'+(i+1)]=cc[k]}}ii.forEach(x=>{x.s=i+1;S.iss.push(x)});S.steps.splice(i+1,0,{n:s.n+' (cópia)',e:s.e,d:s.d,note:s.note,emotionRecorded:s.emotionRecorded});save()}
+else if(a=='alane'){const id='x'+uid();(S.lanes=S.lanes||[]).push({id,n:'Nova faixa'});V.hiddenRows=V.hiddenRows.filter(x=>x!==id);V.rowOrder.push(id);save();saveView();rerender();focusNew('[data-ed="ln"][data-id="'+id+'"]');return}
 else if(a=='dlane'){S.lanes=(S.lanes||[]).filter(x=>x.id!=d.id);for(const k in S.c)if(k.split('|')[0]==d.id)delete S.c[k];save()}
 else if(a=='undo'){undo(0)}
 else if(a=='redo'){undo(1)}
 else if(a=='lib'){lib=true}
-else if(a=='back'){lib=false}
+else if(a=='back'){lib=true}
 else if(a=='new'){const o=blank();o.id=uid();DB.js.push(o);ST=newST();sw(o)}
 else if(a=='open'){const j=DB.js.find(x=>x.id==d.id);if(j)sw(j)}
 else if(a=='dup'){const j=DB.js.find(x=>x.id==d.id);if(j){const c=JSON.parse(JSON.stringify(j));c.id=uid();c.title=(c.title||'Jornada')+' (cópia)';DB.js.splice(DB.js.indexOf(j)+1,0,c);msg='Jornada duplicada.';save()}}
 else if(a=='rm'){if(dr!=d.id){dr=d.id}else{dr='';DB.js=DB.js.filter(x=>x.id!=d.id);if(!DB.js.length){const o=blank();o.id=uid();DB.js.push(o)}if(!DB.js.some(x=>x.id==S.id)){ST=newST();sw(DB.js[0]);lib=true}else save()}}
 else if(a=='dl'){dl();return}
 else if(a=='imp'){document.getElementById('fi').click();return}
-else if(a=='step'){S.steps.push({n:'Etapa '+(S.steps.length+1),e:0});save()}
+else if(a=='step'){S.steps.push({n:'Etapa '+(S.steps.length+1),e:0});save();rerender();const target=app.querySelector('.sh:last-child [data-ed="sn"]');target?.focus();target?.scrollIntoView({block:'nearest',inline:'nearest'});return}
 else if(a=='del'){const s=+d.si,c={};for(const k in S.c){const[l,i]=k.split('|');if(+i==s)continue;c[l+'|'+(+i>s?i-1:i)]=S.c[k]}S.c=c;S.iss=S.iss.filter(x=>x.s!=s).map(x=>({...x,s:x.s>s?x.s-1:x.s}));S.steps.splice(s,1);save()}
-else if(a=='add'){(S.c[d.k]=S.c[d.k]||[]).push({i:uid(),t:''});save();render();focusNew('[data-k="'+d.k+'"][data-j="'+(S.c[d.k].length-1)+'"]');return}
-else if(a=='addi'){S.iss.push({s:+d.si,t:d.t,x:'',v:d.t=='d'?2:0,d:1});save();render();focusNew('[data-ii="'+(S.iss.length-1)+'"][data-ed]');return}
+else if(a=='add'){(S.c[d.k]=S.c[d.k]||[]).push({i:uid(),t:''});save();rerender();focusNew('[data-ed="c"][data-k="'+d.k+'"][data-j="'+(S.c[d.k].length-1)+'"]');return}
+else if(a=='addi'){S.iss.push({s:+d.si,t:d.t,x:'',v:d.t=='d'?2:0,d:1});save();rerender();focusNew('[data-ii="'+(S.iss.length-1)+'"][data-ed]');return}
 else if(a=='sg'){const k=d.l+'|'+d.i;(S.c[k]=S.c[k]||[]).push({i:uid(),t:SG[S.steps[+d.i].n.toLowerCase()][d.l][+d.n]});save()}
 else if(a=='chip'){const s=ST.steps[+d.i];s.on=s.on?0:1}
 else if(a=='addst'){const v=(ST.new||'').trim();if(v){ST.steps.push({n:v,on:1});ST.new=''}}
@@ -194,7 +251,7 @@ else if(a=='go'){if(!ST.title.trim()||ST.steps.filter(s=>s.on).length<2)return;s
 else if(a=='demo'){setS(seed());mig(S);save()}
 else if(a=='sev'){const x=S.iss[+d.ii];x.v=x.v%3+1;save()}
 else if(a=='deli'){S.iss.splice(+d.ii,1);save()}
-render()});
+rerender();if(a==='undo'||a==='redo')focusNew('[data-act="'+a+'"]');});
 app.addEventListener('focusout',e=>{const el=e.target,t=el.dataset&&el.dataset.ed,f=el.dataset&&el.dataset.f;
 if(f){if(!f.startsWith('st:')){S[f]=el.value;save()}return}if(!t||!el.isConnected)return;const v=el.innerText.replace(/\s+$/,'').trim();
 if(t=='c'){const a=S.c[el.dataset.k],j=+el.dataset.j;if(a[j]===undefined)return;if(v)a[j].t=v;else a.splice(j,1);save();if(!v)render()}
@@ -202,9 +259,19 @@ else if(t=='sd'){S.steps[+el.dataset.si].d=v;save()}
 else if(t=='ln'){const l=(S.lanes||[]).find(x=>x.id==el.dataset.id);if(l){l.n=v||'Faixa';save()}}
 else if(t=='sn'){S.steps[+el.dataset.si].n=v||'Etapa';save();live()}
 else if(t=='ix'){const ii=+el.dataset.ii;if(!S.iss[ii])return;if(v){S.iss[ii].x=v;save();live()}else{S.iss.splice(ii,1);save();render()}}});
-app.addEventListener('input',e=>{const el=e.target;if(el.isContentEditable)drawLinks();if(el.dataset.f){const f=el.dataset.f;if(f.startsWith('st:')){ST[f.slice(3)]=el.value;chk()}else{S[f]=el.value;save()}}else if(el.dataset.act=='emo'){S.steps[+el.dataset.si].e=+el.value;save();live()}});
-app.addEventListener('change',e=>{const el=e.target;if(el.id=='fi'){impF(el.files[0]);return}if(el.dataset.act=='dim'){S.iss[+el.dataset.ii].d=+el.value;save();live()}});
-app.addEventListener('keydown',e=>{if(e.key=='Enter'&&e.target.dataset.f=='st:new'){e.preventDefault();document.querySelector('[data-act=addst]').click()}if(e.key=='Enter'&&e.target.isContentEditable){e.preventDefault();e.target.blur()}});
+app.addEventListener('input',e=>{const el=e.target;if(el.dataset.emotionNote!==undefined){S.steps[+el.dataset.emotionNote].note=el.value;save();return}if(el.isContentEditable)drawLinks();if(el.dataset.f){const f=el.dataset.f;if(f.startsWith('st:')){ST[f.slice(3)]=el.value;chk()}else{S[f]=el.value;save()}}else if(el.dataset.act=='emo'){S.steps[+el.dataset.si].e=+el.value;S.steps[+el.dataset.si].emotionRecorded=true;save();live()}});
+app.addEventListener('change',e=>{const el=e.target;if(el.dataset.viewRow){const id=el.dataset.viewRow;V.hiddenRows=el.checked?V.hiddenRows.filter(x=>x!==id):[...new Set([...V.hiddenRows,id])];V.preset='custom';saveView();redrawCustomizer('[data-view-row="'+id+'"]');return}if(el.id=='fi'){impF(el.files[0]);return}if(el.dataset.act=='dim'){S.iss[+el.dataset.ii].d=+el.value;save();live()}});
+app.addEventListener('keydown',e=>{
+if(e.key==='Escape'){
+  const dialog=document.getElementById('customize');if(dialog?.open){e.preventDefault();closeCustomizer();return}
+  const menu=e.target.closest('details');if(menu?.open){menu.open=false;menu.querySelector('summary').focus();return}
+  if(emotionEdit!==null){const i=emotionEdit;emotionEdit=null;rerender();focusNew('[data-act="emotion-edit"][data-si="'+i+'"]');return}
+}
+if(e.target.getAttribute('role')==='tab'&&['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){
+  e.preventDefault();const ids=['guidance','analysis','quality'],at=ids.indexOf(V.insightsTab),index=e.key==='Home'?0:e.key==='End'?2:(at+(e.key==='ArrowRight'?1:2))%3;changeView({insightsTab:ids[index]},'#tab-'+ids[index]);return;
+}
+if((e.ctrlKey||e.metaKey)&&['z','y'].includes(e.key.toLowerCase())&&!e.target.closest('input,textarea,[contenteditable=true]')){e.preventDefault();undo(e.shiftKey||e.key.toLowerCase()==='y');rerender();return}
+if(e.key=='Enter'&&e.target.dataset.f=='st:new'){e.preventDefault();document.querySelector('[data-act=addst]').click()}if(e.key=='Enter'&&e.target.isContentEditable){e.preventDefault();e.target.blur()}});
 function remap(f){const c={};for(const k in S.c){const p=k.split('|'),n=f(+p[1]);if(n!=null)c[p[0]+'|'+n]=S.c[k]}S.c=c;S.iss=S.iss.map(x=>({...x,s:f(x.s)})).filter(x=>x.s!=null)}
 let dg=null;
 app.addEventListener('dragstart',e=>{const h=e.target.closest&&e.target.closest('.gh');if(!h)return;dg={k:h.dataset.k,j:+h.dataset.j};e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain','n')}catch(x){}});
@@ -219,32 +286,21 @@ else{const rt=dx>0;y1=(a.t+a.b)/2;y2=(b.t+b.b)/2;x1=rt?a.r:a.l;x2=rt?b.l:b.r;con
 const d='M'+x1+' '+y1+' C'+c1.join(' ')+' '+c2.join(' ')+' '+x2+' '+y2;
 h+='<path d="'+d+'" fill="none" style="stroke:var(--ac)" stroke-width="1.75" marker-end="url(#ar)"/><path d="'+d+'" fill="none" stroke="transparent" stroke-width="14" style="pointer-events:stroke;cursor:pointer" data-act="ul" data-n="'+n+'"><title>Remover ligação</title></path>'});
 sv.innerHTML=h}
+document.addEventListener('click',event=>{app.querySelectorAll('details.menu[open]').forEach(menu=>{if(!menu.contains(event.target))menu.open=false})});
+app.addEventListener('toggle',event=>{if(event.target.matches('details.menu')&&event.target.open)app.querySelectorAll('details.menu[open]').forEach(menu=>{if(menu!==event.target)menu.open=false})},true);
 window.addEventListener('resize',drawLinks);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawLinks);
-const originalBlueprintRender=render;
-render=function(){
-  originalBlueprintRender();
-  if(HOSTED){
-    const anchor=app.querySelector('.hd .bk');
-    if(anchor&&!anchor.querySelector('[data-act="back"]')){
-      const back=document.createElement('button');
-      back.type='button';back.className='tb';back.dataset.act='back';
-      back.textContent='‹ Voltar para Blueprints';back.setAttribute('aria-label','Voltar para Blueprints');
-      back.style.cssText='min-height:30px;padding:0 8px;font-size:11px;margin-right:8px';
-      anchor.prepend(back);
-    }
-  }
-};
 render();
 if(HOSTED){
   window.addEventListener('message',event=>{
     if(event.source!==window.parent||event.origin!==location.origin||event.data?.boBlueprintHost!==1)return;
+    if(event.data.type==='saved'){announceSave(event.data.ok);return}
     if(event.data.type==='hydrate'){
       applyingHost=true;
       try{
         const state=event.data.state;
         if(!state||!Array.isArray(state.steps)||typeof state.c!=='object')throw Error('Invalid host state');
         S=JSON.parse(JSON.stringify(state));S.id='host';DB={cur:'host',js:[S]};
-        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;render();
+        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;V=viewState(S.view);saveLabel='Salvo no projeto';document.title='Blue Ocean · '+(S.editorKind==='blueprint'?'Blueprint':'Jornada');render();app.inert=false;app.setAttribute('aria-busy','false');
       }catch(e){console.error('Blueprint: cannot hydrate service graph',e)}
       finally{applyingHost=false}
     }

@@ -26,11 +26,12 @@ try:
         page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
         exact=page.frame_locator('.bo-blueprint-reference-frame')
         expect(exact.locator('#app')).to_be_visible()
-        expect(exact.locator('[data-empty-journey="1"], .bd')).to_be_visible(timeout=15000)
+        expect(exact.locator('.bd')).to_be_visible(timeout=15000)
         # A new hosted map starts empty; no compulsory coffee demo or stage suggestions.
         while exact.locator('.sh').count() < 2:
             exact.locator('button[data-act="step"]').first.click()
         expect(exact.locator('.bd')).to_be_visible()
+        exact.get_by_role('button',name='Insights',exact=True).click()
         expect(exact.locator('.pnl')).to_be_visible()
         assert exact.locator('.hd').count()==1
         assert exact.locator('.lb').count()>=5
@@ -43,11 +44,12 @@ try:
           const j=g.journeys[b.journeyId]||Object.values(g.journeys)[0];
           return j.stageIds.map(id=>({id,title:g.stages[id].title}));}""")
         assert len(stages)>=2,stages
+        exact.locator('[data-act="emotion-edit"]').first.click()
         slider=exact.locator('input[data-act="emo"]').first
         slider.evaluate("""el=>{el.value='-2';el.dispatchEvent(new Event('input',{bubbles:true}))}""")
         expect.poll if False else None
         page.wait_for_function("""id=>window.BlueOceanRuntime.api('dataBridge').get().stages[id].emotionScore===-2""",arg=stages[0]['id'],timeout=10000)
-        exact.locator('button[data-act="alane"]').click()
+        exact.get_by_role('button',name='+ Adicionar faixa',exact=True).click()
         expect(exact.locator('[data-ed="ln"]')).to_have_count(1)
         note=exact.locator('.ad[data-act="add"]').first
         note.click()
@@ -70,7 +72,8 @@ try:
         assert state['custom']==1,state
         page.screenshot(path=str(OUT/'blueprint-real-ui.png'),animations='disabled')
         assert exact.get_by_role('button',name='Modo profissional').count()==0, 'Retired UI still exposed'
-        exact.get_by_role('button',name='Ferramentas').click()
+        exact.locator('.tools-menu summary').click()
+        exact.get_by_role('button',name='Recursos avançados').click()
         tools_dialog=page.get_by_role('dialog',name='Ferramentas do Blueprint')
         expect(tools_dialog).to_be_visible()
         tools_dialog.get_by_role('button',name='Revisar entrega').click()
