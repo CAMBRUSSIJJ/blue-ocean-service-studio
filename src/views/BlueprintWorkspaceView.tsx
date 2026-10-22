@@ -237,8 +237,11 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
     window.setTimeout(() => { void invoke(); }, 120);
   };
 
+  // Regression-only pathway: the prior Journey editor is not the production default.
+  const legacyJourneyQa = ['localhost','127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).has('__qa_legacy_journey');
   // A matriz original é agora o editor padrão da Jornada; o fluxo anterior fica opcional.
   const openJourney = async (id: string) => {
+    if (legacyJourneyQa) { await openJourneyGuided(id); return; }
     const runtime = journeyApi();
     if (!runtime?.selectInWorkspace && !runtime?.open) { showToast('O runtime de Jornada ainda não está disponível.'); return; }
     const selected = runtime.selectInWorkspace ? runtime.selectInWorkspace(id) : await runtime.open?.(id);
