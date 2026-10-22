@@ -15,7 +15,7 @@ export function JourneyReferenceCanvas({ studio, onBack, onBlueprintDraft }: {
   onBack?: () => void;
   onBlueprintDraft: () => void | Promise<void>;
 }) {
-  const { graph, setGraph, journey, showToast, handleExport } = studio;
+  const { graph, setGraph, journey, handleExport } = studio;
   const frame = useRef<HTMLIFrameElement>(null);
   const initialGraph = useRef(graph);
   const id = journey.id;
