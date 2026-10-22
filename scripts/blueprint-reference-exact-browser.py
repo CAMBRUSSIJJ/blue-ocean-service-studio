@@ -88,7 +88,9 @@ try:
         if unified.get_by_role('button',name='Abrir workspace local sem conta').count():
             unified.get_by_role('button',name='Abrir workspace local sem conta').click()
         unified.locator('[data-service-journey-nav="1"]').click()
-        unified.get_by_role('button',name='Criar Jornada',exact=True).first.click()
+        if not unified.locator('[data-journey-starter="full-page"]').count():
+            unified.get_by_role('button',name='Criar Jornada',exact=True).first.click()
+        expect(unified.locator('[data-journey-starter="full-page"]')).to_be_visible()
         unified.get_by_role('button',name='Criar e abrir Jornada').click()
         journey=unified.frame_locator('.bo-blueprint-reference-frame')
         expect(journey.get_by_role('heading',name='Sua primeira etapa')).to_be_visible()
