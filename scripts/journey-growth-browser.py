@@ -32,7 +32,7 @@ def stage(f,title,inline=False):
 def preset(f,name):
     f.locator('.toolbar>.menu').first.locator('summary').click();f.get_by_role('button',name=name,exact=False).click();saved(f)
 def note(f,key,value):
-    f.locator(f'[data-cell="{key}"] .ad').click();edit=f.locator(f'[data-cell="{key}"] [data-ed="c"]').last
+    f.locator(f'[data-cell="{key}"] .ad').click();f.get_by_role('button',name='Adicionar Cartão',exact=True).click();edit=f.locator(f'[data-cell="{key}"] [data-ed="c"]').last
     expect(edit).to_be_focused();edit.fill(value);edit.press('Tab');saved(f)
 def audit(frame,label):
     frame.add_script_tag(content=(ROOT/'node_modules/axe-core/axe.min.js').read_text())

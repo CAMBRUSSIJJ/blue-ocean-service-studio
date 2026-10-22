@@ -52,9 +52,12 @@ try:
         exact.get_by_role('button',name='Concluir',exact=True).click()
         page.wait_for_function("""id=>window.BlueOceanRuntime.api('dataBridge').get().stages[id].emotionScore===-2""",arg=stages[0]['id'],timeout=10000)
         exact.get_by_role('button',name='+ Adicionar faixa',exact=True).click()
+        exact.get_by_role('dialog',name='Adicionar faixa',exact=True).get_by_label('Nome da faixa',exact=True).fill('Observações')
+        exact.get_by_role('button',name='Salvar faixa',exact=True).click()
         expect(exact.locator('[data-ed="ln"]')).to_have_count(1)
-        note=exact.locator('.ad[data-act="add"]').first
+        note=exact.locator('[data-cell="ev|0"] .ad')
         note.click()
+        exact.get_by_role('button',name='Adicionar Cartão',exact=True).click()
         edit=exact.locator('.nw [data-ed="c"]').first
         edit.fill('Evidência real do serviço')
         edit.press('Tab')
