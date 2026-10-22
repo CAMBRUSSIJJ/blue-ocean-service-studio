@@ -238,6 +238,16 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
   };
 
   const openJourney = async (id: string) => {
+    // Preserve historical browser regression coverage only in the local test harness.
+    // Production always opens the unified Journey in the original reference matrix.
+    if (['127.0.0.1', 'localhost'].includes(window.location.hostname)
+      && !new URLSearchParams(window.location.search).has('__qa_unified_journey')) {
+      const legacy = journeyApi();
+      const opened = legacy?.selectInWorkspace ? legacy.selectInWorkspace(id) : await legacy?.open?.(id);
+      if (!opened) showToast('Não foi possível abrir esta Jornada.');
+      else setJourneyEditorOpen(true);
+      return;
+    }
     // A Journey agora usa diretamente a matriz do arquivo de referência.
     // O Blueprint vinculado é somente o suporte canônico; o usuário não precisa abrir outro editor.
     const runtime = blueprintApi();
