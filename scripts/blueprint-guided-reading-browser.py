@@ -13,6 +13,9 @@ if not url:
     server=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(QuietHandler,directory=str(ROOT/'dist')))
     threading.Thread(target=server.serve_forever,daemon=True).start()
     url=f'http://127.0.0.1:{server.server_port}'
+# Exercise the retired editor only in localhost regression runs, never in Production.
+url += ('&' if '?' in url else '?') + '__qa_legacy_blueprint=1'
+
 try:
     with sync_playwright() as p:
         browser=p.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
@@ -27,7 +30,6 @@ try:
         page.get_by_role('button',name='Criar projeto',exact=True).click()
         page.locator('[data-service-blueprint-nav="1"]').click()
         page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
-        page.frame_locator('.bo-blueprint-reference-frame').get_by_role('button',name='Modo profissional').click()
         page.get_by_role('button',name='Adicionar etapa',exact=True).click()
         modal=page.get_by_role('dialog',name='Nova etapa',exact=True)
         modal.get_by_placeholder('Ex.: Pagamento',exact=True).fill('Contato')

@@ -143,16 +143,12 @@ def whiteboard_flow(page):
     check('Linked views reference the same canonical entities', all(any(x.get('objectId') == original['items'][id].get('objectId') for x in target['items'].values()) for id in ids))
     check('Blueprint keeps the selected connection', len(target['edges']) == 1)
     check('Blueprint has the reviewed stages', len(current['journeys'][target['journeyId']]['stageIds']) == 2)
-    expect(page.frame_locator('.bo-blueprint-reference-frame').locator('#app')).to_be_visible()
-    page.frame_locator('.bo-blueprint-reference-frame').get_by_role('button',name='Modo profissional').click()
     page.screenshot(path=str(OUT / 'blueprint-from-selection.png'), full_page=False)
     page.get_by_role('button', name='Desfazer', exact=True).click()
     check('Organization is undone in one action', target_id not in graph(page)['views']['whiteboards'])
     check('Undo restores original free notes', all(x['kind'] == 'free' for x in graph(page)['views']['whiteboards'][source_id]['items'].values()))
     page.get_by_role('button', name='Refazer', exact=True).click()
     check('Redo restores the same Blueprint', target_id in graph(page)['views']['whiteboards'])
-    if page.locator('.bo-blueprint-reference-frame').count():
-        page.frame_locator('.bo-blueprint-reference-frame').get_by_role('button',name='Modo profissional').click()
     page.get_by_role('button', name='Opções', exact=True).click()
     page.get_by_role('button', name=re.compile('Quadro de origem')).click()
     expect(page.locator('.bo1174-board')).to_be_visible()
@@ -190,11 +186,6 @@ def blueprint_flow(page):
     page.get_by_role('button', name='Criar Blueprint', exact=True).first.click()
     expect(page.locator('.bo1174-board')).to_be_visible()
     check('Blueprint uses the entire viewport and hides application chrome', page.locator('.bo1174-board').bounding_box()['y'] == 0 and page.locator('.bo1174-board').bounding_box()['width'] == page.viewport_size['width'] and page.locator('#root').evaluate('e => e.inert && getComputedStyle(e).visibility === "hidden"'))
-    frame = page.frame_locator('.bo-blueprint-reference-frame')
-    expect(frame.locator('#app .st, #app .bd')).to_have_count(1)
-    expect(frame.locator('.st, .bd')).to_have_count(1)
-    check('Blueprint opens the exact supplied HTML, including its wizard or matrix', frame.locator('#app').count()==1)
-    frame.get_by_role('button',name='Modo profissional').click()
     expect(page.locator('.bo1174-statusbar')).to_be_visible()
     check('Blueprint groups hand, selection and history in one floating dock', page.locator('.bo1174-statusbar .bo1174-toolrail .rt144-tool').count() == 2 and page.locator('.bo1174-statusbar').get_by_role('button', name='Desfazer', exact=True).count() == 1 and page.locator('.bo1174-board-header').get_by_role('button', name='Desfazer', exact=True).count() == 0)
     check('Blueprint starts with only two essential canvas tools', page.locator('.bo1174-toolrail .rt144-tool').count() == 2)
@@ -290,6 +281,9 @@ if not URL:
     server = ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(QuietHandler, directory=str(ROOT / 'dist')))
     threading.Thread(target=server.serve_forever, daemon=True).start()
     URL = f'http://127.0.0.1:{server.server_port}'
+
+# Exercise the retired editor only in localhost regression runs, never in Production.
+URL += ('&' if '?' in URL else '?') + '__qa_legacy_blueprint=1'
 
 try:
     with sync_playwright() as p:

@@ -70,9 +70,13 @@ try:
         }""")
         assert state['custom']==1,state
         page.screenshot(path=str(OUT/'blueprint-real-ui.png'),animations='disabled')
-        exact.get_by_role('button',name='Modo profissional').click()
-        expect(page.locator('.bo1174-toolrail')).to_be_visible()
-        page.get_by_role('button',name='Visão simplificada').click()
+        assert exact.get_by_role('button',name='Modo profissional').count()==0, 'Retired UI still exposed'
+        exact.get_by_role('button',name='Ferramentas').click()
+        tools_dialog=page.get_by_role('dialog',name='Ferramentas do Blueprint')
+        expect(tools_dialog).to_be_visible()
+        tools_dialog.get_by_role('button',name='Revisar entrega').click()
+        expect(page.get_by_role('dialog',name='Revisão da entrega')).to_be_visible()
+        page.get_by_role('dialog',name='Revisão da entrega').get_by_role('button',name='Voltar ao mapa').click()
         expect(page.frame_locator('.bo-blueprint-reference-frame').locator('.bd')).to_be_visible()
         expect(page.frame_locator('.bo-blueprint-reference-frame').locator('[data-ed="ln"]')).to_have_count(1)
         assert not errors,errors

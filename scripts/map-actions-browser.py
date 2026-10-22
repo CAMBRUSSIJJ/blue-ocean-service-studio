@@ -111,9 +111,6 @@ def flow(page, width):
     cards.first.locator('[data-journey-to-blueprint]').click()
     board = page.locator('.bo1174-board')
     expect(board).to_be_visible()
-    exact = page.frame_locator('.bo-blueprint-reference-frame')
-    expect(exact.locator('#app')).to_be_visible()
-    exact.get_by_role('button',name='Modo profissional').click()
     if width >= 600:
         add = page.get_by_role('button', name='Adicionar etapa', exact=True).first
         page.mouse.move(0, page.viewport_size['height'] - 1)
@@ -150,6 +147,9 @@ if not URL:
     server = ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Quiet, directory=str(ROOT / 'dist')))
     threading.Thread(target=server.serve_forever, daemon=True).start()
     URL = f'http://127.0.0.1:{server.server_port}'
+# Exercise the retired editor only in localhost regression runs, never in Production.
+URL += ('&' if '?' in URL else '?') + '__qa_legacy_blueprint=1'
+
 try:
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'), args=['--no-sandbox', '--disable-dev-shm-usage'])
