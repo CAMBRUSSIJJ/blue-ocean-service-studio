@@ -87,6 +87,7 @@ button,select,input{font:inherit;color:var(--ink)}button{cursor:pointer}
 <div id="app"></div>
 <script src="/v1102-journey-content-shared.js"></script>
 <script src="/v1102-journey-content-ui.js"></script>
+<script src="/v1102-journey-picker-ui.js"></script>
 <script src="/v1102-journey-growth-ui.js"></script>
 <script>
 const HOSTED=new URLSearchParams(location.search).get('service-graph')==='1';let applyingHost=false;
@@ -209,7 +210,7 @@ app.innerHTML=h+'</main>'+customizer()+growthDialogs()+contentDialogs();requestA
 function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();const dxEl=document.getElementById('dx');if(dxEl)dxEl.innerHTML=dx();app.querySelectorAll('[data-emotion-label]').forEach(el=>el.textContent=EM[S.steps[+el.dataset.emotionLabel].e+2]);const count=app.querySelector('.insight-count');if(count)count.textContent=' · '+S.iss.filter(x=>x.t==='i').length+' oportunidades'}
 function focusNew(sel){const e=app.querySelector(sel);if(e)e.focus()}
 app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
-if(contentAction(a,d)||growthAction(a,d))return;
+if(contentAction(a,d,b)||growthAction(a,d))return;
 if(a==='customize'){openCustomizer();return}
 if(a==='close-customize'){closeCustomizer();return}
 if(a==='preset'){cv=false;choosePreset(d.preset);rerender();focusNew('.toolbar .menu summary');return}

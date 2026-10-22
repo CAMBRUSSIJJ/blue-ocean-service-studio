@@ -99,10 +99,10 @@ outra etapa e remover. Também é possível arrastar pela alça entre células d
 mesma faixa. Desfazer e refazer preservam o tipo e o conteúdo completo.
 
 A engrenagem de cada faixa permite alterar nome, descrição, ícone e conteúdo
-padrão. O padrão aparece primeiro no menu de inclusão e mantém os tipos dos
-elementos existentes. **Adicionar faixa** oferece modelos de Canais, Falas do
-cliente, Expectativas, Evidências e Responsáveis, além de uma faixa em branco.
-Cancelar o formulário não cria uma faixa vazia.
+padrão. O padrão é sinalizado no catálogo de inclusão e mantém os tipos dos
+elementos existentes. **Adicionar faixa** abre um catálogo contextual: escolher o tipo cria a faixa e
+foca seu nome para edição no mapa. **Modelos de faixa** mantém Canais, Falas do
+cliente, Expectativas, Evidências e Responsáveis. Fechar o catálogo não cria dados.
 
 A faixa de Contexto mantém seu campo principal e admite elementos adicionais.
 Emoções e Dores e ideias preservam seus controles específicos. Um emoji
@@ -119,3 +119,29 @@ outra aba. A apresentação e a exportação preservam esses elementos.
 
 O formulário de nova etapa flutua junto ao botão de inclusão. Ele mantém a
 altura do cabeçalho e oferece criação contínua por Enter.
+
+
+## Catálogo contextual e tipos avançados
+
+O mesmo catálogo atende células e novas faixas. A busca ignora acentos e filtra
+os tipos; setas movem o foco, Enter escolhe e Escape fecha devolvendo o foco ao
+botão de origem. Os grupos Básicos e Avançados mantêm posição estável. **Etapa**
+cria uma etapa real da Jornada, pela mesma entrada compacta do cabeçalho.
+Nome, descrição, ícone e padrão continuam disponíveis na engrenagem da faixa.
+
+**Escala** aceita limites, intervalo, rótulos e um valor opcional. Começa não
+preenchida; zero é um valor explícito. É uma avaliação da equipe e não altera
+emoções, prioridade nem medições de indicadores. O valor pode ser ajustado pelo
+controle na célula ou apagado com Limpar valor.
+
+**Embed** aceita links de YouTube, Vimeo e Figma. A prévia só cria o iframe após
+o clique em Carregar conteúdo; Abrir original continua disponível. HTML livre
+não é interpretado. O resumo HTML exporta o link, mantendo o documento sem
+players ativos. A disponibilidade e as permissões do provedor continuam necessárias.
+
+**Planejamento** e **Métrica** vinculam registros já existentes no serviço. Se
+não houver registros, Ir para dores e planos leva ao fluxo de criação existente.
+Os cartões acompanham status, responsável, prazo e valores medidos sem duplicar
+iniciativas ou indicadores. Uma ação do cliente não recebe o nome de um indicador
+só porque um cartão foi colocado na mesma célula. Registros removidos aparecem
+como indisponíveis e podem ser vinculados novamente em Editar elemento.
