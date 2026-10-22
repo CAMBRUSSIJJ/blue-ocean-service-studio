@@ -100,6 +100,7 @@ def desktop(page):
     expect(sidebar).to_have_attribute('data-sidebar-collapsed', '0')
     page.keyboard.press('Control+Backslash')
     expect(sidebar).to_have_attribute('data-sidebar-collapsed', '1')
+    page.wait_for_function("() => localStorage.getItem('bo-sidebar-collapsed') === '1'", timeout=5000)
     check('Sidebar keyboard shortcut uses the same saved preference', page.evaluate("localStorage.getItem('bo-sidebar-collapsed')") == '1')
     page.locator('summary[aria-label="Ações do projeto"]').click()
     expect(page.locator('.bo-simple-project-actions')).to_have_attribute('open', '')
