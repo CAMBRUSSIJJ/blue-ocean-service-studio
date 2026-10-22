@@ -1054,10 +1054,11 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     return meta.blueprintReference.boards[boardId||'global'] ||= {mode:'reference',client:false};
   }
 
+  let blueprintOriginJourneyId=null;
   function hostedBlueprintDocument(){
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
-    const ref={id:'host',title:b.name||'Blueprint de serviço',persona:saved.persona||j?.name||'',
-      guide:1,start:stages.length?0:1,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
+    const ref={id:'host',title:blueprintOriginJourneyId&&j?j.name:(b.name||'Blueprint de serviço'),persona:saved.persona||'',
+      guide:0,start:stages.length?0:1,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
     const order=new Map(stages.map((stage,index)=>[stage.id,index]));
     stages.forEach(st=>ref.steps.push({
@@ -1219,7 +1220,8 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     Object.entries(b.edges||{}).forEach(([id,edge])=>{
       if(edge.blueprintHostedLink&&!referenced.has(id))delete b.edges[id];
     });
-    b.name=String(doc.title||b.name||'Blueprint de serviço').slice(0,240);
+    b.name=String(doc.title||b.name||'Jornada').slice(0,240);
+    if(blueprintOriginJourneyId&&j){j.name=b.name;j.updatedAt=timestamp;}
     const customCells={};Object.entries(doc.c).forEach(([key,value])=>{
       if(/^x[a-z0-9]{1,12}\|\d+$/.test(key)&&Array.isArray(value))
         customCells[key]=value.slice(0,100).map(n=>({i:String(n.i||uid('note')),t:String(n.t||'').slice(0,1000)}));
@@ -1260,7 +1262,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const outer=document.createElement('section');outer.className='bo-blueprint-exact-host';
     outer.style.cssText='position:absolute;inset:0;z-index:210;background:#f5f7fb;overflow:hidden';
     const frame=document.createElement('iframe');frame.className='bo-blueprint-reference-frame';
-    frame.title='Blue Ocean · Blueprint de Serviço';frame.src='/blueprint-reference-original.html?service-graph=1';
+    frame.title=blueprintOriginJourneyId?'Blue Ocean · Jornada':'Blue Ocean · Blueprint de Serviço';frame.src='/blueprint-reference-original.html?service-graph=1'+(blueprintOriginJourneyId?'&mode=journey':'');
     frame.style.cssText='width:100%;height:100%;border:0;display:block;background:#f5f7fb';
     const viewBoardId=boardId;
     hostedBlueprintListener=event=>{
@@ -1276,8 +1278,9 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       }else if(type==='tools'){
         showBlueprintReferenceTools();
       }else if(type==='back'){
-        close(false);window.dispatchEvent(new CustomEvent('rt-navigation',{detail:'canvas'}));
-        setTimeout(()=>window.dispatchEvent(new CustomEvent('bo-service-workspace-tab',{detail:'blueprint'})),0);
+        const origin=blueprintOriginJourneyId;blueprintOriginJourneyId=null;close(false);
+        window.dispatchEvent(new CustomEvent('rt-navigation',{detail:'canvas'}));
+        setTimeout(()=>window.dispatchEvent(new CustomEvent('bo-service-workspace-tab',{detail:origin?'journey':'blueprint'})),0);
       }else if(type==='library'){
         close(false);window.dispatchEvent(new CustomEvent('rt-navigation',{detail:'journeys'}));
       }
@@ -3395,11 +3398,25 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   async function openWhiteboard(id){if(!graph)load();const b=graph.views?.whiteboards?.[id];if(!b||b.viewKind!=='free')return false;boardId=id;meta.activeBoardId=id;await open();boardId=id;meta.activeBoardId=id;pref().layoutMode='free';if(pref().viewport){zoom=pref().viewport.zoom;pan=clone(pref().viewport.pan)}save(false,{label:'Abrir Whiteboard'});if(overlay){renderAll();if(!pref().viewport)setTimeout(fit,0)}return true}
   async function createServiceFrameWhiteboard(){toast('O Service Frame agora pertence a Blueprints.');return null}
   async function createServiceBlueprint(name='Service Blueprint'){blueprintReferenceState().mode='reference';if(!graph)load();if(isWorkspaceEmptyGraph(graph))refreshGraphFromStorageIfInitialized();if(isWorkspaceEmptyGraph(graph)){window.dispatchEvent(new CustomEvent('bo-create-service'));return null}const clean=String(name||'Service Blueprint').trim()||'Service Blueprint',id=createBoard(clean,{viewKind:'blueprint',layoutMode:'service',items:{},edges:{}});if(!id)return null;const b=board();b.viewKind='blueprint';b.name=clean;pref().layoutMode='service';serviceCompositionState().experienceMode='guided';serviceCompositionState().showRecipePrompt=false;save(false,{label:'Criar Service Blueprint'});await open();boardId=id;meta.activeBoardId=id;pref().layoutMode='service';applyLayout('service',true);if(overlay){renderAll();setTimeout(fit,0)}return{id:boardId,name:b.name}}
-  async function openServiceBlueprint(id){if(!graph)load();const b=graph.views?.whiteboards?.[id];if(!b||b.viewKind!=='blueprint')return false;boardId=id;meta.activeBoardId=id;blueprintReferenceState().mode='reference';await open();boardId=id;meta.activeBoardId=id;pref().layoutMode=b.layoutMode==='service'?'service':'blueprint';save(false,{label:'Abrir Service Blueprint'});if(overlay){if(pref().viewport){zoom=pref().viewport.zoom;pan=clone(pref().viewport.pan);renderAll()}else{applyLayout(pref().layoutMode||'service');renderAll();setTimeout(fit,0)}}return true}
+  async function openServiceBlueprint(id,origin='blueprint'){blueprintOriginJourneyId=origin==='journey'?(graph?.views?.whiteboards?.[id]?.journeyId||null):null;if(!graph)load();const b=graph.views?.whiteboards?.[id];if(!b||b.viewKind!=='blueprint')return false;boardId=id;meta.activeBoardId=id;blueprintReferenceState().mode='reference';await open();boardId=id;meta.activeBoardId=id;pref().layoutMode=b.layoutMode==='service'?'service':'blueprint';save(false,{label:'Abrir Service Blueprint'});if(overlay){if(pref().viewport){zoom=pref().viewport.zoom;pan=clone(pref().viewport.pan);renderAll()}else{applyLayout(pref().layoutMode||'service');renderAll();setTimeout(fit,0)}}return true}
+  async function openJourneyCanvasAsBlueprint(journeyId){
+    if(!graph)load();
+    if(isWorkspaceEmptyGraph(graph))refreshGraphFromStorageIfInitialized();
+    const j=graph.journeys?.[journeyId];if(!j)return false;
+    let b=Object.values(graph.views.whiteboards||{}).find(item=>item.viewKind==='blueprint'&&item.journeyId===journeyId);
+    if(!b){
+      const id=createBoard(j.name||'Jornada',{viewKind:'blueprint',layoutMode:'service',items:{},edges:{}});
+      if(!id)return false;
+      b=board();b.viewKind='blueprint';b.journeyId=journeyId;b.name=j.name||'Jornada';
+      pref().layoutMode='service';
+      save(false,{label:'Vincular editor da Jornada ao Service Graph'});
+    }
+    return openServiceBlueprint(b.id,'journey');
+  }
   function listServiceBlueprints(){if(!graph)load();return Object.values(graph.views?.whiteboards||{}).filter(b=>b.viewKind==='blueprint').map(b=>({id:b.id,name:b.name||'Service Blueprint',layoutMode:b.layoutMode||meta.boardPrefs?.[b.id]?.layoutMode||'service',itemCount:Object.keys(b.items||{}).length,updatedAt:b.updatedAt||graph.service.updatedAt||null}))}
   function listWhiteboards(){if(!graph)load();return Object.values(graph.views?.whiteboards||{}).filter(b=>b.viewKind==='free').map(b=>({id:b.id,name:b.name||'Whiteboard',itemCount:Object.keys(b.items||{}).length,edgeCount:Object.keys(b.edges||{}).length,updatedAt:b.updatedAt||graph.service.updatedAt||null}))}
   runtime.register('whiteboardCore',{appVersion:APP_VERSION,coreVersion:WHITEBOARD_CORE_VERSION,studioVersion:WHITEBOARD_STUDIO_VERSION,audit:coreAudit,repair:repairCoreIntegrity,show:showCoreStatus,createBlank:createBlankWhiteboard,createServiceFrame:createServiceFrameWhiteboard,openBoard:openWhiteboard,list:listWhiteboards,renameBoard:renameBoardById,duplicateBoard:duplicateBoardById,deleteBoard:deleteBoardById,focusItem:(id)=>focusItem(id,{fitItem:true,record:true}),openOrigin:(id)=>{const it=board()?.items?.[id];return it?openSmartObjectOrigin(it):false},conflictDraft:()=>clone(conflictDraft()),clearConflictDraft},WHITEBOARD_CORE_VERSION);
-  runtime.register('serviceBlueprintFrame',{appVersion:APP_VERSION,create:createServiceBlueprint,open:openServiceBlueprint,list:listServiceBlueprints},APP_VERSION);
+  runtime.register('serviceBlueprintFrame',{appVersion:APP_VERSION,create:createServiceBlueprint,open:openServiceBlueprint,openJourney:openJourneyCanvasAsBlueprint,list:listServiceBlueprints},APP_VERSION);
   const diagnosticsApi={version:APP_VERSION,coreVersion:WHITEBOARD_CORE_VERSION,audit:coreAudit,open:()=>open(),stats:()=>({boardId,totalItems:Object.keys(board()?.items||{}).length,visibleItems:visibleItems().length,renderedItems:perf.renderedItems,lastRenderMs:perf.lastRenderMs,avgRenderMs:perf.avgRenderMs,runtimeErrors:perf.runtimeErrors,lastError:perf.lastError,zoom}),createStressBoard:(count=1000)=>{count=clamp(Number(count)||1000,10,5000);createBoard(`Stress ${count}`);const b=board(),cols=Math.ceil(Math.sqrt(count)),gapX=300,gapY=190;for(let i=0;i<count;i++){const id=`stress-${i}`;b.items[id]={id,instanceId:id,entityRef:null,kind:'free',shape:'card',visualKind:'card',semantic:'card',semanticType:'card',tone:['blue','emerald','amber','violet','rose','slate'][i%6],text:`Objeto ${i+1}`,description:'Stress test do Whiteboard',x:120+(i%cols)*gapX,y:120+Math.floor(i/cols)*gapY,width:250,height:132,z:i+1}}normalizeLayers();save(false,{label:`Stress test ${count}`});fit();return diagnosticsApi.stats()},benchmark:async(frames=20)=>{const samples=[];for(let i=0;i<frames;i++){const t=performance.now();renderAll();samples.push(performance.now()-t);await new Promise(r=>requestAnimationFrame(r))}return{count:frames,min:Math.min(...samples),max:Math.max(...samples),avg:samples.reduce((a,b)=>a+b,0)/samples.length,stats:diagnosticsApi.stats()}}};
   runtime.register('whiteboardDiagnostics',diagnosticsApi,APP_VERSION);
   if(location.hash==='#blueprint-v186'||location.hash==='#blueprint-v185'||location.hash==='#blueprint-v184'||location.hash==='#blueprint-v183'||location.hash==='#blueprint-v182'||location.hash==='#blueprint-v181'||location.hash==='#blueprint-v180'||location.hash==='#blueprint-v170'||location.hash==='#blueprint-v160'||location.hash==='#blueprint-v159'||location.hash==='#blueprint-v158'||location.hash==='#blueprint-v157'||location.hash==='#blueprint-v156'||location.hash==='#blueprint-v1551'||location.hash==='#blueprint-v155'||location.hash==='#blueprint-v154'||location.hash==='#blueprint-v153'||location.hash==='#blueprint-v152'||location.hash==='#blueprint-v151'||location.hash==='#blueprint-v150'||location.hash==='#blueprint-v1410'||location.hash==='#blueprint-v149'||location.hash==='#blueprint-v148'||location.hash==='#blueprint-v147'||location.hash==='#blueprint-v146'||location.hash==='#blueprint-v145'||location.hash==='#blueprint-v144'||location.hash==='#blueprint-v143')setTimeout(open,700);

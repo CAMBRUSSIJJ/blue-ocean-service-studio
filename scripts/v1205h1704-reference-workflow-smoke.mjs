@@ -31,7 +31,7 @@ const checks = [
  ['runtime aceita templateId',runtime.includes('opts.templateId') && runtime.includes('t.stages.entries()')],
  ['modelos têm etapas reais editáveis',templates.includes("id:'essential'") && templates.includes('stages:')],
  ['modelo é identificado como exemplo editável',workspace.includes('nenhuma etapa representa um fato confirmado')],
- ['mapa abre logo após criação',workspace.includes('runtime.selectInWorkspace(created.id)') && workspace.includes('setJourneyEditorOpen(true)')],
+ ['Jornada abre no novo editor HTML logo após a criação',workspace.includes('await openJourney(created.id)') && workspace.includes('blueprint?.openJourney?.(id)') && runtime.includes('openJourney:openJourneyCanvasAsBlueprint')],
  ['abertura integrada sem overlay',workspace.includes('runtime.selectInWorkspace(id)') && runtime.includes('function selectJourneyInWorkspace(id)') && runtime.includes('selectInWorkspace:selectJourneyInWorkspace')],
  ['primeira etapa nasce dentro do mapa',journey.includes('data-first-stage-inline="1"')],
  ['campo alimenta stageDraft canônico',journey.includes('setStageDraft((current) => ({ ...current, title: event.target.value }))')],

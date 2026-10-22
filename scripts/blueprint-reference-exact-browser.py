@@ -27,9 +27,13 @@ try:
         exact=page.frame_locator('.bo-blueprint-reference-frame')
         expect(exact.locator('#app')).to_be_visible()
         if exact.locator('.st').count():
-            expect(exact.get_by_text('Vamos montar um blueprint')).to_be_visible()
+            expect(exact.get_by_text('Comece sua Jornada')).to_be_visible()
             exact.locator('input[data-f="st:title"]').fill('Serviço real de atendimento')
             exact.locator('input[data-f="st:persona"]').fill('Cliente da plataforma')
+            for name in ('Descobrir','Solicitar'):
+                exact.locator('input[data-f="st:new"]').fill(name)
+                exact.get_by_role('button',name='Adicionar',exact=True).click()
+            assert exact.locator('[data-act="ex"]').count()==0 and exact.locator('[data-act="demo"]').count()==0
             exact.locator('#go').click()
         expect(exact.locator('.bd')).to_be_visible()
         expect(exact.locator('.pnl')).to_be_visible()

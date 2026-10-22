@@ -158,6 +158,7 @@ class Quiet(SimpleHTTPRequestHandler):
 server=None;URL=os.environ.get('BLUE_OCEAN_URL')
 if not URL:
  server=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT/'dist')));threading.Thread(target=server.serve_forever,daemon=True).start();URL=f'http://127.0.0.1:{server.server_port}'
+URL += ('&' if '?' in URL else '?') + '__qa_legacy_journey=1'
 try:
  with sync_playwright() as p:
   browser=p.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
