@@ -71,3 +71,25 @@ o vínculo à mesma fonte, mas duplica profundamente os dados locais do cartão.
 O roteiro usa dados fictícios e pode ser executado automaticamente no Blue
 Ocean. Uma comparação interativa no produto observado e o teste com
 participantes são etapas separadas, ainda não realizadas neste registro.
+
+## Entrega do incremento e correspondência com os testes
+
+A especificação inicial e a observação foram registradas no commit `da7b8db`,
+anterior ao código deste incremento. Os estados da tabela inicial acima são
+preservados como ponto de partida. B03–B08 foram implementados; B11 e B12
+continuam no backlog. Não houve execução autenticada no Smaply.
+
+| Contrato | Implementação | Verificação reproduzível |
+| --- | --- | --- |
+| B03 | Âncora no próximo elemento; validação explícita de célula cheia/âncora removida; cancelamento sem mutação | `journey:observation:test` e navegador: ordem A/B/C, identidades, recarga, reordenação e toque |
+| B04 | Opção rápida do padrão com busca vazia; busca preenchida usa catálogo filtrado | Navegador: padrão Emoji, escolha de Texto por busca, foco |
+| B05 | Foco no cartão e cópia profunda; referências à origem preservadas | Domínio: independência dos valores e identidade; navegador: referência, Ctrl+D, Delete, histórico e edição de texto |
+| B06 | Configurações por jornada; dados atuais compartilhados | Domínio: ausência de cópias, Persona removida e faixas novas; navegador: Personas, faixas/ordem, recarga e toque |
+| B07 | Criar, renomear, atualizar e remover; nomes únicos e limite de 20 | Domínio: nomes, limites e isolamento; navegador: erro visível, atualização e exclusão com desfazer |
+| B08 | Apresentação/exportação explícita das faixas visíveis | Navegador: conjunto de faixas e HTML comparados ao mapa; conteúdo oculto aparece somente no resumo completo |
+
+As capturas e relatórios axe são gerados em `artifacts/journey-observation/`,
+com telas de 1440, 834 e 390 px e contexto de toque em 390 px. Os comandos e
+seus limites estão em [Testes](../testes.md). A regressão de Personas, dores,
+evidências e planos permanece em `journey:context:browser`; o piloto com pessoas
+e a comparação interativa entre produtos continuam pendentes.

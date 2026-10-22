@@ -226,3 +226,34 @@ explique por que a curva muda. Observe dúvidas, cliques perdidos e pedidos de
 ajuda sem orientar o percurso. As suítes automatizadas verificam o funcionamento;
 o piloto com pessoas ainda precisa ser realizado antes de afirmar facilidade
 de uso ou valor comercial validado.
+
+## Inclusão precisa e visualizações salvas
+
+Passe o mouse entre os elementos de uma célula, ou use Tab, para revelar
+**Inserir aqui** antes de um cartão. No celular esse botão fica visível. O
+seletor abre naquele ponto; cancelar não cria conteúdo. Com a busca vazia,
+Enter escolhe o tipo padrão da faixa. Preencha a busca para escolher outro tipo.
+
+Foque o contorno de um cartão usando Tab ou clicando fora dos campos e botões.
+Ctrl+D (Cmd+D no Mac) duplica o elemento; Delete ou Backspace o remove. Desfazer
+e refazer continuam disponíveis. Esses atalhos não atuam enquanto você escreve
+no cartão ou preenche um diálogo. Duplicar um vínculo cria outra representação
+do mesmo registro do serviço.
+
+Em **Visualizações**, informe um nome e use **Salvar visualização atual**.
+Cada jornada aceita até 20 configurações. A visualização guarda faixas, ordem,
+ajuste de tela e Persona sobre os dados atuais da jornada. **Aplicar** recupera
+esse recorte; **Renomear** altera seu nome e **Atualizar** substitui a configuração
+pela atual. **Excluir** remove somente a configuração, com opção de desfazer.
+Faixas criadas depois da captura ficam ocultas ao aplicar a configuração antiga.
+Se a Persona foi removida, selecione outra e atualize a visualização.
+
+**Apresentar visualização atual**, dentro desse diálogo, usa somente as faixas
+visíveis e mantém o mesmo recorte ao baixar HTML ou imprimir. O botão
+**Apresentar** da barra principal continua abrindo o resumo executivo completo.
+O contexto de Persona altera as observações emocionais; os demais cartões ainda
+são comuns à jornada. Configurações são preservadas no backup do projeto.
+
+O [registro de observação pública](research/smaply-observation-2026-10-22.md) e a
+[especificação independente](specs/journey-editor-behavior.md) documentam as
+referências, decisões e funcionalidades deixadas para próximos incrementos.

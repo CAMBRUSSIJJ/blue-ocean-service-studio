@@ -34,6 +34,7 @@ npm run journey:growth:test
 npm run journey:content:test
 npm run journey:picker:test
 npm run journey:context:test
+npm run journey:observation:test
 ```
 
 Esses testes exercitam operações como seleção, criação e movimentação de cartões,
@@ -69,6 +70,7 @@ python3 scripts/journey-progressive-browser.py
 npm run journey:growth:browser
 npm run journey:content:browser
 npm run journey:picker:browser
+npm run journey:observation:browser
 ```
 
 Esses runners podem servir o `dist/` em um servidor temporário. Para os que
@@ -159,3 +161,17 @@ contextos emocionais, ligar evidências, planejar e exportar o resumo. Inclui
 histórico, recarga e axe em 1440, 834 e 390 px. Os registros de biblioteca são
 fictícios; isso não equivale a validar o produto com participantes. Capturas e
 resultados ficam em `artifacts/journey-context/`, publicados na CI.
+
+## Especificação por observação pública
+
+`journey:observation:test` exercita os contratos de inserção estável, cópia
+profunda, configuração sem dados duplicados, nomes/limites, isolamento por
+jornada, Persona removida, novas faixas e serialização.
+`journey:observation:browser` executa as tarefas B03–B08 da
+[especificação](specs/journey-editor-behavior.md): posição de inserção, padrão e
+busca, atalhos com proteção de edição, referências, visualizações, histórico,
+exportação, reordenação/recarga, teclado e toque. Gera capturas e relatórios axe
+em `artifacts/journey-observation/` para 1440, 834 e 390 px.
+
+A referência externa foi lida em documentação pública. Estes testes validam o
+Blue Ocean; não comprovam uma comparação interativa com o produto observado.

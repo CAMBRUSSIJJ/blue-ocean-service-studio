@@ -1,5 +1,13 @@
 # Histórico de mudanças
 
+## 2026-10-22 · Inserção precisa e visualizações da jornada
+
+- Inclui elementos antes de qualquer cartão com âncora estável e seleção rápida do tipo padrão com Enter.
+- Duplicação por Ctrl/Cmd+D e remoção por Delete/Backspace no cartão em foco; preserva digitação e referências canônicas.
+- Salva até 20 visualizações nomeadas por jornada, com faixas, ordem, ajuste de tela e Persona, além de renomeação, atualização e exclusão reversível.
+- Apresenta e exporta explicitamente as faixas visíveis, mantendo o resumo executivo completo separado.
+- Registra fontes públicas, especificação independente anterior à implementação e tarefas de aceitação; não declara clean-room rigoroso ou paridade completa.
+
 ## 2026-10-22 · Contexto da jornada e caminho da melhoria
 
 - Separa o catálogo de faixas (Experiência, Operação, Negócio) da inserção de conteúdo nas células; preserva tipos livres e modelos como opções secundárias.
