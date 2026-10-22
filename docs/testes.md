@@ -31,6 +31,7 @@ npm run journey:layout:test
 npm run blueprint:methodology:test
 npm run journey:starter:test
 npm run journey:growth:test
+npm run journey:content:test
 ```
 
 Esses testes exercitam operações como seleção, criação e movimentação de cartões,
@@ -64,6 +65,7 @@ npm run maps:browser
 python3 scripts/h1710-journey-template-whiteboard-browser.py
 python3 scripts/journey-progressive-browser.py
 npm run journey:growth:browser
+npm run journey:content:browser
 ```
 
 Esses runners podem servir o `dist/` em um servidor temporário. Para os que
@@ -92,6 +94,12 @@ desfazer/refazer, persistência, backup e resumo HTML. Executa axe-core no mapa,
 planejamento, acompanhamento e apresentação em desktop e larguras menores; as
 evidências ficam em `artifacts/journey-growth/`. Os dados são simulados para QA.
 Esses testes não representam pesquisa com clientes ou validação comercial.
+
+`journey:content:browser` verifica composição de texto, cartões, emojis, imagens
+e links, modelos e configuração de faixas, movimentação, histórico, projeções
+canônicas, persistência, backup e HTML independente. Audita os novos menus,
+formulários e apresentação com axe-core nas três larguras. Evidências em
+`artifacts/journey-content/`.
 
 `maps:browser` verifica os botões de Jornada e Blueprint em 1440, 834 e 390 px.
 Confere rodapés com nomes longos, busca, Cards/Tabela, confirmação de exclusão,

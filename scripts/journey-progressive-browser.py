@@ -52,6 +52,7 @@ def preset(f, name):
 
 def note(f, key, text):
     f.locator(f'[data-cell="{key}"] .ad').click()
+    f.get_by_role('button',name='Adicionar Cartão',exact=True).click()
     edit = f.locator(f'[data-cell="{key}"] [data-ed="c"]').last
     expect(edit).to_be_focused()
     edit.fill(text)
@@ -96,6 +97,8 @@ try:
         for key, text in [('ev|0','Confirmação do pedido'), ('fl|0','Acolher a solicitação'), ('bk|0','Conferir o cadastro'), ('sy|0','Sistema de atendimento')]:
             note(f, key, text)
         f.get_by_role('button', name='+ Adicionar faixa', exact=True).click()
+        f.get_by_role('dialog',name='Adicionar faixa',exact=True).get_by_label('Nome da faixa',exact=True).fill('Necessidades')
+        f.get_by_role('button',name='Salvar faixa',exact=True).click()
         f.locator('[data-ed="ln"]').fill('Necessidades')
         f.locator('[data-ed="ln"]').press('Tab')
         custom = f.locator('.r[data-row^="x"]').get_attribute('data-row')

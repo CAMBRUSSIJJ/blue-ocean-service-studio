@@ -8,7 +8,9 @@ A partir da **V1.16.0**, a autoridade do produto é a pasta `src/` junto de `ind
 - `public/v*.js` e `public/v*.css` são gerados por `scripts/prepare-assets.mjs`.
 - A matriz integrada é editada em `src/runtime/journey-matrix.html` e
   `src/runtime/journey-matrix.css`, com interações complementares em
-  `src/runtime/journey-growth-ui.js` e regras de planejamento em
+  `src/runtime/journey-growth-ui.js`, composição em
+  `src/runtime/journey-content-ui.js`, validação compartilhada em
+  `src/services/journey-content.js` e regras de planejamento em
   `src/services/journey-growth.ts`. O mesmo script gera
   `public/blueprint-reference-original.html` e `public/journey-matrix.css`.
 - `dist/` é sempre gerado por `npm run build` e **não deve ser corrigido manualmente**.

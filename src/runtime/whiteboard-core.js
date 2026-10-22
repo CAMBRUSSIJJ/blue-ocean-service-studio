@@ -1,6 +1,7 @@
 import { BLUEPRINT_FRAME_LAYERS, BLUEPRINT_BOUNDARIES, BLUEPRINT_MARKETING_DIMENSIONS, BLUEPRINT_QUALITY_DIMENSIONS, buildBlueprintDeliveryReport, blueprintServicePromise, validateActivityNumbers, isCustomerServiceEvidence } from './blueprint-methodology.js';
 import { runtime } from './runtime-registry.js';
 import { renderBlueprintReference } from './blueprint-reference-view.js';
+import { validateMatrixDocument, matrixContentFromDocument, restoreMatrixContent } from '../services/journey-content.js';
 import { ACQUISITION_ROWS, saveJourneyImprovement, journeyImprovementPlans, measureJourneyImprovement } from '../services/journey-growth.js';
 import { buildBlueprintGuidedReading, BLUEPRINT_EMOTION_LABELS } from '../services/blueprint-guided-reading.js';
 import { migrateGraphV3, validateGraphDeep, repairGraphIntegrity, deletePlan, applyDeletePlan, isSafeImageDataUrl } from './data-integrity.js';
@@ -1109,6 +1110,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       if(/^x[a-z0-9]{1,12}\|\d+$/.test(key)&&Array.isArray(values))ref.c[key]=clone(values);
     }
     stages.forEach((stage,index)=>{for(const lane of ACQUISITION_ROWS){const notes=j?.acquisitionCells?.[stage.id]?.[lane];if(notes?.length)ref.c[lane+'|'+index]=notes.map(n=>({i:n.id,t:n.text}))}});
+    restoreMatrixContent(ref,j?.matrixContent,stages.map(s=>s.id));
     b.blueprintHostedShown=Array.from(presented);
     return ref;
   }
@@ -1116,6 +1118,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     if(!doc||!Array.isArray(doc.steps)||!doc.c||typeof doc.c!=='object'||!canEditHostedMatrix())return false;
     if(doc.steps.length>90||Object.values(doc.c).some(x=>!Array.isArray(x)||x.length>100))return;
     if(doc.steps.some(s=>s.emotionRecorded&&s.emotionStatus==='validated'&&!String(s.emotionSource||'').trim()))throw Error('Informe a fonte da evidência para validar uma emoção.');
+    validateMatrixDocument(doc);
     const b=board();if(!b)return;
     let j=activeJourney();
     if(!j){
@@ -1249,9 +1252,10 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       if(/^x[a-z0-9]{1,12}\|\d+$/.test(key)&&Array.isArray(value))
         customCells[key]=value.slice(0,100).map(n=>({i:String(n.i||uid('note')),t:String(n.t||'').slice(0,1000)}));
     });
-    const customerCells={};stageIds.forEach((sid,index)=>{customerCells[sid]=(doc.c['ac|'+index]||[]).map(n=>({...n,i:String(n.i),t:String(n.t||'').slice(0,1000)}))});
+    const customerCells={};stageIds.forEach((sid,index)=>{customerCells[sid]=(doc.c['ac|'+index]||[]).map(n=>({i:String(n.i),t:String(n.t||'').slice(0,1000),...(n.hostItemId?{hostItemId:n.hostItemId}:{}),...(n.hostKind?{hostKind:n.hostKind}:{}),...(n.hostAction?{hostAction:true}:{})}))});
     b.blueprintHosted={persona:String(doc.persona||'').slice(0,400),customerCells,lanes:Array.isArray(doc.lanes)?clone(doc.lanes):[],
       customCells};
+    j.matrixContent=matrixContentFromDocument(doc,stageIds,sync);
     invalidateViewLayout('journey');invalidateViewLayout('blueprint');
     return save(false,{label:openedFromUnifiedJourney?'Editar matriz da Jornada':'Editar matriz do Blueprint'});
   }
@@ -3196,7 +3200,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   function renameBoardById(id,name){if(!graph)load();const b=graph.views.whiteboards?.[id];if(!b)return false;const clean=String(name||'').trim();if(!clean)return false;b.name=clean;b.updatedAt=new Date().toISOString();if(meta.blueprintHome?.records?.[id])meta.blueprintHome.records[id].name=clean;if(boardId===id&&overlay)renderAll();save(false,{label:'Renomear quadro'});return true}
   function duplicateBoardById(id){if(!graph)load();const b=graph.views.whiteboards?.[id];if(!b)return null;const previous=boardId;boardId=id;meta.activeBoardId=id;const newId=duplicateBoard();if(previous&&graph.views.whiteboards[previous]){boardId=previous;meta.activeBoardId=previous;save(false,{content:false,label:'Restaurar quadro ativo'})}return newId}
   function dialogHost(){return overlay||document.body}
-  function mountDialog(root){const standalone=!overlay;if(standalone)root.classList.add('rt1120-standalone-modal');dialogHost().appendChild(root);return root}
+  function mountDialog(root){const standalone=!overlay;if(standalone)root.classList.add('rt1120-standalone-modal');if(overlay?.querySelector('.bo-blueprint-exact-host'))root.style.zIndex='999999';dialogHost().appendChild(root);return root}
   function confirmDialog(title,message,confirmLabel='Confirmar',danger=false){return new Promise(resolve=>{let settled=false;const root=document.createElement('div');root.className='rt144-modal rt190-native-dialog';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label',title);const box=document.createElement('div');box.className='rt144-modalbox rt190-confirm-dialog';box.innerHTML=`<div class="rt144-panelhead"><div><b>${esc(title)}</b><small>${esc(message)}</small></div><button class="rt144-x" aria-label="Fechar">×</button></div>`;const actions=document.createElement('div');actions.className='rt190-dialog-actions';const finish=v=>{if(settled)return;settled=true;document.removeEventListener('keydown',key,true);root.remove();resolve(v)};const cancel=btn('Cancelar',()=>finish(false));const ok=btn(confirmLabel,()=>finish(true),danger?'danger':'primary');actions.append(cancel,ok);box.appendChild(actions);root.appendChild(box);mountDialog(root);$('.rt144-x',box).setAttribute('aria-label','Fechar diálogo');$('.rt144-x',box).onclick=()=>finish(false);root.onclick=e=>{if(e.target===root)finish(false)};const key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();finish(false)}if(e.key==='Tab'){const nodes=[...root.querySelectorAll('button,input,textarea,select')].filter(n=>!n.disabled),first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}};document.addEventListener('keydown',key,true);setTimeout(()=>ok.focus(),0)})}
   function promptDialog(title,label,initial='',placeholder=''){return new Promise(resolve=>{let settled=false;const root=document.createElement('div');root.className='rt144-modal rt190-native-dialog';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label',title);const box=document.createElement('div');box.className='rt144-modalbox rt190-prompt-dialog';box.innerHTML=`<div class="rt144-panelhead"><div><b>${esc(title)}</b><small>Preencha o campo abaixo para continuar.</small></div><button class="rt144-x" aria-label="Fechar">×</button></div>`;const form=document.createElement('form');form.className='rt190-prompt-form';form.innerHTML=`<label><span>${esc(label)}</span><input value="${esc(initial)}" placeholder="${esc(placeholder)}"></label><div class="rt190-dialog-actions"><button type="button" data-cancel>Cancelar</button><button type="submit" class="primary">Continuar</button></div>`;box.appendChild(form);root.appendChild(box);mountDialog(root);const input=form.querySelector('input'),finish=v=>{if(settled)return;settled=true;document.removeEventListener('keydown',key,true);root.remove();resolve(v)};form.querySelector('[data-cancel]').onclick=()=>finish(null);form.onsubmit=e=>{e.preventDefault();finish(input.value.trim()||null)};$('.rt144-x',box).onclick=()=>finish(null);root.onclick=e=>{if(e.target===root)finish(null)};const key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();finish(null)}if(e.key==='Tab'){const nodes=[...root.querySelectorAll('button,input')].filter(n=>!n.disabled),first=nodes[0],last=nodes.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}};document.addEventListener('keydown',key,true);setTimeout(()=>{input.focus();input.select()},0)})}
 

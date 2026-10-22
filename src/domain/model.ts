@@ -122,6 +122,12 @@ export type JourneyCard = { id: string; content: string; checked?: boolean; icon
 export type JourneyLaneTone = 'neutral' | 'blue' | 'emerald' | 'amber' | 'rose' | 'violet';
 export type JourneyLane = { id: string; type: JourneyLaneType; label: string; hidden?: boolean; tone?: JourneyLaneTone; height?: number; binding?: 'customerAction' | 'thoughts' | 'touchpoints' | 'needs' | 'pains'; cards: Record<string, string>; cardItems?: Record<string, JourneyCard[]>; };
 export type JourneyMapLayout = { version: 1; lanes: JourneyLane[]; stageWidth?: number; introDismissed?: boolean };
+export type JourneyMatrixBlock = { id: Id; type: 'text' | 'card' | 'emoji' | 'image' | 'link'; text: string; icon?: string; url?: string; credit?: string };
+export type JourneyMatrixContent = {
+  version: 1;
+  rows: Record<string, { n: string; h: string; icon: string; defaultType: JourneyMatrixBlock['type'] }>;
+  cells: Record<Id, Record<string, JourneyMatrixBlock[]>>;
+};
 export type JourneyMatrixView = {
   version: 1;
   preset: 'essential' | 'detailed' | 'operational' | 'acquisition' | 'complete' | 'custom';
@@ -140,6 +146,7 @@ export type Journey = {
   stageIds: Id[];
   mapLayout?: JourneyMapLayout;
   matrixView?: JourneyMatrixView;
+  matrixContent?: JourneyMatrixContent;
   acquisitionCells?: Record<Id, Record<string, Array<{ id: Id; text: string }>>>;
   owner?: string;
   status?: 'draft' | 'active' | 'archived';

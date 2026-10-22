@@ -88,3 +88,34 @@ participantes antes de definir planos comerciais.
 A persistência entre dispositivos e a colaboração remota continuam descritas
 no [plano de colaboração](colaboracao-remota.md). O piloto deve observar se a
 ausência desses recursos impede a adoção antes de ampliar a oferta.
+
+## Compor as células e configurar faixas
+
+**+ Adicionar** abre um menu com Texto, Cartão, Emoji, Imagem e Link. É possível
+combinar esses elementos na mesma célula. Texto e cartão permitem digitação
+direta; os demais abrem um formulário com significado, descrição ou título.
+O menu **⋯** permite editar, duplicar, mover para cima/baixo, transferir para
+outra etapa e remover. Também é possível arrastar pela alça entre células da
+mesma faixa. Desfazer e refazer preservam o tipo e o conteúdo completo.
+
+A engrenagem de cada faixa permite alterar nome, descrição, ícone e conteúdo
+padrão. O padrão aparece primeiro no menu de inclusão e mantém os tipos dos
+elementos existentes. **Adicionar faixa** oferece modelos de Canais, Falas do
+cliente, Expectativas, Evidências e Responsáveis, além de uma faixa em branco.
+Cancelar o formulário não cria uma faixa vazia.
+
+A faixa de Contexto mantém seu campo principal e admite elementos adicionais.
+Emoções e Dores e ideias preservam seus controles específicos. Um emoji
+adicionado como elemento complementar não confirma uma emoção nem gera uma
+medição. Ações e evidências continuam projetadas nos registros canônicos do
+serviço; a composição visual acompanha a identidade da etapa.
+
+Imagens podem usar um endereço HTTPS ou um arquivo JPG, PNG ou WebP de até
+500 KB, com descrição obrigatória e autoria opcional. O mapa comporta até 2 MB
+de arquivos de imagem; imagens por endereço são carregadas de sua origem e
+precisam continuar disponíveis para serem exibidas. Arquivos locais ficam no
+backup do projeto e no HTML exportado. Links aceitam HTTP/HTTPS e abrem em
+outra aba. A apresentação e a exportação preservam esses elementos.
+
+O formulário de nova etapa flutua junto ao botão de inclusão. Ele mantém a
+altura do cabeçalho e oferece criação contínua por Enter.

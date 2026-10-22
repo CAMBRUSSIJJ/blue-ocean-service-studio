@@ -1,5 +1,13 @@
 # Histórico de mudanças
 
+## Conteúdos e composição de faixas — 22/10/2026
+
+- Acrescenta texto, cartão, emoji, imagem e link por célula, com edição, duplicação e movimentação.
+- Oferece configuração de nome, descrição, ícone e conteúdo padrão, além de modelos de faixa.
+- Preserva composição no histórico, backup e apresentação, mantendo as projeções canônicas de ações e evidências.
+- Move a criação de etapas para um painel flutuante que mantém a altura do cabeçalho.
+- Amplia a validação de persistência, conteúdo acessível e navegação em desktop e celular.
+
 ## Jornada, aquisição e acompanhamento de melhorias — 22/10/2026
 
 - Organiza a matriz em colunas confortáveis, com ajuste à tela opcional, criação de etapas por rascunho e ações de nota em menu contextual.
