@@ -50,7 +50,7 @@ const service = { service: { id: 'service' }, stages: { stage: { id: 'stage', cu
   views: { whiteboards: {} }, entities: { persona: { persona: { id: 'persona', name: 'Cliente' } } } };
 const snapshot = structuredClone(service);
 assert.equal(prepareJourneyBlueprintDraft(service, 'missing').graph, service);
-assert.equal(prepareJourneyBlueprintDraft(service, 'empty').boardId, null);
+assert.ok(prepareJourneyBlueprintDraft(service, 'empty').boardId, 'A Jornada pode começar antes da primeira etapa, sem gerar exemplos');
 const draft = prepareJourneyBlueprintDraft(service, 'journey', { id: 'blueprint', now: '2026-10-20T12:00:00Z' });
 assert.equal(draft.created, true);
 assert.equal(draft.graph.views.whiteboards.blueprint.journeyId, 'journey');

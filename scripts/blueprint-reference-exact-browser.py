@@ -81,6 +81,32 @@ try:
         expect(page.frame_locator('.bo-blueprint-reference-frame').locator('[data-ed="ln"]')).to_have_count(1)
         assert not errors,errors
         print('Blueprint exact HTML + Service Graph persistence: OK')
+        # The Journey uses the same original HTML directly, with no extra Blueprint step
+        # and without seeded coffee examples or suggested cards.
+        unified=b.new_page(viewport={'width':1440,'height':1000})
+        unified.goto('http://127.0.0.1:'+str(server.server_port)+'/?__qa_unified_journey=1',wait_until='networkidle')
+        if unified.get_by_role('button',name='Abrir workspace local sem conta').count():
+            unified.get_by_role('button',name='Abrir workspace local sem conta').click()
+        unified.locator('[data-service-journey-nav="1"]').click()
+        unified.get_by_role('button',name='Criar Jornada',exact=True).first.click()
+        unified.get_by_role('button',name='Criar e abrir Jornada').click()
+        journey=unified.frame_locator('.bo-blueprint-reference-frame')
+        expect(journey.get_by_role('heading',name='Sua primeira etapa')).to_be_visible()
+        assert journey.get_by_text('Preencher com o exemplo do café').count()==0
+        assert journey.get_by_text('Ver exemplo pronto').count()==0
+        journey.get_by_role('textbox',name='Nome da primeira etapa').fill('Conhecer o serviço')
+        journey.get_by_role('button',name='Criar etapa').click()
+        expect(journey.locator('.bd')).to_be_visible()
+        assert journey.locator('.sg').count()==0, 'Reference must not inject suggestion examples'
+        assert journey.locator('.st').count()==0, 'Starter must be replaced by the map'
+        unified.wait_for_function("""() => {
+          const g=window.BlueOceanRuntime.api('dataBridge').get();
+          return Object.values(g.stages).some(st=>st.title==='Conhecer o serviço');
+        }""",timeout=10000)
+        journey.get_by_role('button',name='Voltar para Blueprints').click()
+        expect(unified.locator('[data-journey-library="1"]')).to_be_visible()
+        print('Unified Journey: original HTML, empty start and canonical stage persistence OK')
+        unified.close()
         b.close()
 finally:
     server.shutdown();server.server_close()

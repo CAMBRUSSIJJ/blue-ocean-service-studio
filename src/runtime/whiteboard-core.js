@@ -1054,10 +1054,11 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     return meta.blueprintReference.boards[boardId||'global'] ||= {mode:'reference',client:false};
   }
 
+  let journeyPrimaryEditor=false;
   function hostedBlueprintDocument(){
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
-    const ref={id:'host',title:b.name||'Blueprint de serviço',persona:saved.persona||j?.name||'',
-      guide:1,start:stages.length?0:1,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
+    const ref={id:'host',title:journeyPrimaryEditor?(j?.name||'Jornada'):b.name||'Blueprint de serviço',persona:saved.persona||j?.name||'',
+      guide:journeyPrimaryEditor?0:1,start:stages.length?0:1,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
     const order=new Map(stages.map((stage,index)=>[stage.id,index]));
     stages.forEach(st=>ref.steps.push({
@@ -1220,6 +1221,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       if(edge.blueprintHostedLink&&!referenced.has(id))delete b.edges[id];
     });
     b.name=String(doc.title||b.name||'Blueprint de serviço').slice(0,240);
+    if(journeyPrimaryEditor&&j){j.name=b.name;j.updatedAt=timestamp;}
     const customCells={};Object.entries(doc.c).forEach(([key,value])=>{
       if(/^x[a-z0-9]{1,12}\|\d+$/.test(key)&&Array.isArray(value))
         customCells[key]=value.slice(0,100).map(n=>({i:String(n.i||uid('note')),t:String(n.t||'').slice(0,1000)}));
@@ -1260,7 +1262,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const outer=document.createElement('section');outer.className='bo-blueprint-exact-host';
     outer.style.cssText='position:absolute;inset:0;z-index:210;background:#f5f7fb;overflow:hidden';
     const frame=document.createElement('iframe');frame.className='bo-blueprint-reference-frame';
-    frame.title='Blue Ocean · Blueprint de Serviço';frame.src='/blueprint-reference-original.html?service-graph=1';
+    frame.title='Blue Ocean · Blueprint de Serviço';frame.src='/blueprint-reference-original.html?service-graph=1'+(journeyPrimaryEditor?'&journey-primary=1':'');
     frame.style.cssText='width:100%;height:100%;border:0;display:block;background:#f5f7fb';
     const viewBoardId=boardId;
     hostedBlueprintListener=event=>{
@@ -1276,8 +1278,10 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       }else if(type==='tools'){
         showBlueprintReferenceTools();
       }else if(type==='back'){
-        close(false);window.dispatchEvent(new CustomEvent('rt-navigation',{detail:'canvas'}));
-        setTimeout(()=>window.dispatchEvent(new CustomEvent('bo-service-workspace-tab',{detail:'blueprint'})),0);
+        const wasJourney=journeyPrimaryEditor;
+        close(false);
+        window.dispatchEvent(new CustomEvent('rt-navigation',{detail:'canvas'}));
+        setTimeout(()=>window.dispatchEvent(new CustomEvent('bo-service-workspace-tab',{detail:wasJourney?'journey':'blueprint'})),0);
       }else if(type==='library'){
         close(false);window.dispatchEvent(new CustomEvent('rt-navigation',{detail:'journeys'}));
       }
@@ -3394,8 +3398,8 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   async function createBlankWhiteboard(name='Novo Whiteboard'){if(!graph)load();if(isWorkspaceEmptyGraph(graph))refreshGraphFromStorageIfInitialized();if(isWorkspaceEmptyGraph(graph)){window.dispatchEvent(new CustomEvent('bo-create-service'));return null}const clean=String(name||'Novo Whiteboard').trim()||'Novo Whiteboard',id=createBoard(clean,{viewKind:'free',layoutMode:'free',items:{},edges:{}});if(!id)return null;const b=board();b.viewKind='free';b.name=clean;pref().layoutMode='free';save(false,{label:'Criar Whiteboard'});await open();if(overlay){renderAll();setTimeout(fit,0)}return{id:boardId,name:b.name}}
   async function openWhiteboard(id){if(!graph)load();const b=graph.views?.whiteboards?.[id];if(!b||b.viewKind!=='free')return false;boardId=id;meta.activeBoardId=id;await open();boardId=id;meta.activeBoardId=id;pref().layoutMode='free';if(pref().viewport){zoom=pref().viewport.zoom;pan=clone(pref().viewport.pan)}save(false,{label:'Abrir Whiteboard'});if(overlay){renderAll();if(!pref().viewport)setTimeout(fit,0)}return true}
   async function createServiceFrameWhiteboard(){toast('O Service Frame agora pertence a Blueprints.');return null}
-  async function createServiceBlueprint(name='Service Blueprint'){blueprintReferenceState().mode='reference';if(!graph)load();if(isWorkspaceEmptyGraph(graph))refreshGraphFromStorageIfInitialized();if(isWorkspaceEmptyGraph(graph)){window.dispatchEvent(new CustomEvent('bo-create-service'));return null}const clean=String(name||'Service Blueprint').trim()||'Service Blueprint',id=createBoard(clean,{viewKind:'blueprint',layoutMode:'service',items:{},edges:{}});if(!id)return null;const b=board();b.viewKind='blueprint';b.name=clean;pref().layoutMode='service';serviceCompositionState().experienceMode='guided';serviceCompositionState().showRecipePrompt=false;save(false,{label:'Criar Service Blueprint'});await open();boardId=id;meta.activeBoardId=id;pref().layoutMode='service';applyLayout('service',true);if(overlay){renderAll();setTimeout(fit,0)}return{id:boardId,name:b.name}}
-  async function openServiceBlueprint(id){if(!graph)load();const b=graph.views?.whiteboards?.[id];if(!b||b.viewKind!=='blueprint')return false;boardId=id;meta.activeBoardId=id;blueprintReferenceState().mode='reference';await open();boardId=id;meta.activeBoardId=id;pref().layoutMode=b.layoutMode==='service'?'service':'blueprint';save(false,{label:'Abrir Service Blueprint'});if(overlay){if(pref().viewport){zoom=pref().viewport.zoom;pan=clone(pref().viewport.pan);renderAll()}else{applyLayout(pref().layoutMode||'service');renderAll();setTimeout(fit,0)}}return true}
+  async function createServiceBlueprint(name='Service Blueprint'){journeyPrimaryEditor=false;blueprintReferenceState().mode='reference';if(!graph)load();if(isWorkspaceEmptyGraph(graph))refreshGraphFromStorageIfInitialized();if(isWorkspaceEmptyGraph(graph)){window.dispatchEvent(new CustomEvent('bo-create-service'));return null}const clean=String(name||'Service Blueprint').trim()||'Service Blueprint',id=createBoard(clean,{viewKind:'blueprint',layoutMode:'service',items:{},edges:{}});if(!id)return null;const b=board();b.viewKind='blueprint';b.name=clean;pref().layoutMode='service';serviceCompositionState().experienceMode='guided';serviceCompositionState().showRecipePrompt=false;save(false,{label:'Criar Service Blueprint'});await open();boardId=id;meta.activeBoardId=id;pref().layoutMode='service';applyLayout('service',true);if(overlay){renderAll();setTimeout(fit,0)}return{id:boardId,name:b.name}}
+  async function openServiceBlueprint(id,options={}){journeyPrimaryEditor=!!options.asJourney;if(!graph)load();const b=graph.views?.whiteboards?.[id];if(!b||b.viewKind!=='blueprint')return false;boardId=id;meta.activeBoardId=id;blueprintReferenceState().mode='reference';await open();boardId=id;meta.activeBoardId=id;pref().layoutMode=b.layoutMode==='service'?'service':'blueprint';save(false,{label:'Abrir Service Blueprint'});if(overlay){if(pref().viewport){zoom=pref().viewport.zoom;pan=clone(pref().viewport.pan);renderAll()}else{applyLayout(pref().layoutMode||'service');renderAll();setTimeout(fit,0)}}return true}
   function listServiceBlueprints(){if(!graph)load();return Object.values(graph.views?.whiteboards||{}).filter(b=>b.viewKind==='blueprint').map(b=>({id:b.id,name:b.name||'Service Blueprint',layoutMode:b.layoutMode||meta.boardPrefs?.[b.id]?.layoutMode||'service',itemCount:Object.keys(b.items||{}).length,updatedAt:b.updatedAt||graph.service.updatedAt||null}))}
   function listWhiteboards(){if(!graph)load();return Object.values(graph.views?.whiteboards||{}).filter(b=>b.viewKind==='free').map(b=>({id:b.id,name:b.name||'Whiteboard',itemCount:Object.keys(b.items||{}).length,edgeCount:Object.keys(b.edges||{}).length,updatedAt:b.updatedAt||graph.service.updatedAt||null}))}
   runtime.register('whiteboardCore',{appVersion:APP_VERSION,coreVersion:WHITEBOARD_CORE_VERSION,studioVersion:WHITEBOARD_STUDIO_VERSION,audit:coreAudit,repair:repairCoreIntegrity,show:showCoreStatus,createBlank:createBlankWhiteboard,createServiceFrame:createServiceFrameWhiteboard,openBoard:openWhiteboard,list:listWhiteboards,renameBoard:renameBoardById,duplicateBoard:duplicateBoardById,deleteBoard:deleteBoardById,focusItem:(id)=>focusItem(id,{fitItem:true,record:true}),openOrigin:(id)=>{const it=board()?.items?.[id];return it?openSmartObjectOrigin(it):false},conflictDraft:()=>clone(conflictDraft()),clearConflictDraft},WHITEBOARD_CORE_VERSION);
