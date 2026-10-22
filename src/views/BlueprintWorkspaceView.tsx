@@ -43,7 +43,7 @@ import { listContextEntities } from '../services/context-library';
 
 type BlueprintApi = {
   create?(name?: string): Promise<{ id: string; name: string } | null> | { id: string; name: string } | null;
-  open?(id: string): Promise<boolean> | boolean;
+  open?(id: string, options?: { asJourney?: boolean }): Promise<boolean> | boolean;
   list?(): Array<{ id: string; name: string; layoutMode?: string; itemCount?: number; updatedAt?: string }>;
 };
 
@@ -238,11 +238,20 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
   };
 
   const openJourney = async (id: string) => {
-    const runtime = journeyApi();
-    if (!runtime?.selectInWorkspace && !runtime?.open) { showToast('O runtime de Journey ainda não está disponível.'); return; }
-    const opened = runtime.selectInWorkspace ? runtime.selectInWorkspace(id) : await runtime.open?.(id);
-    if (!opened) { showToast('Não foi possível abrir esta Journey.'); return; }
-    setJourneyEditorOpen(true);
+    // A Journey agora usa diretamente a matriz do arquivo de referência.
+    // O Blueprint vinculado é somente o suporte canônico; o usuário não precisa abrir outro editor.
+    const runtime = blueprintApi();
+    const latest = window.BlueOceanRuntime?.api<{ get(): typeof graph }>('dataBridge')?.get() ?? graph;
+    const prepared = prepareJourneyBlueprintDraft(latest, id);
+    if (!prepared.boardId) { showToast('Não foi possível abrir esta Jornada.'); return; }
+    if (prepared.created) setGraph(current =>
+      prepareJourneyBlueprintDraft(current, id, { id: prepared.boardId! }).graph,
+      'Jornada: inicializar matriz compartilhada');
+    setJourneyEditorOpen(false);
+    window.setTimeout(async () => {
+      const opened = await (blueprintApi() ?? runtime)?.open?.(prepared.boardId!, { asJourney: true });
+      if (!opened) showToast('Não foi possível abrir a matriz da Jornada.');
+    }, prepared.created ? 160 : 20);
   };
 
   // Open the canonical Blueprint for a particular Journey; never clone stages or invent backstage work.
@@ -294,9 +303,7 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
     setJourneyDraftName('');
     setJourneyStartTemplate('blank');
     showToast((requestedTemplate ?? journeyStartTemplate) === 'blank' ? 'Jornada vazia pronta para editar. Comece com sua primeira etapa.' : 'Jornada criada com um modelo editável. Ajuste as etapas para a realidade do serviço.');
-    const opened = runtime.selectInWorkspace ? runtime.selectInWorkspace(created.id) : await runtime.open?.(created.id);
-    if (!opened) { showToast('Jornada criada. Abra-a na biblioteca para editar.'); return; }
-    setJourneyEditorOpen(true);
+    await openJourney(created.id);
   };
 
   const deleteJourney = () => {
@@ -836,11 +843,11 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
     {workspaceTab === 'operations' && <ServiceOperationsBridgeView studio={studio}/>}
 
     {workspaceTab === 'journey' && !journeyEditorOpen && !journeyCreateOpen && <div className="bo-h722-blueprint-pane bo-h724-journey-pane" data-journey-library="1">
-      <div className="bo-h722-library-head"><div><small>EXPERIÊNCIA DO SERVIÇO</small><h2>Jornadas</h2><p>Mapeie o que o cliente vive. Quando houver etapas, continue no Blueprint para desenhar como a operação entrega essa experiência.</p></div></div>
+      <div className="bo-h722-library-head"><div><small>EXPERIÊNCIA DO SERVIÇO</small><h2>Jornadas</h2><p>Mapeie a experiência e a operação na mesma Jornada. As faixas podem ser adicionadas conforme a necessidade.</p></div></div>
       <div className="bo-h1711-flow-hint" data-design-flow="journey" role="note"><span><strong>Jornada</strong><ArrowRight size={13}/><strong>Blueprint</strong><span>·</span><span>Whiteboard para explorar ideias, quando precisar.</span></span><button className="bo-button bo-button--secondary" type="button" onClick={() => selectWorkspaceTab('whiteboard')}>Explorar no Whiteboard <ArrowRight size={13}/></button></div>
       <div className="bo1205h3-list-toolbar bo-h722-library-toolbar"><strong>{filteredJourneys.length} {filteredJourneys.length === 1 ? 'resultado' : 'resultados'}</strong>{journeys.length > 0 && <div><label className="bo1205h3-icon-search"><Search size={15}/><input value={journeyQuery} onChange={(event) => setJourneyQuery(event.target.value)} placeholder="Buscar Jornada" aria-label="Buscar Jornada"/></label><div className="bo-view-switch" role="group" aria-label="Exibição da biblioteca"><button type="button" className={`bo-button bo-button--ghost ${journeyViewMode === 'cards' ? 'active' : ''}`} aria-pressed={journeyViewMode === 'cards'} onClick={() => setJourneyViewMode('cards')}><LayoutTemplate size={16}/><span>Cards</span></button><button type="button" className={`bo-button bo-button--ghost ${journeyViewMode === 'table' ? 'active' : ''}`} aria-pressed={journeyViewMode === 'table'} onClick={() => setJourneyViewMode('table')}><Table2 size={16}/><span>Tabela</span></button></div><button type="button" className="primary bo-button bo-button--primary" onClick={() => setJourneyCreateOpen(true)}><Plus size={16}/> Criar Jornada</button></div>}</div>
       {journeyViewMode === 'cards' ? <div className="bo-h724-journey-grid">{filteredJourneys.map((journey) => <article key={journey.id} className="bo-h724-journey-card"><img src={journeyPreviewSrc(journey, graph)} alt=""/><div className="bo-h724-journey-card__copy"><small>JORNADA</small><strong>{journey.name}</strong><span>{journey.stageIds.length} etapas · {journey.status === 'active' ? 'Ativa' : journey.status === 'archived' ? 'Arquivada' : 'Em construção'}</span><time>{formatDate(journey.updatedAt || graph.service.updatedAt)}</time></div><footer className="bo-map-card-actions"><button type="button" className="bo-h722-open bo-button bo-button--secondary" onClick={() => void openJourney(journey.id)}>Abrir Jornada <ArrowRight size={14}/></button><button type="button" className="bo-h1711-link bo-button bo-button--ghost" data-journey-to-blueprint={journey.id} onClick={() => continueJourneyInBlueprint(journey.id)}>{journey.stageIds.length ? (Object.values(graph.views.whiteboards).some(board => board.viewKind === 'blueprint' && board.journeyId === journey.id) ? 'Abrir Blueprint vinculado' : 'Continuar no Blueprint') : 'Preparar Blueprint'} <ArrowRight size={13}/></button><button type="button" className="bo-h722-journey-delete bo-button bo-button--danger" aria-label={`Excluir Jornada ${journey.name}`} onClick={() => setJourneyToDelete({ id: journey.id, name: journey.name })} title={`Excluir Jornada ${journey.name}`}><Trash2 size={16}/><span className="sr-only">Excluir</span></button></footer></article>)}</div> : <div className="bo1205h3-table-wrap"><table className="bo1205h3-table"><thead><tr><th>NOME</th><th>STATUS</th><th>ETAPAS</th><th>ATUALIZADO</th><th></th></tr></thead><tbody>{filteredJourneys.map((journey) => <tr key={journey.id}><td><div className="bo1205h3-name-cell"><span><BlueOceanObjectIcon kind="journey" size={14}/></span><button className="bo-button bo-button--secondary" type="button" onClick={() => void openJourney(journey.id)}>{journey.name}</button></div></td><td>{journey.status === 'active' ? 'Ativa' : journey.status === 'archived' ? 'Arquivada' : 'Em construção'}</td><td>{journey.stageIds.length}</td><td>{formatDate(journey.updatedAt || graph.service.updatedAt)}</td><td><button className="bo-button bo-button--secondary" type="button" onClick={() => void openJourney(journey.id)}>Abrir</button> <button type="button" className="bo-h1711-link bo-button bo-button--ghost" data-journey-to-blueprint={journey.id} onClick={() => continueJourneyInBlueprint(journey.id)}>Blueprint vinculado</button> <button type="button" className="bo-h722-journey-delete bo-button bo-button--danger" aria-label={`Excluir Jornada ${journey.name}`} onClick={() => setJourneyToDelete({ id: journey.id, name: journey.name })}>Excluir</button></td></tr>)}</tbody></table></div>}
-      {!filteredJourneys.length && <div className="bo1205h3-empty bo-h724-journey-empty"><BlueOceanObjectIcon kind="journey" size={30}/><strong>{journeys.length ? 'Nenhuma Jornada encontrada' : 'Crie sua primeira Jornada'}</strong><p>{journeys.length ? 'Ajuste a busca para encontrar outra Jornada.' : 'Comece em branco ou escolha um modelo. Depois, continue no Blueprint com as mesmas etapas.'}</p>{!journeys.length && <button type="button" className="primary bo-button bo-button--primary" onClick={() => setJourneyCreateOpen(true)}><Plus size={16}/> Criar Jornada</button>}</div>}
+      {!filteredJourneys.length && <div className="bo1205h3-empty bo-h724-journey-empty"><BlueOceanObjectIcon kind="journey" size={30}/><strong>{journeys.length ? 'Nenhuma Jornada encontrada' : 'Crie sua primeira Jornada'}</strong><p>{journeys.length ? 'Ajuste a busca para encontrar outra Jornada.' : 'Comece em branco ou escolha um modelo. A matriz fica pronta para editar, sem exemplos obrigatórios.'}</p>{!journeys.length && <button type="button" className="primary bo-button bo-button--primary" onClick={() => setJourneyCreateOpen(true)}><Plus size={16}/> Criar Jornada</button>}</div>}
     </div>}
 
     {workspaceTab === 'journey' && journeyEditorOpen && <EditorSurface><div className="bo-h724-journey-editor-shell"><div className="bo-h722-embedded bo-h722-embedded--journey" data-unified-journey-pane="1"><JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/></div></div></EditorSurface>}
