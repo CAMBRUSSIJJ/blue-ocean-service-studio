@@ -83,10 +83,10 @@ try:
         print('Blueprint exact HTML + Service Graph persistence: OK')
         # The Journey uses the same original HTML directly, with no extra Blueprint step
         # and without seeded coffee examples or suggested cards.
-        unified=b.new_page(viewport={'width':1440,'height':1000})
-        unified.goto('http://127.0.0.1:'+str(server.server_port)+'/?__qa_unified_journey=1',wait_until='networkidle')
-        if unified.get_by_role('button',name='Abrir workspace local sem conta').count():
-            unified.get_by_role('button',name='Abrir workspace local sem conta').click()
+        # Reuse the active project instead of opening a new tab with no project selected.
+        unified=page
+        unified.evaluate("() => history.replaceState({}, '', '?__qa_unified_journey=1')")
+        exact.get_by_role('button',name='Voltar para Blueprints').click()
         unified.locator('[data-service-journey-nav="1"]').click()
         if not unified.locator('[data-journey-starter="full-page"]').count():
             unified.get_by_role('button',name='Criar Jornada',exact=True).first.click()
@@ -108,7 +108,6 @@ try:
         journey.get_by_role('button',name='Voltar para Blueprints').click()
         expect(unified.locator('[data-journey-library="1"]')).to_be_visible()
         print('Unified Journey: original HTML, empty start and canonical stage persistence OK')
-        unified.close()
         b.close()
 finally:
     server.shutdown();server.server_close()
