@@ -240,6 +240,14 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
   // Open the original reference HTML as the primary Journey editor. The linked
   // Blueprint board is a canonical storage view, not a required extra step.
   const openJourney = async (id: string) => {
+    // Keep old Journey renderer available for localhost regression tests only.
+    if (['localhost', '127.0.0.1'].includes(window.location.hostname)
+        && new URLSearchParams(window.location.search).has('__qa_legacy_journey')) {
+      const runtime = journeyApi();
+      const opened = runtime?.selectInWorkspace ? runtime.selectInWorkspace(id) : await runtime?.open?.(id);
+      if (opened) setJourneyEditorOpen(true);
+      return;
+    }
     const runtime = journeyApi();
     if (!runtime?.selectInWorkspace && !runtime?.open) { showToast('Jornada indisponível.'); return; }
     const selected = runtime.selectInWorkspace ? runtime.selectInWorkspace(id) : await runtime.open?.(id);
