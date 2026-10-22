@@ -48,7 +48,7 @@ def new_journey(page):
 def preset(f, name):
     f.locator('.toolbar>.menu').first.locator('summary').click()
     f.get_by_role('button', name=name, exact=False).click()
-    expect(f.locator('[data-save-status]')).to_have_text('Salvo no projeto')
+    expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
 
 def note(f, key, text):
     f.locator(f'[data-cell="{key}"] .ad').click()
@@ -56,7 +56,7 @@ def note(f, key, text):
     expect(edit).to_be_focused()
     edit.fill(text)
     edit.press('Tab')
-    expect(f.locator('[data-save-status]')).to_have_text('Salvo no projeto')
+    expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
 
 try:
     with sync_playwright() as p:
@@ -76,19 +76,21 @@ try:
         check('Journey title updates the canonical Journey without a Blueprint suffix', 'Blueprint' not in name.input_value())
         for title in ['Descobrir', 'Solicitar', 'Receber']:
             f.get_by_role('button', name='Adicionar etapa', exact=True).click()
-            f.locator('.sh [data-ed="sn"]').last.fill(title)
-            f.locator('.sh [data-ed="sn"]').last.press('Tab')
+            f.get_by_role('textbox',name='Nome da nova etapa',exact=True).fill(title)
+            f.get_by_role('button',name='Adicionar etapa ao mapa',exact=True).click()
         note(f, 'ac|0', 'Comparar opções de atendimento')
         page.wait_for_timeout(750)  # End the editor's existing 700ms undo grouping window.
+        f.locator('[data-cell="ac|0"] .note-menu summary').click()
         f.locator('[data-cell="ac|0"] [data-act="dn"]').click()
-        expect(f.locator('[data-save-status]')).to_have_text('Salvo no projeto')
+        expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
         check('Duplicating a note keeps direct editing focus', f.locator('[data-cell="ac|0"] [data-ed="c"]').count() == 2 and f.locator('[data-cell="ac|0"] [data-ed="c"]').last.evaluate('e=>e===document.activeElement'))
         f.get_by_role('button',name='Desfazer',exact=True).click()
         expect(f.locator('[data-cell="ac|0"] [data-ed="c"]')).to_have_count(1)
         f.get_by_role('button',name='Refazer',exact=True).click()
         expect(f.locator('[data-cell="ac|0"] [data-ed="c"]')).to_have_count(2)
+        f.locator('[data-cell="ac|0"] .note-menu summary').last.click()
         f.locator('[data-cell="ac|0"] [data-act="rn"]').last.click()
-        expect(f.locator('[data-save-status]')).to_have_text('Salvo no projeto')
+        expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
         check('Undo, redo and note removal stay available', f.locator('[data-cell="ac|0"] [data-ed="c"]').count() == 1)
         preset(f, 'Matriz completa')
         for key, text in [('ev|0','Confirmação do pedido'), ('fl|0','Acolher a solicitação'), ('bk|0','Conferir o cadastro'), ('sy|0','Sistema de atendimento')]:
@@ -102,7 +104,7 @@ try:
         f.locator('[data-ed="ix"]').fill('Tempo de espera sem previsão')
         f.locator('[data-ed="ix"]').press('Tab')
         page.wait_for_function("() => Object.values(window.BlueOceanRuntime.api('dataBridge').get().problems).some(x=>x.description==='Tempo de espera sem previsão')")
-        expect(f.locator('[data-save-status]')).to_have_text('Salvo no projeto')
+        expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
         before = graph(page)
         preset(f, 'Jornada essencial')
         after = graph(page)
@@ -131,8 +133,9 @@ try:
         page.wait_for_function("id=>window.BlueOceanRuntime.api('dataBridge').get().stages[id].emotionScore===-2", arg=sid)
         check('Compact emotion controls save score and observation on the canonical stage', graph(page)['stages'][sid]['emotionNote'] == 'Insegurança antes do primeiro contato')
         f.locator('[data-act="emotion-edit"]').last.click()
+        f.get_by_role('combobox',name='Tipo de registro em Receber').select_option('hypothesis')
         f.get_by_role('button',name='Concluir',exact=True).click()
-        expect(f.locator('[data-save-status]')).to_have_text('Salvo no projeto')
+        expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
         neutral_id = graph(page)['journeys'][jid]['stageIds'][-1]
         check('A confirmed neutral emotion is recorded without changing its score', graph(page)['stages'][neutral_id]['emotionScore'] == 0 and graph(page)['stages'][neutral_id]['emotionRecorded'])
         f.get_by_role('button', name='Insights', exact=True).click()
@@ -207,6 +210,11 @@ try:
         mobile.locator('.bo-h724-journey-card').filter(has_text='Atendimento ao cliente').get_by_role('button',name='Abrir Jornada',exact=True).click()
         mf = mobile.frame_locator('.bo-blueprint-reference-frame')
         expect(mf.locator('.bd')).to_be_visible()
+        expect(mf.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+        iframe_handle=mobile.locator('.bo-blueprint-reference-frame').element_handle()
+        mobile.wait_for_function("async()=>{const r=await window.BlueOceanRuntime.api('dataBridge').recovery();return r.durableOk&&r.durableRevision>=r.revision}")
+        check('Opening the editor preserves the hydrated iframe while durable initialization completes',iframe_handle.evaluate('e=>e.isConnected'))
+        mf.locator('.lb').first.click()  # Settle any imported-session notification before asserting input focus.
         check('Touch devices expose cell actions without hover', mf.locator('[data-cell="ac|0"] .ad').evaluate('e=>getComputedStyle(e).opacity') == '1')
         note(mf,'ac|0','Comparar opções no celular')
         mobile.wait_for_function("id=>window.BlueOceanRuntime.api('dataBridge').get().stages[id].customerAction.includes('Comparar opções no celular')",arg=sid)
@@ -214,7 +222,7 @@ try:
         mf.get_by_role('button',name='Personalizar visualização',exact=True).click()
         mf.get_by_role('checkbox',name='Evidência física',exact=True).uncheck()
         mf.get_by_role('button',name='Concluir',exact=True).click()
-        expect(mf.locator('[data-save-status]')).to_have_text('Salvo no projeto')
+        expect(mf.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
         check('Touch visualization preferences are persisted', 'ev' in graph(mobile)['journeys'][jid]['matrixView']['hiddenRows'])
         touch.close()
         check('No uncaught browser errors', not errors)

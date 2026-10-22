@@ -32,6 +32,8 @@ try:
     boards=[b for b in graph['views']['whiteboards'].values() if b.get('journeyId')==j['id'] and b.get('viewKind')=='blueprint']
     assert len(boards)==1,'Primary Journey must use one linked map, not duplicate data'
     exact.locator('button[data-act="step"]').first.click()
+    exact.get_by_role('textbox',name='Nome da nova etapa').fill('Etapa 1')
+    exact.get_by_role('button',name='Adicionar etapa ao mapa',exact=True).click()
     page.wait_for_function("id => window.BlueOceanRuntime.api('dataBridge').get().journeys[id].stageIds.length===1",arg=j['id'])
     assert exact.locator('.sh').count()==1
     assert not errors,errors

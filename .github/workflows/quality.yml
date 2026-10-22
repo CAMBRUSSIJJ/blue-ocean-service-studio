@@ -102,6 +102,8 @@ jobs:
       - run: python3 scripts/blueprint-reference-exact-browser.py
       - run: python3 scripts/journey-primary-reference-browser.py
       - run: python3 scripts/unified-journey-browser.py
+      - run: python3 scripts/journey-progressive-browser.py
+      - run: npm run journey:growth:browser
       - run: npm run entry:browser
       - run: npm run product:browser
       - run: npm run maps:browser
@@ -122,3 +124,5 @@ jobs:
             artifacts/product-experience
             artifacts/map-actions
             artifacts/blueprint-reference-exact
+            artifacts/journey-progressive
+            artifacts/journey-growth

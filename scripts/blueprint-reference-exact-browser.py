@@ -30,6 +30,8 @@ try:
         # A new hosted map starts empty; no compulsory coffee demo or stage suggestions.
         while exact.locator('.sh').count() < 2:
             exact.locator('button[data-act="step"]').first.click()
+            exact.get_by_role('textbox',name='Nome da nova etapa').fill('Etapa '+str(exact.locator('.sh').count()+1))
+            exact.get_by_role('button',name='Adicionar etapa ao mapa',exact=True).click()
         expect(exact.locator('.bd')).to_be_visible()
         exact.get_by_role('button',name='Insights',exact=True).click()
         expect(exact.locator('.pnl')).to_be_visible()
@@ -47,7 +49,7 @@ try:
         exact.locator('[data-act="emotion-edit"]').first.click()
         slider=exact.locator('input[data-act="emo"]').first
         slider.evaluate("""el=>{el.value='-2';el.dispatchEvent(new Event('input',{bubbles:true}))}""")
-        expect.poll if False else None
+        exact.get_by_role('button',name='Concluir',exact=True).click()
         page.wait_for_function("""id=>window.BlueOceanRuntime.api('dataBridge').get().stages[id].emotionScore===-2""",arg=stages[0]['id'],timeout=10000)
         exact.get_by_role('button',name='+ Adicionar faixa',exact=True).click()
         expect(exact.locator('[data-ed="ln"]')).to_have_count(1)
