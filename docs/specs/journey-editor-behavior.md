@@ -126,3 +126,19 @@ editar, duplicar, inserir, remover, mover e ajustar escala com cartões ocultos
 antes/depois; conferir desfazer/refazer e reordenação de etapas; salvar/aplicar
 visões; apresentar/exportar e recarregar; remover uma Persona; repetir por toque
 em 390 px e auditar teclado/axe em 1440, 834 e 390 px.
+
+## Entrega de B11
+
+A seção B11 acima foi registrada em `70fa08f`, antes do código. O incremento
+implementa vínculos opcionais em todos os elementos compostos, os três modos de
+filtro e persistência nas visualizações. As afirmações de conteúdo comum na
+primeira versão deste documento descrevem a base anterior: cartões agora podem
+ter vínculos; contexto da etapa e dores/ideias nativas continuam comuns.
+
+`journey:persona-content:test` verifica normalização, legado, vínculos múltiplos,
+fontes independentes, Personas indisponíveis, cópia, serialização e configurações.
+`journey:persona-content:browser` executa o roteiro de B11, incluindo controles
+com índices originais, ações nativas completas no grafo, histórico, recarga,
+HTML, teclado, toque e axe. Capturas e relatórios ficam em
+`artifacts/journey-persona-content/`. O teste com participantes não foi realizado.
+B12 (alcance em várias etapas, seleção múltipla e hierarquia) permanece no backlog.

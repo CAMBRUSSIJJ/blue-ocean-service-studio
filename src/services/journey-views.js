@@ -9,7 +9,7 @@ export function normalizeSavedMatrixView(input = {}) {
   return { version:1, preset:['essential','detailed','operational','acquisition','complete','custom'].includes(input.preset)?input.preset:'custom',
     hiddenRows:rows(input.hiddenRows),rowOrder:rows(input.rowOrder),insightsOpen:input.insightsOpen===true,
     insightsTab:['guidance','analysis','quality'].includes(input.insightsTab)?input.insightsTab:'guidance',
-    emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true };
+    emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true,...(['selected','exclusive'].includes(input.personaFilter)?{personaFilter:input.personaFilter}:{}) };
 }
 /** Configuration only: never copies or rewrites the map's cards, stages or observations. */
 export function manageJourneySavedView(graph, journeyId, action, input = {}, now = new Date().toISOString()) {
@@ -26,7 +26,9 @@ export function manageJourneySavedView(graph, journeyId, action, input = {}, now
   if (action === 'apply') {
     const legacyRows=Object.values(graph.views?.whiteboards||{}).filter(board=>board.journeyId===journeyId).flatMap(board=>(board.blueprintHosted?.lanes||[]).map(row=>row.id));
     const allowed = new Set([...baseRows,...Object.keys(journey.matrixContent?.rows||{}),...rows(legacyRows)]);
-    const snapshot = normalizeSavedMatrixView(previous.view), captured = snapshot.rowOrder.filter(id => allowed.has(id));
+    const snapshot = normalizeSavedMatrixView(previous.view);
+    if (snapshot.personaFilter && !personaId) throw Error('Selecione uma Persona para aplicar este filtro.');
+    const captured = snapshot.rowOrder.filter(id => allowed.has(id));
     const added = [...allowed].filter(id => !captured.includes(id));
     journey.matrixView = {...snapshot,rowOrder:[...captured,...added],hiddenRows:[...new Set([...snapshot.hiddenRows.filter(id=>allowed.has(id)),...added])]};
     journey.personaId = personaId;
@@ -35,6 +37,7 @@ export function manageJourneySavedView(graph, journeyId, action, input = {}, now
   const title = action === 'update' ? previous.name : name(input.name);
   if (list.some(record => record.id !== previous?.id && record.name.toLocaleLowerCase() === title.toLocaleLowerCase())) throw Error('Já existe uma visualização com esse nome.');
   if (action === 'create' && list.length >= 20) throw Error('Esta Jornada pode ter até 20 visualizações salvas.');
+  if (action !== 'rename' && normalizeSavedMatrixView(input.view).personaFilter && !personaId) throw Error('Selecione uma Persona antes de salvar este filtro.');
   const record = action === 'rename' ? {...previous,name:title,updatedAt:now} : {id:previous?.id||'view-'+crypto.randomUUID(),name:title,personaId,view:normalizeSavedMatrixView(input.view),createdAt:previous?.createdAt||now,updatedAt:now};
   journey.savedMatrixViews = previous ? list.map(value=>value.id===record.id?record:value) : [...list,record];
   return graph;

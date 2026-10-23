@@ -1,5 +1,15 @@
 # Histórico de mudanças
 
+## 2026-10-22 · Vínculos e filtros de cartões por Persona
+
+- Cada cartão pode ser vinculado explicitamente a uma ou mais Personas; cartões sem vínculos continuam comuns.
+- Filtros mostram todos, Persona e comuns ou somente Persona, preservando índices e todos os conteúdos ocultos ao editar.
+- Novos cartões em um recorte recebem o vínculo indicado; duplicação, histórico, etapas e referências preservam os vínculos.
+- Visualizações salvas e sua apresentação/HTML guardam o filtro; o resumo completo continua disponível.
+- Personas removidas permanecem identificadas nos vínculos, com remoção explícita.
+- Indicador de salvamento de Persona/evidências mostra o estado pendente até a confirmação.
+- Inclui testes de domínio e navegador com conteúdo intercalado, escalas, ações nativas, teclado e toque.
+
 ## 2026-10-22 · Inserção precisa e visualizações da jornada
 
 - Inclui elementos antes de qualquer cartão com âncora estável e seleção rápida do tipo padrão com Enter.

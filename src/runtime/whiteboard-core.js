@@ -937,7 +937,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   function restoreEditSnapshot(index){
     const matrixViews=overlay?.querySelector('.bo-blueprint-exact-host')?Object.fromEntries(Object.entries(graph.journeys).map(([id,j])=>[id,clone(j.matrixView||null)])):null;
     const snap=editHistory[index];if(!snap)return;restoringEdit=true;const data=clone(snap.data);graph=data.graph;const currentRevision=persistence.revision;meta=data.meta;meta.persistenceRevision=currentRevision;graph.persistenceRevision=currentRevision;boardId=graph.views.whiteboards[data.boardId]?data.boardId:Object.keys(graph.views.whiteboards)[0];meta.activeBoardId=boardId;
-    if(matrixViews)for(const [id,view] of Object.entries(matrixViews))if(graph.journeys[id]&&view)graph.journeys[id].matrixView=view;
+    if(matrixViews)for(const [id,view] of Object.entries(matrixViews))if(graph.journeys[id]&&view){graph.journeys[id].matrixView=view;if(!graph.journeys[id].personaId&&view.personaFilter)view.personaFilter='all'}
     normalizeContainers();normalizeLayers();normalizeEdges();normalizeVisualItems();normalizeInstances();selected=[];selectedEdge=null;showInspector=false;drag=null;quickCreate=null;contextMenu=null;editIndex=index;
     save(false,{label:'Restaurar histórico'});restoringEdit=false;saveState='saved';renderAll();toast(snap.label);renderHistoryState();
   }
@@ -1266,8 +1266,8 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const strings=value=>Array.isArray(value)?[...new Set(value.filter(x=>typeof x==='string'&&/^[a-z][a-z0-9]{0,24}$/.test(x)))].slice(0,150):[];
     const view={version:1,preset:['essential','detailed','operational','acquisition','complete','custom'].includes(input.preset)?input.preset:'essential',
       hiddenRows:strings(input.hiddenRows),rowOrder:strings(input.rowOrder),insightsOpen:input.insightsOpen===true,
-      insightsTab:['guidance','analysis','quality'].includes(input.insightsTab)?input.insightsTab:'guidance',emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true};
-    const target=activeJourney()||board();target.matrixView=view;
+      insightsTab:['guidance','analysis','quality'].includes(input.insightsTab)?input.insightsTab:'guidance',emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true,...(['selected','exclusive'].includes(input.personaFilter)?{personaFilter:input.personaFilter}:{})};
+    const target=activeJourney()||board();if(view.personaFilter&&!target.personaId)return false;target.matrixView=view;
     return save(false,{content:false,history:false,label:'Personalizar visualização da Jornada'});
   }
   function showBlueprintReferenceTools(){
@@ -1357,7 +1357,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
           const journey=activeJourney();if(!journey)throw Error('Jornada indisponível.');
           markEdit(type==='persona-select'?'Definir Persona da Jornada':'Vincular evidências da dor');
           let problemId='';
-          if(type==='persona-select')graph=selectJourneyPersona(clone(graph),journey.id,event.data.personaId);
+          if(type==='persona-select'){graph=selectJourneyPersona(clone(graph),journey.id,event.data.personaId);if(!event.data.personaId&&graph.journeys[journey.id].matrixView)graph.journeys[journey.id].matrixView.personaFilter='all'}
           else{const result=saveJourneyPainEvidence(clone(graph),journey.id,String(event.data.sourceId||''),event.data.evidenceIds,event.data.stageId,event.data.planNext===true);graph=result.graph;problemId=result.problemId;if(event.data.planNext&&problemId&&graph.problems[problemId])graph.problems[problemId].blueprintHiddenOn=(graph.problems[problemId].blueprintHiddenOn||[]).filter(id=>id!==boardId)}
           if(!save(false,{label:type==='persona-select'?'Definir Persona da Jornada':'Vincular evidências da dor'}))throw Error('Não foi possível salvar.');
           respond('context-result',{ok:true,state:hostedBlueprintDocument(),problemId,planNext:event.data.planNext===true});
