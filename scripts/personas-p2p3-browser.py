@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""End-to-end gate for Persona creation page and local saved filter views."""
+import functools
+import json
+import threading
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from playwright.sync_api import sync_playwright, expect
+
+ROOT=Path(__file__).resolve().parents[1]
+assert (ROOT/'dist'/'index.html').exists(), 'Build dist before browser QA'
+server=ThreadingHTTPServer(('127.0.0.1',0), functools.partial(SimpleHTTPRequestHandler,directory=str(ROOT/'dist')))
+thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+url=f'http://127.0.0.1:{server.server_port}'
+checks=[]
+
+def check(name,value):
+    checks.append((name,bool(value)))
+    if not value: raise AssertionError(name)
+    print('PASS '+name,flush=True)
+
+try:
+    with sync_playwright() as p:
+        browser=p.chromium.launch(headless=True)
+        page=browser.new_page(viewport={'width':1450,'height':980}, accept_downloads=False)
+        page.goto(url,wait_until='domcontentloaded')
+        page.get_by_role('button',name='Abrir workspace local sem conta').click()
+        page.get_by_role('button',name='Novo projeto',exact=True).click()
+        page.get_by_label('Nome do projeto',exact=True).fill('Personas UX QA')
+        page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
+        page.get_by_role('button',name='Criar projeto',exact=True).click()
+        page.locator('button[aria-label="Personas"]').click()
+        library=page.locator('[data-personas-h71="library"]')
+        expect(library).to_be_visible()
+        check('Default mode uses cards',library.get_attribute('data-persona-view')=='cards')
+        library.get_by_role('button',name='Nova Persona').click()
+        form=page.locator('[data-personas-h71="create"]')
+        expect(form).to_be_visible()
+        check('Creation uses page instead of a modal',page.locator('.bo-h713-builder-backdrop').count()==0)
+        form.get_by_label('Nome da Persona').fill('Cliente inicial')
+        form.get_by_label('Resumo').fill('Perfil para testar a experiência')
+        form.get_by_role('button',name='Avançada').click()
+        form.get_by_role('button',name='Criar Persona e continuar').click()
+        detail=page.locator('[data-personas-h71="detail"]')
+        expect(detail).to_be_visible()
+        check('Created Persona opens its profile', 'Cliente inicial' in detail.inner_text())
+        detail.get_by_role('button',name='Personalizar interface').click()
+        panel=page.locator('#bo-p2-persona-customize')
+        expect(panel).to_be_visible()
+        panel.get_by_role('button',name='Equilibrado').click()
+        detail.get_by_role('button',name='Salvar alterações').click()
+        detail.get_by_role('button',name='Personas',exact=True).click()
+        library=page.locator('[data-personas-h71="library"]')
+        expect(library.locator('[data-persona-card]')).to_have_count(1)
+        library.get_by_role('button',name='Filtros de personas').click()
+        filters=page.get_by_role('dialog',name='Filtrar Personas')
+        expect(filters).to_be_visible()
+        filters.get_by_role('button',name='Sem evidências').click()
+        filters.get_by_role('button',name='Adicionar condição').click()
+        filters.get_by_label('Campo da condição 1').select_option('evidence')
+        filters.get_by_label('Operador da condição 1').select_option('equals')
+        filters.get_by_label('Valor da condição 1').fill('0')
+        filters.get_by_role('button',name='Aplicar filtros').click()
+        check('Combined filters match the created Persona', library.locator('[data-persona-card]').count()==1)
+        library.get_by_role('button',name='Visualizações',exact=False).click()
+        library.get_by_label('Salvar visão atual').fill('Sem evidências QA')
+        library.get_by_role('button',name='Salvar visualização').click()
+        library.get_by_role('button',name='Tabela',exact=True).click()
+        check('Switch to table renders only table',library.locator('[data-persona-table]').count()==1)
+        library.get_by_role('button',name='Exibição',exact=False).click()
+        library.get_by_role('checkbox',name='Atualizado').uncheck()
+        check('Column configuration hides updated header',library.locator('th').filter(has_text='ATUALIZADO').count()==0)
+        library.get_by_role('button',name='Concluir',exact=True).click()
+        library.get_by_role('button',name='Visualizações',exact=False).click()
+        library.get_by_role('button',name='Sem evidências QA').click()
+        check('Saved view restores cards and rule',library.get_attribute('data-persona-view')=='cards' and library.locator('[data-persona-card]').count()==1)
+        page.reload(wait_until='domcontentloaded')
+        page.locator('button[aria-label="Personas"]').click()
+        page.get_by_role('button',name='Visualizações',exact=False).click()
+        check('Saved view persists across reload',page.get_by_role('button',name='Sem evidências QA').count()==1)
+        browser.close()
+finally:
+    server.shutdown()
+print(json.dumps({'passed':len(checks),'checks':[name for name,_ in checks]},ensure_ascii=False))
