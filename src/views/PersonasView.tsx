@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { TextareaHTMLAttributes } from 'react';
 import {
-  ArrowLeft, Check, Filter, MoreVertical, Plus, Search, Table2, Trash2, UserRound, X,
+  ArrowLeft, Check, Filter, MoreVertical, Plus, Search, Table2, Trash2, UserRound, UsersRound, X,
 } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
@@ -38,7 +38,8 @@ function AutoTextarea({ minRows = 2, className = '', ...props }: AutoTextareaPro
 }
 
 type DetailTab = 'overview' | 'behavior' | 'relations' | 'evidence' | 'usage';
-type FilterMode = 'all' | 'unused' | 'evidence' | 'incomplete';
+type FilterMode = 'all' | 'unused' | 'used' | 'evidence' | 'without-evidence' | 'incomplete';
+type LibraryViewMode = 'cards' | 'table';
 
 
 const personaSectionOptions: Array<{ id: PersonaSectionId; label: string; description: string; recommended?: boolean; advanced?: boolean }> = [
@@ -99,6 +100,14 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<FilterMode>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<LibraryViewMode>(() => {
+    try { return sessionStorage.getItem('bo-personas-library-view') === 'table' ? 'table' : 'cards'; }
+    catch { return 'cards'; }
+  });
+  const changeViewMode = (mode: LibraryViewMode) => {
+    setViewMode(mode);
+    try { sessionStorage.setItem('bo-personas-library-view', mode); } catch { /* preference is optional */ }
+  };
   const [menuId, setMenuId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>('overview');
@@ -177,6 +186,8 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       title: contextEntityTitle(persona),
       owner: String(persona.owner || 'Você'),
       tags,
+      tagList: Array.isArray(persona.tags) ? persona.tags.map(String).filter(Boolean) : [],
+      goal: personaProfileFromEntity(persona).primaryGoal,
     };
   }), [graph, personas]);
 
@@ -184,7 +195,9 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     const haystack = `${row.title} ${row.owner} ${row.tags} ${String(row.persona.description ?? '')}`.toLowerCase();
     if (!haystack.includes(query.trim().toLowerCase())) return false;
     if (filter === 'unused') return row.usage.instances === 0 && row.usage.relatedCount === 0;
+    if (filter === 'used') return row.usage.instances > 0;
     if (filter === 'evidence') return (row.report?.connectionCounts.evidence ?? 0) > 0;
+    if (filter === 'without-evidence') return (row.report?.connectionCounts.evidence ?? 0) === 0;
     if (filter === 'incomplete') return (row.report?.foundationScore ?? 0) < 100;
     return true;
   }), [rows, query, filter]);
@@ -334,11 +347,69 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     </section>;
   }
 
-  return <section className="bo-h71-personas" data-personas-h71="library">
-    <div className="bo-h71-page-head"><div><span>Workspace /</span><h1>Personas</h1></div></div>
-    <div className="bo-h71-toolbar"><strong>{filtered.length} {filtered.length === 1 ? 'resultado' : 'resultados'}</strong><div><label className="bo-h71-search"><Search size={15}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar personas"/></label><button type="button" className={showFilters ? 'is-active' : ''} onClick={() => setShowFilters((value) => !value)} aria-label="Filtros"><Filter size={16}/></button><button type="button" className="is-active"><Table2 size={16}/><span>Tabela</span></button><button type="button" className="primary" onClick={() => setCreateOpen(true)}><Plus size={16}/> Criar persona</button></div></div>
-    {showFilters && <div className="bo-h71-filters"><span>Filtros</span>{([['all','Todas'],['unused','Não usadas'],['evidence','Com evidência'],['incomplete','Base incompleta']] as Array<[FilterMode,string]>).map(([id,label]) => <button key={id} type="button" className={filter === id ? 'is-active' : ''} onClick={() => setFilter(id)}>{label}</button>)}</div>}
-    <div className="bo-h71-table-wrap"><table className="bo-h71-table"><thead><tr><th></th><th>NOME</th><th>ATUALIZADO</th><th>ATUALIZADO POR</th><th>CRIADO</th><th>CRIADOR</th><th>TAGS</th><th>USADO EM</th></tr></thead><tbody>{filtered.map((row) => <tr key={row.persona.id}><td className="menu-cell"><button type="button" onClick={() => setMenuId(menuId === row.persona.id ? null : row.persona.id)}><MoreVertical size={15}/></button>{menuId === row.persona.id && <div className="bo-h71-row-menu"><button type="button" onClick={() => openPersona(row.persona.id)}>Abrir</button><button type="button" className="danger" onClick={() => setDeleteId(row.persona.id)}>Remover</button></div>}</td><td><button type="button" className="bo-h71-persona-name" onClick={() => openPersona(row.persona.id)}><span><UserRound size={14}/></span><strong>{row.title}</strong></button></td><td>{formatDate(row.persona.updatedAt ?? row.persona.createdAt)}</td><td>{row.owner}</td><td>{formatDate(row.persona.createdAt)}</td><td>{row.owner}</td><td>{row.tags}</td><td><span className="bo-h71-usage-pill">{row.usage.instances || row.usage.relatedCount ? `${row.usage.instances} visual · ${row.usage.relatedCount} relação` : 'Não usada'}</span></td></tr>)}</tbody></table>{!filtered.length && <div className="bo-h71-empty"><UserRound size={26}/><strong>{query || filter !== 'all' ? 'Nenhuma Persona encontrada' : 'Nenhuma Persona criada'}</strong><p>{query || filter !== 'all' ? 'Ajuste a busca ou os filtros.' : 'Crie a primeira persona para começar a conectar necessidades, Jobs, dores e evidências.'}</p>{!query && filter === 'all' && <button type="button" onClick={() => setCreateOpen(true)}><Plus size={14}/> Criar persona</button>}</div>}</div>
+  const hasSearchOrFilter = Boolean(query.trim()) || filter !== 'all';
+  const filters: Array<[FilterMode, string]> = [
+    ['all', 'Todas'], ['used', 'Em Jornadas ou mapas'], ['unused', 'Não utilizadas'],
+    ['evidence', 'Com evidências'], ['without-evidence', 'Sem evidências'], ['incomplete', 'Dados incompletos'],
+  ];
+
+  return <section className="bo-h71-personas bo-p1-personas" data-personas-h71="library" data-persona-view={viewMode}>
+    <div className="bo-h71-page-head bo-p1-page-head">
+      <div><span>Público-alvo /</span><h1>Personas</h1></div>
+      <p>Perfis das pessoas que vivem a experiência do serviço.</p>
+    </div>
+    <div className="bo-h71-toolbar bo-p1-toolbar">
+      <div className="bo-p1-toolbar-summary">
+        <strong>{filtered.length} {filtered.length === 1 ? 'persona' : 'personas'}</strong>
+        <span>{hasSearchOrFilter ? `de ${rows.length} no serviço` : 'neste serviço'}</span>
+      </div>
+      <div className="bo-p1-toolbar-actions">
+        <label className="bo-h71-search bo-p1-search"><Search size={16}/><input aria-label="Buscar personas" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar personas, tags ou responsáveis"/></label>
+        <button type="button" className={showFilters || filter !== 'all' ? 'is-active' : ''} onClick={() => setShowFilters((value) => !value)} aria-label="Filtros de personas" aria-expanded={showFilters} aria-controls="bo-p1-filters"><Filter size={16}/><span>Filtros</span>{filter !== 'all' && <b aria-label="Filtro ativo" className="bo-p1-filter-dot"/>}</button>
+        <div className="bo-p1-view-toggle" role="group" aria-label="Visualização de personas">
+          <button type="button" className={viewMode === 'cards' ? 'is-active' : ''} aria-pressed={viewMode === 'cards'} onClick={() => changeViewMode('cards')}><UsersRound size={16}/><span>Cartões</span></button>
+          <button type="button" className={viewMode === 'table' ? 'is-active' : ''} aria-pressed={viewMode === 'table'} onClick={() => changeViewMode('table')}><Table2 size={16}/><span>Tabela</span></button>
+        </div>
+        <button type="button" className="primary bo-p1-create" onClick={() => setCreateOpen(true)}><Plus size={16}/> Nova Persona</button>
+      </div>
+    </div>
+    {showFilters && <div id="bo-p1-filters" className="bo-h71-filters bo-p1-filters" role="group" aria-label="Filtrar personas"><span>Mostrar</span>{filters.map(([id, label]) => <button key={id} type="button" className={filter === id ? 'is-active' : ''} aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</button>)}</div>}
+    {filtered.length > 0 && viewMode === 'cards' && <div className="bo-p1-card-grid" data-persona-card-grid="1">
+      {filtered.map((row) => {
+        const evidenceCount = row.report?.connectionCounts.evidence ?? 0;
+        const contextUsage = row.usage.instances ?? 0;
+        const snippet = String(row.persona.description || '').trim();
+        return <article className="bo-p1-card" data-persona-card={row.persona.id} key={row.persona.id}>
+          <div className="bo-p1-card-head">
+            <span className="bo-p1-avatar" aria-hidden="true"><UserRound size={19}/></span>
+            <span className="bo-p1-kind">{personaProfileFromEntity(row.persona).mode === 'professional' ? 'Avançada' : 'Simples'}</span>
+            <div className="bo-p1-card-menu">
+              <button type="button" aria-label={`Ações da persona ${row.title}`} aria-expanded={menuId === row.persona.id} onClick={() => setMenuId(menuId === row.persona.id ? null : row.persona.id)}><MoreVertical size={17}/></button>
+              {menuId === row.persona.id && <div className="bo-h71-row-menu"><button type="button" onClick={() => openPersona(row.persona.id)}>Abrir</button><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(row.persona.id); }}>Remover</button></div>}
+            </div>
+          </div>
+          <button type="button" className="bo-p1-card-title" onClick={() => openPersona(row.persona.id)}>{row.title}</button>
+          <p className="bo-p1-card-desc">{snippet || 'Adicione um resumo para identificar melhor esta persona.'}</p>
+          {row.goal && <p className="bo-p1-card-goal"><strong>Objetivo</strong><span>{row.goal}</span></p>}
+          <div className="bo-p1-card-tags">{row.tagList.slice(0,3).map((tag) => <span key={tag}>{tag}</span>)}{row.tagList.length > 3 && <span>+{row.tagList.length - 3}</span>}</div>
+          <div className="bo-p1-card-bottom">
+            <div className="bo-p1-card-metrics" aria-label="Conexões e evidências"><span><strong>{evidenceCount}</strong> {evidenceCount === 1 ? 'evidência' : 'evidências'}</span><span><strong>{contextUsage}</strong> {contextUsage === 1 ? 'uso visual' : 'usos visuais'}</span></div>
+            <button type="button" className="bo-p1-card-open" onClick={() => openPersona(row.persona.id)}>Abrir Persona <span aria-hidden="true">→</span></button>
+          </div>
+        </article>;
+      })}
+    </div>}
+    {filtered.length > 0 && viewMode === 'table' && <div className="bo-h71-table-wrap bo-p1-table-wrap" data-persona-table="1">
+      <table className="bo-h71-table bo-p1-table"><thead><tr><th>PERSONA</th><th>RESPONSÁVEL</th><th>EVIDÊNCIAS</th><th>USO EM MAPAS</th><th>ATUALIZADO</th><th>AÇÕES</th></tr></thead>
+      <tbody>{filtered.map((row) => <tr key={row.persona.id}>
+        <td><button type="button" className="bo-h71-persona-name" onClick={() => openPersona(row.persona.id)}><span><UserRound size={14}/></span><strong>{row.title}</strong></button><small className="bo-p1-table-hint">{String(row.persona.description || '').trim() || 'Sem resumo'}</small></td>
+        <td>{row.owner}</td><td>{row.report?.connectionCounts.evidence ?? 0}</td><td>{row.usage.instances ?? 0}</td><td>{formatDate(row.persona.updatedAt ?? row.persona.createdAt)}</td>
+        <td className="menu-cell"><button type="button" aria-label={`Ações da persona ${row.title}`} aria-expanded={menuId === row.persona.id} onClick={() => setMenuId(menuId === row.persona.id ? null : row.persona.id)}><MoreVertical size={15}/></button>{menuId === row.persona.id && <div className="bo-h71-row-menu"><button type="button" onClick={() => openPersona(row.persona.id)}>Abrir</button><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(row.persona.id); }}>Remover</button></div>}</td>
+      </tr>)}</tbody></table>
+    </div>}
+    {!filtered.length && <div className="bo-h71-empty bo-p1-empty"><UsersRound size={28}/><strong>{hasSearchOrFilter ? 'Nenhuma Persona corresponde à busca' : 'Comece conhecendo seu público-alvo'}</strong><p>{hasSearchOrFilter ? 'Experimente buscar outro termo ou remover os filtros aplicados.' : 'Crie uma Persona para documentar objetivos, necessidades e evidências ligadas ao serviço.'}</p>
+      {hasSearchOrFilter ? <button type="button" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar busca e filtros</button> : <button type="button" onClick={() => setCreateOpen(true)}><Plus size={14}/> Criar persona</button>}
+    </div>}
 
     {createOpen && <div className="bo-h71-modal-backdrop bo-h713-builder-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setCreateOpen(false); }}><form className="bo-h713-persona-builder" onSubmit={(event) => { event.preventDefault(); createPersona(); }}>
       <header><div><small>PERSONAS · BLUE OCEAN</small><h2>Personalizar Persona</h2><p>Escolha a profundidade, o layout e os blocos que fazem sentido para este serviço.</p></div><button type="button" onClick={() => setCreateOpen(false)}><X size={18}/></button></header>
