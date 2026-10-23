@@ -226,3 +226,17 @@ Aceitação: criar filha vazia, editar e voltar à origem; criar neta e usar o
 caminho; vincular mapa existente sem copiar conteúdo; rejeitar ciclo/limites;
 desvincular com desfazer/refazer; excluir origem e preservar filha; duplicar pai;
 recarregar/exportar; permissões, teclado, toque e axe em 1440/834/390 px.
+
+## Entrega de B13
+
+O contrato acima foi registrado em `5d3578e`, antes do código. O editor
+integrado agora cria/vincula mapas reais, navega entre ancestrais e filhas e
+preserva a independência de seus dados. As relações legadas válidas continuam
+legíveis; caminhos inválidos são anunciados com travessia limitada. A criação
+antiga também passa pelo serviço compartilhado, sem etapas inventadas.
+
+`journey:hierarchy:test` verifica invariantes e exclusões genéricas;
+`journey:hierarchy:browser` cobre navegação real, histórico, remoção da origem,
+mapas existentes, exportações, leitura, teclado, toque e axe. Evidências em
+`artifacts/journey-hierarchy/`. Fases recursivas, colaboração remota e avaliação
+com participantes permanecem para outros contratos.

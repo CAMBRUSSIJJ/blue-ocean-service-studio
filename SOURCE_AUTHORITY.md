@@ -15,7 +15,8 @@ A partir da **V1.16.0**, a autoridade do produto é a pasta `src/` junto de `ind
   `src/services/journey-content.js`, visualizações em
   `src/runtime/journey-views-ui.js` e `src/services/journey-views.js`, vínculos e filtros de cartões em
   `src/runtime/journey-persona-content-ui.js`, abrangência, seleção e fases em
-  `src/runtime/journey-structure-ui.js` e `src/services/journey-structure.js`, e regras de planejamento em
+  `src/runtime/journey-structure-ui.js` e `src/services/journey-structure.js`, sub-jornadas em
+  `src/runtime/journey-hierarchy-ui.js` e `src/services/journey-hierarchy.js`, e regras de planejamento em
   `src/services/journey-growth.ts`. O mesmo script gera
   `public/blueprint-reference-original.html` e `public/journey-matrix.css`.
 - `dist/` é sempre gerado por `npm run build` e **não deve ser corrigido manualmente**.

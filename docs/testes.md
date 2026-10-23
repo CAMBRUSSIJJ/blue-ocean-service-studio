@@ -204,3 +204,16 @@ e histórico em lote, fases, reordenação, recarga e exportação. Inclui rejei
 de destino cheio com cartões ocultos, documento avulso legado e seus limites de
 desfazer, teclado, toque e axe em 1440, 834 e 390 px.
 Capturas e relatórios são gerados em `artifacts/journey-structure/`.
+
+### Sub-jornadas e navegação
+
+- `npm run journey:hierarchy:test`: criação vazia, identidade, vínculos sem cópia,
+  ciclos, profundidade de descendentes, capacidade, leitura de legado inválido,
+  serialização e preservação de filhas em exclusões de pai/etapa.
+- `npm run journey:hierarchy:browser`: navegação real entre três níveis,
+  conteúdo independente, criação/cancelamento, vínculo de mapa existente,
+  histórico, duplicação, exclusão de origem, recarga, resumo/HTML, permissões,
+  documento avulso, toque e axe em 1440, 834 e 390 px.
+- Capturas fictícias e relatórios: `artifacts/journey-hierarchy/`, publicados
+  pela esteira junto das evidências dos editores. Não houve piloto com usuários
+  nem nova comparação interativa com o produto observado.

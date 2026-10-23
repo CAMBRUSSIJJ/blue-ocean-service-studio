@@ -12,6 +12,8 @@ copyFileSync('src/runtime/journey-matrix.html', 'public/blueprint-reference-orig
 copyFileSync('src/runtime/journey-matrix.css', 'public/journey-matrix.css');
 copyFileSync('src/runtime/journey-growth-ui.js', 'public/v1102-journey-growth-ui.js');
 copyFileSync('src/runtime/journey-content-ui.js', 'public/v1102-journey-content-ui.js');
+copyFileSync('src/runtime/journey-hierarchy-ui.js', 'public/v1102-journey-hierarchy-ui.js');
+copyFileSync('src/services/journey-hierarchy.js', 'public/v1102-journey-hierarchy.js');
 copyFileSync('src/runtime/journey-structure-ui.js', 'public/v1102-journey-structure-ui.js');
 copyFileSync('src/runtime/journey-persona-content-ui.js', 'public/v1102-journey-persona-content-ui.js');
 copyFileSync('src/runtime/journey-views-ui.js', 'public/v1102-journey-views-ui.js');
@@ -116,6 +118,7 @@ for (const [source, target] of [
       '../services/journey-context.js':'./v1102-journey-context.js',
       '../services/journey-views.js':'./v1102-journey-views.js',
       '../services/journey-structure.js':'./v1102-journey-structure.js',
+      '../services/journey-hierarchy.js':'./v1102-journey-hierarchy.js',
       './practical-simulation-data.js':'./v1102-practical-simulation-data.js',
     };
     for (const [a,b] of Object.entries(rewrites)) text=text.split(a).join(b);
