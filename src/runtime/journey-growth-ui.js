@@ -8,14 +8,72 @@ const growthStatusLabels={backlog:'A organizar',planned:'Planejada',in_progress:
 const growthEmotionKnown=s=>s.emotionRecorded===true||s.emotionRecorded===undefined&&(s.e!==0||!!s.note?.trim());
 const growthEmotionKey=i=>S.steps[i].hostStageId||S.steps[i].hostLocalId||String(i);
 function growthDraft(i){const key=growthEmotionKey(i);if(!growthEmotionDrafts.has(key)){const s=S.steps[i];growthEmotionDrafts.set(key,{score:s.e,mode:growthEmotionKnown(s)?s.emotionStatus||'hypothesis':'not_informed',note:s.note||'',source:s.emotionSource||''})}return growthEmotionDrafts.get(key)}
+function growthEmotionCurvePath(points){
+  let path='';
+  points.forEach((p,i)=>{if(!p.known)return;const before=points[i-1];if(!before?.known)path+=' M'+p.x+' '+p.y;else{const middle=(before.x+p.x)/2;path+=' C'+middle+' '+before.y+' '+middle+' '+p.y+' '+p.x+' '+p.y}});
+  return path;
+}
 function growthCurve(){
   const N=S.steps.length,W=Math.max(100,N*100),points=S.steps.map((s,i)=>({x:i*100+50,y:16+(2-s.e)*14,known:growthEmotionKnown(s),s}));
-  let path='';points.forEach((p,i)=>{if(!p.known)return;const before=points[i-1];if(!before?.known)path+=' M'+p.x+' '+p.y;else{const middle=(before.x+p.x)/2;path+=' C'+middle+' '+before.y+' '+middle+' '+p.y+' '+p.x+' '+p.y}});
-  return '<svg viewBox="0 0 '+W+' 112" preserveAspectRatio="none" role="img" aria-label="Emoções registradas; lacunas representam informações ausentes"><path d="'+path+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+points.map((p,i)=>{
+  const path=growthEmotionCurvePath(points);
+  return '<svg viewBox="0 0 '+W+' 112" preserveAspectRatio="none" role="img" aria-label="Emoções registradas; lacunas representam informações ausentes"><path data-emotion-curve-line="1" d="'+path+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+points.map((p,i)=>{
     const validated=p.known&&p.s.emotionStatus==='validated'&&p.s.emotionSource?.trim(),top=p.known?p.y:44;
     const label=p.known?EM[p.s.e+2]+' · '+(validated?'Validado':'Hipótese'):'Não informado';
-    return '<button type="button" class="dt '+(!p.known?'unknown':validated?'validated':'hypothesis')+'" data-act="emotion-edit" data-si="'+i+'" style="left:'+p.x/W*100+'%;top:'+top+'px" aria-label="Editar emoção em '+esc(p.s.n)+': '+esc(label)+'" aria-expanded="'+(emotionEdit===i||V.emotionsExpanded)+'"></button><span class="dl" style="left:'+p.x/W*100+'%;top:'+(top+15)+'px">'+esc(label)+'</span>';
+    return '<button type="button" class="dt '+(!p.known?'unknown':validated?'validated':'hypothesis')+'" data-act="emotion-edit" data-si="'+i+'" style="left:'+p.x/W*100+'%;top:'+top+'px" aria-label="Editar emoção em '+esc(p.s.n)+': '+esc(label)+'" aria-expanded="'+(emotionEdit===i||V.emotionsExpanded)+'"></button><span class="dl" data-emotion-curve-label="'+i+'" style="left:'+p.x/W*100+'%;top:'+(top+15)+'px">'+esc(label)+'</span>';
   }).join('');
+}
+
+let growthEmotionDrag=null;
+let growthEmotionSuppressUntil=0;
+function growthEmotionRefreshPoint(i){
+  const box=app.querySelector('#curve'),stage=S.steps[i];
+  if(!box||!stage)return;
+  const points=S.steps.map((s,j)=>({x:j*100+50,y:16+(2-s.e)*14,known:growthEmotionKnown(s)}));
+  box.querySelector('[data-emotion-curve-line]')?.setAttribute('d',growthEmotionCurvePath(points));
+  const dot=box.querySelector('.dt[data-si="'+i+'"]'),label=box.querySelector('[data-emotion-curve-label="'+i+'"]');
+  const known=growthEmotionKnown(stage),validated=known&&stage.emotionStatus==='validated'&&stage.emotionSource?.trim();
+  const top=known?16+(2-stage.e)*14:44;
+  const labelText=known?EM[stage.e+2]+' · '+(validated?'Validado':'Hipótese'):'Não informado';
+  if(dot){dot.style.top=top+'px';dot.classList.toggle('unknown',!known);dot.classList.toggle('validated',!!validated);dot.classList.toggle('hypothesis',!!known&&!validated);dot.setAttribute('aria-label','Editar emoção em '+stage.n+': '+labelText)}
+  if(label){label.style.top=(top+15)+'px';label.textContent=labelText}
+}
+function growthEmotionPointerDown(event){
+  const dot=event.target.closest?.('#curve .dt[data-act="emotion-edit"]');
+  if(!dot||!event.isPrimary||event.button!==0)return;
+  const i=Number(dot.dataset.si),stage=S.steps[i],box=app.querySelector('#curve');
+  if(!stage||!box)return;
+  growthEmotionDrag={pointerId:event.pointerId,i,startY:event.clientY,rect:box.getBoundingClientRect(),moved:false,original:{e:stage.e,emotionRecorded:stage.emotionRecorded,emotionStatus:stage.emotionStatus,emotionSource:stage.emotionSource},known:growthEmotionKnown(stage)};
+  dot.setPointerCapture?.(event.pointerId);
+}
+function growthEmotionPointerMove(event){
+  const drag=growthEmotionDrag;
+  if(!drag||drag.pointerId!==event.pointerId)return;
+  if(!drag.moved&&Math.abs(event.clientY-drag.startY)<5)return;
+  drag.moved=true;
+  event.preventDefault();
+  const fraction=(event.clientY-drag.rect.top)/Math.max(1,drag.rect.height);
+  const score=Math.max(-2,Math.min(2,Math.round(2-(fraction*112-16)/14)));
+  const stage=S.steps[drag.i];
+  if(!stage)return;
+  stage.e=score;
+  if(score!==drag.original.e||!drag.known){stage.emotionRecorded=true;stage.emotionStatus='hypothesis';stage.emotionSource=''}
+  growthEmotionRefreshPoint(drag.i);
+}
+function growthEmotionPointerEnd(event,cancel=false){
+  const drag=growthEmotionDrag;
+  if(!drag||drag.pointerId!==event.pointerId)return;
+  growthEmotionDrag=null;
+  const stage=S.steps[drag.i];
+  if(!stage)return;
+  const changed=!cancel&&drag.moved&&(stage.e!==drag.original.e||!drag.known);
+  if(!changed)Object.assign(stage,drag.original);
+  if(drag.moved){growthEmotionSuppressUntil=Date.now()+450;event.preventDefault()}
+  if(changed){growthEmotionDrafts.delete(growthEmotionKey(drag.i));save()}
+  if(drag.moved)live();
+}
+function growthEmotionIgnoreClick(event){
+  if(Date.now()>growthEmotionSuppressUntil||!event.target.closest?.('#curve .dt[data-act="emotion-edit"]'))return false;
+  growthEmotionSuppressUntil=0;event.preventDefault();event.stopPropagation();return true;
 }
 function growthEmotionFields(i){const s=S.steps[i],d=growthDraft(i);return '<div class="emotion-editor" data-emotion-editor="'+i+'" style="grid-column:'+(i+1)+'" role="group" aria-label="Emoção em '+esc(s.n)+'"><label>Registro<select data-emotion-field="mode" aria-label="Tipo de registro em '+esc(s.n)+'">'+[['not_informed','Não informado'],['hypothesis','Hipótese da equipe'],['validated','Validado com evidência']].map(([value,label])=>'<option value="'+value+'" '+(d.mode===value?'selected':'')+'>'+label+'</option>').join('')+'</select></label><label>Emoção / intensidade<output data-draft-label="'+i+'">'+EM[d.score+2]+'</output><input type="range" min="-2" max="2" step="1" value="'+d.score+'" data-act="emo" data-emotion-field="score" data-si="'+i+'" aria-label="Intensidade em '+esc(s.n)+'"></label><label>Observação<textarea maxlength="1000" data-emotion-field="note" aria-label="Observação emocional em '+esc(s.n)+'">'+esc(d.note)+'</textarea></label><label>Fonte da evidência<input maxlength="1000" data-emotion-field="source" aria-label="Fonte da evidência em '+esc(s.n)+'" placeholder="Ex.: entrevista ou pesquisa" value="'+esc(d.source)+'"></label><small>Para validar, informe a fonte. A confirmação é feita pela equipe.</small><div class="emotion-actions"><button class="tb" data-act="emotion-cancel" data-si="'+i+'">Cancelar</button><button class="tb" data-act="emotion-done" data-si="'+i+'">Concluir</button></div></div>'}
 function growthEmotionInput(el){const box=el.closest('[data-emotion-editor]');if(!box)return false;const i=Number(box.dataset.emotionEditor),draft=growthDraft(i),field=el.dataset.emotionField;
