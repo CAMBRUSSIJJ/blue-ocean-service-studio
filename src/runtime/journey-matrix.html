@@ -199,7 +199,7 @@ h+='<main class="wrap'+(V.insightsOpen?' has-insights':'')+'"><div class="bd" ta
 if(!N)h+='<div class="empty-map" data-empty-journey="1">Adicione uma etapa para começar o mapa.</div>';
 rows.forEach(L=>{
 if(L.d)h+='<div class="dv">'+L.d+'</div>';
-h+='<div class="r" data-row="'+esc(L.id)+'" data-category="'+(['fl','bk','sy'].includes(L.id)?'operation':L.id==='ev'?'evidence':'experience')+'"><div class="lb">'+contentRowLabel(L)+'<small>'+esc(L.h||'Faixa personalizada')+'</small>'+(L.id==='em'?'<button class="emotion-toggle" data-act="emotion-expand" aria-expanded="'+V.emotionsExpanded+'">'+(V.emotionsExpanded?'Recolher detalhes':'Expandir detalhes')+'</button>':'')+'</div>';
+h+='<div class="r" data-row="'+esc(L.id)+'" data-category="'+(['fl','bk','sy'].includes(L.id)?'operation':L.id==='ev'?'evidence':'experience')+'"><div class="lb">'+contentRowLabel(L)+'<small>'+esc(L.h||'Faixa personalizada')+'</small>'+(L.id==='em'?'<small class="emotion-tip">Arraste os pontos da curva para ajustar a emoção.</small><button class="emotion-toggle" data-act="emotion-expand" aria-expanded="'+V.emotionsExpanded+'">'+(V.emotionsExpanded?'Recolher detalhes':'Expandir detalhes')+'</button>':'')+'</div>';
 if(L.id==='sd')h+=S.steps.map((s,i)=>'<div class="c"><div class="n" contenteditable="true" role="textbox" data-placeholder="Em que situação o cliente está?" aria-label="Contexto em '+esc(s.n)+'" data-ed="sd" data-si="'+i+'">'+esc(s.d||'')+'</div>'+contentCell('sd',i,true)+'</div>').join('');
 else if(L.id==='em'&&N)h+='<div class="c" style="grid-column:2/'+(N+2)+'"><div class="cvb" id="curve">'+curve()+'</div><div class="emotion-cells" style="grid-template-columns:repeat('+N+',minmax(0,1fr))">'+S.steps.map((_,i)=>'<div class="emotion-stage" style="grid-column:'+(i+1)+'">'+(V.emotionsExpanded||emotionEdit===i?emotionFields(i):'')+contentCell('em',i,true)+'</div>').join('')+'</div></div>';
 else if(L.id==='im')for(let i=0;i<N;i++)h+='<div class="c">'+S.iss.map((x,ii)=>x.s===i?item(x,ii):'').join('')+'<div class="bt"><button data-act="addi" data-si="'+i+'" data-t="d">+ Dor</button><button data-act="addi" data-si="'+i+'" data-t="i">+ Ideia</button></div>'+contentCell('im',i,true)+'</div>';
@@ -212,7 +212,11 @@ app.innerHTML=h+'</main>'+cardToolsBulkBar()+customizer()+growthDialogs()+conten
 }
 function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();const dxEl=document.getElementById('dx');if(dxEl)dxEl.innerHTML=dx();app.querySelectorAll('[data-emotion-label]').forEach(el=>el.textContent=EM[S.steps[+el.dataset.emotionLabel].e+2]);const count=app.querySelector('.insight-count');if(count)count.textContent=' · '+S.iss.filter(x=>x.t==='i').length+' oportunidades'}
 function focusNew(sel){const e=app.querySelector(sel);if(e)e.focus()}
-app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
+app.addEventListener('pointerdown',growthEmotionPointerDown);
+app.addEventListener('pointermove',growthEmotionPointerMove);
+app.addEventListener('pointerup',event=>growthEmotionPointerEnd(event));
+app.addEventListener('pointercancel',event=>growthEmotionPointerEnd(event,true));
+app.addEventListener('click',e=>{if(growthEmotionIgnoreClick(e))return;const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
 if(viewsAction(a,d,b)||contentAction(a,d,b)||growthAction(a,d))return;
 if(a==='customize'){openCustomizer();return}
 if(a==='close-customize'){closeCustomizer();return}
