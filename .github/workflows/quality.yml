@@ -96,6 +96,7 @@ jobs:
       - run: python -m pip install playwright
       - run: python -m playwright install --with-deps chromium
       - run: npm run editor:browser
+      - run: python3 scripts/personas-p2p3-browser.py
       - run: npm run journey:browser
       - run: npm run blueprint:methodology:browser
       - run: python3 scripts/blueprint-guided-reading-browser.py
