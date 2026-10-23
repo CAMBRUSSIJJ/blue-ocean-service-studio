@@ -106,6 +106,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [ruleLogic, setRuleLogic] = useState<'all' | 'any'>('all');
   const [draftRules, setDraftRules] = useState<PersonaFilterRule[]>([]);
   const [draftLogic, setDraftLogic] = useState<'all' | 'any'>('all');
+  const [draftQuickFilter, setDraftQuickFilter] = useState<FilterMode>('all');
   const [sortMode, setSortMode] = useState<PersonaSort>('title');
   const [visibleColumns, setVisibleColumns] = useState<PersonaColumn[]>([...PERSONA_COLUMNS]);
   const [displayOpen, setDisplayOpen] = useState(false);
@@ -130,6 +131,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const openFilters = () => {
     setDraftRules(filterRules.map(rule=>({...rule})));
     setDraftLogic(ruleLogic);
+    setDraftQuickFilter(filter);
     setShowFilters(true);
     setDisplayOpen(false);
     setSavedViewsOpen(false);
@@ -520,7 +522,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
         <header><div><small>PERSONAS / SEGMENTAÇÃO</small><h2 id="bo-p3-filters-title">Filtrar Personas</h2><p>Combine condições para encontrar os perfis que precisam de atenção.</p></div>
           <button type="button" aria-label="Fechar filtros" onClick={()=>setShowFilters(false)}><X size={18}/></button></header>
         <div className="bo-p3-filter-body">
-          <section><h3>Filtros rápidos</h3><div className="bo-p3-quick">{filters.map(([id,label])=><button key={id} type="button" className={filter===id?'is-active':''} aria-pressed={filter===id} onClick={()=>setFilter(id)}>{label}</button>)}</div></section>
+          <section><h3>Filtros rápidos</h3><div className="bo-p3-quick">{filters.map(([id,label])=><button key={id} type="button" className={draftQuickFilter===id?'is-active':''} aria-pressed={draftQuickFilter===id} onClick={()=>setDraftQuickFilter(id)}>{label}</button>)}</div></section>
           <section><div className="bo-p3-section-head"><h3>Condições personalizadas</h3><span>{draftRules.length} de 8</span></div>
             {draftRules.length>1&&<div className="bo-p3-logic" role="group" aria-label="Combinar condições"><button type="button" aria-pressed={draftLogic==='all'} onClick={()=>setDraftLogic('all')}>E · todas</button><button type="button" aria-pressed={draftLogic==='any'} onClick={()=>setDraftLogic('any')}>OU · qualquer uma</button></div>}
             {draftRules.map((rule,index)=>{
@@ -537,8 +539,8 @@ export function PersonasView({ studio }: { studio: StudioController }) {
             <p className="bo-p3-filter-help">Os filtros rápidos são combinados com as condições. Nenhuma informação da Persona é alterada.</p>
           </section>
         </div>
-        <footer><button type="button" onClick={()=>{setDraftRules([]);setFilter('all');setDraftLogic('all');setRuleLogic('all');setFilterRules([])}}>Limpar filtros</button>
-        <button type="button" className="primary" onClick={()=>{setFilterRules(validatePersonaRules(draftRules));setRuleLogic(draftLogic);setShowFilters(false)}}>Aplicar filtros</button></footer>
+        <footer><button type="button" onClick={()=>{setDraftRules([]);setDraftQuickFilter('all');setDraftLogic('all')}}>Limpar filtros</button>
+        <button type="button" className="primary" onClick={()=>{setFilterRules(validatePersonaRules(draftRules));setRuleLogic(draftLogic);setFilter(draftQuickFilter);setShowFilters(false)}}>Aplicar filtros</button></footer>
       </aside>
     </div>}
     {filtered.length > 0 && viewMode === 'cards' && <div className="bo-p1-card-grid" data-persona-card-grid="1">
