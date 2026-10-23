@@ -142,3 +142,101 @@ com índices originais, ações nativas completas no grafo, histórico, recarga,
 HTML, teclado, toque e axe. Capturas e relatórios ficam em
 `artifacts/journey-persona-content/`. O teste com participantes não foi realizado.
 B12 (alcance em várias etapas, seleção múltipla e hierarquia) permanece no backlog.
+
+## Incremento B12 — abrangência, seleção e fases
+
+Contrato independente registrado antes do código. Este incremento usa as fontes
+públicas já documentadas; não acrescenta observação autenticada do concorrente.
+
+- Um cartão pode abranger etapas explicitamente escolhidas. Existe um único
+  conteúdo editável, na etapa de origem, e a abrangência usa identidades estáveis.
+  Segmentos contínuos ocupam a largura das etapas; após reordenação, segmentos
+  separados mostram continuações que levam à mesma origem. Etapas intermediárias
+  não escolhidas não ganham o cartão automaticamente.
+- A origem deve estar na abrangência. Reduzir a uma etapa torna o cartão comum
+  de uma célula. Mover a origem mantém os membros anteriores e inclui o destino;
+  duplicar o cartão conserva a abrangência e os vínculos, com nova identidade.
+- Excluir uma etapa remove sua participação. Se era a origem de um cartão amplo,
+  o cartão passa para a primeira etapa participante restante. Sem participantes,
+  ele é removido. Duplicar uma etapa copia seus cartões como cartões locais e não
+  amplia os cartões anteriores. Desfazer restaura estrutura e conteúdo juntos.
+- A seleção permite até 100 cartões exibidos, com duplicação, movimentação para
+  outra etapa na mesma faixa e exclusão em uma transação. Trocar o recorte elimina
+  da seleção cartões ocultos. Falhas de capacidade ou imagem rejeitam o lote sem
+  alterações parciais. Selecionar não altera o projeto.
+- Fases organizam uma hierarquia de um nível: fase → etapas. São até 20 fases,
+  com nomes únicos de até 80 caracteres e participação exclusiva de cada etapa.
+  Fases não alteram a ordem temporal e continuam vinculadas às etapas após
+  reordenação; fases vazias são removidas ao excluir suas etapas.
+- Abrangência e fases sobrevivem ao histórico, à recarga e ao backup. Filtros por
+  Persona aplicam-se ao cartão inteiro. Apresentação/HTML identificam a fase e a
+  abrangência; o conteúdo completo é apresentado uma vez, com referências de
+  continuação nas demais etapas, sem multiplicar medições ou entidades.
+- Alcance não cria atividades canônicas adicionais nas etapas participantes.
+  Hierarquias com vários níveis e sub-jornadas não fazem parte deste contrato.
+
+Aceitação: criar três etapas e cartões comuns/específicos, ampliar e editar uma
+escala e um vínculo, fragmentar o alcance por reordenação, remover a origem e
+recuperar pelo histórico, duplicar etapas/cartões, rejeitar lote cheio de forma
+atômica, filtrar a seleção, criar/editar/remover fases, recarregar e exportar.
+Repetir ações por teclado/toque e auditar axe em 1440, 834 e 390 px.
+
+## Entrega de B12
+
+O contrato foi registrado em `674b134`, antes do código. A entrega cobre
+abrangência explícita por identidade, projeções contínuas/fragmentadas, seleção
+em lote e fases com um nível. Cartões locais e abrangentes continuam no mesmo
+documento; a apresentação em trilhas não cria novas entidades. Lotes são
+validados antes da aplicação. História, serialização e transferências de origem
+preservam os dados do cartão e seus vínculos.
+
+As suítes `journey:structure:test` e `journey:structure:browser` verificam o
+contrato, inclusive destinos cheios de cartões ocultos e acesso às origens.
+Capturas e relatórios axe ficam em `artifacts/journey-structure/`. Não houve
+piloto com participantes ou comparação interativa com o produto observado.
+Hierarquia recursiva, sub-jornadas e colaboração remota exigem contratos futuros.
+
+## Incremento B13 — sub-jornadas e navegação
+
+Contrato independente registrado antes do código. A base é B12; usa os campos
+legados `parentJourneyId` e `sourceStageId`, agora tipados. Fases continuam
+organizando etapas dentro de um mapa; sub-jornadas são mapas independentes.
+
+- Cada etapa permite criar uma sub-jornada vazia com nome explícito ou vincular
+  uma jornada existente livre do mesmo serviço. Não há cópia de etapas,
+  emoções, cartões ou registros. Cada filha tem um pai e uma etapa de origem.
+- São até 20 filhas por etapa e oito jornadas em um caminho. Rejeitar ciclos,
+  autorreferência, referência inválida e árvore que exceda o limite, inclusive
+  descendentes de uma jornada vinculada. Falhas não alteram o projeto.
+- O mapa mostra filhas por etapa e caminho de ancestrais, com navegação para
+  mapas reais no mesmo editor. O nome vem da fonte atual. Links inválidos
+  legados são anunciados; a leitura é limitada e não entra em recursão infinita.
+- Desvincular preserva a filha e seus descendentes. Excluir uma etapa/pai solta
+  os vínculos diretos correspondentes e preserva as filhas. Duplicar um mapa
+  cria uma cópia independente, sem copiar a relação parental nem descendentes.
+- Criar, vincular e desvincular exigem edição, validam antes de salvar e entram
+  no histórico. Navegar não é edição de conteúdo. Recarga e backup mantêm os
+  vínculos. A criação antiga passa a usar a mesma regra de mapa vazio.
+- Apresentação e HTML identificam o caminho e as sub-jornadas por etapa sem
+  incorporar seus conteúdos ou inventar URLs para o arquivo exportado.
+- O documento avulso explica que vínculos entre mapas exigem um projeto.
+  Colaboração remota e fases recursivas permanecem fora deste incremento.
+
+Aceitação: criar filha vazia, editar e voltar à origem; criar neta e usar o
+caminho; vincular mapa existente sem copiar conteúdo; rejeitar ciclo/limites;
+desvincular com desfazer/refazer; excluir origem e preservar filha; duplicar pai;
+recarregar/exportar; permissões, teclado, toque e axe em 1440/834/390 px.
+
+## Entrega de B13
+
+O contrato acima foi registrado em `5d3578e`, antes do código. O editor
+integrado agora cria/vincula mapas reais, navega entre ancestrais e filhas e
+preserva a independência de seus dados. As relações legadas válidas continuam
+legíveis; caminhos inválidos são anunciados com travessia limitada. A criação
+antiga também passa pelo serviço compartilhado, sem etapas inventadas.
+
+`journey:hierarchy:test` verifica invariantes e exclusões genéricas;
+`journey:hierarchy:browser` cobre navegação real, histórico, remoção da origem,
+mapas existentes, exportações, leitura, teclado, toque e axe. Evidências em
+`artifacts/journey-hierarchy/`. Fases recursivas, colaboração remota e avaliação
+com participantes permanecem para outros contratos.

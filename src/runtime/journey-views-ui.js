@@ -11,14 +11,14 @@ function viewsOpen(){
 }
 function viewsClose(){viewsRenameId='';app.querySelector('#journey-views-dialog')?.close();focusNew('[data-act="views-open"]')}
 function viewsRequest(action,input={}){
-  if(viewsPending||!HOSTED)return;viewsPending=true;
+  if(viewsPending||!HOSTED)return;viewsPending=true;announceSave('pending');
   const dialog=app.querySelector('#journey-views-dialog');dialog.querySelector('.form-error').textContent='';dialog.querySelectorAll('button').forEach(button=>button.disabled=true);
   const snapshot={...V,rowOrder:orderedRows().map(row=>row.id)};
   window.parent.postMessage({boBlueprintHost:1,type:'saved-view',action,input:{...input,...(['create','update'].includes(action)?{view:snapshot}:{})}},location.origin);
 }
 function viewsResult(data){
   viewsPending=false;
-  if(!data.ok){const dialog=app.querySelector('#journey-views-dialog');if(dialog){dialog.querySelector('.form-error').textContent=data.error||'Não foi possível salvar.';dialog.querySelectorAll('button').forEach(button=>button.disabled=false)}return}
+  if(!data.ok){announceSave(false);const dialog=app.querySelector('#journey-views-dialog');if(dialog){dialog.querySelector('.form-error').textContent=data.error||'Não foi possível salvar.';dialog.querySelectorAll('button').forEach(button=>button.disabled=false)}return}
   S=data.state;H=S.history||H;V=viewState(S.view);last=JSON.stringify(S);growthLastPatch=growthPatchKey();growthEmotionDrafts.clear();emotionEdit=null;announceSave(true);viewsRenameId='';rerender();
   if(data.action==='apply')focusNew('[data-act="views-open"]');else viewsOpen();
 }
@@ -38,8 +38,9 @@ function viewsBind(){
 function viewsSummaryBody(){
   const rows=orderedRows().filter(row=>!V.hiddenRows.includes(row.id));
   let html='<article class="executive-report"><header><small>BLUE OCEAN · VISUALIZAÇÃO ATUAL</small><h1>'+esc(S.title||'Jornada')+'</h1><p>Persona: '+esc(contextPersonaName())+'</p><p>'+esc(rows.map(row=>row.n).join(' · '))+'</p><p>Cartões: '+esc(personaFilterNames[V.personaFilter||'all'])+'</p></header><p>Recorte das faixas visíveis. Contexto da etapa e dores nativas são comuns; emoções seguem a Persona selecionada.</p>';
-  html+=S.steps.map((step,index)=>'<section class="report-stage"><h2>'+(index+1)+'. '+esc(step.n)+'</h2>'+rows.map(row=>{
-    const notes=contentReportNotes(S.c[row.id+'|'+index]||[],true);let content=notes;
+  html+=hierarchyReportHeader()+structureReportOverview();
+  html+=S.steps.map((step,index)=>'<section class="report-stage"><h2>'+(index+1)+'. '+esc(step.n)+'</h2>'+hierarchyReportStage(index)+rows.map(row=>{
+    const notes=contentReportNotes(S.c[row.id+'|'+index]||[],true)+structureReportContinuations(index,row.id,true);let content=notes;
     if(row.id==='sd')content='<p>'+esc(step.d||'Não informado')+'</p>'+notes;
     if(row.id==='em')content='<p>'+esc(growthEmotionKnown(step)?EM[step.e+2]+' · '+(step.emotionStatus==='validated'?'Validado pela equipe':'Hipótese'):'Não informada')+'</p>'+(step.emotionSource?'<p>Fonte: '+esc(step.emotionSource)+'</p>':'')+(step.note?'<p>'+esc(step.note)+'</p>':'')+notes;
     if(row.id==='im')content=S.iss.filter(issue=>issue.s===index).map(issue=>'<p><b>'+(issue.t==='d'?'Dor':'Ideia')+':</b> '+esc(issue.x)+'</p>'+contextPainReport(issue)).join('')+notes;

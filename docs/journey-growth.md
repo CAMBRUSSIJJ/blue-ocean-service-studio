@@ -291,3 +291,65 @@ o resumo completo. Contexto da etapa e dores/ideias da faixa nativa permanecem
 comuns; as emoções seguem a Persona selecionada. Isso não altera nem filtra os
 registros canônicos de dor, canal, Persona ou indicador. Os vínculos dos cartões
 sobrevivem à recarga e ao backup do projeto.
+
+## Abrangência dos cartões, seleção e fases
+
+No menu de um cartão, **Abrangência do cartão** permite escolher outras etapas
+que participam daquele conteúdo. A origem permanece selecionada. Cartões amplos
+ocupam a largura das etapas em uma faixa acima das células locais; **Ver cartão
+abrangente** leva à origem editável. O conteúdo, a escala, a imagem ou o vínculo
+continuam únicos. Para voltar a uma célula, deixe apenas a origem selecionada.
+
+A abrangência acompanha as identidades das etapas. Se a reordenação separar
+as participantes, aparecem segmentos de continuação que levam à mesma origem.
+Etapas intermediárias não escolhidas não entram automaticamente. Mover um cartão
+para outra etapa mantém a abrangência e inclui o destino como nova origem.
+Excluir a origem transfere o cartão à primeira participante restante; quando
+a última participante é excluída, o cartão também sai do mapa. Duplicar uma
+etapa cria cópias locais de seus cartões e preserva o alcance dos originais.
+
+Use **Selecionar cartões** para marcar até 100 cartões exibidos. **Duplicar
+selecionados**, **Mover selecionados** e **Excluir selecionados** realizam o lote
+em uma edição que pode ser desfeita. O destino mantém a faixa de cada cartão.
+Trocar o filtro ou ocultar uma faixa retira seus cartões da seleção. Se uma célula
+ficar cheia ou a duplicação exceder o orçamento de imagens, o lote inteiro é
+recusado, preservando os dados anteriores.
+
+**Fases** organiza a hierarquia fase → etapas, com até 20 fases de nomes únicos.
+Escolha um nome e etapas livres para criar; use **Editar** para renomear ou
+alterar a participação. Cada etapa pertence a uma fase por vez. **Excluir**
+remove a fase e preserva as etapas e cartões. A ordenação temporal é independente
+da fase. Reordenação, histórico, recarga e backup preservam essa organização.
+
+A apresentação e o HTML identificam fases e abrangência. O conteúdo completo de
+cada cartão aparece uma vez, com referências de continuação nas outras etapas.
+O recorte por Persona vale para o cartão inteiro. Alcance visual não cria
+atividades, canais ou medições adicionais nas etapas participantes. A hierarquia
+deste incremento tem um nível; sub-jornadas e hierarquias recursivas ficam para
+um contrato futuro. No documento avulso, as etapas antigas recebem identidades
+locais estáveis para suportar abrangência e ações estruturais com desfazer.
+
+## Sub-jornadas: detalhar uma etapa em outro mapa
+
+Em cada cabeçalho de etapa, **Sub-jornadas** permite dar um nome e **Criar
+sub-jornada vazia**, ou escolher uma **Jornada existente** livre e vinculá-la.
+A filha começa sem etapas, ações ou emoções sugeridas. Cada mapa conserva seu
+conteúdo e seus registros. Use o botão com seu nome para abri-la; o caminho no
+cabeçalho permite voltar a qualquer ancestral. Você pode criar novas filhas nas
+etapas do mapa detalhado, até oito mapas no caminho e 20 filhas por etapa.
+
+**Desvincular** remove apenas a relação com a origem. A Jornada e seus
+próprios filhos continuam no projeto; você pode vinculá-la a outra etapa. Um
+mapa já vinculado precisa ser desvinculado antes de receber outra origem.
+Ligações que criariam um ciclo ou excederiam os limites são recusadas por inteiro.
+Excluir uma origem solta suas filhas diretas, preservando seus dados. Duplicar
+um mapa cria uma cópia independente, sem copiar descendentes ou vínculo parental.
+
+Criar, vincular e desvincular usam o histórico. A visualização canônica vazia
+é preparada nessa edição para permitir a primeira abertura por quem tem leitura.
+Navegar não acrescenta uma edição ao histórico. Recarga e backup preservam os
+vínculos. O resumo e o HTML identificam caminho e filhas por etapa, sem incorporar
+os conteúdos dos outros mapas. Links legados incompletos geram um aviso; o
+caminho tem leitura limitada mesmo diante de um ciclo em dados importados.
+O documento avulso explica que essa conexão entre mapas exige um projeto.
+Fases continuam sendo grupos de etapas dentro de um mesmo mapa.
