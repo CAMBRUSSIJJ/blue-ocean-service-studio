@@ -456,7 +456,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     </form>
   </section>;
 
-  const hasSearchOrFilter = Boolean(query.trim()) || filter !== 'all';
+  const hasSearchOrFilter = Boolean(query.trim()) || filter !== 'all' || filterRules.length>0;
   const filters: Array<[FilterMode, string]> = [
     ['all', 'Todas'], ['used', 'Em Jornadas ou mapas'], ['unused', 'Não usadas'],
     ['evidence', 'Com evidência'], ['without-evidence', 'Sem evidências'], ['incomplete', 'Base incompleta'],
@@ -474,7 +474,25 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       </div>
       <div className="bo-p1-toolbar-actions">
         <label className="bo-h71-search bo-p1-search"><Search size={16}/><input aria-label="Buscar personas" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar personas, tags ou responsáveis"/></label>
-        <button type="button" className={showFilters || filter !== 'all' ? 'is-active' : ''} onClick={() => setShowFilters((value) => !value)} aria-label="Filtros de personas" aria-expanded={showFilters} aria-controls="bo-p1-filters"><Filter size={16}/><span>Filtros</span>{filter !== 'all' && <b aria-label="Filtro ativo" className="bo-p1-filter-dot"/>}</button>
+        <div className="bo-p3-saved-wrap"><button type="button" className={savedViewsOpen?'is-active':''} aria-expanded={savedViewsOpen} aria-controls="bo-p3-saved-panel" onClick={()=>{setSavedViewsOpen(!savedViewsOpen);setDisplayOpen(false);setShowFilters(false)}}>Visualizações <span aria-hidden="true">⌄</span></button>
+          {savedViewsOpen && <div className="bo-p3-popover bo-p3-saved-popover" id="bo-p3-saved-panel">
+            <strong>Visualizações salvas</strong><small>Disponíveis neste navegador e serviço.</small>
+            {savedViews.map(v=><div className="bo-p3-saved-item" key={v.id}><button type="button" onClick={()=>applySavedView(v)}>{v.name}</button><button type="button" aria-label={`Excluir visualização ${v.name}`} onClick={()=>persistSavedViews(savedViews.filter(x=>x.id!==v.id))}><Trash2 size={14}/></button></div>)}
+            {!savedViews.length&&<p>Nenhuma visualização salva.</p>}
+            <label htmlFor="bo-p3-save-name">Salvar visão atual</label><input id="bo-p3-save-name" maxLength={60} value={newViewName} onChange={e=>setNewViewName(e.target.value)} placeholder="Ex.: Personas sem evidências"/>
+            <button type="button" className="bo-p3-save-action" disabled={!newViewName.trim()} onClick={saveCurrentView}>Salvar visualização</button>
+          </div>}
+        </div>
+        <button type="button" className={showFilters || filter !== 'all' || filterRules.length ? 'is-active' : ''} onClick={openFilters} aria-label="Filtros de personas" aria-expanded={showFilters} aria-controls="bo-p3-filter-panel"><Filter size={16}/><span>Filtros</span>{(filter !== 'all' || filterRules.length>0) && <b aria-label="Filtro ativo" className="bo-p1-filter-dot"/>}</button>
+        <label className="bo-p3-sort-label">Classificar <select aria-label="Classificar personas" value={sortMode} onChange={e=>setSortMode(e.target.value as PersonaSort)}><option value="title">Nome A–Z</option><option value="recent">Atualização recente</option><option value="evidence">Mais evidências</option><option value="usage">Mais utilizadas</option><option value="completeness">Mais completas</option></select></label>
+        <div className="bo-p3-display-wrap"><button type="button" aria-expanded={displayOpen} aria-controls="bo-p3-display-panel" onClick={()=>{setDisplayOpen(!displayOpen);setSavedViewsOpen(false);setShowFilters(false)}}>Exibição <span aria-hidden="true">⌄</span></button>
+          {displayOpen&&<div className="bo-p3-popover" id="bo-p3-display-panel"><strong>Personalizar exibição</strong><small>Escolha o formato e as colunas da tabela.</small>
+            <div className="bo-p3-display-modes" role="group" aria-label="Formato de visualização"><button type="button" aria-pressed={viewMode==='cards'} onClick={()=>changeViewMode('cards')}>Cartões</button><button type="button" aria-pressed={viewMode==='table'} onClick={()=>changeViewMode('table')}>Tabela</button></div>
+            <strong>Colunas visíveis</strong><small>Persona e Ações permanecem fixas.</small>
+            {([['owner','Responsável'],['evidence','Evidências'],['usage','Uso em mapas'],['updated','Atualizado']] as Array<[PersonaColumn,string]>).map(([id,label])=><label className="bo-p3-column" key={id}><input type="checkbox" checked={visibleColumns.includes(id)} onChange={e=>setVisibleColumns(current=>e.target.checked?[...current,id]:current.filter(x=>x!==id))}/>{label}</label>)}
+            <button type="button" className="bo-p3-close" onClick={()=>setDisplayOpen(false)}>Concluir</button>
+          </div>}
+        </div>
         <div className="bo-p1-view-toggle" role="group" aria-label="Visualização de personas">
           <button type="button" className={viewMode === 'cards' ? 'is-active' : ''} aria-pressed={viewMode === 'cards'} onClick={() => changeViewMode('cards')}><UsersRound size={16}/><span>Cartões</span></button>
           <button type="button" className={viewMode === 'table' ? 'is-active' : ''} aria-pressed={viewMode === 'table'} onClick={() => changeViewMode('table')}><Table2 size={16}/><span>Tabela</span></button>
@@ -482,7 +500,32 @@ export function PersonasView({ studio }: { studio: StudioController }) {
         <button type="button" className="primary bo-p1-create" onClick={() => setCreateOpen(true)}><Plus size={16}/> Nova Persona</button>
       </div>
     </div>
-    {showFilters && <div id="bo-p1-filters" className="bo-h71-filters bo-p1-filters" role="group" aria-label="Filtrar personas"><span>Mostrar</span>{filters.map(([id, label]) => <button key={id} type="button" className={filter === id ? 'is-active' : ''} aria-pressed={filter === id} onClick={() => setFilter(id)}>{label}</button>)}</div>}
+    {showFilters && <div className="bo-p3-overlay" onMouseDown={(e)=>{if(e.target===e.currentTarget)setShowFilters(false)}}>
+      <aside className="bo-p3-filter-panel" id="bo-p3-filter-panel" role="dialog" aria-modal="true" aria-labelledby="bo-p3-filters-title" onKeyDown={(e)=>{if(e.key==='Escape')setShowFilters(false)}}>
+        <header><div><small>PERSONAS / SEGMENTAÇÃO</small><h2 id="bo-p3-filters-title">Filtrar Personas</h2><p>Combine condições para encontrar os perfis que precisam de atenção.</p></div>
+          <button type="button" aria-label="Fechar filtros" onClick={()=>setShowFilters(false)}><X size={18}/></button></header>
+        <div className="bo-p3-filter-body">
+          <section><h3>Filtros rápidos</h3><div className="bo-p3-quick">{filters.map(([id,label])=><button key={id} type="button" className={filter===id?'is-active':''} aria-pressed={filter===id} onClick={()=>setFilter(id)}>{label}</button>)}</div></section>
+          <section><div className="bo-p3-section-head"><h3>Condições personalizadas</h3><span>{draftRules.length} de 8</span></div>
+            {draftRules.length>1&&<div className="bo-p3-logic" role="group" aria-label="Combinar condições"><button type="button" aria-pressed={draftLogic==='all'} onClick={()=>setDraftLogic('all')}>E · todas</button><button type="button" aria-pressed={draftLogic==='any'} onClick={()=>setDraftLogic('any')}>OU · qualquer uma</button></div>}
+            {draftRules.map((rule,index)=>{
+              const field=PERSONA_FIELDS.find(f=>f.id===rule.field);
+              return <div className="bo-p3-rule" key={rule.id}>
+                <div className="bo-p3-rule-head"><strong>Condição {index+1}</strong><button type="button" aria-label={`Remover condição ${index+1}`} onClick={()=>setDraftRules(current=>current.filter(x=>x.id!==rule.id))}><Trash2 size={14}/></button></div>
+                <label>Campo<select aria-label={`Campo da condição ${index+1}`} value={rule.field} onChange={e=>setDraftRules(current=>current.map(x=>x.id===rule.id?{...x,field:e.target.value as PersonaFilterField,operator:'equals',value:''}:x))}>{PERSONA_FIELDS.map(f=><option key={f.id} value={f.id}>{f.label}</option>)}</select></label>
+                <label>Operador<select aria-label={`Operador da condição ${index+1}`} value={rule.operator} onChange={e=>setDraftRules(current=>current.map(x=>x.id===rule.id?{...x,operator:e.target.value as PersonaFilterOperator}:x))}>
+                  {!field?.numeric&&<option value="contains">Contém</option>}<option value="equals">É igual a</option>{field?.numeric&&<><option value="gte">Maior ou igual a</option><option value="lte">Menor ou igual a</option></>}<option value="empty">Vazio / zero</option></select></label>
+                {rule.operator!=='empty'&&<label>Valor{rule.field==='mode'?<select aria-label={`Valor da condição ${index+1}`} value={rule.value} onChange={e=>setDraftRules(current=>current.map(x=>x.id===rule.id?{...x,value:e.target.value}:x))}><option value="">Selecione</option><option value="simple">Simples</option><option value="professional">Avançada</option></select>:<input aria-label={`Valor da condição ${index+1}`} value={rule.value} type={field?.numeric?'number':'text'} maxLength={150} placeholder={field?.numeric?'Ex.: 0':'Digite um valor'} onChange={e=>setDraftRules(current=>current.map(x=>x.id===rule.id?{...x,value:e.target.value}:x))}/>}</label>}
+              </div>;
+            })}
+            <button type="button" className="bo-p3-add-rule" disabled={draftRules.length>=8} onClick={()=>setDraftRules(current=>[...current,personaRule()])}><Plus size={15}/> Adicionar condição</button>
+            <p className="bo-p3-filter-help">Os filtros rápidos são combinados com as condições. Nenhuma informação da Persona é alterada.</p>
+          </section>
+        </div>
+        <footer><button type="button" onClick={()=>{setDraftRules([]);setFilter('all');setDraftLogic('all');setRuleLogic('all');setFilterRules([])}}>Limpar filtros</button>
+        <button type="button" className="primary" onClick={()=>{setFilterRules(validatePersonaRules(draftRules));setRuleLogic(draftLogic);setShowFilters(false)}}>Aplicar filtros</button></footer>
+      </aside>
+    </div>}
     {filtered.length > 0 && viewMode === 'cards' && <div className="bo-p1-card-grid" data-persona-card-grid="1">
       {filtered.map((row) => {
         const evidenceCount = row.report?.connectionCounts.evidence ?? 0;
@@ -509,10 +552,10 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       })}
     </div>}
     {filtered.length > 0 && viewMode === 'table' && <div className="bo-h71-table-wrap bo-p1-table-wrap" data-persona-table="1">
-      <table className="bo-h71-table bo-p1-table"><thead><tr><th>PERSONA</th><th>RESPONSÁVEL</th><th>EVIDÊNCIAS</th><th>USO EM MAPAS</th><th>ATUALIZADO</th><th>AÇÕES</th></tr></thead>
+      <table className="bo-h71-table bo-p1-table"><thead><tr><th>PERSONA</th>{visibleColumns.includes('owner')&&<th>RESPONSÁVEL</th>}{visibleColumns.includes('evidence')&&<th>EVIDÊNCIAS</th>}{visibleColumns.includes('usage')&&<th>USO EM MAPAS</th>}{visibleColumns.includes('updated')&&<th>ATUALIZADO</th>}<th>AÇÕES</th></tr></thead>
       <tbody>{filtered.map((row) => <tr key={row.persona.id}>
         <td><button type="button" className="bo-h71-persona-name" onClick={() => openPersona(row.persona.id)}><span><UserRound size={14}/></span><strong>{row.title}</strong></button><small className="bo-p1-table-hint">{String(row.persona.description || '').trim() || 'Sem resumo'}</small></td>
-        <td>{row.owner}</td><td>{row.report?.connectionCounts.evidence ?? 0}</td><td>{row.usage.instances ?? 0}</td><td>{formatDate(row.persona.updatedAt ?? row.persona.createdAt)}</td>
+        {visibleColumns.includes('owner')&&<td>{row.owner}</td>}{visibleColumns.includes('evidence')&&<td>{row.report?.connectionCounts.evidence ?? 0}</td>}{visibleColumns.includes('usage')&&<td>{row.usage.instances ?? 0}</td>}{visibleColumns.includes('updated')&&<td>{formatDate(row.persona.updatedAt ?? row.persona.createdAt)}</td>}
         <td className="menu-cell"><button type="button" aria-label={`Ações da persona ${row.title}`} aria-expanded={menuId === row.persona.id} onClick={() => setMenuId(menuId === row.persona.id ? null : row.persona.id)}><MoreVertical size={15}/></button>{menuId === row.persona.id && <div className="bo-h71-row-menu"><button type="button" onClick={() => openPersona(row.persona.id)}>Abrir</button><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(row.persona.id); }}>Remover</button></div>}</td>
       </tr>)}</tbody></table>
     </div>}
