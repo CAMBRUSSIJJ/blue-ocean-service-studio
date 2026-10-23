@@ -29,12 +29,12 @@ function contextOpenPain(key,index=0){
 function contextClose(){app.querySelector('#pain-context-dialog')?.close();focusNew('[data-act="context-pain"]')}
 function contextSubmit(form,planNext){
   if(contextPending||!form.reportValidity())return;
-  contextPending=true;form.querySelectorAll('[type="submit"]').forEach(button=>button.disabled=true);
+  contextPending=true;announceSave('pending');form.querySelectorAll('[type="submit"]').forEach(button=>button.disabled=true);
   const data=new FormData(form);window.parent.postMessage({boBlueprintHost:1,type:'pain-evidence',sourceId:contextSourceId,evidenceIds:data.getAll('evidence'),stageId:data.get('stage'),planNext},location.origin);
 }
 function contextResult(data){
   contextPending=false;
-  if(!data.ok){const form=app.querySelector('#pain-context-form');if(form){form.querySelector('.form-error').textContent=data.error||'Não foi possível salvar.';form.querySelectorAll('[type="submit"]').forEach(button=>button.disabled=false)}const status=app.querySelector('#context-status');if(status)status.textContent=data.error||'Não foi possível salvar.';const select=app.querySelector('[data-context-persona]');if(select){select.disabled=false;select.value=S.personaId||''}return}
+  if(!data.ok){announceSave(false);const form=app.querySelector('#pain-context-form');if(form){form.querySelector('.form-error').textContent=data.error||'Não foi possível salvar.';form.querySelectorAll('[type="submit"]').forEach(button=>button.disabled=false)}const status=app.querySelector('#context-status');if(status)status.textContent=data.error||'Não foi possível salvar.';const select=app.querySelector('[data-context-persona]');if(select){select.disabled=false;select.value=S.personaId||''}return}
   S=data.state;H=S.history||H;V=viewState(S.view);last=JSON.stringify(S);growthLastPatch=growthPatchKey();growthEmotionDrafts.clear();emotionEdit=null;announceSave(true);rerender();
   if(data.planNext){const index=S.iss.findIndex(issue=>issue.hostEntityId===data.problemId);if(index>=0){pickerShowTool('im');growthOpenPlan(index)}}else focusNew('[data-context-persona]');
 }
@@ -44,7 +44,7 @@ function contextAction(action,data,button){
   return false;
 }
 function contextBind(){
-  app.addEventListener('change',event=>{if(!event.target.matches('[data-context-persona]')||contextPending)return;contextPending=true;event.target.disabled=true;window.parent.postMessage({boBlueprintHost:1,type:'persona-select',personaId:event.target.value},location.origin)});
+  app.addEventListener('change',event=>{if(!event.target.matches('[data-context-persona]')||contextPending)return;contextPending=true;announceSave('pending');event.target.disabled=true;window.parent.postMessage({boBlueprintHost:1,type:'persona-select',personaId:event.target.value},location.origin)});
   app.addEventListener('submit',event=>{if(event.target.id==='pain-context-form'){event.preventDefault();contextSubmit(event.target,event.submitter?.value==='plan')}});
   app.addEventListener('cancel',event=>{if(event.target.id==='pain-context-dialog'){event.preventDefault();contextClose()}},true);
 }

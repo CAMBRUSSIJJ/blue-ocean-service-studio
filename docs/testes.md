@@ -35,6 +35,7 @@ npm run journey:content:test
 npm run journey:picker:test
 npm run journey:context:test
 npm run journey:observation:test
+npm run journey:persona-content:test
 ```
 
 Esses testes exercitam operações como seleção, criação e movimentação de cartões,
@@ -71,6 +72,7 @@ npm run journey:growth:browser
 npm run journey:content:browser
 npm run journey:picker:browser
 npm run journey:observation:browser
+npm run journey:persona-content:browser
 ```
 
 Esses runners podem servir o `dist/` em um servidor temporário. Para os que
@@ -175,3 +177,16 @@ em `artifacts/journey-observation/` para 1440, 834 e 390 px.
 
 A referência externa foi lida em documentação pública. Estes testes validam o
 Blue Ocean; não comprovam uma comparação interativa com o produto observado.
+
+## Cartões por Persona
+
+`journey:persona-content:test` cobre validação dos IDs/limite, os três modos de
+exibição, vínculos múltiplos, referências independentes, vínculos indisponíveis,
+cópia profunda, serialização, reordenação e visualizações antigas/novas.
+`journey:persona-content:browser` intercala cartões comuns e específicos de duas
+Personas e verifica os índices originais ao editar, inserir, ajustar escala,
+duplicar, excluir e mover. Confere ações nativas completas no Service Graph,
+recarga, visualizações, HTML, recuperação de vínculos indisponíveis, teclado e
+toque. Gera capturas e axe em `artifacts/journey-persona-content/` para 1440,
+834 e 390 px. O filtro cobre elementos compostos; contexto e dores nativas
+permanecem comuns, conforme a especificação B11.

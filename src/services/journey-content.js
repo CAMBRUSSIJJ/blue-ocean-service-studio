@@ -4,6 +4,24 @@ export const MATRIX_CONTENT_TYPES = ['text', 'card', 'emoji', 'image', 'link', '
 export const MATRIX_IMAGE_LIMIT = 500 * 1024;
 export const MATRIX_IMAGE_BUDGET = 2 * 1024 * 1024;
 const clipped = (v, n) => typeof v === 'string' ? v.trim().slice(0, n) : '';
+export function normalizeMatrixPersonaIds(input) {
+  if (input == null) return [];
+  if (!Array.isArray(input) || input.some(id => typeof id !== 'string' || !id.trim() || id.length > 160)) throw Error('Revise os vínculos de Persona do cartão.');
+  const ids = [...new Set(input.map(id => id.trim()))];
+  if (ids.length > 20) throw Error('Cada cartão pode ser vinculado a até 20 Personas.');
+  return ids;
+}
+export function matrixBlockVisible(note, mode = 'all', personaId = '') {
+  if (!['selected', 'exclusive'].includes(mode) || !personaId) return true;
+  const ids = normalizeMatrixPersonaIds(note.personaIds);
+  return ids.includes(personaId) || mode === 'selected' && ids.length === 0;
+}
+/** Retain old unavailable links until explicitly removed; never introduce new unknown links. */
+export function assignMatrixBlockPersonas(note, input, availableIds) {
+  const ids = normalizeMatrixPersonaIds(input), previous = normalizeMatrixPersonaIds(note.personaIds);
+  if (ids.some(id => !availableIds.includes(id) && !previous.includes(id))) throw Error('Uma Persona selecionada está indisponível. Reabra os vínculos.');
+  return { ...note, personaIds: ids };
+}
 export function insertMatrixBlock(notes, note, beforeId = null) {
   if (!Array.isArray(notes) || notes.length >= 100) throw Error('Cada célula pode ter até 100 elementos.');
   if (notes.some(value => value.i === note.i)) throw Error('O elemento já está nesta célula.');
@@ -78,6 +96,8 @@ export function normalizeMatrixBlock(note) {
   const type = MATRIX_CONTENT_TYPES.includes(note?.type) ? note.type : 'card';
   const normalized = { id: clipped(note?.id ?? note?.i, 160), type, text: clipped(note?.text ?? note?.t, 1000) };
   if (!normalized.id) throw Error('O elemento precisa de uma identificação.');
+  const personaIds = normalizeMatrixPersonaIds(note?.personaIds);
+  if (personaIds.length) normalized.personaIds = personaIds;
   const icon = clipped(note?.icon, 24);
   if (icon) normalized.icon = icon;
   if (type === 'link' || type === 'image') {

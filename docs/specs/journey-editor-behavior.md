@@ -93,3 +93,52 @@ com telas de 1440, 834 e 390 px e contexto de toque em 390 px. Os comandos e
 seus limites estão em [Testes](../testes.md). A regressão de Personas, dores,
 evidências e planos permanece em `journey:context:browser`; o piloto com pessoas
 e a comparação interativa entre produtos continuam pendentes.
+
+## Próximo incremento — cartões por Persona (B11)
+
+Esta seção especifica o incremento antes de sua implementação. A fonte pública
+S04 já registrada orienta a tarefa; regras e interface abaixo são escolhas do
+Blue Ocean. Não houve nova sessão no produto observado.
+
+- Cada elemento composto aceita até 20 vínculos explícitos com Personas. Nenhum
+  vínculo significa conteúdo comum. Os cartões atuais continuam comuns sem
+  migração; referências a registros do serviço não inferem esse vínculo.
+- A Persona da jornada continua escolhendo a observação emocional. Um filtro
+  separado permite todos os cartões, Persona e comuns ou somente Persona.
+  Os dois últimos modos exigem uma Persona selecionada.
+- Novos cartões criados com filtro ativo recebem vínculo à Persona selecionada,
+  anunciado junto ao filtro. Duplicação mantém vínculos; desvincular é explícito.
+- A filtragem é apenas de exibição. Os índices, identidades, etapas, dados e
+  vínculos canônicos permanecem completos ao editar, mover ou excluir um cartão
+  visível. Campos de escala, menus e pontos de inclusão usam os índices originais.
+- Vínculos a Personas removidas ficam identificados como indisponíveis até
+  remoção explícita. Não se tornam conteúdo comum automaticamente.
+- Visualizações salvas guardam o modo do filtro. As antigas abrem com todos os
+  cartões. O recorte apresentado/exportado respeita o filtro; o resumo executivo
+  completo continua incluindo todos os cartões, com os vínculos identificados.
+- Contexto da etapa e dores/ideias da faixa nativa permanecem comuns. Filtrar
+  cartões vinculados a uma dor não filtra ou remove o registro canônico da dor.
+- Salvar vínculos é uma edição com histórico; trocar o modo é preferência de
+  exibição. Recarga e backup preservam vínculos e visualizações.
+
+Aceitação: intercalar cartões comuns, de A, B e A+B; alternar os três modos;
+editar, duplicar, inserir, remover, mover e ajustar escala com cartões ocultos
+antes/depois; conferir desfazer/refazer e reordenação de etapas; salvar/aplicar
+visões; apresentar/exportar e recarregar; remover uma Persona; repetir por toque
+em 390 px e auditar teclado/axe em 1440, 834 e 390 px.
+
+## Entrega de B11
+
+A seção B11 acima foi registrada em `70fa08f`, antes do código. O incremento
+implementa vínculos opcionais em todos os elementos compostos, os três modos de
+filtro e persistência nas visualizações. As afirmações de conteúdo comum na
+primeira versão deste documento descrevem a base anterior: cartões agora podem
+ter vínculos; contexto da etapa e dores/ideias nativas continuam comuns.
+
+`journey:persona-content:test` verifica normalização, legado, vínculos múltiplos,
+fontes independentes, Personas indisponíveis, cópia, serialização e configurações.
+`journey:persona-content:browser` executa o roteiro de B11, incluindo controles
+com índices originais, ações nativas completas no grafo, histórico, recarga,
+HTML, teclado, toque e axe. Capturas e relatórios ficam em
+`artifacts/journey-persona-content/`. O teste com participantes não foi realizado.
+B12 (alcance em várias etapas, seleção múltipla e hierarquia) permanece no backlog.

@@ -251,9 +251,43 @@ Se a Persona foi removida, selecione outra e atualize a visualização.
 **Apresentar visualização atual**, dentro desse diálogo, usa somente as faixas
 visíveis e mantém o mesmo recorte ao baixar HTML ou imprimir. O botão
 **Apresentar** da barra principal continua abrindo o resumo executivo completo.
-O contexto de Persona altera as observações emocionais; os demais cartões ainda
-são comuns à jornada. Configurações são preservadas no backup do projeto.
+O contexto de Persona altera as observações emocionais. O filtro de cartões,
+descrito abaixo, também entra no recorte e na configuração salva. Configurações
+são preservadas no backup do projeto.
 
 O [registro de observação pública](research/smaply-observation-2026-10-22.md) e a
 [especificação independente](specs/journey-editor-behavior.md) documentam as
 referências, decisões e funcionalidades deixadas para próximos incrementos.
+
+## Cartões vinculados a Personas
+
+No menu de um cartão, use **Vincular Personas**. Marque uma ou mais Personas do
+serviço e salve. Sem vínculos, o cartão é **comum a todas as Personas**. Os cartões
+já existentes continuam comuns até uma escolha explícita. O vínculo de exibição
+é independente do registro do serviço: um cartão do tipo Persona, por exemplo,
+não ganha automaticamente um vínculo de exibição com a pessoa referenciada.
+
+Escolha a **Persona da jornada** e use **Cartões exibidos**:
+
+- **Todos os cartões** permite consultar e editar o mapa completo.
+- **Persona e cartões comuns** mostra os vinculados à pessoa e os compartilhados.
+- **Somente cartões da Persona** mostra apenas os explicitamente vinculados.
+
+O contador mostra quantos cartões estão no recorte das faixas visíveis. Com filtro
+ativo, novos cartões são vinculados à Persona selecionada para permanecerem no
+recorte; esse comportamento é informado junto ao filtro. Duplicar mantém os
+vínculos. Ao alterar vínculos, um cartão pode sair do recorte sem ser excluído.
+**Mostrar todos os cartões** permite encontrá-lo novamente.
+
+Filtros não excluem conteúdo: edição, escala, movimentação, inserção e exclusão
+atuam no cartão escolhido e preservam os ocultos. Desfazer/refazer recupera os
+vínculos. Ao remover uma Persona da biblioteca, os vínculos antigos continuam
+identificados como indisponíveis. Remova-os explicitamente para tornar o cartão
+comum ou selecione outras Personas.
+
+Visualizações salvas guardam o modo do filtro. Apresentação e HTML da visualização
+atual respeitam o recorte; **Apresentar**, na barra principal, continua mostrando
+o resumo completo. Contexto da etapa e dores/ideias da faixa nativa permanecem
+comuns; as emoções seguem a Persona selecionada. Isso não altera nem filtra os
+registros canônicos de dor, canal, Persona ou indicador. Os vínculos dos cartões
+sobrevivem à recarga e ao backup do projeto.
