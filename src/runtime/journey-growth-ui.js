@@ -13,14 +13,40 @@ function growthEmotionCurvePath(points){
   points.forEach((p,i)=>{if(!p.known)return;const before=points[i-1];if(!before?.known)path+=' M'+p.x+' '+p.y;else{const middle=(before.x+p.x)/2;path+=' C'+middle+' '+before.y+' '+middle+' '+p.y+' '+p.x+' '+p.y}});
   return path;
 }
+const growthEmotionState=s=>!growthEmotionKnown(s)?'unknown':s.emotionStatus==='validated'&&s.emotionSource?.trim()?'validated':'hypothesis';
+const growthEmotionStateName=state=>({unknown:'Não informado',hypothesis:'Hipótese',validated:'Validado'})[state];
+const growthEmotionScore=s=>Math.max(-2,Math.min(2,Math.round(Number(s.e)||0)));
+function growthEmotionLabel(s){return growthEmotionKnown(s)?EM[growthEmotionScore(s)+2]:'Sem registro'}
+function growthEmotionPointTitle(s){return growthEmotionLabel(s)+' · '+growthEmotionStateName(growthEmotionState(s))+(growthEmotionKnown(s)?' · '+(growthEmotionScore(s)>0?'+':'')+growthEmotionScore(s):'')}
+function growthEmotionScale(W){
+ const lines=[2,1,0,-1,-2].map(score=>{
+  const y=16+(2-score)*14,level=score>0?'+'+score:String(score);
+  return '<line data-emotion-level="'+score+'" x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'" class="emotion-grid-line'+(score===0?' is-neutral':'')+'" vector-effect="non-scaling-stroke"/>';
+ }).join('');
+ return '<svg class="emotion-plot" viewBox="0 0 '+W+' 112" preserveAspectRatio="none" role="img" aria-label="Curva de emoções com escala de menos dois a mais dois; pontos vazios representam hipóteses ou ausência de registro. Lacunas não são tratadas como neutras.">'+
+ lines;
+}
+function growthEmotionLegend(){
+ const counts={unknown:0,hypothesis:0,validated:0};
+ S.steps.forEach(stage=>counts[growthEmotionState(stage)]++);
+ return '<div class="emotion-legend" aria-label="Legenda dos registros de emoção">'+
+ '<span class="emotion-legend-item"><i class="emotion-legend-dot unknown" aria-hidden="true"></i>Não informado <b>'+counts.unknown+'</b></span>'+
+ '<span class="emotion-legend-item"><i class="emotion-legend-dot hypothesis" aria-hidden="true"></i>Hipótese <b>'+counts.hypothesis+'</b></span>'+
+ '<span class="emotion-legend-item"><i class="emotion-legend-dot validated" aria-hidden="true"></i>Validado <b>'+counts.validated+'</b></span>'+
+ '<small class="emotion-legend-help">Arraste um ponto para mudar a intensidade; alterações validadas voltam a ser hipóteses.</small></div>';
+}
 function growthCurve(){
-  const N=S.steps.length,W=Math.max(100,N*100),points=S.steps.map((s,i)=>({x:i*100+50,y:16+(2-s.e)*14,known:growthEmotionKnown(s),s}));
-  const path=growthEmotionCurvePath(points);
-  return '<svg viewBox="0 0 '+W+' 112" preserveAspectRatio="none" role="img" aria-label="Emoções registradas; lacunas representam informações ausentes"><path data-emotion-curve-line="1" d="'+path+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+points.map((p,i)=>{
-    const validated=p.known&&p.s.emotionStatus==='validated'&&p.s.emotionSource?.trim(),top=p.known?p.y:44;
-    const label=p.known?EM[p.s.e+2]+' · '+(validated?'Validado':'Hipótese'):'Não informado';
-    return '<button type="button" class="dt '+(!p.known?'unknown':validated?'validated':'hypothesis')+'" data-act="emotion-edit" data-si="'+i+'" style="left:'+p.x/W*100+'%;top:'+top+'px" aria-label="Editar emoção em '+esc(p.s.n)+': '+esc(label)+'" aria-expanded="'+(emotionEdit===i||V.emotionsExpanded)+'"></button><span class="dl" data-emotion-curve-label="'+i+'" style="left:'+p.x/W*100+'%;top:'+(top+15)+'px">'+esc(label)+'</span>';
-  }).join('');
+ const N=S.steps.length,W=Math.max(100,N*100),points=S.steps.map((stage,i)=>({x:i*100+50,y:16+(2-growthEmotionScore(stage))*14,known:growthEmotionKnown(stage),s:stage}));
+ const path=growthEmotionCurvePath(points);
+ const ticks=[2,1,0,-1,-2].map(score=>'<span class="emotion-axis-tick" data-emotion-tick="'+score+'" style="top:'+(16+(2-score)*14)+'px" title="'+({2:'Muito positiva',1:'Positiva',0:'Neutra','-1':'Negativa','-2':'Muito negativa'}[score])+'">'+(score>0?'+'+score:score)+'</span>').join('');
+ const curve=growthEmotionScale(W)+'<path data-emotion-curve-line="1" d="'+path+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+
+ '<div class="emotion-axis" aria-hidden="true">'+ticks+'</div>'+
+ points.map((p,i)=>{
+  const state=growthEmotionState(p.s),top=p.known?p.y:44,title=growthEmotionPointTitle(p.s);
+  return '<button type="button" class="dt '+state+'" data-act="emotion-edit" data-emotion-state="'+state+'" data-si="'+i+'" style="left:'+p.x/W*100+'%;top:'+top+'px" title="'+esc(title)+'" aria-label="Editar emoção em '+esc(p.s.n)+': '+esc(title)+'" aria-expanded="'+(emotionEdit===i||V.emotionsExpanded)+'"></button>'+
+   '<span class="dl" data-emotion-curve-label="'+i+'" title="'+esc(title)+'" style="left:'+p.x/W*100+'%;top:'+(top+16)+'px">'+esc(growthEmotionLabel(p.s))+'</span>';
+ }).join('');
+ return curve;
 }
 
 let growthEmotionDrag=null;
@@ -28,14 +54,13 @@ let growthEmotionSuppressUntil=0;
 function growthEmotionRefreshPoint(i){
   const box=app.querySelector('#curve'),stage=S.steps[i];
   if(!box||!stage)return;
-  const points=S.steps.map((s,j)=>({x:j*100+50,y:16+(2-s.e)*14,known:growthEmotionKnown(s)}));
+  const points=S.steps.map((s,j)=>({x:j*100+50,y:16+(2-growthEmotionScore(s))*14,known:growthEmotionKnown(s)}));
   box.querySelector('[data-emotion-curve-line]')?.setAttribute('d',growthEmotionCurvePath(points));
   const dot=box.querySelector('.dt[data-si="'+i+'"]'),label=box.querySelector('[data-emotion-curve-label="'+i+'"]');
-  const known=growthEmotionKnown(stage),validated=known&&stage.emotionStatus==='validated'&&stage.emotionSource?.trim();
-  const top=known?16+(2-stage.e)*14:44;
-  const labelText=known?EM[stage.e+2]+' · '+(validated?'Validado':'Hipótese'):'Não informado';
-  if(dot){dot.style.top=top+'px';dot.classList.toggle('unknown',!known);dot.classList.toggle('validated',!!validated);dot.classList.toggle('hypothesis',!!known&&!validated);dot.setAttribute('aria-label','Editar emoção em '+stage.n+': '+labelText)}
-  if(label){label.style.top=(top+15)+'px';label.textContent=labelText}
+  const state=growthEmotionState(stage),top=growthEmotionKnown(stage)?16+(2-growthEmotionScore(stage))*14:44,title=growthEmotionPointTitle(stage);
+  if(dot){dot.style.top=top+'px';dot.classList.toggle('unknown',state==='unknown');dot.classList.toggle('validated',state==='validated');dot.classList.toggle('hypothesis',state==='hypothesis');dot.dataset.emotionState=state;dot.title=title;dot.setAttribute('aria-label','Editar emoção em '+stage.n+': '+title)}
+  if(label){label.style.top=(top+16)+'px';label.textContent=growthEmotionLabel(stage);label.title=title}
+  const legend=app.querySelector('.emotion-legend');if(legend)legend.outerHTML=growthEmotionLegend();
 }
 function growthEmotionPointerDown(event){
   const dot=event.target.closest?.('#curve .dt[data-act="emotion-edit"]');
