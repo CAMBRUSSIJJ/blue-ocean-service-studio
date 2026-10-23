@@ -129,6 +129,7 @@ export type JourneyMatrixContent = {
   cells: Record<Id, Record<string, JourneyMatrixBlock[]>>;
 };
 export type JourneyMatrixView = {
+  perspective?: 'journey' | 'blueprint';
   version: 1;
   preset: 'essential' | 'detailed' | 'operational' | 'acquisition' | 'complete' | 'custom';
   hiddenRows: string[];

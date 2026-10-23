@@ -1,5 +1,13 @@
 # Histórico de mudanças
 
+## 2026-10-23 · Matriz compartilhada de Jornada e Blueprint
+
+- Reúne Jornadas e Blueprints em uma entrada do projeto, mantendo as bibliotecas e os vínculos existentes.
+- Adiciona alternância entre as perspectivas no mapa, com a mesma interface e preservação das faixas personalizadas.
+- Usa linhas suaves, divisórias verticais, etapas em seta e cartões com superfície consistente.
+- Mostra Adicionar cartão sobre uma linha tracejada, inclusive nos pontos de inserção intermediários; recolhe os filtros para liberar a matriz.
+- Preserva ferramentas completas e detalhes operacionais, com retorno à matriz e testes reais de navegação, dados e toque.
+
 ## 2026-10-23 · Perspectivas e edição em lote dos cartões
 
 - Associa Personas e tags a cada cartão e adiciona cores de destaque, preservando os vínculos ao serviço.

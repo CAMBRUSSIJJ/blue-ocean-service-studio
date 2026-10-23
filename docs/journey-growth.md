@@ -240,6 +240,10 @@ e refazer continuam disponíveis. Esses atalhos não atuam enquanto você escrev
 no cartão ou preenche um diálogo. Duplicar um vínculo cria outra representação
 do mesmo registro do serviço.
 
+A entrada **Jornadas e Blueprints** reúne os mapas do projeto. Consulte a
+[matriz compartilhada](shared-map-matrix.md) para alternar a perspectiva no editor
+e acessar as ferramentas operacionais.
+
 Em **Visualizações**, informe um nome e use **Salvar visualização atual**.
 Cada jornada aceita até 20 configurações. A visualização guarda faixas, ordem,
 ajuste de tela, Persona e filtros dos cartões sobre os dados atuais da jornada. **Aplicar** recupera

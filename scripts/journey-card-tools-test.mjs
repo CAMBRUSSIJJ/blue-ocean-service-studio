@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { normalizeMatrixCardMetadata, normalizeMatrixCardFilters, matrixCardMatches, applyMatrixCardAction, matrixContentFromDocument, restoreMatrixContent, duplicateMatrixBlock } from '../src/services/journey-content.js';
-import { manageJourneySavedView } from '../src/services/journey-views.js';
+import { manageJourneySavedView, normalizeSavedMatrixView } from '../src/services/journey-views.js';
 let count = 0;
 const check = (name, run) => { run(); count++; console.log('PASS ' + name); };
 const fixture = () => ({ 'xnotes|0': [{ i: 'one', type: 'text', t: 'Ação na contratação', personaIds: ['ana'], tags: ['Pesquisa'], tone: 'blue' }, { i: 'two', type: 'metric', t: '', referenceId: 'metric-source' }], 'xnotes|1': [{ i: 'three', type: 'text', t: 'Conteúdo de outra Persona', personaIds: ['bia'] }] });
@@ -70,5 +70,14 @@ check('Saved views restore card filters without copying or rewriting any card', 
   manageJourneySavedView(graph, 'journey', 'apply', { id: record.id });
   assert.deepEqual(graph.journeys.journey.matrixView.cardFilters, filters); assert.equal(JSON.stringify(graph.journeys.journey.matrixContent), snapshot);
   assert.equal(normalizeMatrixCardFilters({ type: 'unknown', includeUnassigned: false }).type, '');
+});
+check('Saved matrix perspectives survive custom presets and legacy operational views', () => {
+  assert.equal(normalizeSavedMatrixView({ preset: 'operational' }).perspective, 'blueprint');
+  assert.equal(normalizeSavedMatrixView().perspective, 'journey');
+  const graph = { service: { id: 'service' }, journeys: { journey: { matrixContent: { rows: {}, cells: {} } } }, entities: { persona: {} } };
+  manageJourneySavedView(graph, 'journey', 'create', { name: 'Operação personalizada', view: { preset: 'custom', perspective: 'blueprint' } });
+  const restored = JSON.parse(JSON.stringify(graph)), id = restored.journeys.journey.savedMatrixViews[0].id;
+  manageJourneySavedView(restored, 'journey', 'apply', { id });
+  assert.equal(restored.journeys.journey.matrixView.perspective, 'blueprint');
 });
 console.log(`Journey card tools: ${count}/${count} PASS`);

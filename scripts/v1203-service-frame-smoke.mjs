@@ -94,7 +94,7 @@ ok(views.includes('Etapas × Cliente × Frontstage × Backstage × Processos × 
 const ui=read('src/views/WhiteboardsView.tsx');
 const blueprintWorkspace=read('src/views/BlueprintWorkspaceView.tsx');
 ok(!ui.includes('Novo Service Frame')&&!ui.includes('Criar Service Frame'),'Whiteboard no longer owns Service Frame');
-for(const marker of ['serviceBlueprintFrame','Criar Service Blueprint',"runtimeCall('open'","runtimeCall('create'"]) ok(blueprintWorkspace.includes(marker),`blueprint workspace marker ${marker}`);
+for(const marker of ['serviceBlueprintFrame','Criar Blueprint',"runtimeCall('open'","runtimeCall('create'"]) ok(blueprintWorkspace.includes(marker),`blueprint workspace marker ${marker}`);
 ok(core.includes('function createServiceBlueprint')&&core.includes("viewKind:'blueprint'")&&core.includes("layoutMode:'service'"),'runtime creates Service Frame as Blueprint');
 ok(core.includes("runtime.register('serviceBlueprintFrame'"),'Service Blueprint runtime API registered');
 const css=read('src/runtime/whiteboard-core.css');

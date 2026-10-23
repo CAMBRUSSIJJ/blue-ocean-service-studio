@@ -73,6 +73,7 @@ npm run journey:content:browser
 npm run journey:picker:browser
 npm run journey:observation:browser
 npm run journey:cards:browser
+npm run maps:matrix:browser
 ```
 
 Esses runners podem servir o `dist/` em um servidor temporário. Para os que

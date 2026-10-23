@@ -20,6 +20,9 @@ A partir da **V1.16.0**, a autoridade do produto é a pasta `src/` junto de `ind
 - Classificação, filtros e edição em lote dos cartões são editados em
   `src/runtime/journey-card-tools-ui.js`; validação, correspondência e alterações
   atômicas usam `src/services/journey-content.js`.
+- A biblioteca compartilhada de mapas é composta em
+  `src/views/BlueprintWorkspaceView.tsx`, com entrada única em `src/App.tsx`.
+  Jornada e Blueprint usam a mesma matriz e o mesmo catálogo de cartões.
 - a versão do produto vem de `package.json` e é propagada automaticamente para React, Whiteboard e `app-version.json`.
 - qualquer alteração direta no bundle publicado deve ser refeita no source antes de uma release.
 

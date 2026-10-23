@@ -1,6 +1,6 @@
 /* Card classification, filtered views and atomic bulk edits. */
 const cardToolsSelection = new Set();
-let cardToolsSelecting = false, cardToolsDialogIds = [];
+let cardToolsSelecting = false, cardToolsDialogIds = [], cardToolsFiltersOpen = false;
 const cardToolsToneNames = { neutral: 'Sem destaque', blue: 'Azul', emerald: 'Verde', amber: 'Amarelo', rose: 'Rosa', violet: 'Violeta' };
 function cardToolsPersonas() { return S.serviceElements?.persona || []; }
 function cardToolsPersonaName(id) { return cardToolsPersonas().find(persona => persona.id === id)?.title || 'Persona indisponível'; }
@@ -27,15 +27,14 @@ function cardToolsHeader() {
   const visible = cardToolsVisibleCards().length;
   const total = Object.entries(S.c).filter(([key]) => !V.hiddenRows.includes(key.split('|')[0])).reduce((sum, [, notes]) => sum + notes.length, 0);
   const active = filters.query || filters.type || filters.personaId || filters.tag;
-  return '<section class="card-tools" aria-label="Filtros dos cartões"><form id="card-filter-form">' +
+  return '<section class="card-tools" aria-label="Filtros dos cartões"><div class="card-tools-status"><button class="tb" data-act="cards-toggle-filters" aria-expanded="' + cardToolsFiltersOpen + '" aria-controls="card-filter-form">☷ Filtros' + (active ? ' · ativos' : '') + '</button><span role="status">' + visible + ' de ' + total + ' cartões</span><button class="tb" data-act="cards-select-mode" aria-pressed="' + cardToolsSelecting + '">' + (cardToolsSelecting ? 'Concluir seleção' : 'Selecionar cartões') + '</button></div><form id="card-filter-form" ' + (cardToolsFiltersOpen ? '' : 'hidden') + '>' +
     '<label>Buscar cartões<input type="search" name="query" maxlength="160" value="' + esc(filters.query) + '" placeholder="Texto, registro ou tag"></label>' +
     '<label>Persona dos cartões<select name="personaId" aria-label="Persona dos cartões"><option value="">Todas as Personas</option>' + personas.map(persona => '<option value="' + esc(persona.id) + '" ' + (filters.personaId === persona.id ? 'selected' : '') + '>' + esc(persona.title) + '</option>').join('') + (filters.personaId && !personas.some(p => p.id === filters.personaId) ? '<option selected value="' + esc(filters.personaId) + '">Persona indisponível</option>' : '') + '</select></label>' +
     '<label>Tipo de cartão<select name="type" aria-label="Tipo de cartão"><option value="">Todos os tipos</option>' + Object.entries(contentTypes).map(([type, [, name]]) => '<option value="' + type + '" ' + (filters.type === type ? 'selected' : '') + '>' + esc(name) + '</option>').join('') + '</select></label>' +
     '<label>Tag<select name="tag" aria-label="Tag"><option value="">Todas as tags</option>' + tags.map(tag => '<option ' + (filters.tag === tag ? 'selected' : '') + '>' + esc(tag) + '</option>').join('') + '</select></label>' +
     '<label class="card-common"><input type="checkbox" name="includeUnassigned" ' + (filters.includeUnassigned ? 'checked' : '') + '>Incluir sem Persona</label>' +
     '<button type="submit" class="tb p">Aplicar filtros</button>' + (active ? '<button type="button" class="tb" data-act="cards-reset-filters">Limpar filtros</button>' : '') + '</form>' +
-    '<div class="card-tools-status"><span role="status">' + visible + ' de ' + total + ' cartões nestas faixas</span><button class="tb" data-act="cards-select-mode" aria-pressed="' + cardToolsSelecting + '">' + (cardToolsSelecting ? 'Concluir seleção' : 'Selecionar cartões') + '</button></div>' +
-    (active ? '<p class="hint">Os filtros afetam os cartões. Etapas, contexto e emoções permanecem visíveis.</p>' : '') + '</section>';
+    (active && cardToolsFiltersOpen ? '<p class="hint">Os filtros afetam os cartões. Etapas, contexto e emoções permanecem visíveis.</p>' : '') + '</section>';
 }
 function cardToolsCheckbox(note) {
   return cardToolsSelecting ? '<label class="card-selection"><input type="checkbox" data-card-select="' + esc(note.i) + '" ' + (cardToolsSelection.has(note.i) ? 'checked' : '') + ' aria-label="Selecionar cartão ' + esc((note.t || contentTypes[note.type || 'card']?.[1] || '').slice(0, 80)) + '"><span>Selecionar</span></label>' : '';
@@ -97,6 +96,7 @@ function cardToolsSubmit(form) {
   } catch (error) { form.querySelector('.form-error').textContent = error.message; }
 }
 function cardToolsAction(action, data) {
+  if (action === 'cards-toggle-filters') { cardToolsFiltersOpen = !cardToolsFiltersOpen; rerender(); focusNew(cardToolsFiltersOpen ? '#card-filter-form [name="query"]' : '[data-act="cards-toggle-filters"]'); return true; }
   if (action === 'cards-reset-filters') { changeView({ cardFilters: window.BlueOceanJourneyContent.normalizeMatrixCardFilters() }, '[name="query"]'); return true; }
   if (action === 'cards-select-mode') { cardToolsSelecting = !cardToolsSelecting; if (!cardToolsSelecting) cardToolsSelection.clear(); rerender(); focusNew('[data-act="cards-select-mode"]'); return true; }
   if (action === 'cards-select-visible') { cardToolsVisibleCards().forEach(({ note }) => cardToolsSelection.add(note.i)); rerender(); focusNew('[data-act="cards-bulk-classify"]'); return true; }

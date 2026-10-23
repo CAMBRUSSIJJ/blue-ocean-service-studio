@@ -1291,6 +1291,10 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     add('Importar / Exportar','Backup, documentos e dados estruturados',()=>showImportExportCenter());
     add('Guia do Blueprint','Entenda etapas e camadas de entrega',()=>showBlueprintQuickStart());
     add('Integridade do Service Graph','Auditar vínculos e registros existentes',()=>runtime.api('dataIntegrity')?.showReport?.());
+    add('Editor operacional completo','Atividades, relações, camadas, histórico e todas as ferramentas do Blueprint',()=>{
+      blueprintReferenceState().mode='professional';
+      pref().layoutMode='service';renderAll();setTimeout(fitCurrentView,0);
+    });
   }
   let openedFromUnifiedJourney=false;
   let hostedBlueprintListener=null;
@@ -1359,6 +1363,15 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
           if(!save(false,{label:type==='persona-select'?'Definir Persona da Jornada':'Vincular evidências da dor'}))throw Error('Não foi possível salvar.');
           respond('context-result',{ok:true,state:hostedBlueprintDocument(),problemId,planNext:event.data.planNext===true});
         }catch(error){graph=before;respond('context-result',{ok:false,error:String(error?.message||error)})}
+      }else if(type==='activity-details'){
+        if(!canEditHostedMatrix())return;
+        if(mobileReadOnly()){toast('Os detalhes operacionais podem ser editados em tablet ou computador.');return}
+        const id=String(event.data.itemId||''),b=board();
+        const item=b.items[id]||b.items[b.blueprintHostedSync?.notes?.[id]];
+        if(item?.kind==='smart'&&['frontstage','backstage','process','evidence','system'].includes(item.objectKind)){
+          showBlueprintActivityDetails(item);
+          overlay?.querySelectorAll('.rt144-modal').forEach(node=>{node.style.zIndex='999999'});
+        }else toast('Este cartão não possui uma atividade operacional vinculada.');
       }else if(type==='tools'){
         showBlueprintReferenceTools();
       }else if(type==='back'){
@@ -1379,7 +1392,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   }
 
   function renderAll(){
-    if(!overlay)return;const focusBefore=focusDescriptor(document.activeElement);const renderStarted=performance.now(); overlay.innerHTML='';overlay.dataset.view=pref().layoutMode||'free';overlay.classList.toggle('bo-simple-blueprint',editorContextKind()==='blueprint'&&blueprintLearningState().mode==='guided');overlay.dataset.cardDensity=pref().cardDensity||'normal';overlay.classList.toggle('rt1811-density-compact',pref().cardDensity==='compact');overlay.classList.toggle('rt1811-density-normal',pref().cardDensity==='normal');overlay.classList.toggle('rt1811-density-detailed',pref().cardDensity==='detailed');overlay.classList.toggle('zoom-far',zoom<.58);overlay.classList.toggle('zoom-near',zoom>1.18);overlay.classList.toggle('rt159-performance',Object.keys(board()?.items||{}).length>perf.cullThreshold);overlay.classList.toggle('rt183-blueprint-editor',(pref().layoutMode||'free')==='blueprint');const __learn=blueprintLearningState();overlay.classList.toggle('rt185-guided',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='guided');overlay.classList.toggle('rt185-professional',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='professional');overlay.classList.toggle('rt185-show-tips',__learn.showTips!==false);if(showInspector&&(selected.length||selectedEdge))showBlueprintDocument=false;overlay.classList.toggle('rt183-document-open',!!showBlueprintDocument&&(pref().layoutMode||'free')==='blueprint');if(editorContextKind()==='blueprint'&&!blueprintLegacyQaMode()){renderReferenceCanvas();return}renderTop();
+    if(!overlay)return;const focusBefore=focusDescriptor(document.activeElement);const renderStarted=performance.now(); overlay.innerHTML='';overlay.dataset.view=pref().layoutMode||'free';overlay.classList.toggle('bo-simple-blueprint',editorContextKind()==='blueprint'&&blueprintLearningState().mode==='guided');overlay.dataset.cardDensity=pref().cardDensity||'normal';overlay.classList.toggle('rt1811-density-compact',pref().cardDensity==='compact');overlay.classList.toggle('rt1811-density-normal',pref().cardDensity==='normal');overlay.classList.toggle('rt1811-density-detailed',pref().cardDensity==='detailed');overlay.classList.toggle('zoom-far',zoom<.58);overlay.classList.toggle('zoom-near',zoom>1.18);overlay.classList.toggle('rt159-performance',Object.keys(board()?.items||{}).length>perf.cullThreshold);overlay.classList.toggle('rt183-blueprint-editor',(pref().layoutMode||'free')==='blueprint');const __learn=blueprintLearningState();overlay.classList.toggle('rt185-guided',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='guided');overlay.classList.toggle('rt185-professional',(pref().layoutMode||'free')==='blueprint'&&__learn.mode==='professional');overlay.classList.toggle('rt185-show-tips',__learn.showTips!==false);if(showInspector&&(selected.length||selectedEdge))showBlueprintDocument=false;overlay.classList.toggle('rt183-document-open',!!showBlueprintDocument&&(pref().layoutMode||'free')==='blueprint');if(editorContextKind()==='blueprint'&&!blueprintLegacyQaMode()&&blueprintReferenceState().mode!=='professional'){renderReferenceCanvas();return}renderTop();
     const body=document.createElement('div');body.className='rt144-body';overlay.appendChild(body);
     renderViewport(body); renderToolbar(body);
     if(showLibrary)renderLibrary(body);
@@ -2346,6 +2359,10 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const copy=document.createElement('div');copy.className='rt181-context-copy rt183-context-copy rt190-context-copy';
     copy.innerHTML=`<small class="bo1174-board-crumb">${label} <i>·</i> ${esc(graph.service.name)}</small><div class="rt183-doc-title rt190-doc-title"><b>${esc(board().name||label)}</b></div>`;
     context.append(back,copy);
+    if(kind==='blueprint'&&blueprintReferenceState().mode==='professional'){
+      const matrix=btn('Voltar à matriz',()=>{blueprintReferenceState().mode='reference';renderAll()},'bo-editor-return-matrix');
+      mid.appendChild(matrix);
+    }
     if(kind==='whiteboard'){
       const organize=btn('Organizar em Blueprint',showBlueprintSelectionPreview,'bo-editor-organize');
       organize.disabled=!selected.length;organize.title=selected.length?'Revisar etapas, camadas e vínculos da seleção':'Selecione as ideias que deseja organizar';mid.appendChild(organize);

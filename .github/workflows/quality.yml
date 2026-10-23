@@ -109,6 +109,8 @@ jobs:
       - run: npm run journey:elements:browser
       - run: npm run journey:context:browser
       - run: npm run journey:observation:browser
+      - run: npm run journey:cards:browser
+      - run: npm run maps:matrix:browser
       - run: npm run entry:browser
       - run: npm run product:browser
       - run: npm run maps:browser
@@ -136,3 +138,5 @@ jobs:
             artifacts/journey-elements
             artifacts/journey-context
             artifacts/journey-observation
+            artifacts/journey-card-tools
+            artifacts/shared-map-matrix

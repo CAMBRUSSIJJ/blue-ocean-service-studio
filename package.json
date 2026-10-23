@@ -213,7 +213,8 @@
     "journey:observation:test": "node scripts/journey-observation-test.mjs",
     "journey:observation:browser": "python3 scripts/journey-observation-browser.py",
     "journey:cards:test": "node scripts/journey-card-tools-test.mjs",
-    "journey:cards:browser": "python3 scripts/journey-card-tools-browser.py"
+    "journey:cards:browser": "python3 scripts/journey-card-tools-browser.py",
+    "maps:matrix:browser": "python3 scripts/shared-map-matrix-browser.py"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

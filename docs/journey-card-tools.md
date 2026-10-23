@@ -24,7 +24,7 @@ se repetem no mesmo cartão quando diferem apenas por maiúsculas ou espaços.
 
 ## Filtrar o conteúdo
 
-O painel **Filtros dos cartões** combina busca textual, Persona, tipo de cartão
+Clique em **Filtros** para abrir o painel, que combina busca textual, Persona, tipo de cartão
 e tag. A busca também considera o nome atual do registro vinculado e ignora
 acentos. Clique em **Aplicar filtros** ou pressione Enter na busca.
 

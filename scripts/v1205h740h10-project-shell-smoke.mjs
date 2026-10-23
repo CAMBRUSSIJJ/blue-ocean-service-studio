@@ -27,7 +27,7 @@ const checks=[
  [app.includes('data-project-scope={isGlobalScope ? "global" : "project"}'),'Explicit project scope preserved'],
  [app.includes('const isGlobalScope = !projectShellOpen'),'Global and project scope stay separate'],
  [app.includes('isGlobalHome && <ProjectHomeView') && !app.includes('isProjectHome && <ProjectShellView'),'Only global project picker and working editor render'],
- [app.includes('<span>Jornadas</span>') && app.includes('<span>Serviço</span>'),'Mobile goes to Jornadas and keeps project picker'],
+ [app.includes('<span>Mapas</span>') && app.includes('<span>Serviço</span>'),'Mobile goes to the shared maps library and keeps project picker'],
  [shell.includes('data-project-shell="7.40-H10"'),'Legacy shell remains available without losing archived code'],
  [app.includes('data-project-shell="7.40-H10"'),'Application marker retained for historical QA'],
  [css.includes('grid-template-columns:repeat(3,minmax(0,1fr))'),'Legacy grid styles preserved for migration'],

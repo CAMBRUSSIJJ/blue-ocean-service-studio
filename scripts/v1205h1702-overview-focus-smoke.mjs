@@ -21,7 +21,7 @@ check('Capacidades continuam navegáveis',overview.includes('data-capability-tar
 check('Conexões da fase preservadas',overview.includes('COMO ESTA FASE SE CONECTA'));
 check('Pesquisa preservada',view.includes("workspaceTab === 'research'"));
 check('Journey preservada',view.includes("workspaceTab === 'journey'"));
-check('Blueprint preservado',view.includes("workspaceTab === 'blueprint'"));
+check('Blueprint preservado',view.includes('data-blueprint-library="1"') && view.includes("runtimeCall('create')"));
 check('Whiteboard preservado',view.includes("workspaceTab === 'whiteboard'"));
 check('Importação do ícone hotfix H17.0.1 permanece',app.includes('ChevronsUpDown'));
 check('Release H17.0.2',(launch.includes('RELEASE="H17.0.3.1"') || (launch.includes('RELEASE="H17.0.5"') || launch.includes('RELEASE="H17.0.4"')) || launch.includes('RELEASE="H17.0.3"') || launch.includes('RELEASE="H17.0.2"')));
