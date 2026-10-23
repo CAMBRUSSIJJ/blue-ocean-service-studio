@@ -11,6 +11,8 @@ import { contextEntityTitle, contextEntityUsage, listContextEntities } from '../
 import {
   ADVANCED_PERSONA_SECTIONS,
   SIMPLE_PERSONA_SECTIONS,
+  switchPersonaDepth,
+  visiblePersonaSections,
   buildPersonaStudioReport,
   personaProfileFromEntity,
   personaRelationOptions,
@@ -37,7 +39,7 @@ function AutoTextarea({ minRows = 2, className = '', ...props }: AutoTextareaPro
   return <textarea {...props} ref={ref} rows={minRows} className={`bo-h724-autogrow ${className}`.trim()}/>;
 }
 
-type DetailTab = 'overview' | 'behavior' | 'relations' | 'evidence' | 'usage';
+type DetailTab = 'overview' | 'behavior' | 'decisions' | 'barriers' | 'relations' | 'evidence' | 'usage';
 type FilterMode = 'all' | 'unused' | 'used' | 'evidence' | 'without-evidence' | 'incomplete';
 type LibraryViewMode = 'cards' | 'table';
 type PersonaFilterField = 'title' | 'owner' | 'mode' | 'tags' | 'evidence' | 'usage' | 'completeness';
@@ -297,7 +299,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     }), 'Personas 2.0: criar');
     setCreateOpen(false); setCreateTitle(''); setCreateDescription('');
     setCreateMode('simple'); setCreateSections([...SIMPLE_PERSONA_SECTIONS]);
-    setSelectedId(entity.id); setDetailTab('overview');
+    setSelectedId(entity.id); setDetailTab(createMode === 'professional' ? 'behavior' : 'overview');
     showToast('Persona criada. Complete o perfil e salve.');
   };
 
@@ -336,6 +338,12 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     showToast('Alterações descartadas.');
   };
 
+  const changeDetailMode = (mode: PersonaDepth) => {
+    setDraft(current => current ? switchPersonaDepth(current, mode) : current);
+    if (mode === 'simple' && ['behavior','decisions','barriers'].includes(detailTab)) setDetailTab('overview');
+  };
+  const activeDetailSections = draft ? visiblePersonaSections(draft) : [];
+
   const removePersona = (id: string) => {
     setGraph((current) => removePersonaFromGraph(current, id), 'Personas 2.0: remover');
     if (selectedId === id) closePersona();
@@ -366,7 +374,11 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   if (selected && draft && report) {
     const evidenceConnections = relationOptions.filter((item) => item.kind === 'evidence' && connectedIds.includes(item.id));
     const usage = contextEntityUsage(graph, 'persona', selected.id);
-    const completeness = draft.mode === 'professional' ? (previewReport?.professionalScore ?? report.professionalScore) : (previewReport?.foundationScore ?? report.foundationScore);
+    const completenessReport = previewReport ?? report;
+    const completeness = draft.mode === 'professional' ? completenessReport.professionalScore : completenessReport.foundationScore;
+    const completenessChecks = draft.mode === 'professional'
+      ? [...completenessReport.foundationChecks, ...completenessReport.professionalChecks]
+      : completenessReport.foundationChecks;
     const savedDraft = personaProfileFromEntity(selected);
     const savedConnectedIds = report.connections.map((item) => item.id).sort();
     const isDirty = JSON.stringify(draft) !== JSON.stringify(savedDraft)
@@ -384,41 +396,74 @@ export function PersonasView({ studio }: { studio: StudioController }) {
 
       <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Persona">
         {([
-          ['overview', 'Visão geral'], ...(draft.mode === 'professional' ? [['behavior', 'Comportamento'] as [DetailTab, string]] : []), ['relations', 'Relações'], ['evidence', 'Evidências'], ['usage', 'Uso'],
+          ['overview', 'Visão geral'], ...(draft.mode === 'professional' ? [
+              ['behavior', 'Comportamento'], ['decisions', 'Decisões'], ['barriers', 'Barreiras'],
+            ] as Array<[DetailTab, string]> : []), ['relations', 'Relações'], ['evidence', 'Evidências'], ['usage', 'Uso'],
         ] as Array<[DetailTab, string]>).map(([id, label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'relations' && <b>{connectedIds.length}</b>}{id === 'evidence' && <b>{evidenceConnections.length}</b>}</button>)}
         <button type="button" className="bo-p2-persona-customize-tab" aria-expanded={showDetailCustomize} aria-controls="bo-p2-persona-customize" onClick={()=>setShowDetailCustomize(!showDetailCustomize)}>Personalizar interface</button>
       </nav>
       {showDetailCustomize&&<section id="bo-p2-persona-customize" className="bo-p2-persona-customize" aria-label="Personalizar interface da Persona">
         <div><h2>Como deseja visualizar esta Persona?</h2><p>Altere a apresentação sem apagar informações já preenchidas.</p></div>
         <fieldset><legend>Layout</legend><div className="bo-p2-customize-options">{layoutLabels.map(([id,label])=><button type="button" key={id} aria-pressed={draft.layout===id} onClick={()=>setDraft({...draft,layout:id})}>{label}</button>)}</div></fieldset>
-        <fieldset><legend>Blocos do perfil</legend><div className="bo-p2-customize-blocks">{personaCustomSections.filter(item=>draft.mode==='professional'||!['bio','behaviors','expectations','constraints','triggers','alternatives','relations'].includes(item.id)).map(item=><label key={item.id}><input type="checkbox" disabled={item.id==='identity'} checked={draft.sections.includes(item.id)} onChange={(e)=>setDraft({...draft,sections:e.target.checked?[...new Set([...draft.sections,item.id])]:draft.sections.filter(x=>x!==item.id)})}/>{item.label}</label>)}</div></fieldset>
+        <fieldset><legend>Blocos do perfil</legend><div className="bo-p2-customize-blocks">{personaCustomSections.filter(item=>draft.mode==='professional'||!['bio','behaviors','expectations','constraints','triggers','alternatives','relations'].includes(item.id)).map(item=><label key={item.id}><input type="checkbox" disabled={item.id==='identity'} checked={activeDetailSections.includes(item.id)} onChange={(e)=>setDraft({...draft,sections:e.target.checked?[...new Set([...draft.sections,item.id])]:draft.sections.filter(x=>x!==item.id)})}/>{item.label}</label>)}</div></fieldset>
         <p className="bo-p2-customize-tip">Use “Salvar alterações” ao terminar. Ocultar um bloco não exclui seus dados.</p>
       </section>}
 
+      {draft.mode === 'professional' && <div className="bo-p4-advanced-guide" role="status">
+        <div><strong>Pesquisa avançada ativada</strong><span>Organize comportamentos, decisões e barreiras em áreas separadas. As informações precisam de evidências para serem validadas.</span></div>
+        <button type="button" onClick={() => setDetailTab('behavior')}>Explorar pesquisa avançada <span aria-hidden="true">→</span></button>
+      </div>}
       <div className="bo-h71-detail-body">
         {detailTab === 'overview' && <div className="bo-h724-overview-layout">
           <main className="bo-h724-overview-main">
             <section className="bo-h71-editor-card bo-h724-identity-card">
-              <header><div><small>IDENTIDADE</small><strong>Quem é essa persona?</strong><p>Registre apenas o contexto necessário para reconhecer a pessoa e orientar decisões.</p></div><div className="bo-h71-depth-switch bo-h724-depth-switch"><button type="button" className={draft.mode === 'simple' ? 'is-active' : ''} onClick={() => setDraft({ ...draft, mode: 'simple', sections: [...SIMPLE_PERSONA_SECTIONS] })}><strong>Simples</strong><small>Essencial</small></button><button type="button" className={draft.mode === 'professional' ? 'is-active' : ''} onClick={() => setDraft({ ...draft, mode: 'professional', sections: [...ADVANCED_PERSONA_SECTIONS] })}><strong>Avançada</strong><small>Pesquisa profunda</small></button></div></header>
+              <header><div><small>IDENTIDADE</small><strong>Quem é essa persona?</strong><p>Registre apenas o contexto necessário para reconhecer a pessoa e orientar decisões.</p></div><div className="bo-h71-depth-switch bo-h724-depth-switch"><button type="button" className={draft.mode === 'simple' ? 'is-active' : ''} onClick={() => changeDetailMode('simple')}><strong>Simples</strong><small>Essencial</small></button><button type="button" className={draft.mode === 'professional' ? 'is-active' : ''} onClick={() => changeDetailMode('professional')}><strong>Avançada</strong><small>Pesquisa profunda</small></button></div></header>
               <div className="bo-h724-form-grid">
                 <label className="bo-h724-field bo-h724-field--wide"><span>Nome da Persona</span><input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="Ex.: Profissionais que moram sozinhos"/></label>
                 <label className="bo-h724-field bo-h724-field--wide"><span>Resumo <small>curto e observável</small></span><AutoTextarea minRows={2} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Quem é essa pessoa e o que a caracteriza neste serviço?"/></label>
-                {draft.sections.includes('bio') && <label className="bo-h724-field bo-h724-field--wide"><span>Bio / contexto</span><AutoTextarea minRows={2} value={draft.context} onChange={(event) => setDraft({ ...draft, context: event.target.value })} placeholder="Contexto relevante, sem transformar em biografia extensa."/></label>}
-                {draft.sections.includes('goal') && <label className="bo-h724-field"><span>Objetivo principal</span><AutoTextarea minRows={2} value={draft.primaryGoal} onChange={(event) => setDraft({ ...draft, primaryGoal: event.target.value })} placeholder="O que ela precisa alcançar?"/></label>}
-                {draft.sections.includes('situation') && <label className="bo-h724-field"><span>Situação / momento</span><AutoTextarea minRows={2} value={draft.situation} onChange={(event) => setDraft({ ...draft, situation: event.target.value })} placeholder="Quando essa necessidade ou comportamento aparece?"/></label>}
-                {draft.sections.includes('quote') && <label className="bo-h724-field bo-h724-field--wide bo-h724-quote-field"><span>Frase representativa</span><AutoTextarea minRows={2} value={draft.quote} onChange={(event) => setDraft({ ...draft, quote: event.target.value })} placeholder="“Uma frase curta que represente sua perspectiva.”"/></label>}
-                {draft.mode === 'simple' && draft.sections.includes('channels') && <div className="bo-h724-field bo-h724-field--wide"><span>Canais / ambientes</span><div className="bo-h724-chip-editor">{draft.channels.map((channel) => <button key={channel} type="button" className="bo-h724-chip" onClick={() => removeChannel(channel)}>{channel}<X size={11}/></button>)}<input value={channelEntry} onChange={(event) => setChannelEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addChannel(); } }} placeholder={draft.channels.length ? 'Adicionar canal…' : 'Ex.: WhatsApp'}/></div><div className="bo-h724-suggestions">{suggestedChannels.filter((channel) => !draft.channels.includes(channel)).slice(0, 5).map((channel) => <button key={channel} type="button" onClick={() => addChannel(channel)}>+ {channel}</button>)}</div></div>}
+                {activeDetailSections.includes('bio') && <label className="bo-h724-field bo-h724-field--wide"><span>Bio / contexto</span><AutoTextarea minRows={2} value={draft.context} onChange={(event) => setDraft({ ...draft, context: event.target.value })} placeholder="Contexto relevante, sem transformar em biografia extensa."/></label>}
+                {activeDetailSections.includes('goal') && <label className="bo-h724-field"><span>Objetivo principal</span><AutoTextarea minRows={2} value={draft.primaryGoal} onChange={(event) => setDraft({ ...draft, primaryGoal: event.target.value })} placeholder="O que ela precisa alcançar?"/></label>}
+                {activeDetailSections.includes('situation') && <label className="bo-h724-field"><span>Situação / momento</span><AutoTextarea minRows={2} value={draft.situation} onChange={(event) => setDraft({ ...draft, situation: event.target.value })} placeholder="Quando essa necessidade ou comportamento aparece?"/></label>}
+                {activeDetailSections.includes('quote') && <label className="bo-h724-field bo-h724-field--wide bo-h724-quote-field"><span>Frase representativa</span><AutoTextarea minRows={2} value={draft.quote} onChange={(event) => setDraft({ ...draft, quote: event.target.value })} placeholder="“Uma frase curta que represente sua perspectiva.”"/></label>}
+                {draft.mode === 'simple' && activeDetailSections.includes('channels') && <div className="bo-h724-field bo-h724-field--wide"><span>Canais / ambientes</span><div className="bo-h724-chip-editor">{draft.channels.map((channel) => <button key={channel} type="button" className="bo-h724-chip" onClick={() => removeChannel(channel)}>{channel}<X size={11}/></button>)}<input value={channelEntry} onChange={(event) => setChannelEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addChannel(); } }} placeholder={draft.channels.length ? 'Adicionar canal…' : 'Ex.: WhatsApp'}/></div><div className="bo-h724-suggestions">{suggestedChannels.filter((channel) => !draft.channels.includes(channel)).slice(0, 5).map((channel) => <button key={channel} type="button" onClick={() => addChannel(channel)}>+ {channel}</button>)}</div></div>}
               </div>
             </section>
           </main>
           <aside className="bo-h724-overview-aside">
-            <section className="bo-h724-completeness-card"><header><div><small>COMPLETUDE</small><strong>{completeness}%</strong></div><span>{draft.mode === 'professional' ? 'Avançada' : 'Simples'}</span></header><i><b style={{ width: `${completeness}%` }}/></i><div className="bo-h71-check-list bo-h724-check-list">{(previewReport?.foundationChecks ?? report.foundationChecks).map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span>{check.label}</span></div>)}</div></section>
+            <section className="bo-h724-completeness-card"><header><div><small>COMPLETUDE</small><strong>{completeness}%</strong></div><span>{draft.mode === 'professional' ? 'Avançada' : 'Simples'}</span></header><i><b style={{ width: `${completeness}%` }}/></i><div className="bo-h71-check-list bo-h724-check-list">{completenessChecks.map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span>{check.label}</span></div>)}</div></section>
             <section className="bo-h724-organization-card"><header><small>ORGANIZAÇÃO</small><strong>Responsabilidade e tags</strong></header><label><span>Responsável</span><div className="bo-h724-owner-field"><UserRound size={14}/><input list="bo-h724-owner-options" value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></div><datalist id="bo-h724-owner-options">{ownerSuggestions.map((item) => <option key={item} value={item}/>)}</datalist></label><div className="bo-h724-tags-field"><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map((tag) => <button key={tag} type="button" className="bo-h724-chip" onClick={() => removeTag(tag)}>{tag}<X size={11}/></button>)}<input value={tagEntry} onChange={(event) => setTagEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addTag(); } }} placeholder={tagValues.length ? 'Adicionar tag…' : 'Ex.: B2C'}/></div></div></section>
             <section className="bo-h724-context-card"><small>BASE ATUAL</small><strong>{connectedIds.length} conexões</strong><p>{evidenceConnections.length} evidência(s) · {usage.instances} instância(s) visual(is)</p><button type="button" onClick={() => setDetailTab('relations')}>Ver relações</button></section>
           </aside>
         </div>}
 
-        {detailTab === 'behavior' && <div className="bo-h71-editor-grid"><section className="bo-h71-editor-card bo-h71-editor-card--wide"><header><div><small>COMPORTAMENTO</small><strong>Como essa pessoa decide e age?</strong></div><span>{previewReport?.professionalScore ?? report.professionalScore}% profissional</span></header><div className="bo-h71-form two-col">{draft.sections.includes('behaviors') && <label><span>Comportamentos <small>um por linha</small></span><textarea rows={6} value={draft.behaviors.join('\n')} onChange={(event) => updateList('behaviors', event.target.value)}/></label>}{draft.sections.includes('expectations') && <label><span>Expectativas</span><textarea rows={6} value={draft.expectations.join('\n')} onChange={(event) => updateList('expectations', event.target.value)}/></label>}{draft.sections.includes('constraints') && <label><span>Restrições</span><textarea rows={6} value={draft.constraints.join('\n')} onChange={(event) => updateList('constraints', event.target.value)}/></label>}{draft.sections.includes('triggers') && <label><span>Gatilhos</span><textarea rows={6} value={draft.triggers.join('\n')} onChange={(event) => updateList('triggers', event.target.value)}/></label>}{draft.sections.includes('alternatives') && <label><span>Alternativas atuais</span><textarea rows={6} value={draft.alternatives.join('\n')} onChange={(event) => updateList('alternatives', event.target.value)}/></label>}{draft.sections.includes('channels') && <label><span>Canais / ambientes</span><textarea rows={6} value={draft.channels.join('\n')} onChange={(event) => updateList('channels', event.target.value)}/></label>}</div></section></div>}
+        {draft.mode === 'professional' && detailTab === 'behavior' && <div className="bo-h71-editor-grid">
+          <section className="bo-h71-editor-card bo-h71-editor-card--wide bo-p4-research-card">
+            <header><div><small>01 / OBSERVAÇÃO</small><strong>Comportamentos e hábitos</strong><p>Registre o que a pessoa faz e em quais situações. Separe observações de suposições.</p></div></header>
+            <div className="bo-h71-form two-col">
+              {activeDetailSections.includes('behaviors') && <label><span>Comportamentos observados <small>um por linha</small></span><textarea rows={6} value={draft.behaviors.join('\n')} onChange={(event) => updateList('behaviors', event.target.value)} placeholder="Ex.: Consulta preços antes de pedir atendimento"/></label>}
+              {activeDetailSections.includes('channels') && <label><span>Canais e ambientes</span><textarea rows={6} value={draft.channels.join('\n')} onChange={(event) => updateList('channels', event.target.value)} placeholder="Ex.: WhatsApp, presencial, site"/></label>}
+            </div><p className="bo-p4-research-helper">Comportamentos descrevem ações. Motivações e critérios de escolha ficam em Decisões.</p>
+          </section>
+        </div>}
+        {draft.mode === 'professional' && detailTab === 'decisions' && <div className="bo-h71-editor-grid">
+          <section className="bo-h71-editor-card bo-h71-editor-card--wide bo-p4-research-card">
+            <header><div><small>02 / DECISÃO</small><strong>Por que escolhe ou abandona uma solução?</strong><p>Explore expectativas, situações que desencadeiam a busca e alternativas já utilizadas.</p></div></header>
+            <div className="bo-h71-form two-col">
+              {activeDetailSections.includes('expectations') && <label><span>Expectativas e critérios de escolha <small>um por linha</small></span><textarea rows={6} value={draft.expectations.join('\n')} onChange={(event) => updateList('expectations', event.target.value)} placeholder="Ex.: Precisa confiar na previsão do prazo"/></label>}
+              {activeDetailSections.includes('triggers') && <label><span>Gatilhos e motivações</span><textarea rows={6} value={draft.triggers.join('\n')} onChange={(event) => updateList('triggers', event.target.value)} placeholder="Ex.: Busca ajuda quando falta tempo"/></label>}
+              {activeDetailSections.includes('alternatives') && <label><span>Alternativas atuais</span><textarea rows={6} value={draft.alternatives.join('\n')} onChange={(event) => updateList('alternatives', event.target.value)} placeholder="Ex.: Faz a tarefa sozinho ou contrata outra empresa"/></label>}
+            </div>
+          </section>
+        </div>}
+        {draft.mode === 'professional' && detailTab === 'barriers' && <div className="bo-h71-editor-grid">
+          <section className="bo-h71-editor-card bo-h71-editor-card--wide bo-p4-research-card">
+            <header><div><small>03 / BARREIRAS</small><strong>O que dificulta a experiência?</strong><p>Registre restrições e vincule dores e necessidades sem duplicar esses registros.</p></div></header>
+            <div className="bo-h71-form two-col">
+              {activeDetailSections.includes('constraints') && <label><span>Restrições e barreiras <small>um por linha</small></span><textarea rows={6} value={draft.constraints.join('\n')} onChange={(event) => updateList('constraints', event.target.value)} placeholder="Ex.: Horários incompatíveis com a rotina"/></label>}
+              <div className="bo-p4-related-summary"><strong>Dores e necessidades conectadas</strong><span>{(previewReport?.connectionCounts.pain ?? report.connectionCounts.pain)} dores · {(previewReport?.connectionCounts.need ?? report.connectionCounts.need)} necessidades</span><p>Esses registros são compartilhados com a Jornada e o Blueprint.</p><button type="button" onClick={() => setDetailTab('relations')}>Gerenciar relações →</button></div>
+            </div>
+          </section>
+        </div>}
 
         {detailTab === 'relations' && <div className="bo-h71-relations"><div className="bo-h71-section-intro"><div><small>SERVICE GRAPH</small><h2>Contexto conectado à Persona</h2><p>As relações abaixo são canônicas: a mesma necessidade, Job, dor ou hipótese pode aparecer em Journey, Blueprint e Whiteboard sem ser duplicada.</p></div><strong>{connectedIds.length} conexões</strong></div><div className="bo-h71-relation-grid">{(['need', 'job', 'pain', 'problemHypothesis'] as PersonaRelationKind[]).map((kind) => { const options = relationOptions.filter((item) => item.kind === kind); return <section key={kind}><header><strong>{relationLabel[kind]}</strong><span>{options.filter((item) => connectedIds.includes(item.id)).length}/{options.length}</span></header>{options.length ? <div>{options.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <p>Nenhum item criado ainda.</p>}</section>; })}</div></div>}
 
@@ -458,6 +503,15 @@ export function PersonasView({ studio }: { studio: StudioController }) {
             <div className="bo-p2-modes" role="group" aria-label="Profundidade da Persona">
               <button type="button" className={createMode === 'simple' ? 'is-selected' : ''} aria-pressed={createMode === 'simple'} onClick={() => chooseCreateMode('simple')}><strong>Simples</strong><span>Identidade, objetivo, situação, canais e necessidades. Ideal para começar.</span></button>
               <button type="button" className={createMode === 'professional' ? 'is-selected' : ''} aria-pressed={createMode === 'professional'} onClick={() => chooseCreateMode('professional')}><strong>Avançada</strong><span>Adiciona comportamento, expectativas, restrições, alternativas e mais conexões.</span></button>
+            </div>
+            <div className="bo-p4-create-explainer" aria-live="polite">
+              {createMode === 'professional' ? <>
+                <strong>Persona Avançada selecionada</strong>
+                <p>Após criar, você entrará na área de Comportamento. Também poderá pesquisar Decisões e Barreiras, além de conectar Evidências.</p>
+                <span>Comportamentos · Expectativas · Gatilhos · Alternativas · Restrições</span>
+              </> : <>
+                <strong>Persona Simples selecionada</strong><p>Comece com identidade, situação e objetivo. Você poderá ativar a pesquisa avançada depois sem perder informações.</p>
+              </>}
             </div>
           </section>
           <footer className="bo-p2-actions"><button type="button" onClick={cancelCreate}>Cancelar</button>
