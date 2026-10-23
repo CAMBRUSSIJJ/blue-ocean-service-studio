@@ -60,6 +60,13 @@ const validatePersonaRules = (input: unknown): PersonaFilterRule[] => !Array.isA
 
 
 
+const personaCustomSections: Array<{id:PersonaSectionId;label:string}> = [
+ {id:'identity',label:'Identificação'},{id:'bio',label:'Contexto'},{id:'goal',label:'Objetivos'},{id:'needs',label:'Necessidades'},
+ {id:'situation',label:'Situação'},{id:'quote',label:'Citação'},{id:'channels',label:'Canais'},
+ {id:'behaviors',label:'Comportamentos'},{id:'expectations',label:'Expectativas'},{id:'constraints',label:'Restrições'},
+ {id:'triggers',label:'Gatilhos'},{id:'alternatives',label:'Alternativas'},{id:'evidence',label:'Evidências'},{id:'relations',label:'Relações'},
+];
+const layoutLabels: Array<[PersonaLayout,string]> = [['profile-left','Perfil à esquerda'],['balanced','Equilibrado'],['story-first','Narrativa primeiro']];
 const relationLabel: Record<PersonaRelationKind, string> = {
   need: 'Necessidades', job: 'Jobs', pain: 'Dores', problemHypothesis: 'Hipóteses', evidence: 'Evidências',
 };
@@ -139,6 +146,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [menuId, setMenuId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>('overview');
+  const [showDetailCustomize, setShowDetailCustomize] = useState(false);
   const [draft, setDraft] = useState<PersonaProfileDraft | null>(null);
   const [owner, setOwner] = useState('');
   const [tagsText, setTagsText] = useState('');
@@ -267,7 +275,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     changeViewMode(view.mode==='table'?'table':'cards');setSavedViewsOpen(false);
   };
 
-  const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setMenuId(null); };
+  const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setMenuId(null); };
   const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
 
   const chooseCreateMode = (mode: PersonaDepth) => {
@@ -376,7 +384,14 @@ export function PersonasView({ studio }: { studio: StudioController }) {
         {([
           ['overview', 'Visão geral'], ...(draft.mode === 'professional' ? [['behavior', 'Comportamento'] as [DetailTab, string]] : []), ['relations', 'Relações'], ['evidence', 'Evidências'], ['usage', 'Uso'],
         ] as Array<[DetailTab, string]>).map(([id, label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'relations' && <b>{connectedIds.length}</b>}{id === 'evidence' && <b>{evidenceConnections.length}</b>}</button>)}
+        <button type="button" className="bo-p2-persona-customize-tab" aria-expanded={showDetailCustomize} aria-controls="bo-p2-persona-customize" onClick={()=>setShowDetailCustomize(!showDetailCustomize)}>Personalizar interface</button>
       </nav>
+      {showDetailCustomize&&<section id="bo-p2-persona-customize" className="bo-p2-persona-customize" aria-label="Personalizar interface da Persona">
+        <div><h2>Como deseja visualizar esta Persona?</h2><p>Altere a apresentação sem apagar informações já preenchidas.</p></div>
+        <fieldset><legend>Layout</legend><div className="bo-p2-customize-options">{layoutLabels.map(([id,label])=><button type="button" key={id} aria-pressed={draft.layout===id} onClick={()=>setDraft({...draft,layout:id})}>{label}</button>)}</div></fieldset>
+        <fieldset><legend>Blocos do perfil</legend><div className="bo-p2-customize-blocks">{personaCustomSections.filter(item=>draft.mode==='professional'||!['bio','behaviors','expectations','constraints','triggers','alternatives','relations'].includes(item.id)).map(item=><label key={item.id}><input type="checkbox" disabled={item.id==='identity'} checked={draft.sections.includes(item.id)} onChange={(e)=>setDraft({...draft,sections:e.target.checked?[...new Set([...draft.sections,item.id])]:draft.sections.filter(x=>x!==item.id)})}/>{item.label}</label>)}</div></fieldset>
+        <p className="bo-p2-customize-tip">Use “Salvar alterações” ao terminar. Ocultar um bloco não exclui seus dados.</p>
+      </section>}
 
       <div className="bo-h71-detail-body">
         {detailTab === 'overview' && <div className="bo-h724-overview-layout">
