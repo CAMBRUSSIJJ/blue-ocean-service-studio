@@ -145,7 +145,7 @@ function mapGridStyle(count,preview=null){
  const max=count<=2?440:320,widths=V.stageWidths||[],hasCustom=widths.some((n,i)=>i<count&&Number.isFinite(n));
  const style='--stage-count:'+Math.max(1,count)+';--stage-max:'+max+'px;--map-zoom:'+(V.zoom||100)/100+';';
  if(!hasCustom&&!preview)return style;
- const px=Array.from({length:count},(_,i)=>preview?.i===i?preview.width:stageWidth(i));
+ const px=Array.from({length:count},(_,i)=>preview?.i===i?preview.width:(preview?.widths?.[i]||stageWidth(i)));
  const total=320+px.reduce((a,b)=>a+b,0);
  return style+'--cols:180px '+px.map(w=>Math.max(210,Math.min(600,w))+'px').join(' ')+' 140px;min-width:'+total+'px;width:max(100%,'+total+'px);';
 }
@@ -247,7 +247,7 @@ function geometryPointerDown(event){
  const el=stage||lane,kind=stage?'stage':'lane',i=stage?Number(stage.dataset.stageResize):lane.dataset.laneResize;
  const zoom=(V.zoom||100)/100,rendered=kind==='stage'?el.closest('.sh')?.getBoundingClientRect().width:el.closest('.r')?.getBoundingClientRect().height;
  const initial=Math.round((rendered||290)/zoom);
- geometryDrag={kind,i,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,initial,value:initial,moved:false};
+ geometryDrag={kind,i,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,initial,value:initial,moved:false,widths:kind==='stage'?[...app.querySelectorAll('.r[data-row="st"]>.sh')].map(sh=>Math.max(210,Math.min(600,Math.round(sh.getBoundingClientRect().width/zoom)))):null};
  el.setPointerCapture?.(event.pointerId);event.preventDefault();
 }
 function geometryPointerMove(event){
@@ -255,7 +255,7 @@ function geometryPointerMove(event){
  const zoom=(V.zoom||100)/100,change=(d.kind==='stage'?event.clientX-d.startX:event.clientY-d.startY)/zoom;
  d.moved=Math.abs(change)>3;
  d.value=Math.max(d.kind==='stage'?210:76,Math.min(d.kind==='stage'?600:540,Math.round(d.initial+change)));
- if(d.kind==='stage')resizeMatrixPreview({i:d.i,width:d.value});
+ if(d.kind==='stage')resizeMatrixPreview({i:d.i,width:d.value,widths:d.widths});
  else{const row=app.querySelector('.r[data-row="'+d.i+'"]');if(row)row.style.setProperty('--lane-height',d.value+'px');requestAnimationFrame(drawLinks)}
  event.preventDefault();
 }
@@ -263,7 +263,7 @@ function geometryPointerEnd(event,cancel=false){
  const d=geometryDrag;if(!d||d.pointerId!==event.pointerId)return;
  geometryDrag=null;
  if(!cancel&&d.moved){
-  if(d.kind==='stage'){V.stageWidths ||= [];V.stageWidths[d.i]=d.value}
+  if(d.kind==='stage'){V.stageWidths=d.widths||[];V.stageWidths[d.i]=d.value}
   else{V.rowHeights ||= {};V.rowHeights[d.i]=d.value}
   saveView();
  }
