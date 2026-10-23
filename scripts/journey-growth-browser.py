@@ -66,6 +66,9 @@ try:
     check('Named stages are shared with the canonical Journey without invented actions',len(ids)==3 and all(not graph(page)['stages'][id]['customerAction'] for id in ids))
     check('Comfortable columns do not stretch to half the screen',f.locator('.sh').first.bounding_box()['width']<=360)
     check('Unrecorded emotions are empty markers and do not draw a curve',f.locator('.dt.unknown').count()==3 and f.locator('.cvb path').get_attribute('d')=='')
+    check('Five emotional intensity levels are visible from -2 to +2', f.locator('[data-emotion-tick]').count()==5 and f.locator('[data-emotion-level]').count()==5 and f.locator('[data-emotion-tick="0"]').is_visible())
+    check('Legend starts with three unknown points and no invented neutral emotion', 'Não informado 3' in f.locator('.emotion-legend').inner_text() and f.locator('.dt.unknown').count()==3)
+
     context=f.get_by_role('textbox',name='Contexto em Descobrir',exact=True);context.fill('Cliente percebe uma necessidade. <script>alert("teste")</script>');context.press('Tab');saved(f)
     note(f,'ac|0','Pesquisar alternativas de atendimento')
     check('Context and customer action have independent canonical contents',graph(page)['stages'][sid]['thoughts'].startswith('Cliente percebe') and graph(page)['stages'][sid]['customerAction']=='Pesquisar alternativas de atendimento')
@@ -76,6 +79,15 @@ try:
     f.get_by_role('textbox',name='Fonte da evidência em Usar').fill('Entrevista simulada para QA');f.get_by_role('button',name='Concluir',exact=True).click();saved(f)
     check('Validated emotions preserve their source and leave a gap at unknown stages',graph(page)['stages'][ids[-1]]['emotionSource']=='Entrevista simulada para QA' and ' C' not in f.locator('.cvb path').get_attribute('d'))
     check('Emotion captions fit inside the curve instead of overlapping the next row',f.locator('.cvb').evaluate('e=>[...e.querySelectorAll(".dl")].every(n=>n.getBoundingClientRect().bottom<=e.getBoundingClientRect().bottom)'))
+    legend = f.locator('.emotion-legend').inner_text()
+    check('Legend differentiates unknown, hypothesis, and evidence validated', 'Não informado 1' in legend and 'Hipótese 1' in legend and 'Validado 1' in legend)
+    check('Distinct validation states are reflected in accessible point names', 'Validado' in f.locator('.dt.validated').get_attribute('aria-label') and 'Hipótese' in f.locator('.dt.hypothesis').get_attribute('aria-label'))
+    f.locator('#curve .dt[data-si="1"]').focus()
+    f.locator('#curve .dt[data-si="1"]').press('ArrowUp'); saved(f)
+    mid = graph(page)['stages'][ids[1]]
+    check('Keyboard adjustments persist and never turn missing information into neutral', mid['emotionScore']==1 and mid['emotionStatus']=='hypothesis' and mid['emotionRecorded'] is True)
+    check('Legend refreshes after keyboard editing an unrecorded point', 'Não informado 0' in f.locator('.emotion-legend').inner_text() and f.locator('.dt.unknown').count()==0)
+
     preset(f,'Aquisição e relacionamento')
     for key,value in [('go|0','Gerar interesse qualificado'),('ch|0','Busca e indicação'),('pr|0','Atendimento com previsão clara'),('br|0','Receio de esperar sem retorno'),('rr|0','Cumprir o prazo e convidar ao retorno'),('ki|0','Solicitações que avançam para contratação')]: note(f,key,value)
     marketing=graph(page)['journeys'][jid]['acquisitionCells'][sid]
