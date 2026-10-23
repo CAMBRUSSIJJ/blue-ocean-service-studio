@@ -7,6 +7,24 @@ export type PersonaSectionId = 'identity' | 'bio' | 'goal' | 'needs' | 'situatio
 
 export const SIMPLE_PERSONA_SECTIONS: PersonaSectionId[] = ['identity', 'goal', 'needs', 'situation', 'quote', 'channels', 'evidence'];
 export const ADVANCED_PERSONA_SECTIONS: PersonaSectionId[] = ['identity', 'bio', 'goal', 'needs', 'situation', 'quote', 'channels', 'behaviors', 'expectations', 'constraints', 'triggers', 'alternatives', 'evidence', 'relations'];
+
+// Changing depth does not discard data or reset individually selected blocks.
+// On the first upgrade from an essential profile, expose the advanced toolkit.
+export const switchPersonaDepth = (draft: PersonaProfileDraft, mode: PersonaDepth): PersonaProfileDraft => {
+  if (draft.mode === mode) return draft;
+  const selected = [...new Set<PersonaSectionId>(['identity', ...draft.sections])];
+  const hasAdvanced = selected.some(section => !SIMPLE_PERSONA_SECTIONS.includes(section));
+  return {
+    ...draft,
+    mode,
+    sections: mode === 'professional' && !hasAdvanced
+      ? [...new Set<PersonaSectionId>([...selected, ...ADVANCED_PERSONA_SECTIONS])]
+      : selected,
+  };
+};
+export const visiblePersonaSections = (draft: PersonaProfileDraft): PersonaSectionId[] =>
+  draft.mode === 'professional' ? draft.sections : draft.sections.filter(id => SIMPLE_PERSONA_SECTIONS.includes(id));
+
 export type PersonaRelationKind = Exclude<DiscoveryKind, 'persona'>;
 
 export type PersonaProfileDraft = {
@@ -111,23 +129,24 @@ export function buildPersonaStudioReport(graph: ServiceGraph, personaId: Id): Pe
   }
 
   const draft = personaProfileFromEntity(persona);
+  const activeSections = visiblePersonaSections(draft);
   const foundationChecks = [
     { id: 'identity', label: 'Identidade clara', complete: Boolean(draft.title.trim()) },
-    ...(draft.sections.includes('bio') ? [{ id: 'context', label: 'Bio / contexto registrado', complete: Boolean(draft.context.trim() || draft.description.trim()) }] : []),
-    ...(draft.sections.includes('goal') ? [{ id: 'goal', label: 'Objetivo principal', complete: Boolean(draft.primaryGoal.trim()) }] : []),
-    ...(draft.sections.includes('situation') ? [{ id: 'situation', label: 'Situação de uso', complete: Boolean(draft.situation.trim()) }] : []),
-    ...(draft.sections.includes('quote') ? [{ id: 'quote', label: 'Citação representativa', complete: Boolean(draft.quote.trim()) }] : []),
-    ...(draft.sections.includes('channels') ? [{ id: 'channels', label: 'Canais / ambientes', complete: draft.channels.length > 0 }] : []),
-    ...(draft.sections.includes('needs') ? [{ id: 'need-job', label: 'Necessidade ou Job conectado', complete: counts.need + counts.job > 0 }] : []),
-    ...(draft.sections.includes('relations') ? [{ id: 'pain-hypothesis', label: 'Dor ou hipótese conectada', complete: counts.pain + counts.problemHypothesis > 0 }] : []),
-    ...(draft.sections.includes('evidence') ? [{ id: 'evidence', label: 'Evidência conectada', complete: counts.evidence > 0 }] : []),
+    ...(activeSections.includes('bio') ? [{ id: 'context', label: 'Bio / contexto registrado', complete: Boolean(draft.context.trim() || draft.description.trim()) }] : []),
+    ...(activeSections.includes('goal') ? [{ id: 'goal', label: 'Objetivo principal', complete: Boolean(draft.primaryGoal.trim()) }] : []),
+    ...(activeSections.includes('situation') ? [{ id: 'situation', label: 'Situação de uso', complete: Boolean(draft.situation.trim()) }] : []),
+    ...(activeSections.includes('quote') ? [{ id: 'quote', label: 'Citação representativa', complete: Boolean(draft.quote.trim()) }] : []),
+    ...(activeSections.includes('channels') ? [{ id: 'channels', label: 'Canais / ambientes', complete: draft.channels.length > 0 }] : []),
+    ...(activeSections.includes('needs') ? [{ id: 'need-job', label: 'Necessidade ou Job conectado', complete: counts.need + counts.job > 0 }] : []),
+    ...(activeSections.includes('relations') ? [{ id: 'pain-hypothesis', label: 'Dor ou hipótese conectada', complete: counts.pain + counts.problemHypothesis > 0 }] : []),
+    ...(activeSections.includes('evidence') ? [{ id: 'evidence', label: 'Evidência conectada', complete: counts.evidence > 0 }] : []),
   ];
   const professionalChecks = [
-    ...(draft.sections.includes('behaviors') ? [{ id: 'behaviors', label: 'Comportamentos', complete: draft.behaviors.length > 0 }] : []),
-    ...(draft.sections.includes('expectations') ? [{ id: 'expectations', label: 'Expectativas', complete: draft.expectations.length > 0 }] : []),
-    ...(draft.sections.includes('constraints') ? [{ id: 'constraints', label: 'Restrições', complete: draft.constraints.length > 0 }] : []),
-    ...(draft.sections.includes('triggers') ? [{ id: 'triggers', label: 'Gatilhos', complete: draft.triggers.length > 0 }] : []),
-    ...(draft.sections.includes('alternatives') ? [{ id: 'alternatives', label: 'Alternativas atuais', complete: draft.alternatives.length > 0 }] : []),
+    ...(activeSections.includes('behaviors') ? [{ id: 'behaviors', label: 'Comportamentos', complete: draft.behaviors.length > 0 }] : []),
+    ...(activeSections.includes('expectations') ? [{ id: 'expectations', label: 'Expectativas', complete: draft.expectations.length > 0 }] : []),
+    ...(activeSections.includes('constraints') ? [{ id: 'constraints', label: 'Restrições', complete: draft.constraints.length > 0 }] : []),
+    ...(activeSections.includes('triggers') ? [{ id: 'triggers', label: 'Gatilhos', complete: draft.triggers.length > 0 }] : []),
+    ...(activeSections.includes('alternatives') ? [{ id: 'alternatives', label: 'Alternativas atuais', complete: draft.alternatives.length > 0 }] : []),
   ];
   const score = (checks: Array<{ complete: boolean }>) => Math.round((checks.filter((item) => item.complete).length / checks.length) * 100);
   const foundationScore = score(foundationChecks);
