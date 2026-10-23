@@ -11,14 +11,14 @@ function viewsOpen(){
 }
 function viewsClose(){viewsRenameId='';app.querySelector('#journey-views-dialog')?.close();focusNew('[data-act="views-open"]')}
 function viewsRequest(action,input={}){
-  if(viewsPending||!HOSTED)return;viewsPending=true;
+  if(viewsPending||!HOSTED)return;viewsPending=true;announceSave('pending');
   const dialog=app.querySelector('#journey-views-dialog');dialog.querySelector('.form-error').textContent='';dialog.querySelectorAll('button').forEach(button=>button.disabled=true);
   const snapshot={...V,rowOrder:orderedRows().map(row=>row.id)};
   window.parent.postMessage({boBlueprintHost:1,type:'saved-view',action,input:{...input,...(['create','update'].includes(action)?{view:snapshot}:{})}},location.origin);
 }
 function viewsResult(data){
   viewsPending=false;
-  if(!data.ok){const dialog=app.querySelector('#journey-views-dialog');if(dialog){dialog.querySelector('.form-error').textContent=data.error||'Não foi possível salvar.';dialog.querySelectorAll('button').forEach(button=>button.disabled=false)}return}
+  if(!data.ok){announceSave(false);const dialog=app.querySelector('#journey-views-dialog');if(dialog){dialog.querySelector('.form-error').textContent=data.error||'Não foi possível salvar.';dialog.querySelectorAll('button').forEach(button=>button.disabled=false)}return}
   S=data.state;H=S.history||H;V=viewState(S.view);last=JSON.stringify(S);growthLastPatch=growthPatchKey();growthEmotionDrafts.clear();emotionEdit=null;announceSave(true);viewsRenameId='';rerender();
   if(data.action==='apply')focusNew('[data-act="views-open"]');else viewsOpen();
 }
