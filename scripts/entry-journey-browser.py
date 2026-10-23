@@ -126,7 +126,7 @@ def starting_map(page):
  page.keyboard.press('Escape')
  expect(welcome).to_be_visible()
  page.get_by_role('button',name='Todas as Jornadas',exact=True).click()
- page.get_by_role('button',name='Abrir Jornada',exact=True).click()
+ page.locator('[data-journey-library="1"]').get_by_role('button',name='Abrir Jornada',exact=True).click()
  expect(welcome).to_be_visible()
  check(f'{width}: mapa vazio dispensado continua oferecendo um ponto de partida',journey(page)['mapLayout']['introDismissed'] and not journey(page)['stageIds'])
  page.get_by_role('button',name='Criar primeira etapa',exact=True).click()

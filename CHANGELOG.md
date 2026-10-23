@@ -2,6 +2,7 @@
 
 ## 2026-10-23 · Matriz compartilhada de Jornada e Blueprint
 
+- Corrige menus cobertos por outras faixas, reforça o contraste das descrições e atualiza os testes para distinguir as ações das bibliotecas reunidas.
 - Reúne Jornadas e Blueprints em uma entrada do projeto, mantendo as bibliotecas e os vínculos existentes.
 - Adiciona alternância entre as perspectivas no mapa, com a mesma interface e preservação das faixas personalizadas.
 - Usa linhas suaves, divisórias verticais, etapas em seta e cartões com superfície consistente.

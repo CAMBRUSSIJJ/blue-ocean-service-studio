@@ -108,7 +108,7 @@ def desktop(page):
     page.keyboard.press('Escape')
     check('Escape closes the project actions and restores focus', not page.locator('.bo-simple-project-actions').evaluate('e => e.open') and page.locator('summary[aria-label="Ações do projeto"]').evaluate('e => e === document.activeElement'))
 
-    page.get_by_role('button', name='Abrir Jornada', exact=True).click()
+    page.locator('[data-journey-library="1"]').get_by_role('button', name='Abrir Jornada', exact=True).click()
     page.keyboard.press('Control+Backslash')
     check('Application shortcuts do not change hidden navigation while editing', page.evaluate("localStorage.getItem('bo-sidebar-collapsed')") == '1')
     page.keyboard.press('Control+k')
@@ -238,7 +238,7 @@ def desktop(page):
     expect(editor).to_be_visible()
     # Journey, library and service navigation must not rewrite the document.
     page.get_by_role('button', name='Todas as Jornadas', exact=True).click()
-    page.get_by_role('button', name='Abrir Jornada', exact=True).click()
+    page.locator('[data-journey-library="1"]').get_by_role('button', name='Abrir Jornada', exact=True).click()
     editor.get_by_role('button', name=re.compile('^Visualizações')).click()
     editor.get_by_role('button', name='Voltar às Jornadas', exact=True).click()
     page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir Jornada', exact=True).click()
@@ -251,7 +251,7 @@ def desktop(page):
     check('Blueprint draft shares Journey identity and stages', len(boards) == 1 and boards[0]['journeyId'] == jid and graph(page)['journeys'][jid]['stageIds'] == stages)
     check('Opening a draft preserves custom lanes and canonical action', graph(page)['journeys'][jid]['mapLayout'] == before_reload and graph(page)['stages'][stages[0]]['customerAction'] == 'Cliente solicita ajuda')
     page.screenshot(path=str(OUT / 'journey-blueprint.png'))
-    page.get_by_role('button', name='Voltar para Jornadas e Blueprints', exact=True).click()
+    page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
     page.locator('[data-service-journey-nav="1"]').click()
     page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir Jornada', exact=True).click()
     check('Reopened map still fits the viewport', editor.bounding_box()['y'] == 0 and editor.bounding_box()['height'] == page.viewport_size['height'])

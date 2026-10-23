@@ -126,7 +126,7 @@ def flow(page, width):
     page.keyboard.press('Escape')
     if page.get_by_role('dialog', name='Ferramentas do editor', exact=True).is_visible():
         page.get_by_role('button', name='Fechar', exact=True).last.click()
-    page.get_by_role('button', name='Voltar para Jornadas e Blueprints', exact=True).click()
+    page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
     blueprints = page.locator('[data-blueprint-library="1"]')
     expect(blueprints).to_be_visible()
     check(f'{width}: ação de criar no cabeçalho do serviço usa o mesmo padrão', style(page.get_by_role('button', name='Criar Blueprint', exact=True).first)['background'] == primary_style['background'])

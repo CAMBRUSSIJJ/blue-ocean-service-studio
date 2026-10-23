@@ -119,7 +119,7 @@ def contextual_design_continuity(page):
     blueprint_id = linked[0][0]
     check(graph(page)['journeys'][journey_id]['stageIds'] == stage_ids,
           'Blueprint handoff preserves canonical stage identities')
-    page.get_by_role('button', name='Voltar para Jornadas e Blueprints', exact=True).click()
+    page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
     expect(page.locator('[data-blueprint-library="1"]')).to_be_visible()
     page.locator(f'[data-blueprint-to-journey="{blueprint_id}"]').click()
     expect(page.locator('.bo-h1705-journey')).to_be_visible()
@@ -131,7 +131,7 @@ def contextual_design_continuity(page):
     expect(page.locator('.bo1174-board')).to_be_visible()
     check(blueprint_id in graph(page)['views']['whiteboards'] and len([b for b in graph(page)['views']['whiteboards'].values() if b.get('viewKind') == 'blueprint']) == 1,
           'Repeating Journey handoff reuses the existing linked Blueprint')
-    page.get_by_role('button', name='Voltar para Jornadas e Blueprints', exact=True).click()
+    page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
     page.locator('[data-design-flow="blueprint"]').get_by_role('button', name='Explorar no Whiteboard').click()
     expect(page.locator('[data-whiteboard-library="1"]')).to_be_visible()
     check(page.locator('[data-design-flow="whiteboard"]').is_visible(),
