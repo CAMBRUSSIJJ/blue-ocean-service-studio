@@ -80,6 +80,16 @@ try:
         check('Ruled Add card inserts before the chosen stable card', f.locator('[data-cell="ac|0"] .content-block').last.get_attribute('data-nid') == first_id)
         initial = graph(page); jid = next(iter(initial['journeys'])); bid = next(b['id'] for b in initial['views']['whiteboards'].values() if b.get('viewKind') == 'blueprint')
         stages = initial['journeys'][jid]['stageIds']
+        # Drag an initially unrecorded emotional point to the highest score.
+        dot = f.locator('#curve .dt[data-si="1"]')
+        start = dot.bounding_box()
+        check('Unrecorded emotion exposes a draggable point', 'unknown' in dot.get_attribute('class'))
+        cx, cy = start['x'] + start['width'] / 2, start['y'] + start['height'] / 2
+        page.mouse.move(cx, cy); page.mouse.down()
+        page.mouse.move(cx, cy - 30, steps=9); page.mouse.up(); saved(f)
+        recorded = graph(page)['stages'][stages[1]]
+        check('Dragging emotion stores canonical score and hypothesis', recorded['emotionScore'] == 2 and recorded['emotionRecorded'] and recorded['emotionStatus'] == 'hypothesis')
+        check('Curve updates without losing stage markers', f.locator('#curve .dt.hypothesis').count() == 1 and f.locator('#curve [data-emotion-curve-line]').get_attribute('d') != '')
         f.get_by_role('button', name='Blueprint', exact=True).click(); saved(f)
         expect(f.locator('[data-row=fl]')).to_be_visible()
         check('Changing perspective keeps the same Journey, board and stages', list(graph(page)['journeys']) == [jid] and graph(page)['journeys'][jid]['stageIds'] == stages and len([b for b in graph(page)['views']['whiteboards'].values() if b.get('viewKind') == 'blueprint']) == 1)
@@ -149,8 +159,22 @@ try:
         add(mf, 'ac|0', 'Cartão criado no celular')
         check('Touch Add card persists in the same canonical stage', 'Cartão criado no celular' in graph(mobile)['stages'][stages[0]]['customerAction'])
         audit(mobile, 'matrix-touch', frame=True)
+        mobile_context.close()
+        # A Blueprint can be removed without deleting the Journey.
+        page.locator('[data-blueprint-library]').get_by_role('button', name='Excluir Blueprint', exact=False).first.click()
+        delete_blueprint = page.locator('[data-delete-blueprint-dialog]')
+        expect(delete_blueprint).to_be_visible()
+        check('Blueprint deletion requires confirmation', bid in graph(page)['views']['whiteboards'])
+        delete_blueprint.get_by_role('button', name='Excluir Blueprint', exact=True).click()
+        check('Blueprint deletion preserves its Journey', bid not in graph(page)['views']['whiteboards'] and jid in graph(page)['journeys'])
+        # Remove the Journey independently once the Blueprint has been deleted.
+        page.locator('[data-journey-library]').get_by_role('button', name='Excluir Jornada', exact=False).first.click()
+        delete_journey = page.locator('[data-delete-journey-dialog]')
+        expect(delete_journey).to_be_visible()
+        delete_journey.get_by_role('button', name='Confirmar exclusão', exact=True).click()
+        check('Confirmed Journey deletion removes the record', jid not in graph(page)['journeys'])
         check('No uncaught browser errors', not errors)
-        mobile_context.close(); browser.close()
+        browser.close()
     (OUT / 'results.json').write_text(json.dumps(checks, ensure_ascii=False, indent=2))
 finally:
     server.shutdown(); server.server_close()

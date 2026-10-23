@@ -109,6 +109,9 @@ button:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visi
 .stage-next .tb{font-size:12px;padding:7px;min-height:36px}
 .cvb{height:112px}
 .dt{width:32px;height:32px;margin:-16px;padding:0;border:0;background:transparent}
+.cvb .dt{touch-action:none;cursor:ns-resize}
+.cvb .dt:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+.emotion-tip{display:block;margin-top:5px;color:var(--mut);line-height:1.35}
 .dt::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:var(--ac);border:2px solid var(--sf)}
 .dt.unknown::before{background:var(--sf);border-color:var(--mut)}
 .dt.hypothesis::before{background:var(--sf);border-color:var(--ac)}
