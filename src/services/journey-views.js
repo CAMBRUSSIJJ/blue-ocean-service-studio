@@ -1,6 +1,11 @@
 import { normalizeMatrixCardFilters } from './journey-content.js';
 const baseRows = ['sd','ev','ac','em','fl','bk','sy','im','go','ch','pr','br','rr','ki'];
 const rows = value => Array.isArray(value) ? [...new Set(value.filter(id => typeof id === 'string' && /^[a-z][a-z0-9]{0,24}$/.test(id)))].slice(0,150) : [];
+const bounded = (value,min,max,fallback) => Number.isFinite(Number(value)) ? Math.round(Math.max(min,Math.min(max,Number(value)))) : fallback;
+const stageWidths = value => Array.isArray(value) ? value.slice(0,100).map(v=>bounded(v,210,600,290)) : [];
+const rowHeights = value => Object.fromEntries(Object.entries(value && typeof value==='object' && !Array.isArray(value) ? value : {})
+  .filter(([id])=>/^[a-z][a-z0-9]{0,24}$/.test(id)).slice(0,150)
+  .map(([id,height])=>[id,bounded(height,76,540,110)]));
 const name = value => {
   const result = typeof value === 'string' ? value.trim().replace(/\s+/g,' ') : '';
   if (!result || result.length > 80) throw Error('Use um nome de 1 a 80 caracteres.');
@@ -10,7 +15,9 @@ export function normalizeSavedMatrixView(input = {}) {
   return { version:1, perspective:input.perspective==='blueprint'||!input.perspective&&input.preset==='operational'?'blueprint':'journey',preset:['essential','detailed','operational','acquisition','complete','custom'].includes(input.preset)?input.preset:'custom',
     hiddenRows:rows(input.hiddenRows),rowOrder:rows(input.rowOrder),insightsOpen:input.insightsOpen===true,
     insightsTab:['guidance','analysis','quality'].includes(input.insightsTab)?input.insightsTab:'guidance',
-    emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true,cardFilters:normalizeMatrixCardFilters(input.cardFilters) };
+    emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true,
+    zoom:bounded(input.zoom,75,150,100),stageWidths:stageWidths(input.stageWidths),rowHeights:rowHeights(input.rowHeights),collapsedRows:rows(input.collapsedRows),
+    cardFilters:normalizeMatrixCardFilters(input.cardFilters) };
 }
 /** Configuration only: never copies or rewrites the map's cards, stages or observations. */
 export function manageJourneySavedView(graph, journeyId, action, input = {}, now = new Date().toISOString()) {
