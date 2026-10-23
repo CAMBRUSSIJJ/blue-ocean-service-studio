@@ -43,7 +43,7 @@ function growthCurve(){
  '<div class="emotion-axis" aria-hidden="true">'+ticks+'</div>'+
  points.map((p,i)=>{
   const state=growthEmotionState(p.s),top=p.known?p.y:44,title=growthEmotionPointTitle(p.s);
-  return '<button type="button" class="dt '+state+'" data-act="emotion-edit" data-emotion-state="'+state+'" data-si="'+i+'" style="left:'+p.x/W*100+'%;top:'+top+'px" title="'+esc(title)+'" aria-label="Editar emoção em '+esc(p.s.n)+': '+esc(title)+'" aria-expanded="'+(emotionEdit===i||V.emotionsExpanded)+'"></button>'+
+  return '<button type="button" class="dt '+state+'" data-act="emotion-edit" data-emotion-state="'+state+'" data-si="'+i+'" aria-keyshortcuts="ArrowUp ArrowDown Home End" style="left:'+p.x/W*100+'%;top:'+top+'px" title="'+esc(title)+'" aria-label="Editar emoção em '+esc(p.s.n)+': '+esc(title)+'" aria-expanded="'+(emotionEdit===i||V.emotionsExpanded)+'"></button>'+
    '<span class="dl" data-emotion-curve-label="'+i+'" title="'+esc(title)+'" style="left:'+p.x/W*100+'%;top:'+(top+16)+'px">'+esc(growthEmotionLabel(p.s))+'</span>';
  }).join('');
  return curve;
