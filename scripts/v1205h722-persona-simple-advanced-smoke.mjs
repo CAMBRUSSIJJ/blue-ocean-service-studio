@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { createDiscoveryEntity } from '../src/services/discovery-workspace.ts';
-import { ADVANCED_PERSONA_SECTIONS, SIMPLE_PERSONA_SECTIONS, buildPersonaStudioReport, personaProfileFromEntity, updatePersonaProfile } from '../src/services/persona-studio.ts';
+import { ADVANCED_PERSONA_SECTIONS, SIMPLE_PERSONA_SECTIONS, buildPersonaStudioReport, personaProfileFromEntity, updatePersonaProfile, switchPersonaDepth, visiblePersonaSections } from '../src/services/persona-studio.ts';
 import { createServiceProjectState } from '../src/services/service-project.ts';
 
 let passed = 0;
@@ -29,6 +29,21 @@ ok(Array.isArray(updated.entities.persona[persona.id].personaSections) && update
 report = buildPersonaStudioReport(updated, persona.id);
 ok(Boolean(report) && report.professionalChecks.length === 5, 'modo avançado calcula apenas blocos avançados selecionados');
 
+// Upgrading exposes advanced sections, but later switches never erase custom choices.
+let toggled = switchPersonaDepth(personaProfileFromEntity(graph.entities.persona[persona.id]), 'professional');
+ok(toggled.mode === 'professional' && toggled.sections.includes('behaviors') && toggled.sections.includes('constraints'), 'primeira ativação avançada habilita blocos de pesquisa');
+toggled = {...toggled, sections:toggled.sections.filter(section => section !== 'expectations')};
+toggled = switchPersonaDepth(toggled,'simple');
+ok(!visiblePersonaSections(toggled).includes('behaviors') && toggled.sections.includes('behaviors'), 'modo simples oculta pesquisa avançada sem apagar conteúdo');
+toggled = switchPersonaDepth(toggled,'professional');
+ok(!toggled.sections.includes('expectations') && toggled.sections.includes('behaviors'), 'modo avançado restaurado respeita blocos personalizados');
+const customSaved = updatePersonaProfile({graph,personaId:persona.id,draft:toggled,connectedIds:[],now:'2026-10-09T12:00:00.000Z'});
+const reopened = switchPersonaDepth(personaProfileFromEntity(customSaved.entities.persona[persona.id]),'simple');
+ok(!switchPersonaDepth(reopened,'professional').sections.includes('expectations'), 'configuração avançada é preservada após salvar e reabrir');
+const allHidden = {...toggled,sections:[...SIMPLE_PERSONA_SECTIONS]};
+const hiddenSaved = updatePersonaProfile({graph,personaId:persona.id,draft:allHidden,connectedIds:[]});
+const hiddenReopened = switchPersonaDepth(personaProfileFromEntity(hiddenSaved.entities.persona[persona.id]),'simple');
+ok(!switchPersonaDepth(hiddenReopened,'professional').sections.includes('behaviors'), 'até uma configuração avançada com todos blocos ocultos é preservada');
 const view = fs.readFileSync('src/views/PersonasView.tsx', 'utf8');
 const css = fs.readFileSync('src/runtime/personas-h713.css', 'utf8');
 const style = fs.readFileSync('src/style.css', 'utf8');

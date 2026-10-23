@@ -25,7 +25,7 @@ const checks = [
   ['relações usam Service Graph', files.view.includes('personaRelationOptions') && files.view.includes('connectedIds')],
   ['remoção limpa relações', files.view.includes('removePersonaFromGraph')],
   ['rastreamento de uso presente', files.view.includes('contextEntityUsage') && files.view.includes('ServiceUsageRelations')],
-  ['modo simples/profissional preservado', files.view.includes("mode: 'simple'") && files.view.includes('Avançada')],
+  ['modo simples/profissional preservado', files.view.includes("switchPersonaDepth") && files.view.includes("changeDetailMode('simple')") && files.view.includes("changeDetailMode('professional')") && files.view.includes('Avançada')],
   ['CSS H7.1 importado no bloco inicial', files.style.includes("@import './runtime/personas-h71.css';") && files.style.indexOf("@import './runtime/personas-h71.css';") < files.style.indexOf('@tailwind base')],
   ['P1 cartões são visualização padrão', files.view.includes("useState<LibraryViewMode>") && files.view.includes("return 'cards'") && files.view.includes("data-persona-card-grid")],
   ['P1 alternância entre cartões e tabela funciona por estado', files.view.includes("changeViewMode('cards')") && files.view.includes("changeViewMode('table')") && files.view.includes('data-persona-table') && files.view.includes("aria-pressed={viewMode === 'cards'}")],
