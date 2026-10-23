@@ -18,6 +18,7 @@ const growthEmotionStateName=state=>({unknown:'Não informado',hypothesis:'Hipó
 const growthEmotionScore=s=>Math.max(-2,Math.min(2,Math.round(Number(s.e)||0)));
 function growthEmotionLabel(s){return growthEmotionKnown(s)?EM[growthEmotionScore(s)+2]:'Sem registro'}
 function growthEmotionPointTitle(s){return growthEmotionLabel(s)+' · '+growthEmotionStateName(growthEmotionState(s))+(growthEmotionKnown(s)?' · '+(growthEmotionScore(s)>0?'+':'')+growthEmotionScore(s):'')}
+function growthEmotionAccessibleState(s){return growthEmotionKnown(s)?EM[growthEmotionScore(s)+2]+' · '+growthEmotionStateName(growthEmotionState(s)):'Não informado'}
 function growthEmotionScale(W){
  const lines=[2,1,0,-1,-2].map(score=>{
   const y=16+(2-score)*14,level=score>0?'+'+score:String(score);
@@ -43,7 +44,7 @@ function growthCurve(){
  '<div class="emotion-axis" aria-hidden="true">'+ticks+'</div>'+
  points.map((p,i)=>{
   const state=growthEmotionState(p.s),top=p.known?p.y:44,title=growthEmotionPointTitle(p.s);
-  return '<button type="button" class="dt '+state+'" data-act="emotion-edit" data-emotion-state="'+state+'" data-si="'+i+'" aria-keyshortcuts="ArrowUp ArrowDown Home End" style="left:'+p.x/W*100+'%;top:'+top+'px" title="'+esc(title)+'" aria-label="Editar emoção em '+esc(p.s.n)+': '+esc(title)+'" aria-expanded="'+(emotionEdit===i||V.emotionsExpanded)+'"></button>'+
+  return '<button type="button" class="dt '+state+'" data-act="emotion-edit" data-emotion-state="'+state+'" data-si="'+i+'" aria-keyshortcuts="ArrowUp ArrowDown Home End" style="left:'+p.x/W*100+'%;top:'+top+'px" title="'+esc(title)+'" aria-label="Editar emoção em '+esc(p.s.n)+': '+esc(growthEmotionAccessibleState(p.s))+'" aria-expanded="'+(emotionEdit===i||V.emotionsExpanded)+'"></button>'+
    '<span class="dl" data-emotion-curve-label="'+i+'" title="'+esc(title)+'" style="left:'+p.x/W*100+'%;top:'+(top+16)+'px">'+esc(growthEmotionLabel(p.s))+'</span>';
  }).join('');
  return curve;
@@ -58,7 +59,7 @@ function growthEmotionRefreshPoint(i){
   box.querySelector('[data-emotion-curve-line]')?.setAttribute('d',growthEmotionCurvePath(points));
   const dot=box.querySelector('.dt[data-si="'+i+'"]'),label=box.querySelector('[data-emotion-curve-label="'+i+'"]');
   const state=growthEmotionState(stage),top=growthEmotionKnown(stage)?16+(2-growthEmotionScore(stage))*14:44,title=growthEmotionPointTitle(stage);
-  if(dot){dot.style.top=top+'px';dot.classList.toggle('unknown',state==='unknown');dot.classList.toggle('validated',state==='validated');dot.classList.toggle('hypothesis',state==='hypothesis');dot.dataset.emotionState=state;dot.title=title;dot.setAttribute('aria-label','Editar emoção em '+stage.n+': '+title)}
+  if(dot){dot.style.top=top+'px';dot.classList.toggle('unknown',state==='unknown');dot.classList.toggle('validated',state==='validated');dot.classList.toggle('hypothesis',state==='hypothesis');dot.dataset.emotionState=state;dot.title=title;dot.setAttribute('aria-label','Editar emoção em '+stage.n+': '+growthEmotionAccessibleState(stage))}
   if(label){label.style.top=(top+16)+'px';label.textContent=growthEmotionLabel(stage);label.title=title}
   const legend=app.querySelector('.emotion-legend');if(legend)legend.outerHTML=growthEmotionLegend();
 }
