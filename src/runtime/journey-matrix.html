@@ -356,11 +356,11 @@ app.addEventListener('change',e=>{const el=e.target;if(growthEmotionInput(el))re
 app.addEventListener('submit',event=>{const form=event.target;if(form.id==='growth-stage-form'){event.preventDefault();growthCreateStage();return}if(form.id==='growth-plan-form'){event.preventDefault();growthSubmitPlan(form);return}if(form.matches('.growth-measure-form')){event.preventDefault();growthSubmitMeasurement(form)}});
 app.addEventListener('keydown',e=>{
  const point=e.target.closest?.('#curve .dt[data-act="emotion-edit"]');
- if(point&&['ArrowUp','ArrowDown'].includes(e.key)){
+ if(point&&['ArrowUp','ArrowDown','Home','End'].includes(e.key)){
   e.preventDefault();
   const i=Number(point.dataset.si),stage=S.steps[i];
   if(!stage)return;
-  const old=growthEmotionScore(stage),next=Math.max(-2,Math.min(2,old+(e.key==='ArrowUp'?1:-1)));
+  const old=growthEmotionScore(stage),next=e.key==='Home'?-2:e.key==='End'?2:Math.max(-2,Math.min(2,old+(e.key==='ArrowUp'?1:-1)));
   if(next!==old||!growthEmotionKnown(stage)){
    stage.e=next;stage.emotionRecorded=true;stage.emotionStatus='hypothesis';stage.emotionSource='';
    growthEmotionDrafts.delete(growthEmotionKey(i));save();growthEmotionRefreshPoint(i);
