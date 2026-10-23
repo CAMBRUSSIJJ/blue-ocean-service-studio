@@ -195,3 +195,34 @@ contrato, inclusive destinos cheios de cartões ocultos e acesso às origens.
 Capturas e relatórios axe ficam em `artifacts/journey-structure/`. Não houve
 piloto com participantes ou comparação interativa com o produto observado.
 Hierarquia recursiva, sub-jornadas e colaboração remota exigem contratos futuros.
+
+## Incremento B13 — sub-jornadas e navegação
+
+Contrato independente registrado antes do código. A base é B12; usa os campos
+legados `parentJourneyId` e `sourceStageId`, agora tipados. Fases continuam
+organizando etapas dentro de um mapa; sub-jornadas são mapas independentes.
+
+- Cada etapa permite criar uma sub-jornada vazia com nome explícito ou vincular
+  uma jornada existente livre do mesmo serviço. Não há cópia de etapas,
+  emoções, cartões ou registros. Cada filha tem um pai e uma etapa de origem.
+- São até 20 filhas por etapa e oito jornadas em um caminho. Rejeitar ciclos,
+  autorreferência, referência inválida e árvore que exceda o limite, inclusive
+  descendentes de uma jornada vinculada. Falhas não alteram o projeto.
+- O mapa mostra filhas por etapa e caminho de ancestrais, com navegação para
+  mapas reais no mesmo editor. O nome vem da fonte atual. Links inválidos
+  legados são anunciados; a leitura é limitada e não entra em recursão infinita.
+- Desvincular preserva a filha e seus descendentes. Excluir uma etapa/pai solta
+  os vínculos diretos correspondentes e preserva as filhas. Duplicar um mapa
+  cria uma cópia independente, sem copiar a relação parental nem descendentes.
+- Criar, vincular e desvincular exigem edição, validam antes de salvar e entram
+  no histórico. Navegar não é edição de conteúdo. Recarga e backup mantêm os
+  vínculos. A criação antiga passa a usar a mesma regra de mapa vazio.
+- Apresentação e HTML identificam o caminho e as sub-jornadas por etapa sem
+  incorporar seus conteúdos ou inventar URLs para o arquivo exportado.
+- O documento avulso explica que vínculos entre mapas exigem um projeto.
+  Colaboração remota e fases recursivas permanecem fora deste incremento.
+
+Aceitação: criar filha vazia, editar e voltar à origem; criar neta e usar o
+caminho; vincular mapa existente sem copiar conteúdo; rejeitar ciclo/limites;
+desvincular com desfazer/refazer; excluir origem e preservar filha; duplicar pai;
+recarregar/exportar; permissões, teclado, toque e axe em 1440/834/390 px.
