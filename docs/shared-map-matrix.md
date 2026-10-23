@@ -66,3 +66,15 @@ A matriz adapta automaticamente a largura inicial das colunas à quantidade de e
 - **Persistência:** zoom, larguras, altura, ordem e recolhimento são preferências opcionais, normalizadas e guardadas com a visualização no Service Graph. Os dados dos cartões, etapas, emoções e demais objetos canônicos não são duplicados.
 
 O mapa continua navegável por rolagem horizontal e teclado. O redimensionamento é independente do movimento de cartões e do arraste dos pontos da curva de emoções.
+
+## H3 — Curva de Emoções 2.0
+
+A faixa **Emoções** representa intensidades em escala ordinal de **−2 a +2** com cinco marcas visíveis: muito negativa (−2), negativa (−1), neutra (0), positiva (+1), muito positiva (+2). A linha horizontal central indica zero; ela **não** significa que etapas sem informação sejam neutras.
+
+- **Não informado:** marcador com borda tracejada; não preenche a linha nem cria hipóteses automaticamente. 
+- **Hipótese:** marcador vazio com contorno sólido; é uma avaliação ainda não validada.
+- **Validado:** marcador preenchido, disponível apenas quando a fonte da evidência está registrada.
+- A legenda mostra quantos registros estão em cada estado. Os nomes das emoções ficam próximos aos pontos e os detalhes completos aparecem no título acessível do ponto.
+- Arraste o ponto verticalmente ou use **↑ / ↓** com o ponto focado para ajustar a intensidade. Um ajuste transforma um registro validado em **hipótese** porque a nota antiga não comprova o valor novo. O clique simples continua abrindo o formulário de observação, fonte e validação.
+- Pontos não informados não são conectados automaticamente: lacunas continuam visíveis no gráfico. Se um ponto antes ausente for movimentado, uma hipótese é explicitamente criada.
+- Os valores, observações e estados continuam salvos nas etapas canônicas da Jornada; a apresentação e os marcadores são derivados desses dados, sem duplicação.
