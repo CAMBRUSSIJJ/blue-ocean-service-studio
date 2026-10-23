@@ -349,8 +349,8 @@ export function PersonasView({ studio }: { studio: StudioController }) {
 
   const hasSearchOrFilter = Boolean(query.trim()) || filter !== 'all';
   const filters: Array<[FilterMode, string]> = [
-    ['all', 'Todas'], ['used', 'Em Jornadas ou mapas'], ['unused', 'Não utilizadas'],
-    ['evidence', 'Com evidências'], ['without-evidence', 'Sem evidências'], ['incomplete', 'Dados incompletos'],
+    ['all', 'Todas'], ['used', 'Em Jornadas ou mapas'], ['unused', 'Não usadas'],
+    ['evidence', 'Com evidência'], ['without-evidence', 'Sem evidências'], ['incomplete', 'Base incompleta'],
   ];
 
   return <section className="bo-h71-personas bo-p1-personas" data-personas-h71="library" data-persona-view={viewMode}>
