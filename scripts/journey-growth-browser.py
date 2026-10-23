@@ -66,8 +66,10 @@ try:
     check('Named stages are shared with the canonical Journey without invented actions',len(ids)==3 and all(not graph(page)['stages'][id]['customerAction'] for id in ids))
     check('Comfortable columns do not stretch to half the screen',f.locator('.sh').first.bounding_box()['width']<=360)
     check('Unrecorded emotions are empty markers and do not draw a curve',f.locator('.dt.unknown').count()==3 and f.locator('.cvb path').get_attribute('d')=='')
-    check('Five emotional intensity levels are visible from -2 to +2', f.locator('[data-emotion-tick]').count()==5 and f.locator('[data-emotion-level]').count()==5 and f.locator('[data-emotion-tick="0"]').is_visible())
-    check('Legend starts with three unknown points and no invented neutral emotion', f.locator('.emotion-legend-item').first.locator('b').inner_text().strip()=='3' and f.locator('.dt.unknown').count()==3)
+    check('Emotion chart hides numeric ticks and category legend while retaining grid positions',
+          f.locator('[data-emotion-tick]').count()==0 and f.locator('.emotion-legend').count()==0 and f.locator('[data-emotion-level]').count()==5)
+    check('Unrecorded points remain editable but no unknown label is printed on the chart',
+          f.locator('.dt.unknown').count()==3 and f.locator('#curve').inner_text().strip()=='')
 
     context=f.get_by_role('textbox',name='Contexto em Descobrir',exact=True);context.fill('Cliente percebe uma necessidade. <script>alert("teste")</script>');context.press('Tab');saved(f)
     note(f,'ac|0','Pesquisar alternativas de atendimento')
@@ -79,14 +81,21 @@ try:
     f.get_by_role('textbox',name='Fonte da evidência em Usar').fill('Entrevista simulada para QA');f.get_by_role('button',name='Concluir',exact=True).click();saved(f)
     check('Validated emotions preserve their source and leave a gap at unknown stages',graph(page)['stages'][ids[-1]]['emotionSource']=='Entrevista simulada para QA' and ' C' not in f.locator('.cvb path').get_attribute('d'))
     check('Emotion captions fit inside the curve instead of overlapping the next row',f.locator('.cvb').evaluate('e=>[...e.querySelectorAll(".dl")].every(n=>n.getBoundingClientRect().bottom<=e.getBoundingClientRect().bottom)'))
-    legend_counts = [int(element.inner_text()) for element in f.locator('.emotion-legend-item b').all()]
-    check('Legend differentiates unknown, hypothesis, and evidence validated', legend_counts==[1,1,1])
+    chart_text = f.locator('#curve').inner_text()
+    chart_labels = [el.inner_text().strip() for el in f.locator('#curve .dl').all()]
+    check('Visible curve only presents recorded emotion names, not states or values',
+          'Hipótese' not in chart_text and 'Validado' not in chart_text and 'Não informado' not in chart_text
+          and chart_labels[0]=='Frustrada' and chart_labels[1]=='' and f.locator('#curve .dt.validated').count()==1)
+    check('Hover titles omit internal classifications and numeric score',
+          all('Hipótese' not in (title or '') and 'Validado' not in (title or '') and ' · ' not in (title or '')
+              for title in [el.get_attribute('title') for el in f.locator('#curve .dt').all()]))
     check('Distinct validation states are reflected in accessible point names', 'Validado' in f.locator('.dt.validated').get_attribute('aria-label') and 'Hipótese' in f.locator('.dt.hypothesis').get_attribute('aria-label'))
     f.locator('#curve .dt[data-si="1"]').focus()
     f.locator('#curve .dt[data-si="1"]').press('ArrowUp'); saved(f)
     mid = graph(page)['stages'][ids[1]]
     check('Keyboard adjustments persist and never turn missing information into neutral', mid['emotionScore']==1 and mid['emotionStatus']=='hypothesis' and mid['emotionRecorded'] is True)
-    check('Legend refreshes after keyboard editing an unrecorded point', f.locator('.emotion-legend-item').first.locator('b').inner_text().strip()=='0' and f.locator('.dt.unknown').count()==0)
+    check('Keyboard edit fills missing point without reintroducing a legend or numeric ticks',
+          f.locator('.dt.unknown').count()==0 and f.locator('.emotion-legend').count()==0 and f.locator('[data-emotion-tick]').count()==0)
     f.locator('#curve .dt[data-si="1"]').press('End'); saved(f)
     check('End key sets the maximum positive emotion', graph(page)['stages'][ids[1]]['emotionScore']==2)
     f.locator('#curve .dt[data-si="1"]').press('Home'); saved(f)

@@ -78,3 +78,9 @@ A faixa **Emoções** representa intensidades em escala ordinal de **−2 a +2**
 - Arraste o ponto verticalmente ou use **↑ / ↓** com o ponto focado para ajustar a intensidade. Um ajuste transforma um registro validado em **hipótese** porque a nota antiga não comprova o valor novo. O clique simples continua abrindo o formulário de observação, fonte e validação.
 - Pontos não informados não são conectados automaticamente: lacunas continuam visíveis no gráfico. Se um ponto antes ausente for movimentado, uma hipótese é explicitamente criada.
 - Os valores, observações e estados continuam salvos nas etapas canônicas da Jornada; a apresentação e os marcadores são derivados desses dados, sem duplicação.
+
+## H3.1 — Curva simplificada
+
+Por padrão, a faixa **Emoções** exibe somente a curva e os nomes das emoções que foram registradas. A escala textual de −2 a +2 e a legenda de estados (não informado, hipótese, validado) não aparecem mais sobre o mapa, reduzindo a carga visual. Permanecem as linhas de referência discretas e os controles de arraste e teclado.
+
+Os valores de intensidade, estados de hipótese/validação, fontes e observações **não são removidos dos dados**. Continuam disponíveis ao selecionar um ponto e abrir a edição. Etapas sem emoção registrada permanecem como lacunas na curva, sem receber o valor neutro automaticamente. 

@@ -21,31 +21,20 @@ function growthEmotionPointTitle(s){return growthEmotionLabel(s)+' · '+growthEm
 function growthEmotionAccessibleState(s){return growthEmotionKnown(s)?EM[growthEmotionScore(s)+2]+' · '+growthEmotionStateName(growthEmotionState(s)):'Não informado'}
 function growthEmotionScale(W){
  const lines=[2,1,0,-1,-2].map(score=>{
-  const y=16+(2-score)*14,level=score>0?'+'+score:String(score);
+  const y=16+(2-score)*14;
   return '<line data-emotion-level="'+score+'" x1="0" y1="'+y+'" x2="'+W+'" y2="'+y+'" class="emotion-grid-line'+(score===0?' is-neutral':'')+'" vector-effect="non-scaling-stroke"/>';
  }).join('');
- return '<svg class="emotion-plot" viewBox="0 0 '+W+' 112" preserveAspectRatio="none" role="img" aria-label="Curva de emoções com escala de menos dois a mais dois; pontos vazios representam hipóteses ou ausência de registro. Lacunas não são tratadas como neutras.">'+
+ return '<svg class="emotion-plot" viewBox="0 0 '+W+' 112" preserveAspectRatio="none" role="img" aria-label="Curva de emoções; edite um ponto para consultar intensidade e evidências. Lacunas representam ausência de registro.">'+
  lines;
-}
-function growthEmotionLegend(){
- const counts={unknown:0,hypothesis:0,validated:0};
- S.steps.forEach(stage=>counts[growthEmotionState(stage)]++);
- return '<div class="emotion-legend" role="group" aria-label="Legenda dos registros de emoção">'+
- '<span class="emotion-legend-item"><i class="emotion-legend-dot unknown" aria-hidden="true"></i>Não informado <b>'+counts.unknown+'</b></span>'+
- '<span class="emotion-legend-item"><i class="emotion-legend-dot hypothesis" aria-hidden="true"></i>Hipótese <b>'+counts.hypothesis+'</b></span>'+
- '<span class="emotion-legend-item"><i class="emotion-legend-dot validated" aria-hidden="true"></i>Validado <b>'+counts.validated+'</b></span>'+
- '<small class="emotion-legend-help">Arraste um ponto para mudar a intensidade; alterações validadas voltam a ser hipóteses.</small></div>';
 }
 function growthCurve(){
  const N=S.steps.length,W=Math.max(100,N*100),points=S.steps.map((stage,i)=>({x:i*100+50,y:16+(2-growthEmotionScore(stage))*14,known:growthEmotionKnown(stage),s:stage}));
  const path=growthEmotionCurvePath(points);
- const ticks=[2,1,0,-1,-2].map(score=>'<span class="emotion-axis-tick" data-emotion-tick="'+score+'" style="top:'+(16+(2-score)*14)+'px" title="'+({2:'Muito positiva',1:'Positiva',0:'Neutra','-1':'Negativa','-2':'Muito negativa'}[score])+'">'+(score>0?'+'+score:score)+'</span>').join('');
  const curve=growthEmotionScale(W)+'<path data-emotion-curve-line="1" d="'+path+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+
- '<div class="emotion-axis" aria-hidden="true">'+ticks+'</div>'+
  points.map((p,i)=>{
-  const state=growthEmotionState(p.s),top=p.known?p.y:44,title=growthEmotionPointTitle(p.s);
+  const state=growthEmotionState(p.s),top=p.known?p.y:44,title=growthEmotionLabel(p.s);
   return '<button type="button" class="dt '+state+'" data-act="emotion-edit" data-emotion-state="'+state+'" data-si="'+i+'" aria-keyshortcuts="ArrowUp ArrowDown Home End" style="left:'+p.x/W*100+'%;top:'+top+'px" title="'+esc(title)+'" aria-label="Editar emoção em '+esc(p.s.n)+': '+esc(growthEmotionAccessibleState(p.s))+'" aria-expanded="'+(emotionEdit===i||V.emotionsExpanded)+'"></button>'+
-   '<span class="dl" data-emotion-curve-label="'+i+'" title="'+esc(title)+'" style="left:'+p.x/W*100+'%;top:'+(top+16)+'px">'+esc(growthEmotionLabel(p.s))+'</span>';
+   '<span class="dl" data-emotion-curve-label="'+i+'" title="'+esc(p.known?title:'')+'" style="left:'+p.x/W*100+'%;top:'+(top+16)+'px">'+esc(p.known?growthEmotionLabel(p.s):'')+'</span>';
  }).join('');
  return curve;
 }
@@ -58,10 +47,9 @@ function growthEmotionRefreshPoint(i){
   const points=S.steps.map((s,j)=>({x:j*100+50,y:16+(2-growthEmotionScore(s))*14,known:growthEmotionKnown(s)}));
   box.querySelector('[data-emotion-curve-line]')?.setAttribute('d',growthEmotionCurvePath(points));
   const dot=box.querySelector('.dt[data-si="'+i+'"]'),label=box.querySelector('[data-emotion-curve-label="'+i+'"]');
-  const state=growthEmotionState(stage),top=growthEmotionKnown(stage)?16+(2-growthEmotionScore(stage))*14:44,title=growthEmotionPointTitle(stage);
+  const state=growthEmotionState(stage),known=growthEmotionKnown(stage),top=known?16+(2-growthEmotionScore(stage))*14:44,title=growthEmotionLabel(stage);
   if(dot){dot.style.top=top+'px';dot.classList.toggle('unknown',state==='unknown');dot.classList.toggle('validated',state==='validated');dot.classList.toggle('hypothesis',state==='hypothesis');dot.dataset.emotionState=state;dot.title=title;dot.setAttribute('aria-label','Editar emoção em '+stage.n+': '+growthEmotionAccessibleState(stage))}
-  if(label){label.style.top=(top+16)+'px';label.textContent=growthEmotionLabel(stage);label.title=title}
-  const legend=app.querySelector('.emotion-legend');if(legend)legend.outerHTML=growthEmotionLegend();
+  if(label){label.style.top=(top+16)+'px';label.textContent=known?title:'';label.title=known?title:''}
 }
 function growthEmotionPointerDown(event){
   const dot=event.target.closest?.('#curve .dt[data-act="emotion-edit"]');
