@@ -54,3 +54,15 @@ de um cartão, alternância de perspectivas, edição operacional, faixas própr
 retorno das ferramentas completas, persistência e toque. Também executa Axe
 na biblioteca e na matriz em 1440, 834 e 390 px. As evidências ficam em
 `artifacts/shared-map-matrix/` e não são versionadas.
+
+## Editor de Mapas 2.0 — navegação e manipulação
+
+A matriz adapta automaticamente a largura inicial das colunas à quantidade de etapas. A barra superior inclui **‹ / ›** para deslocamento horizontal e **− / percentual / +** para zoom (75 a 150%). Com Ctrl ou ⌘ + rolagem sobre o mapa, o zoom também é ajustado. O botão central restaura 100%.
+
+- **Largura da etapa:** passe o mouse na divisória direita do cabeçalho e arraste. Com foco no separador, use **← / →** em incrementos de 20 px (mínimo 210, máximo 600 px).
+- **Ordem das faixas:** use a alça ⠿ na lateral esquerda para arrastar a faixa até outra posição. Como alternativa acessível, foque a alça e pressione **Alt + ↑ / ↓**. A personalização existente continua permitindo subir e descer por botões.
+- **Altura das faixas:** arraste a pequena divisória inferior da legenda lateral ou use **↑ / ↓** com o separador em foco; os limites são 76 a 540 px. A altura é mínima, de modo que conteúdo longo se expande naturalmente.
+- **Recolher/expandir:** use o controle ▴/▾ ao lado da legenda da faixa; os cartões ficam ocultos, **não são excluídos**.
+- **Persistência:** zoom, larguras, altura, ordem e recolhimento são preferências opcionais, normalizadas e guardadas com a visualização no Service Graph. Os dados dos cartões, etapas, emoções e demais objetos canônicos não são duplicados.
+
+O mapa continua navegável por rolagem horizontal e teclado. O redimensionamento é independente do movimento de cartões e do arraste dos pontos da curva de emoções.
