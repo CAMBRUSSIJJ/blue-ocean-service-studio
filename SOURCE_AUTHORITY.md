@@ -17,6 +17,9 @@ A partir da **V1.16.0**, a autoridade do produto é a pasta `src/` junto de `ind
   `src/services/journey-growth.ts`. O mesmo script gera
   `public/blueprint-reference-original.html` e `public/journey-matrix.css`.
 - `dist/` é sempre gerado por `npm run build` e **não deve ser corrigido manualmente**.
+- Classificação, filtros e edição em lote dos cartões são editados em
+  `src/runtime/journey-card-tools-ui.js`; validação, correspondência e alterações
+  atômicas usam `src/services/journey-content.js`.
 - a versão do produto vem de `package.json` e é propagada automaticamente para React, Whiteboard e `app-version.json`.
 - qualquer alteração direta no bundle publicado deve ser refeita no source antes de uma release.
 

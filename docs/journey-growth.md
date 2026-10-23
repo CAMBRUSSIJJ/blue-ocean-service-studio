@@ -242,17 +242,19 @@ do mesmo registro do serviço.
 
 Em **Visualizações**, informe um nome e use **Salvar visualização atual**.
 Cada jornada aceita até 20 configurações. A visualização guarda faixas, ordem,
-ajuste de tela e Persona sobre os dados atuais da jornada. **Aplicar** recupera
+ajuste de tela, Persona e filtros dos cartões sobre os dados atuais da jornada. **Aplicar** recupera
 esse recorte; **Renomear** altera seu nome e **Atualizar** substitui a configuração
 pela atual. **Excluir** remove somente a configuração, com opção de desfazer.
 Faixas criadas depois da captura ficam ocultas ao aplicar a configuração antiga.
 Se a Persona foi removida, selecione outra e atualize a visualização.
 
 **Apresentar visualização atual**, dentro desse diálogo, usa somente as faixas
-visíveis e mantém o mesmo recorte ao baixar HTML ou imprimir. O botão
+visíveis e os cartões que correspondem aos filtros, mantendo o recorte ao baixar HTML ou imprimir. O botão
 **Apresentar** da barra principal continua abrindo o resumo executivo completo.
-O contexto de Persona altera as observações emocionais; os demais cartões ainda
-são comuns à jornada. Configurações são preservadas no backup do projeto.
+O contexto da Persona da jornada altera as observações emocionais. A classificação
+por Persona, tags e destaque e os filtros dos cartões são descritos no guia de
+[edição em lote e perspectivas](journey-card-tools.md). Configurações e metadados
+são preservados no backup do projeto.
 
 O [registro de observação pública](research/smaply-observation-2026-10-22.md) e a
 [especificação independente](specs/journey-editor-behavior.md) documentam as

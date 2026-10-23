@@ -1,5 +1,13 @@
 # Histórico de mudanças
 
+## 2026-10-23 · Perspectivas e edição em lote dos cartões
+
+- Associa Personas e tags a cada cartão e adiciona cores de destaque, preservando os vínculos ao serviço.
+- Combina busca sem acentos, tipo, Persona e tag; cartões sem Persona podem ser incluídos no recorte.
+- Permite seleção explícita e classificação ou exclusão em lote, com cancelamento e desfazer/refazer.
+- Inclui filtros nas visualizações salvas, na apresentação do recorte e no HTML exportado.
+- Acrescenta testes de domínio, persistência e navegador; mantém etapas e contexto visíveis ao filtrar cartões.
+
 ## 2026-10-22 · Inserção precisa e visualizações da jornada
 
 - Inclui elementos antes de qualquer cartão com âncora estável e seleção rápida do tipo padrão com Enter.

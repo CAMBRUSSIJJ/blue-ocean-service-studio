@@ -1,7 +1,7 @@
 import { BLUEPRINT_FRAME_LAYERS, BLUEPRINT_BOUNDARIES, BLUEPRINT_MARKETING_DIMENSIONS, BLUEPRINT_QUALITY_DIMENSIONS, buildBlueprintDeliveryReport, blueprintServicePromise, validateActivityNumbers, isCustomerServiceEvidence } from './blueprint-methodology.js';
 import { runtime } from './runtime-registry.js';
 import { renderBlueprintReference } from './blueprint-reference-view.js';
-import { manageJourneySavedView } from '../services/journey-views.js';
+import { manageJourneySavedView, normalizeSavedMatrixView } from '../services/journey-views.js';
 import { selectJourneyPersona, readJourneyEmotion, writeJourneyEmotion, journeyPainContexts, saveJourneyPainEvidence } from '../services/journey-context.js';
 import { MATRIX_REFERENCE_TYPES, matrixServiceReferences, validateMatrixDocument, matrixContentFromDocument, restoreMatrixContent } from '../services/journey-content.js';
 import { ACQUISITION_ROWS, saveJourneyImprovement, journeyImprovementPlans, measureJourneyImprovement } from '../services/journey-growth.js';
@@ -1263,10 +1263,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
   }
   function saveHostedMatrixView(input){
     if(!input||typeof input!=='object'||!board()||!canEditHostedMatrix())return false;
-    const strings=value=>Array.isArray(value)?[...new Set(value.filter(x=>typeof x==='string'&&/^[a-z][a-z0-9]{0,24}$/.test(x)))].slice(0,150):[];
-    const view={version:1,preset:['essential','detailed','operational','acquisition','complete','custom'].includes(input.preset)?input.preset:'essential',
-      hiddenRows:strings(input.hiddenRows),rowOrder:strings(input.rowOrder),insightsOpen:input.insightsOpen===true,
-      insightsTab:['guidance','analysis','quality'].includes(input.insightsTab)?input.insightsTab:'guidance',emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true};
+    const view=normalizeSavedMatrixView(input);
     const target=activeJourney()||board();target.matrixView=view;
     return save(false,{content:false,history:false,label:'Personalizar visualização da Jornada'});
   }

@@ -91,6 +91,7 @@ button,select,input{font:inherit;color:var(--ink)}button{cursor:pointer}
 <script src="/v1102-journey-growth-ui.js"></script>
 <script src="/v1102-journey-context-ui.js"></script>
 <script src="/v1102-journey-views-ui.js"></script>
+<script src="/v1102-journey-card-tools-ui.js"></script>
 <script>
 const HOSTED=new URLSearchParams(location.search).get('service-graph')==='1';let applyingHost=false;
 const KEY='bo-blueprint-v1',DIMS=['Tangíveis','Confiabilidade','Presteza','Segurança','Empatia'],EM=['Frustrada','Ansiosa','Neutra','Animada','Satisfeita'];
@@ -131,7 +132,7 @@ function viewState(input){
   const preset=Object.hasOwn(PRESETS,input?.preset)?input.preset:input?.preset==='custom'?'custom':S.editorKind==='blueprint'?'operational':'essential';
   let hiddenRows=Array.isArray(input?.hiddenRows)?input.hiddenRows.filter(x=>typeof x==='string'):BASE_ROWS.filter(r=>!PRESETS[preset]?.includes(r.id)).map(r=>r.id);
   if(input&&!input.rowOrder?.includes('go')&&!['complete','acquisition'].includes(preset))hiddenRows=[...new Set([...hiddenRows,...ACQUISITION_LANES.map(r=>r.id)])];
-  return {version:1,preset,hiddenRows,rowOrder:Array.isArray(input?.rowOrder)?[...new Set(input.rowOrder.filter(x=>typeof x==='string'))]:BASE_ROWS.map(r=>r.id),insightsOpen:input?.insightsOpen===true,insightsTab:['guidance','analysis','quality'].includes(input?.insightsTab)?input.insightsTab:'guidance',emotionsExpanded:input?.emotionsExpanded===true,fitToScreen:input?.fitToScreen===true};
+  return {version:1,preset,hiddenRows,rowOrder:Array.isArray(input?.rowOrder)?[...new Set(input.rowOrder.filter(x=>typeof x==='string'))]:BASE_ROWS.map(r=>r.id),insightsOpen:input?.insightsOpen===true,insightsTab:['guidance','analysis','quality'].includes(input?.insightsTab)?input.insightsTab:'guidance',emotionsExpanded:input?.emotionsExpanded===true,fitToScreen:input?.fitToScreen===true,cardFilters:window.BlueOceanJourneyContent.normalizeMatrixCardFilters(input?.cardFilters)};
 }
 function orderedRows(){const rows=rowDefs();return [...V.rowOrder.map(id=>rows.find(r=>r.id===id)).filter(Boolean),...rows.filter(r=>!V.rowOrder.includes(r.id))]}
 function saveView(){
@@ -193,7 +194,7 @@ function render(){
 if(growthPresent){growthShowPresentation();return}if(lib){app.innerHTML=libView();return}if(S.start){app.innerHTML=startScreen();chk();return}
 if(!V)V=viewState(S.view);
 const N=S.steps.length,rows=orderedRows().filter(r=>!V.hiddenRows.includes(r.id));
-let h=editorHeader()+(lk?'<div class="ins" role="status" style="margin:12px 24px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois na de destino. Clique numa seta para removê-la.')+'</div>':'');
+let h=editorHeader()+cardToolsHeader()+(lk?'<div class="ins" role="status" style="margin:12px 24px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois na de destino. Clique numa seta para removê-la.')+'</div>':'');
 h+='<main class="wrap'+(V.insightsOpen?' has-insights':'')+'"><div class="bd" tabindex="0" role="region" aria-label="Matriz da Jornada"><div class="matrix'+(V.fitToScreen?' fit-screen':'')+'" style="--stage-count:'+Math.max(1,N)+'"><div class="r" data-row="st"><div class="lb">Etapas<small>Um momento da experiência</small></div>'+S.steps.map((s,i)=>'<div class="sh"><i>'+(i+1)+'</i><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da etapa" data-ed="sn" data-si="'+i+'">'+esc(s.n)+'</span><div class="sa"><button class="x" data-act="mv" data-si="'+i+'" data-d="-1" aria-label="Mover etapa para a esquerda" '+(!i?'disabled':'')+'>‹</button><button class="x" data-act="mv" data-si="'+i+'" data-d="1" aria-label="Mover etapa para a direita" '+(i===N-1?'disabled':'')+'>›</button><button class="x" data-act="ds" data-si="'+i+'" aria-label="Duplicar etapa">⧉</button><button class="x" data-act="del" data-si="'+i+'" aria-label="Remover etapa">×</button></div></div>').join('')+growthStageColumn()+'</div>';
 if(!N)h+='<div class="empty-map" data-empty-journey="1">Adicione uma etapa para começar o mapa.</div>';
 rows.forEach(L=>{
@@ -207,7 +208,7 @@ h+='</div>';
 });
 h+='<div class="row-tools"><button class="ad" data-act="alane">+ Adicionar faixa</button><button class="ad" data-act="customize">Mostrar outras faixas</button></div><svg class="lk" id="lk" aria-hidden="true"></svg></div></div>';
 if(V.insightsOpen)h+='<aside class="pnl" id="insights-panel" aria-label="Insights"><div class="panel-head"><h2>Insights</h2><button class="x" data-act="insights" aria-label="Fechar Insights">×</button></div><div class="panel-tabs" role="tablist" aria-label="Tipos de insights">'+[['guidance','Orientações'],['analysis','Análise'],['quality','Qualidade']].map(([id,label])=>'<button id="tab-'+id+'" role="tab" data-act="insight-tab" data-tab="'+id+'" aria-controls="dx" aria-selected="'+(V.insightsTab===id)+'" tabindex="'+(V.insightsTab===id?0:-1)+'">'+label+'</button>').join('')+'</div><div id="dx" role="tabpanel" aria-labelledby="tab-'+V.insightsTab+'">'+dx()+'</div></aside>';
-app.innerHTML=h+'</main>'+customizer()+growthDialogs()+contentDialogs()+contextDialogs()+viewsDialogs();requestAnimationFrame(drawLinks);
+app.innerHTML=h+'</main>'+cardToolsBulkBar()+customizer()+growthDialogs()+contentDialogs()+contextDialogs()+viewsDialogs()+cardToolsDialogs();requestAnimationFrame(drawLinks);
 }
 function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();const dxEl=document.getElementById('dx');if(dxEl)dxEl.innerHTML=dx();app.querySelectorAll('[data-emotion-label]').forEach(el=>el.textContent=EM[S.steps[+el.dataset.emotionLabel].e+2]);const count=app.querySelector('.insight-count');if(count)count.textContent=' · '+S.iss.filter(x=>x.t==='i').length+' oportunidades'}
 function focusNew(sel){const e=app.querySelector(sel);if(e)e.focus()}
