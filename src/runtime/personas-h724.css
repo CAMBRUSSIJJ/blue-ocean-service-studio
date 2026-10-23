@@ -193,3 +193,29 @@
 @media(max-width:1100px){.bo-p2-create-grid{grid-template-columns:minmax(0,1fr)}.bo-p2-create-aside{grid-template-columns:1fr 1fr}.bo-p3-sort-label select{max-width:135px}}
 @media(max-width:750px){.bo-p2-create-form{width:calc(100% - 24px);margin:22px auto}.bo-p2-header{padding:0 12px}.bo-p2-header>span{display:none}.bo-p2-section{padding:18px}.bo-p2-title h1{font-size:24px}.bo-p2-create-aside{grid-template-columns:1fr}.bo-p3-saved-wrap,.bo-p3-display-wrap{flex:1 1 auto}.bo-p3-saved-wrap>button,.bo-p3-display-wrap>button{width:100%;justify-content:center}.bo-p3-sort-label{width:100%;justify-content:space-between}.bo-p3-sort-label select{max-width:none;flex:1}.bo-p2-persona-customize{margin:10px;padding:14px}}
 @media(max-width:480px){.bo-p2-modes{grid-template-columns:1fr}.bo-p2-create-grid{gap:15px}.bo-p3-filter-panel{width:100vw}.bo-p3-filter-body{padding:14px}.bo-p3-filter-panel>header{padding:18px 14px}}
+
+/* P4 — A profundidade selecionada deve ter efeito imediato e perceptível. */
+.bo-p4-create-explainer{margin-top:4px;padding:13px 15px;background:#f3f5ff;border:1px solid #dce2ff;border-radius:10px;display:grid;gap:6px}
+.bo-p4-create-explainer strong{color:#293ac1;font-size:12px}
+.bo-p4-create-explainer p{font-size:11px;line-height:1.55;color:#566580;margin:0}
+.bo-p4-create-explainer span{color:#4558bb;font-size:10px;font-weight:650}
+.bo-p4-advanced-guide{margin:12px 26px 0;background:#f3f5ff;border:1px solid #dfe4ff;border-radius:11px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.bo-p4-advanced-guide>div{display:grid;gap:4px;min-width:180px;flex:1}
+.bo-p4-advanced-guide strong{font-size:12px;color:#2939b3}
+.bo-p4-advanced-guide span{font-size:11px;line-height:1.5;color:#62708d}
+.bo-p4-advanced-guide button{background:#fff;color:#2a3eb7;border:1px solid #cfd7ff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:700;cursor:pointer}
+.bo-p4-advanced-guide button:hover{background:#e9edff}
+.bo-p4-research-card{min-width:0}
+.bo-p4-research-card header p{color:#77849a;font-size:11px;line-height:1.5;margin:6px 0 0}
+.bo-p4-research-card .bo-h71-form textarea{min-height:140px;line-height:1.5;resize:vertical}
+.bo-p4-research-helper{font-size:11px;color:#728099;line-height:1.6;margin:12px 0 0}
+.bo-p4-related-summary{display:flex;flex-direction:column;gap:8px;background:#f8faff;border:1px solid #e2e7f5;border-radius:10px;padding:17px}
+.bo-p4-related-summary strong{font-size:12px;color:#31415d}
+.bo-p4-related-summary span{font-size:13px;color:#3043bb;font-weight:700}
+.bo-p4-related-summary p{font-size:11px;line-height:1.55;color:#7a879b;margin:0}
+.bo-p4-related-summary button{align-self:flex-start;padding:8px 11px;background:#fff;color:#344bc9;border:1px solid #cfd8f2;border-radius:7px;cursor:pointer;font-size:11px;font-weight:700}
+.bo-p4-related-summary button:hover{background:#f0f3ff}
+.bo-h71-detail-tabs{flex-wrap:wrap;height:auto;min-height:52px;gap:3px}
+.bo-h71-detail-tabs>button{white-space:nowrap;min-height:40px}
+.bo-h71-detail-tabs>button:focus-visible,.bo-p4-advanced-guide button:focus-visible,.bo-p4-related-summary button:focus-visible{outline:2px solid #4056d8;outline-offset:2px}
+@media(max-width:760px){.bo-p4-advanced-guide{margin:10px 14px 0;padding:12px}.bo-p4-advanced-guide button{width:100%}.bo-h71-detail-tabs{overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start}}
