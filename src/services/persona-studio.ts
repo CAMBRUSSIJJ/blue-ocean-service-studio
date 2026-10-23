@@ -13,10 +13,11 @@ export const ADVANCED_PERSONA_SECTIONS: PersonaSectionId[] = ['identity', 'bio',
 export const switchPersonaDepth = (draft: PersonaProfileDraft, mode: PersonaDepth): PersonaProfileDraft => {
   if (draft.mode === mode) return draft;
   const selected = [...new Set<PersonaSectionId>(['identity', ...draft.sections])];
-  const hasAdvanced = selected.some(section => !SIMPLE_PERSONA_SECTIONS.includes(section));
+  const hasAdvanced = Boolean(draft.advancedConfigured) || selected.some(section => !SIMPLE_PERSONA_SECTIONS.includes(section));
   return {
     ...draft,
     mode,
+    advancedConfigured: draft.advancedConfigured || mode === 'professional',
     sections: mode === 'professional' && !hasAdvanced
       ? [...new Set<PersonaSectionId>([...selected, ...ADVANCED_PERSONA_SECTIONS])]
       : selected,
@@ -33,6 +34,7 @@ export type PersonaProfileDraft = {
   mode: PersonaDepth;
   layout: PersonaLayout;
   sections: PersonaSectionId[];
+  advancedConfigured?: boolean;
   context: string;
   primaryGoal: string;
   situation: string;
@@ -86,6 +88,7 @@ export const personaProfileFromEntity = (entity: GraphEntity): PersonaProfileDra
   title: entityTitle(entity) === 'Sem título' ? '' : entityTitle(entity),
   description: entityDescription(entity),
   mode: entity.personaMode === 'professional' ? 'professional' : 'simple',
+  advancedConfigured: entity.personaAdvancedConfigured === true || entity.personaMode === 'professional' || (Array.isArray(entity.personaSections) && entity.personaSections.some((s) => !SIMPLE_PERSONA_SECTIONS.includes(s as PersonaSectionId))),
   layout: entity.personaLayout === 'balanced' || entity.personaLayout === 'story-first' ? entity.personaLayout : 'profile-left',
   sections: Array.isArray(entity.personaSections)
     ? entity.personaSections.filter((value): value is PersonaSectionId => ['identity','bio','goal','needs','situation','quote','channels','behaviors','expectations','constraints','triggers','alternatives','evidence','relations'].includes(String(value)))
@@ -189,6 +192,7 @@ export function updatePersonaProfile(input: {
     title: input.draft.title.trim(),
     description: input.draft.description.trim(),
     personaMode: input.draft.mode,
+    personaAdvancedConfigured: Boolean(input.draft.advancedConfigured || input.draft.mode === 'professional'),
     personaLayout: input.draft.layout ?? 'profile-left',
     personaSections: [...new Set(Array.isArray(input.draft.sections) ? input.draft.sections : (input.draft.mode === 'professional' ? ADVANCED_PERSONA_SECTIONS : SIMPLE_PERSONA_SECTIONS))],
     context: input.draft.context.trim(),
