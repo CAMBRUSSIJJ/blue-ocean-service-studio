@@ -321,29 +321,16 @@ body:has(.card-bulk-bar) .wrap{padding-bottom:110px}
 @media(max-width:640px){.matrix{--cols:140px repeat(var(--stage-count),minmax(210px,1fr)) 140px;min-width:calc(280px + var(--stage-count)*210px);width:calc(280px + var(--stage-count)*280px)}.matrix.fit-screen{--cols:140px repeat(var(--stage-count),minmax(210px,1fr)) 140px;min-width:calc(280px + var(--stage-count)*210px)}.map-navigation{order:1}.toolbar .map-customize{font-size:11px}.lane-direct-actions{right:2px}}
 @media(prefers-reduced-motion:reduce){.lane-direct-actions{transition:none}}
 
-/* H3 — Emotion Curve 2.0: scale is visual guidance, unknown never maps to neutral. */
+/* Emoções — visual limpo: valores e estados são editados no ponto, não exibidos na curva. */
 .cvb{isolation:isolate;overflow:visible}
 .cvb .emotion-plot{z-index:0;pointer-events:none}
-.emotion-grid-line{stroke:var(--matrix-divider,var(--ln));stroke-width:1;stroke-dasharray:3 5;opacity:.74}
-.emotion-grid-line.is-neutral{stroke:var(--mut);stroke-dasharray:1 0;opacity:.45}
-.emotion-axis{position:absolute;z-index:1;top:0;left:4px;width:31px;height:100%;pointer-events:none}
-.emotion-axis-tick{position:absolute;left:0;transform:translateY(-50%);font-size:10px;line-height:1;font-weight:650;letter-spacing:.01em;color:var(--mut);min-width:20px;text-align:right;font-variant-numeric:tabular-nums}
+.emotion-grid-line{stroke:var(--matrix-divider,var(--ln));stroke-width:1;stroke-dasharray:3 5;opacity:.48}
+.emotion-grid-line.is-neutral{stroke:var(--mut);stroke-dasharray:1 0;opacity:.32}
 .cvb .dt{z-index:3}
 .cvb .dt::before{box-shadow:0 0 0 2px var(--sf)}
-.cvb .dt.validated::before{background:var(--ac);border-color:var(--ac);box-shadow:0 0 0 3px var(--sf)}
-.cvb .dt.hypothesis::before{background:var(--sf);border-color:var(--ac);border-width:2px}
+.cvb .dt.validated::before,.cvb .dt.hypothesis::before{background:var(--sf);border-color:var(--ac);border-width:2px;box-shadow:0 0 0 2px var(--sf)}
 .cvb .dt.unknown::before{background:var(--sf);border-color:var(--mut);border-style:dashed}
 .cvb .dt:focus-visible{outline-offset:1px}
 .cvb .dl{z-index:2;line-height:1.35;max-width:clamp(82px,calc(100% / var(--stage-count,3) - 20px),192px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;font-size:11px;font-weight:600;color:var(--ink)}
-.cvb .dt.unknown+.dl{color:var(--mut);font-weight:400;font-style:italic}
-.cvb .dt.validated+.dl{font-weight:750}
-.emotion-legend{display:flex;align-items:center;gap:8px 15px;flex-wrap:wrap;margin:7px 0 10px 10px;padding:9px 10px;border-top:1px solid var(--matrix-divider,var(--ln));color:var(--mut);font-size:11px}
-.emotion-legend-item{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.emotion-legend-item b{font-size:10px;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:700}
-.emotion-legend-dot{display:inline-block;flex:none;width:11px;height:11px;border-radius:50%;border:2px solid var(--ac);background:var(--sf)}
-.emotion-legend-dot.unknown{border-color:var(--mut);border-style:dashed}
-.emotion-legend-dot.hypothesis{border-color:var(--ac)}
-.emotion-legend-dot.validated{background:var(--ac);border-color:var(--ac)}
-.emotion-legend-help{flex-basis:100%;font-size:10px;color:var(--mut);line-height:1.45}
-@media(max-width:640px){.emotion-legend{margin:7px 0 8px;padding:8px 4px;gap:6px 10px}.emotion-legend-help{font-size:10px}.emotion-axis{left:2px}}
+.cvb .dt.unknown+.dl{display:none}
 @media(prefers-reduced-motion:reduce){.cvb .dt::before{transition:none!important}}
