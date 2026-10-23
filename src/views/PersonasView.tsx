@@ -40,6 +40,24 @@ function AutoTextarea({ minRows = 2, className = '', ...props }: AutoTextareaPro
 type DetailTab = 'overview' | 'behavior' | 'relations' | 'evidence' | 'usage';
 type FilterMode = 'all' | 'unused' | 'used' | 'evidence' | 'without-evidence' | 'incomplete';
 type LibraryViewMode = 'cards' | 'table';
+type PersonaFilterField = 'title' | 'owner' | 'mode' | 'tags' | 'evidence' | 'usage' | 'completeness';
+type PersonaFilterOperator = 'contains' | 'equals' | 'gte' | 'lte' | 'empty';
+type PersonaFilterRule = { id: string; field: PersonaFilterField; operator: PersonaFilterOperator; value: string };
+type PersonaSort = 'title' | 'recent' | 'evidence' | 'usage' | 'completeness';
+type PersonaColumn = 'owner' | 'evidence' | 'usage' | 'updated';
+type PersonaSavedView = { id: string; name: string; query: string; filter: FilterMode; rules: PersonaFilterRule[]; logic: 'all' | 'any'; mode: LibraryViewMode; sort: PersonaSort; columns: PersonaColumn[] };
+const PERSONA_COLUMNS: PersonaColumn[] = ['owner','evidence','usage','updated'];
+const PERSONA_FIELDS: Array<{ id: PersonaFilterField; label: string; numeric?: boolean }> = [
+  { id:'title',label:'Nome' },{ id:'owner',label:'Responsável' },{ id:'mode',label:'Perfil' },
+  { id:'tags',label:'Tags' },{ id:'evidence',label:'Evidências',numeric:true },
+  { id:'usage',label:'Utilização em mapas',numeric:true },{ id:'completeness',label:'Completude',numeric:true },
+];
+const personaRule = (): PersonaFilterRule => ({ id: String(Date.now())+'-'+Math.random().toString(36).slice(2,7),field:'evidence',operator:'equals',value:'0' });
+const validatePersonaRules = (input: unknown): PersonaFilterRule[] => !Array.isArray(input) ? [] : input.slice(0,8).filter((x):x is PersonaFilterRule =>
+  Boolean(x && typeof x === 'object' && typeof x.id === 'string' && PERSONA_FIELDS.some(f=>f.id===x.field)
+   && ['contains','equals','gte','lte','empty'].includes(x.operator) && typeof x.value === 'string')
+ ).map(x=>({...x,value:x.value.slice(0,150)}));
+
 
 
 const relationLabel: Record<PersonaRelationKind, string> = {
@@ -77,6 +95,39 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<FilterMode>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [filterRules, setFilterRules] = useState<PersonaFilterRule[]>([]);
+  const [ruleLogic, setRuleLogic] = useState<'all' | 'any'>('all');
+  const [draftRules, setDraftRules] = useState<PersonaFilterRule[]>([]);
+  const [draftLogic, setDraftLogic] = useState<'all' | 'any'>('all');
+  const [sortMode, setSortMode] = useState<PersonaSort>('title');
+  const [visibleColumns, setVisibleColumns] = useState<PersonaColumn[]>([...PERSONA_COLUMNS]);
+  const [displayOpen, setDisplayOpen] = useState(false);
+  const [savedViewsOpen, setSavedViewsOpen] = useState(false);
+  const [newViewName, setNewViewName] = useState('');
+  const [savedViews, setSavedViews] = useState<PersonaSavedView[]>([]);
+  const serviceViewKey = 'bo-persona-saved-views-v1:'+String(graph.service.id);
+  useEffect(() => {
+    try {
+      const value = JSON.parse(localStorage.getItem(serviceViewKey) || '[]') as unknown;
+      if (!Array.isArray(value)) { setSavedViews([]); return; }
+      setSavedViews(value.slice(0,30).filter((view):view is PersonaSavedView =>
+        Boolean(view && typeof view==='object' && typeof view.id==='string' && typeof view.name==='string' && view.name.trim())
+      ).map((view)=>({...view,rules:validatePersonaRules(view.rules),columns:PERSONA_COLUMNS.filter(c=>Array.isArray(view.columns)&&view.columns.includes(c))})));
+    } catch { setSavedViews([]); }
+  }, [serviceViewKey]);
+  const persistSavedViews = (next: PersonaSavedView[]) => {
+    setSavedViews(next);
+    try { localStorage.setItem(serviceViewKey,JSON.stringify(next)); }
+    catch { showToast('Sem espaço local para salvar esta visualização.'); }
+  };
+  const openFilters = () => {
+    setDraftRules(filterRules.map(rule=>({...rule})));
+    setDraftLogic(ruleLogic);
+    setShowFilters(true);
+    setDisplayOpen(false);
+    setSavedViewsOpen(false);
+  };
+
   const [viewMode, setViewMode] = useState<LibraryViewMode>(() => {
     try { return sessionStorage.getItem('bo-personas-library-view') === 'table' ? 'table' : 'cards'; }
     catch { return 'cards'; }
@@ -168,15 +219,53 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   }), [graph, personas]);
 
   const filtered = useMemo(() => rows.filter((row) => {
-    const haystack = `${row.title} ${row.owner} ${row.tags} ${String(row.persona.description ?? '')}`.toLowerCase();
-    if (!haystack.includes(query.trim().toLowerCase())) return false;
-    if (filter === 'unused') return row.usage.instances === 0 && row.usage.relatedCount === 0;
-    if (filter === 'used') return row.usage.instances > 0;
-    if (filter === 'evidence') return (row.report?.connectionCounts.evidence ?? 0) > 0;
-    if (filter === 'without-evidence') return (row.report?.connectionCounts.evidence ?? 0) === 0;
-    if (filter === 'incomplete') return (row.report?.foundationScore ?? 0) < 100;
-    return true;
-  }), [rows, query, filter]);
+    const haystack = `${row.title} ${row.owner} ${row.tags} ${String(row.persona.description ?? '')}`.toLocaleLowerCase('pt-BR');
+    if (!haystack.includes(query.trim().toLocaleLowerCase('pt-BR'))) return false;
+    if (filter === 'unused' && !(row.usage.instances === 0 && row.usage.relatedCount === 0)) return false;
+    if (filter === 'used' && row.usage.instances === 0) return false;
+    if (filter === 'evidence' && (row.report?.connectionCounts.evidence ?? 0) === 0) return false;
+    if (filter === 'without-evidence' && (row.report?.connectionCounts.evidence ?? 0) > 0) return false;
+    if (filter === 'incomplete' && (row.report?.foundationScore ?? 0) >= 100) return false;
+    const matches = (rule: PersonaFilterRule) => {
+      const source: Record<PersonaFilterField, string | number> = {
+        title:row.title,owner:row.owner,mode:personaProfileFromEntity(row.persona).mode,
+        tags:row.tags,evidence:row.report?.connectionCounts.evidence ?? 0,
+        usage:row.usage.instances ?? 0,completeness:row.report?.foundationScore ?? 0,
+      };
+      const current=source[rule.field], target=rule.value.trim();
+      if (rule.operator==='empty') return typeof current==='number' ? current===0 : !current.trim();
+      if (typeof current==='number') {
+        if (!target || !Number.isFinite(Number(target))) return false;
+        const n=Number(target);
+        return rule.operator==='gte' ? current>=n : rule.operator==='lte' ? current<=n : current===n;
+      }
+      const a=current.toLocaleLowerCase('pt-BR'),b=target.toLocaleLowerCase('pt-BR');
+      if (rule.operator==='contains') return a.includes(b);
+      return a===b;
+    };
+    return !filterRules.length || (ruleLogic==='all' ? filterRules.every(matches) : filterRules.some(matches));
+  }).sort((a,b)=>{
+    if(sortMode==='recent') return new Date(String(b.persona.updatedAt??b.persona.createdAt)).getTime()-new Date(String(a.persona.updatedAt??a.persona.createdAt)).getTime();
+    if(sortMode==='evidence') return (b.report?.connectionCounts.evidence??0)-(a.report?.connectionCounts.evidence??0);
+    if(sortMode==='usage') return b.usage.instances-a.usage.instances;
+    if(sortMode==='completeness') return (b.report?.foundationScore??0)-(a.report?.foundationScore??0);
+    return a.title.localeCompare(b.title,'pt-BR');
+  }),[rows,query,filter,filterRules,ruleLogic,sortMode]);
+
+  const saveCurrentView = () => {
+    const name=newViewName.trim().slice(0,60);
+    if (!name) { showToast('Informe um nome para salvar a visualização.'); return; }
+    const view:PersonaSavedView={id:String(Date.now()),name,query,filter,rules:filterRules.map(x=>({...x})),
+      logic:ruleLogic,mode:viewMode,sort:sortMode,columns:[...visibleColumns]};
+    persistSavedViews([...savedViews.filter(v=>v.name.toLocaleLowerCase('pt-BR')!==name.toLocaleLowerCase('pt-BR')),view].slice(-30));
+    setNewViewName('');setSavedViewsOpen(false);showToast('Visualização salva neste navegador.');
+  };
+  const applySavedView = (view:PersonaSavedView) => {
+    setQuery(view.query||'');setFilter(view.filter||'all');setFilterRules(validatePersonaRules(view.rules));
+    setRuleLogic(view.logic==='any'?'any':'all');setSortMode(['recent','evidence','usage','completeness'].includes(view.sort)?view.sort:'title');
+    setVisibleColumns(PERSONA_COLUMNS.filter(c=>view.columns.includes(c)));
+    changeViewMode(view.mode==='table'?'table':'cards');setSavedViewsOpen(false);
+  };
 
   const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setMenuId(null); };
   const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
