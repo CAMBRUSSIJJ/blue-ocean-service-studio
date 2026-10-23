@@ -270,6 +270,15 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
     }, prepared.created ? 180 : 30);
   };
 
+  useEffect(() => {
+    const navigate = (event: Event) => {
+      const id = (event as CustomEvent<{ journeyId: string }>).detail?.journeyId;
+      if (id) void openJourney(id);
+    };
+    window.addEventListener('bo-open-linked-journey', navigate);
+    return () => window.removeEventListener('bo-open-linked-journey', navigate);
+  });
+
   // Open the canonical Blueprint for a particular Journey; never clone stages or invent backstage work.
   const continueJourneyInBlueprint = (journeyId: string) => {
     const source = graph.journeys[journeyId];

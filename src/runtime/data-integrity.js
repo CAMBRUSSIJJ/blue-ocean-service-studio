@@ -195,9 +195,11 @@ export function repairGraphIntegrity(input) {
 export function deletePlan(g,kind,id){const plan={kind,id,exists:entityExists(g,kind,id),cascade:[],detach:[],block:[]};if(!plan.exists)return plan;
   const cascade=(k,x)=>plan.cascade.push({kind:k,id:x}),detach=(k,x,field)=>plan.detach.push({kind:k,id:x,field});
   if(kind==='stage'){
+    for(const j of values(g.journeys))if(j.sourceStageId===id){detach('journey',j.id,'parentJourneyId');detach('journey',j.id,'sourceStageId')}
     const st=g.stages[id];for(const pid of st.problemIds||[])cascade('problem',pid);for(const oid of st.opportunityIds||[]){cascade('opportunity',oid);for(const tid of g.opportunities?.[oid]?.taskIds||[])cascade('task',tid)}
     for(const [ek,col] of Object.entries(g.entities||{}))for(const rec of values(col))if(rec.stageId===id)detach(ek,rec.id,'stageId');
   } else if(kind==='journey'){
+    for(const j of values(g.journeys))if(j.parentJourneyId===id){detach('journey',j.id,'parentJourneyId');detach('journey',j.id,'sourceStageId')}
     const j=g.journeys[id];
     for(const sid of j.stageIds||[]){
       const sub=deletePlan(g,'stage',sid);cascade('stage',sid);for(const c of sub.cascade||[])cascade(c.kind,c.id);for(const d of sub.detach||[])detach(d.kind,d.id,d.field);

@@ -1,5 +1,14 @@
 # Histórico de mudanças
 
+## 2026-10-22 — Sub-jornadas no editor integrado
+
+- Criar mapas filhos vazios ou vincular Jornadas livres às etapas, com navegação
+  entre ancestrais e filhas, sem copiar conteúdo.
+- Desvincular, preservar filhas ao excluir a origem e duplicar mapas independentes.
+- Validar ciclos, serviço, origem, profundidade e permissões; preservar histórico,
+  backup e identificação das relações no resumo e no HTML.
+- Corrigir o estado pendente ao aplicar visualizações salvas (PR #26).
+
 ## 2026-10-22 · Abrangência, seleção em lote e fases
 
 - Cartões podem abranger etapas escolhidas com um único conteúdo editável e segmentos de continuação após reordenação.

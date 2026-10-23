@@ -328,3 +328,28 @@ atividades, canais ou medições adicionais nas etapas participantes. A hierarqu
 deste incremento tem um nível; sub-jornadas e hierarquias recursivas ficam para
 um contrato futuro. No documento avulso, as etapas antigas recebem identidades
 locais estáveis para suportar abrangência e ações estruturais com desfazer.
+
+## Sub-jornadas: detalhar uma etapa em outro mapa
+
+Em cada cabeçalho de etapa, **Sub-jornadas** permite dar um nome e **Criar
+sub-jornada vazia**, ou escolher uma **Jornada existente** livre e vinculá-la.
+A filha começa sem etapas, ações ou emoções sugeridas. Cada mapa conserva seu
+conteúdo e seus registros. Use o botão com seu nome para abri-la; o caminho no
+cabeçalho permite voltar a qualquer ancestral. Você pode criar novas filhas nas
+etapas do mapa detalhado, até oito mapas no caminho e 20 filhas por etapa.
+
+**Desvincular** remove apenas a relação com a origem. A Jornada e seus
+próprios filhos continuam no projeto; você pode vinculá-la a outra etapa. Um
+mapa já vinculado precisa ser desvinculado antes de receber outra origem.
+Ligações que criariam um ciclo ou excederiam os limites são recusadas por inteiro.
+Excluir uma origem solta suas filhas diretas, preservando seus dados. Duplicar
+um mapa cria uma cópia independente, sem copiar descendentes ou vínculo parental.
+
+Criar, vincular e desvincular usam o histórico. A visualização canônica vazia
+é preparada nessa edição para permitir a primeira abertura por quem tem leitura.
+Navegar não acrescenta uma edição ao histórico. Recarga e backup preservam os
+vínculos. O resumo e o HTML identificam caminho e filhas por etapa, sem incorporar
+os conteúdos dos outros mapas. Links legados incompletos geram um aviso; o
+caminho tem leitura limitada mesmo diante de um ciclo em dados importados.
+O documento avulso explica que essa conexão entre mapas exige um projeto.
+Fases continuam sendo grupos de etapas dentro de um mesmo mapa.
