@@ -42,29 +42,6 @@ type FilterMode = 'all' | 'unused' | 'used' | 'evidence' | 'without-evidence' | 
 type LibraryViewMode = 'cards' | 'table';
 
 
-const personaSectionOptions: Array<{ id: PersonaSectionId; label: string; description: string; recommended?: boolean; advanced?: boolean }> = [
-  { id: 'identity', label: 'Nome com resumo', description: 'Nome representativo e uma síntese curta.', recommended: true },
-  { id: 'needs', label: 'Necessidades', description: 'O que precisa ser resolvido para esta pessoa.', recommended: true },
-  { id: 'goal', label: 'Objetivo principal', description: 'O resultado que ela quer alcançar.', recommended: true },
-  { id: 'situation', label: 'Situação / momento', description: 'Em que contexto ou etapa essa persona aparece.', recommended: true },
-  { id: 'channels', label: 'Canais', description: 'Onde ela se comunica ou vive a experiência.', recommended: true },
-  { id: 'quote', label: 'Citação', description: 'Uma frase que represente sua perspectiva.', recommended: true },
-  { id: 'bio', label: 'Bio / contexto', description: 'História e contexto relevantes para o serviço.', advanced: true },
-  { id: 'behaviors', label: 'Comportamentos', description: 'Padrões de decisão e ação observáveis.', advanced: true },
-  { id: 'expectations', label: 'Expectativas', description: 'O que ela espera da experiência.', advanced: true },
-  { id: 'constraints', label: 'Restrições', description: 'Limites, barreiras e condicionantes.', advanced: true },
-  { id: 'triggers', label: 'Gatilhos', description: 'Eventos que iniciam uma decisão ou ação.', advanced: true },
-  { id: 'alternatives', label: 'Alternativas atuais', description: 'Como resolve o problema hoje.', advanced: true },
-  { id: 'evidence', label: 'Evidências', description: 'Dados, entrevistas e observações que sustentam a persona.', recommended: true },
-  { id: 'relations', label: 'Relações do Service Graph', description: 'Jobs, dores, hipóteses e outros objetos conectados.', advanced: true },
-];
-
-const layoutLabel: Record<PersonaLayout, string> = {
-  'profile-left': 'Perfil à esquerda',
-  balanced: 'Equilibrado',
-  'story-first': 'Narrativa primeiro',
-};
-
 const relationLabel: Record<PersonaRelationKind, string> = {
   need: 'Necessidades', job: 'Jobs', pain: 'Dores', problemHypothesis: 'Hipóteses', evidence: 'Evidências',
 };
@@ -121,7 +98,6 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [createTitle, setCreateTitle] = useState('');
   const [createDescription, setCreateDescription] = useState('');
   const [createMode, setCreateMode] = useState<PersonaDepth>('simple');
-  const [createLayout, setCreateLayout] = useState<PersonaLayout>('profile-left');
   const [createSections, setCreateSections] = useState<PersonaSectionId[]>([...SIMPLE_PERSONA_SECTIONS]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -209,25 +185,29 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     setCreateMode(mode);
     setCreateSections(mode === 'professional' ? [...ADVANCED_PERSONA_SECTIONS] : [...SIMPLE_PERSONA_SECTIONS]);
   };
-  const toggleCreateSection = (section: PersonaSectionId) => {
-    if (section === 'identity') return;
-    setCreateSections((current) => current.includes(section) ? current.filter((item) => item !== section) : [...current, section]);
-  };
 
   const createPersona = () => {
     if (!createTitle.trim()) return;
     const now = new Date().toISOString();
     const baseEntity = createDiscoveryEntity({ graph, kind: 'persona', title: createTitle, description: createDescription, now });
-    const entity = { ...baseEntity, personaMode: createMode, personaLayout: createLayout, personaSections: [...new Set(createSections)] };
+    const entity = { ...baseEntity, personaMode: createMode, personaLayout: 'profile-left' as PersonaLayout, personaSections: [...new Set(createSections)] };
     setGraph((current) => ({
       ...current,
       service: { ...current.service, updatedAt: now },
       entities: { ...current.entities, persona: { ...(current.entities?.persona ?? {}), [entity.id]: entity } },
     }), 'Personas 2.0: criar');
     setCreateOpen(false); setCreateTitle(''); setCreateDescription('');
-    setCreateMode('simple'); setCreateLayout('profile-left'); setCreateSections([...SIMPLE_PERSONA_SECTIONS]);
+    setCreateMode('simple'); setCreateSections([...SIMPLE_PERSONA_SECTIONS]);
     setSelectedId(entity.id); setDetailTab('overview');
     showToast('Persona criada. Complete o perfil e salve.');
+  };
+
+  const cancelCreate = () => {
+    if ((createTitle.trim() || createDescription.trim()) && !window.confirm('Descartar as informações ainda não salvas?')) return;
+    setCreateOpen(false);
+    setCreateTitle('');
+    setCreateDescription('');
+    chooseCreateMode('simple');
   };
 
   const savePersona = () => {
@@ -347,6 +327,46 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     </section>;
   }
 
+  if (createOpen) return <section className="bo-p2-create-page" data-personas-h71="create">
+    <header className="bo-p2-header">
+      <button type="button" className="bo-p2-back" onClick={cancelCreate}><ArrowLeft size={16}/> Voltar para Personas</button>
+      <span>PUBLICO-ALVO / PERSONAS / CRIAR</span>
+    </header>
+    <form className="bo-p2-create-form" onSubmit={(event) => { event.preventDefault(); createPersona(); }}>
+      <div className="bo-p2-title"><small>CRIAÇÃO DE PERSONA</small><h1>Criar Persona</h1>
+        <p>Comece com as informações essenciais. Você poderá aprofundar a pesquisa e personalizar os blocos depois.</p></div>
+      <div className="bo-p2-create-grid">
+        <main className="bo-p2-create-main">
+          <section className="bo-p2-section">
+            <span className="bo-p2-step">01 · IDENTIFICAÇÃO</span>
+            <h2>Como vamos reconhecer esta pessoa?</h2>
+            <label htmlFor="bo-p2-name">Nome da Persona <strong>Obrigatório</strong></label>
+            <input id="bo-p2-name" autoFocus required maxLength={140} value={createTitle} onChange={(event) => setCreateTitle(event.target.value)}
+              placeholder="Ex.: Profissional que mora sozinho"/>
+            <label htmlFor="bo-p2-description">Resumo <small>Opcional</small></label>
+            <textarea id="bo-p2-description" rows={4} maxLength={2000} value={createDescription}
+              onChange={(event) => setCreateDescription(event.target.value)} placeholder="Quem é essa pessoa, em que contexto utiliza o serviço e por que é relevante?"/>
+          </section>
+          <section className="bo-p2-section">
+            <span className="bo-p2-step">02 · PROFUNDIDADE</span><h2>Como deseja começar?</h2>
+            <div className="bo-p2-modes" role="group" aria-label="Profundidade da Persona">
+              <button type="button" className={createMode === 'simple' ? 'is-selected' : ''} aria-pressed={createMode === 'simple'} onClick={() => chooseCreateMode('simple')}><strong>Simples</strong><span>Identidade, objetivo, situação, canais e necessidades. Ideal para começar.</span></button>
+              <button type="button" className={createMode === 'professional' ? 'is-selected' : ''} aria-pressed={createMode === 'professional'} onClick={() => chooseCreateMode('professional')}><strong>Avançada</strong><span>Adiciona comportamento, expectativas, restrições, alternativas e mais conexões.</span></button>
+            </div>
+          </section>
+          <footer className="bo-p2-actions"><button type="button" onClick={cancelCreate}>Cancelar</button>
+            <button className="primary" type="submit" disabled={!createTitle.trim()}>Criar Persona e continuar <span aria-hidden="true">→</span></button>
+          </footer>
+        </main>
+        <aside className="bo-p2-create-aside">
+          <div className="bo-p2-help-card"><strong>Construa progressivamente</strong><p>Você só precisa de um nome para começar. Depois de criar, poderá completar objetivos, relações e evidências sem perder o contexto.</p>
+            <div><span>✓</span> Informações essenciais</div><div><span>✓</span> Salvar e editar no próprio perfil</div><div><span>✓</span> Personalizar layout e blocos depois</div></div>
+          <div className="bo-p2-help-note"><strong>Sobre a validação</strong><p>Uma Persona com todos os campos preenchidos não está automaticamente validada. As evidências serão vinculadas durante a pesquisa.</p></div>
+        </aside>
+      </div>
+    </form>
+  </section>;
+
   const hasSearchOrFilter = Boolean(query.trim()) || filter !== 'all';
   const filters: Array<[FilterMode, string]> = [
     ['all', 'Todas'], ['used', 'Em Jornadas ou mapas'], ['unused', 'Não usadas'],
@@ -410,20 +430,6 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     {!filtered.length && <div className="bo-h71-empty bo-p1-empty"><UsersRound size={28}/><strong>{hasSearchOrFilter ? 'Nenhuma Persona corresponde à busca' : 'Comece conhecendo seu público-alvo'}</strong><p>{hasSearchOrFilter ? 'Experimente buscar outro termo ou remover os filtros aplicados.' : 'Crie uma Persona para documentar objetivos, necessidades e evidências ligadas ao serviço.'}</p>
       {hasSearchOrFilter ? <button type="button" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar busca e filtros</button> : <button type="button" onClick={() => setCreateOpen(true)}><Plus size={14}/> Criar persona</button>}
     </div>}
-
-    {createOpen && <div className="bo-h71-modal-backdrop bo-h713-builder-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setCreateOpen(false); }}><form className="bo-h713-persona-builder" onSubmit={(event) => { event.preventDefault(); createPersona(); }}>
-      <header><div><small>PERSONAS · BLUE OCEAN</small><h2>Personalizar Persona</h2><p>Escolha a profundidade, o layout e os blocos que fazem sentido para este serviço.</p></div><button type="button" onClick={() => setCreateOpen(false)}><X size={18}/></button></header>
-      <div className="bo-h713-builder-body">
-        <section className="bo-h713-builder-top">
-          <label><span>Nome</span><input autoFocus value={createTitle} onChange={(event) => setCreateTitle(event.target.value)} placeholder="Ex.: Profissional que mora sozinho"/></label>
-          <div className="bo-h713-depth"><span>Profundidade</span><div><button type="button" className={createMode === 'simple' ? 'is-active' : ''} onClick={() => chooseCreateMode('simple')}><strong>Simples</strong><small>Essencial para começar</small></button><button type="button" className={createMode === 'professional' ? 'is-active' : ''} onClick={() => chooseCreateMode('professional')}><strong>Avançada</strong><small>Pesquisa e decisões profundas</small></button></div></div>
-        </section>
-        <section className="bo-h713-layouts"><div className="bo-h713-section-title"><span>Layout</span><small>{layoutLabel[createLayout]}</small></div><div className="bo-h713-layout-options">{(['profile-left','balanced','story-first'] as PersonaLayout[]).map((layout) => <button key={layout} type="button" className={createLayout === layout ? 'is-active' : ''} onClick={() => setCreateLayout(layout)} aria-label={layoutLabel[layout]}><i className={`preview preview--${layout}`}><b/><b/><b/></i><span>{layoutLabel[layout]}</span></button>)}</div></section>
-        <section className="bo-h713-blocks"><div className="bo-h713-section-title"><span>Blocos da Persona</span><small>{createSections.length} selecionados</small></div><div className="bo-h713-block-grid">{personaSectionOptions.filter((option) => createMode === 'professional' || !option.advanced).map((option) => { const checked = createSections.includes(option.id); return <button key={option.id} type="button" className={checked ? 'is-selected' : ''} onClick={() => toggleCreateSection(option.id)}><b className="bo-h713-check">{checked ? <Check size={13}/> : null}</b><span><strong>{option.label}</strong>{option.recommended && <em>Recomendado</em>}<small>{option.description}</small></span></button>; })}</div></section>
-        <label className="bo-h713-summary"><span>Resumo <small>opcional</small></span><textarea rows={3} value={createDescription} onChange={(event) => setCreateDescription(event.target.value)} placeholder="Quem é essa pessoa e por que ela importa para o serviço?"/></label>
-      </div>
-      <footer><div><strong>{createMode === 'professional' ? 'Persona Avançada' : 'Persona Simples'}</strong><span>{layoutLabel[createLayout]} · {createSections.length} blocos</span></div><button type="button" onClick={() => setCreateOpen(false)}>Cancelar</button><button type="submit" className="primary" disabled={!createTitle.trim()}>Criar Persona</button></footer>
-    </form></div>}
 
     {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER PERSONA</small><h2>Remover “{contextEntityTitle(graph.entities?.persona?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações existentes serão desvinculadas do Service Graph.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removePersona(deleteId)}>Remover Persona</button></footer></div></div>}
   </section>;
