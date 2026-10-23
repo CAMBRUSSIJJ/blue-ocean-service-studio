@@ -142,3 +142,41 @@ com índices originais, ações nativas completas no grafo, histórico, recarga,
 HTML, teclado, toque e axe. Capturas e relatórios ficam em
 `artifacts/journey-persona-content/`. O teste com participantes não foi realizado.
 B12 (alcance em várias etapas, seleção múltipla e hierarquia) permanece no backlog.
+
+## Incremento B12 — abrangência, seleção e fases
+
+Contrato independente registrado antes do código. Este incremento usa as fontes
+públicas já documentadas; não acrescenta observação autenticada do concorrente.
+
+- Um cartão pode abranger etapas explicitamente escolhidas. Existe um único
+  conteúdo editável, na etapa de origem, e a abrangência usa identidades estáveis.
+  Segmentos contínuos ocupam a largura das etapas; após reordenação, segmentos
+  separados mostram continuações que levam à mesma origem. Etapas intermediárias
+  não escolhidas não ganham o cartão automaticamente.
+- A origem deve estar na abrangência. Reduzir a uma etapa torna o cartão comum
+  de uma célula. Mover a origem mantém os membros anteriores e inclui o destino;
+  duplicar o cartão conserva a abrangência e os vínculos, com nova identidade.
+- Excluir uma etapa remove sua participação. Se era a origem de um cartão amplo,
+  o cartão passa para a primeira etapa participante restante. Sem participantes,
+  ele é removido. Duplicar uma etapa copia seus cartões como cartões locais e não
+  amplia os cartões anteriores. Desfazer restaura estrutura e conteúdo juntos.
+- A seleção permite até 100 cartões exibidos, com duplicação, movimentação para
+  outra etapa na mesma faixa e exclusão em uma transação. Trocar o recorte elimina
+  da seleção cartões ocultos. Falhas de capacidade ou imagem rejeitam o lote sem
+  alterações parciais. Selecionar não altera o projeto.
+- Fases organizam uma hierarquia de um nível: fase → etapas. São até 20 fases,
+  com nomes únicos de até 80 caracteres e participação exclusiva de cada etapa.
+  Fases não alteram a ordem temporal e continuam vinculadas às etapas após
+  reordenação; fases vazias são removidas ao excluir suas etapas.
+- Abrangência e fases sobrevivem ao histórico, à recarga e ao backup. Filtros por
+  Persona aplicam-se ao cartão inteiro. Apresentação/HTML identificam a fase e a
+  abrangência; o conteúdo completo é apresentado uma vez, com referências de
+  continuação nas demais etapas, sem multiplicar medições ou entidades.
+- Alcance não cria atividades canônicas adicionais nas etapas participantes.
+  Hierarquias com vários níveis e sub-jornadas não fazem parte deste contrato.
+
+Aceitação: criar três etapas e cartões comuns/específicos, ampliar e editar uma
+escala e um vínculo, fragmentar o alcance por reordenação, remover a origem e
+recuperar pelo histórico, duplicar etapas/cartões, rejeitar lote cheio de forma
+atômica, filtrar a seleção, criar/editar/remover fases, recarregar e exportar.
+Repetir ações por teclado/toque e auditar axe em 1440, 834 e 390 px.
