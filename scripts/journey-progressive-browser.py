@@ -119,8 +119,27 @@ try:
         preset(f, 'Matriz completa')
         check('Editing visible rows preserves hidden custom and operational content', f.get_by_text('Conferir o cadastro', exact=True).is_visible() and f.get_by_text('Receber uma resposta clara', exact=True).is_visible())
         preset(f, 'Jornada essencial')
+        check('Perspectives expose clear active states and tools have named groups',
+              f.locator('.map-perspectives [aria-pressed="true"]').count()==1 and f.locator('.map-toolset--views').count()==1)
         f.get_by_role('button', name='Personalizar visualização', exact=True).click()
         dialog = f.get_by_role('dialog', name='Personalizar visualização')
+        search = dialog.get_by_role('searchbox', name='Buscar faixa')
+        expect(search).to_be_focused()
+        search.fill('uma faixa inexistente')
+        expect(dialog.locator('[data-customize-empty]')).to_be_visible()
+        check('Lane search hides nonmatching settings but leaves canonical rows unchanged',
+              dialog.locator('[data-customize-item]:visible').count()==0)
+        search.fill('Evidência')
+        check('Lane search narrows controls to matching rows',
+              dialog.locator('[data-customize-item]:visible').count()==1)
+        search.fill('')
+        dialog.get_by_role('button', name='Mostrar todas as faixas', exact=True).click()
+        check('Show all makes the optional lane visible in customization',
+              dialog.get_by_role('checkbox', name='Evidência física', exact=True).is_checked())
+        dialog.get_by_role('button', name='Restaurar padrão', exact=True).click()
+        check('Restore default keeps data while returning the essential lane configuration',
+              not dialog.get_by_role('checkbox', name='Evidência física', exact=True).is_checked()
+              and graph(page)['journeys'][jid]['matrixView']['preset']=='essential')
         dialog.get_by_role('checkbox', name='Evidência física', exact=True).check()
         dialog.get_by_role('button', name='Mover Evidência física para cima', exact=True).click()
         dialog.get_by_role('button', name='Concluir', exact=True).click()
