@@ -87,6 +87,10 @@ try:
     mid = graph(page)['stages'][ids[1]]
     check('Keyboard adjustments persist and never turn missing information into neutral', mid['emotionScore']==1 and mid['emotionStatus']=='hypothesis' and mid['emotionRecorded'] is True)
     check('Legend refreshes after keyboard editing an unrecorded point', 'Não informado 0' in f.locator('.emotion-legend').inner_text() and f.locator('.dt.unknown').count()==0)
+    f.locator('#curve .dt[data-si="1"]').press('End'); saved(f)
+    check('End key sets the maximum positive emotion', graph(page)['stages'][ids[1]]['emotionScore']==2)
+    f.locator('#curve .dt[data-si="1"]').press('Home'); saved(f)
+    check('Home key sets the minimum negative emotion', graph(page)['stages'][ids[1]]['emotionScore']==-2)
 
     preset(f,'Aquisição e relacionamento')
     for key,value in [('go|0','Gerar interesse qualificado'),('ch|0','Busca e indicação'),('pr|0','Atendimento com previsão clara'),('br|0','Receio de esperar sem retorno'),('rr|0','Cumprir o prazo e convidar ao retorno'),('ki|0','Solicitações que avançam para contratação')]: note(f,key,value)
