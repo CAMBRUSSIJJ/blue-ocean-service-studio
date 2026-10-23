@@ -1,5 +1,13 @@
 # Histórico de mudanças
 
+## 2026-10-22 · Abrangência, seleção em lote e fases
+
+- Cartões podem abranger etapas escolhidas com um único conteúdo editável e segmentos de continuação após reordenação.
+- Excluir uma origem transfere o cartão a uma participante restante; duplicar uma etapa cria cópias locais e preserva o alcance original.
+- Seleção de até 100 cartões permite duplicar, mover e excluir em uma transação, com validação atômica de capacidade e imagens.
+- Fases organizam uma hierarquia de um nível com etapas exclusivas, nomes únicos, edição e exclusão reversível.
+- Filtros, histórico, serialização, apresentação e HTML preservam a estrutura e as fontes canônicas sem multiplicar medições.
+
 ## 2026-10-22 · Vínculos e filtros de cartões por Persona
 
 - Cada cartão pode ser vinculado explicitamente a uma ou mais Personas; cartões sem vínculos continuam comuns.

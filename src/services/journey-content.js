@@ -4,6 +4,13 @@ export const MATRIX_CONTENT_TYPES = ['text', 'card', 'emoji', 'image', 'link', '
 export const MATRIX_IMAGE_LIMIT = 500 * 1024;
 export const MATRIX_IMAGE_BUDGET = 2 * 1024 * 1024;
 const clipped = (v, n) => typeof v === 'string' ? v.trim().slice(0, n) : '';
+export function normalizeMatrixSpanIds(input) {
+  if (input == null) return [];
+  if (!Array.isArray(input) || input.some(id => typeof id !== 'string' || !id || id.length > 160)) throw Error('Revise as etapas da abrangência.');
+  const ids = [...new Set(input)];
+  if (ids.length > 90) throw Error('A abrangência pode conter até 90 etapas.');
+  return ids;
+}
 export function normalizeMatrixPersonaIds(input) {
   if (input == null) return [];
   if (!Array.isArray(input) || input.some(id => typeof id !== 'string' || !id.trim() || id.length > 160)) throw Error('Revise os vínculos de Persona do cartão.');
@@ -98,6 +105,8 @@ export function normalizeMatrixBlock(note) {
   if (!normalized.id) throw Error('O elemento precisa de uma identificação.');
   const personaIds = normalizeMatrixPersonaIds(note?.personaIds);
   if (personaIds.length) normalized.personaIds = personaIds;
+  const spanStageIds = normalizeMatrixSpanIds(note?.spanStageIds);
+  if (spanStageIds.length > 1) normalized.spanStageIds = spanStageIds;
   const icon = clipped(note?.icon, 24);
   if (icon) normalized.icon = icon;
   if (type === 'link' || type === 'image') {
@@ -136,6 +145,8 @@ export function validateMatrixDocument(doc) {
 }
 export function matrixContentFromDocument(doc, stageIds, sync = {}) {
   const rows = {}, cells = {};
+  const aliases = new Map(stageIds.map(id => [id,id]));
+  (doc.steps || []).forEach((step,index) => {for (const key of [step.hostStageId,step.hostLocalId]) if (key) aliases.set(key,stageIds[index]);});
   for (const [id, value] of Object.entries(doc.rowSettings || {})) {
     if (/^[a-z][a-z0-9]{0,24}$/.test(id)) rows[id] = normalizeMatrixRow(value);
   }
@@ -144,7 +155,11 @@ export function matrixContentFromDocument(doc, stageIds, sync = {}) {
     for (const [key, notes] of Object.entries(doc.c || {})) {
       const [row, column] = key.split('|');
       if (Number(column) !== index || !/^[a-z][a-z0-9]{0,24}$/.test(row)) continue;
-      cells[id][row] = notes.map(note => normalizeMatrixBlock({ ...note, id: note.hostItemId || sync.notes?.[note.i] || note.i }));
+      cells[id][row] = notes.map(note => {
+        const block = normalizeMatrixBlock({ ...note, id: note.hostItemId || sync.notes?.[note.i] || note.i });
+        if (block.spanStageIds) block.spanStageIds = block.spanStageIds.map(key => aliases.get(key) || key);
+        return block;
+      });
     }
   });
   return { version: 1, rows, cells };

@@ -180,3 +180,18 @@ escala e um vínculo, fragmentar o alcance por reordenação, remover a origem e
 recuperar pelo histórico, duplicar etapas/cartões, rejeitar lote cheio de forma
 atômica, filtrar a seleção, criar/editar/remover fases, recarregar e exportar.
 Repetir ações por teclado/toque e auditar axe em 1440, 834 e 390 px.
+
+## Entrega de B12
+
+O contrato foi registrado em `674b134`, antes do código. A entrega cobre
+abrangência explícita por identidade, projeções contínuas/fragmentadas, seleção
+em lote e fases com um nível. Cartões locais e abrangentes continuam no mesmo
+documento; a apresentação em trilhas não cria novas entidades. Lotes são
+validados antes da aplicação. História, serialização e transferências de origem
+preservam os dados do cartão e seus vínculos.
+
+As suítes `journey:structure:test` e `journey:structure:browser` verificam o
+contrato, inclusive destinos cheios de cartões ocultos e acesso às origens.
+Capturas e relatórios axe ficam em `artifacts/journey-structure/`. Não houve
+piloto com participantes ou comparação interativa com o produto observado.
+Hierarquia recursiva, sub-jornadas e colaboração remota exigem contratos futuros.

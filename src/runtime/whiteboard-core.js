@@ -1,3 +1,4 @@
+import { validateMatrixStructure, matrixStructureFromDocument } from '../services/journey-structure.js';
 import { BLUEPRINT_FRAME_LAYERS, BLUEPRINT_BOUNDARIES, BLUEPRINT_MARKETING_DIMENSIONS, BLUEPRINT_QUALITY_DIMENSIONS, buildBlueprintDeliveryReport, blueprintServicePromise, validateActivityNumbers, isCustomerServiceEvidence } from './blueprint-methodology.js';
 import { runtime } from './runtime-registry.js';
 import { renderBlueprintReference } from './blueprint-reference-view.js';
@@ -1064,7 +1065,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
     const ref={id:'host',title:openedFromUnifiedJourney?(j?.name||'Jornada'):(b.name||'Blueprint de serviço'),persona:saved.persona||'',
       editorKind:openedFromUnifiedJourney?'journey':'blueprint',view:clone(j?.matrixView||b.matrixView||null),
-      savedViews:clone(j?.savedMatrixViews||[]),personaId:j?.personaId||'',painContexts:j?journeyPainContexts(graph,j.id):[],serviceElements:matrixServiceReferences(graph),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
+      structure:clone(j?.matrixStructure||{version:1,phases:[]}),savedViews:clone(j?.savedMatrixViews||[]),personaId:j?.personaId||'',painContexts:j?journeyPainContexts(graph,j.id):[],serviceElements:matrixServiceReferences(graph),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
       availableMetrics:Object.values(graph.entities?.metric||{}).filter(m=>!m.serviceId||m.serviceId===graph.service.id).map(m=>({id:m.id,name:m.title||m.name||'Indicador',unit:m.unit||'',current:typeof m.value==='number'?m.value:undefined,target:typeof m.target==='number'?m.target:undefined})),
       guide:0,start:0,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
@@ -1120,6 +1121,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     if(doc.steps.length>90||Object.values(doc.c).some(x=>!Array.isArray(x)||x.length>100))return;
     if(doc.steps.some(s=>s.emotionRecorded&&s.emotionStatus==='validated'&&!String(s.emotionSource||'').trim()))throw Error('Informe a fonte da evidência para validar uma emoção.');
     validateMatrixDocument(doc);
+    validateMatrixStructure(doc);
     const b=board();if(!b)return;
     let j=activeJourney();
     if(!j){
@@ -1253,6 +1255,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     b.blueprintHosted={persona:String(doc.persona||'').slice(0,400),customerCells,lanes:Array.isArray(doc.lanes)?clone(doc.lanes):[],
       customCells};
     j.matrixContent=matrixContentFromDocument(doc,stageIds,sync);
+    j.matrixStructure=matrixStructureFromDocument(doc,stageIds);
     invalidateViewLayout('journey');invalidateViewLayout('blueprint');
     return save(false,{label:openedFromUnifiedJourney?'Editar matriz da Jornada':'Editar matriz do Blueprint'});
   }

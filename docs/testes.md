@@ -36,6 +36,7 @@ npm run journey:picker:test
 npm run journey:context:test
 npm run journey:observation:test
 npm run journey:persona-content:test
+npm run journey:structure:test
 ```
 
 Esses testes exercitam operações como seleção, criação e movimentação de cartões,
@@ -73,6 +74,7 @@ npm run journey:content:browser
 npm run journey:picker:browser
 npm run journey:observation:browser
 npm run journey:persona-content:browser
+npm run journey:structure:browser
 ```
 
 Esses runners podem servir o `dist/` em um servidor temporário. Para os que
@@ -190,3 +192,15 @@ recarga, visualizações, HTML, recuperação de vínculos indisponíveis, tecla
 toque. Gera capturas e axe em `artifacts/journey-persona-content/` para 1440,
 834 e 390 px. O filtro cobre elementos compostos; contexto e dores nativas
 permanecem comuns, conforme a especificação B11.
+
+## Abrangência, seleção e fases
+
+`journey:structure:test` cobre alcance por identidade, segmentação, resgate da
+origem, cópia local de etapas, duplicação profunda, lotes atômicos, capacidade,
+imagens, nomes e participação exclusiva em fases e serialização canônica.
+`journey:structure:browser` exercita cartões largos e fragmentados, escala,
+fontes canônicas, Persona, seleção em várias faixas, movimentação/drag, exclusão
+e histórico em lote, fases, reordenação, recarga e exportação. Inclui rejeição
+de destino cheio com cartões ocultos, documento avulso legado e seus limites de
+desfazer, teclado, toque e axe em 1440, 834 e 390 px.
+Capturas e relatórios são gerados em `artifacts/journey-structure/`.

@@ -110,6 +110,7 @@ jobs:
       - run: npm run journey:context:browser
       - run: npm run journey:observation:browser
       - run: npm run journey:persona-content:browser
+      - run: npm run journey:structure:browser
       - run: npm run entry:browser
       - run: npm run product:browser
       - run: npm run maps:browser
@@ -138,3 +139,4 @@ jobs:
             artifacts/journey-context
             artifacts/journey-observation
             artifacts/journey-persona-content
+            artifacts/journey-structure

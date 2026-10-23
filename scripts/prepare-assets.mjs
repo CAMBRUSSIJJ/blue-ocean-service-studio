@@ -12,6 +12,7 @@ copyFileSync('src/runtime/journey-matrix.html', 'public/blueprint-reference-orig
 copyFileSync('src/runtime/journey-matrix.css', 'public/journey-matrix.css');
 copyFileSync('src/runtime/journey-growth-ui.js', 'public/v1102-journey-growth-ui.js');
 copyFileSync('src/runtime/journey-content-ui.js', 'public/v1102-journey-content-ui.js');
+copyFileSync('src/runtime/journey-structure-ui.js', 'public/v1102-journey-structure-ui.js');
 copyFileSync('src/runtime/journey-persona-content-ui.js', 'public/v1102-journey-persona-content-ui.js');
 copyFileSync('src/runtime/journey-views-ui.js', 'public/v1102-journey-views-ui.js');
 copyFileSync('src/services/journey-views.js', 'public/v1102-journey-views.js');
@@ -20,7 +21,11 @@ copyFileSync('src/services/journey-context.js', 'public/v1102-journey-context.js
 copyFileSync('src/runtime/journey-picker-ui.js', 'public/v1102-journey-picker-ui.js');
 copyFileSync('src/services/journey-content.js', 'public/v1102-journey-content.js');
 const contentShared = readFileSync('src/services/journey-content.js', 'utf8').replace(/^export /gm, '');
-writeFileSync('public/v1102-journey-content-shared.js', '(()=>{'+contentShared+';window.BlueOceanJourneyContent={normalizeMatrixPersonaIds,matrixBlockVisible,assignMatrixBlockPersonas,insertMatrixBlock,duplicateMatrixBlock,MATRIX_REFERENCE_TYPES,MATRIX_CONTENT_TYPES,MATRIX_IMAGE_LIMIT,MATRIX_IMAGE_BUDGET,matrixSafeUrl,matrixEmbedUrl,normalizeMatrixScale,normalizeMatrixBlock,normalizeMatrixRow,validateMatrixDocument};})();');
+writeFileSync('public/v1102-journey-content-shared.js', '(()=>{'+contentShared+';window.BlueOceanJourneyContent={normalizeMatrixSpanIds,normalizeMatrixPersonaIds,matrixBlockVisible,assignMatrixBlockPersonas,insertMatrixBlock,duplicateMatrixBlock,MATRIX_REFERENCE_TYPES,MATRIX_CONTENT_TYPES,MATRIX_IMAGE_LIMIT,MATRIX_IMAGE_BUDGET,matrixSafeUrl,matrixEmbedUrl,normalizeMatrixScale,normalizeMatrixBlock,normalizeMatrixRow,validateMatrixDocument};})();');
+const structureSource = readFileSync('src/services/journey-structure.js', 'utf8');
+writeFileSync('public/v1102-journey-structure.js', structureSource.replaceAll('./journey-content.js','./v1102-journey-content.js'));
+const structureShared = structureSource.replace(/^import .*;$/gm,'').replace(/^export /gm,'');
+writeFileSync('public/v1102-journey-structure-shared.js', '(()=>{const {duplicateMatrixBlock,validateMatrixDocument,normalizeMatrixSpanIds}=window.BlueOceanJourneyContent;'+structureShared+';window.BlueOceanJourneyStructure={matrixStageKey,matrixStageIds,normalizeMatrixStructure,validateMatrixStructure,matrixStructureFromDocument,matrixSpanSegments,setMatrixSpan,manageMatrixPhase,operateMatrixSelection,operateMatrixStages};})();');
 for (const name of ['journey-growth', 'improvement-backlog', 'improvement-portfolio', 'service-outcomes', 'current-future-service']) {
   let generated = transpileModule(readFileSync(`src/services/${name}.ts`, 'utf8'), { compilerOptions: { module: ModuleKind.ESNext, target: ScriptTarget.ES2022 } }).outputText;
   for (const dependency of ['improvement-backlog', 'improvement-portfolio', 'service-outcomes', 'current-future-service']) generated = generated.replaceAll(`./${dependency}.ts`, `./v1102-${dependency}.js`);
@@ -110,6 +115,7 @@ for (const [source, target] of [
       '../services/journey-content.js':'./v1102-journey-content.js',
       '../services/journey-context.js':'./v1102-journey-context.js',
       '../services/journey-views.js':'./v1102-journey-views.js',
+      '../services/journey-structure.js':'./v1102-journey-structure.js',
       './practical-simulation-data.js':'./v1102-practical-simulation-data.js',
     };
     for (const [a,b] of Object.entries(rewrites)) text=text.split(a).join(b);

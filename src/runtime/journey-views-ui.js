@@ -38,8 +38,9 @@ function viewsBind(){
 function viewsSummaryBody(){
   const rows=orderedRows().filter(row=>!V.hiddenRows.includes(row.id));
   let html='<article class="executive-report"><header><small>BLUE OCEAN · VISUALIZAÇÃO ATUAL</small><h1>'+esc(S.title||'Jornada')+'</h1><p>Persona: '+esc(contextPersonaName())+'</p><p>'+esc(rows.map(row=>row.n).join(' · '))+'</p><p>Cartões: '+esc(personaFilterNames[V.personaFilter||'all'])+'</p></header><p>Recorte das faixas visíveis. Contexto da etapa e dores nativas são comuns; emoções seguem a Persona selecionada.</p>';
+  html+=structureReportOverview();
   html+=S.steps.map((step,index)=>'<section class="report-stage"><h2>'+(index+1)+'. '+esc(step.n)+'</h2>'+rows.map(row=>{
-    const notes=contentReportNotes(S.c[row.id+'|'+index]||[],true);let content=notes;
+    const notes=contentReportNotes(S.c[row.id+'|'+index]||[],true)+structureReportContinuations(index,row.id,true);let content=notes;
     if(row.id==='sd')content='<p>'+esc(step.d||'Não informado')+'</p>'+notes;
     if(row.id==='em')content='<p>'+esc(growthEmotionKnown(step)?EM[step.e+2]+' · '+(step.emotionStatus==='validated'?'Validado pela equipe':'Hipótese'):'Não informada')+'</p>'+(step.emotionSource?'<p>Fonte: '+esc(step.emotionSource)+'</p>':'')+(step.note?'<p>'+esc(step.note)+'</p>':'')+notes;
     if(row.id==='im')content=S.iss.filter(issue=>issue.s===index).map(issue=>'<p><b>'+(issue.t==='d'?'Dor':'Ideia')+':</b> '+esc(issue.x)+'</p>'+contextPainReport(issue)).join('')+notes;
