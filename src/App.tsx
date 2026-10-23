@@ -89,7 +89,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const [serviceName, setServiceName] = useState('');
   const [serviceDescription, setServiceDescription] = useState('');
   const [externalNav, setExternalNav] = useState<string | null>(null);
-  const [serviceWorkspaceTab, setServiceWorkspaceTab] = useState(() => { try { const stored = sessionStorage.getItem('bo-service-workspace-tab'); return stored === 'research' ? 'overview' : stored || 'overview'; } catch { return 'overview'; } });
+  const [serviceWorkspaceTab, setServiceWorkspaceTab] = useState(() => { try { const stored = sessionStorage.getItem('bo-service-workspace-tab'); return stored === 'research' ? 'overview' : stored === 'blueprint' ? 'journey' : stored || 'overview'; } catch { return 'overview'; } });
   const [libraryPage, setLibraryPage] = useState<WorkspaceLibraryPage>('personas');
   const [projectHomeSection, setProjectHomeSection] = useState<ProjectHomeSection>('home');
   const [projectShellOpen, setProjectShellOpen] = useState(false);
@@ -133,7 +133,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
         : activeTab === 'journey' && !externalNav
           ? 'Jornadas'
           : activeTab === 'canvas' && !externalNav
-          ? ({ journey: 'Jornadas', blueprint: 'Blueprints', whiteboard: 'Whiteboard', channels: 'Canais', overview: 'Design do serviço' } as Record<string, string>)[serviceWorkspaceTab] ?? 'Design do serviço'
+          ? ({ journey: 'Jornadas e Blueprints', blueprint: 'Jornadas e Blueprints', whiteboard: 'Whiteboard', channels: 'Canais', overview: 'Design do serviço' } as Record<string, string>)[serviceWorkspaceTab] ?? 'Design do serviço'
           : 'Plano de Ação'
   );
 
@@ -363,7 +363,8 @@ export default function App({ authUser, onSignOut }: AppProps) {
 
   const requestServiceCreation = () => window.dispatchEvent(new CustomEvent('bo-create-service'));
 
-  const openServiceWorkspaceTab = (tab: string) => {
+  const openServiceWorkspaceTab = (requestedTab: string) => {
+    const tab = requestedTab === 'blueprint' ? 'journey' : requestedTab;
     if (tab === 'research') { openPrimaryLibraryPage('personas'); return; }
     setProjectShellOpen(true);
     setServiceWorkspaceTab(tab);
@@ -390,7 +391,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
   }, [isProjectHome, hasService]);
 
   useEffect(() => {
-    const changed = (event: Event) => { const target = String((event as CustomEvent<string>).detail || 'overview'); setServiceWorkspaceTab(target === 'research' ? 'overview' : target); };
+    const changed = (event: Event) => { const target = String((event as CustomEvent<string>).detail || 'overview'); setServiceWorkspaceTab(target === 'research' ? 'overview' : target === 'blueprint' ? 'journey' : target); };
     window.addEventListener('bo-service-workspace-tab-changed', changed);
     return () => window.removeEventListener('bo-service-workspace-tab-changed', changed);
   }, []);
@@ -464,8 +465,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
                 <button type="button" onClick={() => openPrimaryLibraryPage('personas')}><BlueOceanObjectIcon kind="persona" size={16}/><span>Público-alvo</span></button>
               </section>
               <section><strong>DESENHAR</strong>
-                <button type="button" className={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' ? 'is-active' : ''} onClick={() => openServiceWorkspaceTab('journey')}><BlueOceanObjectIcon kind="journey" size={16}/><span>Jornada</span></button>
-                <button type="button" className={activeTab === 'canvas' && serviceWorkspaceTab === 'blueprint' ? 'is-active' : ''} onClick={() => openServiceWorkspaceTab('blueprint')}><BlueOceanObjectIcon kind="blueprint" size={16}/><span>Como o serviço funciona</span></button>
+                <button type="button" className={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' ? 'is-active' : ''} onClick={() => openServiceWorkspaceTab('journey')}><BlueOceanObjectIcon kind="journey" size={16}/><span>Jornadas e Blueprints</span></button>
                 <button type="button" data-blue-ocean-whiteboard-nav="foundation" aria-label="Abrir Whiteboard pelo menu de desenho" className={activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' ? 'is-active' : ''} onClick={() => openServiceWorkspaceTab('whiteboard')}><BlueOceanObjectIcon kind="whiteboard" size={16}/><span>Whiteboard</span></button>
               </section>
               <section><strong>TESTAR</strong>
@@ -483,8 +483,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
               <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.design} onClick={() => toggleSidebarSection('design')}><span>Desenho do serviço</span><span aria-hidden="true">{collapsedSidebarSections.design ? '+' : '−'}</span></button>
               <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.design}>
               <button type="button" data-service-projects-nav="1" data-unified-service-workspace-nav="1" title="Serviço" aria-label="Serviço" aria-current={isGlobalHome && projectHomeSection === 'projects' ? 'page' : undefined} className={`bo1205h3-nav-child ${isGlobalHome && projectHomeSection === 'projects' ? 'is-active' : ''}`} onClick={() => openGlobalHome('projects')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="service" size={16}/></span><span className="hidden md:inline">Serviço</span></button>
-              <button type="button" data-service-journey-nav="1" title="Jornadas" aria-label="Abrir Jornadas" aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' && !externalNav ? 'page' : undefined} className={`bo1205h3-nav-child ${activeTab === 'canvas' && serviceWorkspaceTab === 'journey' && !externalNav ? 'is-active' : ''}`} onClick={() => openServiceWorkspaceTab('journey')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="journey" size={16}/></span><span className="hidden md:inline">Jornadas</span></button>
-              <button type="button" data-service-blueprint-nav="1" title="Blueprints" aria-label="Abrir Blueprints" aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'blueprint' && !externalNav ? 'page' : undefined} className={`bo1205h3-nav-child ${activeTab === 'canvas' && serviceWorkspaceTab === 'blueprint' && !externalNav ? 'is-active' : ''}`} onClick={() => openServiceWorkspaceTab('blueprint')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="blueprint" size={16}/></span><span className="hidden md:inline">Blueprints</span></button>
+              <button type="button" data-service-journey-nav="1" data-service-blueprint-nav="1" title="Jornadas e Blueprints" aria-label="Abrir Jornadas e Blueprints" aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' && !externalNav ? 'page' : undefined} className={`bo1205h3-nav-child ${activeTab === 'canvas' && serviceWorkspaceTab === 'journey' && !externalNav ? 'is-active' : ''}`} onClick={() => openServiceWorkspaceTab('journey')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="journey" size={16}/></span><span className="hidden md:inline">Jornadas e Blueprints</span></button>
               <button type="button" data-blue-ocean-whiteboard-nav="standard" title="Whiteboard" aria-label="Abrir Whiteboard pelo menu principal" aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'page' : undefined} className={`bo1205h3-nav-child ${activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'is-active' : ''}`} onClick={() => openServiceWorkspaceTab('whiteboard')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="whiteboard" size={16}/></span><span className="hidden md:inline">Whiteboard</span></button>
               <span className="sr-only" data-unified-service-workspace-legacy="1"><span>Journey maps</span><span>Whiteboards</span><span>Blueprints</span></span>
               <button type="button" data-experience-nav="expanded" title="Hierarquias" aria-label="Hierarquias" aria-current={isPrimaryLibrary && libraryPage === 'hierarchies' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'hierarchies' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('hierarchies')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="hierarchy" size={16}/></span><span className="hidden md:inline">Hierarquias</span></button>
@@ -616,7 +615,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
       <nav className="bo1175-mobile-nav" aria-label="Navegação rápida">
         <button type="button" onClick={() => openGlobalHome('home')} aria-current={isGlobalHome && projectHomeSection === 'home' ? 'page' : undefined}><BlueOceanUtilityIcon kind="dashboard" size={18}/><span>Home</span></button>
         <button type="button" onClick={() => openGlobalHome('projects')} aria-current={isGlobalHome && projectHomeSection === 'projects' ? 'page' : undefined}><BlueOceanObjectIcon kind="service" size={18}/><span>Serviço</span></button>
-        {hasService && <button type="button" onClick={openCurrentProjectWorkspace} aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' ? 'page' : undefined}><BlueOceanUtilityIcon kind="portfolio" size={18}/><span>Jornadas</span></button>}
+        {hasService && <button type="button" onClick={openCurrentProjectWorkspace} aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' ? 'page' : undefined}><BlueOceanUtilityIcon kind="portfolio" size={18}/><span>Mapas</span></button>}
         {hasService && <button type="button" aria-label="Abrir Whiteboard pelo atalho móvel" onClick={() => openServiceWorkspaceTab('whiteboard')} aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'page' : undefined}><BlueOceanObjectIcon kind="whiteboard" size={18}/><span>Whiteboard</span></button>}
         {hasService && <button type="button" onClick={openCurrentProjectWorkspace} aria-current={activeTab === 'canvas' && !externalNav ? 'page' : undefined}><BlueOceanObjectIcon kind="service" size={18}/><span>Serviço</span></button>}
         {hasService && <button type="button" onClick={() => selectCore('action')} aria-current={activeTab === 'action' && !externalNav ? 'page' : undefined}><KanbanSquare size={18} /><span>Ações</span></button>}

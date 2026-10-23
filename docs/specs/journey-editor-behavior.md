@@ -50,8 +50,9 @@ o vínculo à mesma fonte, mas duplica profundamente os dados locais do cartão.
   capturada, permanecem ocultas nesse recorte até edição explícita.
 - Uma Persona indisponível gera erro visível ao aplicar, sem troca silenciosa
   para outra pessoa e sem alteração parcial das preferências.
-- O contexto de Persona desta versão muda a leitura emocional. Os demais
-  conteúdos continuam comuns; não há alegação de filtro completo por Persona.
+- Na implementação inicial, a Persona mudava somente a leitura emocional.
+  A evolução de 23/10/2026 acrescenta classificação e filtros próprios dos
+  cartões, descritos no [guia de cartões](../journey-card-tools.md).
 - Aplicar uma visualização é uma ação de preferência; salvar, atualizar,
   renomear e excluir a configuração são transações do projeto.
 
@@ -76,8 +77,10 @@ participantes são etapas separadas, ainda não realizadas neste registro.
 
 A especificação inicial e a observação foram registradas no commit `da7b8db`,
 anterior ao código deste incremento. Os estados da tabela inicial acima são
-preservados como ponto de partida. B03–B08 foram implementados; B11 e B12
-continuam no backlog. Não houve execução autenticada no Smaply.
+preservados como ponto de partida. B03–B08 foram implementados. Na evolução de
+23/10/2026, B11 e a seleção/edição múltipla de B12 foram implementados. Alcance
+por várias etapas e hierarquia continuam no backlog. Não houve execução
+autenticada no Smaply.
 
 | Contrato | Implementação | Verificação reproduzível |
 | --- | --- | --- |

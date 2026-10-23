@@ -43,9 +43,9 @@ check(css.includes('.bo-h724-sidebar.is-collapsed .bo-h701-nav-section__label'),
 check(css.includes('.bo-h724-sidebar.is-collapsed .rt182-host-footer'),'footer se adapta ao modo recolhido');
 check(css.includes('@media(max-width:767px){.bo-h724-sidebar-toggle{display:none}'),'collapse desktop não conflita com navegação móvel');
 
-check(view.includes("workspaceTab === 'blueprint' && <>{handoff.readyForJourney"),'ações globais de Blueprint ficam restritas ao tab Blueprint');
+check(view.includes("workspaceTab === 'journey' && !journeyCreateOpen && <>{handoff.readyForJourney"),'ações de Blueprint estão na biblioteca compartilhada e fora do fluxo de criação da Jornada');
 check(view.includes('bo-h722-library-toolbar') && view.includes('journeys.length > 0 && <div>') && view.includes('!journeys.length && <button') && view.includes('> Criar Jornada</button>') && !view.includes("workspaceTab === 'journey' && !journeyEditorOpen && <button"),'Jornada tem uma ação principal contextual, sem duplicar no header');
-check(view.includes('Blueprint operacional é opcional') && view.includes('data-journey-to-blueprint={journey.id}'),'Jornada é o mapa principal e Blueprint operacional permanece opcional');
+check(app.includes('data-service-journey-nav="1" data-service-blueprint-nav="1"') && view.includes("requestedTab === 'blueprint' ? 'journey' : requestedTab") && view.includes('data-journey-to-blueprint={journey.id}'),'Jornada e Blueprint compartilham a navegação preservando o vínculo canônico');
 check(view.includes('<JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/>'),'editor Journey canônico permanece incorporado');
 check(view.includes('<WhiteboardsView studio={studio}/>'),'Whiteboard permanece incorporado');
 check(view.includes('data-unified-legacy-targets'),'contratos legados continuam documentados');

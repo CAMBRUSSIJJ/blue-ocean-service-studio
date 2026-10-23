@@ -35,6 +35,7 @@ npm run journey:content:test
 npm run journey:picker:test
 npm run journey:context:test
 npm run journey:observation:test
+npm run journey:cards:test
 ```
 
 Esses testes exercitam operações como seleção, criação e movimentação de cartões,
@@ -71,6 +72,8 @@ npm run journey:growth:browser
 npm run journey:content:browser
 npm run journey:picker:browser
 npm run journey:observation:browser
+npm run journey:cards:browser
+npm run maps:matrix:browser
 ```
 
 Esses runners podem servir o `dist/` em um servidor temporário. Para os que

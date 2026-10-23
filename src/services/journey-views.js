@@ -1,3 +1,4 @@
+import { normalizeMatrixCardFilters } from './journey-content.js';
 const baseRows = ['sd','ev','ac','em','fl','bk','sy','im','go','ch','pr','br','rr','ki'];
 const rows = value => Array.isArray(value) ? [...new Set(value.filter(id => typeof id === 'string' && /^[a-z][a-z0-9]{0,24}$/.test(id)))].slice(0,150) : [];
 const name = value => {
@@ -6,10 +7,10 @@ const name = value => {
   return result;
 };
 export function normalizeSavedMatrixView(input = {}) {
-  return { version:1, preset:['essential','detailed','operational','acquisition','complete','custom'].includes(input.preset)?input.preset:'custom',
+  return { version:1, perspective:input.perspective==='blueprint'||!input.perspective&&input.preset==='operational'?'blueprint':'journey',preset:['essential','detailed','operational','acquisition','complete','custom'].includes(input.preset)?input.preset:'custom',
     hiddenRows:rows(input.hiddenRows),rowOrder:rows(input.rowOrder),insightsOpen:input.insightsOpen===true,
     insightsTab:['guidance','analysis','quality'].includes(input.insightsTab)?input.insightsTab:'guidance',
-    emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true };
+    emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true,cardFilters:normalizeMatrixCardFilters(input.cardFilters) };
 }
 /** Configuration only: never copies or rewrites the map's cards, stages or observations. */
 export function manageJourneySavedView(graph, journeyId, action, input = {}, now = new Date().toISOString()) {

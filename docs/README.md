@@ -18,7 +18,9 @@ o fluxo local. Os guias abaixo descrevem o funcionamento atual.
 ## Usar e evoluir os editores
 
 - [Entrada e início da Jornada](entry-and-journey-start.md).
+- [Matriz compartilhada de Jornada e Blueprint](shared-map-matrix.md).
 - [Da Jornada ao resultado e roteiro de piloto](journey-growth.md).
+- [Personas, tags, filtros e edição em lote nos cartões](journey-card-tools.md).
 - [Jornada configurável: recursos, auditoria e testes](journey-editor-2.md).
 - [Edição simplificada e sidebar recolhível](editor-simplicity.md).
 - [Whiteboard e Blueprint: melhorias de UX](whiteboard-blueprint-ux.md).

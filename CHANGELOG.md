@@ -1,5 +1,22 @@
 # Histórico de mudanças
 
+## 2026-10-23 · Matriz compartilhada de Jornada e Blueprint
+
+- Corrige menus cobertos por outras faixas, reforça o contraste das descrições e atualiza os testes para distinguir as ações das bibliotecas reunidas.
+- Reúne Jornadas e Blueprints em uma entrada do projeto, mantendo as bibliotecas e os vínculos existentes.
+- Adiciona alternância entre as perspectivas no mapa, com a mesma interface e preservação das faixas personalizadas.
+- Usa linhas suaves, divisórias verticais, etapas em seta e cartões com superfície consistente.
+- Mostra Adicionar cartão sobre uma linha tracejada, inclusive nos pontos de inserção intermediários; recolhe os filtros para liberar a matriz.
+- Preserva ferramentas completas e detalhes operacionais, com retorno à matriz e testes reais de navegação, dados e toque.
+
+## 2026-10-23 · Perspectivas e edição em lote dos cartões
+
+- Associa Personas e tags a cada cartão e adiciona cores de destaque, preservando os vínculos ao serviço.
+- Combina busca sem acentos, tipo, Persona e tag; cartões sem Persona podem ser incluídos no recorte.
+- Permite seleção explícita e classificação ou exclusão em lote, com cancelamento e desfazer/refazer.
+- Inclui filtros nas visualizações salvas, na apresentação do recorte e no HTML exportado.
+- Acrescenta testes de domínio, persistência e navegador; mantém etapas e contexto visíveis ao filtrar cartões.
+
 ## 2026-10-22 · Inserção precisa e visualizações da jornada
 
 - Inclui elementos antes de qualquer cartão com âncora estável e seleção rápida do tipo padrão com Enter.

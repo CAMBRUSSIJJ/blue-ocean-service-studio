@@ -42,7 +42,7 @@ check('runtime bloqueia criação legada de frame no Whiteboard',core.includes("
 check('runtime cria Blueprint estruturado',core.includes('function createServiceBlueprint')&&core.includes("viewKind:'blueprint'")&&core.includes("layoutMode:'service'"));
 check('runtime registra Service Blueprint API',core.includes("runtime.register('serviceBlueprintFrame'"));
 check('Blueprint library usa API estruturada',blueprints.includes("api<BlueprintApi>('serviceBlueprintFrame')"));
-check('Blueprint library cria Service Blueprint',blueprints.includes('Criar Service Blueprint'));
+check('Blueprint library cria Service Blueprint',blueprints.includes('Criar Blueprint'));
 check('Blueprint library lista viewKind blueprint',blueprints.includes("board.viewKind === 'blueprint'"));
 check('Blueprint mostra Service Frame como estrutura',blueprints.includes("row.layoutMode === 'service' ? 'Service Frame' : 'Blueprint'"));
 

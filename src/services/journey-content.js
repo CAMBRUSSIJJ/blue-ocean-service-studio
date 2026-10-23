@@ -17,6 +17,61 @@ export function duplicateMatrixBlock(note, id) {
   for (const field of ['id', 'hostItemId', 'hostAction']) delete copy[field];
   return copy;
 }
+export const MATRIX_CARD_TONES = ['neutral', 'blue', 'emerald', 'amber', 'rose', 'violet'];
+const metadataList = (value, limit, length, insensitive = false) => {
+  const result = [], seen = new Set();
+  for (const raw of Array.isArray(value) ? value : []) {
+    const item = clipped(raw, length).replace(/\s+/g, ' '), key = insensitive ? item.toLocaleLowerCase() : item;
+    if (!item || seen.has(key)) continue;
+    seen.add(key); result.push(item);
+  }
+  if (result.length > limit) throw Error(`Use até ${limit} ${insensitive ? 'tags' : 'Personas'} por cartão.`);
+  return result;
+};
+export function normalizeMatrixCardMetadata(input = {}) {
+  return { personaIds: metadataList(input.personaIds, 20, 160), tags: metadataList(input.tags, 20, 40, true),
+    tone: MATRIX_CARD_TONES.includes(input.tone) ? input.tone : 'neutral' };
+}
+export function normalizeMatrixCardFilters(input = {}) {
+  return { query: clipped(input?.query, 160), type: MATRIX_CONTENT_TYPES.includes(input?.type) ? input.type : '',
+    personaId: clipped(input?.personaId, 160), tag: clipped(input?.tag, 40), includeUnassigned: input?.includeUnassigned !== false };
+}
+export function matrixCardMatches(note, input = {}, extraText = '') {
+  const filter = normalizeMatrixCardFilters(input), metadata = normalizeMatrixCardMetadata(note);
+  if (filter.type && (note.type || 'card') !== filter.type) return false;
+  if (filter.personaId && !metadata.personaIds.includes(filter.personaId) && !(filter.includeUnassigned && !metadata.personaIds.length)) return false;
+  if (filter.tag && !metadata.tags.some(tag => tag.toLocaleLowerCase() === filter.tag.toLocaleLowerCase())) return false;
+  const fold = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
+  const searchable = fold([note.t ?? note.text ?? '', note.icon || '', ...metadata.tags, extraText].join(' '));
+  return !filter.query || fold(filter.query).split(/\s+/).every(word => searchable.includes(word));
+}
+/** Atomic edits use stable card IDs, never positions in a filtered rendering. */
+export function applyMatrixCardAction(cells, selectedIds, action, input = {}, availablePersonaIds) {
+  const selected = new Set(selectedIds), found = new Set(), next = {};
+  if (!selected.size) throw Error('Selecione pelo menos um cartão.');
+  if (!['metadata', 'tags-add', 'tags-remove', 'persona-add', 'persona-remove', 'tone', 'remove'].includes(action)) throw Error('Alteração de cartão inválida.');
+  for (const [key, notes] of Object.entries(cells)) {
+    next[key] = notes.flatMap(note => {
+      if (!selected.has(note.i ?? note.id)) return [note];
+      found.add(note.i ?? note.id);
+      if (action === 'remove') return [];
+      const previous = normalizeMatrixCardMetadata(note);
+      let patch = {};
+      if (action === 'metadata') patch = input;
+      if (action === 'tags-add') patch.tags = [...previous.tags, ...(input.tags || [])];
+      if (action === 'tags-remove') patch.tags = previous.tags.filter(tag => !(input.tags || []).some(value => value.trim().toLocaleLowerCase() === tag.toLocaleLowerCase()));
+      if (action === 'persona-add') patch.personaIds = [...previous.personaIds, ...(input.personaIds || [])];
+      if (action === 'persona-remove') patch.personaIds = previous.personaIds.filter(id => !(input.personaIds || []).includes(id));
+      if (action === 'tone') patch.tone = input.tone;
+      const metadata = normalizeMatrixCardMetadata({ ...previous, ...patch });
+      if (availablePersonaIds && metadata.personaIds.some(id => !previous.personaIds.includes(id) && !availablePersonaIds.includes(id))) throw Error('Uma Persona selecionada não está disponível neste serviço.');
+      return [{ ...note, ...metadata }];
+    });
+  }
+  if (found.size !== selected.size) throw Error('A seleção mudou. Selecione os cartões novamente.');
+  validateMatrixDocument({ c: next });
+  return next;
+}
 /** Read-only summaries of existing service records for the insertion catalog. */
 export function matrixServiceReferences(graph) {
   const result = {};
@@ -96,6 +151,10 @@ export function normalizeMatrixBlock(note) {
     if (!normalized.referenceId) throw Error('Selecione um registro do serviço.');
   }
   if (note?.credit) normalized.credit = clipped(note.credit, 240);
+  const metadata = normalizeMatrixCardMetadata(note);
+  if (Array.isArray(note.personaIds)) normalized.personaIds = metadata.personaIds;
+  if (Array.isArray(note.tags)) normalized.tags = metadata.tags;
+  if (note.tone) normalized.tone = metadata.tone;
   return normalized;
 }
 export function normalizeMatrixRow(input = {}) {
