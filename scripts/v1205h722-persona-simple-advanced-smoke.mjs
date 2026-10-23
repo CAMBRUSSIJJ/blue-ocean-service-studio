@@ -32,7 +32,9 @@ ok(Boolean(report) && report.professionalChecks.length === 5, 'modo avançado ca
 const view = fs.readFileSync('src/views/PersonasView.tsx', 'utf8');
 const css = fs.readFileSync('src/runtime/personas-h713.css', 'utf8');
 const style = fs.readFileSync('src/style.css', 'utf8');
-for (const marker of ['Personalizar Persona', 'Persona Simples', 'Persona Avançada', 'Profundidade', 'Blocos da Persona', 'profile-left', 'story-first', 'createSections']) ok(view.includes(marker), `UI contém ${marker}`);
+for (const marker of ['Criar Persona e continuar', 'Profundidade da Persona', 'Personalizar interface', 'Blocos do perfil', 'profile-left', 'story-first', 'createSections']) ok(view.includes(marker), `UI contém ${marker}`);
+ok(view.includes('data-personas-h71="create"') && !view.includes('bo-h713-builder-backdrop'), 'criação usa página própria e não modal');
+ok(view.includes("layout:id") && view.includes("draft.sections.filter"), 'layout e blocos podem ser alterados no perfil');
 for (const marker of ['.bo-h713-persona-builder', '.bo-h713-block-grid', '.bo-h713-layout-options', '.bo-h713-layout-balanced', '.bo-h713-layout-story-first']) ok(css.includes(marker), `CSS contém ${marker}`);
 ok(style.includes("@import './runtime/personas-h713.css';"), 'CSS H7.2.2 carregado no pipeline');
 ok(!css.toLowerCase().includes('#1d9e75'), 'configurador não reintroduz verde estrutural legado');
