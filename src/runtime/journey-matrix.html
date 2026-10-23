@@ -142,7 +142,7 @@ function viewState(input){
 
 const stageWidth=i=>V.stageWidths?.[i]||290;
 function mapGridStyle(count,preview=null){
- const max=count<=2?440:320,widths=V.stageWidths||[],hasCustom=widths.some((n,i)=>i<count&&Number.isFinite(n)&&n!==290);
+ const max=count<=2?440:320,widths=V.stageWidths||[],hasCustom=widths.some((n,i)=>i<count&&Number.isFinite(n));
  const style='--stage-count:'+Math.max(1,count)+';--stage-max:'+max+'px;--map-zoom:'+(V.zoom||100)/100+';';
  if(!hasCustom&&!preview)return style;
  const px=Array.from({length:count},(_,i)=>preview?.i===i?preview.width:stageWidth(i));
