@@ -18,7 +18,7 @@ const checks = [
   ['P3 filtros possuem operadores E/OU e limite de regras', files.view.includes("ruleLogic==='all'") && files.view.includes("draftLogic==='any'") && files.view.includes('draftRules.length>=8')],
   ['P3 visões são armazenadas por identificador do serviço', files.view.includes("bo-persona-saved-views-v1:") && files.view.includes('localStorage.setItem(serviceViewKey')],
   ['P3 classificação, colunas e restauração de visão', files.view.includes('Classificar personas') && files.view.includes('visibleColumns.includes') && files.view.includes('applySavedView')],
-  ['P3 limpa filtros sem modificar entidades', files.view.includes('Limpar filtros') && files.view.includes("setFilterRules([])")],
+  ['P3 limpa filtros sem modificar entidades', files.view.includes('Limpar filtros') && files.view.includes("setDraftRules([])") && files.view.includes("setFilter(draftQuickFilter)")],
 
   ['detalhe possui cinco abas', ['Visão geral','Comportamento','Relações','Evidências','Uso'].every((label) => files.view.includes(label))],
   ['editor usa Persona Studio canônico', files.view.includes('updatePersonaProfile') && files.view.includes('buildPersonaStudioReport')],
