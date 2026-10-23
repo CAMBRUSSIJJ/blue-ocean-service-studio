@@ -29,7 +29,7 @@ function growthEmotionScale(W){
 function growthEmotionLegend(){
  const counts={unknown:0,hypothesis:0,validated:0};
  S.steps.forEach(stage=>counts[growthEmotionState(stage)]++);
- return '<div class="emotion-legend" aria-label="Legenda dos registros de emoção">'+
+ return '<div class="emotion-legend" role="group" aria-label="Legenda dos registros de emoção">'+
  '<span class="emotion-legend-item"><i class="emotion-legend-dot unknown" aria-hidden="true"></i>Não informado <b>'+counts.unknown+'</b></span>'+
  '<span class="emotion-legend-item"><i class="emotion-legend-dot hypothesis" aria-hidden="true"></i>Hipótese <b>'+counts.hypothesis+'</b></span>'+
  '<span class="emotion-legend-item"><i class="emotion-legend-dot validated" aria-hidden="true"></i>Validado <b>'+counts.validated+'</b></span>'+
