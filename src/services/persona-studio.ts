@@ -271,7 +271,14 @@ export function updatePersonaProfile(input: {
   const now = input.now ?? new Date().toISOString();
   const managedEntities = relationUniverse(input.graph);
   const managedIds = new Set(managedEntities.map(({ entity }) => entity.id));
-  const selected = new Set(input.connectedIds.filter((id) => managedIds.has(id)));
+  // A claim-bound source and an explicit profile-wide link are different intents.
+  // Track manual evidence separately so editing a claim does not silently retain
+  // its old source as an unrelated, general Persona connection.
+  const previouslyClaimed = new Set(normalizePersonaEvidenceClaims(existing.personaEvidenceClaims).flatMap(claim=>claim.evidenceIds));
+  const manualEvidenceIds = input.connectedIds.filter(id=>managedIds.has(id) && Boolean(input.graph.entities?.evidence?.[id]) &&
+    (!previouslyClaimed.has(id) || Array.isArray(existing.personaEvidenceManualIds) && existing.personaEvidenceManualIds.includes(id)));
+  const selected = new Set(input.connectedIds.filter(id=>managedIds.has(id) && !input.graph.entities?.evidence?.[id]));
+  for (const id of manualEvidenceIds) selected.add(id);
   const statements = new Set(personaEvidenceStatements(input.draft).map(item=>item.field+'\u0000'+item.statement));
   // Changed/deleted claims lose their old evidence anchor, rather than inheriting
   // a source that no longer supports the edited wording.
@@ -300,6 +307,7 @@ export function updatePersonaProfile(input: {
     personaPortraitUrl: safePersonaImage(input.draft.imageUrl),
     personaVisualScale: personaVisualScale(input.draft.scale),
     personaEvidenceClaims: evidenceClaims,
+    personaEvidenceManualIds: [...new Set(manualEvidenceIds)],
     personaSections: [...new Set(Array.isArray(input.draft.sections) ? input.draft.sections : (input.draft.mode === 'professional' ? ADVANCED_PERSONA_SECTIONS : SIMPLE_PERSONA_SECTIONS))],
     context: input.draft.context.trim(),
     primaryGoal: input.draft.primaryGoal.trim(),
