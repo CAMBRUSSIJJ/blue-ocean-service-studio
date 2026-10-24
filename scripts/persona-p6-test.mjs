@@ -45,11 +45,15 @@ check(matrixCardMatches(note,{personaId:'p1',includeUnassigned:false}) &&
       !matrixCardMatches(note,{personaId:'p-other',includeUnassigned:false}),
   'Focused card filter preserves Persona isolation');
 const edited={...personaProfileFromEntity(saved),behaviors:['Prefere chamadas']};
-next=updatePersonaProfile({graph:next,personaId:'p1',draft:edited,connectedIds:[],now:'2026-10-03T00:00:00Z'});
+next=updatePersonaProfile({graph:next,personaId:'p1',draft:edited,connectedIds:['e1'],now:'2026-10-03T00:00:00Z'});
 check(next.entities.persona.p1.personaEvidenceClaims.length===0,
   'Editing a claim removes the stale statement-specific evidence anchor');
 check(!next.entities.evidence.e1.relatedIds.includes('p1'),
   'Stale evidence is not retained as an automatically verified relation');
+const explicit = updatePersonaProfile({graph:original,personaId:'p1',draft,connectedIds:['e1'],now:'2026-10-02T00:00:00Z'});
+const later = updatePersonaProfile({graph:explicit,personaId:'p1',draft:edited,connectedIds:['e1'],now:'2026-10-03T00:00:00Z'});
+check(later.entities.persona.p1.relatedIds.includes('e1'),
+  'Explicit profile-wide evidence remains linked after a granular claim changes');
 check(normalizePersonaEvidenceClaims([
   {field:'behaviors',statement:'A',evidenceIds:['e1']},
   {field:'behaviors',statement:'A',evidenceIds:['e1','e2']},
