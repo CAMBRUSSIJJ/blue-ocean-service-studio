@@ -83,9 +83,14 @@ try:
    if kind=='evidence':
     previous=graph(page);d.get_by_role('button',name='Criar e vincular à etapa',exact=True).click();check('Evidence creation requires a real source before any transaction',graph(page)==previous);d.get_by_label('Fonte da evidência',exact=True).fill('Registro de observação, equipe de atendimento')
    d.get_by_role('button',name='Criar e vincular à etapa',exact=True).click();saved(f)
-   cells=graph(page)['journeys'][jid]['matrixContent']['cells'][s2]['ac'];record_id=cells[-1]['referenceId'];created[kind]=record_id
-   record=graph(page)['opportunities'][record_id] if kind=='opportunity' else graph(page)['entities'][kind][record_id]
-   check('Creation persists one canonical '+kind+' and its reference together',record['title']==title and record['createdBy']=='member-local-owner' and cells[-1]['type']==kind)
+   current=graph(page);cells=current['journeys'][jid]['matrixContent']['cells'][s2]['ac']
+   records=current['opportunities'] if kind=='opportunity' else current['entities'][kind]
+   linked=[(note,records.get(note.get('referenceId'))) for note in cells if note.get('type')==kind]
+   matches=[(note,record) for note,record in linked if record and record.get('title')==title]
+   if len(matches)!=1 or matches[0][1].get('createdBy')!='member-local-owner':
+    print('CREATE_DIAGNOSTIC',kind,[(note.get('referenceId'),record.get('title') if record else None,record.get('createdBy') if record else None) for note,record in linked])
+   check('Creation persists one canonical '+kind+' and its reference together',len(matches)==1 and matches[0][1].get('createdBy')=='member-local-owner')
+   record_id=matches[0][0]['referenceId'];created[kind]=record_id
    if kind=='pain':
     f.get_by_role('button',name='Desfazer',exact=True).click();expect(f.locator('.type-pain .service-reference b').filter(has_text=title)).to_have_count(0);check('One undo removes both creation and placement',record_id not in graph(page)['entities']['pain'])
     f.get_by_role('button',name='Refazer',exact=True).click();expect(f.locator('.type-pain .service-reference b').filter(has_text=title)).to_have_count(1);check('Redo restores both with the same identity',record_id in graph(page)['entities']['pain'])
