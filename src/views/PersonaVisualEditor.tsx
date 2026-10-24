@@ -32,6 +32,14 @@ const OPTIONS: Array<{ id: PersonaVisualCardId; title: string; caption: string; 
 ];
 const listFields = ['channels','behaviors','expectations','constraints','triggers','alternatives'] as const;
 type ListField = typeof listFields[number];
+function ListTextEditor({label,value,placeholder,onChange}: {label:string;value:string[];placeholder:string;onChange:(items:string[])=>void}) {
+  // Keep trailing newlines while typing; normalized domain arrays alone cannot represent them.
+  const [raw,setRaw]=useState(value.join('\n'));
+  return <label className="bo-p5-field"><span>Um item por linha</span>
+    <textarea aria-label={label} rows={3} value={raw} placeholder={placeholder}
+      onChange={e=>{setRaw(e.target.value);onChange(e.target.value.split(/\n|,/).map(v=>v.trim()).filter(Boolean))}}/>
+  </label>;
+}
 
 export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNavigate}: Props) {
   const [showLibrary,setShowLibrary]=useState(false);
@@ -59,15 +67,13 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
     setShowLibrary(false);
   };
   const setWidth=(id:PersonaVisualCardId,width:PersonaVisualWidth)=>updateCards(cards.map(c=>c.id===id?{...c,width}:c));
-  const listField=(id:ListField,placeholder:string)=><label className="bo-p5-field"><span>Um item por linha</span>
-    <textarea aria-label={OPTIONS.find(o=>o.id===id)?.title} rows={3} value={draft[id].join('\n')}
-      placeholder={placeholder} onChange={e=>update({[id]:e.target.value.split(/\n|,/).map(x=>x.trim()).filter(Boolean)} as Partial<PersonaProfileDraft>)}/>
-  </label>;
+  const listField=(id:ListField,placeholder:string)=><ListTextEditor label={OPTIONS.find(o=>o.id===id)?.title??id}
+    value={draft[id]} placeholder={placeholder} onChange={items=>update({[id]:items} as Partial<PersonaProfileDraft>)}/>;
   const textField=(key:'context'|'primaryGoal'|'situation'|'quote',label:string,placeholder:string)=><label className="bo-p5-field"><span>{label}</span>
     <textarea aria-label={label} rows={3} value={draft[key]} placeholder={placeholder} onChange={e=>update({[key]:e.target.value})}/></label>;
   const body=(id:PersonaVisualCardId)=>{
     if(id==='identity')return <div className="bo-p5-identity-body">
-      <div className="bo-p5-mode-switch" role="group" aria-label="Profundidade da Persona">
+      <div className="bo-p5-mode-switch bo-h724-depth-switch" role="group" aria-label="Profundidade da Persona">
         <button type="button" aria-pressed={draft.mode==='simple'} onClick={()=>onChangeMode('simple')}>Simples</button>
         <button type="button" aria-pressed={draft.mode==='professional'} onClick={()=>onChangeMode('professional')}>Avançada</button>
       </div>
@@ -133,7 +139,7 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
           onDragOver={e=>{if(dragging&&dragging!==card.id)e.preventDefault()}}
           onDrop={e=>{e.preventDefault();if(dragging)move(dragging,card.id);setDragging(null)}}>
           <header className="bo-p5-card-head">
-            <span className="bo-p5-drag-handle" draggable aria-label={`Arrastar bloco ${meta.title}`} title="Arraste para reorganizar"
+            <span className="bo-p5-drag-handle" draggable tabIndex={0} aria-label={`Arrastar bloco ${meta.title}`} title="Arraste para reorganizar"
               onDragStart={e=>{setDragging(card.id);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.id)}} onDragEnd={()=>setDragging(null)}>⠿</span>
             <div><small>{meta.caption}</small><h3>{meta.title}</h3></div>
             <div className="bo-p5-card-actions" role="group" aria-label={`Ações do bloco ${meta.title}`}>
