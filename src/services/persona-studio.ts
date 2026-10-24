@@ -14,7 +14,7 @@ export const PERSONA_VISUAL_CARD_IDS: PersonaVisualCardId[] = [
   'identity','portrait','bio','goal','needs','situation','quote','channels',
   'behaviors','expectations','constraints','triggers','alternatives','evidence','relations','scale',
 ];
-export const personaVisualTemplate = (mode: PersonaDepth, template: 'essential' | 'research'): PersonaVisualCard[] => {
+export const personaVisualTemplate = (template: 'essential' | 'research'): PersonaVisualCard[] => {
   const ids: PersonaVisualCardId[] = template === 'research'
     ? ['identity','portrait','goal','bio','behaviors','expectations','constraints','needs','quote','evidence']
     : ['identity','goal','needs','situation','channels','quote'];
@@ -22,7 +22,7 @@ export const personaVisualTemplate = (mode: PersonaDepth, template: 'essential' 
   return ids.map(id => ({ id, width: ['identity','quote'].includes(id) ? 'full' : 'half' }));
 };
 export function normalizePersonaVisualCards(value: unknown, mode: PersonaDepth): PersonaVisualCard[] {
-  if (!Array.isArray(value)) return personaVisualTemplate(mode, mode === 'professional' ? 'research' : 'essential');
+  if (!Array.isArray(value)) return personaVisualTemplate(mode === 'professional' ? 'research' : 'essential');
   const seen = new Set<PersonaVisualCardId>();
   const parsed = value.slice(0, PERSONA_VISUAL_CARD_IDS.length).flatMap((item): PersonaVisualCard[] => {
     if (!item || typeof item !== 'object') return [];
