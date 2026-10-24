@@ -535,3 +535,29 @@ body:has(.card-bulk-bar) .wrap{padding-bottom:110px}
  .card-tools-status{flex-wrap:wrap}.card-tools-status>span{flex-basis:100%;margin:0}
  .dv{font-size:12px}.row-preview{padding:12px;gap:10px}
 }
+
+/* Connected service operations: semantic roles and responsive editing. */
+.blueprint-lane-role,.blueprint-role{display:inline-block;font-size:11px;font-weight:600;border:1px solid var(--ln);border-radius:999px;padding:2px 7px;line-height:1.5;background:var(--cd);color:var(--ink);margin-top:5px}
+[data-role=fl]{background:color-mix(in srgb,#3b82f6 12%,var(--sf));border-color:color-mix(in srgb,#3b82f6 35%,var(--ln))}
+[data-role=bk]{background:color-mix(in srgb,#8b5cf6 12%,var(--sf));border-color:color-mix(in srgb,#8b5cf6 35%,var(--ln))}
+.matrix:has(.blueprint-lane-role) [data-row=fl] .content-block.tone-neutral{background:color-mix(in srgb,#3b82f6 5%,var(--sf));border-color:color-mix(in srgb,#3b82f6 32%,var(--ln))}
+.matrix:has(.blueprint-lane-role) [data-row=bk] .content-block.tone-neutral{background:color-mix(in srgb,#8b5cf6 5%,var(--sf));border-color:color-mix(in srgb,#8b5cf6 32%,var(--ln))}
+.blueprint-card-meta{display:flex;gap:5px 8px;align-items:center;flex-wrap:wrap;font-size:12px;line-height:1.5;padding:0 12px 10px;overflow-wrap:anywhere;color:var(--mut)}
+.blueprint-card-meta:empty{display:none}.blueprint-card-meta small{flex-basis:100%;font-size:12px}.blueprint-card-meta .blueprint-role{margin:0}
+.blueprint-connections{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:8px 24px;border-bottom:1px solid var(--ln);background:var(--sf);font-size:12px;color:var(--mut)}
+.blueprint-connections>.tb{min-height:36px;font-size:13px}.blueprint-connections label{display:flex;align-items:center;gap:8px;margin:0;font-size:12px}
+.blueprint-connections select{min-height:36px;padding:6px 9px;border:1px solid var(--ln);background:var(--sf);border-radius:6px;max-width:100%;font:inherit}
+.blueprint-legend{margin-left:auto;font-size:11px}.blueprint-legend>span{margin-left:12px}
+.blueprint-dialog{width:min(700px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto}
+.blueprint-dialog fieldset{border:1px solid var(--ln);border-radius:9px;padding:14px;margin:16px 0;min-width:0}
+.blueprint-dialog legend{font-weight:600;font-size:13px}.blueprint-dialog fieldset[hidden]{display:none}
+.blueprint-dialog .blueprint-resources label{display:flex;align-items:center;gap:8px;font-weight:400;min-height:40px}.blueprint-resources input[type=checkbox]{width:18px;min-height:18px;margin:0;flex:none}
+.blueprint-link-list{border-top:1px solid var(--ln);margin-top:20px;padding-top:12px}.blueprint-link-list article{border:1px solid var(--ln);border-radius:9px;padding:12px;margin-top:8px;overflow-wrap:anywhere}
+.blueprint-link-list p{font-size:13px;line-height:1.5}.blueprint-link-list small{display:block;color:var(--mut);margin-bottom:10px}.blueprint-link-list .tb{min-height:40px;margin:4px;font-size:12px}
+.blueprint-edge{stroke:var(--ac)}.blueprint-edge.edge-dependency{stroke:var(--mut);stroke-dasharray:5 4}.blueprint-edge.edge-uses{stroke:var(--act);stroke-dasharray:2 4}.blueprint-edge.edge-handoff{stroke:var(--act);stroke-width:2.5}
+.blueprint-handoff-dot{fill:#e5a000;stroke:var(--sf);stroke-width:2;pointer-events:none}
+.r[data-row=em]>.c{padding-inline:0;border-left:0}.emotion-stage{padding-inline:14px;border-left:1px solid var(--matrix-divider);min-width:0}
+.emotion-stage .content-add{max-width:100%}.blueprint-connection-status{overflow-wrap:anywhere;max-width:360px}
+.blueprint-dialog .form-error:empty{display:none}.blueprint-dialog footer{position:sticky;bottom:-24px;background:var(--sf);border-top:1px solid var(--ln);padding:12px 0 0}
+@media(max-width:900px){.blueprint-legend{display:none}.blueprint-connection-status{max-width:none;flex-basis:100%}}
+@media(max-width:640px){.blueprint-connections{padding:8px 12px;gap:8px}.blueprint-connections label{flex:1;flex-wrap:wrap}.blueprint-connections select{width:100%;min-height:44px}.blueprint-connections>.tb{min-height:44px}.blueprint-dialog{padding:16px}.blueprint-dialog .form-grid{grid-template-columns:1fr}.blueprint-dialog footer{bottom:-16px;flex-wrap:wrap}.blueprint-link-list .tb{min-height:44px}.emotion-stage{padding-inline:10px}}

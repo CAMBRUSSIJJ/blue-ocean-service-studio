@@ -37,6 +37,7 @@ function cardToolsSummary() {
   if(hidden)label+=' · '+hidden+' em faixas ocultas';
   if(collapsed)label+=' · '+collapsed+' em faixas recolhidas';
   if(drafts)label+=' · '+drafts+' rascunho'+(drafts===1?'':'s')+' sem texto';
+  const emotions=S.steps.filter(growthEmotionKnown).length;if(emotions)label+=' · '+emotions+' '+(emotions===1?'emoção registrada':'emoções registradas');
   return label;
 }
 function cardToolsUpdateSummary() {

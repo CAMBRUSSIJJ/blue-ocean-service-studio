@@ -45,5 +45,5 @@ function viewsSummaryBody(){
     if(row.id==='im')content=S.iss.filter(issue=>issue.s===index).map(issue=>'<p><b>'+(issue.t==='d'?'Dor':'Ideia')+':</b> '+esc(issue.x)+'</p>'+contextPainReport(issue)).join('')+notes;
     return '<div class="report-row" data-report-row="'+esc(row.id)+'"><h3>'+esc(row.n)+'</h3>'+(content||'<p>Sem conteúdo registrado.</p>')+'</div>';
   }).join('')+'</section>').join('');
-  return html+'</article>';
+  return html+blueprintReport(true)+'</article>';
 }

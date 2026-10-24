@@ -37,9 +37,16 @@ try:
         expect(exact.locator('.pnl')).to_be_visible()
         assert exact.locator('.hd').count()==1
         assert exact.locator('.lb').count()>=5
-        assert exact.locator('.cvb').count()==1
         assert exact.locator('.dv').count()>=3
         assert exact.locator('.ad').count()>=5
+        # Blueprint now opens with a compact operational preset. Emotions are an
+        # optional lane, preserved in the document and exposed by Personalizar.
+        assert exact.locator('.cvb').count()==0
+        exact.locator('button[data-act="customize"]').first.click()
+        expect(exact.locator('#customize')).to_be_visible()
+        exact.locator('[data-view-row="em"]').check()
+        exact.locator('#customize button[data-act="close-customize"]').click()
+        expect(exact.locator('.cvb')).to_have_count(1)
         # Direct editing updates canonical Journey entities, not isolated iframe localStorage.
         stages=page.evaluate("""() => {const g=window.BlueOceanRuntime.api('dataBridge').get();
           const b=Object.values(g.views.whiteboards).find(x=>x.viewKind==='blueprint');

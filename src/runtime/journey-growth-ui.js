@@ -28,7 +28,7 @@ function growthEmotionScale(W){
  lines;
 }
 function growthCurve(){
- const N=S.steps.length,W=Math.max(100,N*100),points=S.steps.map((stage,i)=>({x:i*100+50,y:16+(2-growthEmotionScore(stage))*14,known:growthEmotionKnown(stage),s:stage}));
+ const N=S.steps.length,geometry=blueprintGeometry(),W=Math.max(100,geometry.total),points=S.steps.map((stage,i)=>({x:geometry.stages[i].center,y:16+(2-growthEmotionScore(stage))*14,known:growthEmotionKnown(stage),s:stage}));
  const path=growthEmotionCurvePath(points);
  const curve=growthEmotionScale(W)+'<path data-emotion-curve-line="1" d="'+path+'" fill="none" stroke="var(--ac)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>'+
  points.map((p,i)=>{
@@ -42,9 +42,10 @@ function growthCurve(){
 let growthEmotionDrag=null;
 let growthEmotionSuppressUntil=0;
 function growthEmotionRefreshPoint(i){
+  cardToolsUpdateSummary();
   const box=app.querySelector('#curve'),stage=S.steps[i];
   if(!box||!stage)return;
-  const points=S.steps.map((s,j)=>({x:j*100+50,y:16+(2-growthEmotionScore(s))*14,known:growthEmotionKnown(s)}));
+  const geometry=blueprintGeometry(),points=S.steps.map((s,j)=>({x:geometry.stages[j].center,y:16+(2-growthEmotionScore(s))*14,known:growthEmotionKnown(s)}));
   box.querySelector('[data-emotion-curve-line]')?.setAttribute('d',growthEmotionCurvePath(points));
   const dot=box.querySelector('.dt[data-si="'+i+'"]'),label=box.querySelector('[data-emotion-curve-label="'+i+'"]');
   const state=growthEmotionState(stage),known=growthEmotionKnown(stage),top=known?16+(2-growthEmotionScore(stage))*14:44,title=growthEmotionLabel(stage);
@@ -133,7 +134,7 @@ function growthSummaryBody(){
   body+=section('Dores e evidências',pains.length?'<ol>'+pains.map(p=>'<li><b>'+esc(S.steps[p.s]?.n||'Etapa')+':</b> '+esc(p.x)+contextPainReport(p)+'</li>').join('')+'</ol><p>As dores registradas precisam ser investigadas; a classificação de gravidade é informada pela equipe.</p>':'<p>Nenhuma dor registrada.</p>');
   body+=section('Plano de melhoria e indicadores',plans.length?plans.map(plan=>'<div class="report-stage"><h3>'+esc(plan.title)+'</h3><p>Dor de origem: '+esc(plan.problem)+'</p><dl><dt>Responsável</dt><dd>'+esc(plan.owner||'Não informado')+'</dd><dt>Prazo</dt><dd>'+esc(plan.targetDate||'Não informado')+'</dd><dt>Status</dt><dd>'+esc(growthStatusLabels[plan.status])+'</dd><dt>Resultado esperado</dt><dd>'+esc(plan.expectedOutcome||'Não informado')+'</dd></dl>'+(!plan.metrics.length?'<p>Sem indicador vinculado.</p>':plan.metrics.map(m=>'<p><b>'+esc(m.name)+':</b> '+esc(growthMetricText(m))+' · Inicial: '+esc(m.baseline===undefined?'não informado':String(m.baseline))+'</p>').join(''))+'</div>').join(''):'<p>Nenhum plano criado. Planeje uma melhoria a partir de uma dor registrada.</p>');
   body+=section('Próxima decisão',!S.steps.length?'<p>Defina o primeiro momento da experiência.</p>':!pains.length?'<p>Converse com clientes e equipe para investigar dificuldades nesta experiência.</p>':!plans.length?'<p>Escolha uma dor para discutir uma ação, um responsável e um resultado esperado.</p>':'<p>Revise as ações com a equipe e registre medições para verificar seus efeitos.</p>');
-  return body+'</article>';
+  return body+blueprintReport()+'</article>';
 }
 function growthShowPresentation(){growthPresent=true;document.body.classList.add('is-presenting');app.innerHTML='<nav class="report-toolbar" aria-label="Apresentação"><button class="tb" data-act="close-presentation" aria-label="Voltar ao mapa">← Voltar ao mapa</button><button class="tb" data-act="download-summary">Baixar resumo HTML</button><button class="tb p" data-act="print-summary">Imprimir / PDF</button></nav>'+growthSummaryBody();window.scrollTo(0,0);app.querySelector('button').focus()}
 function growthAction(action,data){

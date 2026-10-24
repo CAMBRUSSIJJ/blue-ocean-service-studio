@@ -15,7 +15,7 @@ function normalizeMatrixViewSnapshot(input = {}) {
   return { version:1, perspective:input.perspective==='blueprint'||!input.perspective&&input.preset==='operational'?'blueprint':'journey',preset:['essential','detailed','operational','acquisition','complete','custom'].includes(input.preset)?input.preset:'custom',
     hiddenRows:rows(input.hiddenRows),rowOrder:rows(input.rowOrder),insightsOpen:input.insightsOpen===true,
     insightsTab:['guidance','analysis','quality'].includes(input.insightsTab)?input.insightsTab:'guidance',
-    emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true,
+    emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true,connectionMode:['selected','all','off'].includes(input.connectionMode)?input.connectionMode:'selected',
     zoom:bounded(input.zoom,75,150,100),stageWidths:stageWidths(input.stageWidths),rowHeights:rowHeights(input.rowHeights),collapsedRows:rows(input.collapsedRows),
     cardFilters:normalizeMatrixCardFilters(input.cardFilters) };
 }
@@ -31,7 +31,7 @@ export function switchMatrixPerspective(input, perspective, definitions) {
   const current = normalizeSavedMatrixView(input);
   if (!['journey','blueprint'].includes(perspective) || perspective === current.perspective) return current;
   const memory = {...current.perspectiveViews,[current.perspective]:normalizeMatrixViewSnapshot(current)};
-  const visible = perspective === 'blueprint' ? ['sd','ev','ac','em','fl','bk','sy','im'] : ['sd','ac','em'];
+  const visible = perspective === 'blueprint' ? ['ev','ac','fl','bk','sy'] : ['sd','ac','em'];
   const defaults = {...current,perspective,preset:perspective === 'blueprint' ? 'operational' : 'essential',
     rowOrder:definitions.map(row=>row.id),hiddenRows:definitions.filter(row=>!visible.includes(row.id)&&!row.custom).map(row=>row.id),
     collapsedRows:[],cardFilters:{}};

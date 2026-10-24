@@ -3,7 +3,7 @@ import { runtime } from './runtime-registry.js';
 import { renderBlueprintReference } from './blueprint-reference-view.js';
 import { manageJourneySavedView, normalizeSavedMatrixView } from '../services/journey-views.js';
 import { selectJourneyPersona, readJourneyEmotion, writeJourneyEmotion, journeyPainContexts, saveJourneyPainEvidence } from '../services/journey-context.js';
-import { MATRIX_REFERENCE_TYPES, matrixServiceReferences, validateMatrixDocument, matrixContentFromDocument, restoreMatrixContent } from '../services/journey-content.js';
+import { MATRIX_REFERENCE_TYPES, matrixActivityFromRecord, writeMatrixActivity, matrixServiceReferences, validateMatrixDocument, matrixContentFromDocument, restoreMatrixContent } from '../services/journey-content.js';
 import { prepareJourneyElement } from '../services/journey-elements.js';
 import { ACQUISITION_ROWS, saveJourneyImprovement, journeyImprovementPlans, measureJourneyImprovement } from '../services/journey-growth.js';
 import { buildBlueprintGuidedReading, BLUEPRINT_EMOTION_LABELS } from '../services/blueprint-guided-reading.js';
@@ -1065,7 +1065,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
     const ref={id:'host',title:openedFromUnifiedJourney?(j?.name||'Jornada'):(b.name||'Blueprint de serviço'),persona:saved.persona||'',
       editorKind:openedFromUnifiedJourney?'journey':'blueprint',view:clone(j?.matrixView||b.matrixView||null),
-      savedViews:clone(j?.savedMatrixViews||[]),personaId:j?.personaId||'',painContexts:j?journeyPainContexts(graph,j.id):[],serviceElements:hostedServiceElements(),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
+      savedViews:clone(j?.savedMatrixViews||[]),personaId:j?.personaId||'',painContexts:j?journeyPainContexts(graph,j.id):[],serviceElements:hostedServiceElements(),operationalResources:hostedOperationalResources(),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
       availableMetrics:Object.values(graph.entities?.metric||{}).filter(m=>!m.serviceId||m.serviceId===graph.service.id).map(m=>({id:m.id,name:m.title||m.name||'Indicador',unit:m.unit||'',current:typeof m.value==='number'?m.value:undefined,target:typeof m.target==='number'?m.target:undefined})),
       guide:0,start:0,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
@@ -1106,16 +1106,18 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     Object.values(ref.c).flat().forEach(note=>{if(note.hostItemId)listed.set(note.hostItemId,note.i)});
     Object.values(b.edges||{}).forEach(edge=>{
       if(listed.has(edge.fromId)&&listed.has(edge.toId))
-        ref.links.push({a:listed.get(edge.fromId),b:listed.get(edge.toId),hostEdgeId:edge.id});
+        ref.links.push({id:edge.id,a:listed.get(edge.fromId),b:listed.get(edge.toId),hostEdgeId:edge.id,type:edge.matrixConnection?.type||'sequence',label:edge.matrixConnection?.label||edge.label||'',...(edge.matrixConnection?.handoff?{handoff:clone(edge.matrixConnection.handoff)}:{})});
     });
     for(const [key,values] of Object.entries(saved.customCells||{})){
       if(/^x[a-z0-9]{1,12}\|\d+$/.test(key)&&Array.isArray(values))ref.c[key]=clone(values);
     }
     stages.forEach((stage,index)=>{for(const lane of ACQUISITION_ROWS){const notes=j?.acquisitionCells?.[stage.id]?.[lane];if(notes?.length)ref.c[lane+'|'+index]=notes.map(n=>({i:n.id,t:n.text}))}});
     restoreMatrixContent(ref,j?.matrixContent,stages.map(s=>s.id));
+    for(const [key,notes] of Object.entries(ref.c))for(const note of notes){const item=b.items[note.hostItemId];if(item?.kind==='smart'){const record=entityRecord(item.objectKind,item.objectId);if(record){const activity=matrixActivityFromRecord(record,key.startsWith('sy|')?(item.objectKind==='process'?'support-process':'resource'):'activity');if(activity)note.activity=activity}}}
     b.blueprintHostedShown=Array.from(presented);
     return ref;
   }
+  function hostedOperationalResources(){return ['system','resource'].flatMap(kind=>Object.values(entityCollection(kind)||{}).filter(record=>!record.serviceId||record.serviceId===graph.service.id).map(record=>({ref:kind+':'+record.id,title:entityTitle(kind,record),kind,id:record.id})))}
   function hostedServiceElements(){return matrixServiceReferences(graph,{journeyId:activeJourney()?.id,actorId:runtime.api('collaboration')?.currentMember?.()?.id||'member-local-owner'})}
   function applyHostedBlueprintPatch(doc){
     if(!doc||!Array.isArray(doc.steps)||!doc.c||typeof doc.c!=='object'||!canEditHostedMatrix())return false;
@@ -1133,6 +1135,9 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     if(String(doc.personaId||'')!==String(j.personaId||''))throw Error('O contexto da Persona mudou. Reabra o mapa antes de editar.');
     const sync=b.blueprintHostedSync ||= {stages:{},notes:{},issues:{}};
     const previousShown=new Set(b.blueprintHostedShown||[]);
+    const availableResources=new Set(hostedOperationalResources().map(record=>record.ref));
+    const previousResources=new Set(Object.values(j.matrixContent?.cells||{}).flatMap(rows=>Object.values(rows).flatMap(notes=>notes.flatMap(note=>note.activity?.resourceRefs||[]))));
+    for(const notes of Object.values(doc.c))for(const note of notes)for(const ref of note.activity?.resourceRefs||[])if(!availableResources.has(ref)&&!previousResources.has(ref))throw Error('Um recurso selecionado não pertence a este serviço.');
     markEdit('Editar matriz do Blueprint');
     const timestamp=new Date().toISOString(),stageIds=[];
     doc.steps.forEach(step=>{
@@ -1186,9 +1191,17 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
             x:180+index*300,y:160+Object.keys(kindFor).indexOf(lane)*185,width:260,height:132,z:maxZ()+1};
           b.items[itemId]=item;
         }
+        if(note.activity){
+          const desired=lane==='sy'?(note.activity.category==='support-process'?'process':'system'):kindFor[lane];
+          if(note.reclassifyActivity===true&&item.kind==='smart'&&item.objectKind!==desired&&['fl','bk','sy'].includes(lane)){
+            const previous=entityRecord(item.objectKind,item.objectId),id=createGraphEntityWithTitle(desired,value);
+            const next=entityRecord(desired,id);if(previous&&next){Object.assign(next,clone(previous),{id,type:desired,title:value,serviceId:graph.service.id,updatedAt:timestamp,matrixSourceRef:{type:item.objectKind,id:item.objectId}});if(desired==='system')next.name=value}
+            item.objectKind=desired;item.objectId=id;item.entityRef={type:desired,id};
+          }
+        }
         sync.notes[nid]=itemId;nextShown.add(itemId);
         // The original UI groups processes and systems in one visual row. Keep their distinct canonical layers.
-        const canonicalLane=lane==='sy'&&item.serviceLayer==='process'?'process':serviceLane[lane];
+        const canonicalLane=lane==='sy'&&(note.activity?.category==='support-process'||!note.activity&&item.serviceLayer==='process')?'process':serviceLane[lane];
         item.serviceStageId=sid;item.blueprintStageId=sid;item.serviceLayer=canonicalLane;
         item.blueprintLane=canonicalLane;
         if(item.kind==='smart'){
@@ -1197,6 +1210,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
             if(item.objectKind==='touchpoint'||item.objectKind==='system'&&'name' in rec)rec.name=value;
             else if(item.objectKind==='problem')rec.description=value;
             else rec.title=value;
+            if(note.activity)writeMatrixActivity(rec,note.activity);
             rec.updatedAt=timestamp;
             assignBlueprintEntityStage(item.objectKind,item.objectId,sid,canonicalLane);
           }
@@ -1241,7 +1255,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       if(!from||!to||from===to)return;
       const id=link.hostEdgeId&&b.edges[link.hostEdgeId]?link.hostEdgeId:uid('edge');
       b.edges[id] ||= {id,fromId:from,toId:to,fromHandle:'auto',toHandle:'auto',label:'',style:'solid',arrow:'end',route:'curve',waypoint:null};
-      b.edges[id].blueprintHostedLink=true;referenced.add(id);
+      b.edges[id].matrixConnection=clone(link);b.edges[id].label=link.label||'';b.edges[id].blueprintHostedLink=true;referenced.add(id);
     });
     Object.entries(b.edges||{}).forEach(([id,edge])=>{
       if(edge.blueprintHostedLink&&!referenced.has(id))delete b.edges[id];
@@ -1318,7 +1332,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       else if(type==='patch'){
         try{
           const ok=applyHostedBlueprintPatch(state);
-          respond('saved',{ok:ok===true,painContexts:journeyPainContexts(graph,activeJourney().id),serviceElements:hostedServiceElements(),plans:journeyImprovementPlans(graph,activeJourney()?.id)});
+          respond('saved',{ok:ok===true,painContexts:journeyPainContexts(graph,activeJourney().id),serviceElements:hostedServiceElements(),operationalResources:hostedOperationalResources(),plans:journeyImprovementPlans(graph,activeJourney()?.id)});
         }catch(error){
           respond('saved',{ok:false});
           console.error('Falha ao editar Blueprint da referência',error);
