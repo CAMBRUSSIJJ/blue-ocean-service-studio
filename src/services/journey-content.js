@@ -254,6 +254,11 @@ export function normalizeMatrixBlock(note) {
   if (Array.isArray(note.tags)) normalized.tags = metadata.tags;
   if (note.tone) normalized.tone = metadata.tone;
   if (note.activity) normalized.activity = normalizeMatrixActivity(note.activity);
+  if (note.canvas && typeof note.canvas==='object') {
+    const kind=clipped(note.canvas.kind,30);
+    if(!['activity','touchpoint','artifact','decision','system','resource','metric'].includes(kind))throw Error('Tipo de componente do canvas inválido.');
+    normalized.canvas={version:1,kind,description:clipped(note.canvas.description,1000),channelId:clipped(note.canvas.channelId,160),metricId:clipped(note.canvas.metricId,160)};
+  }
   return normalized;
 }
 export function normalizeMatrixRow(input = {}) {

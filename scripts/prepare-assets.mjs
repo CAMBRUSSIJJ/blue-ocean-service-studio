@@ -14,6 +14,11 @@ copyFileSync('src/runtime/journey-growth-ui.js', 'public/v1102-journey-growth-ui
 copyFileSync('src/runtime/journey-content-ui.js', 'public/v1102-journey-content-ui.js');
 copyFileSync('src/runtime/journey-blueprint-ui.js', 'public/v1102-journey-blueprint-ui.js');
 copyFileSync('src/runtime/journey-business-ui.js', 'public/v1102-journey-business-ui.js');
+copyFileSync('src/runtime/journey-cad-ui.js', 'public/v1102-journey-cad-ui.js');
+copyFileSync('src/runtime/journey-cad.css', 'public/journey-cad.css');
+writeFileSync('public/v1102-blueprint-canvas.js',readFileSync('src/services/blueprint-canvas.js','utf8').replace('./journey-content.js','./v1102-journey-content.js'));
+const canvasShared=readFileSync('src/services/blueprint-canvas.js','utf8').replace(/^import .*;\n/,'').replace(/^export /gm,'');
+writeFileSync('public/v1102-blueprint-canvas-shared.js','(()=>{const {normalizeMatrixActivity,validateMatrixDocument,normalizeMatrixConnection}=window.BlueOceanJourneyContent;'+canvasShared+';window.BlueOceanBlueprintCanvas={CANVAS_COMPONENTS,CANVAS_GRID,canvasBoundary,normalizeCanvasMetadata,canvasKind,canvasStageIndex,prepareCanvasInput,moveCanvasCard,canvasTitleLines,canvasConnectionOffsets,buildCanvasLayout,canvasEdgeGeometry,exportCanvasSvg};})();');
 copyFileSync('src/runtime/journey-card-tools-ui.js', 'public/v1102-journey-card-tools-ui.js');
 copyFileSync('src/runtime/journey-views-ui.js', 'public/v1102-journey-views-ui.js');
 writeFileSync('public/v1102-journey-views.js', readFileSync('src/services/journey-views.js', 'utf8').replace('./journey-content.js', './v1102-journey-content.js'));
@@ -115,6 +120,7 @@ for (const [source, target] of [
       '../services/journey-growth.js':'./v1102-journey-growth.js',
       '../services/journey-content.js':'./v1102-journey-content.js',
       '../services/journey-elements.js':'./v1102-journey-elements.js',
+      '../services/blueprint-canvas.js':'./v1102-blueprint-canvas.js',
       '../services/journey-context.js':'./v1102-journey-context.js',
       '../services/journey-views.js':'./v1102-journey-views.js',
       './practical-simulation-data.js':'./v1102-practical-simulation-data.js',

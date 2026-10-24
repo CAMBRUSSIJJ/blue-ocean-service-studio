@@ -26,6 +26,7 @@ jobs:
       - run: npm run docs:check
       - run: node scripts/journey-visualization-test.mjs
       - run: node scripts/blueprint-guided-reading-test.mjs
+      - run: npm run blueprint:canvas:test
       - run: npm run release:verify
       - name: Verificar comportamento da Jornada
         run: |
@@ -113,6 +114,7 @@ jobs:
       - run: npm run journey:observation:browser
       - run: npm run journey:cards:browser
       - run: npm run maps:matrix:browser
+      - run: npm run blueprint:canvas:browser
       - run: npm run entry:browser
       - run: npm run product:browser
       - run: npm run maps:browser
@@ -143,3 +145,4 @@ jobs:
             artifacts/journey-observation
             artifacts/journey-card-tools
             artifacts/shared-map-matrix
+            artifacts/blueprint-canvas

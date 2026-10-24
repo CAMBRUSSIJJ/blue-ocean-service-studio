@@ -17,7 +17,7 @@ function blueprintBadges(note,row,report=false){
 }
 function blueprintDialogs(){return '<dialog class="growth-dialog blueprint-dialog" id="blueprint-activity-dialog" aria-labelledby="blueprint-activity-title"></dialog><dialog class="growth-dialog blueprint-dialog" id="blueprint-links-dialog" aria-labelledby="blueprint-links-title"></dialog>'}
 function blueprintActivityOpen(key,index){
- const note=S.c[key]?.[index];if(!note)return;blueprintEditing=note.i;
+ const note=S.c[key]?.[index];if(!note)return;if(cadEnabled()){cadSelect(note.i);return}blueprintEditing=note.i;
  const row=key.split('|')[0],activity=blueprintActivity(note,row),dialog=app.querySelector('#blueprint-activity-dialog');
  const resources=S.operationalResources||[],refs=[...new Set([...resources.map(value=>value.ref),...activity.resourceRefs])];
  dialog.innerHTML='<form id="blueprint-activity-form"><div class="panel-head"><h2 id="blueprint-activity-title">Detalhes da atividade</h2><button type="button" class="x" data-act="bp-close-activity" aria-label="Fechar detalhes da atividade">×</button></div><p class="row-method">'+esc(row==='fl'?'Frontstage · percebido pelo cliente':row==='bk'?'Backstage · fora da percepção do cliente':rowDefs().find(value=>value.id===row)?.n||'Atividade')+'</p>'+
@@ -44,6 +44,7 @@ function blueprintActivitySubmit(form){
 }
 function blueprintConnectionBar(){return '<section class="blueprint-connections" aria-label="Conexões do mapa"><button class="tb" data-act="bp-links">Conexões <span data-blueprint-link-count>'+((S.links||[]).length)+'</span></button><label>Exibir conexões<select aria-label="Exibir conexões" data-blueprint-connection-mode>'+[['selected','Da atividade selecionada'],['all','Todas'],['off','Ocultar']].map(([id,name])=>'<option value="'+id+'" '+((V.connectionMode||'selected')===id?'selected':'')+'>'+name+'</option>').join('')+'</select></label><span class="blueprint-connection-status" role="status">'+(V.connectionMode==='all'?'Todas as conexões com cartões visíveis.':V.connectionMode==='off'?'Conexões ocultas; os vínculos permanecem salvos.':blueprintSelected?'Conexões da atividade selecionada.':'Selecione um cartão para acompanhar suas conexões.')+'</span><span class="blueprint-legend">Frontstage · percebido pelo cliente <span>Backstage · operação interna</span></span></section>'}
 function blueprintLinksOpen(id='',source=''){
+ if(cadEnabled()){cadOpenLink(id,source);return}
  const dialog=app.querySelector('#blueprint-links-dialog'),notes=blueprintNotes(),link=(S.links||[]).find(value=>value.id===id),first=source||link?.a||notes[0]?.note.i||'';
  const options=selected=>notes.map(entry=>'<option value="'+esc(entry.note.i)+'" '+(entry.note.i===selected?'selected':'')+'>'+esc(blueprintCaption(entry))+'</option>').join('');
  const type=link?.type||'sequence',from=blueprintNote(first),to=blueprintNote(link?.b),handoff=link?.handoff||{};

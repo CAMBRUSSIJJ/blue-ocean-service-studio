@@ -25,9 +25,12 @@ sem precisar preencher uma pesquisa antes de desenhar.
 | --- | --- |
 | **Jornadas** | Mapear etapas, ações, pensamentos, emoções e pontos de contato, com faixas configuráveis e cartões editáveis. |
 | **Whiteboard** | Explorar livremente, organizar ideias e trabalhar com objetos vinculados ao serviço. |
-| **Blueprint** | Relacionar a experiência à operação: evidências do serviço, linha de frente, bastidores e processos de suporte. |
+| **Blueprint** | Canvas com biblioteca de componentes, inspetor, conexões e organização automática da linha de frente, bastidores e apoio. A matriz continua disponível. |
 | **Revisão da entrega** | Identificar lacunas, vínculos ausentes, dependências circulares, prazos inviáveis e desequilíbrios entre capacidade e demanda. |
 | **Continuidade** | Navegar entre Jornada e Blueprint preservando a identidade dos dados e exportar backups do trabalho. |
+
+Conheça o [canvas operacional do Blueprint](docs/blueprint-canvas.md), incluindo
+componentes, conexões entre equipes e edição no celular.
 
 ## Começar
 

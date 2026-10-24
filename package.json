@@ -225,7 +225,9 @@
     "remote:security:test": "python3 scripts/remote-workspace-security.py",
     "remote:stack": "python3 scripts/remote-workspace-stack.py",
     "remote:browser": "python3 scripts/remote-workspace-browser.py",
-    "remote:stop": "docker stop bo-cloud-qa-rest bo-cloud-qa-auth bo-cloud-qa-db && docker network rm bo-cloud-qa-network"
+    "remote:stop": "docker stop bo-cloud-qa-rest bo-cloud-qa-auth bo-cloud-qa-db && docker network rm bo-cloud-qa-network",
+    "blueprint:canvas:test": "node scripts/blueprint-canvas-test.mjs",
+    "blueprint:canvas:browser": "python3 scripts/blueprint-canvas-browser.py"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",

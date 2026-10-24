@@ -39,6 +39,9 @@ def add(f, key, text):
 def perspective(f, name):
     f.get_by_role('button', name=name, exact=True).click(); saved(f)
     expect(f.locator('.map-perspective-label')).to_have_text(name)
+    # This suite verifies the matrix; the canvas has its own acceptance suite.
+    if name == 'Blueprint' and f.get_by_role('button', name='Matriz', exact=True).count():
+        f.get_by_role('button', name='Matriz', exact=True).click(); saved(f)
 def customize(f, row, visible):
     f.get_by_role('button', name='Personalizar visualização', exact=True).click()
     f.locator(f'[data-view-row="{row}"]').set_checked(visible); saved(f)

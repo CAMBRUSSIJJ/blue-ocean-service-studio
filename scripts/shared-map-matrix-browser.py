@@ -112,6 +112,7 @@ try:
         check('Dragging emotion stores canonical score and hypothesis', recorded['emotionScore'] == 2 and recorded['emotionRecorded'] and recorded['emotionStatus'] == 'hypothesis')
         check('Curve updates without losing stage markers', f.locator('#curve .dt.hypothesis').count() == 1 and f.locator('#curve [data-emotion-curve-line]').get_attribute('d') != '')
         f.get_by_role('button', name='Blueprint', exact=True).click(); saved(f)
+        f.get_by_role('button', name='Matriz', exact=True).click(); saved(f)
         expect(f.locator('[data-row=fl]')).to_be_visible()
         check('Changing perspective keeps the same Journey, board and stages', list(graph(page)['journeys']) == [jid] and graph(page)['journeys'][jid]['stageIds'] == stages and len([b for b in graph(page)['views']['whiteboards'].values() if b.get('viewKind') == 'blueprint']) == 1)
         check('Blueprint keeps conceptual boundaries', f.locator('.dv').count() >= 3)
