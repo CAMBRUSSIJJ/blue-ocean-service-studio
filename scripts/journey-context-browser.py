@@ -31,7 +31,7 @@ def stage(f,name):
 def tool(f,name):
  f.get_by_role('button',name='+ Adicionar faixa',exact=True).click();f.get_by_role('searchbox',name='Buscar tipo de conteúdo',exact=True).fill(name);f.get_by_role('button',name='Mostrar '+name,exact=True).click();saved(f)
 def link(f,key,kind,record):
- add(f,key,kind);dialog=f.locator('#content-editor');dialog.get_by_label('Registro do serviço',exact=True).select_option(record);dialog.get_by_role('button',name='Salvar elemento',exact=True).click();saved(f)
+ add(f,key,kind);dialog=f.locator('#element-selector');dialog.locator('[data-act="elements-select"][data-source="'+record+'"]').click();dialog.get_by_role('button',name='Vincular à etapa',exact=True).click();saved(f)
 def persona(f,id):
  f.get_by_role('combobox',name='Persona da jornada',exact=True).select_option(id);saved(f);expect(f.get_by_role('combobox',name='Persona da jornada',exact=True)).to_be_enabled()
 try:

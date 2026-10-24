@@ -88,6 +88,7 @@ button,select,input{font:inherit;color:var(--ink)}button{cursor:pointer}
 <script src="/v1102-journey-content-shared.js"></script>
 <script src="/v1102-journey-content-ui.js"></script>
 <script src="/v1102-journey-picker-ui.js"></script>
+<script src="/v1102-journey-elements-ui.js"></script>
 <script src="/v1102-journey-growth-ui.js"></script>
 <script src="/v1102-journey-context-ui.js"></script>
 <script src="/v1102-journey-views-ui.js"></script>
@@ -426,9 +427,10 @@ if(HOSTED){
     if(event.source!==window.parent||event.origin!==location.origin||event.data?.boBlueprintHost!==1)return;
     if(event.data.history){H=event.data.history;const u=app.querySelector('[data-act="undo"]'),r=app.querySelector('[data-act="redo"]');if(u)u.disabled=!H.canUndo;if(r)r.disabled=!H.canRedo}
     if(event.data.type==='saved-view-result'){viewsResult(event.data);return}
+    if(event.data.type==='element-result'){elementsResult(event.data);return}
     if(event.data.type==='context-result'){contextResult(event.data);return}
     if(event.data.type==='plan-result'){growthPlanResult(event.data);return}
-    if(event.data.type==='saved'){if(!event.data.ok)growthLastPatch='';if(event.data.plans)S.plans=event.data.plans;if(event.data.painContexts)S.painContexts=event.data.painContexts;if(event.data.serviceElements){S.serviceElements=event.data.serviceElements;pickerRefreshReferences()}announceSave(event.data.ok);return}
+    if(event.data.type==='saved'){if(!event.data.ok)growthLastPatch='';if(event.data.plans)S.plans=event.data.plans;if(event.data.painContexts)S.painContexts=event.data.painContexts;if(event.data.serviceElements){S.serviceElements=event.data.serviceElements;pickerRefreshReferences();elementsRefresh()}announceSave(event.data.ok);return}
     if(event.data.type==='hydrate'){
       applyingHost=true;
       try{

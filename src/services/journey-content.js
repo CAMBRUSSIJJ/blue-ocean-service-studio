@@ -73,18 +73,49 @@ export function applyMatrixCardAction(cells, selectedIds, action, input = {}, av
   return next;
 }
 /** Read-only summaries of existing service records for the insertion catalog. */
-export function matrixServiceReferences(graph) {
+export function matrixServiceReferences(graph, { journeyId = '', actorId = '' } = {}) {
   const result = {};
+  const belongs = record => record && (!record.serviceId || record.serviceId === graph.service.id);
+  const usage = new Map();
+  const addStage = (type, id, stageId) => {
+    if (!id || !graph.stages?.[stageId]) return;
+    const key = type + ':' + id;
+    if (!usage.has(key)) usage.set(key, new Set());
+    usage.get(key).add(stageId);
+  };
+  for (const journey of Object.values(graph.journeys || {}).filter(belongs)) {
+    for (const [stageId, rows] of Object.entries(journey.matrixContent?.cells || {})) {
+      if (!(journey.stageIds || []).includes(stageId)) continue;
+      for (const notes of Object.values(rows)) for (const note of Array.isArray(notes) ? notes : []) addStage(note.type, note.referenceId, stageId);
+    }
+  }
+  for (const stage of Object.values(graph.stages || {})) {
+    for (const type of ['persona', 'channel', 'pain', 'need', 'evidence', 'opportunity']) {
+      for (const id of Array.isArray(stage[type + 'Ids']) ? stage[type + 'Ids'] : []) addStage(type, id, stage.id);
+    }
+  }
+  const related = (record, type) => Object.values(graph.entities?.[type] || {}).filter(belongs).filter(other =>
+    [record.relatedIds, record[type + 'Ids']].some(ids => Array.isArray(ids) && ids.includes(other.id)) ||
+    [other.relatedIds, other.painIds].some(ids => Array.isArray(ids) && ids.includes(record.id))
+  ).map(other => ({ id: other.id, title: clipped(other.title || other.name || other.description, 1000) || 'Sem nome', source: clipped(other.source, 1000) }));
   for (const type of ['channel', 'persona', 'pain', 'need', 'evidence', 'opportunity']) {
     const records = { ...(graph.entities?.[type] || {}), ...(type === 'pain' ? graph.problems : type === 'opportunity' ? graph.opportunities : {}) };
-    result[type] = Object.values(records).filter(record => !record.serviceId || record.serviceId === graph.service.id).map(record => ({
-      id: record.id,
-      title: clipped(record.title || record.name || record.description, 1000) || 'Sem nome',
-      description: clipped(record.description || record.context, 1000),
-      category: clipped(record.category, 160),
-      source: clipped(record.source, 1000),
-      stageName: clipped(graph.stages?.[record.stageId]?.title, 240)
-    }));
+    result[type] = Object.values(records).filter(belongs).map(record => {
+      addStage(type, record.id, record.stageId);
+      const stages = [...(usage.get(type + ':' + record.id) || [])].map(id => ({ id, title: clipped(graph.stages[id].title, 240), journeyId: graph.stages[id].journeyId || Object.values(graph.journeys || {}).find(j => j.stageIds?.includes(id))?.id || '' }));
+      return {
+        id: record.id,
+        title: clipped(record.title || record.name || record.description, 1000) || 'Sem nome',
+        description: clipped(record.description || record.context, 1000),
+        category: clipped(record.category, 160),
+        source: clipped(record.source, 1000),
+        stageName: clipped(graph.stages?.[record.stageId]?.title, 240),
+        stages, inJourney: stages.some(stage => stage.journeyId === journeyId) || type === 'persona' && graph.journeys?.[journeyId]?.personaId === record.id,
+        createdByMe: !!actorId && record.createdBy === actorId,
+        status: clipped(record.status, 80), tags: (Array.isArray(record.tags) ? record.tags : []).map(tag => clipped(tag, 40)).filter(Boolean).slice(0, 20),
+        needs: related(record, 'need'), evidence: related(record, 'evidence')
+      };
+    });
   }
   return result;
 }

@@ -94,6 +94,7 @@ function pickerAdvancedReport(note){if(note.type==='scale'){const v=note.scale||
   if(pickerReferenceTypes.includes(note.type))return pickerReferenceMarkup(note,true);return '';
 }
 function pickerOpenAdvanced(type,note=null){
+  if(elementTypes.includes(type)){elementsOpen(type,note);return}
   contentEditingId=note?.i||null;const dialog=app.querySelector('#content-editor'),reference=pickerReferenceTypes.includes(type),sources=pickerSources(type);
   let fields='';
   if(type==='embed')fields='<label>Título do conteúdo<input name="text" maxlength="1000" required value="'+esc(note?.t||'')+'"></label><label>Endereço para incorporar<input name="url" type="url" required value="'+esc(note?.url||'')+'" placeholder="https://"></label><p class="hint">YouTube, Vimeo ou Figma. O conteúdo só carrega quando você clicar na prévia.</p>';
