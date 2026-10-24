@@ -23,6 +23,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # The generated version module is intentionally ignored by Git.
+      # A clean checkout must still be able to run typecheck directly.
+      - run: rm -f src/generated/app-version.ts && npm run typecheck
       - run: npm run docs:check
       - run: node scripts/journey-visualization-test.mjs
       - run: node scripts/blueprint-guided-reading-test.mjs

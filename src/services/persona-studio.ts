@@ -72,6 +72,45 @@ export const visiblePersonaSections = (draft: PersonaProfileDraft): PersonaSecti
 
 export type PersonaRelationKind = Exclude<DiscoveryKind, 'persona'>;
 
+// P6: evidence belongs to a specific verbatim claim, not the whole Persona by assumption.
+export const PERSONA_EVIDENCE_FIELDS = [
+  ['context','Contexto'],['primaryGoal','Objetivo'],['situation','Situação'],['quote','Citação'],
+  ['channels','Canais'],['behaviors','Comportamentos'],['expectations','Expectativas'],
+  ['constraints','Barreiras'],['triggers','Motivações'],['alternatives','Alternativas'],
+] as const;
+export type PersonaEvidenceField = typeof PERSONA_EVIDENCE_FIELDS[number][0];
+export type PersonaEvidenceClaim = { field: PersonaEvidenceField; statement: string; evidenceIds: Id[] };
+export function normalizePersonaEvidenceClaims(value: unknown): PersonaEvidenceClaim[] {
+  if (!Array.isArray(value)) return [];
+  const allowed = new Set<string>(PERSONA_EVIDENCE_FIELDS.map(([id])=>id));
+  const result = new Map<string, PersonaEvidenceClaim>();
+  for (const raw of value.slice(0, 200)) {
+    if (!raw || typeof raw !== 'object') continue;
+    const item = raw as Partial<PersonaEvidenceClaim>;
+    const field = item.field;
+    if (!field || !allowed.has(field) || typeof item.statement !== 'string') continue;
+    const statement = item.statement.trim().slice(0, 1000);
+    if (!statement) continue;
+    const evidenceIds = Array.isArray(item.evidenceIds)
+      ? [...new Set(item.evidenceIds.filter((id): id is Id => typeof id === 'string' && Boolean(id.trim())).map(id=>id.slice(0,160)))].slice(0,40)
+      : [];
+    if (!evidenceIds.length) continue;
+    const key = field + '\u0000' + statement;
+    const previous = result.get(key);
+    result.set(key,{field,statement,evidenceIds:[...new Set([...(previous?.evidenceIds||[]),...evidenceIds])].slice(0,40)});
+    if (result.size >= 100) break;
+  }
+  return [...result.values()];
+}
+export function personaEvidenceStatements(draft: PersonaProfileDraft) {
+  return PERSONA_EVIDENCE_FIELDS.flatMap(([field,label]) => {
+    const value = draft[field];
+    const statements = Array.isArray(value) ? value : [value];
+    return [...new Set(statements.map(text=>String(text||'').trim()).filter(Boolean))]
+      .slice(0,30).map(statement=>({field,label,statement}));
+  }).slice(0,100);
+}
+
 export type PersonaProfileDraft = {
   title: string;
   description: string;
@@ -82,6 +121,7 @@ export type PersonaProfileDraft = {
   visualCards?: PersonaVisualCard[];
   imageUrl?: string;
   scale?: PersonaVisualScale;
+  evidenceClaims?: PersonaEvidenceClaim[];
   context: string;
   primaryGoal: string;
   situation: string;
@@ -140,6 +180,7 @@ export const personaProfileFromEntity = (entity: GraphEntity): PersonaProfileDra
   visualCards: normalizePersonaVisualCards(entity.personaVisualCards, entity.personaMode === 'professional' ? 'professional' : 'simple'),
   imageUrl: safePersonaImage(entity.personaPortraitUrl),
   scale: personaVisualScale(entity.personaVisualScale),
+  evidenceClaims: normalizePersonaEvidenceClaims(entity.personaEvidenceClaims),
   sections: Array.isArray(entity.personaSections)
     ? entity.personaSections.filter((value): value is PersonaSectionId => ['identity','bio','goal','needs','situation','quote','channels','behaviors','expectations','constraints','triggers','alternatives','evidence','relations'].includes(String(value)))
     : (entity.personaMode === 'professional' ? [...ADVANCED_PERSONA_SECTIONS] : [...SIMPLE_PERSONA_SECTIONS]),
@@ -156,7 +197,9 @@ export const personaProfileFromEntity = (entity: GraphEntity): PersonaProfileDra
 });
 
 const relationUniverse = (graph: ServiceGraph) => RELATION_KINDS.flatMap((kind) =>
-  Object.values(graph.entities?.[kind] ?? {}).map((entity) => ({ kind, entity })),
+  Object.values(graph.entities?.[kind] ?? {})
+    .filter((entity) => !entity.serviceId || entity.serviceId === graph.service.id)
+    .map((entity) => ({ kind, entity })),
 );
 
 export function buildPersonaStudioReport(graph: ServiceGraph, personaId: Id): PersonaStudioReport | null {
@@ -230,7 +273,25 @@ export function updatePersonaProfile(input: {
   const now = input.now ?? new Date().toISOString();
   const managedEntities = relationUniverse(input.graph);
   const managedIds = new Set(managedEntities.map(({ entity }) => entity.id));
-  const selected = new Set(input.connectedIds.filter((id) => managedIds.has(id)));
+  // A claim-bound source and an explicit profile-wide link are different intents.
+  // Track manual evidence separately so editing a claim does not silently retain
+  // its old source as an unrelated, general Persona connection.
+  const previouslyClaimed = new Set(normalizePersonaEvidenceClaims(existing.personaEvidenceClaims).flatMap(claim=>claim.evidenceIds));
+  const manualEvidenceIds = input.connectedIds.filter(id=>managedIds.has(id) && Boolean(input.graph.entities?.evidence?.[id]) &&
+    (!previouslyClaimed.has(id) || Array.isArray(existing.personaEvidenceManualIds) && existing.personaEvidenceManualIds.includes(id)));
+  const selected = new Set(input.connectedIds.filter(id=>managedIds.has(id) && !input.graph.entities?.evidence?.[id]));
+  for (const id of manualEvidenceIds) selected.add(id);
+  const statements = new Set(personaEvidenceStatements(input.draft).map(item=>item.field+'\u0000'+item.statement));
+  // Changed/deleted claims lose their old evidence anchor, rather than inheriting
+  // a source that no longer supports the edited wording.
+  const evidenceClaims = normalizePersonaEvidenceClaims(input.draft.evidenceClaims)
+    .filter(claim=>statements.has(claim.field+'\u0000'+claim.statement))
+    .map(claim=>({...claim,evidenceIds:claim.evidenceIds.filter(id=>{
+      const record=input.graph.entities?.evidence?.[id];
+      return Boolean(record && (!record.serviceId || record.serviceId===input.graph.service.id));
+    })}))
+    .filter(claim=>claim.evidenceIds.length);
+  for (const claim of evidenceClaims) for (const id of claim.evidenceIds) selected.add(id);
   const preservedExternal = relatedIds(existing).filter((id) => !managedIds.has(id));
   const entities: ServiceGraph['entities'] = { ...(input.graph.entities ?? {}) };
   const personaCollection = { ...(entities.persona ?? {}) };
@@ -247,6 +308,8 @@ export function updatePersonaProfile(input: {
     personaVisualCards: normalizePersonaVisualCards(input.draft.visualCards, input.draft.mode),
     personaPortraitUrl: safePersonaImage(input.draft.imageUrl),
     personaVisualScale: personaVisualScale(input.draft.scale),
+    personaEvidenceClaims: evidenceClaims,
+    personaEvidenceManualIds: [...new Set(manualEvidenceIds)],
     personaSections: [...new Set(Array.isArray(input.draft.sections) ? input.draft.sections : (input.draft.mode === 'professional' ? ADVANCED_PERSONA_SECTIONS : SIMPLE_PERSONA_SECTIONS))],
     context: input.draft.context.trim(),
     primaryGoal: input.draft.primaryGoal.trim(),
@@ -310,12 +373,10 @@ export function removePersonaFromGraph(graph: ServiceGraph, personaId: Id, now =
   return { ...graph, entities, service: { ...graph.service, updatedAt: now } };
 }
 
-export const personaRelationOptions = (graph: ServiceGraph) => RELATION_KINDS.flatMap((kind) =>
-  Object.values(graph.entities?.[kind] ?? {}).map((entity) => ({
+export const personaRelationOptions = (graph: ServiceGraph) => relationUniverse(graph).map(({kind,entity}) => ({
     id: entity.id,
     kind,
     title: entityTitle(entity),
     description: entityDescription(entity),
     confidence: kind === 'evidence' ? String(entity.confidence ?? 'medium') : undefined,
-  })),
-);
+  }));

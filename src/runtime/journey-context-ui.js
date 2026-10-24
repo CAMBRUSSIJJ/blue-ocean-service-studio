@@ -1,5 +1,5 @@
 /* Journey context and the explicit pain → evidence → improvement path. */
-let contextPending=false,contextSourceId='';
+let contextPending=false,contextSourceId='',contextPersonaSelectionPending=false;
 function contextPersona(){return (S.serviceElements?.persona||[]).find(record=>record.id===S.personaId)}
 function contextPersonaName(){return contextPersona()?.title||(S.personaId?'Persona indisponível':'Sem Persona vinculada')}
 function contextHeader(){
@@ -34,8 +34,18 @@ function contextSubmit(form,planNext){
 }
 function contextResult(data){
   contextPending=false;
+  const focusChanged=contextPersonaSelectionPending;contextPersonaSelectionPending=false;
   if(!data.ok){const form=app.querySelector('#pain-context-form');if(form){form.querySelector('.form-error').textContent=data.error||'Não foi possível salvar.';form.querySelectorAll('[type="submit"]').forEach(button=>button.disabled=false)}const status=app.querySelector('#context-status');if(status)status.textContent=data.error||'Não foi possível salvar.';const select=app.querySelector('[data-context-persona]');if(select){select.disabled=false;select.value=S.personaId||''}return}
-  S=data.state;H=S.history||H;V=viewState(S.view);last=JSON.stringify(S);growthLastPatch=growthPatchKey();growthEmotionDrafts.clear();emotionEdit=null;announceSave(true);rerender();
+  S=data.state;H=S.history||H;V=viewState(S.view);last=JSON.stringify(S);growthLastPatch=growthPatchKey();growthEmotionDrafts.clear();emotionEdit=null;
+  if(focusChanged){
+    // Changing the Persona also focuses the cards on her experience. This changes
+    // only the saved view, never the cards, other Personas, or existing emotions.
+    V.cardFilters=window.BlueOceanJourneyContent.normalizeMatrixCardFilters({
+      ...V.cardFilters,personaId:S.personaId||'',includeUnassigned:false
+    });
+    saveView();
+  }
+  announceSave(true);rerender();
   if(data.planNext){const index=S.iss.findIndex(issue=>issue.hostEntityId===data.problemId);if(index>=0){pickerShowTool('im');growthOpenPlan(index)}}else focusNew('[data-context-persona]');
 }
 function contextAction(action,data,button){
@@ -44,7 +54,7 @@ function contextAction(action,data,button){
   return false;
 }
 function contextBind(){
-  app.addEventListener('change',event=>{if(!event.target.matches('[data-context-persona]')||contextPending)return;contextPending=true;event.target.disabled=true;window.parent.postMessage({boBlueprintHost:1,type:'persona-select',personaId:event.target.value},location.origin)});
+  app.addEventListener('change',event=>{if(!event.target.matches('[data-context-persona]')||contextPending)return;contextPending=true;contextPersonaSelectionPending=true;event.target.disabled=true;window.parent.postMessage({boBlueprintHost:1,type:'persona-select',personaId:event.target.value},location.origin)});
   app.addEventListener('submit',event=>{if(event.target.id==='pain-context-form'){event.preventDefault();contextSubmit(event.target,event.submitter?.value==='plan')}});
   app.addEventListener('cancel',event=>{if(event.target.id==='pain-context-dialog'){event.preventDefault();contextClose()}},true);
 }
