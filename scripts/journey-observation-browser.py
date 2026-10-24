@@ -86,11 +86,11 @@ try:
   for width in [1440,834,390]:
    page.set_viewport_size({'width':width,'height':1000});d=manager(f);audit(page,f'views-{width}');box=d.bounding_box();check(f'Saved views fit inside the viewport at {width}px',box['x']>=0 and box['x']+box['width']<=width and box['height']<=1000);page.screenshot(path=str(OUT/f'views-{width}.png'),animations='disabled');d.get_by_role('button',name='Voltar ao mapa',exact=True).click();audit(page,f'map-{width}')
   f.get_by_role('button',name='Voltar para Jornadas e Blueprints',exact=True).click();touch=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,storage_state=page.context.storage_state());mobile=touch.new_page();mobile.on('pageerror',lambda e:errors.append(str(e)));mobile.add_locator_handler(mobile.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click());mobile.goto(URL,wait_until='networkidle');mobile.get_by_role('button',name='Abrir workspace local sem conta').click();mobile.get_by_role('button',name='Abrir navegação',exact=True).click();mobile.get_by_role('button',name='Abrir Jornadas e Blueprints',exact=True).click();mobile.get_by_role('button',name='Abrir Jornada',exact=True).first.click();mf=mobile.frame_locator('.bo-blueprint-reference-frame');saved(mf)
-   # Restore the complete card set before manipulating unassigned observations on touch.
-   # P6 focused views otherwise intentionally exclude cards with no Persona.
-   mf.locator('[data-act="cards-toggle-filters"]').tap()
-   mf.locator('#card-filter-form select[name="personaId"]').select_option('')
-   mf.locator('#card-filter-form button[type="submit"]').tap();saved(mf)
+  # Restore the complete card set before manipulating unassigned observations on touch.
+  # P6 focused views otherwise intentionally exclude cards with no Persona.
+  mf.locator('[data-act="cards-toggle-filters"]').tap()
+  mf.locator('#card-filter-form select[name="personaId"]').select_option('')
+  mf.locator('#card-filter-form button[type="submit"]').tap();saved(mf)
   key=lane+'|1';slot=mf.locator(f'[data-cell="{key}"]>.content-insert').nth(1);slot.tap();mf.get_by_role('button',name='Adicionar Texto',exact=True).tap();field=mf.locator(f'[data-cell="{key}"] [data-ed="c"]').nth(1);field.fill('TOQUE');field.press('Tab');saved(mf);check('B03: touch inserts at the selected intermediate point',graph(mobile)['journeys'][jid]['matrixContent']['cells'][sid][lane][1]['text']=='TOQUE')
   d=manager(mf);d.get_by_role('button',name='Aplicar visualização Cliente',exact=True).tap();saved(mf);check('B06: touch applies a saved view without dropping map data',visible_rows(mf)==review_rows and graph(mobile)['journeys'][jid]['matrixContent']['cells'][sid][lane][1]['text']=='TOQUE');audit(mobile,'touch-map');touch.close()
   check('No uncaught browser errors',not errors);(OUT/'results.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2));browser.close()
