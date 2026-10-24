@@ -37,6 +37,7 @@ npm run journey:elements:test
 npm run journey:context:test
 npm run journey:observation:test
 npm run journey:cards:test
+npm run maps:ux:test
 ```
 
 Esses testes exercitam operações como seleção, criação e movimentação de cartões,
@@ -77,6 +78,7 @@ npm run journey:selector:browser
 npm run journey:observation:browser
 npm run journey:cards:browser
 npm run maps:matrix:browser
+npm run maps:ux:browser
 ```
 
 Esses runners podem servir o `dist/` em um servidor temporário. Para os que
@@ -187,3 +189,10 @@ em `artifacts/journey-observation/` para 1440, 834 e 390 px.
 
 A referência externa foi lida em documentação pública. Estes testes validam o
 Blue Ocean; não comprovam uma comparação interativa com o produto observado.
+
+`maps:ux:test` verifica a memória independente de Jornada e Blueprint, os limites
+metodológicos das faixas, rascunhos e persistência da aparência sem alterar cartões.
+`maps:ux:browser` percorre a matriz com uma, duas e várias etapas, configuração
+de faixas, filtros, histórico, recarga e toque em 1440, 834 e 390 px.
+As capturas ficam em `artifacts/journey-editor-ux/`. A auditoria axe requer
+`node_modules/axe-core/axe.min.js`; se ausente, o runner informa o check não executado.

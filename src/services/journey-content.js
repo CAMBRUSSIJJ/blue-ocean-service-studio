@@ -18,6 +18,10 @@ export function duplicateMatrixBlock(note, id) {
   return copy;
 }
 export const MATRIX_CARD_TONES = ['neutral', 'blue', 'emerald', 'amber', 'rose', 'violet'];
+/** Empty inline text/card drafts stay editable without inflating the content count. */
+export function matrixCardHasContent(note) {
+  return Boolean(String(note.t ?? note.text ?? '').trim() || !['text','card'].includes(note.type || 'card'));
+}
 const metadataList = (value, limit, length, insensitive = false) => {
   const result = [], seen = new Set();
   for (const raw of Array.isArray(value) ? value : []) {
@@ -190,7 +194,8 @@ export function normalizeMatrixBlock(note) {
 }
 export function normalizeMatrixRow(input = {}) {
   return { n: clipped(input.n, 100), h: clipped(input.h, 240), icon: clipped(input.icon, 24),
-    defaultType: MATRIX_CONTENT_TYPES.includes(input.defaultType) ? input.defaultType : 'card' };
+    defaultType: MATRIX_CONTENT_TYPES.includes(input.defaultType) ? input.defaultType : 'card',
+    tone: MATRIX_CARD_TONES.includes(input.tone) ? input.tone : 'neutral' };
 }
 export function validateMatrixDocument(doc) {
   let imageBytes = 0;
