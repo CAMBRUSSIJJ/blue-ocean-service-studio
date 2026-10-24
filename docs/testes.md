@@ -33,6 +33,7 @@ npm run journey:starter:test
 npm run journey:growth:test
 npm run journey:content:test
 npm run journey:picker:test
+npm run journey:elements:test
 npm run journey:context:test
 npm run journey:observation:test
 npm run journey:cards:test
@@ -71,6 +72,8 @@ python3 scripts/journey-progressive-browser.py
 npm run journey:growth:browser
 npm run journey:content:browser
 npm run journey:picker:browser
+npm run journey:elements:browser
+npm run journey:selector:browser
 npm run journey:observation:browser
 npm run journey:cards:browser
 npm run maps:matrix:browser
@@ -80,6 +83,12 @@ Esses runners podem servir o `dist/` em um servidor temporário. Para os que
 suportam `BLUE_OCEAN_URL`, defina essa variável quando quiser validar uma
 instância já iniciada. `CHROMIUM_PATH` permite selecionar o executável do
 Chromium instalado no sistema. Consulte o início do runner para suas opções.
+
+`journey:selector:browser` verifica o J1: busca, filtros, detalhes, criação dos
+seis tipos, vínculos sem duplicação, cancelamento, histórico atômico, persistência,
+exportação e toque. Audita o seletor com axe-core em 1440, 834 e 390 px e salva
+evidências em `artifacts/journey-selector/`. `journey:elements:test` verifica
+imutabilidade, validação, autoria, referências e serialização das operações.
 
 As evidências ficam em `artifacts/`, que não deve ser versionado. A integração
 contínua publica as evidências dos testes como artefatos da execução no GitHub Actions.

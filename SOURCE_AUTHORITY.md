@@ -16,6 +16,9 @@ A partir da **V1.16.0**, a autoridade do produto é a pasta `src/` junto de `ind
   `src/runtime/journey-views-ui.js` e `src/services/journey-views.js`, e regras de planejamento em
   `src/services/journey-growth.ts`. O mesmo script gera
   `public/blueprint-reference-original.html` e `public/journey-matrix.css`.
+- O Seletor Universal de Elementos é editado em
+  `src/runtime/journey-elements-ui.js`; criação e vinculação atômicas usam
+  `src/services/journey-elements.js`, com projeções em `src/services/journey-content.js`.
 - `dist/` é sempre gerado por `npm run build` e **não deve ser corrigido manualmente**.
 - Classificação, filtros e edição em lote dos cartões são editados em
   `src/runtime/journey-card-tools-ui.js`; validação, correspondência e alterações

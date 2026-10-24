@@ -108,6 +108,7 @@ jobs:
       - run: npm run journey:content:browser
       - run: npm run journey:picker:browser
       - run: npm run journey:elements:browser
+      - run: npm run journey:selector:browser
       - run: npm run journey:context:browser
       - run: npm run journey:observation:browser
       - run: npm run journey:cards:browser
@@ -137,6 +138,7 @@ jobs:
             artifacts/journey-content
             artifacts/journey-picker
             artifacts/journey-elements
+            artifacts/journey-selector
             artifacts/journey-context
             artifacts/journey-observation
             artifacts/journey-card-tools

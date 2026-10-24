@@ -4,6 +4,7 @@ import { renderBlueprintReference } from './blueprint-reference-view.js';
 import { manageJourneySavedView, normalizeSavedMatrixView } from '../services/journey-views.js';
 import { selectJourneyPersona, readJourneyEmotion, writeJourneyEmotion, journeyPainContexts, saveJourneyPainEvidence } from '../services/journey-context.js';
 import { MATRIX_REFERENCE_TYPES, matrixServiceReferences, validateMatrixDocument, matrixContentFromDocument, restoreMatrixContent } from '../services/journey-content.js';
+import { prepareJourneyElement } from '../services/journey-elements.js';
 import { ACQUISITION_ROWS, saveJourneyImprovement, journeyImprovementPlans, measureJourneyImprovement } from '../services/journey-growth.js';
 import { buildBlueprintGuidedReading, BLUEPRINT_EMOTION_LABELS } from '../services/blueprint-guided-reading.js';
 import { migrateGraphV3, validateGraphDeep, repairGraphIntegrity, deletePlan, applyDeletePlan, isSafeImageDataUrl } from './data-integrity.js';
@@ -1064,7 +1065,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
     const ref={id:'host',title:openedFromUnifiedJourney?(j?.name||'Jornada'):(b.name||'Blueprint de serviço'),persona:saved.persona||'',
       editorKind:openedFromUnifiedJourney?'journey':'blueprint',view:clone(j?.matrixView||b.matrixView||null),
-      savedViews:clone(j?.savedMatrixViews||[]),personaId:j?.personaId||'',painContexts:j?journeyPainContexts(graph,j.id):[],serviceElements:matrixServiceReferences(graph),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
+      savedViews:clone(j?.savedMatrixViews||[]),personaId:j?.personaId||'',painContexts:j?journeyPainContexts(graph,j.id):[],serviceElements:hostedServiceElements(),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
       availableMetrics:Object.values(graph.entities?.metric||{}).filter(m=>!m.serviceId||m.serviceId===graph.service.id).map(m=>({id:m.id,name:m.title||m.name||'Indicador',unit:m.unit||'',current:typeof m.value==='number'?m.value:undefined,target:typeof m.target==='number'?m.target:undefined})),
       guide:0,start:0,steps:[],c:{},iss:[],lanes:clone(saved.lanes||[]),links:[]};
     const laneId={evidence:'ev',customer:'ac',frontstage:'fl',backstage:'bk',process:'sy',enablement:'sy'};
@@ -1115,6 +1116,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     b.blueprintHostedShown=Array.from(presented);
     return ref;
   }
+  function hostedServiceElements(){return matrixServiceReferences(graph,{journeyId:activeJourney()?.id,actorId:runtime.api('collaboration')?.currentMember?.()?.id||'member-local-owner'})}
   function applyHostedBlueprintPatch(doc){
     if(!doc||!Array.isArray(doc.steps)||!doc.c||typeof doc.c!=='object'||!canEditHostedMatrix())return false;
     if(doc.steps.length>90||Object.values(doc.c).some(x=>!Array.isArray(x)||x.length>100))return;
@@ -1316,7 +1318,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       else if(type==='patch'){
         try{
           const ok=applyHostedBlueprintPatch(state);
-          respond('saved',{ok:ok===true,painContexts:journeyPainContexts(graph,activeJourney().id),serviceElements:matrixServiceReferences(graph),plans:journeyImprovementPlans(graph,activeJourney()?.id)});
+          respond('saved',{ok:ok===true,painContexts:journeyPainContexts(graph,activeJourney().id),serviceElements:hostedServiceElements(),plans:journeyImprovementPlans(graph,activeJourney()?.id)});
         }catch(error){
           respond('saved',{ok:false});
           console.error('Falha ao editar Blueprint da referência',error);
@@ -1351,6 +1353,17 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
           if(!save(false,{label:'Editar visualização salva',...(action==='apply'?{content:false,history:false}:{})}))throw Error('Não foi possível salvar a visualização.');
           respond('saved-view-result',{ok:true,state:hostedBlueprintDocument(),action});
         }catch(error){graph=before;respond('saved-view-result',{ok:false,error:String(error?.message||error)})}
+      }else if(type==='element-link'){
+        const requestId=event.data.requestId;
+        if(!canEditHostedMatrix()){respond('element-result',{ok:false,requestId,error:'Seu papel permite somente leitura.'});return}
+        const before=clone(graph);
+        try{
+          const journey=activeJourney();if(!journey)throw Error('Jornada indisponível.');
+          const prepared=prepareJourneyElement(graph,journey.id,hostedBlueprintDocument(),event.data.input,runtime.api('collaboration')?.currentMember?.()?.id||'member-local-owner');
+          graph=prepared.graph;
+          if(!applyHostedBlueprintPatch(prepared.document))throw Error('Não foi possível salvar neste navegador.');
+          respond('element-result',{ok:true,requestId,state:hostedBlueprintDocument(),noteId:prepared.noteId});
+        }catch(error){graph=before;respond('element-result',{ok:false,requestId,error:String(error?.message||error)})}
       }else if(type==='persona-select'||type==='pain-evidence'){
         if(!canEditHostedMatrix())return;
         const before=clone(graph);
