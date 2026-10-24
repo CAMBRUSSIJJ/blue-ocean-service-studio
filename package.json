@@ -220,9 +220,15 @@
     "maps:ux:test": "node scripts/journey-editor-ux-test.mjs",
     "maps:ux:browser": "python3 scripts/journey-editor-ux-browser.py",
     "blueprint:connections:test": "node scripts/blueprint-connections-test.mjs",
-    "blueprint:connections:browser": "python3 scripts/blueprint-connections-browser.py"
+    "blueprint:connections:browser": "python3 scripts/blueprint-connections-browser.py",
+    "business:browser": "python3 scripts/business-first-browser.py",
+    "remote:security:test": "python3 scripts/remote-workspace-security.py",
+    "remote:stack": "python3 scripts/remote-workspace-stack.py",
+    "remote:browser": "python3 scripts/remote-workspace-browser.py",
+    "remote:stop": "docker stop bo-cloud-qa-rest bo-cloud-qa-auth bo-cloud-qa-db && docker network rm bo-cloud-qa-network"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.118.0",
     "lucide-react": "^0.468.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

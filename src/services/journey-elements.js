@@ -1,4 +1,5 @@
 import { insertMatrixBlock, normalizeMatrixBlock, validateMatrixDocument } from './journey-content.js';
+import { readJourneyEmotion } from './journey-context.js';
 
 export const JOURNEY_ELEMENT_TYPES = ['pain', 'need', 'persona', 'evidence', 'channel', 'opportunity'];
 const field = (value, limit) => typeof value === 'string' ? value.trim().slice(0, limit) : '';
@@ -8,8 +9,9 @@ export function prepareJourneyElement(graph, journeyId, document, input, actorId
   const journey = graph.journeys?.[journeyId], type = input?.elementType;
   if (!journey || journey.serviceId && journey.serviceId !== graph.service.id) throw Error('Jornada indisponível neste serviço.');
   if (!JOURNEY_ELEMENT_TYPES.includes(type)) throw Error('Tipo de elemento inválido.');
-  const index = document.steps.findIndex(step => step.hostStageId === input.stageId);
-  if (index < 0 || !journey.stageIds.includes(input.stageId)) throw Error('A etapa mudou. Abra o seletor novamente.');
+  const index = document.steps.findIndex(step => input.stageId ? step.hostStageId === input.stageId : input.stageLocalId && step.hostLocalId === input.stageLocalId);
+  const stageId = document.steps[index]?.hostStageId;
+  if (index < 0 || !stageId || !journey.stageIds.includes(stageId)) throw Error('A etapa mudou. Abra o seletor novamente.');
   const row = field(input.rowId, 25);
   if (!/^[a-z][a-z0-9]{0,24}$/.test(row) || row !== input.rowId) throw Error('Faixa inválida.');
   const key = row + '|' + index, notes = document.c[key] || [], editingId = field(input.editingId, 160);
@@ -25,7 +27,7 @@ export function prepareJourneyElement(graph, journeyId, document, input, actorId
     record = { id, type, serviceId: graph.service.id, title, description: field(input.newRecord.description, 1000),
       category: field(input.newRecord.category, 160), source: field(input.newRecord.source, 1000), relatedIds: [],
       createdBy: field(actorId, 160), createdAt: now, updatedAt: now, status: type === 'evidence' ? 'captured' : 'active' };
-    if (type === 'opportunity') Object.assign(record, { stageId: input.stageId, problemIds: [], taskIds: [] });
+    if (type === 'opportunity') Object.assign(record, { stageId, problemIds: [], taskIds: [] });
     referenceId = id;
   } else {
     const record = (type === 'pain' ? graph.problems?.[referenceId] : type === 'opportunity' ? graph.opportunities?.[referenceId] : null) || graph.entities?.[type]?.[referenceId];
@@ -41,10 +43,17 @@ export function prepareJourneyElement(graph, journeyId, document, input, actorId
   if (record) {
     if (type === 'opportunity') {
       nextGraph.opportunities ||= {}; nextGraph.opportunities[record.id] = record;
-      (nextGraph.stages[input.stageId].opportunityIds ||= []).push(record.id);
+      (nextGraph.stages[stageId].opportunityIds ||= []).push(record.id);
     } else {
       nextGraph.entities ||= {}; nextGraph.entities[type] ||= {}; nextGraph.entities[type][record.id] = record;
     }
+  }
+  if (type === 'persona' && input.useAsJourneyPersona === true) {
+    const nextJourney = nextGraph.journeys[journeyId];
+    nextJourney.personaId = referenceId;
+    nextDocument.personaId = referenceId;
+    // A context switch must read that Persona's own observations, never copy another person's emotions.
+    nextDocument.steps.forEach(step => Object.assign(step, readJourneyEmotion(nextGraph, nextJourney, nextGraph.stages[step.hostStageId])));
   }
   return { graph: nextGraph, document: nextDocument, noteId: note.i, referenceId };
 }

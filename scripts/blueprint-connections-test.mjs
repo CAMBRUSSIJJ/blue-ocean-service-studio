@@ -8,11 +8,11 @@ check('Geometry follows unequal column widths, including widths beyond manual li
 check('Operational values preserve absent versus explicit zero estimates',()=>{
  const empty=normalizeMatrixActivity(),actual=normalizeMatrixActivity({owner:' Ana ',team:' Atendimento ',durationMinutes:0,targetMinutes:''});
  assert.equal(empty.durationMinutes,null);assert.equal(actual.durationMinutes,0);assert.equal(actual.targetMinutes,null);assert.equal(actual.owner,'Ana');assert.equal(actual.team,'Atendimento');
- for(const input of [{durationMinutes:-1},{durationMinutes:'bad'},{targetMinutes:Infinity}])assert.throws(()=>normalizeMatrixActivity(input));
+ for(const input of [{durationMinutes:-1},{durationMinutes:'bad'},{targetMinutes:Infinity},{waitMinutes:-1},{waitMinutes:'bad'}])assert.throws(()=>normalizeMatrixActivity(input));
 });
 check('Canonical activity editing preserves advanced operational fields, identity and unrelated relations',()=>{
  const record={id:'canonical',roleIds:['role'],operationalDetails:{failureMode:'Falha',predecessors:[{kind:'backstage',id:'earlier'}],capacityPerHour:12}};
- writeMatrixActivity(record,{owner:'Ana',team:'Suporte',resourceRefs:['system:crm'],rule:'Validar protocolo',durationMinutes:0});
+ writeMatrixActivity(record,{owner:'Ana',team:'Suporte',resourceRefs:['system:crm'],rule:'Validar protocolo',durationMinutes:0,waitMinutes:15});
  assert.equal(record.id,'canonical');assert.deepEqual(record.roleIds,['role']);assert.equal(record.operationalDetails.failureMode,'Falha');assert.equal(record.operationalDetails.capacityPerHour,12);assert.equal(record.operationalDetails.predecessors[0].id,'earlier');
  assert.equal(matrixActivityFromRecord(record).resourceRefs[0],'system:crm');assert.equal(matrixActivityFromRecord({}),null);
 });

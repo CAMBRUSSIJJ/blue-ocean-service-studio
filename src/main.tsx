@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { AuthExperience } from './auth/AuthExperience';
 import { getStoredUser } from './auth/auth';
 import { installWorkspaceActivityTracking } from './services/workspace-preferences';
+import { RemoteWorkspaceDialog } from './components/RemoteWorkspaceDialog';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
 import './style.css';
 
@@ -22,6 +23,7 @@ function mountApplication() {
     <React.StrictMode>
       <AppErrorBoundary>
         <AuthExperience />
+        <RemoteWorkspaceDialog />
       </AppErrorBoundary>
     </React.StrictMode>,
   );

@@ -8,7 +8,7 @@ function elementsOpen(type,note=null){
   const stage=S.steps[Number(contentCellKey.split('|')[1])];
   if(!stage)return;
   elementPending='';
-  elementState={type,stageId:stage.hostStageId,rowId:contentCellKey.split('|')[0],editingId:note?.i||'',beforeId:contentBeforeId,
+  elementState={type,stageId:stage.hostStageId,stageLocalId:stage.hostLocalId,rowId:contentCellKey.split('|')[0],editingId:note?.i||'',beforeId:contentBeforeId,
     selected:note?.referenceId||'',query:'',scope:'all',category:'',stage:'',evidenceOnly:false,creating:false,caption:note?.t||''};
   const dialog=elementsDialog(),plural=elementPlurals[type],sources=elementsSources();
   dialog.innerHTML='<div class="panel-head"><div><h2 id="element-selector-title">'+(note?'Editar vínculo de ':'Adicionar ')+esc(contentTypes[type][1].toLowerCase())+'</h2><p class="hint">Vincular à etapa <b>'+esc(stage.n)+'</b></p></div><button type="button" class="x" data-act="elements-close" aria-label="Fechar seletor de elementos">×</button></div>'+
@@ -18,7 +18,7 @@ function elementsOpen(type,note=null){
     '<details class="element-filters"><summary>Filtros personalizados</summary><label>Categoria<select id="element-category" aria-label="Categoria"><option value="">Todas as categorias</option>'+[...new Set(sources.map(r=>r.category).filter(Boolean))].sort().map(value=>'<option>'+esc(value)+'</option>').join('')+'</select></label><label>Etapa em que aparece<select id="element-stage" aria-label="Etapa em que aparece"><option value="">Todas as etapas</option>'+[...new Map(sources.flatMap(r=>r.stages||[]).map(stage=>[stage.id,stage])).values()].map(stage=>'<option value="'+esc(stage.id)+'">'+esc(stage.title)+'</option>').join('')+'</select></label><label class="element-check"><input type="checkbox" id="element-evidence"> Com evidências vinculadas</label><button type="button" class="tb" data-act="elements-reset">Limpar filtros</button></details>'+
     '<p id="element-count" class="hint" role="status" aria-live="polite"></p><div class="element-results" role="group" aria-label="Registros encontrados"></div></section>'+
     '<section class="element-detail" aria-label="Detalhes do registro"></section></div><p class="form-error" role="alert"></p>'+
-    '<footer><label class="element-caption">Legenda no mapa<input id="element-caption" maxlength="1000" value="'+esc(elementState.caption)+'" placeholder="Usar o nome do registro"></label><div class="element-footer-actions"><button type="button" class="tb" data-act="elements-close">Cancelar</button><button type="button" class="tb p" data-act="elements-link" '+(!HOSTED?'disabled':'')+'>Vincular à etapa</button></div></footer>';
+    '<footer><label class="element-caption">Legenda no mapa<input id="element-caption" maxlength="1000" value="'+esc(elementState.caption)+'" placeholder="Usar o nome do registro"></label>'+(type==='persona'?'<label class="element-check"><input type="checkbox" id="element-journey-persona"> Usar também como Persona da jornada</label><p class="hint">O cartão marca onde esta pessoa aparece. Esta escolha define de quem são a experiência e as emoções da Jornada.</p>':'')+'<div class="element-footer-actions"><button type="button" class="tb" data-act="elements-close">Cancelar</button><button type="button" class="tb p" data-act="elements-link" '+(!HOSTED?'disabled':'')+'>Vincular à etapa</button></div></footer>';
   elementsRefresh();dialog.showModal();dialog.querySelector('#element-search').focus();
 }
 function elementsFiltered(){
@@ -56,9 +56,10 @@ function elementsSend(newRecord=null){
   const dialog=elementsDialog(),state=elementState;
   if(!newRecord&&!state.selected)return;
   state.caption=dialog.querySelector('#element-caption').value;
+  const useAsJourneyPersona=dialog.querySelector('#element-journey-persona')?.checked===true;
   elementPending=uid();dialog.querySelector('.form-error').textContent='';dialog.setAttribute('aria-busy','true');
   dialog.querySelectorAll('button,input,textarea,select').forEach(el=>el.disabled=true);
-  window.parent.postMessage({boBlueprintHost:1,type:'element-link',requestId:elementPending,input:{elementType:state.type,stageId:state.stageId,rowId:state.rowId,
+  window.parent.postMessage({boBlueprintHost:1,type:'element-link',requestId:elementPending,input:{elementType:state.type,stageId:state.stageId,stageLocalId:state.stageLocalId,useAsJourneyPersona,rowId:state.rowId,
     editingId:state.editingId,beforeId:state.beforeId,caption:state.caption,referenceId:newRecord?'':state.selected,newRecord}},location.origin);
 }
 function elementsResult(data){

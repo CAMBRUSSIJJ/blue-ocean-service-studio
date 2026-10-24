@@ -50,7 +50,7 @@ type BlueprintApi = {
 type JourneyStarterTemplate = { id: string; name: string; description: string; stages: string[] };
 type JourneyHomeApi = {
   model?(): { templates?: JourneyStarterTemplate[] };
-  create?(options: { name: string; status?: 'draft' | 'active'; priority?: string; templateId?: string }): { id: string } | null;
+  create?(options: { name: string; status?: 'draft' | 'active'; priority?: string; objective?: string; templateId?: string }): { id: string } | null;
   open?(id: string): Promise<boolean> | boolean;
   selectInWorkspace?(id: string): boolean;
   remove?(id: string): { ok: boolean; message?: string };
@@ -146,6 +146,13 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
   const [designStartOpen, setDesignStartOpen] = useState(false);
   const [journeyDraftName, setJourneyDraftName] = useState('');
   const [journeyStartTemplate, setJourneyStartTemplate] = useState('blank');
+  const [journeyGoal, setJourneyGoal] = useState('');
+  const businessGoals = [
+    { goal: 'Organizar meu atendimento', template: 'service', hint: 'Veja o caminho do primeiro contato até a entrega.' },
+    { goal: 'Reduzir atrasos e retrabalho', template: 'delivery', hint: 'Localize esperas e passagens entre pessoas.' },
+    { goal: 'Padronizar meu serviço', template: 'professional', hint: 'Combine atividades, responsáveis e recursos.' },
+    { goal: 'Resolver um problema do cliente', template: 'essential', hint: 'Registre o problema e acompanhe uma melhoria.' },
+  ];
   const [showServiceStructure, setShowServiceStructure] = useState(false);
   const [researchSurface, setResearchSurface] = useState<'research' | 'tools'>('research');
   const [overviewPhase, setOverviewPhase] = useState<GuidedWorkspacePhase>('understand');
@@ -315,11 +322,12 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
     }
     const runtime = journeyApi();
     if (!runtime?.create) { showToast('O runtime de Journey ainda não está disponível.'); return; }
-    const created = runtime.create({ name, status: 'draft', priority: 'medium', ...((requestedTemplate ?? journeyStartTemplate) !== 'blank' ? { templateId: requestedTemplate ?? journeyStartTemplate } : {}) });
+    const created = runtime.create({ name, status: 'draft', priority: 'medium', objective: journeyGoal, ...((requestedTemplate ?? journeyStartTemplate) !== 'blank' ? { templateId: requestedTemplate ?? journeyStartTemplate } : {}) });
     if (!created?.id) { showToast('Não foi possível criar a Journey.'); return; }
     setJourneyCreateOpen(false);
     setJourneyDraftName('');
     setJourneyStartTemplate('blank');
+    setJourneyGoal('');
     showToast((requestedTemplate ?? journeyStartTemplate) === 'blank' ? 'Jornada pronta para editar na matriz.' : 'Jornada criada com um modelo editável. Ajuste as etapas para a realidade do serviço.');
     await openJourney(created.id);
   };
@@ -901,6 +909,7 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
     {workspaceTab === 'journey' && journeyCreateOpen && <section className="bo-h1704-journey-starter" data-journey-starter="full-page" aria-labelledby="bo-h1704-starter-title">
       <header className="bo-h1704-starter-top"><button type="button" onClick={() => { setJourneyCreateOpen(false); setJourneyDraftName(''); }}><ArrowLeft size={16}/> Voltar às Jornadas</button><span>1. Escolha como começar &nbsp; → &nbsp; 2. Edite seu mapa</span></header>
       <div className="bo-h1704-starter-content"><small>CRIAR JORNADA DO CLIENTE</small><h1 id="bo-h1704-starter-title">Como você quer começar?</h1><p>Comece com um mapa em branco ou use um exemplo editável. Não é necessário cadastrar uma Persona ou fazer Pesquisa antes.</p>
+        <fieldset className="bo-business-goals"><legend>O que você quer melhorar no negócio?</legend><div>{businessGoals.map(item => <button type="button" key={item.goal} aria-pressed={journeyGoal === item.goal} onClick={() => { setJourneyGoal(item.goal); setJourneyStartTemplate(item.template); }}><strong>{item.goal}</strong><small>{item.hint}</small></button>)}</div><p>{journeyGoal ? `Objetivo: ${journeyGoal}. O modelo sugerido está destacado abaixo; você pode escolher outro.` : 'Escolha um objetivo para receber uma sugestão ou comece diretamente com um mapa.'}</p></fieldset>
         <label className="bo-h1704-name-field"><span>Nome da Jornada <em>(opcional)</em></span><input autoFocus value={journeyDraftName} onChange={(event) => setJourneyDraftName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') void createJourney(); }} placeholder="Ex.: Jornada de coleta e entrega"/></label>
         <div className="bo-h1704-templates-head"><strong>Escolha um ponto de partida</strong><small>Os modelos são exemplos; nenhuma etapa representa um fato confirmado sobre seu serviço.</small></div>
         <div className="bo-h1704-template-grid" aria-label="Criar Jornada a partir de um modelo"><button type="button" className={journeyStartTemplate === 'blank' ? 'is-selected' : ''} onClick={() => void createJourney('blank')}><span className="bo-h1704-template-preview is-blank"><Plus size={28}/></span><strong>Em branco</strong><small>Adicione suas próprias etapas no mapa. Clique para criar.</small></button>{starterTemplates.map((template) => <button type="button" key={template.id} className={journeyStartTemplate === template.id ? 'is-selected' : ''} onClick={() => void createJourney(template.id)}><span className="bo-h1704-template-preview">{template.stages.slice(0,4).map((stage) => <i key={stage} title={stage}/>)}</span><strong>{template.name}</strong><small>{template.description} · Clique para criar.</small></button>)}</div>

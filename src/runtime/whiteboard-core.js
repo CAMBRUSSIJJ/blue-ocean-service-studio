@@ -1063,7 +1063,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
 
   function hostedBlueprintDocument(){
     const b=board(),j=activeJourney(),stages=serviceFrameStages(),saved=b.blueprintHosted||{};
-    const ref={id:'host',title:openedFromUnifiedJourney?(j?.name||'Jornada'):(b.name||'Blueprint de serviço'),persona:saved.persona||'',
+    const ref={id:'host',journeyId:j?.id,title:openedFromUnifiedJourney?(j?.name||'Jornada'):(b.name||'Blueprint de serviço'),persona:saved.persona||'',
       editorKind:openedFromUnifiedJourney?'journey':'blueprint',view:clone(j?.matrixView||b.matrixView||null),
       savedViews:clone(j?.savedMatrixViews||[]),personaId:j?.personaId||'',painContexts:j?journeyPainContexts(graph,j.id):[],serviceElements:hostedServiceElements(),operationalResources:hostedOperationalResources(),serviceName:graph.service.name,objective:j?.objective||'',plans:journeyImprovementPlans(graph,j?.id),history:{canUndo:editIndex>0,canRedo:editIndex<editHistory.length-1},
       availableMetrics:Object.values(graph.entities?.metric||{}).filter(m=>!m.serviceId||m.serviceId===graph.service.id).map(m=>({id:m.id,name:m.title||m.name||'Indicador',unit:m.unit||'',current:typeof m.value==='number'?m.value:undefined,target:typeof m.target==='number'?m.target:undefined})),
@@ -1332,7 +1332,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       else if(type==='patch'){
         try{
           const ok=applyHostedBlueprintPatch(state);
-          respond('saved',{ok:ok===true,painContexts:journeyPainContexts(graph,activeJourney().id),serviceElements:hostedServiceElements(),operationalResources:hostedOperationalResources(),plans:journeyImprovementPlans(graph,activeJourney()?.id)});
+          respond('saved',{ok:ok===true,stageIdentities:hostedBlueprintDocument().steps.map(step=>({hostLocalId:step.hostLocalId,hostStageId:step.hostStageId})),painContexts:journeyPainContexts(graph,activeJourney().id),serviceElements:hostedServiceElements(),operationalResources:hostedOperationalResources(),plans:journeyImprovementPlans(graph,activeJourney()?.id)});
         }catch(error){
           respond('saved',{ok:false});
           console.error('Falha ao editar Blueprint da referência',error);
@@ -1345,6 +1345,12 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
         if(canEditHostedMatrix()){if(event.data.direction==='redo')redoEdit();else if(event.data.direction==='undo')undoEdit()}
       }else if(type==='backup'){
         exportFullBackup();
+      }else if(type==='storage-remote'){
+        runtime.api('remoteWorkspace')?.show?.();
+      }else if(type==='storage-import'){
+        showImportExportCenter('import');
+      }else if(type==='storage-recovery'){
+        showRecoveryCenter();
       }else if(type==='plan-save'||type==='plan-measure'){
         if(!canEditHostedMatrix()){respond('plan-result',{ok:false,error:'Seu papel permite somente leitura.'});return}
         const before=clone(graph);
@@ -3504,6 +3510,7 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
     transact:(updater,label='Editar projeto')=>{if(!graph)load();const collab=runtime.api('collaboration');if(!collab?.internalWrite?.()&&collab?.can&&!collab.can('edit'))throw Error('Seu papel atual permite somente leitura/comentários.');if(!historyReady)resetEditHistory('Antes da edição');const before=clone(graph),next=updater(clone(graph));if(!next?.service||!next?.journeys||!next?.views)throw Error('Projeto inválido');const hardened=repairGraphIntegrity(migrateGraphV3(next));if(!hardened.report.ok)throw Error('Operação bloqueada por integridade: '+(hardened.report.errors[0]?.message||'referência inválida'));graph=hardened.graph;if(!save(false,{label})){graph=before;throw Error(persistence.error||'Falha ao salvar')}if(overlay)renderAll();return clone(graph)},
     undo:()=>{if(!graph)load();undoEdit()},redo:()=>{if(!graph)load();redoEdit()},
     historyState:()=>({canUndo:editIndex>0,canRedo:editIndex>=0&&editIndex<editHistory.length-1}),
+    snapshot:()=>{if(!graph)load();return backupPayload()},
     export:()=>{if(!graph)load();exportFullBackup()},
     import:async data=>{if(!graph)load();await importFullProject(data);return clone(graph)},
     recovery:validatePersistence,

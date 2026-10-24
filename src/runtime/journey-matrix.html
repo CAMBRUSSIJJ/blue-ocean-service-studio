@@ -95,6 +95,7 @@ button,select,input{font:inherit;color:var(--ink)}button{cursor:pointer}
 <script src="/v1102-journey-views-ui.js"></script>
 <script src="/v1102-journey-card-tools-ui.js"></script>
 <script src="/v1102-journey-blueprint-ui.js"></script>
+<script src="/v1102-journey-business-ui.js"></script>
 <script>
 const HOSTED=new URLSearchParams(location.search).get('service-graph')==='1';let applyingHost=false;
 const KEY='bo-blueprint-v1',DIMS=['Tangíveis','Confiabilidade','Presteza','Segurança','Empatia'],EM=['Frustrada','Ansiosa','Neutra','Animada','Satisfeita'];
@@ -237,7 +238,8 @@ if(growthPresent){growthShowPresentation();return}if(lib){app.innerHTML=libView(
 if(!V)V=viewState(S.view);
 document.title='Blue Ocean · '+(V.perspective==='blueprint'?'Blueprint':'Jornada')+' · '+(S.title||'Mapa sem nome');
 const N=S.steps.length,rows=orderedRows().filter(r=>!V.hiddenRows.includes(r.id));
-let h=editorHeader()+cardToolsHeader()+blueprintConnectionBar()+(lk?'<div class="ins" role="status" style="margin:12px 24px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois na de destino. Clique numa seta para removê-la.')+'</div>':'');
+let h=editorHeader()+cardToolsHeader()+blueprintConnectionBar()+businessHeader()+(lk?'<div class="ins" role="status" style="margin:12px 24px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois na de destino. Clique numa seta para removê-la.')+'</div>':'');
+if(businessFocusMode()){h+=businessFocus(rows)}else{
 h+='<main class="wrap'+(V.insightsOpen?' has-insights':'')+'"><div class="bd" tabindex="0" role="region" aria-label="Matriz da Jornada"><div class="map-canvas'+(N<=2?' is-compact is-'+N:'')+'"><div class="matrix'+(V.fitToScreen?' fit-screen':'')+'" style="'+mapGridStyle(N)+'"><div class="r" data-row="st"><div class="lb">Etapas<small>Um momento da experiência</small></div>'+S.steps.map((s,i)=>'<div class="sh"><i>'+(i+1)+'</i><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da etapa" data-ed="sn" data-si="'+i+'">'+esc(s.n)+'</span><div class="sa"><button class="x" data-act="mv" data-si="'+i+'" data-d="-1" aria-label="Mover etapa para a esquerda" '+(!i?'disabled':'')+'>‹</button><button class="x" data-act="mv" data-si="'+i+'" data-d="1" aria-label="Mover etapa para a direita" '+(i===N-1?'disabled':'')+'>›</button><button class="x" data-act="ds" data-si="'+i+'" aria-label="Duplicar etapa">⧉</button><button class="x" data-act="del" data-si="'+i+'" aria-label="Remover etapa">×</button></div><span class="stage-resize" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Ajustar largura da etapa '+esc(s.n)+'" aria-valuemin="210" aria-valuemax="600" aria-valuenow="'+stageWidth(i)+'" data-stage-resize="'+i+'" title="Arraste ou use as setas do teclado para ajustar largura"></span></div>').join('')+growthStageColumn()+'</div>';
 if(!N)h+='<div class="empty-map" data-empty-journey="1"><h2>Comece pelo primeiro momento da experiência</h2><p>Adicione uma etapa e registre o que a pessoa faz, pensa e sente.</p><button class="tb p" data-act="step">Adicionar a primeira etapa</button></div>';
 if(N&&V.perspective==='blueprint'){const missing=['ac','fl','bk','sy'].filter(id=>!rows.some(row=>row.id===id));if(missing.length)h+='<div class="blueprint-notice" role="note">Camadas essenciais ocultas: '+missing.map(id=>esc(rowDefs().find(row=>row.id===id).n)).join(', ')+'. Os separadores dependem dessas camadas.<button class="tb" data-act="customize">Revisar faixas</button></div>'}
@@ -253,7 +255,8 @@ h+='</div>';
 });
 h+='<div class="row-tools"><button class="ad" data-act="alane">+ Adicionar faixa</button><button class="ad" data-act="customize">Mostrar outras faixas</button></div><svg class="lk" id="lk" aria-hidden="true"></svg></div>'+(N>0&&N<=2&&!V.insightsOpen?'<aside class="map-guidance" aria-label="Orientação para construir o mapa"><small>PRÓXIMOS PASSOS</small><h2>'+esc(V.perspective==='blueprint'?'Conecte experiência e operação':'Dê forma à experiência')+'</h2><ol><li>Descreva a situação vivida em cada etapa.</li><li>Use <b>+ Adicionar cartão</b> para registrar ações e observações.</li><li>'+esc(V.perspective==='blueprint'?'Relacione linha de frente, bastidores e apoio.':'Registre emoções e acrescente as faixas que precisar.')+'</li></ol><p>Seus cartões acompanham a troca entre Jornada e Blueprint.</p><button class="tb" data-act="step">Adicionar próxima etapa</button></aside>':'')+'</div></div>';
 if(V.insightsOpen)h+='<aside class="pnl" id="insights-panel" aria-label="Insights"><div class="panel-head"><h2>Insights</h2><button class="x" data-act="insights" aria-label="Fechar Insights">×</button></div><div class="panel-tabs" role="tablist" aria-label="Tipos de insights">'+[['guidance','Orientações'],['analysis','Análise'],['quality','Qualidade']].map(([id,label])=>'<button id="tab-'+id+'" role="tab" data-act="insight-tab" data-tab="'+id+'" aria-controls="dx" aria-selected="'+(V.insightsTab===id)+'" tabindex="'+(V.insightsTab===id?0:-1)+'">'+label+'</button>').join('')+'</div><div id="dx" role="tabpanel" aria-labelledby="tab-'+V.insightsTab+'">'+dx()+'</div></aside>';
-app.innerHTML=h+'</main>'+cardToolsBulkBar()+customizer()+growthDialogs()+contentDialogs()+contextDialogs()+viewsDialogs()+cardToolsDialogs()+blueprintDialogs();requestAnimationFrame(drawLinks);
+}
+app.innerHTML=h+'</main>'+cardToolsBulkBar()+customizer()+growthDialogs()+contentDialogs()+contextDialogs()+viewsDialogs()+cardToolsDialogs()+blueprintDialogs()+businessDialogs();businessAfterRender();requestAnimationFrame(drawLinks);
 }
 function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();const dxEl=document.getElementById('dx');if(dxEl)dxEl.innerHTML=dx();app.querySelectorAll('[data-emotion-label]').forEach(el=>el.textContent=EM[S.steps[+el.dataset.emotionLabel].e+2]);const count=app.querySelector('.insight-count');if(count)count.textContent=' · '+S.iss.filter(x=>x.t==='i').length+' oportunidades'}
 function focusNew(sel){const e=app.querySelector(sel);if(e)e.focus()}
@@ -309,7 +312,7 @@ app.addEventListener('pointermove',growthEmotionPointerMove);
 app.addEventListener('pointerup',event=>growthEmotionPointerEnd(event));
 app.addEventListener('pointercancel',event=>growthEmotionPointerEnd(event,true));
 app.addEventListener('click',e=>{if(growthEmotionIgnoreClick(e))return;const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
-if(blueprintAction(a,d,b)||viewsAction(a,d,b)||contentAction(a,d,b)||growthAction(a,d))return;
+if(businessAction(a,d,b)||blueprintAction(a,d,b)||viewsAction(a,d,b)||contentAction(a,d,b)||growthAction(a,d))return;
 if(a==='map-prev'||a==='map-next'){const bd=app.querySelector('.bd');if(bd)bd.scrollBy({left:bd.clientWidth*(a==='map-prev'?-0.75:0.75),behavior:'smooth'});return}
 if(a==='zoom-in'||a==='zoom-out'||a==='zoom-reset'){V.zoom=a==='zoom-reset'?100:Math.max(75,Math.min(150,(V.zoom||100)+(a==='zoom-in'?10:-10)));saveView();rerender();return}
 if(a==='lane-collapse'){V.collapsedRows=V.collapsedRows.includes(d.id)?V.collapsedRows.filter(id=>id!==d.id):[...V.collapsedRows,d.id];saveView();rerender();focusNew('[data-act="lane-collapse"][data-id="'+d.id+'"]');return}
@@ -451,7 +454,7 @@ if(HOSTED){
     if(event.data.type==='element-result'){elementsResult(event.data);return}
     if(event.data.type==='context-result'){contextResult(event.data);return}
     if(event.data.type==='plan-result'){growthPlanResult(event.data);return}
-    if(event.data.type==='saved'){if(event.data.operationalResources)S.operationalResources=event.data.operationalResources;if(!event.data.ok)growthLastPatch='';if(event.data.plans)S.plans=event.data.plans;if(event.data.painContexts)S.painContexts=event.data.painContexts;if(event.data.serviceElements){S.serviceElements=event.data.serviceElements;pickerRefreshReferences();elementsRefresh()}announceSave(event.data.ok);return}
+    if(event.data.type==='saved'){if(Array.isArray(event.data.stageIdentities)){const ids=new Map(event.data.stageIdentities.filter(x=>x.hostLocalId&&x.hostStageId).map(x=>[x.hostLocalId,x.hostStageId]));for(const step of S.steps){const id=ids.get(step.hostLocalId);if(id)step.hostStageId=id}}if(event.data.operationalResources)S.operationalResources=event.data.operationalResources;if(!event.data.ok)growthLastPatch='';if(event.data.plans)S.plans=event.data.plans;if(event.data.painContexts)S.painContexts=event.data.painContexts;if(event.data.serviceElements){S.serviceElements=event.data.serviceElements;pickerRefreshReferences();elementsRefresh()}announceSave(event.data.ok);return}
     if(event.data.type==='hydrate'){
       applyingHost=true;
       try{
