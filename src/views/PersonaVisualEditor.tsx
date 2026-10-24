@@ -119,8 +119,8 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
       <div><span>PERSONA VISUAL</span><h2>Composição do perfil</h2><p>Organize as informações como cartões. A edição acontece diretamente no quadro.</p></div>
       <div className="bo-p5-toolbar-actions">
         <div className="bo-p5-template-actions" role="group" aria-label="Modelos de composição">
-          <button type="button" onClick={()=>updateCards(personaVisualTemplate(draft.mode,'essential'))}>Modelo essencial</button>
-          <button type="button" onClick={()=>updateCards(personaVisualTemplate(draft.mode,'research'))}>Modelo pesquisa</button>
+          <button type="button" onClick={()=>updateCards(personaVisualTemplate('essential'))}>Modelo essencial</button>
+          <button type="button" onClick={()=>updateCards(personaVisualTemplate('research'))}>Modelo pesquisa</button>
         </div>
         <button type="button" className="bo-p5-add-button" aria-expanded={showLibrary} aria-controls="bo-p5-library" onClick={()=>setShowLibrary(v=>!v)}>+ Adicionar bloco</button>
       </div>
