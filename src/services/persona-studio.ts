@@ -5,6 +5,50 @@ export type PersonaDepth = 'simple' | 'professional';
 export type PersonaLayout = 'profile-left' | 'balanced' | 'story-first';
 export type PersonaSectionId = 'identity' | 'bio' | 'goal' | 'needs' | 'situation' | 'quote' | 'channels' | 'behaviors' | 'expectations' | 'constraints' | 'triggers' | 'alternatives' | 'evidence' | 'relations';
 
+// Visual presentation stays on the canonical Persona entity; no shadow records.
+export type PersonaVisualCardId = PersonaSectionId | 'portrait' | 'scale';
+export type PersonaVisualWidth = 'half' | 'full';
+export type PersonaVisualCard = { id: PersonaVisualCardId; width: PersonaVisualWidth };
+export type PersonaVisualScale = { left: string; right: string; value: number };
+export const PERSONA_VISUAL_CARD_IDS: PersonaVisualCardId[] = [
+  'identity','portrait','bio','goal','needs','situation','quote','channels',
+  'behaviors','expectations','constraints','triggers','alternatives','evidence','relations','scale',
+];
+export const personaVisualTemplate = (template: 'essential' | 'research'): PersonaVisualCard[] => {
+  const ids: PersonaVisualCardId[] = template === 'research'
+    ? ['identity','portrait','goal','bio','behaviors','expectations','constraints','needs','quote','evidence']
+    : ['identity','goal','needs','situation','channels','quote'];
+  // The same data can appear in multiple layouts without being copied.
+  return ids.map(id => ({ id, width: ['identity','quote'].includes(id) ? 'full' : 'half' }));
+};
+export function normalizePersonaVisualCards(value: unknown, mode: PersonaDepth): PersonaVisualCard[] {
+  if (!Array.isArray(value)) return personaVisualTemplate(mode === 'professional' ? 'research' : 'essential');
+  const seen = new Set<PersonaVisualCardId>();
+  const parsed = value.slice(0, PERSONA_VISUAL_CARD_IDS.length).flatMap((item): PersonaVisualCard[] => {
+    if (!item || typeof item !== 'object') return [];
+    const id = (item as Partial<PersonaVisualCard>).id;
+    if (!id || !PERSONA_VISUAL_CARD_IDS.includes(id) || seen.has(id)) return [];
+    seen.add(id);
+    return [{ id, width: (item as Partial<PersonaVisualCard>).width === 'full' ? 'full' : 'half' }];
+  });
+  // Identity cannot be hidden; empty arrays otherwise are intentional.
+  if (!seen.has('identity')) parsed.unshift({ id:'identity', width:'full' });
+  return parsed;
+}
+export const personaVisualScale = (value: unknown): PersonaVisualScale => {
+  const v = value && typeof value === 'object' ? value as Partial<PersonaVisualScale> : {};
+  return {
+    left: typeof v.left === 'string' ? v.left.slice(0,50) : 'Autonomia',
+    right: typeof v.right === 'string' ? v.right.slice(0,50) : 'Orientação',
+    value: typeof v.value === 'number' && Number.isFinite(v.value) ? Math.max(0,Math.min(100,Math.round(v.value))) : 50,
+  };
+};
+const safePersonaImage = (value: unknown): string => {
+  if (typeof value !== 'string' || value.length > 1200) return '';
+  try { const u = new URL(value); return u.protocol === 'https:' ? u.href : ''; }
+  catch { return ''; }
+};
+
 export const SIMPLE_PERSONA_SECTIONS: PersonaSectionId[] = ['identity', 'goal', 'needs', 'situation', 'quote', 'channels', 'evidence'];
 export const ADVANCED_PERSONA_SECTIONS: PersonaSectionId[] = ['identity', 'bio', 'goal', 'needs', 'situation', 'quote', 'channels', 'behaviors', 'expectations', 'constraints', 'triggers', 'alternatives', 'evidence', 'relations'];
 
@@ -35,6 +79,9 @@ export type PersonaProfileDraft = {
   layout: PersonaLayout;
   sections: PersonaSectionId[];
   advancedConfigured?: boolean;
+  visualCards?: PersonaVisualCard[];
+  imageUrl?: string;
+  scale?: PersonaVisualScale;
   context: string;
   primaryGoal: string;
   situation: string;
@@ -90,6 +137,9 @@ export const personaProfileFromEntity = (entity: GraphEntity): PersonaProfileDra
   mode: entity.personaMode === 'professional' ? 'professional' : 'simple',
   advancedConfigured: entity.personaAdvancedConfigured === true || entity.personaMode === 'professional' || (Array.isArray(entity.personaSections) && entity.personaSections.some((s) => !SIMPLE_PERSONA_SECTIONS.includes(s as PersonaSectionId))),
   layout: entity.personaLayout === 'balanced' || entity.personaLayout === 'story-first' ? entity.personaLayout : 'profile-left',
+  visualCards: normalizePersonaVisualCards(entity.personaVisualCards, entity.personaMode === 'professional' ? 'professional' : 'simple'),
+  imageUrl: safePersonaImage(entity.personaPortraitUrl),
+  scale: personaVisualScale(entity.personaVisualScale),
   sections: Array.isArray(entity.personaSections)
     ? entity.personaSections.filter((value): value is PersonaSectionId => ['identity','bio','goal','needs','situation','quote','channels','behaviors','expectations','constraints','triggers','alternatives','evidence','relations'].includes(String(value)))
     : (entity.personaMode === 'professional' ? [...ADVANCED_PERSONA_SECTIONS] : [...SIMPLE_PERSONA_SECTIONS]),
@@ -194,6 +244,9 @@ export function updatePersonaProfile(input: {
     personaMode: input.draft.mode,
     personaAdvancedConfigured: Boolean(input.draft.advancedConfigured || input.draft.mode === 'professional'),
     personaLayout: input.draft.layout ?? 'profile-left',
+    personaVisualCards: normalizePersonaVisualCards(input.draft.visualCards, input.draft.mode),
+    personaPortraitUrl: safePersonaImage(input.draft.imageUrl),
+    personaVisualScale: personaVisualScale(input.draft.scale),
     personaSections: [...new Set(Array.isArray(input.draft.sections) ? input.draft.sections : (input.draft.mode === 'professional' ? ADVANCED_PERSONA_SECTIONS : SIMPLE_PERSONA_SECTIONS))],
     context: input.draft.context.trim(),
     primaryGoal: input.draft.primaryGoal.trim(),
