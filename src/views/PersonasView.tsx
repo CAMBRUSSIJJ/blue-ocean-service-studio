@@ -6,6 +6,7 @@ import {
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
+import { PersonaVisualEditor } from './PersonaVisualEditor';
 import { createDiscoveryEntity } from '../services/discovery-workspace';
 import { contextEntityTitle, contextEntityUsage, listContextEntities } from '../services/context-library';
 import {
@@ -416,18 +417,10 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       <div className="bo-h71-detail-body">
         {detailTab === 'overview' && <div className="bo-h724-overview-layout">
           <main className="bo-h724-overview-main">
-            <section className="bo-h71-editor-card bo-h724-identity-card">
-              <header><div><small>IDENTIDADE</small><strong>Quem é essa persona?</strong><p>Registre apenas o contexto necessário para reconhecer a pessoa e orientar decisões.</p></div><div className="bo-h71-depth-switch bo-h724-depth-switch"><button type="button" className={draft.mode === 'simple' ? 'is-active' : ''} onClick={() => changeDetailMode('simple')}><strong>Simples</strong><small>Essencial</small></button><button type="button" className={draft.mode === 'professional' ? 'is-active' : ''} onClick={() => changeDetailMode('professional')}><strong>Avançada</strong><small>Pesquisa profunda</small></button></div></header>
-              <div className="bo-h724-form-grid">
-                <label className="bo-h724-field bo-h724-field--wide"><span>Nome da Persona</span><input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="Ex.: Profissionais que moram sozinhos"/></label>
-                <label className="bo-h724-field bo-h724-field--wide"><span>Resumo <small>curto e observável</small></span><AutoTextarea minRows={2} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Quem é essa pessoa e o que a caracteriza neste serviço?"/></label>
-                {activeDetailSections.includes('bio') && <label className="bo-h724-field bo-h724-field--wide"><span>Bio / contexto</span><AutoTextarea minRows={2} value={draft.context} onChange={(event) => setDraft({ ...draft, context: event.target.value })} placeholder="Contexto relevante, sem transformar em biografia extensa."/></label>}
-                {activeDetailSections.includes('goal') && <label className="bo-h724-field"><span>Objetivo principal</span><AutoTextarea minRows={2} value={draft.primaryGoal} onChange={(event) => setDraft({ ...draft, primaryGoal: event.target.value })} placeholder="O que ela precisa alcançar?"/></label>}
-                {activeDetailSections.includes('situation') && <label className="bo-h724-field"><span>Situação / momento</span><AutoTextarea minRows={2} value={draft.situation} onChange={(event) => setDraft({ ...draft, situation: event.target.value })} placeholder="Quando essa necessidade ou comportamento aparece?"/></label>}
-                {activeDetailSections.includes('quote') && <label className="bo-h724-field bo-h724-field--wide bo-h724-quote-field"><span>Frase representativa</span><AutoTextarea minRows={2} value={draft.quote} onChange={(event) => setDraft({ ...draft, quote: event.target.value })} placeholder="“Uma frase curta que represente sua perspectiva.”"/></label>}
-                {draft.mode === 'simple' && activeDetailSections.includes('channels') && <div className="bo-h724-field bo-h724-field--wide"><span>Canais / ambientes</span><div className="bo-h724-chip-editor">{draft.channels.map((channel) => <button key={channel} type="button" className="bo-h724-chip" onClick={() => removeChannel(channel)}>{channel}<X size={11}/></button>)}<input value={channelEntry} onChange={(event) => setChannelEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addChannel(); } }} placeholder={draft.channels.length ? 'Adicionar canal…' : 'Ex.: WhatsApp'}/></div><div className="bo-h724-suggestions">{suggestedChannels.filter((channel) => !draft.channels.includes(channel)).slice(0, 5).map((channel) => <button key={channel} type="button" onClick={() => addChannel(channel)}>+ {channel}</button>)}</div></div>}
-              </div>
-            </section>
+            <PersonaVisualEditor draft={draft} onChange={setDraft} onChangeMode={changeDetailMode}
+              counts={{ need:completenessReport.connectionCounts.need, pain:completenessReport.connectionCounts.pain,
+                evidence:evidenceConnections.length, related:connectedIds.length }}
+              onNavigate={setDetailTab}/>
           </main>
           <aside className="bo-h724-overview-aside">
             <section className="bo-h724-completeness-card"><header><div><small>COMPLETUDE</small><strong>{completeness}%</strong></div><span>{draft.mode === 'professional' ? 'Avançada' : 'Simples'}</span></header><i><b style={{ width: `${completeness}%` }}/></i><div className="bo-h71-check-list bo-h724-check-list">{completenessChecks.map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span>{check.label}</span></div>)}</div></section>
