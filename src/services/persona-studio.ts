@@ -197,7 +197,9 @@ export const personaProfileFromEntity = (entity: GraphEntity): PersonaProfileDra
 });
 
 const relationUniverse = (graph: ServiceGraph) => RELATION_KINDS.flatMap((kind) =>
-  Object.values(graph.entities?.[kind] ?? {}).map((entity) => ({ kind, entity })),
+  Object.values(graph.entities?.[kind] ?? {})
+    .filter((entity) => !entity.serviceId || entity.serviceId === graph.service.id)
+    .map((entity) => ({ kind, entity })),
 );
 
 export function buildPersonaStudioReport(graph: ServiceGraph, personaId: Id): PersonaStudioReport | null {
@@ -371,12 +373,10 @@ export function removePersonaFromGraph(graph: ServiceGraph, personaId: Id, now =
   return { ...graph, entities, service: { ...graph.service, updatedAt: now } };
 }
 
-export const personaRelationOptions = (graph: ServiceGraph) => RELATION_KINDS.flatMap((kind) =>
-  Object.values(graph.entities?.[kind] ?? {}).map((entity) => ({
+export const personaRelationOptions = (graph: ServiceGraph) => relationUniverse(graph).map(({kind,entity}) => ({
     id: entity.id,
     kind,
     title: entityTitle(entity),
     description: entityDescription(entity),
     confidence: kind === 'evidence' ? String(entity.confidence ?? 'medium') : undefined,
-  })),
-);
+  }));
