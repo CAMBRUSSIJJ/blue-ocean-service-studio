@@ -1,5 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { TextareaHTMLAttributes } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft, Check, Filter, MoreVertical, Plus, Search, Table2, Trash2, UserRound, UsersRound, X,
 } from '../design-system/icons';
@@ -26,19 +25,6 @@ import {
   type PersonaSectionId,
 } from '../services/persona-studio';
 
-
-type AutoTextareaProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'rows'> & { minRows?: number };
-
-function AutoTextarea({ minRows = 2, className = '', ...props }: AutoTextareaProps) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  useLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    element.style.height = 'auto';
-    element.style.height = `${Math.max(element.scrollHeight, minRows * 22)}px`;
-  }, [props.value, minRows]);
-  return <textarea {...props} ref={ref} rows={minRows} className={`bo-h724-autogrow ${className}`.trim()}/>;
-}
 
 type DetailTab = 'overview' | 'behavior' | 'decisions' | 'barriers' | 'relations' | 'evidence' | 'usage';
 type FilterMode = 'all' | 'unused' | 'used' | 'evidence' | 'without-evidence' | 'incomplete';
@@ -156,7 +142,6 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [owner, setOwner] = useState('');
   const [tagsText, setTagsText] = useState('');
   const [tagEntry, setTagEntry] = useState('');
-  const [channelEntry, setChannelEntry] = useState('');
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [createTitle, setCreateTitle] = useState('');
@@ -182,7 +167,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     setDraft(personaProfileFromEntity(selected));
     setOwner(String(selected.owner ?? ''));
     setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
-    setTagEntry(''); setChannelEntry('');
+    setTagEntry('');
     setConnectedIds(report.connections.map((item) => item.id));
   }, [selectedId, selected?.updatedAt]);
 
@@ -314,8 +299,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
 
   const savePersona = () => {
     if (!selectedId || !draft?.title.trim()) return;
-    const pendingChannel = channelEntry.trim().replace(/,$/, '');
-    const effectiveDraft = pendingChannel ? { ...draft, channels: [...new Set([...draft.channels, pendingChannel])] } : draft;
+    const effectiveDraft = draft;
     const tags = stringList([tagsText, tagEntry].filter(Boolean).join(','));
     setGraph((current) => patchPersonaMeta(
       updatePersonaProfile({ graph: current, personaId: selectedId, draft: effectiveDraft, connectedIds }),
@@ -325,7 +309,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     ), 'Personas 2.0: salvar');
     setDraft(effectiveDraft);
     setTagsText(tags.join(', '));
-    setTagEntry(''); setChannelEntry('');
+    setTagEntry('');
     showToast('Persona salva.');
   };
 
@@ -334,7 +318,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     setDraft(personaProfileFromEntity(selected));
     setOwner(String(selected.owner ?? ''));
     setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
-    setTagEntry(''); setChannelEntry('');
+    setTagEntry('');
     setConnectedIds(report.connections.map((item) => item.id));
     showToast('Alterações descartadas.');
   };
@@ -362,15 +346,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     setTagEntry('');
   };
   const removeTag = (value: string) => setTagsText(tagValues.filter((item) => item !== value).join(', '));
-  const addChannel = (raw = channelEntry) => {
-    const value = raw.trim().replace(/,$/, '');
-    if (!value) return;
-    setDraft((current) => current ? { ...current, channels: [...new Set([...current.channels, value])] } : current);
-    setChannelEntry('');
-  };
-  const removeChannel = (value: string) => setDraft((current) => current ? { ...current, channels: current.channels.filter((item) => item !== value) } : current);
   const ownerSuggestions = [...new Set(personas.map((persona) => String(persona.owner ?? '')).filter(Boolean))];
-  const suggestedChannels = ['WhatsApp', 'E-mail', 'Instagram', 'Site', 'Telefone', 'Presencial'];
 
   if (selected && draft && report) {
     const evidenceConnections = relationOptions.filter((item) => item.kind === 'evidence' && connectedIds.includes(item.id));
@@ -385,7 +361,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     const isDirty = JSON.stringify(draft) !== JSON.stringify(savedDraft)
       || owner !== String(selected.owner ?? '')
       || tagsText !== (Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '')
-      || Boolean(tagEntry.trim()) || Boolean(channelEntry.trim())
+      || Boolean(tagEntry.trim())
       || JSON.stringify([...connectedIds].sort()) !== JSON.stringify(savedConnectedIds);
     const visibleTags = tagValues.slice(0, 3);
     return <section className={`bo-h71-persona-detail bo-h713-layout-${draft.layout}`} data-personas-h71="detail">
