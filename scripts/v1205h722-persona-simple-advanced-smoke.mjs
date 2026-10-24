@@ -54,7 +54,7 @@ ok(visualReopened.visualCards.map(c=>c.id).join(',')==='identity,goal,quote', 'o
 ok(visualReopened.primaryGoal==='Melhorar atendimento' && visualReopened.imageUrl==='https://example.com/avatar.png', 'campos originais e imagem continuam persistentes');
 ok(visualReopened.scale.value===72 && visualReopened.scale.left==='Preço','escala opcional mantém valores');
 ok(personaVisualScale({value:900}).value===100, 'escala normalizada respeita limites');
-ok(personaVisualTemplate('professional','research').some(c=>c.id==='behaviors'), 'template de pesquisa inclui comportamento');
+ok(personaVisualTemplate('research').some(c=>c.id==='behaviors'), 'template de pesquisa inclui comportamento');
 const restored = updatePersonaProfile({graph,personaId:persona.id,draft:{...visualReopened,visualCards:[{id:'identity',width:'full'}]},connectedIds:[]});
 ok(personaProfileFromEntity(restored.entities.persona[persona.id]).primaryGoal==='Melhorar atendimento', 'ocultar bloco não apaga o campo correspondente');
 const visual = fs.readFileSync('src/views/PersonaVisualEditor.tsx','utf8');
