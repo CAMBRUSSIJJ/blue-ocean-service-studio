@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {
   personaProfileFromEntity, updatePersonaProfile, normalizePersonaEvidenceClaims,
-  personaEvidenceStatements,
+  personaEvidenceStatements, personaRelationOptions,
 } from '../src/services/persona-studio.ts';
 import { matrixCardMatches, matrixServiceReferences } from '../src/services/journey-content.js';
 
@@ -35,6 +35,8 @@ check(saved.relatedIds.includes('e1') && next.entities.evidence.e1.relatedIds.in
   'Anchor preserves canonical two-way Persona/evidence relations');
 check(!original.entities.persona.p1.personaEvidenceClaims && !original.entities.evidence.e1.relatedIds.includes('p1'),
   'Input graph is not mutated');
+check(!personaRelationOptions(next).some(item=>item.id==='e2'),
+  'Persona relation selector isolates evidence from other services');
 const refs=matrixServiceReferences(next,{journeyId:'j1'});
 check(refs.evidence.find(item=>item.id==='e1').personaIds.includes('p1'),
   'Evidence reference exposes the existing Persona relationship');
