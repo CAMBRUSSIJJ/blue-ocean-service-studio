@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  normalizePersonaVisualCards, personaVisualTemplate, visiblePersonaSections,
+  normalizePersonaVisualCards, personaVisualTemplate,
   type PersonaDepth, type PersonaProfileDraft, type PersonaVisualCard,
   type PersonaVisualCardId, type PersonaVisualWidth,
 } from '../services/persona-studio';
@@ -37,7 +37,6 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
   const [showLibrary,setShowLibrary]=useState(false);
   const [dragging,setDragging]=useState<PersonaVisualCardId|null>(null);
   const cards=normalizePersonaVisualCards(draft.visualCards,draft.mode);
-  const visibleSections=visiblePersonaSections(draft);
   const update=(changes:Partial<PersonaProfileDraft>)=>onChange({...draft,...changes});
   const updateCards=(next:PersonaVisualCard[])=>update({visualCards:normalizePersonaVisualCards(next,draft.mode)});
   const move=(id:PersonaVisualCardId,to:PersonaVisualCardId)=>{
