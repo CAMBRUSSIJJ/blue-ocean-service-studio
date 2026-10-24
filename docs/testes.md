@@ -38,6 +38,7 @@ npm run journey:context:test
 npm run journey:observation:test
 npm run journey:cards:test
 npm run maps:ux:test
+npm run blueprint:connections:test
 ```
 
 Esses testes exercitam operações como seleção, criação e movimentação de cartões,
@@ -79,6 +80,7 @@ npm run journey:observation:browser
 npm run journey:cards:browser
 npm run maps:matrix:browser
 npm run maps:ux:browser
+npm run blueprint:connections:browser
 ```
 
 Esses runners podem servir o `dist/` em um servidor temporário. Para os que
@@ -196,3 +198,12 @@ metodológicos das faixas, rascunhos e persistência da aparência sem alterar c
 de faixas, filtros, histórico, recarga e toque em 1440, 834 e 390 px.
 As capturas ficam em `artifacts/journey-editor-ux/`. A auditoria axe requer
 `node_modules/axe-core/axe.min.js`; se ausente, o runner informa o check não executado.
+
+`blueprint:connections:test` verifica a geometria de colunas desiguais, metadados
+operacionais, quatro relações, transferências explícitas entre equipes,
+validação de ciclos de dependência e persistência com IDs canônicos.
+`blueprint:connections:browser` cobre responsáveis e recursos vinculados,
+reclassificação sem excluir a origem, histórico, apresentação e exportação,
+recarga e toque. Confere o alinhamento das emoções e cartões durante zoom,
+redimensionamento e ajuste à tela. Audita matriz e formulários com axe em
+1440, 834 e 390 px; evidências em `artifacts/blueprint-connections/`.

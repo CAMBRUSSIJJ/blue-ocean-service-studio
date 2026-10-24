@@ -32,6 +32,69 @@ const metadataList = (value, limit, length, insensitive = false) => {
   if (result.length > limit) throw Error(`Use até ${limit} ${insensitive ? 'tags' : 'Personas'} por cartão.`);
   return result;
 };
+export const MATRIX_CONNECTION_TYPES = {sequence:'Sequência',dependency:'Dependência',uses:'Usa recurso',handoff:'Passagem entre equipes'};
+export function normalizeMatrixActivity(input = {}) {
+  const number = (key) => {
+    if(input[key] === '' || input[key] == null)return null;
+    const value=Number(input[key]);
+    if(!Number.isFinite(value)||value<0||value>525600)throw Error('Use tempos entre zero e 525600 minutos.');
+    return value;
+  };
+  return {category:['activity','support-process','resource'].includes(input.category)?input.category:'activity',
+    owner:clipped(input.owner,160),team:clipped(input.team,160),
+    resourceRefs:metadataList(input.resourceRefs,30,180),resourceNotes:clipped(input.resourceNotes,400),
+    rule:clipped(input.rule,1000),durationMinutes:number('durationMinutes'),targetMinutes:number('targetMinutes')};
+}
+export function matrixActivityFromRecord(record, fallbackCategory = 'activity') {
+  const detail=record.operationalDetails||{};
+  if(!record.owner&&!record.team&&!record.resourceRefs&&!detail.matrixCategory&&!detail.resourceNotes&&!detail.rule&&detail.durationMinutes==null&&detail.targetMinutes==null)return null;
+  return normalizeMatrixActivity({category:detail.matrixCategory||fallbackCategory,owner:record.owner,team:record.team,resourceRefs:record.resourceRefs,
+    resourceNotes:detail.resourceNotes,rule:detail.rule,durationMinutes:detail.durationMinutes,targetMinutes:detail.targetMinutes});
+}
+export function writeMatrixActivity(record, input) {
+  const activity=normalizeMatrixActivity(input);
+  record.owner=activity.owner;record.team=activity.team;record.resourceRefs=activity.resourceRefs;
+  record.operationalDetails={...record.operationalDetails,matrixCategory:activity.category,resourceNotes:activity.resourceNotes,rule:activity.rule,
+    durationMinutes:activity.durationMinutes==null?undefined:activity.durationMinutes,targetMinutes:activity.targetMinutes==null?undefined:activity.targetMinutes};
+}
+export function normalizeMatrixConnection(input) {
+  const a=clipped(input.a,160),b=clipped(input.b,160),type=Object.hasOwn(MATRIX_CONNECTION_TYPES,input.type)?input.type:'sequence';
+  if(!a||!b||a===b)throw Error('Escolha duas atividades diferentes para conectar.');
+  const result={...input,a,b,id:clipped(input.id,160)||('link-'+a+'-'+b).slice(0,160),type,label:clipped(input.label,160)};
+  if(type==='handoff'){
+    const old=input.handoff||{},fromTeam=clipped(old.fromTeam,160),toTeam=clipped(old.toTeam,160),deliverable=clipped(old.deliverable,400);
+    const fold=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').toLocaleLowerCase();
+    if(!fromTeam||!toTeam||!deliverable||fold(fromTeam)===fold(toTeam))throw Error('Informe equipes de origem e destino diferentes e o que será transferido.');
+    const deadline=old.deadlineMinutes===''||old.deadlineMinutes==null?null:Number(old.deadlineMinutes);
+    if(deadline!==null&&(!Number.isFinite(deadline)||deadline<0||deadline>525600))throw Error('Informe um prazo válido em minutos.');
+    result.handoff={fromTeam,toTeam,deliverable,deadlineMinutes:deadline,acceptance:clipped(old.acceptance,1000)};
+  }else delete result.handoff;
+  return result;
+}
+export function validateMatrixConnections(cells, connections = []) {
+  if(!Array.isArray(connections)||connections.length>2000)throw Error('Use até 2000 conexões no mapa.');
+  const notes=new Map(Object.entries(cells).flatMap(([key,values])=>values.map(note=>[note.i??note.id,{...note,row:key.split('|')[0]}])));
+  const ids=new Set(),edges=[];
+  for(const value of connections){
+    const link=normalizeMatrixConnection(value);
+    if(!notes.has(link.a)||!notes.has(link.b))throw Error('Uma atividade desta conexão não está mais disponível.');
+    if(ids.has(link.id))throw Error('A conexão já existe.');ids.add(link.id);
+    const target=notes.get(link.b);
+    if(link.type==='uses'&&target.activity?.category!=='resource'&&!(target.row==='sy'&&!target.activity)&&!['channel','metric'].includes(target.type))throw Error('Uma conexão de uso precisa apontar para um recurso. Classifique o destino nos detalhes da atividade.');
+    edges.push(link);
+  }
+  const successors=new Map();for(const link of edges.filter(link=>link.type==='dependency'))successors.set(link.a,[...(successors.get(link.a)||[]),link.b]);
+  const done=new Set(),active=new Set();
+  const visit=id=>{if(active.has(id))throw Error('As dependências não podem formar um ciclo.');if(done.has(id))return;active.add(id);for(const next of successors.get(id)||[])visit(next);active.delete(id);done.add(id)};
+  for(const id of successors.keys())visit(id);
+  return edges;
+}
+export function matrixStageGeometry(widths) {
+  let total=0;
+  const stages=widths.map(value=>{const width=Number(value);if(!Number.isFinite(width)||width<=0)throw Error('Largura de etapa inválida.');const stage={left:total,width,center:total+width/2};total+=width;return stage});
+  return {stages,total};
+}
+
 export function normalizeMatrixCardMetadata(input = {}) {
   return { personaIds: metadataList(input.personaIds, 20, 160), tags: metadataList(input.tags, 20, 40, true),
     tone: MATRIX_CARD_TONES.includes(input.tone) ? input.tone : 'neutral' };
@@ -46,7 +109,7 @@ export function matrixCardMatches(note, input = {}, extraText = '') {
   if (filter.personaId && !metadata.personaIds.includes(filter.personaId) && !(filter.includeUnassigned && !metadata.personaIds.length)) return false;
   if (filter.tag && !metadata.tags.some(tag => tag.toLocaleLowerCase() === filter.tag.toLocaleLowerCase())) return false;
   const fold = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
-  const searchable = fold([note.t ?? note.text ?? '', note.icon || '', ...metadata.tags, extraText].join(' '));
+  const searchable = fold([note.t ?? note.text ?? '', note.icon || '', note.activity?.owner || '', note.activity?.team || '', note.activity?.resourceNotes || '', ...metadata.tags, extraText].join(' '));
   return !filter.query || fold(filter.query).split(/\s+/).every(word => searchable.includes(word));
 }
 /** Atomic edits use stable card IDs, never positions in a filtered rendering. */
@@ -190,6 +253,7 @@ export function normalizeMatrixBlock(note) {
   if (Array.isArray(note.personaIds)) normalized.personaIds = metadata.personaIds;
   if (Array.isArray(note.tags)) normalized.tags = metadata.tags;
   if (note.tone) normalized.tone = metadata.tone;
+  if (note.activity) normalized.activity = normalizeMatrixActivity(note.activity);
   return normalized;
 }
 export function normalizeMatrixRow(input = {}) {
@@ -200,13 +264,16 @@ export function normalizeMatrixRow(input = {}) {
 export function validateMatrixDocument(doc) {
   let imageBytes = 0;
   if (Object.keys(doc.c || {}).length > 9000) throw Error('O mapa atingiu o limite de células.');
-  for (const notes of Object.values(doc.c || {})) {
+  for (const [key, notes] of Object.entries(doc.c || {})) {
     if (!Array.isArray(notes) || notes.length > 100) throw Error('Cada célula pode ter até 100 elementos.');
     for (const note of notes) {
-      const block = normalizeMatrixBlock(note);
+      const block = normalizeMatrixBlock(note),row=key.split('|')[0];
+      if(block.activity&&['fl','bk'].includes(row)&&block.activity.category!=='activity')throw Error('Recursos e processos de suporte pertencem à faixa Sistemas e apoio.');
+      if(block.activity&&row==='sy'&&block.activity.category==='activity')throw Error('Coloque as atividades de execução em Linha de frente ou Bastidores.');
       if (block.type === 'image' && block.url.startsWith('data:')) imageBytes += block.url.length * .75;
     }
   }
+  if(doc.links)validateMatrixConnections(doc.c,doc.links);
   if (imageBytes > MATRIX_IMAGE_BUDGET) throw Error('As imagens deste mapa atingiram 2 MB. Use imagens menores ou links HTTPS.');
 }
 export function matrixContentFromDocument(doc, stageIds, sync = {}) {
@@ -222,7 +289,9 @@ export function matrixContentFromDocument(doc, stageIds, sync = {}) {
       cells[id][row] = notes.map(note => normalizeMatrixBlock({ ...note, id: note.hostItemId || sync.notes?.[note.i] || note.i }));
     }
   });
-  return { version: 1, rows, cells };
+  const identities=new Map(Object.values(doc.c||{}).flatMap(notes=>notes.map(note=>[note.i,note.hostItemId||sync.notes?.[note.i]||note.i])));
+  const connections=validateMatrixConnections(doc.c,doc.links||[]).map(link=>({...link,a:identities.get(link.a),b:identities.get(link.b)}));
+  return { version: 1, rows, cells, connections };
 }
 /** Canonical text wins after an edit elsewhere; supplemental rows belong to this document. */
 export function restoreMatrixContent(ref, stored, stageIds) {
@@ -251,5 +320,9 @@ export function restoreMatrixContent(ref, stored, stageIds) {
       for (const block of blocks) if (!block.text && !MATRIX_REFERENCE_TYPES.includes(block.type) && !existing.some(n => (n.hostItemId || n.i) === block.id)) ref.c[key].push({ ...block, i: block.id, t: '' });
     }
   });
+  if(Array.isArray(stored?.connections)){
+    const identities=new Map(Object.values(ref.c).flatMap(notes=>notes.map(note=>[note.hostItemId||note.i,note.i])));
+    ref.links=stored.connections.filter(link=>identities.has(link.a)&&identities.has(link.b)).map(link=>({...link,a:identities.get(link.a),b:identities.get(link.b)}));
+  }
   return ref;
 }

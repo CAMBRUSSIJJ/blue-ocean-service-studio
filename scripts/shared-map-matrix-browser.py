@@ -119,6 +119,10 @@ try:
         card = f.locator('[data-cell="fl|0"] .content-block')
         card.get_by_label('Ações da nota', exact=True).click()
         card.get_by_role('button', name='Detalhes operacionais', exact=True).click()
+        expect(f.get_by_role('dialog', name='Detalhes da atividade', exact=True)).to_be_visible()
+        f.get_by_role('button', name='Fechar detalhes da atividade', exact=True).click()
+        card.get_by_label('Ações da nota', exact=True).click()
+        card.get_by_role('button', name='Detalhes avançados do serviço', exact=True).click()
         dialog = page.get_by_role('dialog', name='Detalhes da atividade', exact=True)
         expect(dialog).to_be_visible()
         dialog.get_by_label('Tempo de execução (min)', exact=True).fill('5')
@@ -131,6 +135,10 @@ try:
         lane = name.get_attribute('data-id')
         add(f, lane + '|1', 'Acompanhar o prazo de retorno')
         check('Custom lane configuration and card creation remain available', any(r['n'] == 'Pontos de atenção' for r in graph(page)['journeys'][jid]['matrixContent']['rows'].values()))
+        f.get_by_role('button', name='Personalizar visualização', exact=True).click()
+        f.locator('[data-view-row="sd"]').check(); saved(f)
+        f.get_by_role('button', name='Concluir', exact=True).click()
+        check('Operational view can reveal optional experience lanes without losing cards', f.locator('[data-cell="sd|0"]').count() == 1 and card.count() == 1)
         for width in [1440, 834, 390]:
             page.set_viewport_size({'width': width, 'height': 1000})
             # Inspect real rendered rules, not a source-text approximation.
