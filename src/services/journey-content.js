@@ -165,6 +165,21 @@ export function matrixServiceReferences(graph, { journeyId = '', actorId = '' } 
     [record.relatedIds, record[type + 'Ids']].some(ids => Array.isArray(ids) && ids.includes(other.id)) ||
     [other.relatedIds, other.painIds].some(ids => Array.isArray(ids) && ids.includes(record.id))
   ).map(other => ({ id: other.id, title: clipped(other.title || other.name || other.description, 1000) || 'Sem nome', source: clipped(other.source, 1000) }));
+  // Persona ownership comes from canonical links, including claim-level evidence.
+  // The map consumes a read-only summary; it never clones or rewrites those records.
+  const personas = Object.values(graph.entities?.persona || {}).filter(belongs);
+  const personaIdsFor = (record, type) => {
+    const ids = new Set(type === 'persona' ? [record.id] : []);
+    const linked = Array.isArray(record.personaIds) ? record.personaIds : [];
+    for (const id of linked) if (personas.some(persona=>persona.id===id)) ids.add(id);
+    for (const persona of personas) {
+      if (Array.isArray(record.relatedIds) && record.relatedIds.includes(persona.id) ||
+          Array.isArray(persona.relatedIds) && persona.relatedIds.includes(record.id) ||
+          type === 'evidence' && Array.isArray(persona.personaEvidenceClaims) &&
+          persona.personaEvidenceClaims.some(claim=>Array.isArray(claim.evidenceIds) && claim.evidenceIds.includes(record.id))) ids.add(persona.id);
+    }
+    return [...ids];
+  };
   for (const type of ['channel', 'persona', 'pain', 'need', 'evidence', 'opportunity']) {
     const records = { ...(graph.entities?.[type] || {}), ...(type === 'pain' ? graph.problems : type === 'opportunity' ? graph.opportunities : {}) };
     result[type] = Object.values(records).filter(belongs).map(record => {
@@ -179,7 +194,7 @@ export function matrixServiceReferences(graph, { journeyId = '', actorId = '' } 
         stageName: clipped(graph.stages?.[record.stageId]?.title, 240),
         stages, inJourney: stages.some(stage => stage.journeyId === journeyId) || type === 'persona' && graph.journeys?.[journeyId]?.personaId === record.id,
         createdByMe: !!actorId && record.createdBy === actorId,
-        status: clipped(record.status, 80), tags: (Array.isArray(record.tags) ? record.tags : []).map(tag => clipped(tag, 40)).filter(Boolean).slice(0, 20),
+        status: clipped(record.status, 80), personaIds: personaIdsFor(record,type), tags: (Array.isArray(record.tags) ? record.tags : []).map(tag => clipped(tag, 40)).filter(Boolean).slice(0, 20),
         needs: related(record, 'need'), evidence: related(record, 'evidence')
       };
     });

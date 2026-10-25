@@ -36,7 +36,7 @@ def tool(f,name,key=None):
  if key and name=='Gráfico de emoções':
   f.get_by_role('button',name='Cancelar',exact=True).click();f.locator('[data-act="emotion-edit"][data-si="'+key.split('|')[1]+'"]').click()
 def link(f,key,kind,record):
- add(f,key,kind);dialog=f.locator('#element-selector');dialog.locator('[data-act="elements-select"][data-source="'+record+'"]').click();dialog.get_by_role('button',name='Vincular à etapa',exact=True).click();saved(f)
+ add(f,key,kind);dialog=f.locator('#element-selector');dialog.locator('[data-act="elements-select"][data-source="'+record+'"]').click();dialog.get_by_role('button',name='Vincular à etapa',exact=True).click();expect(dialog).not_to_be_visible();saved(f)
 def reopen(page):
  page.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click();page.get_by_role('button',name='Abrir mapa',exact=True).first.click();return page.frame_locator('.bo-blueprint-reference-frame')
 def select_record(dialog,record): dialog.locator('[data-act="elements-select"][data-source="'+record+'"]').click()
@@ -71,11 +71,11 @@ try:
   d.get_by_label('Categoria',exact=True).select_option('Comunicação');expect(d.locator('.element-record')).to_have_count(1)
   d.get_by_label('Com evidências vinculadas',exact=True).check();expect(d.locator('.element-record')).to_have_count(0)
   d.get_by_role('button',name='Limpar filtros',exact=True).click();expect(d.locator('.element-record')).to_have_count(2)
-  select_record(d,'p');d.get_by_label('Legenda no mapa',exact=True).fill('Dor deste momento');d.get_by_role('button',name='Vincular à etapa',exact=True).click();saved(f)
+  select_record(d,'p');d.get_by_label('Legenda no mapa',exact=True).fill('Dor deste momento');d.get_by_role('button',name='Vincular à etapa',exact=True).click();expect(d).not_to_be_visible();saved(f)
   check('Linking uses the existing identity and preserves canonical research and stage actions',len(graph(page)['entities']['pain'])==2 and graph(page)['journeys'][jid]['matrixContent']['cells'][s1]['ac'][0]['referenceId']=='p' and not graph(page)['stages'][s1]['customerAction'])
   add(f,'ac|1','Dor');d=f.locator('#element-selector');d.get_by_role('button',name='Desta Jornada',exact=True).click();expect(d.locator('.element-record')).to_have_count(1);select_record(d,'p')
   check('A linked pain exposes its real stage in the details pane','Descobrir' in d.locator('.element-detail').inner_text())
-  d.get_by_role('button',name='Vincular à etapa',exact=True).click();saved(f)
+  d.get_by_role('button',name='Vincular à etapa',exact=True).click();expect(d).not_to_be_visible();saved(f)
   add(f,'ac|0','Dor');d=f.locator('#element-selector');select_record(d,'p');before=graph(page);d.get_by_role('button',name='Vincular à etapa',exact=True).click();expect(d.locator('.form-error')).to_contain_text('já está vinculado')
   check('A duplicate link is rejected with no canonical mutation',graph(page)==before);d.get_by_role('button',name='Cancelar',exact=True).click()
   add(f,'ac|0','Dor');d=f.locator('#element-selector');d.get_by_role('searchbox').fill('Dor cancelada');d.get_by_role('button',name='+ Criar nova dor',exact=True).click();expect(d.get_by_label('Nome do registro',exact=True)).to_have_value('Dor cancelada');d.get_by_label('Descrição',exact=True).fill('Rascunho');page.keyboard.press('Escape')
@@ -85,16 +85,21 @@ try:
    add(f,'ac|1',label);d=f.locator('#element-selector');d.locator('[data-act="elements-create"]').click();d.get_by_label('Nome do registro',exact=True).fill(title);d.get_by_label('Descrição',exact=True).fill('Contexto fornecido pela equipe');d.locator('#element-create-form').get_by_label('Categoria',exact=True).fill('Atendimento')
    if kind=='evidence':
     previous=graph(page);d.get_by_role('button',name='Criar e vincular à etapa',exact=True).click();check('Evidence creation requires a real source before any transaction',graph(page)==previous);d.get_by_label('Fonte da evidência',exact=True).fill('Registro de observação, equipe de atendimento')
-   d.get_by_role('button',name='Criar e vincular à etapa',exact=True).click();saved(f)
-   cells=graph(page)['journeys'][jid]['matrixContent']['cells'][s2]['ac'];record_id=cells[-1]['referenceId'];created[kind]=record_id
-   record=graph(page)['opportunities'][record_id] if kind=='opportunity' else graph(page)['entities'][kind][record_id]
-   check('Creation persists one canonical '+kind+' and its reference together',record['title']==title and record['createdBy']=='member-local-owner' and cells[-1]['type']==kind)
+   d.get_by_role('button',name='Criar e vincular à etapa',exact=True).click();expect(d).not_to_be_visible();saved(f)
+   current=graph(page);cells=current['journeys'][jid]['matrixContent']['cells'][s2]['ac']
+   records=current['opportunities'] if kind=='opportunity' else current['entities'][kind]
+   linked=[(note,records.get(note.get('referenceId'))) for note in cells if note.get('type')==kind]
+   matches=[(note,record) for note,record in linked if record and record.get('title')==title]
+   if len(matches)!=1 or matches[0][1].get('createdBy')!='member-local-owner':
+    print('CREATE_DIAGNOSTIC',kind,[(note.get('referenceId'),record.get('title') if record else None,record.get('createdBy') if record else None) for note,record in linked])
+   check('Creation persists one canonical '+kind+' and its reference together',len(matches)==1 and matches[0][1].get('createdBy')=='member-local-owner')
+   record_id=matches[0][0]['referenceId'];created[kind]=record_id
    if kind=='pain':
     f.get_by_role('button',name='Desfazer',exact=True).click();expect(f.locator('.type-pain .service-reference b').filter(has_text=title)).to_have_count(0);check('One undo removes both creation and placement',record_id not in graph(page)['entities']['pain'])
     f.get_by_role('button',name='Refazer',exact=True).click();expect(f.locator('.type-pain .service-reference b').filter(has_text=title)).to_have_count(1);check('Redo restores both with the same identity',record_id in graph(page)['entities']['pain'])
   check('User content is escaped in both selector and cards',not frame(page).evaluate('window.selectorInjected||false'))
   original=f.locator('[data-cell="ac|0"] .type-pain').first;original_id=original.get_attribute('data-nid');original.locator('summary[aria-label="Ações da nota"]').click();original.get_by_role('button',name='Editar elemento',exact=True).click()
-  d=f.locator('#element-selector');select_record(d,'q');d.get_by_label('Legenda no mapa',exact=True).fill('Legenda revisada');d.get_by_role('button',name='Vincular à etapa',exact=True).click();saved(f)
+  d=f.locator('#element-selector');select_record(d,'q');d.get_by_label('Legenda no mapa',exact=True).fill('Legenda revisada');d.get_by_role('button',name='Vincular à etapa',exact=True).click();expect(d).not_to_be_visible();saved(f)
   edited=graph(page)['journeys'][jid]['matrixContent']['cells'][s1]['ac'][0]
   check('Editing changes the reference and local caption while preserving the card identity',edited['id']==original_id and edited['referenceId']=='q' and edited['text']=='Legenda revisada' and graph(page)['entities']['pain']['p']['title']=='Espera sem previsão')
   add(f,'ac|0','Dor');d=f.locator('#element-selector');d.get_by_role('button',name='Criados por mim',exact=True).click();expect(d.locator('.element-record')).to_have_count(2);select_record(d,created['pain'])
@@ -113,7 +118,7 @@ try:
   f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click()
   touch=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,storage_state=page.context.storage_state());mobile=touch.new_page();mobile.on('pageerror',lambda e:errors.append(str(e)));mobile.add_locator_handler(mobile.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click())
   mobile.goto(URL,wait_until='networkidle');mobile.get_by_role('button',name='Abrir workspace local sem conta').click();mobile.get_by_role('button',name='Abrir navegação',exact=True).click();mf=reopen(mobile);saved(mf)
-  mf.locator('.lb').first.tap();mf.locator('[data-cell="ac|0"]>.content-add').tap();mf.get_by_role('button',name='Adicionar Persona',exact=True).tap();md=mf.locator('#element-selector');select_record(md,created['persona']);audit(mobile,'selector-touch');md.get_by_role('button',name='Vincular à etapa',exact=True).tap();saved(mf)
+  mf.locator('.lb').first.tap();mf.locator('[data-cell="ac|0"]>.content-add').tap();mf.get_by_role('button',name='Adicionar Persona',exact=True).tap();md=mf.locator('#element-selector');select_record(md,created['persona']);audit(mobile,'selector-touch');md.get_by_role('button',name='Vincular à etapa',exact=True).tap();expect(md).not_to_be_visible();saved(mf)
   check('Touch insertion reuses a canonical persona without duplication',len(graph(mobile)['entities']['persona'])==1 and mf.locator('.type-persona').count()==2);touch.close()
   f=reopen(page);viewer=page.evaluate("()=>window.BlueOceanRuntime.api('collaboration').addMember({name:'Leitor de QA',role:'viewer'})")
   page.evaluate("id=>window.BlueOceanRuntime.api('collaboration').setCurrentUser(id)",viewer)

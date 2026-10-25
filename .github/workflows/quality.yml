@@ -1,6 +1,7 @@
 name: Qualidade
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -23,6 +24,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # The generated version module is intentionally ignored by Git.
+      # A clean checkout must still be able to run typecheck directly.
+      - run: rm -f src/generated/app-version.ts && npm run typecheck
+      - run: python3 -m py_compile scripts/journey-selector-browser.py scripts/journey-observation-browser.py scripts/journey-editor-ux-browser.py scripts/blueprint-connections-browser.py
       - run: npm run docs:check
       - run: node scripts/journey-visualization-test.mjs
       - run: node scripts/blueprint-guided-reading-test.mjs
@@ -96,6 +101,10 @@ jobs:
           path: dist
       - run: python -m pip install playwright
       - run: python -m playwright install --with-deps chromium
+      - run: npm run journey:selector:browser
+      - run: npm run journey:observation:browser
+      - run: npm run maps:ux:browser
+      - run: npm run blueprint:connections:browser
       - run: npm run editor:browser
       - run: python3 scripts/personas-p2p3-browser.py
       - run: npm run journey:browser
@@ -109,9 +118,7 @@ jobs:
       - run: npm run journey:content:browser
       - run: npm run journey:picker:browser
       - run: npm run journey:elements:browser
-      - run: npm run journey:selector:browser
       - run: npm run journey:context:browser
-      - run: npm run journey:observation:browser
       - run: npm run journey:cards:browser
       - run: npm run maps:matrix:browser
       - run: npm run blueprint:canvas:browser

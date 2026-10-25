@@ -29,6 +29,8 @@ try:
         expect(exact.locator('#app')).to_be_visible()
         # This contract covers the retained matrix renderer.
         use_matrix(exact,'blueprint')
+        # The Canvas leaves the compact operational matrix as a selectable renderer.
+        expect(exact.locator('.cvb')).to_have_count(0)
         expect(exact.locator('.bd')).to_be_visible(timeout=15000)
         # A new hosted map starts empty; no compulsory coffee demo or stage suggestions.
         while exact.locator('.sh').count() < 2:

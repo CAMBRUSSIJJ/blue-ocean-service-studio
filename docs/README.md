@@ -20,6 +20,7 @@ o fluxo local. Os guias abaixo descrevem o funcionamento atual.
 - [Entrada e início da Jornada](entry-and-journey-start.md).
 - [Matriz compartilhada de Jornada e Blueprint](shared-map-matrix.md).
 - [Seletor Universal de Elementos: pesquisar, criar e vincular](journey-element-selector.md).
+- [P6: evidências por afirmação da Persona e foco na Jornada](personas-p6-evidence-journey.md).
 - [Da Jornada ao resultado e roteiro de piloto](journey-growth.md).
 - [Personas, tags, filtros e edição em lote nos cartões](journey-card-tools.md).
 - [Jornada configurável: recursos, auditoria e testes](journey-editor-2.md).
