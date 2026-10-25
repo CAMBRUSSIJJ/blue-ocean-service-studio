@@ -116,6 +116,7 @@ export function buildCanvasLayout(doc,definitions,stageIndices=null,stageWidths=
     const counts=indices.map(index=>definition.id==='em'?0:(doc.c[definition.id+'|'+index]||[]).length);
     const count=Math.max(1,...counts),height=g.padding*2+count*g.cardHeight+(count-1)*g.gap;
     rows.push({...definition,y,height});
+    if(definition.id==='em')for(const stage of stages)(doc.c['em|'+stage.index]||[]).forEach(note=>{if(note.virtualLabel)return;const point=canvasEmotionPoint(stage,{y});nodes.push({id:note.i,note,row:'em',stageIndex:stage.index,position:0,key:'em|'+stage.index,x:point.x-1,y:point.y-1,width:2,height:2});});
     if(definition.id!=='em')for(const stage of stages)(doc.c[definition.id+'|'+stage.index]||[]).forEach((note,position)=>{const width=Math.min(g.cardWidth,stage.width-28);nodes.push({id:note.i,note,row:definition.id,stageIndex:stage.index,position,key:definition.id+'|'+stage.index,x:stage.x+(stage.width-width)/2,y:y+g.padding+position*(g.cardHeight+g.gap),width,height:g.cardHeight});});
     y+=height+28;
   }
@@ -164,7 +165,7 @@ export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type
     const transfer=link.handoff?' · '+link.handoff.fromTeam+' → '+link.handoff.toTeam+' · '+link.handoff.deliverable+' · Prazo: '+(link.handoff.deadlineMinutes??'não informado')+' min · Aceite: '+link.handoff.acceptance:'';
     out+=`<g><title>${xml(titleFor(a.note))} → ${xml(titleFor(b.note))} · ${xml(label+transfer)}</title><path d="${edge.d}" stroke="${color}" stroke-width="2" fill="none" marker-end="url(#arrow-${link.type})"/><text x="${edge.x}" y="${edge.y-5}" text-anchor="middle" font-size="10" fill="${color}">${xml(label.slice(0,60))}</text></g>`;
   }
-  for(const node of layout.nodes){const activity=node.note.activity||{},title=titleFor(node.note),details=[activity.owner?'Responsável: '+activity.owner:'',activity.team?'Equipe: '+activity.team:'',activity.durationMinutes!=null?'Execução: '+activity.durationMinutes+' min':'',activity.waitMinutes!=null?'Espera: '+activity.waitMinutes+' min':'',activity.rule?'Regra: '+activity.rule:'',node.note.canvas?.description||''].filter(Boolean).join(' · ');
+  for(const node of layout.nodes){if(node.row==='em')continue;const activity=node.note.activity||{},title=titleFor(node.note),details=[activity.owner?'Responsável: '+activity.owner:'',activity.team?'Equipe: '+activity.team:'',activity.durationMinutes!=null?'Execução: '+activity.durationMinutes+' min':'',activity.waitMinutes!=null?'Espera: '+activity.waitMinutes+' min':'',activity.rule?'Regra: '+activity.rule:'',node.note.canvas?.description||''].filter(Boolean).join(' · ');
     out+=`<g><title>${xml(title)}${details?' · '+xml(details):''}</title><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="10" fill="#fff" stroke="#536c8d"/><text x="${node.x+12}" y="${node.y+23}" font-size="10" fill="#526885">${xml(CANVAS_COMPONENTS[canvasKind(node.note,node.row)]?.title||node.note.type)}</text>`+canvasTitleLines(title,34).map((line,index)=>`<text x="${node.x+12}" y="${node.y+48+index*19}" font-size="14" fill="#142944">${xml(line)}</text>`).join('')+`<text x="${node.x+12}" y="${node.y+92}" font-size="11" fill="#526885">${xml(activity.owner||activity.team||'')}</text></g>`;
   }
   return out+'</g></svg>';
