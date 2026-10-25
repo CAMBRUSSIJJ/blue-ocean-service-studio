@@ -23,7 +23,7 @@ const checks = [
  ['etapas do serviço não competem no editor Journey',workspace.includes("workspaceTab !== 'research' && workspaceTab !== 'journey'")],
  ['novo criador ocupa área de trabalho',workspace.includes('data-journey-starter="full-page"')],
  ['antigo modal de criação foi retirado',!workspace.includes('journeyCreateOpen && <div className="bo-h724-modal-backdrop"')],
- ['nome opcional com padrão seguro',workspace.includes("journeyDraftName.trim() || 'Nova Jornada'")],
+ ['nome opcional com padrão seguro',workspace.includes("journeyDraftName.trim() || 'Novo mapa'")],
  ['opção mapa em branco',workspace.includes("journeyStartTemplate === 'blank'")],
  ['opções de modelos reais',workspace.includes('starterTemplates.map')],
  ['modelos usam dados existentes',workspace.includes('journeyApi()?.model?.()?.templates')],

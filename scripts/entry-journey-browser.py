@@ -45,7 +45,7 @@ def entry(page):
  check('Project opens directly into the Journey library',page.locator('[data-journey-library="1"]').is_visible())
  check('Project does not display a duplicate top navigation bar',page.locator('[data-project-context-nav]').count()==0)
  page.screenshot(path=str(OUT/'project-journey-entry.png'),full_page=True,animations='disabled')
- page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
+ page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
  expect(page.get_by_role('region',name='Começar a mapear')).to_be_visible()
  before=journey(page)
  check('The visual example does not create stages or cards automatically',not before['stageIds'] and not before.get('mapLayout',{}).get('lanes'))
@@ -71,7 +71,7 @@ def custom(page):
  # This flow uses the visible blank-map controls and then adopts the starter.
  page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta',exact=True).click()
  page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Mapa próprio');page.get_by_label('Serviço principal',exact=True).fill('Suporte');page.get_by_role('button',name='Criar projeto',exact=True).click();
- page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
+ page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
  page.get_by_role('button',name='Nova etapa',exact=True).click();page.get_by_placeholder('Nome da etapa',exact=True).fill('Conversa');page.get_by_role('button',name='Criar etapa',exact=True).click()
  page.locator('.bo-h1705-menubar').get_by_role('button',name='Adicionar faixa',exact=True).click();page.locator('.bo-refined-picker').get_by_role('button',name='Texto',exact=True).click()
  page.get_by_label('Nome da faixa',exact=True).fill('Minhas anotações')
@@ -92,7 +92,7 @@ def small(page):
  if width==390:
   page.get_by_role('button',name='Abrir workspace local sem conta',exact=True).click()
   page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Jornada no celular');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click();
-  page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
+  page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
   welcome=page.get_by_role('region',name='Começar a mapear');expect(welcome).to_be_visible()
   check('The Journey introduction fits a phone',welcome.bounding_box()['x']>=0 and welcome.bounding_box()['x']+welcome.bounding_box()['width']<=391)
   page.get_by_role('button',name='Criar primeira etapa',exact=True).click()
@@ -109,7 +109,7 @@ def starting_map(page):
  page.get_by_label('Nome do projeto',exact=True).fill('Novo início da Jornada')
  page.get_by_label('Serviço principal',exact=True).fill('Atendimento ao cliente')
  page.get_by_role('button',name='Criar projeto',exact=True).click()
- page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click()
+ page.get_by_role('button',name='Criar mapa',exact=True).click()
  page.get_by_role('button',name=re.compile(r'^Em branco')).click()
  width=page.viewport_size['width']
  welcome=page.get_by_role('region',name='Começar a mapear')
@@ -126,7 +126,7 @@ def starting_map(page):
  page.keyboard.press('Escape')
  expect(welcome).to_be_visible()
  page.get_by_role('button',name='Todas as Jornadas',exact=True).click()
- page.locator('[data-journey-library="1"]').get_by_role('button',name='Abrir Jornada',exact=True).click()
+ page.locator('[data-journey-library="1"]').get_by_role('button',name='Abrir mapa',exact=True).click()
  expect(welcome).to_be_visible()
  check(f'{width}: mapa vazio dispensado continua oferecendo um ponto de partida',journey(page)['mapLayout']['introDismissed'] and not journey(page)['stageIds'])
  page.get_by_role('button',name='Criar primeira etapa',exact=True).click()

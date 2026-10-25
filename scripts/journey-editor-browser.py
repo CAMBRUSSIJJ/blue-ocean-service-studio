@@ -60,7 +60,7 @@ def project(page):
     page.get_by_label('Nome do projeto', exact=True).fill('Jornada configurável QA')
     page.get_by_label('Serviço principal', exact=True).fill('Atendimento')
     page.get_by_role('button', name='Criar projeto', exact=True).click()
-    page.locator('.bo-h724-journey-pane').get_by_role('button', name='Criar Jornada', exact=True).click()
+    page.get_by_role('button', name='Criar mapa', exact=True).click()
     page.get_by_role('button', name=re.compile(r'^Em branco')).click()
     expect(page.locator('.bo-h1705-journey')).to_be_visible()
 
@@ -108,7 +108,7 @@ def desktop(page):
     page.keyboard.press('Escape')
     check('Escape closes the project actions and restores focus', not page.locator('.bo-simple-project-actions').evaluate('e => e.open') and page.locator('summary[aria-label="Ações do projeto"]').evaluate('e => e === document.activeElement'))
 
-    page.locator('[data-journey-library="1"]').get_by_role('button', name='Abrir Jornada', exact=True).click()
+    page.locator('[data-journey-library="1"]').get_by_role('button', name='Abrir mapa', exact=True).click()
     page.keyboard.press('Control+Backslash')
     check('Application shortcuts do not change hidden navigation while editing', page.evaluate("localStorage.getItem('bo-sidebar-collapsed')") == '1')
     page.keyboard.press('Control+k')
@@ -116,7 +116,7 @@ def desktop(page):
     check('Blank Journey has no imposed stages or lanes', not current(page)['stageIds'] and not lanes(page))
     name = page.get_by_role('textbox', name='Nome da Jornada', exact=True)
     name.fill('Título cancelado'); name.press('Escape')
-    check('Escape cancels Journey rename', current(page)['name'] == 'Nova Jornada')
+    check('Escape cancels Journey rename', current(page)['name'] == 'Novo mapa')
     name.fill('Atendimento configurável'); name.press('Enter')
     check('Journey title is directly editable', current(page)['name'] == 'Atendimento configurável')
     stages = [stage(page, text) for text in ['Solicitação', 'Atendimento', 'Retorno']]
@@ -234,14 +234,14 @@ def desktop(page):
     expect(sidebar).to_have_attribute('data-sidebar-collapsed', '1')
     check('Sidebar stays collapsed after reload', page.get_by_role('button', name='Expandir sidebar', exact=True).is_visible())
     page.get_by_role('button', name='Continuar projeto', exact=True).click()
-    page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir Jornada', exact=True).click()
+    page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir mapa', exact=True).click()
     expect(editor).to_be_visible()
     # Journey, library and service navigation must not rewrite the document.
     page.get_by_role('button', name='Todas as Jornadas', exact=True).click()
-    page.locator('[data-journey-library="1"]').get_by_role('button', name='Abrir Jornada', exact=True).click()
+    page.locator('[data-journey-library="1"]').get_by_role('button', name='Abrir mapa', exact=True).click()
     editor.get_by_role('button', name=re.compile('^Visualizações')).click()
     editor.get_by_role('button', name='Voltar às Jornadas', exact=True).click()
-    page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir Jornada', exact=True).click()
+    page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir mapa', exact=True).click()
     check('Library and service navigation retain the latest map', current(page)['mapLayout'] == before_reload)
     editor.get_by_role('button', name=re.compile('^Visualizações')).click()
     page.once('dialog', lambda dialog: dialog.accept())
@@ -253,7 +253,7 @@ def desktop(page):
     page.screenshot(path=str(OUT / 'journey-blueprint.png'))
     page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
     page.locator('[data-service-journey-nav="1"]').click()
-    page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir Jornada', exact=True).click()
+    page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir mapa', exact=True).click()
     check('Reopened map still fits the viewport', editor.bounding_box()['y'] == 0 and editor.bounding_box()['height'] == page.viewport_size['height'])
     # Navigation controls belong to the editor and preserve the saved document.
     editor.get_by_role('button', name=re.compile('^Visualizações')).click()
@@ -308,10 +308,10 @@ def responsive(page):
 def templates(page):
     project(page)
     page.get_by_role('button', name='Todas as Jornadas', exact=True).click()
-    page.get_by_role('button', name='Criar Jornada', exact=True).first.click()
+    page.get_by_role('button', name='Criar mapa', exact=True).first.click()
     page.locator('.bo-h1704-template-grid > button').nth(1).click()
     check('A chosen template supplies editable stages', len(current(page)['stageIds']) > 0)
-    check('Default Journey names distinguish successive maps', current(page)['name'] == 'Nova Jornada (2)')
+    check('Default Journey names distinguish successive maps', current(page)['name'] == 'Novo mapa (2)')
     page.get_by_role('textbox', name='Nome da etapa 1', exact=True).fill('Etapa adaptada ao serviço')
     check('Template stage names are editable', graph(page)['stages'][current(page)['stageIds'][0]]['title'] == 'Etapa adaptada ao serviço')
     first_stage = current(page)['stageIds'][0]

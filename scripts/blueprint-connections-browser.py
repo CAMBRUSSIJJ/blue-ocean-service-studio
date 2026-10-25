@@ -3,6 +3,7 @@
 import functools, json, os, shutil, threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from map_browser_support import use_matrix, matrix_perspective
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +27,9 @@ def check(name, value):
     print('PASS ' + name, flush=True)
 
 def graph(page): return page.evaluate("()=>window.BlueOceanRuntime.api('dataBridge').get()")
-def saved(f): expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+def saved(f):
+    expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+    use_matrix(f)
 def stage(f, name):
     f.get_by_role('button', name='Adicionar etapa', exact=True).click()
     f.get_by_role('textbox', name='Nome da nova etapa', exact=True).fill(name)
@@ -37,8 +40,8 @@ def add(f, key, text):
     field=f.locator(f'[data-cell="{key}"] [data-ed="c"]').last
     field.fill(text); field.press('Tab'); saved(f)
 def perspective(f, name):
-    f.get_by_role('button', name=name, exact=True).click(); saved(f)
-    expect(f.locator('.map-perspective-label')).to_have_text(name)
+    matrix_perspective(f, name)
+
 def customize(f, row, visible):
     f.get_by_role('button', name='Personalizar visualização', exact=True).click()
     f.locator(f'[data-view-row="{row}"]').set_checked(visible); saved(f)
@@ -69,7 +72,7 @@ try:
         page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click()
         page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Blueprint conectado QA');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click()
         page.evaluate("""()=>window.BlueOceanRuntime.api('dataBridge').transact(g=>{g.entities.system||={};g.entities.system['qa-crm']={id:'qa-crm',type:'system',serviceId:g.service.id,title:'CRM de atendimento',createdAt:new Date().toISOString()};return g},'Recurso fictício')""")
-        page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name='Em branco',exact=False).first.click()
+        page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name='Em branco',exact=False).first.click()
         f=page.frame_locator('.bo-blueprint-reference-frame');saved(f)
         for name in ['Solicitar atendimento','Acompanhar','Receber retorno']:stage(f,name)
         jid=next(iter(graph(page)['journeys']))
@@ -138,10 +141,10 @@ try:
         with page.expect_download() as download_info:f.get_by_role('button',name='Baixar resumo HTML',exact=True).click()
         download=download_info.value;download.save_as(str(OUT/'summary.html'));summary=(OUT/'summary.html').read_text();check('Standalone HTML includes owners, resources and relationship/acceptance details','Protocolo e diagnóstico preenchidos' in summary and 'CRM de atendimento' in summary and 'Ana' in summary)
         f.get_by_role('button',name='Voltar ao mapa',exact=True).click();saved(f)
-        before=graph(page)['journeys'][jid]['matrixContent'];f.get_by_role('button',name='Voltar para Jornadas e Blueprints',exact=True).click();page.reload(wait_until='networkidle');page.get_by_role('button',name='Abrir Jornadas e Blueprints',exact=True).click();page.locator('[data-journey-library]').get_by_role('button',name='Abrir Jornada',exact=True).first.click();saved(f)
+        before=graph(page)['journeys'][jid]['matrixContent'];f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click();page.reload(wait_until='networkidle');page.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click();page.locator('[data-journey-library]').get_by_role('button',name='Abrir mapa',exact=True).first.click();saved(f)
         check('Reload reconstructs activity metadata and typed connections without duplication',graph(page)['journeys'][jid]['matrixContent']==before)
         perspective(f,'Blueprint');expect(card('fl|0')).to_contain_text('Ana');expect(f.locator('.blueprint-edge')).to_have_count(4);alignment('reload')
-        mobile_context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,storage_state=context.storage_state());mobile=mobile_context.new_page();mobile.on('pageerror',lambda e:errors.append(str(e)));mobile.add_locator_handler(mobile.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click());mobile.goto(URL,wait_until='networkidle');mobile.get_by_role('button',name='Abrir workspace local sem conta').click();mobile.get_by_role('button',name='Abrir navegação',exact=True).click();mobile.get_by_role('button',name='Abrir Jornadas e Blueprints',exact=True).click();mobile.locator('[data-journey-library]').get_by_role('button',name='Abrir Jornada',exact=True).first.click();mf=mobile.frame_locator('.bo-blueprint-reference-frame');saved(mf)
+        mobile_context=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,storage_state=context.storage_state());mobile=mobile_context.new_page();mobile.on('pageerror',lambda e:errors.append(str(e)));mobile.add_locator_handler(mobile.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click());mobile.goto(URL,wait_until='networkidle');mobile.get_by_role('button',name='Abrir workspace local sem conta').click();mobile.get_by_role('button',name='Abrir navegação',exact=True).click();mobile.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click();mobile.locator('[data-journey-library]').get_by_role('button',name='Abrir mapa',exact=True).first.click();mf=mobile.frame_locator('.bo-blueprint-reference-frame');saved(mf)
         mf.locator('[data-cell="fl|0"] .content-block').get_by_label('Ações da nota',exact=True).tap();mf.get_by_role('button',name='Detalhes operacionais',exact=True).tap();mf.get_by_label('Responsável',exact=True).fill('Ana no celular');mf.get_by_role('button',name='Salvar atividade',exact=True).tap();saved(mf);check('Operational editing works by touch', 'Ana no celular' in json.dumps(graph(mobile),ensure_ascii=False));audit(mobile,'activity-touch');mobile_context.close()
         check('No uncaught browser errors',not errors);browser.close()
 finally:

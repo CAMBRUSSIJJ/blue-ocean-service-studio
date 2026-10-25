@@ -4,6 +4,7 @@ import functools, os, shutil, threading
 from pathlib import Path
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from playwright.sync_api import sync_playwright, expect
+from map_browser_support import wait_saved, use_matrix
 ROOT=Path(__file__).resolve().parents[1]
 class Quiet(SimpleHTTPRequestHandler):
     def log_message(self,*args): pass
@@ -20,9 +21,9 @@ try:
     page.get_by_label('Nome do projeto',exact=True).fill('Jornada HTML QA')
     page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
     page.get_by_role('button',name='Criar projeto',exact=True).click()
-    page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click()
+    page.get_by_role('button',name='Criar mapa',exact=True).click()
     page.get_by_role('button',name='Em branco').first.click()
-    exact=page.frame_locator('.bo-blueprint-reference-frame')
+    exact=page.frame_locator('.bo-blueprint-reference-frame'); wait_saved(exact); use_matrix(exact)
     expect(exact.locator('[data-empty-journey="1"]')).to_be_visible(timeout=15000)
     assert page.locator('.bo-h1705-journey').count()==0,'Retired Journey canvas opened instead'
     assert exact.get_by_text('Preencher com o exemplo do café').count()==0

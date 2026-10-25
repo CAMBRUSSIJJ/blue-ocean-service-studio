@@ -62,4 +62,22 @@ check('Details include only real related needs, evidence, stage usage and known 
   assert.deepEqual(record.needs.map(r=>r.id),['n']);assert.deepEqual(record.evidence.map(r=>r.id),['e']);assert.deepEqual(graph,before);
   delete graph.entities.pain.p.createdBy;assert.equal(matrixServiceReferences(graph,{journeyId:'j',actorId:'actor'}).pain[0].createdByMe,false);
 });
+check('Fresh stage local identities resolve without accepting a stale canonical ID',()=>{
+  const {graph,doc,input}=fixture();doc.steps[0].hostLocalId='fresh';
+  const result=prepareJourneyElement(graph,'j',doc,{...input,stageId:undefined,stageLocalId:'fresh'});
+  assert.equal(result.document.c['ac|0'][1].referenceId,'p');
+  for(const patch of [{stageId:'stale',stageLocalId:'fresh'},{stageId:undefined,stageLocalId:'gone'},{stageId:undefined,stageLocalId:undefined}])assert.throws(()=>prepareJourneyElement(graph,'j',doc,{...input,...patch}));
+});
+check('Persona context changes only after explicit choice and stays atomic on failure',()=>{
+  const {graph,doc,input}=fixture(),persona={...input,elementType:'persona',referenceId:'',newRecord:{title:'Cliente'}};
+  assert.equal(prepareJourneyElement(graph,'j',doc,persona).graph.journeys.j.personaId,undefined);
+  const result=prepareJourneyElement(graph,'j',doc,{...persona,useAsJourneyPersona:true});
+  assert.equal(result.graph.journeys.j.personaId,result.referenceId);assert.equal(graph.journeys.j.personaId,undefined);
+  const before=structuredClone(graph);assert.throws(()=>prepareJourneyElement(graph,'j',doc,{...persona,useAsJourneyPersona:true,beforeId:'gone'}));assert.deepEqual(graph,before);
+});
+check('Choosing a Persona never copies generic emotional observations into that person',()=>{
+  const {graph,doc,input}=fixture();graph.stages.s.emotion='negative';graph.stages.s.emotionScore=-2;graph.stages.s.emotionRecorded=true;graph.stages.s.emotionNote='Observação geral';Object.assign(doc.steps[0],{e:-2,note:'Observação geral',emotionRecorded:true});
+  const result=prepareJourneyElement(graph,'j',doc,{...input,elementType:'persona',referenceId:'',newRecord:{title:'Pessoa nova'},useAsJourneyPersona:true});
+  assert.equal(result.document.steps[0].emotionRecorded,false);assert.equal(result.document.steps[0].note,'');assert.equal(result.graph.stages.s.emotionNote,'Observação geral');assert.equal(result.graph.entities.emotion,undefined);
+});
 console.log(`Journey elements: ${count}/${count} PASS`);

@@ -1,5 +1,6 @@
+import { ServiceMapsLibrary } from './ServiceMapsLibrary';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, LayoutTemplate, MoreVertical, Plus, Search, Table2, Trash2, Wrench, X } from '../design-system/icons';
+import { ArrowLeft, ArrowRight, LayoutTemplate, Plus, Table2, Wrench, X } from '../design-system/icons';
 import { BlueOceanObjectIcon, type BlueOceanObjectKind } from '../design-system/blue-ocean-objects';
 import type { StudioController } from '../state/useStudioController';
 import { buildDesignHandoffReport, prepareBlueprintFromDefinition } from '../services/design-handoff';
@@ -50,10 +51,10 @@ type BlueprintApi = {
 type JourneyStarterTemplate = { id: string; name: string; description: string; stages: string[] };
 type JourneyHomeApi = {
   model?(): { templates?: JourneyStarterTemplate[] };
-  create?(options: { name: string; status?: 'draft' | 'active'; priority?: string; templateId?: string }): { id: string } | null;
+  create?(options: { name: string; status?: 'draft' | 'active'; priority?: string; objective?: string; templateId?: string }): { id: string } | null;
   open?(id: string): Promise<boolean> | boolean;
   selectInWorkspace?(id: string): boolean;
-  remove?(id: string): { ok: boolean; message?: string };
+  remove?(id: string, options?: { includeBlueprints?: boolean }): { ok: boolean; message?: string };
 };
 
 // H7.22 legacy contract: type WorkspaceTab = 'overview' | 'journey' | 'blueprint' | 'whiteboard'
@@ -101,7 +102,7 @@ const WORKSPACE_GROUPS: Array<{ id: WorkspaceGroup; label: string; defaultTab: W
     { id: 'ecology', label: 'Ecologia', icon: 'service' }, { id: 'proposition', label: 'Proposição', icon: 'solution' },
   ] },
   { id: 'design', label: 'Projetar', defaultTab: 'journey', items: [
-    { id: 'journey', label: 'Jornadas e Blueprints', icon: 'journey' }, { id: 'channels', label: 'Canais', icon: 'channel' }, { id: 'whiteboard', label: 'Whiteboard', icon: 'whiteboard' },
+    { id: 'journey', label: 'Mapas do serviço', icon: 'journey' }, { id: 'channels', label: 'Canais', icon: 'channel' }, { id: 'whiteboard', label: 'Whiteboard', icon: 'whiteboard' },
   ] },
   { id: 'validate', label: 'Validar', defaultTab: 'prototypes', items: [
     { id: 'prototypes', label: 'Protótipos', icon: 'experiment' }, { id: 'learning', label: 'Aprendizados', icon: 'insight' }, { id: 'decisions', label: 'Decisões', icon: 'opportunity' },
@@ -115,7 +116,6 @@ const WORKSPACE_GROUPS: Array<{ id: WorkspaceGroup; label: string; defaultTab: W
 ];
 const workspaceGroupFor = (tab: WorkspaceTab): WorkspaceGroup => WORKSPACE_GROUPS.find((group) => group.items.some((item) => item.id === tab))?.id ?? 'overview';
 type LibraryViewMode = 'cards' | 'table';
-type BlueprintViewMode = LibraryViewMode;
 
 const blueprintApi = () => window.BlueOceanRuntime?.api<BlueprintApi>('serviceBlueprintFrame') ?? null;
 const blueprintHomeApi = () => window.BlueOceanRuntime?.api<{ remove?(id: string): boolean }>('blueprintHome') ?? null;
@@ -128,16 +128,13 @@ const formatDate = (value: unknown) => {
 export function BlueprintWorkspaceView({ studio }: { studio: StudioController }) {
   const { graph, hasService, setActiveTab, setGraph, showToast } = studio;
   const experience = useExperienceProfile();
-  const [query, setQuery] = useState('');
   const [journeyQuery, setJourneyQuery] = useState('');
-  const [menuId, setMenuId] = useState<string | null>(null);
   const [workspaceTab, setWorkspaceTab] = useState<WorkspaceTab>(() => {
     try {
       const stored = sessionStorage.getItem('bo-service-workspace-tab');
       return ['overview','cockpit','research','ecology','proposition','journey','channels','prototypes','learning','decisions','current-future','improvement','portfolio','outcomes','governance','operations','blueprint','whiteboard','readiness'].includes(String(stored)) ? (stored === 'research' ? 'overview' : stored === 'blueprint' ? 'journey' : stored as WorkspaceTab) : 'overview';
     } catch { return 'overview'; }
   });
-  const [viewMode, setViewMode] = useState<BlueprintViewMode>('cards');
   const [journeyViewMode, setJourneyViewMode] = useState<LibraryViewMode>('cards');
   const [journeyEditorOpen, setJourneyEditorOpen] = useState(false);
   const [journeyCreateOpen, setJourneyCreateOpen] = useState(false);
@@ -146,6 +143,13 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
   const [designStartOpen, setDesignStartOpen] = useState(false);
   const [journeyDraftName, setJourneyDraftName] = useState('');
   const [journeyStartTemplate, setJourneyStartTemplate] = useState('blank');
+  const [journeyGoal, setJourneyGoal] = useState('');
+  const businessGoals = [
+    { goal: 'Organizar meu atendimento', template: 'service', hint: 'Veja o caminho do primeiro contato até a entrega.' },
+    { goal: 'Reduzir atrasos e retrabalho', template: 'delivery', hint: 'Localize esperas e passagens entre pessoas.' },
+    { goal: 'Padronizar meu serviço', template: 'professional', hint: 'Combine atividades, responsáveis e recursos.' },
+    { goal: 'Resolver um problema do cliente', template: 'essential', hint: 'Registre o problema e acompanhe uma melhoria.' },
+  ];
   const [showServiceStructure, setShowServiceStructure] = useState(false);
   const [researchSurface, setResearchSurface] = useState<'research' | 'tools'>('research');
   const [overviewPhase, setOverviewPhase] = useState<GuidedWorkspacePhase>('understand');
@@ -158,7 +162,6 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
   });
   const handoff = useMemo(() => buildDesignHandoffReport(graph), [graph]);
   const journeys = useMemo(() => graph.service.journeyIds.map((id) => graph.journeys[id]).filter(Boolean), [graph]);
-  const filteredJourneys = useMemo(() => journeys.filter((journey) => journey.name.toLowerCase().includes(journeyQuery.trim().toLowerCase())), [journeys, journeyQuery]);
   const starterTemplates = journeyApi()?.model?.()?.templates?.filter((item) => ['essential','delivery','professional','service','restaurant'].includes(item.id)) ?? [];
   const recentJourneys = [...journeys].sort((a, b) => String(b.updatedAt ?? '').localeCompare(String(a.updatedAt ?? ''))).slice(0, 6);
   const freeBoards = useMemo(() => Object.values(graph.views.whiteboards ?? {}).filter((board) => board.viewKind === 'free'), [graph]);
@@ -179,7 +182,7 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
       journeyStageCount: board.journeyId ? (graph.journeys[board.journeyId]?.stageIds.length ?? 0) : 0,
       updatedAt: String(board.updatedAt || graph.service.updatedAt || ''),
     }))
-    .filter((row) => row.name.toLowerCase().includes(query.trim().toLowerCase())), [graph, query]);
+    .filter((row) => row.name.toLowerCase().includes(journeyQuery.trim().toLowerCase())), [graph, journeyQuery]);
 
   const ecologyReport = useMemo(() => buildServiceEcologyReport(graph), [graph]);
   const researchReport = useMemo(() => buildResearchStudioReport(graph), [graph]);
@@ -272,68 +275,35 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
     }, prepared.created ? 180 : 30);
   };
 
-  // Open the canonical Blueprint for a particular Journey; never clone stages or invent backstage work.
-  const continueJourneyInBlueprint = (journeyId: string) => {
-    const source = graph.journeys[journeyId];
-    if (!source) { showToast('Jornada não encontrada neste projeto.'); return; }
-    const latest = window.BlueOceanRuntime?.api<{ get(): typeof graph }>('dataBridge')?.get() ?? graph;
-    const prepared = prepareJourneyBlueprintDraft(latest, journeyId);
-    if (!prepared.boardId) {
-      showToast('Crie pelo menos uma etapa na Jornada antes de continuar no Blueprint.');
-      void openJourney(journeyId);
-      return;
-    }
-    const targetId = prepared.boardId;
-    if (prepared.created) {
-      setGraph(current => prepareJourneyBlueprintDraft(current, journeyId, { id: targetId }).graph,
-        'Jornada → Blueprint vinculado');
-    }
-    selectWorkspaceTab('blueprint');
-    window.setTimeout(async () => {
-      const saved = window.BlueOceanRuntime?.api<{ get(): typeof graph }>('dataBridge')?.get();
-      if (!saved?.views.whiteboards?.[targetId]) {
-        showToast('Não foi possível salvar o vínculo. Verifique sua permissão de edição.');
-        return;
-      }
-      const opened = await blueprintApi()?.open?.(targetId);
-      if (!opened) showToast('Blueprint disponível na biblioteca. Clique em Abrir Blueprint.');
-    }, prepared.created ? 120 : 30);
-  };
-
-  const returnToSourceJourney = (journeyId: string) => {
-    if (!graph.journeys[journeyId]) { showToast('A Jornada de origem não está mais disponível.'); return; }
-    selectWorkspaceTab('journey');
-    window.setTimeout(() => { void openJourney(journeyId); }, 30);
-  };
-
   const createJourney = async (requestedTemplate?: string) => {
-    let name = journeyDraftName.trim() || 'Nova Jornada';
+    let name = journeyDraftName.trim() || 'Novo mapa';
     if (!journeyDraftName.trim()) {
       const names = new Set(Object.values(graph.journeys).map(item => item.name.toLocaleLowerCase('pt-BR')));
       let number = 2;
-      while (names.has(name.toLocaleLowerCase('pt-BR'))) name = `Nova Jornada (${number++})`;
+      while (names.has(name.toLocaleLowerCase('pt-BR'))) name = `Novo mapa (${number++})`;
     }
     const runtime = journeyApi();
     if (!runtime?.create) { showToast('O runtime de Journey ainda não está disponível.'); return; }
-    const created = runtime.create({ name, status: 'draft', priority: 'medium', ...((requestedTemplate ?? journeyStartTemplate) !== 'blank' ? { templateId: requestedTemplate ?? journeyStartTemplate } : {}) });
+    const created = runtime.create({ name, status: 'draft', priority: 'medium', objective: journeyGoal, ...((requestedTemplate ?? journeyStartTemplate) !== 'blank' ? { templateId: requestedTemplate ?? journeyStartTemplate } : {}) });
     if (!created?.id) { showToast('Não foi possível criar a Journey.'); return; }
     setJourneyCreateOpen(false);
     setJourneyDraftName('');
     setJourneyStartTemplate('blank');
-    showToast((requestedTemplate ?? journeyStartTemplate) === 'blank' ? 'Jornada pronta para editar na matriz.' : 'Jornada criada com um modelo editável. Ajuste as etapas para a realidade do serviço.');
+    setJourneyGoal('');
+    showToast((requestedTemplate ?? journeyStartTemplate) === 'blank' ? 'Mapa pronto para adicionar etapas e cartões.' : 'Mapa criado com um modelo editável. Ajuste as etapas para a realidade do serviço.');
     await openJourney(created.id);
   };
 
   const deleteJourney = () => {
     if (!journeyToDelete) return;
-    const result = journeyApi()?.remove?.(journeyToDelete.id);
+    const result = journeyApi()?.remove?.(journeyToDelete.id, { includeBlueprints: true });
     if (!result?.ok) {
-      showToast(result?.message || 'Não foi possível excluir a Jornada.');
+      showToast(result?.message || 'Não foi possível excluir o mapa.');
       return;
     }
     setJourneyToDelete(null);
     setJourneyEditorOpen(false);
-    showToast('Jornada excluída e alterações salvas.');
+    showToast('Mapa excluído e alterações salvas.');
   };
 
   const deleteBlueprint = () => {
@@ -344,7 +314,6 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
       return;
     }
     setBlueprintToDelete(null);
-    setMenuId(null);
     showToast('Blueprint excluído. A Jornada vinculada foi preservada.');
   };
 
@@ -674,7 +643,7 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
         {experience.level === 'foundation' && guidanceSourceRow && <em className="bo-h164-guidance-metric">{guidanceSourceRow.metric}</em>}
         {experience.level !== 'foundation' && guidance.alternatives.filter((alternative) => alternative.target !== 'research' && isWorkspaceCapabilityVisible(experience.level, alternative.target)).length > 0 && <div className="bo-h740h7-alternatives"><span>Ou:</span>{guidance.alternatives.filter((alternative) => alternative.target !== 'research' && isWorkspaceCapabilityVisible(experience.level, alternative.target)).map((alternative) => <button type="button" key={alternative.target} onClick={() => executeGuidedTarget(alternative.target)}>{alternative.label}</button>)}</div>}
       </aside>
-    </header> : <header className="bo-h740h7-compact-head">
+    </header> : <header className="bo-h740h7-compact-head" data-service-maps-header={workspaceTab === 'journey' ? '1' : undefined}>
       <div>
         <button type="button" onClick={() => selectWorkspaceTab('overview')}>Design do serviço</button>
         <span>/</span><span>{WORKSPACE_GROUPS.find((group) => group.id === activeWorkspaceGroup)?.label}</span><span>/</span>
@@ -683,7 +652,7 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
       <small>{graph.service.name}</small>
       <div className="bo-h722-head-actions">
         
-        {workspaceTab === 'journey' && !journeyCreateOpen && <>{handoff.readyForJourney && <button type="button" className="bo-button bo-button--secondary" onClick={createFromDefinition}><Plus size={15}/> Criar com contexto</button>}<button type="button" className="primary bo-button bo-button--primary" onClick={() => void runtimeCall('create')}><Plus size={15}/> Criar Blueprint</button></>}
+        {workspaceTab === 'journey' && !journeyCreateOpen && <>{handoff.readyForJourney && <button type="button" className="bo-button bo-button--secondary" onClick={createFromDefinition}><Plus size={15}/> Criar com contexto</button>}<button type="button" className="primary bo-button bo-button--primary" onClick={() => setJourneyCreateOpen(true)}><Plus size={15}/> Criar mapa</button></>}
       </div>
     </header>}
 
@@ -873,37 +842,23 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
     {workspaceTab === 'governance' && <ServiceGovernanceView studio={studio}/>}
     {workspaceTab === 'operations' && <ServiceOperationsBridgeView studio={studio}/>}
 
-    {workspaceTab === 'journey' && !journeyEditorOpen && !journeyCreateOpen && <div className="bo-h722-blueprint-pane bo-h724-journey-pane" data-journey-library="1">
-      <div className="bo-h722-library-head"><div><small>EXPERIÊNCIA DO SERVIÇO</small><h2>Jornadas</h2><p>Jornada e Blueprint usam o mesmo editor de linhas e cartões. Alterne a perspectiva no mapa para detalhar a experiência ou a operação.</p></div></div>
-      <div className="bo-h1711-flow-hint" data-design-flow="journey" role="note"><span><strong>Jornada</strong><span>·</span><span>Blueprint operacional e Whiteboard são opcionais.</span></span><button className="bo-button bo-button--secondary" type="button" onClick={() => selectWorkspaceTab('whiteboard')}>Explorar no Whiteboard <ArrowRight size={13}/></button></div>
-      <div className="bo1205h3-list-toolbar bo-h722-library-toolbar"><strong>{filteredJourneys.length} {filteredJourneys.length === 1 ? 'resultado' : 'resultados'}</strong>{journeys.length > 0 && <div><label className="bo1205h3-icon-search"><Search size={15}/><input value={journeyQuery} onChange={(event) => setJourneyQuery(event.target.value)} placeholder="Buscar Jornada" aria-label="Buscar Jornada"/></label><div className="bo-view-switch" role="group" aria-label="Exibição das Jornadas"><button type="button" className={`bo-button bo-button--ghost ${journeyViewMode === 'cards' ? 'active' : ''}`} aria-pressed={journeyViewMode === 'cards'} onClick={() => setJourneyViewMode('cards')}><LayoutTemplate size={16}/><span>Cards</span></button><button type="button" className={`bo-button bo-button--ghost ${journeyViewMode === 'table' ? 'active' : ''}`} aria-pressed={journeyViewMode === 'table'} onClick={() => setJourneyViewMode('table')}><Table2 size={16}/><span>Tabela</span></button></div><button type="button" className="primary bo-button bo-button--primary" onClick={() => setJourneyCreateOpen(true)}><Plus size={16}/> Criar Jornada</button></div>}</div>
-      {journeyViewMode === 'cards' ? <div className="bo-h724-journey-grid">{filteredJourneys.map((journey) => <article key={journey.id} className="bo-h724-journey-card"><img src={journeyPreviewSrc(journey, graph)} alt=""/><div className="bo-h724-journey-card__copy"><small>JORNADA</small><strong>{journey.name}</strong><span>{journey.stageIds.length} etapas · {journey.status === 'active' ? 'Ativa' : journey.status === 'archived' ? 'Arquivada' : 'Em construção'}</span><time>{formatDate(journey.updatedAt || graph.service.updatedAt)}</time></div><footer className="bo-map-card-actions"><button type="button" className="bo-h722-open bo-button bo-button--secondary" onClick={() => void openJourney(journey.id)}>Abrir Jornada <ArrowRight size={14}/></button><button type="button" className="bo-h1711-link bo-button bo-button--ghost" data-journey-to-blueprint={journey.id} onClick={() => continueJourneyInBlueprint(journey.id)}>{journey.stageIds.length ? (Object.values(graph.views.whiteboards).some(board => board.viewKind === 'blueprint' && board.journeyId === journey.id) ? 'Abrir Blueprint vinculado' : 'Continuar no Blueprint') : 'Preparar Blueprint'} <ArrowRight size={13}/></button><button type="button" className="bo-h722-journey-delete bo-button bo-button--danger" aria-label={`Excluir Jornada ${journey.name}`} onClick={() => setJourneyToDelete({ id: journey.id, name: journey.name })} title={`Excluir Jornada ${journey.name}`}><Trash2 size={16}/><span className="sr-only">Excluir</span></button></footer></article>)}</div> : <div className="bo1205h3-table-wrap"><table className="bo1205h3-table"><thead><tr><th>NOME</th><th>STATUS</th><th>ETAPAS</th><th>ATUALIZADO</th><th></th></tr></thead><tbody>{filteredJourneys.map((journey) => <tr key={journey.id}><td><div className="bo1205h3-name-cell"><span><BlueOceanObjectIcon kind="journey" size={14}/></span><button className="bo-button bo-button--secondary" type="button" onClick={() => void openJourney(journey.id)}>{journey.name}</button></div></td><td>{journey.status === 'active' ? 'Ativa' : journey.status === 'archived' ? 'Arquivada' : 'Em construção'}</td><td>{journey.stageIds.length}</td><td>{formatDate(journey.updatedAt || graph.service.updatedAt)}</td><td><button className="bo-button bo-button--secondary" type="button" onClick={() => void openJourney(journey.id)}>Abrir</button> <button type="button" className="bo-h1711-link bo-button bo-button--ghost" data-journey-to-blueprint={journey.id} onClick={() => continueJourneyInBlueprint(journey.id)}>Blueprint vinculado</button> <button type="button" className="bo-h722-journey-delete bo-button bo-button--danger" aria-label={`Excluir Jornada ${journey.name}`} onClick={() => setJourneyToDelete({ id: journey.id, name: journey.name })}>Excluir</button></td></tr>)}</tbody></table></div>}
-      {!filteredJourneys.length && <div className="bo1205h3-empty bo-h724-journey-empty"><BlueOceanObjectIcon kind="journey" size={30}/><strong>{journeys.length ? 'Nenhuma Jornada encontrada' : 'Crie sua primeira Jornada'}</strong><p>{journeys.length ? 'Ajuste a busca para encontrar outra Jornada.' : 'Comece em branco ou escolha um modelo. Você pode acrescentar um Blueprint operacional quando precisar.'}</p>{!journeys.length && <button type="button" className="primary bo-button bo-button--primary" onClick={() => setJourneyCreateOpen(true)}><Plus size={16}/> Criar Jornada</button>}</div>}
-    </div>}
+    {workspaceTab === 'journey' && !journeyEditorOpen && !journeyCreateOpen && handoff.readyForJourney && <section className="bo-h78-blueprint-context" data-blueprint-context-handoff="1"><div><small>CONTEXTO DO SERVIÇO</small><strong>{handoff.counts.persona} Personas · {handoff.counts.problem} Problemas · {handoff.counts.evidence} Evidências</strong><span>Use Criar com contexto para manter os vínculos com os registros existentes.</span></div></section>}
+
+    {workspaceTab === 'journey' && !journeyEditorOpen && !journeyCreateOpen && <ServiceMapsLibrary graph={graph} query={journeyQuery} onQuery={setJourneyQuery} view={journeyViewMode} onView={setJourneyViewMode} onCreate={() => setJourneyCreateOpen(true)} onOpen={id => void openJourney(id)} onOpenBoard={id => void runtimeCall('open', id)} onRemove={(id, name) => setJourneyToDelete({ id, name })} onRemoveBoard={(id, name) => setBlueprintToDelete({ id, name })}/>}
 
     {workspaceTab === 'journey' && journeyEditorOpen && <EditorSurface><div className="bo-h724-journey-editor-shell"><div className="bo-h722-embedded bo-h722-embedded--journey" data-unified-journey-pane="1"><JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/></div></div></EditorSurface>}
 
     {workspaceTab === 'whiteboard' && <div className="bo-h722-embedded bo-h722-embedded--whiteboard" data-unified-whiteboard-pane="1"><WhiteboardsView studio={studio}/></div>}
 
-    {workspaceTab === 'journey' && !journeyEditorOpen && !journeyCreateOpen && <div className="bo-h722-blueprint-pane" data-blueprint-library="1">
-      <p className="bo-mobile-read-note" role="note">Jornadas e Blueprints compartilham a matriz. As ferramentas operacionais continuam disponíveis em Recursos avançados.</p>
-      <div className="bo-h722-library-head"><div><small>OPERAÇÃO DO SERVIÇO</small><h2>Blueprints</h2><p>Continue da Jornada para organizar Frontstage, Backstage, Processos e Sistemas. As etapas permanecem compartilhadas, sem inventar atividades.</p></div></div>
-      <div className="bo-h1711-flow-hint" data-design-flow="blueprint" role="note"><span><strong>Jornada</strong><ArrowRight size={13}/><strong>Blueprint</strong><span>·</span><span>Explore alternativas no Whiteboard.</span></span><div><button className="bo-button bo-button--secondary" type="button" onClick={() => selectWorkspaceTab('journey')}>Ver Jornadas</button><button className="bo-button bo-button--secondary" type="button" onClick={() => selectWorkspaceTab('whiteboard')}>Explorar no Whiteboard <ArrowRight size={13}/></button></div></div>
-      {handoff.readyForJourney && <section className="bo-h78-blueprint-context" data-blueprint-context-handoff="1"><div><small>CONTEXT-TO-SERVICE</small><strong>{handoff.counts.persona} Persona · {handoff.counts.problem} Problema · {handoff.counts.evidence} Evidência</strong><span>Crie um Blueprint preservando a rastreabilidade da Service Definition.</span></div><button className="bo-button bo-button--secondary" type="button" onClick={createFromDefinition}><Plus size={15}/> Criar com contexto</button></section>}
-      <div className="bo1205h3-list-toolbar bo-h722-library-toolbar"><strong>{rows.length} {rows.length === 1 ? 'resultado' : 'resultados'}</strong><div><label className="bo1205h3-icon-search"><Search size={15}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar Blueprint" aria-label="Buscar Blueprint"/></label><div className="bo-view-switch" role="group" aria-label="Exibição dos Blueprints"><button type="button" className={`bo-button bo-button--ghost ${viewMode === 'cards' ? 'active' : ''}`} aria-pressed={viewMode === 'cards'} onClick={() => setViewMode('cards')}><LayoutTemplate size={16}/><span>Cards</span></button><button type="button" className={`bo-button bo-button--ghost ${viewMode === 'table' ? 'active' : ''}`} aria-pressed={viewMode === 'table'} onClick={() => setViewMode('table')}><Table2 size={16}/><span>Tabela</span></button></div><button type="button" className="primary bo-button bo-button--primary" onClick={() => void runtimeCall('create')}><Plus size={16}/> Criar Blueprint</button></div></div>
-
-      {viewMode === 'cards' ? <div className="bo-h722-blueprint-grid">{rows.map((row) => <article key={row.id} className="bo-h722-blueprint-card"><button className="bo-h722-card-menu bo-button bo-button--secondary bo-button--icon" type="button" aria-label={`Ações do Blueprint ${row.name}`} aria-expanded={menuId === row.id} onClick={() => setMenuId(menuId === row.id ? null : row.id)}><MoreVertical size={16}/></button>{menuId === row.id && <div className="bo1205h3-row-menu"><button className="bo-button bo-button--secondary" type="button" onClick={() => void runtimeCall('open', row.id)}>Abrir</button></div>}<div className="bo-h722-blueprint-card__visual"><BlueOceanObjectIcon kind="blueprint" size={30}/><span/><span/><span/></div><div className="bo-h722-blueprint-card__copy"><small>SERVICE BLUEPRINT</small><strong>{row.name}</strong><span>{row.journeyStageCount} etapas · {row.itemCount} objetos · {row.contextCount ? `${row.contextCount} vínculos` : 'sem contexto'}</span><time>{formatDate(row.updatedAt)}</time></div><footer className="bo-map-card-actions"><button type="button" className="bo-h722-open bo-button bo-button--secondary" onClick={() => void runtimeCall('open', row.id)}>Abrir Blueprint <ArrowRight size={14}/></button><button type="button" className="bo-h722-journey-delete bo-button bo-button--danger" aria-label={`Excluir Blueprint ${row.name}`} title={`Excluir Blueprint ${row.name}`} onClick={() => setBlueprintToDelete({ id: row.id, name: row.name })}><Trash2 size={16}/><span className="sr-only">Excluir</span></button>{row.journeyId && graph.journeys[row.journeyId] && <button type="button" className="bo-h1711-link bo-button bo-button--ghost" data-blueprint-to-journey={row.id} onClick={() => returnToSourceJourney(row.journeyId!)}>Voltar à Jornada: {graph.journeys[row.journeyId].name} <ArrowRight size={13}/></button>}</footer></article>)}</div> : <div className="bo1205h3-table-wrap"><table className="bo1205h3-table"><thead><tr><th></th><th>NOME</th><th>ESTRUTURA</th><th>CONTEXTO</th><th>OBJETOS</th><th>ATUALIZADO</th><th>USADO EM</th><th>AÇÕES</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}><td className="menu-cell"><button className="bo-button bo-button--secondary" type="button" aria-label={`Ações do Blueprint ${row.name}`} aria-expanded={menuId === row.id} onClick={() => setMenuId(menuId === row.id ? null : row.id)}><MoreVertical size={15}/></button>{menuId === row.id && <div className="bo1205h3-row-menu"><button className="bo-button bo-button--secondary" type="button" onClick={() => void runtimeCall('open', row.id)}>Abrir</button></div>}</td><td><div className="bo1205h3-name-cell"><span><LayoutTemplate size={14}/></span><button className="bo-button bo-button--secondary" type="button" onClick={() => void runtimeCall('open', row.id)}>{row.name}</button></div></td><td>{row.layoutMode === 'service' ? 'Service Frame' : 'Blueprint'}</td><td>{row.contextCount ? <span className="bo-h78-context-badge">{row.contextCount} vínculos</span> : '—'}</td><td>{row.itemCount}</td><td>{formatDate(row.updatedAt)}</td><td>{row.journeyId && graph.journeys[row.journeyId] ? <button type="button" className="bo-h1711-link bo-button bo-button--ghost" data-blueprint-to-journey={row.id} onClick={() => returnToSourceJourney(row.journeyId!)}>{graph.journeys[row.journeyId].name}</button> : 'Sem Jornada vinculada'}</td><td><button type="button" className="bo-h722-journey-delete bo-button bo-button--danger" aria-label={`Excluir Blueprint ${row.name}`} onClick={() => setBlueprintToDelete({ id: row.id, name: row.name })}>Excluir</button></td></tr>)}</tbody></table></div>}
-      {!rows.length && <div className="bo1205h3-empty bo-h722-blueprint-empty"><BlueOceanObjectIcon kind="blueprint" size={30}/><strong>Nenhum Blueprint ainda</strong><p>A Journey e o Whiteboard continuam disponíveis neste workspace. Crie o Blueprint quando estiver pronto para estruturar a operação.</p><div><button className="bo-button bo-button--secondary" type="button" onClick={() => selectWorkspaceTab('journey')}>Abrir Jornada</button><button type="button" className="primary bo-button bo-button--primary" onClick={() => void runtimeCall('create')}><Plus size={14}/> Criar Blueprint</button></div></div>}
-    </div>}
-
     {designStartOpen && <div className="bo-h168-choice-backdrop" role="dialog" aria-modal="true" aria-labelledby="bo-h168-choice-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setDesignStartOpen(false); }}><div className="bo-h168-choice-modal"><header><div><small>COMO VOCÊ QUER TRABALHAR?</small><h2 id="bo-h168-choice-title">Escolha pela intenção, não pela ferramenta</h2><p>As duas formas usam os mesmos dados do serviço. Você pode alternar depois sem perder o que já registrou.</p></div><button type="button" aria-label="Fechar" onClick={() => setDesignStartOpen(false)}><X size={17}/></button></header><div className="bo-h168-choice-grid"><button type="button" className="bo-h168-choice-card is-recommended" onClick={() => void continueJourneyFromDesign()}><span className="bo-h168-choice-icon"><BlueOceanObjectIcon kind="journey" size={22}/></span><em>RECOMENDADO PARA COMEÇAR</em><strong>Organizar a experiência</strong><p>Entenda o que acontece em cada etapa da experiência do cliente e registre necessidades, dores e evidências enquanto desenha.</p><b>Jornada do cliente <ArrowRight size={14}/></b></button><button type="button" className="bo-h168-choice-card" onClick={continueWhiteboardFromDesign}><span className="bo-h168-choice-icon"><BlueOceanObjectIcon kind="whiteboard" size={22}/></span><em>EXPLORAÇÃO LIVRE</em><strong>Explorar visualmente</strong><p>Coloque ideias e relações no espaço, crie pessoas, necessidades, dores e evidências quando aparecerem e organize depois.</p><b>Whiteboard <ArrowRight size={14}/></b></button></div><footer><span>Whiteboard é um ambiente transversal de exploração, não uma etapa obrigatória do desenho.</span><button type="button" onClick={() => setDesignStartOpen(false)}>Agora não</button></footer></div></div>}
 
     {workspaceTab === 'journey' && journeyCreateOpen && <section className="bo-h1704-journey-starter" data-journey-starter="full-page" aria-labelledby="bo-h1704-starter-title">
-      <header className="bo-h1704-starter-top"><button type="button" onClick={() => { setJourneyCreateOpen(false); setJourneyDraftName(''); }}><ArrowLeft size={16}/> Voltar às Jornadas</button><span>1. Escolha como começar &nbsp; → &nbsp; 2. Edite seu mapa</span></header>
-      <div className="bo-h1704-starter-content"><small>CRIAR JORNADA DO CLIENTE</small><h1 id="bo-h1704-starter-title">Como você quer começar?</h1><p>Comece com um mapa em branco ou use um exemplo editável. Não é necessário cadastrar uma Persona ou fazer Pesquisa antes.</p>
-        <label className="bo-h1704-name-field"><span>Nome da Jornada <em>(opcional)</em></span><input autoFocus value={journeyDraftName} onChange={(event) => setJourneyDraftName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') void createJourney(); }} placeholder="Ex.: Jornada de coleta e entrega"/></label>
+      <header className="bo-h1704-starter-top"><button type="button" onClick={() => { setJourneyCreateOpen(false); setJourneyDraftName(''); }}><ArrowLeft size={16}/> Voltar aos mapas</button><span>1. Escolha como começar &nbsp; → &nbsp; 2. Edite seu mapa</span></header>
+      <div className="bo-h1704-starter-content"><small>CRIAR MAPA DO SERVIÇO</small><h1 id="bo-h1704-starter-title">Como você quer começar?</h1><p>Comece com um mapa em branco ou use um exemplo editável. Não é necessário cadastrar uma Persona ou fazer Pesquisa antes.</p>
+        <fieldset className="bo-business-goals"><legend>O que você quer melhorar no negócio?</legend><div>{businessGoals.map(item => <button type="button" key={item.goal} aria-pressed={journeyGoal === item.goal} onClick={() => { setJourneyGoal(item.goal); setJourneyStartTemplate(item.template); }}><strong>{item.goal}</strong><small>{item.hint}</small></button>)}</div><p>{journeyGoal ? `Objetivo: ${journeyGoal}. O modelo sugerido está destacado abaixo; você pode escolher outro.` : 'Escolha um objetivo para receber uma sugestão ou comece diretamente com um mapa.'}</p></fieldset>
+        <label className="bo-h1704-name-field"><span>Nome do mapa <em>(opcional)</em></span><input autoFocus value={journeyDraftName} onChange={(event) => setJourneyDraftName(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') void createJourney(); }} placeholder="Ex.: Jornada de coleta e entrega"/></label>
         <div className="bo-h1704-templates-head"><strong>Escolha um ponto de partida</strong><small>Os modelos são exemplos; nenhuma etapa representa um fato confirmado sobre seu serviço.</small></div>
-        <div className="bo-h1704-template-grid" aria-label="Criar Jornada a partir de um modelo"><button type="button" className={journeyStartTemplate === 'blank' ? 'is-selected' : ''} onClick={() => void createJourney('blank')}><span className="bo-h1704-template-preview is-blank"><Plus size={28}/></span><strong>Em branco</strong><small>Adicione suas próprias etapas no mapa. Clique para criar.</small></button>{starterTemplates.map((template) => <button type="button" key={template.id} className={journeyStartTemplate === template.id ? 'is-selected' : ''} onClick={() => void createJourney(template.id)}><span className="bo-h1704-template-preview">{template.stages.slice(0,4).map((stage) => <i key={stage} title={stage}/>)}</span><strong>{template.name}</strong><small>{template.description} · Clique para criar.</small></button>)}</div>
+        <div className="bo-h1704-template-grid" aria-label="Criar mapa a partir de um modelo"><button type="button" className={journeyStartTemplate === 'blank' ? 'is-selected' : ''} onClick={() => void createJourney('blank')}><span className="bo-h1704-template-preview is-blank"><Plus size={28}/></span><strong>Em branco</strong><small>Adicione suas próprias etapas no mapa. Clique para criar.</small></button>{starterTemplates.map((template) => <button type="button" key={template.id} className={journeyStartTemplate === template.id ? 'is-selected' : ''} onClick={() => void createJourney(template.id)}><span className="bo-h1704-template-preview">{template.stages.slice(0,4).map((stage) => <i key={stage} title={stage}/>)}</span><strong>{template.name}</strong><small>{template.description} · Clique para criar.</small></button>)}</div>
         <footer><button type="button" className="bo-button bo-button--secondary" onClick={() => setJourneyCreateOpen(false)}>Cancelar</button><button type="button" className="primary bo-button bo-button--primary" onClick={() => void createJourney()}>Criar e abrir mapa <ArrowRight size={16}/></button></footer>
       </div>
     </section>}
@@ -917,7 +872,7 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
 
     {journeyToDelete && <div className="bo-h168-choice-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setJourneyToDelete(null); }}>
       <div className="bo-h168-choice-modal" role="dialog" aria-modal="true" aria-labelledby="bo-delete-journey-title" data-delete-journey-dialog="1">
-        <header><div><small>EXCLUSÃO DE JORNADA</small><h2 id="bo-delete-journey-title">Excluir “{journeyToDelete.name}”?</h2><p>Essa ação remove a Jornada e suas etapas vinculadas. Blueprints associados impedem a exclusão até terem o vínculo alterado. Faça um backup se precisar preservar o conteúdo.</p></div><button type="button" aria-label="Cancelar exclusão" onClick={() => setJourneyToDelete(null)}><X size={18}/></button></header>
+        <header><div><small>EXCLUSÃO DE MAPA</small><h2 id="bo-delete-journey-title">Excluir “{journeyToDelete.name}”?</h2><p>Essa ação remove o mapa, suas etapas, cartões e conexões das visualizações Blueprint e Jornada. Os registros compartilhados do serviço serão preservados. Faça um backup se precisar guardar este mapa.</p></div><button type="button" aria-label="Cancelar exclusão" onClick={() => setJourneyToDelete(null)}><X size={18}/></button></header>
         <footer><button type="button" className="bo-button bo-button--secondary" onClick={() => setJourneyToDelete(null)}>Cancelar</button><button type="button" className="danger bo-button bo-button--danger" onClick={deleteJourney}>Confirmar exclusão</button></footer>
       </div>
     </div>}

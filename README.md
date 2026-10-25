@@ -9,8 +9,8 @@
 [![Qualidade](https://github.com/CAMBRUSSIJJ/blue-ocean-service-studio/actions/workflows/quality.yml/badge.svg)](https://github.com/CAMBRUSSIJJ/blue-ocean-service-studio/actions/workflows/quality.yml)
 [![Node.js 22](https://img.shields.io/badge/Node.js-22-43853D?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 
-Construa Jornadas, explore ideias no Whiteboard e detalhe a operação no Blueprint
-sobre os mesmos dados do serviço. Comece em branco ou use um modelo editável,
+Crie mapas do serviço com visualizações de Blueprint e Jornada, e explore ideias
+no Whiteboard sobre os mesmos dados. Comece em branco ou use um modelo editável,
 sem precisar preencher uma pesquisa antes de desenhar.
 
 [Começar](#começar) · [Documentação](docs/README.md) · [Contribuir](CONTRIBUTING.md) · [Histórico](CHANGELOG.md)
@@ -23,11 +23,14 @@ sem precisar preencher uma pesquisa antes de desenhar.
 
 | Área | Para que serve |
 | --- | --- |
-| **Jornadas** | Mapear etapas, ações, pensamentos, emoções e pontos de contato, com faixas configuráveis e cartões editáveis. |
+| **Jornada** | Visualização da experiência dentro do mesmo mapa: ações, canais, pensamentos e emoções. |
 | **Whiteboard** | Explorar livremente, organizar ideias e trabalhar com objetos vinculados ao serviço. |
-| **Blueprint** | Relacionar a experiência à operação: evidências do serviço, linha de frente, bastidores e processos de suporte. |
+| **Blueprint** | Canvas claro com cartões simples, biblioteca do serviço, conexões pelo próprio cartão e organização da linha de frente, bastidores e apoio. |
 | **Revisão da entrega** | Identificar lacunas, vínculos ausentes, dependências circulares, prazos inviáveis e desequilíbrios entre capacidade e demanda. |
 | **Continuidade** | Navegar entre Jornada e Blueprint preservando a identidade dos dados e exportar backups do trabalho. |
+
+Conheça o [editor unificado de mapas do serviço](docs/blueprint-canvas.md), incluindo
+componentes, conexões entre equipes e edição no celular.
 
 ## Começar
 

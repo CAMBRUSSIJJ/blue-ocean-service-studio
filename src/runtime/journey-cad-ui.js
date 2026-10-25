@@ -1,0 +1,325 @@
+/* Operational canvas is a projection of the shared Journey document, never a second store. */
+const cadModel=window.BlueOceanBlueprintCanvas;
+const cadState={scene:'',selected:'',creating:null,link:null,drafts:new Map(),camera:null,layout:null,pending:'',error:'',library:false,inspector:false,detail:'auto',drag:null,ignoreClick:false,quick:null,choosing:null,menu:null,connectFrom:'',connectType:'sequence',pointer:null,query:'',libraryHidden:false,libraryKind:'',pendingDocument:null};
+const cadColors={sd:'#64748b',ev:'#64748b',ch:'#0284c7',ac:'#2563eb',th:'#7c3aed',em:'#d97706',im:'#e11d48',fl:'#0f766e',bk:'#b45309',sy:'#7c3aed'};
+const cadLinkColors={sequence:'#2563eb',dependency:'#b45309',uses:'#7c3aed',handoff:'#0f766e'};
+function cadEnabled(){return !!V&&V.blueprintRenderer!=='matrix'}
+function cadMobile(){return matchMedia('(max-width:760px)').matches}
+function cadRows(){return orderedRows().filter(row=>!V.hiddenRows.includes(row.id)).map(row=>({...row,n:row.id==='ch'?'Canais':row.n}))}
+function cadCellNotes(row,index){
+ const notes=(S.c[row+'|'+index]||[]).map(note=>({...note})),step=S.steps[index];if(!step)return notes;
+ const summary=(id,title,label)=>notes.push({i:'@'+id+':'+index,t:title,type:'text',virtualLabel:label});
+ if(row==='sd'&&step.d?.trim())summary('context',step.d,'Contexto da etapa');
+ if(row==='em'){const marker=notes.find(note=>note.canvas?.kind==='emotion');if(marker)marker.t=(growthEmotionKnown(step)?EM[step.e+2]:'Emoção não registrada')+(step.note?' · '+step.note:'');else if(growthEmotionKnown(step))summary('emotion',EM[step.e+2]+(step.note?' · '+step.note:''),'Emoção');}
+ if(row==='im')S.iss.filter(issue=>issue.s===index&&issue.x.trim()&&!Object.values(S.c).flat().some(note=>note.referenceId===issue.hostEntityId)).forEach((issue,i)=>summary('issue'+i,issue.x,issue.t==='d'?'Dor · editar na matriz':'Ideia · editar na matriz'));
+ return notes;
+}
+function cadProjection(includeDraft=true){if(cadState.pendingDocument)return structuredClone(cadState.pendingDocument);const doc={...S,c:{...S.c}};for(const row of cadRows())S.steps.forEach((_,index)=>{doc.c[row.id+'|'+index]=cadCellNotes(row.id,index)});if(includeDraft&&cadState.creating&&cadState.quick){const draft=cadState.creating,index=S.steps.findIndex(step=>cadStageKey(step)===draft.stageKey);if(index>=0)(doc.c[draft.row+'|'+index]||=[]).push({i:'@draft',t:draft.title||'Novo cartão…',type:'card',canvas:{kind:draft.kind},draft:true})}return doc}
+function cadTitle(note){return note.t||pickerReference(note)?.title||pickerReference(note)?.name||contentTypes[note.type]?.[1]||'Componente'}
+function cadButton(action,label,attrs=''){return '<button type="button" data-act="'+action+'" '+attrs+'>'+label+'</button>'}
+function cadLocked(){return !!S.readOnly||!!cadState.pending}
+function cadStageKey(step){return step.hostStageId||step.hostLocalId}
+function cadStageOptions(index){return S.steps.map((step,i)=>'<option value="'+esc(cadStageKey(step))+'" '+(i===index?'selected':'')+'>'+esc(step.n)+'</option>').join('')}
+function cadCatalog(kind){if(kind==='metric')return S.availableMetrics||[];if(kind==='system'||kind==='resource')return (S.operationalResources||[]).filter(item=>item.kind===kind);return S.serviceElements?.[kind]||[]}
+function cadOptions(items,value,empty='Nenhum'){return '<option value="">'+empty+'</option>'+items.map(item=>'<option value="'+esc(item.id)+'" '+(item.id===value?'selected':'')+'>'+esc(item.title||item.name||item.id)+'</option>').join('')}
+function cadFormData(form){const data=new FormData(form);return {...Object.fromEntries(data),resourceRefs:data.getAll('resourceRefs')}}
+function cadCurrentDraft(){if(cadState.creating)return cadState.creating;if(cadState.link)return cadState.link;return cadState.drafts.get(cadState.selected)}
+function cadField(name,label,value='',type='text',extra=''){return '<label>'+label+'<input name="'+name+'" type="'+type+'" value="'+esc(value??'')+'" '+extra+'></label>'}
+function cadInspector(){
+ const entry=blueprintNote(cadState.selected),isNew=!!cadState.creating;
+ if(cadState.link)return cadLinkForm();
+ if(!isNew&&!entry)return '<div class="cad-empty"><span aria-hidden="true">⬡</span><h2>Inspecione seu serviço</h2><p>Selecione um componente ou uma conexão para editar o combinado da operação.</p>'+cadButton('cad-library','+ Adicionar componente',cadLocked()?'disabled':'')+'</div>';
+ const draft=cadCurrentDraft(),row=entry?.key.split('|')[0]||draft.row,kind=draft.kind,component=cadModel.CANVAS_COMPONENTS[kind];
+ if(!isNew&&(!['card','text','metric'].includes(entry.note.type)||entry.note.type==='metric'&&!entry.note.canvas))return '<h2>'+esc(cadTitle(entry.note))+'</h2><p>Este conteúdo está vinculado à Jornada. Edite-o na matriz para manter seus campos específicos.</p>'+cadButton('cad-matrix','Abrir matriz')+cadButton('cad-close','Fechar propriedades');
+ const allowed=component.rows.includes('*')?rowDefs().map(value=>value.id):component.rows.includes(row)?component.rows:[...component.rows,row];
+ const resourceRefs=[...new Set([...(S.operationalResources||[]).map(item=>item.ref),...(draft.resourceRefs||[])])];
+ return '<form id="cad-component-form"><h2>'+(isNew?'Adicionar '+component.title:'Propriedades')+'</h2><p class="cad-kind">'+component.title+'</p>'+cadField('title','Nome do componente',draft.title,'text','required maxlength="240"')+
+ '<label>Descrição<textarea name="description" maxlength="1000">'+esc(draft.description||'')+'</textarea></label><label>Etapa<select name="stageKey" required>'+cadStageOptions(S.steps.findIndex(step=>cadStageKey(step)===draft.stageKey))+'</select></label><label>Faixa<select name="row">'+allowed.map(id=>'<option value="'+id+'" '+(id===draft.row?'selected':'')+'>'+esc(rowDefs().find(item=>item.id===id)?.n||id)+'</option>').join('')+'</select></label>'+
+ (isNew&&['system','resource','metric','channel','persona','need','pain','opportunity'].includes(kind)?'<label>Usar registro do serviço<select name="referenceId">'+cadOptions(cadCatalog(kind),draft.referenceId,'Criar novo registro')+'</select></label><p>Ao reutilizar, o nome e os dados do registro existente são mantidos.</p>':'')+
+ '<div class="cad-field-grid">'+cadField('owner','Responsável',draft.owner,'text','maxlength="160"')+cadField('team','Equipe',draft.team,'text','maxlength="160"')+'</div><label>Canal<select name="channelId">'+cadOptions(cadCatalog('channel'),draft.channelId)+'</select></label><div class="cad-field-grid">'+[['durationMinutes','Execução (min)'],['waitMinutes','Espera (min)'],['targetMinutes','Prazo (min)']].map(([name,label])=>cadField(name,label,draft[name],'number','min="0" max="525600" step="any"')).join('')+'</div><fieldset><legend>Recursos vinculados</legend>'+(resourceRefs.length?resourceRefs.map(ref=>'<label class="cad-check"><input type="checkbox" name="resourceRefs" value="'+esc(ref)+'" '+(draft.resourceRefs?.includes(ref)?'checked':'')+'>'+esc(blueprintResourceName(ref))+'</label>').join(''):'<p>Cadastre um sistema ou recurso na biblioteca.</p>')+'</fieldset>'+cadField('resourceNotes','Outros recursos',draft.resourceNotes,'text','maxlength="400"')+'<label>Regra ou condição<textarea name="rule" maxlength="1000">'+esc(draft.rule||'')+'</textarea></label><label>Indicador vinculado<select name="metricId">'+cadOptions(cadCatalog('metric'),draft.metricId)+'</select></label><p class="form-error" role="alert">'+esc(cadState.error)+'</p><footer>'+cadButton('cad-cancel','Cancelar')+'<button type="submit" '+(cadLocked()?'disabled':'')+'>'+(isNew?'Adicionar ao Blueprint':'Salvar componente')+'</button></footer>'+(!isNew?cadButton('cad-delete','Remover do mapa',cadLocked()?'disabled':''):'')+'</form>';
+}
+function cadLinkForm(){
+ const draft=cadState.link,options=value=>'<option value="">Escolha um componente</option>'+blueprintNotes().map(entry=>'<option value="'+esc(entry.note.i)+'" '+(value===entry.note.i?'selected':'')+'>'+esc(blueprintCaption(entry))+'</option>').join('');
+ return '<form id="cad-link-form"><h2>'+(draft.id?'Editar conexão':'Criar conexão')+'</h2><p>Escolha origem e destino aqui ou selecione dois componentes no canvas.</p><label>Origem<select name="a" required>'+options(draft.a)+'</select></label><label>Destino<select name="b" required>'+options(draft.b)+'</select></label><label>Relação<select name="type">'+Object.entries(blueprintConnectionNames).map(([id,name])=>'<option value="'+id+'" '+(id===draft.type?'selected':'')+'>'+name+'</option>').join('')+'</select></label>'+cadField('label','Descrição da conexão',draft.label,'text','maxlength="160"')+'<fieldset data-cad-handoff><legend>Passagem entre equipes</legend>'+cadField('fromTeam','Equipe de origem',draft.fromTeam,'text','maxlength="160"')+cadField('toTeam','Equipe de destino',draft.toTeam,'text','maxlength="160"')+cadField('deliverable','O que será transferido',draft.deliverable,'text','maxlength="400"')+cadField('deadlineMinutes','Prazo da transferência (min)',draft.deadlineMinutes,'number','min="0" max="525600" step="any"')+'<label>Condição de aceite<textarea name="acceptance" maxlength="1000">'+esc(draft.acceptance||'')+'</textarea></label></fieldset><p class="form-error" role="alert">'+esc(cadState.error)+'</p><footer>'+cadButton('cad-cancel','Cancelar')+'<button type="submit" '+(cadLocked()?'disabled':'')+'>Salvar conexão</button></footer>'+(draft.id?cadButton('cad-delete-link','Remover conexão',cadLocked()?'disabled':''):'')+'</form>';
+}
+function cadLinkFields(){const form=app.querySelector('#cad-link-form');if(!form)return;const handoff=form.elements.type.value==='handoff',field=form.querySelector('[data-cad-handoff]');field.hidden=!handoff;field.disabled=!handoff;for(const name of ['fromTeam','toTeam','deliverable'])form.elements[name].required=handoff}
+function cadCardDetails(note){const a=note.activity||{};return [a.owner||a.team||'Responsável a definir',a.durationMinutes!=null?a.durationMinutes+' min de execução':'',a.waitMinutes!=null?a.waitMinutes+' min de espera':''].filter(Boolean).join(' · ')}
+const cadBoundary=(row,index,rows)=>cadModel.canvasBoundary(row,index,rows);
+function cadSubmit(form){
+ if(cadLocked()||!form.reportValidity())return;try{
+  const data=cadFormData(form),next=structuredClone(S);
+  if(form.id==='cad-link-form'){
+   const link=window.BlueOceanJourneyContent.normalizeMatrixConnection({...data,id:cadState.link.id||uid(),handoff:data});
+   if((next.links||[]).some(item=>item.id!==link.id&&item.a===link.a&&item.b===link.b&&item.type===link.type))throw Error('Esta conexão já existe. Edite o vínculo salvo.');
+   next.links=[...(next.links||[]).filter(item=>item.id!==link.id),link];window.BlueOceanJourneyContent.validateMatrixDocument(next);cadSend('canvas-change',{state:next});return;
+  }
+  const draft=cadCurrentDraft(),step=S.steps.find(item=>cadStageKey(item)===data.stageKey);if(!step)throw Error('Selecione uma etapa disponível.');
+  const input={...draft,...data,stageId:step.hostStageId,stageLocalId:step.hostLocalId};
+  if(cadState.creating){cadModel.prepareCanvasInput(S,input);cadSend('canvas-create',{input});return}
+  const entry=blueprintNote(cadState.selected);if(!entry)throw Error('Componente indisponível.');const note=next.c[entry.key].find(item=>item.i===entry.note.i),kind=cadModel.canvasKind(note,entry.key.split('|')[0]);
+  note.t=data.title.trim();if(!note.t)throw Error('Informe o nome do componente.');note.canvas=cadModel.normalizeCanvasMetadata({...input,kind});note.activity=window.BlueOceanJourneyContent.normalizeMatrixActivity({...input,category:note.activity?.category});
+  const moved=cadModel.moveCanvasCard(next,note.i,{...input,row:data.row});cadSend('canvas-change',{state:moved},note.i);
+ }catch(error){cadState.error=error.message;form.querySelector('.form-error').textContent=error.message}
+}
+function cadLibrary(){
+ const query=cadState.query.trim().toLocaleLowerCase('pt-BR');
+ const groups={experience:'Experiência do cliente',operation:'Operação do serviço',content:'Anotações'};
+ return '<div class="cad-library-head"><h2>Componentes</h2>'+cadButton('cad-toggle-library','‹','aria-label="Recolher componentes"')+'</div><label class="cad-search">Buscar componente<input type="search" data-cad-search value="'+esc(cadState.query)+'" placeholder="Canal, emoção, atividade…"></label><div class="cad-components-list">'+Object.entries(groups).map(([group,label])=>{
+  const items=Object.entries(cadModel.CANVAS_COMPONENTS).filter(([kind,item])=>(item.group||(['touchpoint'].includes(kind)?'experience':'operation'))===group&&(!query||(item.title+' '+item.hint).toLocaleLowerCase('pt-BR').includes(query)));
+  return items.length?'<section><h3>'+label+'</h3><div class="cad-components">'+items.map(([kind,item])=>cadButton('cad-add','<span aria-hidden="true">'+item.icon+'</span><b>'+item.title+'</b><small>'+item.hint+'</small>','data-kind="'+kind+'" draggable="'+!cadLocked()+'" '+(cadLocked()?'disabled':''))).join('')+'</div></section>':'';
+ }).join('')+'</div>'+cadButton('cad-more-content','Mais tipos de conteúdo…',cadLocked()?'disabled':'')+'<p class="cad-help">Arraste para uma célula. Dê um nome e pressione Enter.</p>'+cadButton('customize','Organizar faixas');
+}
+function cadDraftFor(entry){const [row,index]=entry.key.split('|');return {...blueprintActivity(entry.note,row),kind:cadModel.canvasKind(entry.note,row),channelId:entry.note.canonicalChannelId||'',metricId:entry.note.canonicalMetricId||'',...entry.note.canvas,title:cadTitle(entry.note),description:entry.note.canvas?.description||entry.note.canonicalDescription||'',row,stageKey:cadStageKey(S.steps[index]),editingId:entry.note.i}}
+function cadStash(){if(cadState.creating&&cadState.creating.title.trim())cadState.drafts.set('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row,{...cadState.creating})}
+function cadQuickPosition(point={}){return {x:Math.max(12,Math.min(point.x??innerWidth/2-160,innerWidth-344)),y:Math.max(12,Math.min(point.y??170,innerHeight-350))}}
+function cadReveal(row){if(V.hiddenRows.includes(row)){V.hiddenRows=V.hiddenRows.filter(id=>id!==row);V.preset='custom';saveView()}}
+function cadStartQuick(kind,index=businessStageIndex(),row='',point={}){
+ if(cadLocked())return;if(!S.steps.length){cadStartStage();return}
+ const component=cadModel.CANVAS_COMPONENTS[kind];if(!component)return;
+ index=Number.isInteger(index)&&S.steps[index]?index:0;row=row||component.row;
+ if(!cadModel.canvasAcceptsRow(kind,row)){cadNotice('Este componente precisa de uma faixa compatível.');return}
+ if(kind==='emotion'){
+  const existing=(S.c['em|'+index]||[]).find(note=>note.canvas?.kind==='emotion');if(existing){cadSelect(existing.i);return}
+ }
+ cadStash();const stage=S.steps[index],stageKey=cadStageKey(stage),key='new:'+kind+':'+stageKey+':'+row;
+ cadState.selected='';cadState.link=null;cadState.inspector=false;cadState.library=false;cadState.choosing=null;cadState.menu=null;cadState.error='';
+ cadState.creating={kind,row,stageKey,title:'',description:'',resourceRefs:[],...cadState.drafts.get(key),mode:'card',emotionScore:stage.e??0,emotionNote:stage.note||'',...cadQuickPosition(point)};
+ cadState.quick=cadState.creating;cadReveal(row);rerender();cadFocusQuick();requestAnimationFrame(()=>cadEnsureVisible('@draft'));
+}
+function cadStartStage(index=S.steps.length-1,point={}){
+ if(cadLocked())return;cadStash();cadState.creating=null;cadState.choosing=null;cadState.menu=null;cadState.inspector=false;cadState.quick={mode:'stage',title:'',after:cadStageKey(S.steps[index]||{}),...cadQuickPosition(point)};rerender();cadFocusQuick();
+}
+function cadFocusQuick(){requestAnimationFrame(()=>{const field=app.querySelector('#cad-quick-form input:not([type=hidden]),#cad-quick-form select,#cad-quick-form textarea');field?.focus();if(field?.value&&typeof field.select==='function')field.select()})}
+function cadQuickForm(){
+ const draft=cadState.quick;if(!draft)return '';
+ const stageMode=['stage','stage-edit'].includes(draft.mode),isEmotion=draft.kind==='emotion',step=S.steps.find(value=>cadStageKey(value)===draft.stageKey);
+ const heading=stageMode?(draft.mode==='stage'?'Nova etapa':'Editar etapa'):(draft.editingId?'Editar cartão':cadModel.CANVAS_COMPONENTS[draft.kind]?.title||'Cartão');
+ return '<section class="cad-quick" role="dialog" aria-labelledby="cad-quick-title" style="left:'+draft.x+'px;top:'+draft.y+'px"><form id="cad-quick-form"><header><h2 id="cad-quick-title">'+esc(heading)+'</h2>'+cadButton('cad-cancel','×','aria-label="Fechar edição rápida"')+'</header>'+(!stageMode?'<p>'+esc(step?.n||'')+' · '+esc(rowDefs().find(row=>row.id===draft.row)?.n||draft.row)+'</p>':'')+(isEmotion?'<label>Como o cliente se sente?<select name="emotionScore">'+EM.map((label,index)=>'<option value="'+(index-2)+'" '+(Number(draft.emotionScore)===index-2?'selected':'')+'>'+['😞','🙁','😐','🙂','😊'][index]+' '+label+'</option>').join('')+'</select></label><label>Observação opcional<textarea name="emotionNote" maxlength="1000" placeholder="O que aconteceu nesta etapa?">'+esc(draft.emotionNote||'')+'</textarea></label><input type="hidden" name="title" value="Emoção do cliente">':cadField('title',stageMode?'Nome da etapa':'Nome do cartão',draft.title,'text','required maxlength="240" autocomplete="off" placeholder="'+(stageMode?'Ex.: Agendamento':'Escreva aqui…')+'"'))+(!stageMode&&!isEmotion?'<label class="cad-quick-description">Texto opcional<textarea name="description" maxlength="1000" rows="2" placeholder="Acrescente uma observação, se quiser">'+esc(draft.description||'')+'</textarea></label>':'')+(!stageMode&&['system','resource','metric','channel','persona','need','pain','opportunity'].includes(draft.kind)&&cadCatalog(draft.kind).length?'<details class="cad-quick-reuse"><summary>Usar um registro existente</summary><label>Registro do serviço<select name="referenceId">'+cadOptions(cadCatalog(draft.kind),draft.referenceId,'Criar novo')+'</select></label></details>':'')+'<p class="form-error" role="alert">'+esc(cadState.error)+'</p><footer><small>'+(draft.editingId?'Enter salva · Esc cancela':'Rascunho · Enter confirma')+'</small><button type="submit" '+(cadLocked()?'disabled':'')+'>'+(stageMode?'Adicionar etapa':draft.editingId?'Salvar':'Criar cartão')+'</button></footer></form></section>';
+}
+function cadChooser(){
+ const context=cadState.choosing;if(!context)return '';
+ return '<section class="cad-chooser" role="dialog" aria-label="Adicionar componente" style="left:'+context.x+'px;top:'+context.y+'px"><header><h2>Adicionar componente</h2>'+cadButton('cad-close-chooser','×','aria-label="Fechar componentes"')+'</header><div>'+Object.entries(cadModel.CANVAS_COMPONENTS).filter(([,item])=>!context.row||item.rows.includes('*')||item.rows.includes(context.row)).map(([kind,item])=>cadButton('cad-add',item.icon+' '+item.title,'data-kind="'+kind+'" data-si="'+context.index+'" data-row="'+esc(context.row||'')+'" '+(cadLocked()?'disabled':''))).join('')+'</div></section>';
+}
+function cadContextMenu(){
+ const menu=cadState.menu;if(!menu)return '';
+ let actions='';
+ if(menu.edgeId)actions=cadButton('cad-edge','Editar conexão','data-id="'+esc(menu.edgeId)+'"')+cadButton('cad-remove-edge','Excluir conexão','data-id="'+esc(menu.edgeId)+'"');
+ else if(menu.id)actions=cadButton('cad-select','Editar cartão','data-id="'+esc(menu.id)+'"')+cadButton('cad-connect','Conectar a outro cartão','data-id="'+esc(menu.id)+'"')+cadButton('cad-details','Detalhes opcionais','data-id="'+esc(menu.id)+'"')+cadButton('cad-delete','Remover do mapa','data-id="'+esc(menu.id)+'"');
+ else actions=cadButton('cad-stage-edit','Renomear etapa','data-si="'+menu.index+'"')+cadButton('cad-stage-after','Adicionar etapa ao lado','data-si="'+menu.index+'"')+cadButton('ds','Duplicar etapa','data-si="'+menu.index+'"')+cadButton('del','Remover etapa','data-si="'+menu.index+'"');
+ return '<div class="cad-context-menu" role="group" aria-label="Ações do mapa" style="left:'+menu.x+'px;top:'+menu.y+'px">'+actions+cadButton('cad-close-menu','Fechar')+'</div>';
+}
+function cadSvg(){
+ const layout=cadState.layout,cam=cadState.camera||{x:16,y:16,zoom:1},small=cadState.detail==='overview'||cadState.detail==='auto'&&cam.zoom<.8;
+ const font=Math.max(15,12/cam.zoom),labelFont=Math.max(13,11/cam.zoom),badgeFont=Math.max(10,9/cam.zoom),nodes=new Map(layout.nodes.map(node=>[node.id,node])),offsets=cadModel.canvasConnectionOffsets(S.links||[]);
+ let html='<defs>'+Object.entries(cadLinkColors).map(([type,color])=>'<marker id="cad-arrow-'+type+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="'+color+'"/></marker>').join('')+'</defs><g id="cad-world" transform="translate('+cam.x+' '+cam.y+') scale('+cam.zoom+')"><text x="14" y="36" class="cad-map-label" style="font-size:'+labelFont+'px">MAPA DO</text><text x="14" y="'+(36+labelFont+4)+'" class="cad-map-label" style="font-size:'+labelFont+'px">SERVIÇO</text>';
+ let insertControls='';
+ for(const stage of layout.stages){
+  html+='<g role="button" tabindex="0" data-act="cad-stage-edit" data-si="'+stage.index+'" class="cad-stage" aria-label="Editar etapa '+esc(stage.step.n)+'"><rect x="'+stage.x+'" y="8" width="'+(stage.width-9)+'" height="64" rx="9" class="cad-stage-bg"/><text x="'+(stage.x+16)+'" y="29" class="cad-subtitle" style="font-size:'+badgeFont+'px">ETAPA '+(stage.index+1)+'</text><text x="'+(stage.x+16)+'" y="54" class="cad-stage-name" style="font-size:'+font+'px">'+esc(stage.step.n.slice(0,29))+'</text><title>'+esc(stage.step.n)+'</title></g>';
+  if(!cadLocked())insertControls+='<g class="cad-stage-insert" role="button" tabindex="0" data-act="cad-stage-after" data-si="'+stage.index+'" aria-label="Adicionar etapa depois de '+esc(stage.step.n)+'"><circle cx="'+(stage.x+stage.width-4)+'" cy="40" r="'+Math.max(13,12/cam.zoom)+'"/><path d="M '+(stage.x+stage.width-9)+' 40 h10 M '+(stage.x+stage.width-4)+' 35 v10"/><title>Adicionar etapa ao lado</title></g>';
+ }
+ html+=insertControls;
+ layout.rows.forEach((row,index)=>{
+  const boundary=cadModel.canvasBoundary(row,index,layout.rows),color=cadColors[row.id]||'#64748b';
+  html+='<rect x="0" y="'+row.y+'" width="'+layout.width+'" height="'+row.height+'" rx="7" class="cad-lane-bg"/><path d="M2 '+(row.y+8)+' V'+(row.y+row.height-8)+'" stroke="'+color+'" stroke-width="3"/>';
+  cadModel.canvasTitleLines(row.n,Math.max(7,Math.floor(180/(labelFont*.56))),Math.min(3,Math.max(1,Math.floor((row.height-18)/(labelFont+4))))).forEach((line,i)=>{html+='<text x="15" y="'+(row.y+28+i*(labelFont+4))+'" class="cad-lane-name" style="font-size:'+labelFont+'px">'+esc(line)+'</text>'});
+  if(boundary)html+='<path d="M0 '+(row.y-14)+' H'+layout.width+'" class="cad-boundary"/><text x="'+(layout.width/2)+'" y="'+(row.y-18)+'" text-anchor="middle" class="cad-boundary-name">'+esc(boundary)+'</text>';
+  for(const stage of layout.stages){const empty=!layout.nodes.some(node=>node.row===row.id&&node.stageIndex===stage.index&&!node.note.draft),addWidth=Math.min(stage.width-32,Math.max(140,110/cam.zoom)),addHeight=Math.max(34,28/cam.zoom);
+   html+='<rect x="'+stage.x+'" y="'+row.y+'" width="'+stage.width+'" height="'+row.height+'" class="cad-cell" data-row="'+row.id+'" data-si="'+stage.index+'"/>';
+   if(!cadLocked()&&empty)html+='<g role="button" tabindex="0" class="cad-cell-add" data-act="cad-cell-add" data-row="'+row.id+'" data-si="'+stage.index+'" aria-label="Adicionar cartão em '+esc(stage.step.n)+' — '+esc(row.n)+'"><rect x="'+(stage.x+stage.width/2-addWidth/2)+'" y="'+(row.y+row.height/2-addHeight/2)+'" width="'+addWidth+'" height="'+addHeight+'" rx="6"/><text x="'+(stage.x+stage.width/2)+'" y="'+(row.y+row.height/2+5)+'" text-anchor="middle" style="font-size:'+Math.max(12,10/cam.zoom)+'px">+ Adicionar cartão</text></g>';
+  }
+ });
+ for(const link of S.links||[]){const a=nodes.get(link.a),b=nodes.get(link.b);if(!a||!b||V.connectionMode==='off'||V.connectionMode==='selected'&&![link.a,link.b].includes(cadState.selected))continue;
+  const geometry=cadModel.canvasEdgeGeometry(a,b,offsets.get(link.id)||0),name=blueprintConnectionNames[link.type]+(link.label?' · '+link.label:'');
+  html+='<g role="button" tabindex="0" data-act="cad-edge" data-id="'+esc(link.id)+'" aria-label="Editar '+esc(name)+'" class="cad-edge"><title>'+esc(name+(link.handoff?' · '+link.handoff.fromTeam+' → '+link.handoff.toTeam+' · '+link.handoff.deliverable+' · Aceite: '+link.handoff.acceptance:''))+'</title><path d="'+geometry.d+'" stroke="'+cadLinkColors[link.type]+'" stroke-width="2" fill="none" marker-end="url(#cad-arrow-'+link.type+')"/><path d="'+geometry.d+'" stroke="transparent" stroke-width="16" fill="none"/><text x="'+geometry.x+'" y="'+(geometry.y-6)+'" text-anchor="middle" fill="'+cadLinkColors[link.type]+'" class="cad-edge-label">'+esc(name.slice(0,36))+'</text></g>';
+ }
+ for(const node of layout.nodes){const kind=cadModel.canvasKind(node.note,node.row),title=cadTitle(node.note),selected=node.id===cadState.selected,color=cadColors[node.row]||'#64748b';
+  const badge=node.note.virtualLabel||(!node.note.canvas&&pickerReferenceTypes.includes(node.note.type)?contentTypes[node.note.type]?.[1]:cadModel.CANVAS_COMPONENTS[kind]?.title)||'Cartão';
+  const action=node.note.draft?'cad-quick-focus':node.note.virtualLabel?'cad-virtual':'cad-select';
+  html+='<g class="cad-node-wrap'+(selected?' is-selected':'')+(cadState.connectFrom&&node.id!==cadState.connectFrom?' is-connect-target':'')+'" transform="translate('+node.x+' '+node.y+')" data-group-id="'+esc(node.id)+'"><g class="cad-node'+(node.note.draft?' is-draft':'')+'" data-act="'+action+'" data-id="'+esc(node.id)+'" data-row="'+node.row+'" data-si="'+node.stageIndex+'" role="button" tabindex="0" aria-label="'+esc(title)+'"><title>'+esc(title+(node.note.canvas?.description?' · '+node.note.canvas.description:''))+'</title><rect width="'+node.width+'" height="'+node.height+'" rx="9" class="cad-node-bg"/><path d="M2 10V'+(node.height-10)+'" stroke="'+color+'" stroke-width="3"/><text x="13" y="22" class="cad-subtitle" style="font-size:'+badgeFont+'px">'+esc(badge)+'</text>';
+  cadModel.canvasTitleLines(title,Math.max(7,Math.floor((node.width-26)/(font*.58))),cam.zoom<.4?1:2).forEach((line,index)=>{html+='<text x="13" y="'+(cam.zoom<.4?node.height/2+font/3:22+font+8+index*(font+4))+'" class="cad-node-title" style="font-size:'+font+'px">'+esc(line)+'</text>'});
+  if(!small&&title.length<Math.floor((node.width-26)/(font*.58))&&node.note.activity?.owner)html+='<text x="13" y="85" class="cad-node-meta">'+esc(node.note.activity.owner)+'</text>';
+  html+='</g>';
+  if(!cadLocked()&&!node.note.virtualLabel&&!node.note.draft)html+='<g class="cad-port" role="button" tabindex="0" data-act="cad-connect" data-id="'+esc(node.id)+'" aria-label="Conectar '+esc(title)+'"><circle cx="'+node.width+'" cy="'+(node.height/2)+'" r="'+Math.max(11,11/cam.zoom)+'"/><path d="M '+(node.width-4)+' '+(node.height/2)+' h8 M '+node.width+' '+(node.height/2-4)+' v8"/></g><g class="cad-node-menu" role="button" tabindex="0" data-act="cad-menu" data-id="'+esc(node.id)+'" aria-label="Ações de '+esc(title)+'"><rect x="'+(node.width-35)+'" y="6" width="28" height="25" rx="5"/><text x="'+(node.width-21)+'" y="23" text-anchor="middle">···</text></g>';
+  html+='</g>';
+ }
+ if(cadState.connectFrom&&cadState.pointer){const source=nodes.get(cadState.connectFrom);if(source)html+='<path class="cad-connect-preview" d="M '+(source.x+source.width)+' '+(source.y+source.height/2)+' L '+cadState.pointer.x+' '+cadState.pointer.y+'"/>'}
+ return html+'</g>';
+}
+function cadMobileMap(){
+ const index=businessStageIndex(),step=S.steps[index];if(!step)return '<div class="cad-mobile-empty"><h2>Comece com uma etapa</h2>'+cadButton('step','+ Adicionar etapa')+'</div>';businessStage=step.hostLocalId||step.hostStageId;
+ return '<nav class="cad-stage-nav" aria-label="Navegar entre etapas">'+cadButton('cad-prev','‹','aria-label="Etapa anterior" '+(!index?'disabled':''))+'<label>Etapa '+(index+1)+' de '+S.steps.length+'<select data-cad-stage aria-label="Etapa em foco">'+S.steps.map((value,i)=>'<option value="'+i+'" '+(i===index?'selected':'')+'>'+esc(value.n)+'</option>').join('')+'</select></label>'+cadButton('cad-next','›','aria-label="Próxima etapa" '+(index===S.steps.length-1?'disabled':''))+'</nav><div class="cad-mobile-stage"><h2>'+esc(step.n)+'</h2>'+cadButton('cad-stage-after','+','data-si="'+index+'" aria-label="Adicionar etapa ao lado"')+'</div>'+cadRows().map((row,i,rows)=>'<section class="cad-mobile-lane" data-row="'+row.id+'">'+(cadModel.canvasBoundary(row,i,rows)?'<p class="cad-mobile-boundary">'+cadModel.canvasBoundary(row,i,rows)+'</p>':'')+'<h3>'+esc(row.n)+'</h3>'+cadCellNotes(row.id,index).map(note=>'<article class="cad-mobile-card">'+cadButton(note.virtualLabel?'cad-virtual':'cad-select','<small>'+esc(note.virtualLabel||cadModel.CANVAS_COMPONENTS[cadModel.canvasKind(note,row.id)].title)+'</small><b>'+esc(cadTitle(note))+'</b>','data-id="'+esc(note.i)+'" data-row="'+row.id+'" data-si="'+index+'"')+(!note.virtualLabel?cadButton('cad-menu','···','data-id="'+esc(note.i)+'" aria-label="Ações do cartão"'):'')+'</article>').join('')+cadButton('cad-cell-add','+ Adicionar cartão','data-row="'+row.id+'" data-si="'+index+'" '+(cadLocked()?'disabled':''))+'</section>').join('');
+}
+function cadRender(){
+ if(!V.canvasOrderVersion){const preferred=['sd','ev','ch','ac','th','em','fl','bk','sy','im'];V.rowOrder=[...preferred,...V.rowOrder.filter(id=>!preferred.includes(id))];V.canvasOrderVersion=1;saveView()}
+ const scene=S.journeyId||S.id;if(cadState.scene!==scene){Object.assign(cadState,{scene,selected:'',creating:null,quick:null,link:null,camera:null,drafts:new Map(),inspector:false,error:'',menu:null,connectFrom:'',choosing:null})}
+ document.body.classList.add('cad-mode');cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows());
+ if(cadState.selected&&!blueprintNote(cadState.selected)){cadState.selected='';cadState.inspector=false}
+ const mobile=cadMobile(),showInspector=cadState.inspector&&!!cadState.selected,view=V.perspective==='journey'?'journey':'blueprint';
+ const status=cadState.error||(cadState.pending?'Salvando…':S.readOnly?'Somente leitura':cadState.connectFrom?'Escolha o cartão de destino · Esc cancela':cadState.quick?'Rascunho — confirme para adicionar ao mapa':'Arraste um componente ou use + em uma célula');
+ app.innerHTML='<div class="cad-shell"><header class="cad-header">'+cadButton('back','← Mapas','aria-label="Voltar para mapas do serviço"')+'<input data-f="title" aria-label="Nome do mapa" value="'+esc(S.title||'')+'"><span role="status" data-save-status>'+saveLabel+'</span><label class="cad-view-label">Visualização<select data-cad-view aria-label="Visualização do mapa"><option value="blueprint" '+(view==='blueprint'?'selected':'')+'>Blueprint</option><option value="journey" '+(view==='journey'?'selected':'')+'>Jornada</option><option value="matrix">Matriz</option></select></label></header><div class="cad-toolbar">'+cadButton('cad-library','+ Componente',cadLocked()?'disabled':'')+cadButton('step','+ Etapa','aria-label="Adicionar etapa" '+(cadLocked()?'disabled':''))+cadButton('undo','↶','aria-label="Desfazer" '+(!(HOSTED?H.canUndo:U.length)||cadLocked()?'disabled':''))+cadButton('redo','↷','aria-label="Refazer" '+(!(HOSTED?H.canRedo:R.length)||cadLocked()?'disabled':''))+cadButton('customize','Faixas','aria-label="Organizar faixas"')+cadButton('business-review','Revisar operação')+'<details class="cad-options"><summary>Mais</summary><div class="cad-options-panel">'+cadButton('cad-export','Exportar SVG')+cadButton('business-storage','Dados e backup')+cadButton('cad-fit','Ajustar mapa')+'<label>Conexões<select data-cad-links aria-label="Exibir conexões">'+[['all','Todas'],['selected','Da seleção'],['off','Ocultar']].map(([id,name])=>'<option value="'+id+'" '+(id===V.connectionMode?'selected':'')+'>'+name+'</option>').join('')+'</select></label><label>Detalhes<select data-cad-detail aria-label="Nível de detalhe">'+[['auto','Automático'],['overview','Visão geral'],['detail','Completo']].map(([id,name])=>'<option value="'+id+'" '+(id===cadState.detail?'selected':'')+'>'+name+'</option>').join('')+'</select></label></div></details>'+(cadState.libraryHidden?cadButton('cad-toggle-library','Mostrar componentes'):'')+'<label class="cad-persona-label">Persona<select data-cad-persona aria-label="Persona do mapa">'+cadOptions(cadCatalog('persona'),S.personaId,'Sem Persona vinculada')+'</select></label></div>'+(cadState.connectFrom?'<div class="cad-connecting" role="region" aria-label="Criar conexão"><span>Escolha o cartão de destino</span><label>Relação<select data-cad-connect-type aria-label="Tipo da nova conexão">'+Object.entries(blueprintConnectionNames).map(([id,label])=>'<option value="'+id+'" '+(id===(cadState.connectType||'sequence')?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+cadButton('cad-cancel','Cancelar conexão')+'</div>':'')+'<div class="cad-workspace'+(showInspector?' has-inspector':'')+(cadState.libraryHidden?' is-library-hidden':'')+'"><aside class="cad-library" aria-label="Biblioteca de componentes">'+(!mobile?cadLibrary():'')+'</aside><main class="cad-main" aria-label="Mapa do serviço">'+(mobile?'<div class="cad-mobile-map">'+cadMobileMap()+'</div>':'<div class="cad-viewport" tabindex="0" aria-label="Canvas: arraste o fundo para mover; Ctrl e roda para ampliar"><svg id="cad-svg" aria-label="Etapas e componentes do serviço">'+cadSvg()+'</svg>'+(!S.steps.length?'<div class="cad-start"><h2>Como seu serviço acontece?</h2><p>Crie uma etapa e adicione o primeiro cartão.</p>'+cadButton('step','+ Adicionar etapa',cadLocked()?'disabled':'')+'</div>':'')+'<div class="cad-camera">'+cadButton('cad-minus','−','aria-label="Diminuir canvas"')+cadButton('cad-fit','Ajustar')+'<output data-cad-zoom></output>'+cadButton('cad-plus','+','aria-label="Ampliar canvas"')+'</div></div>')+'</main>'+(showInspector&&!mobile?'<aside class="cad-inspector" aria-label="Detalhes opcionais">'+cadButton('cad-close','Fechar detalhes')+cadInspector()+'</aside>':'')+'</div><footer class="cad-footer"><span>'+Object.values(S.c).flat().length+' cartões · '+(S.links||[]).length+' conexões · '+S.steps.length+' etapas</span><span role="status" data-cad-status>'+esc(status)+'</span><span class="cad-legend"><i style="background:'+cadColors.fl+'"></i> Frente <i style="background:'+cadColors.bk+'"></i> Bastidores <i style="background:'+cadColors.sy+'"></i> Apoio</span></footer></div>'+cadQuickForm()+cadChooser()+cadContextMenu()+
+ (mobile?'<dialog id="cad-library-sheet" class="cad-sheet" aria-label="Biblioteca de componentes">'+cadButton('cad-close-library','Fechar componentes')+cadLibrary()+'</dialog><dialog id="cad-inspector-sheet" class="cad-sheet" aria-label="Detalhes opcionais">'+cadButton('cad-close','Fechar detalhes')+(showInspector?cadInspector():'')+'</dialog>':'')+'<dialog id="cad-link-sheet" class="cad-sheet" aria-label="Editar conexão">'+cadButton('cad-close-link','Fechar conexão')+(cadState.link?cadLinkForm():'')+'</dialog>'+customizer()+growthDialogs()+contentDialogs()+contextDialogs()+viewsDialogs()+cardToolsDialogs()+blueprintDialogs()+businessDialogs();
+ if(mobile&&cadState.library)app.querySelector('#cad-library-sheet').showModal();else if(mobile&&showInspector)app.querySelector('#cad-inspector-sheet').showModal();
+ if(cadState.link)app.querySelector('#cad-link-sheet').showModal();
+ if(cadLocked()){app.querySelector('.cad-header>input').readOnly=true;app.querySelector('[data-cad-persona]').disabled=true;app.querySelectorAll('#cad-component-form input,#cad-component-form select,#cad-component-form textarea,#cad-link-form input,#cad-link-form select,#cad-link-form textarea,#cad-quick-form input,#cad-quick-form select,#cad-quick-form textarea').forEach(field=>field.disabled=true)}
+ cadLinkFields();requestAnimationFrame(()=>{if(!cadState.camera)cadFit();else cadPaint()});
+}
+function cadPaint(){const svg=app.querySelector('#cad-svg');if(svg)svg.innerHTML=cadSvg();const out=app.querySelector('[data-cad-zoom]');if(out)out.value=Math.round((cadState.camera?.zoom||1)*100)+'%'}
+function cadFit(){const viewport=app.querySelector('.cad-viewport');if(!viewport)return;const layout=cadState.layout,zoom=Math.max(.2,Math.min(1,(viewport.clientWidth-40)/layout.width,(viewport.clientHeight-45)/layout.height));cadState.camera={x:Math.max(16,(viewport.clientWidth-layout.width*zoom)/2),y:16,zoom};cadPaint()}
+function cadEnsureVisible(id){const viewport=app.querySelector('.cad-viewport'),node=cadState.layout?.nodes.find(value=>value.id===id);if(!viewport||!node||!cadState.camera)return;const cam=cadState.camera,left=node.x*cam.zoom+cam.x,top=node.y*cam.zoom+cam.y;if(left<20)cam.x+=20-left;else if(left+node.width*cam.zoom>viewport.clientWidth-20)cam.x-=left+node.width*cam.zoom-viewport.clientWidth+20;if(top<20)cam.y+=20-top;else if(top+node.height*cam.zoom>viewport.clientHeight-80)cam.y-=top+node.height*cam.zoom-viewport.clientHeight+80;cadPaint()}
+function cadZoom(factor,x,y){const viewport=app.querySelector('.cad-viewport');if(!viewport)return;const cam=cadState.camera||{x:16,y:16,zoom:1},next=Math.max(.2,Math.min(2.4,cam.zoom*factor));x??=viewport.clientWidth/2;y??=viewport.clientHeight/2;cadState.camera={x:x-(x-cam.x)*next/cam.zoom,y:y-(y-cam.y)*next/cam.zoom,zoom:next};cadPaint()}
+function cadNotice(message){cadState.error=message;const status=app.querySelector('[data-cad-status]');if(status)status.textContent=message}
+function cadOpenInspector(){cadState.inspector=true;cadState.quick=null;cadState.menu=null;cadState.library=false;rerender()}
+function cadSelect(id,point={}){
+ if(cadState.ignoreClick){cadState.ignoreClick=false;return}
+ const entry=blueprintNote(id);if(!entry)return;
+ if(cadState.connectFrom){if(id===cadState.connectFrom){cadState.connectFrom='';cadPaint();return}cadConnectTo(id);return}
+ cadStash();cadState.creating=null;cadState.selected=id;cadState.menu=null;cadState.choosing=null;cadState.inspector=false;cadState.error='';
+ const [row,index]=entry.key.split('|');
+ if(!['card','text','metric','channel','persona','need','pain','opportunity'].includes(entry.note.type)){contentCellKey=entry.key;contentOpenEditor(entry.note.type,entry.note);return}
+ const draft=cadState.drafts.get(id)||cadDraftFor(entry);Object.assign(draft,{mode:'card',editingId:id,...cadQuickPosition(point)});
+ if(draft.kind==='emotion'){draft.emotionScore=S.steps[index].e;draft.emotionNote=S.steps[index].note||''}
+ cadState.drafts.set(id,draft);cadState.quick=draft;rerender();cadFocusQuick();
+}
+function cadOpenLink(id='',source=''){const link=(S.links||[]).find(value=>value.id===id);if(!link){cadState.connectFrom=source||cadState.selected;cadState.quick=null;cadState.menu=null;rerender();return}cadState.link={...link,...link.handoff};cadState.quick=null;cadState.menu=null;cadState.inspector=false;cadState.error='';rerender()}
+function cadConnectTo(target){
+ if(cadLocked())return;try{const source=cadState.connectFrom,next=structuredClone(S),type=cadState.connectType||'sequence';if((next.links||[]).some(link=>link.a===source&&link.b===target&&link.type===type))throw Error('Esta conexão já existe entre esses cartões.');
+  if(type==='handoff'){cadState.link={a:source,b:target,type,fromTeam:blueprintNote(source)?.note.activity?.team||'',toTeam:blueprintNote(target)?.note.activity?.team||'',deliverable:'',acceptance:'',deadlineMinutes:''};cadState.connectFrom='';rerender();return}
+  const link=window.BlueOceanJourneyContent.normalizeMatrixConnection({id:uid(),a:source,b:target,type});next.links=[...(next.links||[]),link];window.BlueOceanJourneyContent.validateMatrixDocument(next);cadState.connectFrom='';cadState.pointer=null;cadSend('canvas-change',{state:next},target);
+ }catch(error){cadNotice(error.message)}
+}
+function cadSend(type,payload,noteId=''){
+ if(cadLocked())return;cadState.pendingDocument=type==='canvas-change'?structuredClone(payload.state):null;cadState.pending=uid();cadState.error='';announceSave('pending');
+ if(HOSTED){window.parent.postMessage({boBlueprintHost:1,type,requestId:cadState.pending,...payload,noteId},location.origin);rerender();return}
+ try{let next=payload.state;if(type==='canvas-create'){const data=cadModel.prepareCanvasInput(S,payload.input);next=structuredClone(S);noteId=uid();(next.c[data.row+'|'+data.index]||=[]).push({i:noteId,type:'card',t:data.title,canvas:data.canvas,activity:data.activity});if(data.kind==='emotion')Object.assign(next.steps[data.index],{e:Number(payload.input.emotionScore||0),emotionRecorded:true,note:payload.input.emotionNote||'',emotionStatus:'hypothesis'})}window.BlueOceanJourneyContent.validateMatrixDocument(next);Object.assign(S,next);save();cadResult({requestId:cadState.pending,ok:true,state:S,noteId})}catch(error){cadResult({requestId:cadState.pending,ok:false,error:error.message})}
+}
+function cadResult(data){
+ if(data.requestId!==cadState.pending)return;cadState.pending='';cadState.pendingDocument=null;if(!data.ok){cadState.error=data.error||'Não foi possível salvar.';announceSave(false);rerender();cadFocusQuick();return}
+ S=structuredClone(data.state);S.id=HOSTED?'host':S.id;DB={cur:S.id,js:[S]};last=JSON.stringify(S);growthLastPatch=growthPatchKey();if(data.history)H=data.history;
+ if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);cadState.drafts.delete(cadState.selected);
+ cadState.creating=null;cadState.quick=null;cadState.link=null;cadState.menu=null;cadState.selected=data.noteId||'';cadState.inspector=false;cadState.error='';announceSave(true);rerender();
+ requestAnimationFrame(()=>app.querySelector('.cad-node[data-id="'+CSS.escape(data.noteId||'')+'"]')?.focus());
+}
+function cadQuickSubmit(form){
+ if(cadLocked()||!form.reportValidity())return;try{
+  const values=Object.fromEntries(new FormData(form)),draft=cadState.quick;Object.assign(draft,values);const next=structuredClone(S);
+  if(draft.mode==='stage'){
+   const after=S.steps.find(step=>cadStageKey(step)===draft.after),state=cadModel.insertCanvasStage(S,{title:draft.title,localId:uid(),afterStageId:after?.hostStageId,afterStageLocalId:after?.hostLocalId});cadState.camera=null;cadSend('canvas-change',{state});return;
+  }
+  if(draft.mode==='context'){const step=next.steps.find(step=>cadStageKey(step)===draft.stageKey);if(!step)throw Error('Etapa indisponível.');step.d=draft.title.trim();cadSend('canvas-change',{state:next});return}
+  if(draft.mode==='stage-edit'){const step=next.steps.find(step=>cadStageKey(step)===draft.stageKey);if(!step)throw Error('Etapa indisponível.');step.n=draft.title.trim();cadSend('canvas-change',{state:next});return}
+  const index=S.steps.findIndex(step=>cadStageKey(step)===draft.stageKey),step=S.steps[index];if(!step)throw Error('A etapa mudou. Escolha um destino disponível.');
+  const input={...draft,title:draft.kind==='emotion'?'Emoção do cliente':draft.title,stageId:step.hostStageId,stageLocalId:step.hostLocalId};
+  if(!draft.editingId){cadModel.prepareCanvasInput(S,input);cadSend('canvas-create',{input});return}
+  const entry=blueprintNote(draft.editingId);if(!entry)throw Error('Cartão indisponível.');const note=next.c[entry.key].find(value=>value.i===draft.editingId);
+  note.t=input.title.trim();if(!note.t)throw Error('Dê um nome ao cartão.');note.canvas=cadModel.normalizeCanvasMetadata({...note.canvas,...input});
+  if(draft.kind==='emotion')Object.assign(next.steps[index],{e:Number(draft.emotionScore),note:String(draft.emotionNote||''),emotionRecorded:true});
+  cadSend('canvas-change',{state:next},note.i);
+ }catch(error){cadState.error=error.message;form.querySelector('.form-error').textContent=error.message}
+}
+function cadAction(action,data,button){
+ if(action==='step'&&cadEnabled()){cadStartStage(S.steps.length-1,button?{x:button.getBoundingClientRect().left,y:button.getBoundingClientRect().bottom+8}:{});return true}
+ if(!action.startsWith('cad-'))return false;
+ const rect=button?.getBoundingClientRect(),point=rect?{x:rect.left,y:rect.bottom+8}:{};
+ if(action==='cad-open'||action==='cad-matrix'){cadStash();V.blueprintRenderer=action==='cad-open'?'canvas':'matrix';saveView();rerender();return true}
+ if(action==='cad-select'){cadSelect(data.id,point);return true}
+ if(action==='cad-quick-focus'){cadFocusQuick();return true}
+ if(action==='cad-edge'){cadOpenLink(data.id);return true}
+ if(action==='cad-connect'||action==='cad-link'){
+  if(cadLocked())return true;cadState.connectFrom=data.id||cadState.selected;cadState.connectType='sequence';cadState.menu=null;cadState.quick=null;cadState.inspector=false;cadState.error='';rerender();return true;
+ }
+ if(action==='cad-menu'){cadState.menu={id:data.id,...cadQuickPosition(point)};rerender();return true}
+ if(action==='cad-close-menu'){cadState.menu=null;rerender();return true}
+ if(action==='cad-close-chooser'){cadState.choosing=null;rerender();return true}
+ if(action==='cad-close-link'){cadState.link=null;rerender();return true}
+ if(action==='cad-close-library'){cadState.library=false;app.querySelector('#cad-library-sheet')?.close();return true}
+ if(action==='cad-library'||action==='cad-cell-add'){
+  if(cadLocked())return true;
+  if(!S.steps.length){cadStartStage();return true}
+  if(action==='cad-library'&&cadMobile()){cadState.library=true;rerender();return true}
+  cadState.choosing={index:data.si!==undefined?Number(data.si):businessStageIndex(),row:data.row||'',...cadQuickPosition(point)};cadState.menu=null;rerender();return true;
+ }
+ if(action==='cad-toggle-library'){cadState.libraryHidden=!cadState.libraryHidden;cadState.camera=null;rerender();return true}
+ if(action==='cad-close'){cadState.inspector=false;rerender();return true}
+ if(action==='cad-details'){
+  const entry=blueprintNote(data.id||cadState.selected);if(!entry)return true;cadState.selected=entry.note.i;cadState.creating=null;cadState.drafts.set(entry.note.i,cadDraftFor(entry));cadOpenInspector();return true;
+ }
+ if(action==='cad-cancel'){
+  if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);
+  cadState.drafts.delete(cadState.selected);Object.assign(cadState,{creating:null,quick:null,link:null,menu:null,selected:'',inspector:false,error:'',connectFrom:'',pointer:null});rerender();return true;
+ }
+ if(action==='cad-add'){cadStartQuick(data.kind||'text',data.si!==undefined?Number(data.si):cadState.choosing?.index??businessStageIndex(),data.row||cadState.choosing?.row||'',point);return true}
+ if(action==='cad-stage-after'){cadStartStage(Number(data.si),point);return true}
+ if(action==='cad-stage-edit'){const step=S.steps[Number(data.si)];if(step&&!cadLocked()){cadStash();cadState.creating=null;cadState.quick={mode:'stage-edit',title:step.n,stageKey:cadStageKey(step),...cadQuickPosition(point)};cadState.menu=null;rerender();cadFocusQuick()}return true}
+ if(action==='cad-virtual'){
+  const row=data.row,index=Number(data.si),step=S.steps[index];if(row==='em'){cadStartQuick('emotion',index,'em',point);return true}
+  if(row==='sd'){cadState.creating=null;cadState.selected='';cadState.quick={mode:'context',kind:'text',title:step.d,description:'',row:'sd',stageKey:cadStageKey(step),...cadQuickPosition(point)};rerender();cadFocusQuick();return true}
+  V.blueprintRenderer='matrix';saveView();rerender();return true;
+ }
+ if(action==='cad-prev'||action==='cad-next'){const index=Math.max(0,Math.min(S.steps.length-1,businessStageIndex()+(action==='cad-prev'?-1:1))),step=S.steps[index];businessStage=step.hostLocalId||step.hostStageId;rerender();return true}
+ if(action==='cad-fit'){cadFit();return true}if(action==='cad-minus'||action==='cad-plus'){cadZoom(action==='cad-plus'?1.2:1/1.2);return true}
+ if(action==='cad-more-content'){cadReveal('sd');rerender();contentOpenPicker('sd|'+businessStageIndex(),null,app.querySelector('[data-act="cad-more-content"]'));return true}
+ if(action==='cad-export'){const blob=new Blob([cadModel.exportCanvasSvg(cadProjection(false),cadRows(),cadTitle)],{type:'image/svg+xml'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=(S.title||'Mapa do serviço').replace(/[^\p{L}\p{N} -]/gu,'')+'.svg';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);return true}
+ if(action==='cad-delete'||action==='cad-delete-link'||action==='cad-remove-edge'){
+  if(cadLocked())return true;const next=structuredClone(S),id=data.id||cadState.selected;
+  if(action==='cad-delete'){if(!confirm('Remover este cartão e suas conexões do mapa?'))return true;for(const key in next.c)next.c[key]=next.c[key].filter(note=>note.i!==id);next.links=(next.links||[]).filter(link=>link.a!==id&&link.b!==id)}else next.links=(next.links||[]).filter(link=>link.id!==(data.id||cadState.link?.id));cadSend('canvas-change',{state:next});return true;
+ }
+ return true;
+}
+function cadWorld(event){const rect=app.querySelector('.cad-viewport').getBoundingClientRect(),cam=cadState.camera;return {x:(event.clientX-rect.left-cam.x)/cam.zoom,y:(event.clientY-rect.top-cam.y)/cam.zoom}}
+function cadDropTarget(point){return {row:cadState.layout.rows.find(row=>point.y>=row.y&&point.y<=row.y+row.height),stage:cadState.layout.stages.find(stage=>point.x>=stage.x&&point.x<=stage.x+stage.width)}}
+function cadHighlight(target,kind){const valid=!!target.row&&!!target.stage&&(!kind||cadModel.canvasAcceptsRow(kind,target.row.id));app.querySelectorAll('.cad-cell').forEach(cell=>{const hit=cell.dataset.row===target.row?.id&&Number(cell.dataset.si)===target.stage?.index;cell.classList.toggle('is-target',hit&&valid);cell.classList.toggle('is-invalid',hit&&!valid)});return valid}
+function cadBind(){
+ app.addEventListener('submit',event=>{if(event.target.id==='cad-quick-form'){event.preventDefault();cadQuickSubmit(event.target)}else if(['cad-component-form','cad-link-form'].includes(event.target.id)){event.preventDefault();cadSubmit(event.target)}});
+ app.addEventListener('input',event=>{
+  const field=event.target,form=field.form;
+  if(field.matches('[data-cad-search]')){cadState.query=field.value;const temp=document.createElement('div');temp.innerHTML=cadLibrary();app.querySelector('.cad-components-list').innerHTML=temp.querySelector('.cad-components-list').innerHTML;return}
+  if(form?.id==='cad-quick-form'){Object.assign(cadState.quick,Object.fromEntries(new FormData(form)));if(cadState.creating)cadPaint();return}
+  if(['cad-component-form','cad-link-form'].includes(form?.id)){const draft=cadCurrentDraft();if(draft)Object.assign(draft,cadFormData(form))}
+ });
+ app.addEventListener('change',event=>{
+  const field=event.target;
+  if(field.matches('[data-cad-connect-type]'))cadState.connectType=field.value;
+  if(field.form?.id==='cad-quick-form'&&field.name==='referenceId'){const record=cadCatalog(cadState.quick.kind).find(value=>value.id===field.value);cadState.quick.referenceId=field.value;if(record){cadState.quick.title=record.title||record.name;field.form.elements.title.value=cadState.quick.title;cadPaint()}}
+  if(field.matches('[data-cad-view]')){cadStash();cadState.quick=null;cadState.inspector=false;cadState.camera=null;if(field.value==='matrix')V.blueprintRenderer='matrix';else{V=window.BlueOceanJourneyViews.switchMatrixPerspective(V,field.value,rowDefs());V.blueprintRenderer='canvas'}saveView();rerender()}
+  if(field.matches('[data-cad-persona]')){cadStash();cadState.quick=null;cadState.creating=null;cadState.inspector=false;announceSave('pending');field.disabled=true;if(HOSTED)window.parent.postMessage({boBlueprintHost:1,type:'persona-select',personaId:field.value},location.origin)}
+  if(field.matches('[data-cad-stage]')){const step=S.steps[Number(field.value)];businessStage=step.hostLocalId||step.hostStageId;rerender()}
+  if(field.matches('[data-cad-detail]')){cadState.detail=field.value;cadPaint()}
+  if(field.matches('[data-cad-links]')){V.connectionMode=field.value;saveView();cadPaint()}
+  if(field.form?.id==='cad-link-form')cadLinkFields();
+ });
+ app.addEventListener('contextmenu',event=>{
+  if(!cadEnabled()||cadLocked())return;const node=event.target.closest?.('.cad-node'),edge=event.target.closest?.('.cad-edge'),stage=event.target.closest?.('.cad-stage');if(!node&&!edge&&!stage)return;if(node&&!blueprintNote(node.dataset.id))return;
+  event.preventDefault();cadState.menu={id:node?.dataset.id,edgeId:edge?.dataset.id,index:stage?Number(stage.dataset.si):undefined,...cadQuickPosition({x:event.clientX,y:event.clientY})};rerender();requestAnimationFrame(()=>app.querySelector('.cad-context-menu button')?.focus());
+ });
+ app.addEventListener('cancel',event=>{if(event.target.id==='cad-library-sheet')cadState.library=false;if(event.target.id==='cad-inspector-sheet')cadState.inspector=false;if(event.target.id==='cad-link-sheet')cadState.link=null},true);
+ app.addEventListener('keydown',event=>{
+  const button=event.target.closest?.('#cad-svg [role="button"]');if(button&&['Enter',' '].includes(event.key)){event.preventDefault();button.dispatchEvent(new MouseEvent('click',{bubbles:true}));return}
+  if(event.key==='Escape'&&cadEnabled()&&!event.target.closest('dialog')){event.preventDefault();cadState.drag=null;if(cadState.choosing){cadState.choosing=null;rerender()}else if(cadState.menu){cadState.menu=null;rerender()}else if(cadState.quick||cadState.connectFrom)cadAction('cad-cancel',{});return}
+  if(event.target.matches('.cad-viewport')&&['+','-','0','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();if(event.key==='0')cadFit();else if(event.key==='+'||event.key==='-')cadZoom(event.key==='+'?1.2:1/1.2);else{const cam=cadState.camera;cam.x+=event.key==='ArrowLeft'?40:event.key==='ArrowRight'?-40:0;cam.y+=event.key==='ArrowUp'?40:event.key==='ArrowDown'?-40:0;cadPaint()}}
+ });
+ app.addEventListener('wheel',event=>{
+  if(!event.target.closest?.('.cad-viewport'))return;event.preventDefault();const viewport=app.querySelector('.cad-viewport'),rect=viewport.getBoundingClientRect();
+  if(event.ctrlKey||event.metaKey)cadZoom(event.deltaY<0?1.1:1/1.1,event.clientX-rect.left,event.clientY-rect.top);else{cadState.camera.x-=event.shiftKey?event.deltaY:event.deltaX;cadState.camera.y-=event.shiftKey?0:event.deltaY;cadPaint()}
+ },{passive:false});
+ app.addEventListener('pointerdown',event=>{
+  const viewport=event.target.closest?.('.cad-viewport');if(!viewport||event.target.closest('.cad-camera,.cad-port,.cad-node-menu,.cad-cell-add,.cad-stage-insert,.cad-stage')||event.button!==0&&event.button!==1)return;
+  const node=event.target.closest('.cad-node');if(node&&(cadLocked()||cadState.connectFrom||!blueprintNote(node.dataset.id)))return;
+  cadState.drag={pointer:event.pointerId,startX:event.clientX,startY:event.clientY,cam:{...cadState.camera},node:node?.dataset.id,moved:false};if(!event.target.closest('[data-act]'))viewport.setPointerCapture(event.pointerId);
+ });
+ app.addEventListener('pointermove',event=>{
+  if(cadState.connectFrom&&event.target.closest?.('.cad-viewport')){cadState.pointer=cadWorld(event);const source=cadState.layout.nodes.find(node=>node.id===cadState.connectFrom);let preview=app.querySelector('.cad-connect-preview');if(source){if(!preview){preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('class','cad-connect-preview');app.querySelector('#cad-world')?.appendChild(preview)}preview.setAttribute('d','M '+(source.x+source.width)+' '+(source.y+source.height/2)+' L '+cadState.pointer.x+' '+cadState.pointer.y)}}
+  const drag=cadState.drag;if(!drag||drag.pointer!==event.pointerId)return;const dx=event.clientX-drag.startX,dy=event.clientY-drag.startY;if(Math.hypot(dx,dy)<6&&!drag.moved)return;drag.moved=true;app.querySelector('.cad-viewport').setPointerCapture(event.pointerId);
+  if(!drag.node){cadState.camera={...drag.cam,x:drag.cam.x+dx,y:drag.cam.y+dy};cadPaint();return}
+  const node=cadState.layout.nodes.find(node=>node.id===drag.node),element=app.querySelector('[data-group-id="'+CSS.escape(drag.node)+'"]');element?.setAttribute('transform','translate('+(node.x+dx/drag.cam.zoom)+' '+(node.y+dy/drag.cam.zoom)+')');element?.classList.add('is-dragging');cadHighlight(cadDropTarget(cadWorld(event)),cadModel.canvasKind(node.note,node.row));
+ });
+ const end=(event,cancel=false)=>{
+  const drag=cadState.drag;if(!drag||drag.pointer!==event.pointerId)return;cadState.drag=null;if(!drag.moved)return;cadState.ignoreClick=true;setTimeout(()=>cadState.ignoreClick=false,150);
+  if(cancel||!drag.node){cadPaint();return}try{const point=cadWorld(event),target=cadDropTarget(point);if(!target.row||!target.stage){cadPaint();cadNotice('Solte dentro de uma etapa e de uma faixa.');return}const step=target.stage.step,before=cadState.layout.nodes.find(node=>!node.note.virtualLabel&&!node.note.draft&&node.id!==drag.node&&node.row===target.row.id&&node.stageIndex===target.stage.index&&point.y<node.y+node.height/2);const next=cadModel.moveCanvasCard(S,drag.node,{stageId:step.hostStageId,stageLocalId:step.hostLocalId,row:target.row.id,beforeId:before?.id});cadSend('canvas-change',{state:next},drag.node)}catch(error){cadState.error=error.message;rerender()}
+ };
+ app.addEventListener('pointerup',event=>end(event));app.addEventListener('pointercancel',event=>end(event,true));
+ app.addEventListener('dragstart',event=>{const item=event.target.closest?.('[data-act="cad-add"]');if(!item||cadLocked())return;cadState.libraryKind=item.dataset.kind;event.dataTransfer.setData('application/x-blue-ocean-component',item.dataset.kind);event.dataTransfer.effectAllowed='copy';getSelection()?.removeAllRanges()});
+ app.addEventListener('dragover',event=>{if(!event.target.closest?.('.cad-viewport')||!event.dataTransfer.types.includes('application/x-blue-ocean-component'))return;event.preventDefault();const target=cadDropTarget(cadWorld(event));event.dataTransfer.dropEffect=cadHighlight(target,cadState.libraryKind)?'copy':'none'});
+ app.addEventListener('drop',event=>{const kind=event.dataTransfer.getData('application/x-blue-ocean-component');if(!kind||!event.target.closest?.('.cad-viewport'))return;event.preventDefault();const target=cadDropTarget(cadWorld(event));if(!target.row||!target.stage){cadNotice('Solte em uma célula do mapa.');return}if(!cadModel.canvasAcceptsRow(kind,target.row.id)){cadNotice('Este componente não pertence a esta faixa. Escolha uma área destacada como válida.');return}cadStartQuick(kind,target.stage.index,target.row.id,{x:event.clientX+12,y:event.clientY+12})});
+ app.addEventListener('dragend',()=>{cadState.libraryKind='';app.querySelectorAll('.cad-cell').forEach(cell=>cell.classList.remove('is-target','is-invalid'));getSelection()?.removeAllRanges()});
+ let wasMobile=cadMobile();window.addEventListener('resize',()=>{if(!cadEnabled())return;if(wasMobile!==cadMobile()){wasMobile=cadMobile();rerender()}else if(!cadState.quick&&!cadState.inspector)cadFit()});
+}

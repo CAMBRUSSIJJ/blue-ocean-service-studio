@@ -3,6 +3,7 @@
 import functools, os, shutil, threading, json
 from pathlib import Path
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
+from map_browser_support import create_map, use_matrix
 from playwright.sync_api import sync_playwright, expect
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts'/'blueprint-reference-exact'; OUT.mkdir(parents=True,exist_ok=True)
@@ -23,9 +24,13 @@ try:
         page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
         page.get_by_role('button',name='Criar projeto',exact=True).click()
         page.locator('[data-service-blueprint-nav="1"]').click()
-        page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
+        create_map(page)
         exact=page.frame_locator('.bo-blueprint-reference-frame')
         expect(exact.locator('#app')).to_be_visible()
+        # This contract covers the retained matrix renderer.
+        use_matrix(exact,'blueprint')
+        # The Canvas leaves the compact operational matrix as a selectable renderer.
+        expect(exact.locator('.cvb')).to_have_count(0)
         expect(exact.locator('.bd')).to_be_visible(timeout=15000)
         # A new hosted map starts empty; no compulsory coffee demo or stage suggestions.
         while exact.locator('.sh').count() < 2:
@@ -33,30 +38,25 @@ try:
             exact.get_by_role('textbox',name='Nome da nova etapa').fill('Etapa '+str(exact.locator('.sh').count()+1))
             exact.get_by_role('button',name='Adicionar etapa ao mapa',exact=True).click()
         expect(exact.locator('.bd')).to_be_visible()
+        exact.get_by_role('button',name='Personalizar visualização',exact=True).click()
+        for row in ['em','im']:
+            exact.locator(f'[data-view-row="{row}"]').set_checked(True)
+        exact.get_by_role('button',name='Concluir',exact=True).click()
         exact.get_by_role('button',name='Insights',exact=True).click()
         expect(exact.locator('.pnl')).to_be_visible()
         assert exact.locator('.hd').count()==1
         assert exact.locator('.lb').count()>=5
+        assert exact.locator('.cvb').count()==1
         assert exact.locator('.dv').count()>=3
         assert exact.locator('.ad').count()>=5
-        # Blueprint now opens with a compact operational preset. Emotions are an
-        # optional lane, preserved in the document and exposed by Personalizar.
-        assert exact.locator('.cvb').count()==0
-        exact.locator('button[data-act="customize"]').first.click()
-        expect(exact.locator('#customize')).to_be_visible()
-        exact.locator('[data-view-row="em"]').check()
-        exact.locator('#customize button[data-act="close-customize"]').click()
-        expect(exact.locator('.cvb')).to_have_count(1)
         # Direct editing updates canonical Journey entities, not isolated iframe localStorage.
         stages=page.evaluate("""() => {const g=window.BlueOceanRuntime.api('dataBridge').get();
           const b=Object.values(g.views.whiteboards).find(x=>x.viewKind==='blueprint');
           const j=g.journeys[b.journeyId]||Object.values(g.journeys)[0];
           return j.stageIds.map(id=>({id,title:g.stages[id].title}));}""")
         assert len(stages)>=2,stages
-        exact.locator('[data-act="emotion-edit"]').first.click()
-        slider=exact.locator('input[data-act="emo"]').first
-        slider.evaluate("""el=>{el.value='-2';el.dispatchEvent(new Event('input',{bubbles:true}))}""")
-        exact.get_by_role('button',name='Concluir',exact=True).click()
+        dot=exact.locator('#curve .dt[data-si="0"]')
+        dot.focus();dot.press('Home')
         page.wait_for_function("""id=>window.BlueOceanRuntime.api('dataBridge').get().stages[id].emotionScore===-2""",arg=stages[0]['id'],timeout=10000)
         exact.get_by_role('button',name='+ Adicionar faixa',exact=True).click()
         exact.get_by_role('button',name='Faixa personalizada →',exact=True).click()
@@ -88,7 +88,7 @@ try:
         assert exact.get_by_role('button',name='Modo profissional').count()==0, 'Retired UI still exposed'
         exact.locator('.tools-menu summary').click()
         exact.get_by_role('button',name='Recursos avançados').click()
-        tools_dialog=page.get_by_role('dialog',name='Ferramentas do Blueprint')
+        tools_dialog=page.get_by_role('dialog',name='Ferramentas da Jornada')
         expect(tools_dialog).to_be_visible()
         tools_dialog.get_by_role('button',name='Revisar entrega').click()
         expect(page.get_by_role('dialog',name='Revisão da entrega')).to_be_visible()

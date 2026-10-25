@@ -2,7 +2,7 @@ import fs from 'node:fs';
 const read=(p)=>fs.readFileSync(p,'utf8');
 const exists=(p)=>fs.existsSync(p);
 let ok=0,fail=0; const check=(v,l)=>{if(v){console.log('OK  ',l);ok++}else{console.log('FAIL',l);fail++}};
-const view=read('src/views/BlueprintWorkspaceView.tsx');
+const view=(read('src/views/BlueprintWorkspaceView.tsx')+read('src/views/ServiceMapsLibrary.tsx'));
 const app=read('src/App.tsx');
 const css=read('src/runtime/unified-service-blueprint-h722.css');
 const style=read('src/style.css');
@@ -53,11 +53,11 @@ check((designBlock.match(/data-unified-service-workspace-nav=/g)||[]).length===1
 check(!designBlock.includes("onClick={() => selectCore('journey')}") && !designBlock.includes("onClick={() => selectCore('whiteboards')}") ,'sidebar não expõe atalhos separados de Journey/Whiteboard');
 check(view.includes('data-unified-legacy-targets'),'compatibilidade semântica legada documentada');
 
-check(view.includes("useState<BlueprintViewMode>('cards')"),'Blueprint abre em cards por padrão');
-check(view.includes("setViewMode('table')"),'tabela continua disponível');
-check(view.includes('bo-h722-blueprint-grid'),'biblioteca de Blueprint possui cards');
-check(view.includes('Nenhum Blueprint ainda'),'estado vazio preservado');
-check(view.includes('A Journey e o Whiteboard continuam disponíveis neste workspace'),'estado vazio ensina fluxo unificado');
+check(view.includes("useState<LibraryViewMode>('cards')"),'Blueprint abre em cards por padrão');
+check(view.includes("onView('table')"),'tabela continua disponível');
+check(view.includes('bo-h724-journey-grid'),'biblioteca de Blueprint possui cards');
+check(view.includes('Crie seu primeiro mapa'),'estado vazio preservado');
+check(view.includes('Blueprint e Jornada são visualizações do mesmo mapa'),'estado vazio ensina fluxo unificado');
 check(view.includes('Criar com contexto'),'criação contextual preservada');
 check(view.includes('prepareBlueprintFromDefinition'),'Service Definition continua fonte de contexto');
 

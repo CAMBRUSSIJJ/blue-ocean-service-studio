@@ -8,6 +8,7 @@ import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
+from map_browser_support import wait_saved, use_matrix
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'artifacts' / 'journey-progressive'
@@ -39,9 +40,9 @@ def enter(page):
     page.get_by_role('button', name='Criar projeto', exact=True).click()
 
 def new_journey(page):
-    page.locator('.bo-h724-journey-pane').get_by_role('button', name='Criar Jornada', exact=True).click()
+    page.get_by_role('button', name='Criar mapa', exact=True).click()
     page.get_by_role('button', name='Em branco').first.click()
-    f = page.frame_locator('.bo-blueprint-reference-frame')
+    f = page.frame_locator('.bo-blueprint-reference-frame'); wait_saved(f); use_matrix(f)
     expect(f.locator('[data-empty-journey="1"]')).to_be_visible(timeout=15000)
     return f
 
@@ -68,9 +69,9 @@ try:
         enter(page)
         f = new_journey(page)
         jid = next(iter(graph(page)['journeys']))
-        expect(f.locator('.matrix>.r')).to_have_count(4)
-        check('Blank Journey begins with exactly four essential rows and closed Insights', f.locator('.matrix>.r').count() == 4 and not f.locator('.pnl').count())
-        name = f.get_by_role('textbox', name='Nome da jornada', exact=True)
+        expect(f.locator('.matrix>.r')).to_have_count(7)
+        check('Journey view includes channels and thoughts with closed Insights', f.locator('.matrix>.r').count() == 7 and not f.locator('.pnl').count())
+        name = f.get_by_role('textbox', name='Nome do mapa', exact=True)
         name.fill('Atendimento ao cliente')
         name.press('Tab')
         page.wait_for_function("id => window.BlueOceanRuntime.api('dataBridge').get().journeys[id].name==='Atendimento ao cliente'", arg=jid)
@@ -120,7 +121,7 @@ try:
         check('Editing visible rows preserves hidden custom and operational content', f.get_by_text('Conferir o cadastro', exact=True).is_visible() and f.get_by_text('Receber uma resposta clara', exact=True).is_visible())
         preset(f, 'Jornada essencial')
         check('Perspectives expose clear active states and tools have named groups',
-              f.locator('.map-perspectives [aria-pressed="true"]').count()==1 and f.locator('.map-toolset--views').count()==1)
+              f.get_by_label('Visualização do mapa', exact=True).input_value()=='matrix' and f.locator('.map-perspective-label').inner_text()=='Jornada' and f.locator('.map-toolset--views').count()==1)
         f.get_by_role('button', name='Personalizar visualização', exact=True).click()
         dialog = f.get_by_role('dialog', name='Personalizar visualização')
         search = dialog.get_by_role('searchbox', name='Buscar faixa')
@@ -135,13 +136,13 @@ try:
         search.fill('')
         dialog.get_by_role('button', name='Mostrar todas as faixas', exact=True).click()
         check('Show all makes the optional lane visible in customization',
-              dialog.get_by_role('checkbox', name='Evidência física', exact=True).is_checked())
+              dialog.locator('[data-view-row="ev"]').is_checked())
         dialog.get_by_role('button', name='Restaurar padrão', exact=True).click()
         check('Restore default keeps data while returning the essential lane configuration',
-              not dialog.get_by_role('checkbox', name='Evidência física', exact=True).is_checked()
+              not dialog.locator('[data-view-row="ev"]').is_checked()
               and graph(page)['journeys'][jid]['matrixView']['preset']=='essential')
-        dialog.get_by_role('checkbox', name='Evidência física', exact=True).check()
-        dialog.get_by_role('button', name='Mover Evidência física para cima', exact=True).click()
+        dialog.locator('[data-view-row="ev"]').check()
+        dialog.locator('[data-act="row-move"][data-id="ev"][data-d="-1"]').click()
         dialog.get_by_role('button', name='Concluir', exact=True).click()
         check('Closing customization restores focus to its trigger', f.locator('[data-act="customize"]').first.evaluate('e=>e===document.activeElement'))
         check('Selected optional row appears and reordering persists', f.locator('.r[data-row="ev"]').count() == 1 and graph(page)['journeys'][jid]['matrixView']['preset'] == 'custom')
@@ -177,22 +178,22 @@ try:
         expect(tools).to_be_visible()
         check('Advanced tools remain available with the Journey label', tools.get_by_role('button', name='Revisar entrega').is_visible() and tools.get_by_role('button', name='Importar / Exportar').is_visible())
         tools.locator('.rt144-x').click()
-        f.get_by_role('button', name='Voltar para Jornadas e Blueprints').click()
+        f.get_by_role('button', name='Voltar para mapas do serviço').click()
         page.reload(wait_until='networkidle')
-        page.get_by_role('button', name='Abrir Jornadas e Blueprints', exact=True).click()
-        page.get_by_role('button', name='Abrir Jornada', exact=True).first.click()
-        f = page.frame_locator('.bo-blueprint-reference-frame')
+        page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
+        page.get_by_role('button', name='Abrir mapa', exact=True).first.click()
+        f = page.frame_locator('.bo-blueprint-reference-frame'); wait_saved(f); use_matrix(f)
         expect(f.locator('.r[data-row="ev"]')).to_be_visible()
         check('Reopening restores per-Journey visibility, order and Insights preferences', graph(page)['journeys'][jid]['matrixView'] == saved_view and not f.locator('.pnl').count())
         check('Emotion and observation survive reload', graph(page)['stages'][sid]['emotionScore'] == -2 and graph(page)['stages'][sid]['emotionNote'] == 'Insegurança antes do primeiro contato')
         first_view = graph(page)['journeys'][jid]['matrixView']
-        f.get_by_role('button', name='Voltar para Jornadas e Blueprints').click()
+        f.get_by_role('button', name='Voltar para mapas do serviço').click()
         f = new_journey(page)
-        check('Another Journey starts essential without inheriting the previous preferences', f.locator('.matrix>.r').count() == 4 and graph(page)['journeys'][jid]['matrixView'] == first_view)
-        f.get_by_role('button', name='Voltar para Jornadas e Blueprints').click()
+        check('Another map starts with its own experience rows without inheriting preferences', f.locator('.matrix>.r').count() == 7 and graph(page)['journeys'][jid]['matrixView'] == first_view)
+        f.get_by_role('button', name='Voltar para mapas do serviço').click()
         # Open the original named Journey card.
-        page.locator('article').filter(has=page.get_by_text('Atendimento ao cliente', exact=True)).get_by_role('button', name='Abrir Jornada', exact=True).click()
-        f = page.frame_locator('.bo-blueprint-reference-frame')
+        page.locator('article').filter(has=page.get_by_text('Atendimento ao cliente', exact=True)).get_by_role('button', name='Abrir mapa', exact=True).click()
+        f = page.frame_locator('.bo-blueprint-reference-frame'); wait_saved(f); use_matrix(f)
         expect(f.locator('.bd')).to_be_visible()
         axe = (ROOT/'node_modules/axe-core/axe.min.js').read_text()
         for width in [1440,834,390]:
@@ -219,7 +220,7 @@ try:
             f.get_by_role('button',name='Fechar Insights',exact=True).click()
             page.wait_for_function("id=>window.BlueOceanRuntime.api('dataBridge').get().journeys[id].matrixView.insightsOpen===false",arg=jid)
         # A real touch context, not only a resized desktop viewport.
-        f.get_by_role('button',name='Voltar para Jornadas e Blueprints',exact=True).click()
+        f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click()
         touch = browser.new_context(viewport={'width':390,'height':844}, has_touch=True, is_mobile=True, storage_state=page.context.storage_state())
         mobile = touch.new_page()
         # Imported browser storage can include the existing recovery notification.
@@ -228,8 +229,8 @@ try:
         mobile.goto(URL,wait_until='networkidle')
         mobile.get_by_role('button',name='Abrir workspace local sem conta').click()
         mobile.get_by_role('button',name='Abrir navegação',exact=True).click()
-        mobile.get_by_role('button',name='Abrir Jornadas e Blueprints',exact=True).click()
-        mobile.locator('.bo-h724-journey-card').filter(has_text='Atendimento ao cliente').get_by_role('button',name='Abrir Jornada',exact=True).click()
+        mobile.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click()
+        mobile.locator('.bo-h724-journey-card').filter(has_text='Atendimento ao cliente').get_by_role('button',name='Abrir mapa',exact=True).click()
         mf = mobile.frame_locator('.bo-blueprint-reference-frame')
         expect(mf.locator('.bd')).to_be_visible()
         expect(mf.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
@@ -242,7 +243,7 @@ try:
         mobile.wait_for_function("id=>window.BlueOceanRuntime.api('dataBridge').get().stages[id].customerAction.includes('Comparar opções no celular')",arg=sid)
         check('Touch editing persists through the canonical graph', 'Comparar opções no celular' in graph(mobile)['stages'][sid]['customerAction'])
         mf.get_by_role('button',name='Personalizar visualização',exact=True).click()
-        mf.get_by_role('checkbox',name='Evidência física',exact=True).uncheck()
+        mf.locator('[data-view-row="ev"]').uncheck()
         mf.get_by_role('button',name='Concluir',exact=True).click()
         expect(mf.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
         check('Touch visualization preferences are persisted', 'ev' in graph(mobile)['journeys'][jid]['matrixView']['hiddenRows'])

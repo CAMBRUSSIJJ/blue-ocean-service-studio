@@ -9,6 +9,7 @@ import threading
 import traceback
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from map_browser_support import create_map, use_matrix, open_operational
 from playwright.sync_api import sync_playwright, expect
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts'/'blueprint-methodology';OUT.mkdir(parents=True,exist_ok=True)
@@ -28,7 +29,8 @@ def create(page):
     page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
     page.get_by_role('button',name='Criar projeto',exact=True).click()
     page.locator('[data-service-blueprint-nav="1"]').click()
-    page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
+    create_map(page)
+    open_operational(page)
     expect(page.locator('.bo1174-board')).to_be_visible()
 def options(page,name):
     page.get_by_role('button',name='Opções',exact=True).click()
@@ -237,8 +239,6 @@ URL=os.environ.get('BLUE_OCEAN_URL')
 if not URL:
     server=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(QuietHandler,directory=str(ROOT/'dist')))
     threading.Thread(target=server.serve_forever,daemon=True).start();URL=f'http://127.0.0.1:{server.server_port}'
-# Exercise the retired editor only in localhost regression runs, never in Production.
-URL += ('&' if '?' in URL else '?') + '__qa_legacy_blueprint=1'
 
 try:
     with sync_playwright() as p:

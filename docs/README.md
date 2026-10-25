@@ -27,6 +27,8 @@ o fluxo local. Os guias abaixo descrevem o funcionamento atual.
 - [Edição simplificada e sidebar recolhível](editor-simplicity.md).
 - [Whiteboard e Blueprint: melhorias de UX](whiteboard-blueprint-ux.md).
 - [Blueprint: estrutura, operação e revisão da entrega](blueprint-methodology.md).
+- [Experiência para MEIs, revisão e acesso remoto](business-first-experience.md).
+- [Mapas do serviço: cartões simples, visualizações e conexões diretas](blueprint-canvas.md).
 - [Blueprint conectado: atividades, recursos e passagens entre equipes](blueprint-conectado.md).
 
 ## Colaborar e consultar o histórico

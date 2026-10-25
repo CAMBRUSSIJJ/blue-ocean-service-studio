@@ -43,19 +43,19 @@ export function normalizeMatrixActivity(input = {}) {
   return {category:['activity','support-process','resource'].includes(input.category)?input.category:'activity',
     owner:clipped(input.owner,160),team:clipped(input.team,160),
     resourceRefs:metadataList(input.resourceRefs,30,180),resourceNotes:clipped(input.resourceNotes,400),
-    rule:clipped(input.rule,1000),durationMinutes:number('durationMinutes'),targetMinutes:number('targetMinutes')};
+    rule:clipped(input.rule,1000),durationMinutes:number('durationMinutes'),waitMinutes:number('waitMinutes'),targetMinutes:number('targetMinutes')};
 }
 export function matrixActivityFromRecord(record, fallbackCategory = 'activity') {
   const detail=record.operationalDetails||{};
-  if(!record.owner&&!record.team&&!record.resourceRefs&&!detail.matrixCategory&&!detail.resourceNotes&&!detail.rule&&detail.durationMinutes==null&&detail.targetMinutes==null)return null;
+  if(!record.owner&&!record.team&&!record.resourceRefs&&!detail.matrixCategory&&!detail.resourceNotes&&!detail.rule&&detail.durationMinutes==null&&detail.waitMinutes==null&&detail.targetMinutes==null)return null;
   return normalizeMatrixActivity({category:detail.matrixCategory||fallbackCategory,owner:record.owner,team:record.team,resourceRefs:record.resourceRefs,
-    resourceNotes:detail.resourceNotes,rule:detail.rule,durationMinutes:detail.durationMinutes,targetMinutes:detail.targetMinutes});
+    resourceNotes:detail.resourceNotes,rule:detail.rule,durationMinutes:detail.durationMinutes,waitMinutes:detail.waitMinutes,targetMinutes:detail.targetMinutes});
 }
 export function writeMatrixActivity(record, input) {
   const activity=normalizeMatrixActivity(input);
   record.owner=activity.owner;record.team=activity.team;record.resourceRefs=activity.resourceRefs;
   record.operationalDetails={...record.operationalDetails,matrixCategory:activity.category,resourceNotes:activity.resourceNotes,rule:activity.rule,
-    durationMinutes:activity.durationMinutes==null?undefined:activity.durationMinutes,targetMinutes:activity.targetMinutes==null?undefined:activity.targetMinutes};
+    durationMinutes:activity.durationMinutes==null?undefined:activity.durationMinutes,waitMinutes:activity.waitMinutes==null?undefined:activity.waitMinutes,targetMinutes:activity.targetMinutes==null?undefined:activity.targetMinutes};
 }
 export function normalizeMatrixConnection(input) {
   const a=clipped(input.a,160),b=clipped(input.b,160),type=Object.hasOwn(MATRIX_CONNECTION_TYPES,input.type)?input.type:'sequence';
@@ -269,6 +269,11 @@ export function normalizeMatrixBlock(note) {
   if (Array.isArray(note.tags)) normalized.tags = metadata.tags;
   if (note.tone) normalized.tone = metadata.tone;
   if (note.activity) normalized.activity = normalizeMatrixActivity(note.activity);
+  if (note.canvas && typeof note.canvas==='object') {
+    const kind=clipped(note.canvas.kind,30);
+    if(!['activity','customer-action','touchpoint','artifact','decision','system','resource','metric','channel','emotion','thought','persona','need','pain','opportunity','text'].includes(kind))throw Error('Tipo de componente do canvas inválido.');
+    normalized.canvas={version:1,kind,description:clipped(note.canvas.description,1000),channelId:clipped(note.canvas.channelId,160),metricId:clipped(note.canvas.metricId,160)};
+  }
   return normalized;
 }
 export function normalizeMatrixRow(input = {}) {
@@ -314,7 +319,7 @@ export function restoreMatrixContent(ref, stored, stageIds) {
   stageIds.forEach((id, index) => {
     for (const [row, blocks] of Object.entries(stored?.cells?.[id] || {})) {
       const key = row + '|' + index;
-      if (['sd', 'em', 'im'].includes(row)) {
+      if (['sd', 'em', 'im', 'th', 'ch'].includes(row)) {
         ref.c[key] = blocks.map(block => ({ ...block, i: block.id, t: block.text }));
         continue;
       }
@@ -327,7 +332,7 @@ export function restoreMatrixContent(ref, stored, stageIds) {
           const { id: _id, text: _text, ...metadata } = block;
           return [{ ...note, ...metadata }];
         }
-        if (MATRIX_REFERENCE_TYPES.includes(block.type)) return [{ ...block, i: block.id, t: block.text }];
+        if (block.canvas || MATRIX_REFERENCE_TYPES.includes(block.type)) return [{ ...block, i: block.id, t: block.text }];
         return [];
       });
       ref.c[key].push(...existing.filter(note => !included.has(note.i)));
