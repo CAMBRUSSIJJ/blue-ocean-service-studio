@@ -8,7 +8,13 @@ const xml = (value: string, max = 25) => value.slice(0, max).replace(/[&<>"']/g,
 export function journeyPreviewSrc(journey: Journey, graph: ServiceGraph): string {
   if (hasCustomJourneyCover(journey)) return journeyCoverSrc(journey);
   const stages = journey.stageIds.map(id => graph.stages[id]).filter(Boolean).slice(0, 4);
-  const lanes = (journey.mapLayout?.lanes ?? []).filter(lane => !lane.hidden).slice(0, 3);
+  const labels: Record<string, string> = { sd: 'Contexto', ev: 'Evidências', ch: 'Canais', ac: 'Ações do cliente', th: 'Pensamentos', em: 'Emoções', fl: 'Linha de frente', bk: 'Bastidores', sy: 'Sistemas e apoio', im: 'Dores e ideias' };
+  const view = journey.matrixView;
+  const defaultRows = view?.perspective === 'journey' ? ['sd', 'ac', 'em'] : ['ev', 'ch', 'ac', 'em', 'fl', 'bk', 'sy'];
+  const rowIds = (view?.rowOrder?.length ? view.rowOrder : defaultRows).filter(id => !(view?.hiddenRows ?? []).includes(id));
+  const lanes = journey.matrixContent || view || !journey.mapLayout?.lanes?.length
+    ? rowIds.slice(0, 3).map(id => ({ id, label: journey.matrixContent?.rows[id]?.n || labels[id] || id, type: 'text' as const, cards: {}, tone: 'neutral' as const, binding: undefined }))
+    : journey.mapLayout.lanes.filter(lane => !lane.hidden).slice(0, 3);
   const colors = { neutral: '#f1f5f9', blue: '#dbeafe', emerald: '#d1fae5', amber: '#fef3c7', rose: '#ffe4e6', violet: '#ede9fe' };
   let body = '<rect width="560" height="180" rx="12" fill="#f8fafc"/>';
   if (!stages.length) body += '<text x="28" y="78" fill="#334155" font-size="18">Jornada em branco</text><text x="28" y="106" fill="#64748b" font-size="12">Pronta para suas etapas e faixas</text>';
@@ -21,7 +27,8 @@ export function journeyPreviewSrc(journey: Journey, graph: ServiceGraph): string
     lanes.forEach((lane, i) => { const y = 55 + i * 38;
       body += `<rect x="12" y="${y}" width="103" height="32" rx="4" fill="${colors[lane.tone ?? 'neutral'] ?? colors.neutral}"/><text x="19" y="${y + 20}" fill="#475569" font-size="10">${xml(lane.label, 17)}</text>`;
       stages.forEach((stage, j) => { const x = 126 + j * width;
-        const text = lane.binding === 'customerAction' ? stage.customerAction : lane.binding === 'thoughts' ? stage.thoughts : lane.type === 'emotion' ? ({ positive: 'Satisfeito', neutral: 'Neutro', negative: 'Frustrado' })[stage.emotion] : cardsInCell(lane, stage.id)[0]?.content;
+        const matrixText = journey.matrixContent?.cells[stage.id]?.[lane.id]?.[0]?.text;
+        const text = matrixText || (lane.id === 'ac' ? stage.customerAction : lane.id === 'sd' ? stage.thoughts : '') || (lane.binding === 'customerAction' ? stage.customerAction : lane.binding === 'thoughts' ? stage.thoughts : lane.type === 'emotion' ? ({ positive: 'Satisfeito', neutral: 'Neutro', negative: 'Frustrado' })[stage.emotion] : cardsInCell(lane, stage.id)[0]?.content);
         body += `<rect x="${x}" y="${y}" width="${width - 5}" height="32" rx="4" fill="#fff" stroke="#e2e8f0"/><text x="${x + 7}" y="${y + 20}" fill="#52647b" font-size="9">${xml(text ?? '', 20)}</text>`;
       });
     });

@@ -5,8 +5,8 @@ import { normalizeSavedMatrixView, switchMatrixPerspective } from '../src/servic
 let count=0;const check=(name,run)=>{run();count++;console.log('PASS '+name)};
 const rows=[{id:'ac',n:'Ações do cliente'},{id:'fl',n:'Linha de frente'},{id:'bk',n:'Bastidores'},{id:'sy',n:'Sistemas e apoio'}];
 const doc=()=>({title:'Clínica < & "',steps:[{hostStageId:'s1',hostLocalId:'l1',n:'Agendar'},{hostStageId:'s2',n:'Atender'}],c:{'fl|0':[{i:'a',hostItemId:'a',t:'Confirmar',activity:normalizeMatrixActivity({owner:'Ana',waitMinutes:0}),canvas:{version:1,kind:'activity',description:'Detalhes',channelId:'whatsapp',metricId:'tempo'},tags:['tag'],unknown:{preserve:true}}],'bk|1':[{i:'b',t:'Prontuário',activity:normalizeMatrixActivity({team:'Clínica'})}],'sy|0':[{i:'c',t:'Agenda',activity:normalizeMatrixActivity({category:'resource'})}]},links:[{id:'dep',a:'b',b:'a',type:'dependency',label:'Liberar'}]});
-check('Library validates all seven kinds and canonical stage/layer boundaries without mutation',()=>{
- const source=doc(),before=structuredClone(source);assert.equal(Object.keys(CANVAS_COMPONENTS).length,7);
+check('Library validates service component kinds and canonical stage/layer boundaries without mutation',()=>{
+ const source=doc(),before=structuredClone(source);assert.ok(Object.keys(CANVAS_COMPONENTS).length>=16);
  for(const [kind,component]of Object.entries(CANVAS_COMPONENTS))assert.equal(prepareCanvasInput(source,{kind,title:'Teste',stageId:'s1',row:component.row}).kind,kind);
  for(const input of [{kind:'bogus'},{kind:'system',row:'fl'},{kind:'activity',stageId:'missing'},{kind:'activity',title:''}])assert.throws(()=>prepareCanvasInput(source,{title:'Nome',stageId:'s1',...input}));assert.deepEqual(source,before);
 });

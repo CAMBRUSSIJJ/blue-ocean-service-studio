@@ -1,5 +1,5 @@
 import { normalizeMatrixCardFilters } from './journey-content.js';
-const baseRows = ['sd','ev','ac','em','fl','bk','sy','im','go','ch','pr','br','rr','ki'];
+const baseRows = ['sd','th','ev','ac','em','fl','bk','sy','im','go','ch','pr','br','rr','ki'];
 const rows = value => Array.isArray(value) ? [...new Set(value.filter(id => typeof id === 'string' && /^[a-z][a-z0-9]{0,24}$/.test(id)))].slice(0,150) : [];
 const bounded = (value,min,max,fallback) => Number.isFinite(Number(value)) ? Math.round(Math.max(min,Math.min(max,Number(value)))) : fallback;
 const stageWidths = value => Array.isArray(value) ? value.slice(0,100).map(v=>bounded(v,210,600,290)) : [];
@@ -16,7 +16,7 @@ function normalizeMatrixViewSnapshot(input = {}) {
     hiddenRows:rows(input.hiddenRows),rowOrder:rows(input.rowOrder),insightsOpen:input.insightsOpen===true,
     insightsTab:['guidance','analysis','quality'].includes(input.insightsTab)?input.insightsTab:'guidance',
     emotionsExpanded:input.emotionsExpanded===true,fitToScreen:input.fitToScreen===true,connectionMode:['selected','all','off'].includes(input.connectionMode)?input.connectionMode:'selected',
-    blueprintRenderer:input.blueprintRenderer==='matrix'?'matrix':'canvas',
+    blueprintRenderer:input.blueprintRenderer==='matrix'?'matrix':'canvas',canvasOrderVersion:input.canvasOrderVersion===1?1:0,
     zoom:bounded(input.zoom,75,150,100),stageWidths:stageWidths(input.stageWidths),rowHeights:rowHeights(input.rowHeights),collapsedRows:rows(input.collapsedRows),
     cardFilters:normalizeMatrixCardFilters(input.cardFilters) };
 }
@@ -32,10 +32,10 @@ export function switchMatrixPerspective(input, perspective, definitions) {
   const current = normalizeSavedMatrixView(input);
   if (!['journey','blueprint'].includes(perspective) || perspective === current.perspective) return current;
   const memory = {...current.perspectiveViews,[current.perspective]:normalizeMatrixViewSnapshot(current)};
-  const visible = perspective === 'blueprint' ? ['ev','ac','fl','bk','sy'] : ['sd','ac','em'];
+  const visible = perspective === 'blueprint' ? ['ev','ch','ac','em','fl','bk','sy'] : ['sd','ch','ac','th','em','im'];
   const defaults = {...current,perspective,preset:perspective === 'blueprint' ? 'operational' : 'essential',
     rowOrder:definitions.map(row=>row.id),hiddenRows:definitions.filter(row=>!visible.includes(row.id)&&!row.custom).map(row=>row.id),
-    collapsedRows:[],cardFilters:{},connectionMode:perspective==='blueprint'?'all':current.connectionMode};
+    collapsedRows:[],cardFilters:{},canvasOrderVersion:0,connectionMode:perspective==='blueprint'?'all':current.connectionMode};
   const next = normalizeMatrixViewSnapshot(memory[perspective] || defaults);
   return {...next,perspective,perspectiveViews:memory};
 }

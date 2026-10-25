@@ -115,6 +115,7 @@ jobs:
       - run: npm run journey:cards:browser
       - run: npm run maps:matrix:browser
       - run: npm run blueprint:canvas:browser
+      - run: npm run maps:flow:browser
       - run: npm run entry:browser
       - run: npm run product:browser
       - run: npm run maps:browser
@@ -146,3 +147,4 @@ jobs:
             artifacts/journey-card-tools
             artifacts/shared-map-matrix
             artifacts/blueprint-canvas
+            artifacts/service-map-flow

@@ -14,6 +14,7 @@ import traceback
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
+from map_browser_support import create_map, open_operational
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'artifacts' / 'editor-ux'
@@ -134,6 +135,7 @@ def whiteboard_flow(page):
     dialog.get_by_label('Etapa de Equipe verifica o pedido', exact=True).select_option('1')
     dialog.get_by_role('button', name='Criar Blueprint', exact=True).click()
     expect(dialog).to_have_count(0)
+    open_operational(page)
     current = graph(page)
     target = next(x for x in current['views']['whiteboards'].values() if x['viewKind'] == 'blueprint')
     target_id = target['id']
@@ -149,6 +151,7 @@ def whiteboard_flow(page):
     check('Undo restores original free notes', all(x['kind'] == 'free' for x in graph(page)['views']['whiteboards'][source_id]['items'].values()))
     page.get_by_role('button', name='Refazer', exact=True).click()
     check('Redo restores the same Blueprint', target_id in graph(page)['views']['whiteboards'])
+    open_operational(page)
     page.get_by_role('button', name='Opções', exact=True).click()
     page.get_by_role('button', name=re.compile('Quadro de origem')).click()
     expect(page.locator('.bo1174-board')).to_be_visible()
@@ -177,13 +180,14 @@ def whiteboard_flow(page):
     if page.get_by_role('button', name='Cancelar', exact=True).is_visible():
         page.get_by_role('button', name='Cancelar', exact=True).click()
     page.locator('[data-service-blueprint-nav="1"]').click()
-    expect(page.get_by_role('button', name='Criar Blueprint', exact=True).first).to_be_visible()
-    check('Library shortcut opens the Blueprint tab', page.get_by_role('button', name='Criar Blueprint', exact=True).first.is_visible())
+    expect(page.get_by_role('button', name='Criar mapa', exact=True).first).to_be_visible()
+    check('Library shortcut opens the Blueprint tab', page.get_by_role('button', name='Criar mapa', exact=True).first.is_visible())
 
 def blueprint_flow(page):
     project(page)
     page.locator('[data-service-blueprint-nav="1"]').click()
-    page.get_by_role('button', name='Criar Blueprint', exact=True).first.click()
+    create_map(page)
+    open_operational(page)
     expect(page.locator('.bo1174-board')).to_be_visible()
     check('Blueprint uses the entire viewport and hides application chrome', page.locator('.bo1174-board').bounding_box()['y'] == 0 and page.locator('.bo1174-board').bounding_box()['width'] == page.viewport_size['width'] and page.locator('#root').evaluate('e => e.inert && getComputedStyle(e).visibility === "hidden"'))
     expect(page.locator('.bo1174-statusbar')).to_be_visible()
@@ -282,8 +286,6 @@ if not URL:
     threading.Thread(target=server.serve_forever, daemon=True).start()
     URL = f'http://127.0.0.1:{server.server_port}'
 
-# Exercise the retired editor only in localhost regression runs, never in Production.
-URL += ('&' if '?' in URL else '?') + '__qa_legacy_blueprint=1'
 
 try:
     with sync_playwright() as p:

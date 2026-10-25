@@ -256,7 +256,7 @@ export function normalizeMatrixBlock(note) {
   if (note.activity) normalized.activity = normalizeMatrixActivity(note.activity);
   if (note.canvas && typeof note.canvas==='object') {
     const kind=clipped(note.canvas.kind,30);
-    if(!['activity','touchpoint','artifact','decision','system','resource','metric'].includes(kind))throw Error('Tipo de componente do canvas inválido.');
+    if(!['activity','customer-action','touchpoint','artifact','decision','system','resource','metric','channel','emotion','thought','persona','need','pain','opportunity','text'].includes(kind))throw Error('Tipo de componente do canvas inválido.');
     normalized.canvas={version:1,kind,description:clipped(note.canvas.description,1000),channelId:clipped(note.canvas.channelId,160),metricId:clipped(note.canvas.metricId,160)};
   }
   return normalized;
@@ -304,7 +304,7 @@ export function restoreMatrixContent(ref, stored, stageIds) {
   stageIds.forEach((id, index) => {
     for (const [row, blocks] of Object.entries(stored?.cells?.[id] || {})) {
       const key = row + '|' + index;
-      if (['sd', 'em', 'im'].includes(row)) {
+      if (['sd', 'em', 'im', 'th', 'ch'].includes(row)) {
         ref.c[key] = blocks.map(block => ({ ...block, i: block.id, t: block.text }));
         continue;
       }
@@ -317,7 +317,7 @@ export function restoreMatrixContent(ref, stored, stageIds) {
           const { id: _id, text: _text, ...metadata } = block;
           return [{ ...note, ...metadata }];
         }
-        if (MATRIX_REFERENCE_TYPES.includes(block.type)) return [{ ...block, i: block.id, t: block.text }];
+        if (block.canvas || MATRIX_REFERENCE_TYPES.includes(block.type)) return [{ ...block, i: block.id, t: block.text }];
         return [];
       });
       ref.c[key].push(...existing.filter(note => !included.has(note.i)));

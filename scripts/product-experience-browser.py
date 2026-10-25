@@ -59,7 +59,7 @@ def project(page):
 
 
 def create_journey(page):
-    page.locator('.bo-h724-journey-pane').get_by_role('button', name='Criar Jornada', exact=True).click()
+    page.get_by_role('button', name='Criar mapa', exact=True).click()
     audit(page, 'escolha-jornada-' + str(page.viewport_size['width']))
     page.get_by_role('button', name=re.compile(r'^Em branco')).click()
     page.get_by_role('button', name='Usar estrutura inicial', exact=True).click()
@@ -80,14 +80,20 @@ def desktop(page):
     enter(page)
     project(page)
     pane = page.locator('[data-journey-library="1"]')
-    check('Estado vazio tem uma ação principal e dispensa filtros', pane.get_by_role('button', name='Criar Jornada', exact=True).count() == 1 and pane.get_by_role('textbox').count() == 0)
+    check('Estado vazio tem uma ação principal e dispensa filtros', pane.get_by_role('button', name='Começar mapa', exact=True).count() == 1 and pane.get_by_role('textbox').count() == 0)
     audit(page, 'biblioteca-desktop')
     page.locator('[data-rt-collab-nav="1"]').first.click()
     expect(page.locator('#rt1101-collaboration')).to_be_visible()
     aligned(page, '#rt1101-collaboration')
     page.locator('[data-tab="sync"]').click()
-    expect(page.get_by_role('button', name='Sincronizar agora', exact=True)).to_be_disabled()
-    check('Nuvem informa a indisponibilidade antes da ação', page.get_by_text('Acesso remoto ainda indisponível', exact=True).is_visible())
+    configured = page.evaluate("()=>window.BlueOceanRuntime.api('remoteWorkspace')?.configured===true")
+    sync = page.get_by_role('button', name='Sincronizar agora', exact=True)
+    if configured:
+        expect(sync).to_be_enabled()
+        check('Nuvem informa que o acesso remoto está configurado', page.get_by_text('Acesso remoto disponível', exact=True).is_visible())
+    else:
+        expect(sync).to_be_disabled()
+        check('Nuvem informa a indisponibilidade antes da ação', page.get_by_text('Acesso remoto ainda indisponível', exact=True).is_visible())
     audit(page, 'colaboracao-desktop')
     page.locator('[data-bo1173-settings-nav="1"]').first.click()
     expect(page.locator('#bo1173-settings-home')).to_be_visible()

@@ -3,7 +3,7 @@ const read=p=>fs.readFileSync(p,'utf8');
 const app=read('src/App.tsx');
 const library=read('src/views/WorkspaceLibraryView.tsx');
 const dashboard=read('src/views/WorkspaceDashboardView.tsx');
-const blueprints=read('src/views/BlueprintWorkspaceView.tsx');
+const blueprints=(read('src/views/BlueprintWorkspaceView.tsx')+read('src/views/ServiceMapsLibrary.tsx'));
 const whiteboards=read('src/views/WhiteboardsView.tsx');
 const core=read('src/runtime/whiteboard-core.js');
 const css=read('src/runtime/workspace-library-h3.css');
@@ -42,9 +42,9 @@ check('runtime bloqueia criação legada de frame no Whiteboard',core.includes("
 check('runtime cria Blueprint estruturado',core.includes('function createServiceBlueprint')&&core.includes("viewKind:'blueprint'")&&core.includes("layoutMode:'service'"));
 check('runtime registra Service Blueprint API',core.includes("runtime.register('serviceBlueprintFrame'"));
 check('Blueprint library usa API estruturada',blueprints.includes("api<BlueprintApi>('serviceBlueprintFrame')"));
-check('Blueprint library cria Service Blueprint',blueprints.includes('Criar Blueprint'));
+check('Blueprint library cria Service Blueprint',blueprints.includes('Criar mapa'));
 check('Blueprint library lista viewKind blueprint',blueprints.includes("board.viewKind === 'blueprint'"));
-check('Blueprint mostra Service Frame como estrutura',blueprints.includes("row.layoutMode === 'service' ? 'Service Frame' : 'Blueprint'"));
+check('Blueprint mostra Service Frame como estrutura',blueprints.includes('journey.stageIds.length') && blueprints.includes('data-service-map-library'));
 
 check('CSS H3 importado',style.includes("./runtime/workspace-library-h3.css"));
 for(const marker of ['.bo1205h3-sidebar','.bo1205h3-dashboard','.bo1205h3-workspace-page','.bo1205h3-table','.bo1205h3-portfolio-grid']) check(`CSS possui ${marker}`,css.includes(marker));

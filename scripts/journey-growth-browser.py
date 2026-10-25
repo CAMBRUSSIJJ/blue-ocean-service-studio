@@ -7,6 +7,7 @@ import shutil
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from map_browser_support import use_matrix, matrix_perspective
 from playwright.sync_api import sync_playwright, expect
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -24,7 +25,9 @@ def check(name,ok):
     assert ok,name
     checks.append(name);print('PASS '+name,flush=True)
 def graph(page): return page.evaluate("() => window.BlueOceanRuntime.api('dataBridge').get()")
-def saved(f): expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+def saved(f):
+    expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+    use_matrix(f)
 def stage(f,title,inline=False):
     f.get_by_role('button',name='Adicionar etapa à direita' if inline else 'Adicionar etapa',exact=True).click()
     f.get_by_role('textbox',name='Nome da nova etapa',exact=True).fill(title)
@@ -53,8 +56,8 @@ try:
     page.get_by_role('button',name='Novo projeto',exact=True).click()
     page.get_by_label('Nome do projeto',exact=True).fill('QA Evolução da Jornada');page.get_by_label('Serviço principal',exact=True).fill('Atendimento ao cliente')
     page.get_by_role('button',name='Criar projeto',exact=True).click()
-    page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name='Em branco').first.click()
-    f=page.frame_locator('.bo-blueprint-reference-frame');expect(f.get_by_role('button',name='Adicionar etapa',exact=True)).to_be_visible()
+    page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name='Em branco').first.click()
+    f=page.frame_locator('.bo-blueprint-reference-frame');saved(f);expect(f.get_by_role('button',name='Adicionar etapa',exact=True)).to_be_visible()
     jid=next(iter(graph(page)['journeys']))
     f.get_by_role('button',name='Adicionar etapa',exact=True).click();f.get_by_role('textbox',name='Nome da nova etapa').fill('Etapa cancelada');f.get_by_role('button',name='Cancelar',exact=True).click()
     check('Cancelling a stage draft creates no placeholder or graph record',not graph(page)['journeys'][jid]['stageIds'])
@@ -141,24 +144,26 @@ try:
     f.get_by_role('button',name='Voltar ao mapa',exact=True).click();f.locator('.tools-menu summary').click()
     with page.expect_download() as backup: f.get_by_role('button',name='Baixar backup do projeto',exact=True).click()
     backup_text=Path(backup.value.path()).read_text();check('A real project backup includes acquisition, plan, indicator and measurement',all(text in backup_text for text in ['acquisitionCells',plan_id,metric_id,'Medição simulada de QA']))
-    f.locator('.tools-menu summary').click();f.get_by_role('button',name='Voltar para Jornadas e Blueprints',exact=True).click();page.reload(wait_until='networkidle');page.get_by_role('button',name='Abrir Jornadas e Blueprints',exact=True).click();page.get_by_role('button',name='Abrir Jornada',exact=True).first.click();f=page.frame_locator('.bo-blueprint-reference-frame');expect(f.locator('[data-row="ch"]')).to_be_visible()
+    f.locator('.tools-menu summary').click();f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click();page.reload(wait_until='networkidle');page.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click();page.get_by_role('button',name='Abrir mapa',exact=True).first.click();f=page.frame_locator('.bo-blueprint-reference-frame');saved(f);expect(f.locator('[data-row="ch"]')).to_be_visible()
     check('Reload preserves marketing notes, independent context, action and outcome',graph(page)['journeys'][jid]['acquisitionCells'][sid]==marketing and graph(page)['stages'][sid]['customerAction']=='Pesquisar alternativas de atendimento' and graph(page)['entities']['metric'][metric_id]['value']==8)
     for width in [1440,834,390]:
         page.set_viewport_size({'width':width,'height':1000});page.wait_for_timeout(300);saved(f);audit(frame(page),f'map-{width}')
         check(f'No page overflow at {width}px',frame(page).evaluate('document.documentElement.scrollWidth<=innerWidth'))
         f.get_by_role('button',name='Editar plano',exact=True).click();audit(frame(page),f'plan-{width}');f.get_by_role('button',name='Fechar plano',exact=True).click()
+        if f.get_by_role('button',name='Mostrar todos os comandos',exact=True).is_visible():f.get_by_role('button',name='Mostrar todos os comandos',exact=True).click()
         f.get_by_role('button',name='Apresentar',exact=True).click();audit(frame(page),f'executive-{width}');page.screenshot(path=str(OUT/f'executive-{width}.png'),animations='disabled');f.get_by_role('button',name='Voltar ao mapa',exact=True).click()
-    f.get_by_role('button',name='Voltar para Jornadas e Blueprints',exact=True).click()
+    f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click()
     touch=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,accept_downloads=True,storage_state=page.context.storage_state())
     mobile=touch.new_page();mobile.on('pageerror',lambda e:errors.append(str(e)))
     mobile.add_locator_handler(mobile.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click())
-    mobile.goto(URL,wait_until='networkidle');mobile.get_by_role('button',name='Abrir workspace local sem conta').click();mobile.get_by_role('button',name='Abrir navegação',exact=True).click();mobile.get_by_role('button',name='Abrir Jornadas e Blueprints',exact=True).click();mobile.get_by_role('button',name='Abrir Jornada',exact=True).first.click()
+    mobile.goto(URL,wait_until='networkidle');mobile.get_by_role('button',name='Abrir workspace local sem conta').click();mobile.get_by_role('button',name='Abrir navegação',exact=True).click();mobile.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click();mobile.get_by_role('button',name='Abrir mapa',exact=True).first.click()
     mf=mobile.frame_locator('.bo-blueprint-reference-frame');saved(mf)
     mobile.wait_for_function("async()=>{const r=await window.BlueOceanRuntime.api('dataBridge').recovery();return r.durableOk&&r.durableRevision>=r.revision}");mf.locator('.lb').first.click()
     mf.get_by_role('button',name='Editar plano',exact=True).tap();md=mf.get_by_role('dialog',name='Editar plano',exact=True);md.get_by_label('Responsável',exact=True).fill('Equipe no celular');md.get_by_role('button',name='Salvar plano',exact=True).tap();expect(md).not_to_be_visible()
     check('A real touch device can edit the existing shared plan',graph(mobile)['service']['improvementPortfolio']['initiatives'][plan_id]['owner']=='Equipe no celular')
     mf.get_by_role('button',name='Acompanhar',exact=True).tap();md=mf.get_by_role('dialog',name='Acompanhar melhoria',exact=True);md.get_by_label('Novo valor medido').fill('9');md.get_by_label('Observação da medição').fill('Medição de QA por toque');md.get_by_role('button',name='Registrar medição',exact=True).tap();expect(md).not_to_be_visible()
     check('Touch measurements preserve the earlier measurement history',len(graph(mobile)['service']['outcomes']['measurements'])==2 and graph(mobile)['entities']['metric'][metric_id]['value']==9)
+    if mf.get_by_role('button',name='Mostrar todos os comandos',exact=True).is_visible():mf.get_by_role('button',name='Mostrar todos os comandos',exact=True).tap()
     mf.get_by_role('button',name='Apresentar',exact=True).tap();audit(frame(mobile),'executive-touch');mobile.screenshot(path=str(OUT/'executive-touch.png'),animations='disabled');mf.get_by_role('button',name='Voltar ao mapa',exact=True).tap();touch.close()
     check('No uncaught browser errors',not errors)
     (OUT/'results.json').write_text(json.dumps(checks,indent=2,ensure_ascii=False));browser.close()

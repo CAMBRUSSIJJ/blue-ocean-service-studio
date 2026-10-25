@@ -1,101 +1,121 @@
-# Canvas operacional do Blueprint
+# Mapas do serviço
 
-Na Jornada, selecione **Blueprint** para abrir o canvas. As etapas, os componentes
-e as conexões usam os mesmos registros da matriz. O botão **Matriz** permite
-continuar usando os editores de conteúdo e os filtros existentes; **Canvas
-operacional** retorna ao novo modo. Cada perspectiva lembra sua visualização.
+Um mapa reúne a experiência do cliente e a operação. **Blueprint**, **Jornada** e
+**Matriz** são opções do seletor **Visualização** dentro do mesmo editor. A
+biblioteca mostra uma entrada por mapa; as Jornadas existentes e os Blueprints
+vinculados continuam nos mesmos registros, com seus IDs e histórico.
 
-## Montar o mapa
+O editor usa o padrão claro da Jornada: fundo branco, faixas suaves e controles
+azuis. A biblioteca de componentes fica à esquerda. Os detalhes avançados só
+aparecem quando solicitados.
 
-1. Adicione as etapas do atendimento com **+ Etapa**.
-2. Escolha um componente na biblioteca ou arraste seu tipo para uma etapa.
-3. Informe o nome e a posição no inspetor. **Adicionar ao Blueprint** cria o
-   registro e o coloca no mapa em uma única operação. **Cancelar** descarta o
-   rascunho.
-4. Selecione um componente para editar responsável, equipe, canal, execução,
-   espera, prazo, recursos, regra e indicador. Use **Salvar componente** para
-   confirmar. O preenchimento mantém o foco no campo.
+## Criar um cartão
 
-| Componente | Uso e posição |
+1. Arraste um componente da biblioteca para a célula desejada. A célula destaca
+   se o destino é compatível. Também é possível usar **+ Adicionar cartão** na
+   própria célula ou **+ Componente** na barra.
+2. O mapa mostra um cartão provisório no destino. Digite o nome, acrescente uma
+   observação se quiser e pressione **Enter** ou **Criar cartão**.
+3. **Escape** ou o botão de fechar cancela o rascunho, sem criar registros órfãos.
+
+O formulário inicial possui nome e texto opcional. Responsável, equipe, tempos,
+recursos, regras e indicadores ficam em **Detalhes opcionais**, no menu do cartão.
+Para canais, sistemas, recursos e outros registros já cadastrados, **Usar um
+registro existente** permite reutilizar seus dados sem criar outra entidade.
+
+Soltar fora da grade ou em uma faixa incompatível não escolhe um destino
+silenciosamente. A criação e a persistência do cartão formam uma única operação.
+O rascunho visual ainda não é um componente salvo.
+
+## Componentes e faixas
+
+| Grupo | Componentes |
 | --- | --- |
-| Atividade | Execução na linha de frente ou nos bastidores; processo de suporte em Sistemas e apoio. |
-| Ponto de contato | Interação do cliente, na faixa Ações do cliente. |
-| Evidência física/digital | Artefato do serviço percebido pelo cliente, como uma confirmação ou recibo. |
-| Decisão operacional | Condição de execução da linha de frente ou dos bastidores. |
-| Sistema | Plataforma que apoia o serviço. |
-| Recurso | Pessoa, meio ou infraestrutura de apoio. |
-| Indicador | Registro de uma medição do serviço; pode ser colocado nas faixas operacionais. |
+| Experiência do cliente | Ação do cliente, canal, ponto de contato, emoção, pensamento, Persona, necessidade, dor e ideia de melhoria. |
+| Operação do serviço | Atividade, decisão operacional, evidência física/digital, sistema, recurso e indicador. |
+| Anotações | Cartão livre; **Mais tipos de conteúdo** abre o seletor de imagens, links, escalas, conteúdo incorporado, planos e demais registros existentes. |
 
-Sistemas, recursos e indicadores podem reutilizar um registro existente. A
-inclusão preserva seus dados. Uma decisão operacional registra uma regra do
-atendimento; o histórico de decisões do projeto continua em sua área própria.
-Evidências de pesquisa mantêm seus registros e fontes na Jornada e na matriz.
+As faixas incluem Contexto, Evidências, Canais, Ações do cliente, Pensamentos,
+Emoções, Linha de frente, Bastidores, Sistemas e apoio e Dores e ideias. Cada
+visualização escolhe um recorte inicial. Adicionar um componente pode revelar sua
+faixa. **Faixas** permite escolher visibilidade, ordem e personalização.
 
-## Ler e organizar
+Canais são registros do serviço. Emoções usam o contexto de Persona selecionado
+no cabeçalho: uma observação de uma Persona não é copiada para outra. A emoção
+pode ser registrada como hipótese; sua validação e fonte continuam disponíveis
+nos editores existentes. Evidências físicas/digitais representam artefatos do
+serviço; evidências de pesquisa preservam seus registros e fontes específicos.
 
-A linha de frente reúne o que o cliente percebe. Os bastidores mostram a
-execução interna; Sistemas e apoio mostram o que viabiliza essa execução. As
-linhas de interação, visibilidade e interação interna aparecem quando as faixas
-correspondentes estão visíveis e em uma ordem semanticamente válida.
+## Etapas e movimentação
 
-O layout organiza os cartões em pilhas por etapa e faixa, sem sobreposição.
-Arrastar um componente muda sua posição; etapa e faixa também podem ser
-alteradas no inspetor pelo teclado. Mudar entre linha de frente, bastidores e
-suporte preserva a identidade visual e registra a reclassificação dos dados.
-**Desfazer** e **Refazer** usam o histórico existente do projeto.
+O **+ discreto ao lado do cabeçalho de cada etapa** insere outra etapa
+imediatamente depois dela. O botão **+ Etapa** da barra adiciona ao final. Dar um
+nome e pressionar Enter confirma. Inserir uma coluna preserva as etapas antigas,
+os cartões, os vínculos e a posição dos problemas.
 
-Se forem exibidos no canvas, contexto, emoções, dores e ideias aparecem como
-resumos dos registros da Jornada. Selecioná-los abre a matriz para editar seus
-campos específicos, preservando observações e fontes.
+Arraste cartões entre etapas e faixas compatíveis. O destino é realçado e a
+prévia acompanha o movimento. A posição solicitada aparece durante a gravação;
+se houver erro, o documento confirmado é mantido. Ações podem ser reclassificadas
+entre cliente, linha de frente, bastidores e suporte, preservando a identidade
+visual e o registro de origem. Uma emoção só pode ser movida para outra etapa
+sem sobrescrever uma observação já existente no contexto atual.
 
-No computador, arraste o fundo para mover, use a roda para ampliar e **Ajustar**
-para enquadrar o mapa. O controle **Detalhes** alterna a visão geral e as
-informações operacionais; no modo automático, o afastamento reduz o conteúdo dos
-cartões. O nome completo permanece disponível na seleção e no inspetor. Com o
-foco no canvas, as setas movem a visão, `+` e `-` ampliam/reduzem e `0` enquadra.
-Com o foco em um cartão ou conexão, `Enter` ou espaço abre suas propriedades.
+**Desfazer** e **Refazer** usam o histórico do projeto. O menu do cabeçalho da
+etapa permite renomear, e as operações existentes de duplicação e remoção
+continuam disponíveis no contexto do mapa.
 
-No celular, o mapa mostra uma etapa por vez. Use a seleção de etapa ou as setas
-para navegar. **+ Componente** abre a biblioteca e selecionar um cartão abre
-suas propriedades. Ambos os painéis têm botão de fechar.
+## Conectar pelo próprio cartão
 
-## Relacionar e revisar
+- Clique no **ponto de conexão na lateral do cartão** e depois no cartão de
+  destino. A conexão de sequência é criada diretamente, sem abrir o inspetor.
+- Ou clique com o **botão direito** no cartão e escolha **Conectar a outro cartão**.
+- O menu **···** oferece as mesmas ações por clique ou toque. Os controles também
+  aceitam foco de teclado e Enter/espaço.
+- Durante a conexão, a barra contextual permite escolher outra relação.
+  **Escape** ou **Cancelar conexão** cancela o gesto.
 
-**Criar conexão** permite escolher origem e destino pelos campos ou selecionar
-dois cartões no canvas. Os vínculos têm quatro tipos:
-
-| Relação | Significado |
+| Relação | Regra |
 | --- | --- |
-| Sequência | Uma atividade acontece antes da outra; retornos no atendimento são permitidos. |
-| Dependência | O destino depende da origem. Dependências circulares são rejeitadas. |
-| Usa recurso | A origem utiliza um sistema, recurso ou indicador de apoio. |
-| Passagem entre equipes | Registra equipes distintas, entrega, prazo e condição de aceite. |
+| Sequência | A origem acontece antes do destino; retornos no atendimento são permitidos. |
+| Dependência | O destino depende da origem. Ciclos são rejeitados antes da gravação. |
+| Usa recurso | O destino deve ser um recurso compatível do serviço. |
+| Passagem entre equipes | Pede equipes diferentes, entrega, prazo e aceite em um diálogo específico. |
 
-Vínculos duplicados com mesma origem, destino e tipo são rejeitados. Selecionar
-uma conexão permite editar ou removê-la. O seletor **Conexões** mostra todas, as
-da seleção ou oculta as linhas, preservando os vínculos salvos.
+Clique em uma linha para editar a relação ou sua descrição. Vínculos duplicados
+com origem, destino e tipo iguais são rejeitados. A criação de uma sequência
+simples não exige preencher um formulário operacional.
 
-**Revisar operação** reúne responsáveis ausentes, esperas, prazos excedidos,
-dependências e transferências registradas. A revisão usa os valores informados;
-não mede automaticamente o atendimento nem executa transferências.
+## Navegar e revisar
 
-**Exportar SVG** gera um mapa independente com setas, rótulos e os detalhes da
-transferência nos títulos acessíveis do arquivo. **Dados e backup** abre a
-exportação completa do projeto. O SVG é uma visualização; o backup JSON permite
-recuperar os registros editáveis. Remover um componente do mapa remove suas
-conexões visuais e mantém o registro original do serviço.
+A roda rola o mapa; **Ctrl + roda** amplia/reduz, e arrastar o fundo move a visão.
+Os controles **−**, **Ajustar** e **+** ficam no canto do canvas. Com o foco no
+canvas, as setas movem a visão, `+` e `-` mudam o zoom e `0` enquadra o mapa.
+O zoom semântico ajusta a quantidade de informações e o tamanho dos títulos.
 
-O canvas respeita o papel de acesso do projeto e utiliza a persistência local ou
-a sincronização remota já configurada. Não cria outro banco ou outro projeto.
+No celular, o mapa mostra uma etapa por vez. As setas e a seleção de etapa
+permitem navegar; criar e editar usam o mesmo cartão simples. O menu **···**
+permite conectar cartões sem depender de botão direito ou de um painel lateral.
+
+**Revisar operação** utiliza os responsáveis, esperas, prazos, dependências,
+transferências e melhorias registrados. Não representa uma medição automática
+da operação nem envia tarefas a outras pessoas.
+
+Em **Mais**, **Exportar SVG** gera uma visualização independente com setas,
+rótulos e detalhes das transferências. **Dados e backup** abre os recursos de
+exportação e recuperação do projeto. O SVG é uma visualização; o backup JSON
+preserva os registros editáveis. O editor respeita os papéis de acesso existentes.
 
 ## Verificação
 
 ```bash
-npm run blueprint:canvas:test
+npm run maps:flow:test
 npm run build
+npm run maps:flow:browser
 npm run blueprint:canvas:browser
 ```
 
-O teste de domínio verifica layout denso, movimentação, metadados, exportação e
-preferências. O teste em Chromium passa pela interface, pelo grafo canônico,
-pelo histórico e pela recarga, além dos fluxos e da acessibilidade no celular.
+A verificação inclui arrastar da biblioteca, cancelar rascunhos, criar com Enter,
+inserir etapa intermediária, mover entre blocos, usar conexão contextual,
+alternar visualizações, recarregar e editar no celular. Os testes de domínio e
+as regressões avançadas também verificam referências, histórico, exportação,
+regras de conexão e acesso somente de leitura.

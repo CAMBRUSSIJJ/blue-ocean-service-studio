@@ -4,6 +4,7 @@ import functools, os, shutil, threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
+from map_browser_support import wait_saved, use_matrix
 ROOT=Path(__file__).resolve().parents[1]
 class Quiet(SimpleHTTPRequestHandler):
     def log_message(self,*args):pass
@@ -21,9 +22,9 @@ try:
     page.get_by_label('Nome do projeto',exact=True).fill('QA Jornada Única')
     page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
     page.get_by_role('button',name='Criar projeto',exact=True).click()
-    page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click()
+    page.get_by_role('button',name='Criar mapa',exact=True).click()
     page.get_by_role('button',name='Em branco',exact=False).click()
-    iframe=page.frame_locator('.bo-blueprint-reference-frame')
+    iframe=page.frame_locator('.bo-blueprint-reference-frame'); wait_saved(iframe); use_matrix(iframe)
     expect(iframe.locator('[data-empty-journey="1"]')).to_be_visible(timeout=15000)
     assert page.locator('.bo-h1705-journey').count()==0,'Old Journey appeared instead of HTML map'
     assert iframe.get_by_text('Preencher com o exemplo do café').count()==0,'Example-heavy setup is still visible'

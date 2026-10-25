@@ -20,7 +20,8 @@ export function ProjectShellView({ studio, section, openService, openWhiteboards
   const project = projects.find((item) => item.id === activeProjectId) ?? projects[0] ?? null;
   const serviceName = graph.service.name || project?.serviceName || 'Serviço ainda não definido';
   const journeys = count(graph.journeys);
-  const blueprints = Object.values(graph.views?.whiteboards ?? {}).filter((item) => item.viewKind === 'blueprint').length;
+  const detachedMaps = Object.values(graph.views?.whiteboards ?? {}).filter(item => item.viewKind === 'blueprint' && (!item.journeyId || !graph.journeys[item.journeyId])).length;
+  const serviceMaps = journeys + detachedMaps;
   const whiteboards = Object.values(graph.views?.whiteboards ?? {}).filter((item) => item.viewKind !== 'blueprint').length;
   const personas = count(graph.entities?.persona);
   const needs = count(graph.entities?.need);
@@ -32,7 +33,7 @@ export function ProjectShellView({ studio, section, openService, openWhiteboards
   const metrics = count(graph.entities?.metric);
   const opportunities = count(graph.opportunities);
   const researchEvidence = evidence;
-  const serviceArtifacts = journeys + blueprints + whiteboards;
+  const serviceArtifacts = serviceMaps + whiteboards;
 
   if (section === 'library') {
     const groups = [
@@ -66,7 +67,7 @@ export function ProjectShellView({ studio, section, openService, openWhiteboards
 
     <section className="bo-h740h10-primary-card">
       <div className="bo-h740h10-primary-card__icon"><FolderKanban size={22}/></div>
-      <div><small>SERVIÇO PRINCIPAL</small><h2>{serviceName}</h2><p>Abra o serviço para criar Jornadas, definir o público-alvo e acompanhar a evolução da experiência.</p><div><span>{journeys} Journey{journeys === 1 ? '' : 's'}</span><span>{blueprints} Blueprint{blueprints === 1 ? '' : 's'}</span><span>{whiteboards} Whiteboard{whiteboards === 1 ? '' : 's'}</span></div></div>
+      <div><small>SERVIÇO PRINCIPAL</small><h2>{serviceName}</h2><p>Abra o serviço para criar mapas, definir o público-alvo e acompanhar a evolução da experiência.</p><div><span>{serviceMaps} mapa{serviceMaps === 1 ? '' : 's'} do serviço</span><span>{whiteboards} Whiteboard{whiteboards === 1 ? '' : 's'}</span></div></div>
       <button type="button" className="primary" onClick={openService}>Abrir serviço <ArrowRight size={14}/></button>
     </section>
 
@@ -80,10 +81,10 @@ export function ProjectShellView({ studio, section, openService, openWhiteboards
           ['Oportunidades', opportunities, 'portfolio', Object.values(graph.opportunities ?? {}).slice(0, 2).map((item) => item.title || 'Oportunidade')],
           ['Métricas', metrics, 'metrics', Object.values(graph.entities?.metric ?? {}).slice(0, 2).map((item) => item.title || 'Métrica')],
         ] as const).map(([label, total, page, examples]) => <button type="button" key={page} onClick={() => openLibraryPage(page)}><span><BookOpen size={18}/></span><strong>{label}</strong><small>{total} {total === 1 ? 'registro' : 'registros'}</small><small>{examples.length ? examples.join(' · ') : 'Nenhum registro criado ainda'}</small><em>Visualizar ou criar <ArrowRight size={12}/></em></button>)}
-        <button type="button" onClick={openService}><span><FolderKanban size={18}/></span><strong>Jornadas e Blueprints</strong><small>{journeys} Jornadas · {blueprints} Blueprints</small><em>Visualizar ou criar no serviço <ArrowRight size={12}/></em></button>
+        <button type="button" onClick={openService}><span><FolderKanban size={18}/></span><strong>Mapas do serviço</strong><small>{serviceMaps} mapas · Blueprint e Jornada</small><em>Visualizar ou criar no serviço <ArrowRight size={12}/></em></button>
         <button type="button" data-project-whiteboard="1" onClick={openWhiteboards}><span><FolderKanban size={18}/></span><strong>Whiteboard</strong><small>{whiteboards} quadros de exploração</small><em>Abrir ou criar Whiteboard <ArrowRight size={12}/></em></button>
       </div>
     </section>
-    <section className="bo-h740h10-shell__section"><header><div><small>ATIVIDADE RECENTE</small><h2>Resumo do projeto</h2></div></header><div className="bo-h740h10-summary-grid"><article><strong>{journeys}</strong><span>Journeys</span></article><article><strong>{researchEvidence}</strong><span>Evidências</span></article><article><strong>{problems}</strong><span>Problemas</span></article><article><strong>{metrics}</strong><span>Métricas</span></article></div></section>
+    <section className="bo-h740h10-shell__section"><header><div><small>ATIVIDADE RECENTE</small><h2>Resumo do projeto</h2></div></header><div className="bo-h740h10-summary-grid"><article><strong>{serviceMaps}</strong><span>Mapas</span></article><article><strong>{researchEvidence}</strong><span>Evidências</span></article><article><strong>{problems}</strong><span>Problemas</span></article><article><strong>{metrics}</strong><span>Métricas</span></article></div></section>
   </section>;
 }

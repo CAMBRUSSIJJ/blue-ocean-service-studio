@@ -2,14 +2,24 @@ import { normalizeMatrixActivity, validateMatrixDocument, normalizeMatrixConnect
 
 /** A projection of the existing matrix document. This module never owns another service graph. */
 export const CANVAS_COMPONENTS = {
-  activity: { title:'Atividade', icon:'▣', row:'fl', rows:['fl','bk','sy'], hint:'Atendimento e execução' },
+  'customer-action': { title:'Ação do cliente', icon:'↗', row:'ac', rows:['ac','fl','bk','sy'], group:'experience', hint:'O que a pessoa faz' },
+  channel: { title:'Canal', icon:'◎', row:'ch', rows:['*'], group:'experience', hint:'WhatsApp, loja, telefone…' },
+  emotion: { title:'Emoção', icon:'☺', row:'em', rows:['em'], group:'experience', hint:'Como o cliente se sente' },
+  thought: { title:'Pensamento', icon:'◌', row:'th', rows:['*'], group:'experience', hint:'O que a pessoa pensa' },
+  activity: { title:'Atividade', icon:'▣', row:'fl', rows:['ac','fl','bk','sy'], group:'operation', hint:'Atendimento e execução' },
   touchpoint: { title:'Ponto de contato', icon:'◉', row:'ac', rows:['ac'], hint:'Interação com o cliente' },
   artifact: { title:'Evidência física/digital', icon:'▤', row:'ev', rows:['ev'], hint:'O que o cliente vê ou recebe' },
   decision: { title:'Decisão operacional', icon:'◇', row:'bk', rows:['fl','bk'], hint:'Regra ou condição da operação' },
   system: { title:'Sistema', icon:'▦', row:'sy', rows:['sy'], hint:'Aplicação e plataforma' },
   resource: { title:'Recurso', icon:'⬡', row:'sy', rows:['sy'], hint:'Pessoas, meios e infraestrutura' },
   metric: { title:'Indicador', icon:'◷', row:'sy', rows:['ev','ac','fl','bk','sy'], hint:'Medição vinculada ao serviço' },
+  persona: { title:'Persona', icon:'♙', row:'sd', rows:['*'], group:'experience', hint:'Quem vive a experiência' },
+  need: { title:'Necessidade', icon:'◈', row:'sd', rows:['*'], group:'experience', hint:'O que o cliente precisa' },
+  pain: { title:'Dor', icon:'!', row:'im', rows:['*'], group:'experience', hint:'Problema percebido pelo cliente' },
+  opportunity: { title:'Ideia de melhoria', icon:'✧', row:'im', rows:['*'], group:'experience', hint:'Uma oportunidade para melhorar' },
+  text: { title:'Cartão livre', icon:'T', row:'sd', rows:['*'], group:'content', hint:'Uma anotação simples' },
 };
+export function canvasAcceptsRow(kind,row){const component=CANVAS_COMPONENTS[kind];return !!component&&(component.rows.includes('*')||component.rows.includes(row))}
 const text = (value,limit) => typeof value==='string'?value.trim().slice(0,limit):'';
 export function normalizeCanvasMetadata(input={}) {
   if (!Object.hasOwn(CANVAS_COMPONENTS,input.kind)) throw Error('Tipo de componente indisponível.');
@@ -33,10 +43,10 @@ export function prepareCanvasInput(doc,input) {
   const kind=input?.kind,component=CANVAS_COMPONENTS[kind];
   if(!component)throw Error('Escolha um componente disponível.');
   const index=canvasStageIndex(doc,input),row=input.row||component.row;
-  if(!component.rows.includes(row))throw Error('Este componente pertence a '+component.rows.map(id=>({ev:'Evidências',ac:'Ações do cliente',fl:'Linha de frente',bk:'Bastidores',sy:'Sistemas e apoio'}[id])).join(' ou ')+'.');
+  if(!canvasAcceptsRow(kind,row))throw Error('Escolha uma faixa compatível: '+component.rows.map(id=>({ev:'Evidências',ac:'Ações do cliente',fl:'Linha de frente',bk:'Bastidores',sy:'Sistemas e apoio',em:'Emoções'}[id]||id)).join(' ou ')+'.');
   const title=text(input.title,240);if(!title)throw Error('Informe o nome do componente.');
   if((doc.c[row+'|'+index]||[]).length>=100)throw Error('Esta etapa e faixa já possuem 100 elementos.');
-  const activity=normalizeMatrixActivity({...input,category:row==='sy'?(kind==='activity'?'support-process':'resource'):'activity'});
+  const activity=normalizeMatrixActivity({...input,category:row==='sy'?(['activity','customer-action'].includes(kind)?'support-process':'resource'):'activity'});
   return {kind,row,index,title,activity,canvas:normalizeCanvasMetadata({...input,kind})};
 }
 export function moveCanvasCard(doc,id,input) {
@@ -44,8 +54,16 @@ export function moveCanvasCard(doc,id,input) {
   if(!source)throw Error('Este componente não está mais no mapa.');
   const [sourceKey,sourceNotes]=source,note=sourceNotes.find(note=>note.i===id),index=canvasStageIndex(next,input),row=text(input.row,25);
   if(!/^[a-z][a-z0-9]{0,24}$/.test(row))throw Error('Faixa inválida.');
-  const kind=canvasKind(note,sourceKey.split('|')[0]);
-  if(note.canvas&&!CANVAS_COMPONENTS[kind].rows.includes(row))throw Error('Esta faixa não aceita o componente selecionado.');
+  let kind=canvasKind(note,sourceKey.split('|')[0]);
+  if(note.canvas&&!canvasAcceptsRow(kind,row))throw Error('Esta faixa não aceita o componente selecionado.');
+  if(['activity','customer-action'].includes(kind)){kind=row==='ac'?'customer-action':'activity';if(note.canvas)note.canvas.kind=kind;if(row==='ac')note.reclassifyActivity=row!==sourceKey.split('|')[0]}
+  if(kind==='emotion'&&index!==Number(sourceKey.split('|')[1])){
+    const previous=next.steps[Number(sourceKey.split('|')[1])],target=next.steps[index];
+    if((next.c['em|'+index]||[]).some(value=>value.canvas?.kind==='emotion'))throw Error('Esta etapa já possui um cartão de emoção.');
+    if(target.emotionRecorded)throw Error('Esta etapa já possui uma emoção registrada. Edite-a antes de mover.');
+    for(const field of ['e','note','emotionRecorded','emotionStatus','emotionSource'])target[field]=previous[field];
+    Object.assign(previous,{e:0,note:'',emotionRecorded:false,emotionStatus:'hypothesis',emotionSource:''});
+  }
   if(note.activity&&['fl','bk','sy'].includes(row)) {
     const category=row==='sy'?(kind==='activity'?'support-process':'resource'):'activity';
     if(['resource','system'].includes(kind)&&row!=='sy')throw Error('Coloque recursos e sistemas em Sistemas e apoio.');
@@ -61,7 +79,17 @@ export function moveCanvasCard(doc,id,input) {
   validateMatrixDocument(next);return next;
 }
 
-export const CANVAS_GRID={label:174,stage:350,header:94,gap:18,cardWidth:304,cardHeight:112,padding:24};
+export function insertCanvasStage(doc,input){
+  const next=structuredClone(doc),title=text(input.title,240);if(!title)throw Error('Dê um nome à etapa.');
+  if(next.steps.length>=90)throw Error('Este mapa já possui 90 etapas.');
+  const at=input.afterStageId||input.afterStageLocalId?canvasStageIndex(next,{stageId:input.afterStageId,stageLocalId:input.afterStageLocalId})+1:next.steps.length;
+  if(!input.localId)throw Error('A etapa precisa de uma identificação.');
+  next.steps.splice(at,0,{n:title,e:0,d:'',emotionRecorded:false,hostLocalId:input.localId});
+  next.c=Object.fromEntries(Object.entries(next.c).map(([key,notes])=>{const [row,column]=key.split('|'),index=Number(column);return [row+'|'+(index>=at?index+1:index),notes]}));
+  next.iss=(next.iss||[]).map(issue=>({...issue,s:issue.s>=at?issue.s+1:issue.s}));
+  return next;
+}
+export const CANVAS_GRID={label:210,stage:336,header:88,gap:14,cardWidth:288,cardHeight:96,padding:16};
 export function canvasBoundary(row,index,rows) {
   const previous={fl:'ac',bk:'fl',sy:'bk'}[row.id],before=rows.findIndex(value=>value.id===previous);
   if(!previous||before<0||before>=index||rows.slice(before+1,index).some(value=>['fl','bk','sy'].includes(value.id)))return '';
@@ -79,11 +107,11 @@ export function buildCanvasLayout(doc,definitions,stageIndices=null) {
   }
   return {stages,rows,nodes,width:g.label+Math.max(1,stages.length)*g.stage+20,height:y+20};
 }
-export function canvasTitleLines(title,limit=32) {
+export function canvasTitleLines(title,limit=32,maxLines=2) {
   const words=String(title).trim().split(/\s+/),lines=[''];
   for(const word of words){const index=lines.length-1;if(lines[index]&&(lines[index]+' '+word).length>limit)lines.push(word);else lines[index]+=(lines[index]?' ':'')+word}
-  const result=lines.slice(0,2).map(line=>line.length>limit?line.slice(0,limit-1)+'…':line);
-  if(lines.length>2)result[1]=result[1].slice(0,limit-1)+'…';return result;
+  const result=lines.slice(0,maxLines).map(line=>line.length>limit?line.slice(0,limit-1)+'…':line);
+  if(lines.length>maxLines)result[maxLines-1]=result[maxLines-1].slice(0,limit-1)+'…';return result;
 }
 export function canvasConnectionOffsets(links) {
   const groups=new Map(),result=new Map();

@@ -3,6 +3,7 @@
 import functools, os, shutil, threading, json
 from pathlib import Path
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
+from map_browser_support import create_map, use_matrix
 from playwright.sync_api import sync_playwright, expect
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts'/'blueprint-reference-exact'; OUT.mkdir(parents=True,exist_ok=True)
@@ -23,11 +24,11 @@ try:
         page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
         page.get_by_role('button',name='Criar projeto',exact=True).click()
         page.locator('[data-service-blueprint-nav="1"]').click()
-        page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
+        create_map(page)
         exact=page.frame_locator('.bo-blueprint-reference-frame')
         expect(exact.locator('#app')).to_be_visible()
         # This contract covers the retained matrix renderer.
-        exact.get_by_role('button',name='Matriz',exact=True).click()
+        use_matrix(exact,'blueprint')
         expect(exact.locator('.bd')).to_be_visible(timeout=15000)
         # A new hosted map starts empty; no compulsory coffee demo or stage suggestions.
         while exact.locator('.sh').count() < 2:
@@ -85,7 +86,7 @@ try:
         assert exact.get_by_role('button',name='Modo profissional').count()==0, 'Retired UI still exposed'
         exact.locator('.tools-menu summary').click()
         exact.get_by_role('button',name='Recursos avançados').click()
-        tools_dialog=page.get_by_role('dialog',name='Ferramentas do Blueprint')
+        tools_dialog=page.get_by_role('dialog',name='Ferramentas da Jornada')
         expect(tools_dialog).to_be_visible()
         tools_dialog.get_by_role('button',name='Revisar entrega').click()
         expect(page.get_by_role('dialog',name='Revisão da entrega')).to_be_visible()

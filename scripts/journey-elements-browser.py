@@ -3,6 +3,7 @@
 import functools,json,os,shutil,threading
 from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
 from pathlib import Path
+from map_browser_support import use_matrix, matrix_perspective
 from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts/journey-elements';OUT.mkdir(parents=True,exist_ok=True)
@@ -17,7 +18,9 @@ def check(name,ok):
  assert ok,name
  checks.append(name);print('PASS '+name,flush=True)
 def graph(p): return p.evaluate("()=>window.BlueOceanRuntime.api('dataBridge').get()")
-def saved(f): expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+def saved(f):
+    expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+    use_matrix(f)
 def frame(p): return p.locator('.bo-blueprint-reference-frame').element_handle().content_frame()
 def add(f,key,kind):
  f.locator(f'[data-cell="{key}"]>.content-add').click();f.get_by_role('button',name='Adicionar '+kind,exact=True).click()
@@ -35,13 +38,13 @@ def tool(f,name,key=None):
 def link(f,key,kind,record):
  add(f,key,kind);dialog=f.locator('#element-selector');dialog.locator('[data-act="elements-select"][data-source="'+record+'"]').click();dialog.get_by_role('button',name='Vincular à etapa',exact=True).click();saved(f)
 def reopen(page):
- page.get_by_role('button',name='Abrir Jornadas e Blueprints',exact=True).click();page.get_by_role('button',name='Abrir Jornada',exact=True).first.click();return page.frame_locator('.bo-blueprint-reference-frame')
+ page.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click();page.get_by_role('button',name='Abrir mapa',exact=True).first.click();return page.frame_locator('.bo-blueprint-reference-frame')
 try:
  with sync_playwright() as pw:
   browser=pw.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
   page=browser.new_page(viewport={'width':1440,'height':1000},accept_downloads=True);errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.add_locator_handler(page.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click())
-  page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click();page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('QA Elementos do serviço');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click();page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name='Em branco').first.click()
-  f=page.frame_locator('.bo-blueprint-reference-frame');expect(f.get_by_role('button',name='Adicionar etapa',exact=True)).to_be_visible()
+  page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click();page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('QA Elementos do serviço');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click();page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name='Em branco').first.click()
+  f=page.frame_locator('.bo-blueprint-reference-frame');saved(f);expect(f.get_by_role('button',name='Adicionar etapa',exact=True)).to_be_visible()
   tool(f,'Gráfico de emoções');expect(f.get_by_role('textbox',name='Nome da nova etapa',exact=True)).to_be_focused();check('Choosing the emotion tool on a blank map asks for a real stage without inventing emotion data',not graph(page)['stages'])
   f.get_by_role('textbox',name='Nome da nova etapa',exact=True).fill('Descobrir');f.get_by_role('button',name='Adicionar etapa ao mapa',exact=True).click();saved(f)
   f.get_by_role('button',name='Adicionar etapa',exact=True).click();f.get_by_role('textbox',name='Nome da nova etapa',exact=True).fill('Usar');f.get_by_role('button',name='Adicionar etapa ao mapa',exact=True).click();saved(f)
@@ -55,7 +58,7 @@ try:
   f.get_by_role('button',name='+ Adicionar faixa',exact=True).click();f.get_by_role('searchbox',name='Buscar tipo de conteúdo',exact=True).fill('canal');f.get_by_role('button',name='Criar faixa de Canal',exact=True).click();saved(f);lane=f.locator('.r[data-row^="x"]').last.get_attribute('data-row');key=lane+'|0'
   check('Canal creates a typed lane instead of a generic text card',graph(page)['journeys'][jid]['matrixContent']['rows'][lane]['defaultType']=='channel')
   link(f,key,'Canal','qa-channel');link(f,'ac|0','Persona','qa-persona');link(f,'ac|0','Necessidade','qa-need');link(f,key,'Dor','qa-pain');link(f,key,'Oportunidade','qa-opportunity')
-  tool(f,'Evidência física');link(f,'ev|0','Evidência','qa-evidence')
+  tool(f,'Evidências físicas e digitais');link(f,'ev|0','Evidência','qa-evidence')
   check('Existing service elements render their current source and description',f.locator('.service-reference b').count()==6 and f.locator('.type-persona .reference-details').count()==1)
   check('Inserting references creates no extra canonical entities or fake customer actions',all(len(graph(page)['entities'][kind])==1 for kind in ['persona','channel','need','evidence','pain']) and graph(page)['stages'][sid]['customerAction']=='Pesquisar atendimento')
   caption=f.locator('[data-cell="ac|0"] .type-persona [data-ed="c"]');caption.fill('Cliente nesta experiência');caption.press('Tab');saved(f);check('A local persona caption does not rename or reassign the canonical persona',graph(page)['entities']['persona']['qa-persona']['title']=='Marina')
@@ -73,10 +76,10 @@ try:
   f.get_by_role('button',name='Apresentar',exact=True).click()
   with page.expect_download() as download:f.get_by_role('button',name='Baixar resumo HTML',exact=True).click()
   exported=Path(download.value.path()).read_text();check('Presentation and HTML export include the linked persona, channel and research context','Marina atualizada' in exported and 'WhatsApp' in exported and 'Contexto atualizado na biblioteca' in exported);f.get_by_role('button',name='Voltar ao mapa',exact=True).click()
-  f.get_by_role('button',name='Voltar para Jornadas e Blueprints',exact=True).click();page.reload(wait_until='networkidle');f=reopen(page);expect(f.locator('.service-reference b').filter(has_text='Marina atualizada')).to_have_count(1);check('Reload preserves typed references, local captions and the emotion curve',' C' in f.locator('#curve path').get_attribute('d') and f.locator('.type-persona [data-ed="c"]').inner_text()=='Cliente nesta experiência')
+  f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click();page.reload(wait_until='networkidle');f=reopen(page);expect(f.locator('.service-reference b').filter(has_text='Marina atualizada')).to_have_count(1);check('Reload preserves typed references, local captions and the emotion curve',' C' in f.locator('#curve path').get_attribute('d') and f.locator('.type-persona [data-ed="c"]').inner_text()=='Cliente nesta experiência')
   for width in [1440,834,390]:
    page.set_viewport_size({'width':width,'height':1000});page.wait_for_timeout(250);f.get_by_role('button',name='+ Adicionar faixa',exact=True).click();f.get_by_role('searchbox',name='Buscar tipo de conteúdo',exact=True).fill('emoções');audit(page,f'tools-{width}');page.screenshot(path=str(OUT/f'tools-{width}.png'),animations='disabled');f.get_by_role('button',name='Cancelar',exact=True).click();audit(page,f'map-{width}');check(f'Linked elements and graph fit the page at {width}px',frame(page).evaluate('document.documentElement.scrollWidth<=innerWidth'))
-  f.get_by_role('button',name='Voltar para Jornadas e Blueprints',exact=True).click();touch=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,storage_state=page.context.storage_state());mobile=touch.new_page();mobile.on('pageerror',lambda e:errors.append(str(e)));mobile.add_locator_handler(mobile.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click());mobile.goto(URL,wait_until='networkidle');mobile.get_by_role('button',name='Abrir workspace local sem conta').click();mobile.get_by_role('button',name='Abrir navegação',exact=True).click();mobile.get_by_role('button',name='Abrir Jornadas e Blueprints',exact=True).click();mobile.get_by_role('button',name='Abrir Jornada',exact=True).first.click();mf=mobile.frame_locator('.bo-blueprint-reference-frame');saved(mf);mobile.wait_for_function("async()=>{const r=await window.BlueOceanRuntime.api('dataBridge').recovery();return r.durableOk&&r.durableRevision>=r.revision}");mf.locator('.lb').first.tap()
+  f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click();touch=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,storage_state=page.context.storage_state());mobile=touch.new_page();mobile.on('pageerror',lambda e:errors.append(str(e)));mobile.add_locator_handler(mobile.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click());mobile.goto(URL,wait_until='networkidle');mobile.get_by_role('button',name='Abrir workspace local sem conta').click();mobile.get_by_role('button',name='Abrir navegação',exact=True).click();mobile.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click();mobile.get_by_role('button',name='Abrir mapa',exact=True).first.click();mf=mobile.frame_locator('.bo-blueprint-reference-frame');saved(mf);mobile.wait_for_function("async()=>{const r=await window.BlueOceanRuntime.api('dataBridge').recovery();return r.durableOk&&r.durableRevision>=r.revision}");mf.locator('.lb').first.tap()
   mf.locator('[data-cell="ac|0"]>.content-add').tap();mf.get_by_role('searchbox',name='Buscar tipo de conteúdo',exact=True).fill('persona');mf.get_by_role('button',name='Adicionar Persona',exact=True).tap();mf.locator('#element-selector [data-source="qa-persona"]').tap();audit(mobile,'persona-dialog-touch');mf.get_by_role('button',name='Vincular à etapa',exact=True).tap();saved(mf);check('A touch device inserts an existing persona without duplicating the source',len(graph(mobile)['entities']['persona'])==1 and mf.locator('.type-persona').count()==2);audit(mobile,'map-touch');touch.close();page.set_viewport_size({'width':1440,'height':1000});f=reopen(page)
   page.evaluate("()=>window.BlueOceanRuntime.api('dataBridge').transact(g=>{delete g.entities.channel['qa-channel'];return g},'Excluir canal de QA')");expect(f.locator('.type-channel .reference-missing')).to_have_count(1);check('A missing source remains visibly unavailable rather than being recreated',not graph(page)['entities']['channel'])
   check('No uncaught browser errors',not errors);(OUT/'results.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2));browser.close()

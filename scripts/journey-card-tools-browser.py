@@ -3,6 +3,7 @@
 import functools, json, os, shutil, threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from map_browser_support import use_matrix, matrix_perspective
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +26,9 @@ def check(name, value):
     print('PASS ' + name, flush=True)
 
 def graph(page): return page.evaluate("()=>window.BlueOceanRuntime.api('dataBridge').get()")
-def saved(f): expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+def saved(f):
+    expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+    use_matrix(f)
 def stage(f, title):
     f.get_by_role('button', name='Adicionar etapa', exact=True).click()
     f.get_by_role('textbox', name='Nome da nova etapa', exact=True).fill(title)
@@ -73,9 +76,9 @@ try:
         page.get_by_label('Nome do projeto', exact=True).fill('QA Cartões por Persona')
         page.get_by_label('Serviço principal', exact=True).fill('Atendimento')
         page.get_by_role('button', name='Criar projeto', exact=True).click()
-        page.locator('.bo-h724-journey-pane').get_by_role('button', name='Criar Jornada', exact=True).click()
+        page.get_by_role('button', name='Criar mapa', exact=True).click()
         page.get_by_role('button', name='Em branco').first.click()
-        f = page.frame_locator('.bo-blueprint-reference-frame')
+        f = page.frame_locator('.bo-blueprint-reference-frame'); saved(f)
         expect(f.get_by_role('button', name='Adicionar etapa', exact=True)).to_be_visible()
         stage(f, 'Descobrir'); stage(f, 'Usar')
         page.evaluate("""()=>window.BlueOceanRuntime.api('dataBridge').transact(g=>{const now=new Date().toISOString();for(const [kind,id,title] of [['persona','qa-a','Marina'],['persona','qa-b','João'],['channel','qa-channel','WhatsApp']]){g.entities[kind]||={};g.entities[kind][id]={id,type:kind,serviceId:g.service.id,title,createdAt:now,updatedAt:now}}return g},'Dados fictícios de aceitação')""")
@@ -183,9 +186,9 @@ try:
         exported = Path(download.value.path()).read_text()
         check('Downloaded HTML uses the same card filters', 'Somente Marina' in exported and 'Somente João' not in exported and 'Compartilhado' not in exported)
         f.get_by_role('button', name='Voltar ao mapa', exact=True).click()
-        f.get_by_role('button', name='Voltar para Jornadas e Blueprints', exact=True).click(); page.reload(wait_until='networkidle')
-        page.get_by_role('button', name='Abrir Jornadas e Blueprints', exact=True).click()
-        page.get_by_role('button', name='Abrir Jornada', exact=True).first.click(); saved(f)
+        f.get_by_role('button', name='Voltar para mapas do serviço', exact=True).click(); page.reload(wait_until='networkidle')
+        page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
+        page.get_by_role('button', name='Abrir mapa', exact=True).first.click(); saved(f)
         expect(f.locator('.content-block')).to_have_count(1)
         check('Reload preserves classifications, stable identities and active filters', len(notes()) == 4 and notes()[0]['personaIds'] == ['qa-a'] and notes()[-1]['referenceId'] == 'qa-channel')
         for width in [1440, 834, 390]:
@@ -204,8 +207,8 @@ try:
         mobile.goto(f'http://127.0.0.1:{server.server_port}', wait_until='networkidle')
         mobile.get_by_role('button', name='Abrir workspace local sem conta').click()
         mobile.get_by_role('button', name='Abrir navegação', exact=True).click()
-        mobile.get_by_role('button', name='Abrir Jornadas e Blueprints', exact=True).click()
-        mobile.get_by_role('button', name='Abrir Jornada', exact=True).first.click()
+        mobile.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
+        mobile.get_by_role('button', name='Abrir mapa', exact=True).first.click()
         mf = mobile.frame_locator('.bo-blueprint-reference-frame'); saved(mf)
         mf.get_by_role('button', name='Selecionar cartões', exact=True).tap()
         mf.get_by_label('Selecionar cartão Somente Marina', exact=True).tap()

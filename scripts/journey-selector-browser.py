@@ -3,6 +3,7 @@
 import functools,json,os,shutil,threading
 from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
 from pathlib import Path
+from map_browser_support import use_matrix, matrix_perspective
 from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'artifacts/journey-selector';OUT.mkdir(parents=True,exist_ok=True)
@@ -17,7 +18,9 @@ def check(name,ok):
  assert ok,name
  checks.append(name);print('PASS '+name,flush=True)
 def graph(p): return p.evaluate("()=>window.BlueOceanRuntime.api('dataBridge').get()")
-def saved(f): expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+def saved(f):
+    expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+    use_matrix(f)
 def frame(p): return p.locator('.bo-blueprint-reference-frame').element_handle().content_frame()
 def add(f,key,kind):
  f.locator(f'[data-cell="{key}"]>.content-add').click();f.get_by_role('button',name='Adicionar '+kind,exact=True).click()
@@ -35,7 +38,7 @@ def tool(f,name,key=None):
 def link(f,key,kind,record):
  add(f,key,kind);dialog=f.locator('#element-selector');dialog.locator('[data-act="elements-select"][data-source="'+record+'"]').click();dialog.get_by_role('button',name='Vincular à etapa',exact=True).click();saved(f)
 def reopen(page):
- page.get_by_role('button',name='Abrir Jornadas e Blueprints',exact=True).click();page.get_by_role('button',name='Abrir Jornada',exact=True).first.click();return page.frame_locator('.bo-blueprint-reference-frame')
+ page.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click();page.get_by_role('button',name='Abrir mapa',exact=True).first.click();return page.frame_locator('.bo-blueprint-reference-frame')
 def select_record(dialog,record): dialog.locator('[data-act="elements-select"][data-source="'+record+'"]').click()
 try:
  with sync_playwright() as pw:
@@ -44,8 +47,8 @@ try:
   page.add_locator_handler(page.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click())
   page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click();page.get_by_role('button',name='Novo projeto',exact=True).click()
   page.get_by_label('Nome do projeto',exact=True).fill('QA Seletor Universal');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click()
-  page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click();page.get_by_role('button',name='Em branco').first.click()
-  f=page.frame_locator('.bo-blueprint-reference-frame')
+  page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name='Em branco').first.click()
+  f=page.frame_locator('.bo-blueprint-reference-frame');saved(f)
   for name in ['Descobrir','Usar']:
    f.get_by_role('button',name='Adicionar etapa',exact=True).click();f.get_by_role('textbox',name='Nome da nova etapa',exact=True).fill(name);f.get_by_role('button',name='Adicionar etapa ao mapa',exact=True).click();saved(f)
   state=graph(page);jid=next(iter(state['journeys']));s1,s2=state['journeys'][jid]['stageIds']
@@ -102,12 +105,12 @@ try:
    check('Selector remains inside the viewport at '+str(width)+'px',box['x']>=0 and box['x']+box['width']<=width and frame(page).evaluate('document.documentElement.scrollWidth<=innerWidth'))
    page.screenshot(path=str(OUT/('selector-'+str(width)+'.png')),animations='disabled');d.get_by_role('button',name='Cancelar',exact=True).click()
   page.set_viewport_size({'width':1440,'height':1000});add(f,'ac|0','Persona');d=f.locator('#element-selector');d.locator('[data-act="elements-create"]').click();audit(page,'create-form');d.get_by_role('button',name='Cancelar',exact=True).click()
-  f.get_by_role('button',name='Voltar para Jornadas e Blueprints',exact=True).click();page.reload(wait_until='networkidle');f=reopen(page)
+  f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click();page.reload(wait_until='networkidle');f=reopen(page)
   expect(f.locator('.type-persona .service-reference b')).to_have_text('Marina');check('Reload retains all six created records and their canonical references',all(created[kind] in (graph(page)['opportunities'] if kind=='opportunity' else graph(page)['entities'][kind]) for kind in created))
   f.get_by_role('button',name='Apresentar',exact=True).click()
   with page.expect_download() as download:f.get_by_role('button',name='Baixar resumo HTML',exact=True).click()
   exported=Path(download.value.path()).read_text();check('The standalone report exports canonical content with safe escaping','Marina' in exported and '&lt;script&gt;' in exported and '<script>window.selectorInjected' not in exported);f.get_by_role('button',name='Voltar ao mapa',exact=True).click()
-  f.get_by_role('button',name='Voltar para Jornadas e Blueprints',exact=True).click()
+  f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click()
   touch=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,storage_state=page.context.storage_state());mobile=touch.new_page();mobile.on('pageerror',lambda e:errors.append(str(e)));mobile.add_locator_handler(mobile.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click())
   mobile.goto(URL,wait_until='networkidle');mobile.get_by_role('button',name='Abrir workspace local sem conta').click();mobile.get_by_role('button',name='Abrir navegação',exact=True).click();mf=reopen(mobile);saved(mf)
   mf.locator('.lb').first.tap();mf.locator('[data-cell="ac|0"]>.content-add').tap();mf.get_by_role('button',name='Adicionar Persona',exact=True).tap();md=mf.locator('#element-selector');select_record(md,created['persona']);audit(mobile,'selector-touch');md.get_by_role('button',name='Vincular à etapa',exact=True).tap();saved(mf)

@@ -18,7 +18,7 @@ const checks=[
  [app.includes("aria-expanded={!collapsedSidebarSections.context}"),'Contexto expõe estado acessível'],
  [app.includes("aria-expanded={!collapsedSidebarSections.management}"),'Gestão expõe estado acessível'],
  [app.includes("bo-h740h14-section-items"),'Itens das seções usam disclosure explícito'],
- [app.includes('>Serviço</span>') && app.includes('>Jornadas e Blueprints</span>'),'Projeto distingue seleção de serviço da biblioteca de Jornadas e Blueprints'],
+ [app.includes('>Serviço</span>') && app.includes('>Mapas do serviço</span>'),'Projeto distingue seleção de serviço da biblioteca de Jornadas e Blueprints'],
  [app.includes("? 'Design do serviço'"),'Título ativo usa Design do serviço'],
  [bp.includes('>Design do serviço</button>'),'Header compacto usa Design do serviço'],
  [app.includes('data-header-mode={activeTab === \'canvas\' && !externalNav ? \'compact-tool\' : \'standard\'}'),'Header do app possui modo compacto'],

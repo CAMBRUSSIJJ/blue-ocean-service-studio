@@ -3,6 +3,7 @@
 import functools, json, os, shutil, threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from map_browser_support import create_map, use_matrix, open_operational
 from playwright.sync_api import sync_playwright, expect
 ROOT=Path(__file__).resolve().parents[1]
 class QuietHandler(SimpleHTTPRequestHandler):
@@ -13,8 +14,6 @@ if not url:
     server=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(QuietHandler,directory=str(ROOT/'dist')))
     threading.Thread(target=server.serve_forever,daemon=True).start()
     url=f'http://127.0.0.1:{server.server_port}'
-# Exercise the retired editor only in localhost regression runs, never in Production.
-url += ('&' if '?' in url else '?') + '__qa_legacy_blueprint=1'
 
 try:
     with sync_playwright() as p:
@@ -29,7 +28,8 @@ try:
         page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
         page.get_by_role('button',name='Criar projeto',exact=True).click()
         page.locator('[data-service-blueprint-nav="1"]').click()
-        page.get_by_role('button',name='Criar Blueprint',exact=True).first.click()
+        create_map(page)
+        open_operational(page)
         page.get_by_role('button',name='Adicionar etapa',exact=True).click()
         modal=page.get_by_role('dialog',name='Nova etapa',exact=True)
         modal.get_by_placeholder('Ex.: Pagamento',exact=True).fill('Contato')

@@ -29,7 +29,7 @@ check('Escape histórico ou popover removido em H17',app.includes("setIsExperien
 check('Fechamento histórico ou popover removido em H17',app.includes('[activeTab, serviceWorkspaceTab, libraryPage, projectHomeSection, projectShellSection, externalNav]')||app.includes('data-single-experience="H17"'));
 check('Fundamentos possui navegação própria',app.includes('data-foundation-navigation="H16.1"'));
 check('Navegação Fundamentos agora usa Público-alvo',app.includes('<strong>ENTENDER</strong>')&&app.includes('<span>Público-alvo</span>')); 
-check('Navegação Fundamentos usa Desenhar',app.includes('<strong>DESENHAR</strong>')&&app.includes('<span>Jornadas e Blueprints</span>')&&app.includes("openServiceWorkspaceTab('journey')"));
+check('Navegação Fundamentos usa Desenhar',app.includes('<strong>DESENHAR</strong>')&&app.includes('<span>Mapas do serviço</span>')&&app.includes("openServiceWorkspaceTab('journey')"));
 check('Navegação Fundamentos usa Melhorar',app.includes('<strong>MELHORAR</strong>')&&app.includes('<span>Melhorias</span>'));
 check('Navegação Fundamentos usa Acompanhar',app.includes('<strong>ACOMPANHAR</strong>')&&app.includes('<span>Resultados</span>'));
 check('Taxonomia padrão é preservada fora de Fundamentos',app.includes('bo-h161-standard-nav'));

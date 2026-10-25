@@ -131,7 +131,7 @@ export type JourneyMatrixConnection = {
   id: Id; a: Id; b: Id; type: 'sequence' | 'dependency' | 'uses' | 'handoff'; label: string;
   handoff?: { fromTeam: string; toTeam: string; deliverable: string; deadlineMinutes: number | null; acceptance: string };
 };
-export type JourneyMatrixBlock = { id: Id; type: 'text' | 'card' | 'emoji' | 'image' | 'link' | 'scale' | 'embed' | 'plan' | 'metric' | 'channel' | 'persona' | 'pain' | 'need' | 'evidence' | 'opportunity'; text: string; activity?: JourneyMatrixActivity; canvas?: { version: 1; kind: 'activity' | 'touchpoint' | 'artifact' | 'decision' | 'system' | 'resource' | 'metric'; description: string; channelId: string; metricId: string }; icon?: string; url?: string; credit?: string; referenceId?: Id; personaIds?: Id[]; tags?: string[]; tone?: JourneyLaneTone; scale?: { min: number; max: number; step: number; value?: number; minLabel: string; maxLabel: string } };
+export type JourneyMatrixBlock = { id: Id; type: 'text' | 'card' | 'emoji' | 'image' | 'link' | 'scale' | 'embed' | 'plan' | 'metric' | 'channel' | 'persona' | 'pain' | 'need' | 'evidence' | 'opportunity'; text: string; activity?: JourneyMatrixActivity; canvas?: { version: 1; kind: 'activity' | 'customer-action' | 'touchpoint' | 'artifact' | 'decision' | 'system' | 'resource' | 'metric' | 'channel' | 'emotion' | 'thought' | 'persona' | 'need' | 'pain' | 'opportunity' | 'text'; description: string; channelId: string; metricId: string }; icon?: string; url?: string; credit?: string; referenceId?: Id; personaIds?: Id[]; tags?: string[]; tone?: JourneyLaneTone; scale?: { min: number; max: number; step: number; value?: number; minLabel: string; maxLabel: string } };
 export type JourneyMatrixContent = {
   version: 1;
   rows: Record<string, { n: string; h: string; icon: string; defaultType: JourneyMatrixBlock['type']; tone?: JourneyLaneTone }>;
@@ -141,6 +141,7 @@ export type JourneyMatrixContent = {
 export type JourneyMatrixView = {
   perspective?: 'journey' | 'blueprint';
   blueprintRenderer?: 'canvas' | 'matrix';
+  canvasOrderVersion?: 0 | 1;
   connectionMode?: 'selected' | 'all' | 'off';
   zoom?: number; stageWidths?: number[]; rowHeights?: Record<string, number>; collapsedRows?: string[];
   perspectiveViews?: Partial<Record<'journey' | 'blueprint', Omit<JourneyMatrixView, 'perspectiveViews'>>>;

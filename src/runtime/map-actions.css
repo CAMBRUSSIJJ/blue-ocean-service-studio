@@ -1,3 +1,5 @@
+/* Keep the map creation control above the library on small, scrolling screens. */
+[data-service-maps-header="1"]{flex-shrink:0}
 /* One action hierarchy for the React Journey and the runtime Blueprint.
    Legacy editor rules use !important; the bridge below confines their reset
    to controls explicitly migrated to the shared bo-button contract. */

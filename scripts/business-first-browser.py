@@ -3,6 +3,7 @@
 import functools, json, os, shutil, threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from map_browser_support import use_matrix, matrix_perspective
 from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +27,9 @@ def check(name, value):
     print('PASS ' + name, flush=True)
 
 def graph(page): return page.evaluate("()=>window.BlueOceanRuntime.api('dataBridge').get()")
-def saved(f): expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+def saved(f):
+    expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+    use_matrix(f)
 def stage(f, name):
     f.get_by_role('button', name='Adicionar etapa', exact=True).click()
     f.get_by_role('textbox', name='Nome da nova etapa', exact=True).fill(name)
@@ -37,11 +40,8 @@ def add(f, key, text):
     field=f.locator(f'[data-cell="{key}"] [data-ed="c"]').last
     field.fill(text); field.press('Tab'); saved(f)
 def perspective(f, name):
-    f.get_by_role('button', name=name, exact=True).click(); saved(f)
-    expect(f.locator('.map-perspective-label')).to_have_text(name)
-    # This suite verifies the matrix; the canvas has its own acceptance suite.
-    if name == 'Blueprint' and f.get_by_role('button', name='Matriz', exact=True).count():
-        f.get_by_role('button', name='Matriz', exact=True).click(); saved(f)
+    matrix_perspective(f, name)
+
 def customize(f, row, visible):
     f.get_by_role('button', name='Personalizar visualização', exact=True).click()
     f.locator(f'[data-view-row="{row}"]').set_checked(visible); saved(f)
@@ -71,7 +71,7 @@ try:
         page.add_locator_handler(page.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click())
         page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click()
         page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Negócio QA');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click()
-        page.locator('.bo-h724-journey-pane').get_by_role('button',name='Criar Jornada',exact=True).click()
+        page.get_by_role('button',name='Criar mapa',exact=True).click()
         page.get_by_role('button',name='Reduzir atrasos e retrabalho',exact=False).click()
         expect(page.locator('.bo-business-goals')).to_contain_text('Objetivo: Reduzir atrasos e retrabalho')
         expect(page.locator('.bo-h1704-template-grid>.is-selected strong')).to_have_text('Delivery')
