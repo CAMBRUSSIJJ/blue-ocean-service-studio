@@ -105,43 +105,29 @@ def blueprint_template(page):
 
 
 def contextual_design_continuity(page):
+    """Unified Service Map: Journey and Blueprint reuse one graph, not separate documents."""
     create_from_project_template(page, 'Redesenho de serviço', 'QA Fluxo Contínuo')
     before = graph(page)
     journey_id = before['service']['journeyIds'][0]
-    stage_ids = before['journeys'][journey_id]['stageIds']
+    stage_ids = list(before['journeys'][journey_id]['stageIds'])
     check(len(stage_ids) == 3 and not before['views']['whiteboards'],
-          'Design flow starts with a Journey and no invented Blueprint')
-    page.locator(f'[data-journey-to-blueprint="{journey_id}"]').click()
-    expect(page.locator('.bo1174-board')).to_be_visible()
-    linked = [(id, b) for id, b in graph(page)['views']['whiteboards'].items() if b.get('viewKind') == 'blueprint']
-    check(len(linked) == 1 and linked[0][1]['journeyId'] == journey_id,
-          'Continue in Blueprint creates a linked document without copying the Journey')
-    blueprint_id = linked[0][0]
+          'Design flow starts with existing Journey stages and no extra Blueprint')
+    expect(page.locator('[data-service-map-library]')).to_be_visible()
+    page.locator('[data-service-map-library]').get_by_role('button', name='Abrir mapa').first.click()
+    f = page.frame_locator('.bo-blueprint-reference-frame')
+    expect(f.locator('#app')).to_be_visible()
+    f.get_by_role('button', name='Blueprint', exact=True).first.click()
     check(graph(page)['journeys'][journey_id]['stageIds'] == stage_ids,
-          'Blueprint handoff preserves canonical stage identities')
-    page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
-    expect(page.locator('[data-blueprint-library="1"]')).to_be_visible()
-    page.locator(f'[data-blueprint-to-journey="{blueprint_id}"]').click()
-    expect(page.locator('.bo-h1705-journey')).to_be_visible()
-    check(page.evaluate("() => window.BlueOceanRuntime.api('dataBridge').currentJourneyId()") == journey_id,
-          'Blueprint returns to its own source Journey')
-    page.get_by_role('button', name='Todas as Jornadas', exact=True).click()
-    expect(page.locator('[data-journey-library="1"]')).to_be_visible()
-    page.locator(f'[data-journey-to-blueprint="{journey_id}"]').click()
-    expect(page.locator('.bo1174-board')).to_be_visible()
-    check(blueprint_id in graph(page)['views']['whiteboards'] and len([b for b in graph(page)['views']['whiteboards'].values() if b.get('viewKind') == 'blueprint']) == 1,
-          'Repeating Journey handoff reuses the existing linked Blueprint')
-    page.get_by_role('button', name='Voltar para Blueprints', exact=True).click()
-    page.locator('[data-design-flow="blueprint"]').get_by_role('button', name='Explorar no Whiteboard').click()
-    expect(page.locator('[data-whiteboard-library="1"]')).to_be_visible()
-    check(page.locator('[data-design-flow="whiteboard"]').is_visible(),
-          'Whiteboard explains free exploration and links back to structured maps')
-    page.locator('[data-design-flow="whiteboard"]').get_by_role('button', name='Organizar em Jornadas').click()
-    expect(page.locator('[data-journey-library="1"]')).to_be_visible()
+          'Switching to Blueprint preserves original stage identities')
+    f.get_by_role('button', name='Jornada', exact=True).first.click()
+    check(graph(page)['journeys'][journey_id]['stageIds'] == stage_ids,
+          'Switching back to Journey uses the same canonical stages')
+    check(len(graph(page)['journeys']) == len(before['journeys']),
+          'Perspective changes create no duplicate Journeys')
     page.reload(wait_until='networkidle')
     after = graph(page)
-    check(blueprint_id in after['views']['whiteboards'] and after['journeys'][journey_id]['stageIds'] == stage_ids,
-          'Linked flow survives reload without duplicating stages or documents')
+    check(after['journeys'][journey_id]['stageIds'] == stage_ids,
+          'One service map persists after reload without duplicating stages')
 
 
 URL = os.environ.get('BLUE_OCEAN_URL')
