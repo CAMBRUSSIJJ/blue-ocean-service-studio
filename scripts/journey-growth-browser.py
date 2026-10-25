@@ -40,6 +40,13 @@ def audit(frame,label):
     (OUT/(label+'-axe.json')).write_text(json.dumps(result,indent=2))
     check('No axe violations: '+label,not result)
 def frame(page): return page.locator('.bo-blueprint-reference-frame').element_handle().content_frame()
+def present(f,touch=False):
+    """Presentation is an advanced command hidden by the optional guided interface."""
+    button=f.get_by_role('button',name='Apresentar',exact=True)
+    if not button.is_visible():
+        f.locator('[data-act="business-guided"]').click()
+    expect(button).to_be_visible()
+    button.tap() if touch else button.click()
 def open_plan(f):
     f.get_by_role('button',name='Planejar melhoria',exact=True).click();return f.get_by_role('dialog',name='Planejar melhoria',exact=True)
 
@@ -133,7 +140,7 @@ try:
     check('Duplicating a stage creates a distinct pain without moving the original plan source',len(duplicated['problems'])==2 and duplicated['problems'][next(iter(before_duplicate['problems']))]['stageId']==sid and duplicated['stages'][copy_sid]['problemIds']!=duplicated['stages'][sid]['problemIds'])
     f.get_by_role('button',name='Desfazer',exact=True).click();expect(f.locator('.sh')).to_have_count(3)
     f.locator('.tools-menu summary').click();f.get_by_label('Cenário da jornada').fill('Pessoa buscando atendimento');f.get_by_label('Objetivo da Jornada').fill('Dar clareza desde o primeiro contato');f.locator('.tools-menu summary').click();saved(f)
-    f.get_by_role('button',name='Apresentar',exact=True).click();expect(f.locator('.executive-report h1')).to_be_visible();check('Presentation is read-only and includes source-linked actions',f.locator('[contenteditable]').count()==0 and f.get_by_text('Dor de origem: Não recebe previsão de atendimento',exact=True).count()==1)
+    present(f);expect(f.locator('.executive-report h1')).to_be_visible();check('Presentation is read-only and includes source-linked actions',f.locator('[contenteditable]').count()==0 and f.get_by_text('Dor de origem: Não recebe previsão de atendimento',exact=True).count()==1)
     audit(frame(page),'executive-desktop');page.screenshot(path=str(OUT/'executive-desktop.png'),animations='disabled')
     with page.expect_download() as download: f.get_by_role('button',name='Baixar resumo HTML',exact=True).click()
     export=Path(download.value.path()).read_text();check('The exported summary is standalone and escapes user-provided markup','&lt;script&gt;' in export and '<script>' not in export and 'Informar previsão no primeiro contato' in export and 'Meta: 10 minutos' in export)
@@ -147,7 +154,7 @@ try:
         page.set_viewport_size({'width':width,'height':1000});page.wait_for_timeout(300);saved(f);audit(frame(page),f'map-{width}')
         check(f'No page overflow at {width}px',frame(page).evaluate('document.documentElement.scrollWidth<=innerWidth'))
         f.get_by_role('button',name='Editar plano',exact=True).click();audit(frame(page),f'plan-{width}');f.get_by_role('button',name='Fechar plano',exact=True).click()
-        f.get_by_role('button',name='Apresentar',exact=True).click();audit(frame(page),f'executive-{width}');page.screenshot(path=str(OUT/f'executive-{width}.png'),animations='disabled');f.get_by_role('button',name='Voltar ao mapa',exact=True).click()
+        present(f);audit(frame(page),f'executive-{width}');page.screenshot(path=str(OUT/f'executive-{width}.png'),animations='disabled');f.get_by_role('button',name='Voltar ao mapa',exact=True).click()
     f.get_by_role('button',name='Voltar para Jornadas e Blueprints',exact=True).click()
     touch=browser.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,accept_downloads=True,storage_state=page.context.storage_state())
     mobile=touch.new_page();mobile.on('pageerror',lambda e:errors.append(str(e)))
@@ -159,7 +166,7 @@ try:
     check('A real touch device can edit the existing shared plan',graph(mobile)['service']['improvementPortfolio']['initiatives'][plan_id]['owner']=='Equipe no celular')
     mf.get_by_role('button',name='Acompanhar',exact=True).tap();md=mf.get_by_role('dialog',name='Acompanhar melhoria',exact=True);md.get_by_label('Novo valor medido').fill('9');md.get_by_label('Observação da medição').fill('Medição de QA por toque');md.get_by_role('button',name='Registrar medição',exact=True).tap();expect(md).not_to_be_visible()
     check('Touch measurements preserve the earlier measurement history',len(graph(mobile)['service']['outcomes']['measurements'])==2 and graph(mobile)['entities']['metric'][metric_id]['value']==9)
-    mf.get_by_role('button',name='Apresentar',exact=True).tap();audit(frame(mobile),'executive-touch');mobile.screenshot(path=str(OUT/'executive-touch.png'),animations='disabled');mf.get_by_role('button',name='Voltar ao mapa',exact=True).tap();touch.close()
+    present(mf,touch=True);audit(frame(mobile),'executive-touch');mobile.screenshot(path=str(OUT/'executive-touch.png'),animations='disabled');mf.get_by_role('button',name='Voltar ao mapa',exact=True).tap();touch.close()
     check('No uncaught browser errors',not errors)
     (OUT/'results.json').write_text(json.dumps(checks,indent=2,ensure_ascii=False));browser.close()
 finally:
