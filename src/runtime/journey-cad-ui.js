@@ -320,7 +320,10 @@ function cadBind(){
  });
  app.addEventListener('change',event=>{
   const field=event.target;
-  if(field.matches('[data-cad-connect-type]'))cadState.connectType=field.value;
+  if(field.form?.id==='cad-quick-form'&&field.name==='emotionScore'){
+    const checkbox=field.form.elements.emotionUnknown;if(checkbox)checkbox.checked=false;if(cadState.quick)cadState.quick.emotionUnknown=false;
+   }
+   if(field.matches('[data-cad-connect-type]'))cadState.connectType=field.value;
   if(field.form?.id==='cad-quick-form'&&field.name==='referenceId'){const record=cadCatalog(cadState.quick.kind).find(value=>value.id===field.value);cadState.quick.referenceId=field.value;if(record){cadState.quick.title=record.title||record.name;field.form.elements.title.value=cadState.quick.title;cadPaint()}}
   if(field.matches('[data-cad-view]')){cadStash();cadState.quick=null;cadState.inspector=false;cadState.camera=null;if(field.value==='matrix')V.blueprintRenderer='matrix';else{V=window.BlueOceanJourneyViews.switchMatrixPerspective(V,field.value,rowDefs());V.blueprintRenderer='canvas'}saveView();rerender()}
   if(field.matches('[data-cad-persona]')){cadStash();cadState.quick=null;cadState.creating=null;cadState.inspector=false;announceSave('pending');field.disabled=true;if(HOSTED)window.parent.postMessage({boBlueprintHost:1,type:'persona-select',personaId:field.value},location.origin)}
@@ -335,7 +338,18 @@ function cadBind(){
  });
  app.addEventListener('cancel',event=>{if(event.target.id==='cad-library-sheet')cadState.library=false;if(event.target.id==='cad-inspector-sheet')cadState.inspector=false;if(event.target.id==='cad-link-sheet')cadState.link=null},true);
  app.addEventListener('keydown',event=>{
-  const button=event.target.closest?.('#cad-svg [role="button"]');if(button&&['Enter',' '].includes(event.key)){event.preventDefault();button.dispatchEvent(new MouseEvent('click',{bubbles:true}));return}
+  const grip=event.target.closest?.('.cad-stage-resize');
+   if(grip&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){
+    event.preventDefault();const i=Number(grip.dataset.si),current=cadModel.canvasStageWidth(cadStageWidths()[i]);
+    cadStageResizeTo(i,event.key==='Home'?336:event.key==='End'?600:current+(event.key==='ArrowRight'?24:-24));return;
+   }
+   const emotion=event.target.closest?.('.cad-emotion-control');
+   if(emotion&&['ArrowUp','ArrowDown','Home','End'].includes(event.key)&&!cadLocked()){
+    event.preventDefault();const i=Number(emotion.dataset.si),next=structuredClone(S),stage=next.steps[i];
+    stage.e=event.key==='Home'?0:event.key==='End'?2:Math.max(-2,Math.min(2,cadModel.canvasEmotionScore(stage)+(event.key==='ArrowUp'?1:-1)));
+    stage.emotionRecorded=true;stage.emotionStatus='hypothesis';stage.emotionSource='';cadSend('canvas-change',{state:next});return;
+   }
+   const button=event.target.closest?.('#cad-svg [role="button"]');if(button&&['Enter',' '].includes(event.key)){event.preventDefault();button.dispatchEvent(new MouseEvent('click',{bubbles:true}));return}
   if(event.key==='Escape'&&cadEnabled()&&!event.target.closest('dialog')){event.preventDefault();cadState.drag=null;if(cadState.choosing){cadState.choosing=null;rerender()}else if(cadState.menu){cadState.menu=null;rerender()}else if(cadState.quick||cadState.connectFrom)cadAction('cad-cancel',{});return}
   if(event.target.matches('.cad-viewport')&&['+','-','0','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();if(event.key==='0')cadFit();else if(event.key==='+'||event.key==='-')cadZoom(event.key==='+'?1.2:1/1.2);else{const cam=cadState.camera;cam.x+=event.key==='ArrowLeft'?40:event.key==='ArrowRight'?-40:0;cam.y+=event.key==='ArrowUp'?40:event.key==='ArrowDown'?-40:0;cadPaint()}}
  });
@@ -344,17 +358,51 @@ function cadBind(){
   if(event.ctrlKey||event.metaKey)cadZoom(event.deltaY<0?1.1:1/1.1,event.clientX-rect.left,event.clientY-rect.top);else{cadState.camera.x-=event.shiftKey?event.deltaY:event.deltaX;cadState.camera.y-=event.shiftKey?0:event.deltaY;cadPaint()}
  },{passive:false});
  app.addEventListener('pointerdown',event=>{
-  const viewport=event.target.closest?.('.cad-viewport');if(!viewport||event.target.closest('.cad-camera,.cad-port,.cad-node-menu,.cad-cell-add,.cad-stage-insert,.cad-stage')||event.button!==0&&event.button!==1)return;
+  const grip=event.target.closest?.('.cad-stage-resize'),emotion=event.target.closest?.('.cad-emotion-control');
+   if(event.button===0&&grip&&!cadLocked()){
+    const i=Number(grip.dataset.si),viewport=app.querySelector('.cad-viewport');
+    cadState.resize={pointer:event.pointerId,index:i,startX:event.clientX,width:cadModel.canvasStageWidth(cadStageWidths()[i]),zoom:cadState.camera.zoom};
+    viewport?.setPointerCapture(event.pointerId);event.preventDefault();return;
+   }
+   if(event.button===0&&emotion&&!cadLocked()){
+    const i=Number(emotion.dataset.si),stage=S.steps[i],viewport=app.querySelector('.cad-viewport');
+    cadState.emotionDrag={pointer:event.pointerId,index:i,startY:event.clientY,moved:false,previous:{e:stage.e,emotionRecorded:stage.emotionRecorded,emotionStatus:stage.emotionStatus,emotionSource:stage.emotionSource}};
+    viewport?.setPointerCapture(event.pointerId);return;
+   }
+   const viewport=event.target.closest?.('.cad-viewport');if(!viewport||event.target.closest('.cad-camera,.cad-port,.cad-node-menu,.cad-cell-add,.cad-stage-insert,.cad-stage')||event.button!==0&&event.button!==1)return;
   const node=event.target.closest('.cad-node');if(node&&(cadLocked()||cadState.connectFrom||!blueprintNote(node.dataset.id)))return;
   cadState.drag={pointer:event.pointerId,startX:event.clientX,startY:event.clientY,cam:{...cadState.camera},node:node?.dataset.id,moved:false};if(!event.target.closest('[data-act]'))viewport.setPointerCapture(event.pointerId);
  });
  app.addEventListener('pointermove',event=>{
   if(cadState.connectFrom&&event.target.closest?.('.cad-viewport')){cadState.pointer=cadWorld(event);const source=cadState.layout.nodes.find(node=>node.id===cadState.connectFrom);let preview=app.querySelector('.cad-connect-preview');if(source){if(!preview){preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('class','cad-connect-preview');app.querySelector('#cad-world')?.appendChild(preview)}preview.setAttribute('d','M '+(source.x+source.width)+' '+(source.y+source.height/2)+' L '+cadState.pointer.x+' '+cadState.pointer.y)}}
-  const drag=cadState.drag;if(!drag||drag.pointer!==event.pointerId)return;const dx=event.clientX-drag.startX,dy=event.clientY-drag.startY;if(Math.hypot(dx,dy)<6&&!drag.moved)return;drag.moved=true;app.querySelector('.cad-viewport').setPointerCapture(event.pointerId);
+  const resize=cadState.resize;if(resize&&resize.pointer===event.pointerId){
+    const widths=[...cadStageWidths()];widths[resize.index]=cadModel.canvasStageWidth(resize.width+(event.clientX-resize.startX)/resize.zoom);
+    cadState.resizePreview=widths;cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,widths);cadPaint();return;
+   }
+   const emotionDrag=cadState.emotionDrag;if(emotionDrag&&emotionDrag.pointer===event.pointerId){
+    const row=cadState.layout.rows.find(value=>value.id==='em');if(!row)return;
+    const score=Math.max(-2,Math.min(2,Math.round((row.y+56-cadWorld(event).y)/16)));
+    if(Math.abs(event.clientY-emotionDrag.startY)>4)emotionDrag.moved=true;
+    if(emotionDrag.moved){S.steps[emotionDrag.index].e=score;S.steps[emotionDrag.index].emotionRecorded=true;cadPaint()}
+    return;
+   }
+   const drag=cadState.drag;if(!drag||drag.pointer!==event.pointerId)return;const dx=event.clientX-drag.startX,dy=event.clientY-drag.startY;if(Math.hypot(dx,dy)<6&&!drag.moved)return;drag.moved=true;app.querySelector('.cad-viewport').setPointerCapture(event.pointerId);
   if(!drag.node){cadState.camera={...drag.cam,x:drag.cam.x+dx,y:drag.cam.y+dy};cadPaint();return}
   const node=cadState.layout.nodes.find(node=>node.id===drag.node),element=app.querySelector('[data-group-id="'+CSS.escape(drag.node)+'"]');element?.setAttribute('transform','translate('+(node.x+dx/drag.cam.zoom)+' '+(node.y+dy/drag.cam.zoom)+')');element?.classList.add('is-dragging');cadHighlight(cadDropTarget(cadWorld(event)),cadModel.canvasKind(node.note,node.row));
  });
  const end=(event,cancel=false)=>{
+   const resize=cadState.resize;if(resize&&resize.pointer===event.pointerId){
+    cadState.resize=null;const width=cadState.resizePreview?.[resize.index]??resize.width;cadState.resizePreview=null;
+    if(cancel){cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths());cadPaint()}
+    else cadStageResizeTo(resize.index,width);return;
+   }
+   const emotionDrag=cadState.emotionDrag;if(emotionDrag&&emotionDrag.pointer===event.pointerId){
+    cadState.emotionDrag=null;const stage=S.steps[emotionDrag.index];
+    if(cancel||!emotionDrag.moved){Object.assign(stage,emotionDrag.previous);cadPaint();return}
+    const next=structuredClone(S);Object.assign(next.steps[emotionDrag.index],{emotionRecorded:true,emotionStatus:'hypothesis',emotionSource:''});
+    Object.assign(stage,emotionDrag.previous);cadState.ignoreClick=true;setTimeout(()=>cadState.ignoreClick=false,200);
+    cadSend('canvas-change',{state:next});return;
+   }
   const drag=cadState.drag;if(!drag||drag.pointer!==event.pointerId)return;cadState.drag=null;if(!drag.moved)return;cadState.ignoreClick=true;setTimeout(()=>cadState.ignoreClick=false,150);
   if(cancel||!drag.node){cadPaint();return}try{const point=cadWorld(event),target=cadDropTarget(point);if(!target.row||!target.stage){cadPaint();cadNotice('Solte dentro de uma etapa e de uma faixa.');return}const step=target.stage.step,before=cadState.layout.nodes.find(node=>!node.note.virtualLabel&&!node.note.draft&&node.id!==drag.node&&node.row===target.row.id&&node.stageIndex===target.stage.index&&point.y<node.y+node.height/2);const next=cadModel.moveCanvasCard(S,drag.node,{stageId:step.hostStageId,stageLocalId:step.hostLocalId,row:target.row.id,beforeId:before?.id});cadSend('canvas-change',{state:next},drag.node)}catch(error){cadState.error=error.message;rerender()}
  };
