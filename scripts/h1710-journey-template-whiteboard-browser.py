@@ -116,10 +116,10 @@ def contextual_design_continuity(page):
     page.locator('[data-service-map-library]').get_by_role('button', name='Abrir mapa').first.click()
     f = page.frame_locator('.bo-blueprint-reference-frame')
     expect(f.locator('#app')).to_be_visible()
-    f.get_by_role('button', name='Blueprint', exact=True).first.click()
+    f.locator('[data-cad-view]').select_option('blueprint')
     check(graph(page)['journeys'][journey_id]['stageIds'] == stage_ids,
           'Switching to Blueprint preserves original stage identities')
-    f.get_by_role('button', name='Jornada', exact=True).first.click()
+    f.locator('[data-cad-view]').select_option('journey')
     check(graph(page)['journeys'][journey_id]['stageIds'] == stage_ids,
           'Switching back to Journey uses the same canonical stages')
     check(len(graph(page)['journeys']) == len(before['journeys']),
