@@ -112,6 +112,9 @@ def contextual_design_continuity(page):
     stage_ids = list(before['journeys'][journey_id]['stageIds'])
     check(len(stage_ids) == 3 and not before['views']['whiteboards'],
           'Design flow starts with existing Journey stages and no extra Blueprint')
+    # The other regression flows intentionally exercise the retained legacy editors.
+    # Switch this one flow to the public, unified map experience before opening it.
+    page.goto(URL.split('?')[0], wait_until='networkidle')
     expect(page.locator('[data-service-map-library]')).to_be_visible()
     page.locator('[data-service-map-library]').get_by_role('button', name='Abrir mapa').first.click()
     f = page.frame_locator('.bo-blueprint-reference-frame')
