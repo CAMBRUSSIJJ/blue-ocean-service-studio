@@ -115,6 +115,7 @@ def contextual_design_continuity(page):
     # The other regression flows intentionally exercise the retained legacy editors.
     # Switch this one flow to the public, unified map experience before opening it.
     page.goto(URL.split('?')[0], wait_until='networkidle')
+    page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
     expect(page.locator('[data-service-map-library]')).to_be_visible()
     page.locator('[data-service-map-library]').get_by_role('button', name='Abrir mapa').first.click()
     f = page.frame_locator('.bo-blueprint-reference-frame')
