@@ -242,7 +242,7 @@ try:
         mobile.wait_for_function("id=>window.BlueOceanRuntime.api('dataBridge').get().stages[id].customerAction.includes('Comparar opções no celular')",arg=sid)
         check('Touch editing persists through the canonical graph', 'Comparar opções no celular' in graph(mobile)['stages'][sid]['customerAction'])
         mf.get_by_role('button',name='Personalizar visualização',exact=True).click()
-        mf.get_by_role('checkbox',name='Evidência física',exact=True).uncheck()
+        mf.locator('[data-view-row="ev"]').uncheck()
         mf.get_by_role('button',name='Concluir',exact=True).click()
         expect(mf.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
         check('Touch visualization preferences are persisted', 'ev' in graph(mobile)['journeys'][jid]['matrixView']['hiddenRows'])
