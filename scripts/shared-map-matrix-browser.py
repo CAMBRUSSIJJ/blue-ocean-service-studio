@@ -4,7 +4,7 @@ import functools, json, os, shutil, threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from map_browser_support import use_matrix, matrix_perspective
-from playwright.sync_api import sync_playwright, expect
+from playwright.sync_api import sync_playwright, expect, TimeoutError as PlaywrightTimeoutError
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'artifacts/shared-map-matrix'
@@ -90,10 +90,27 @@ try:
         check('Collapsing a lane retains content and is persisted', 'sd' in graph(page)['journeys'][first_journey_id]['matrixView']['collapsedRows'] and f.locator('[data-row="sd"]').get_attribute('data-collapsed') == 'true')
         f.locator('[data-act="lane-collapse"][data-id="sd"]').click(); saved(f)
         check('Expanding restores the lane editor', f.locator('[data-cell="sd|0"]').count() == 1)
-        f.locator('[data-lane-handle="sd"]').drag_to(f.locator('[data-row="em"] > .lb'), target_position={'x':30,'y':20})
+        # HTML5 drop, re-render and the host preference write are asynchronous.
+        # Observe the canonical graph rather than a previously rendered save label.
+        lane_reordered = False
+        for attempt in range(2):
+            f.locator('[data-lane-handle="sd"]').drag_to(
+                f.locator('[data-row="em"] > .lb'), target_position={'x':30,'y':20}
+            )
+            try:
+                page.wait_for_function(
+                    """jid => {const j=window.BlueOceanRuntime.api('dataBridge').get().journeys[jid];
+                    const rows=j?.matrixView?.rowOrder||[];
+                    return rows.includes('sd')&&rows.includes('ac')&&rows.indexOf('sd')>rows.indexOf('ac')}""",
+                    arg=first_journey_id, timeout=5000
+                )
+                lane_reordered = True
+                break
+            except PlaywrightTimeoutError:
+                print('Lane drop did not persist on attempt', attempt+1,
+                      graph(page)['journeys'][first_journey_id]['matrixView']['rowOrder'], flush=True)
         saved(f)
-        order = graph(page)['journeys'][first_journey_id]['matrixView']['rowOrder']
-        check('Lane drag changes persistent order', order.index('sd') > order.index('ac'))
+        check('Lane drag changes persistent order', lane_reordered)
         f.locator('[data-lane-resize="ac"]').focus()
         f.locator('[data-lane-resize="ac"]').press('ArrowDown'); saved(f)
         check('Lane height can be adjusted accessibly by keyboard', graph(page)['journeys'][first_journey_id]['matrixView']['rowHeights']['ac'] >= 96)
