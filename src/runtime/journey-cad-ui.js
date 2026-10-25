@@ -170,7 +170,7 @@ function cadMobileMap(){
 }
 function cadRender(){
  if(!V.canvasOrderVersion){const preferred=['sd','ev','ch','ac','th','em','fl','bk','sy','im'];V.rowOrder=[...preferred,...V.rowOrder.filter(id=>!preferred.includes(id))];V.canvasOrderVersion=1;saveView()}
- const scene=S.journeyId||S.id;if(cadState.scene!==scene){Object.assign(cadState,{scene,selected:'',creating:null,quick:null,link:null,camera:null,drafts:new Map(),inspector:false,error:'',menu:null,connectFrom:'',choosing:null})}
+ const scene=S.journeyId||S.id;if(cadState.scene!==scene){Object.assign(cadState,{scene,selected:'',creating:null,quick:null,link:null,camera:null,drafts:new Map(),inspector:false,error:'',menu:null,connectFrom:'',choosing:null,activeCell:null,libraryFilter:'all',resize:null,resizePreview:null,emotionDrag:null})}
  document.body.classList.add('cad-mode');cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths());
  if(cadState.selected&&!blueprintNote(cadState.selected)){cadState.selected='';cadState.inspector=false}
  const mobile=cadMobile(),showInspector=cadState.inspector&&!!cadState.selected,view=V.perspective==='journey'?'journey':'blueprint';
