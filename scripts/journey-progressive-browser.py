@@ -135,13 +135,13 @@ try:
         search.fill('')
         dialog.get_by_role('button', name='Mostrar todas as faixas', exact=True).click()
         check('Show all makes the optional lane visible in customization',
-              dialog.get_by_role('checkbox', name='Evidência física', exact=True).is_checked())
+              dialog.locator('[data-view-row="ev"]').is_checked())
         dialog.get_by_role('button', name='Restaurar padrão', exact=True).click()
         check('Restore default keeps data while returning the essential lane configuration',
-              not dialog.get_by_role('checkbox', name='Evidência física', exact=True).is_checked()
+              not dialog.locator('[data-view-row="ev"]').is_checked()
               and graph(page)['journeys'][jid]['matrixView']['preset']=='essential')
-        dialog.get_by_role('checkbox', name='Evidência física', exact=True).check()
-        dialog.get_by_role('button', name='Mover Evidência física para cima', exact=True).click()
+        dialog.locator('[data-view-row="ev"]').check()
+        dialog.locator('[data-act="row-move"][data-id="ev"][data-d="-1"]').click()
         dialog.get_by_role('button', name='Concluir', exact=True).click()
         check('Closing customization restores focus to its trigger', f.locator('[data-act="customize"]').first.evaluate('e=>e===document.activeElement'))
         check('Selected optional row appears and reordering persists', f.locator('.r[data-row="ev"]').count() == 1 and graph(page)['journeys'][jid]['matrixView']['preset'] == 'custom')

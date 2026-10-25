@@ -5,10 +5,16 @@ const cardToolsToneNames = { neutral: 'Sem destaque', blue: 'Azul', emerald: 'Ve
 function cardToolsPersonas() { return S.serviceElements?.persona || []; }
 function cardToolsPersonaName(id) { return cardToolsPersonas().find(persona => persona.id === id)?.title || 'Persona indisponível'; }
 function cardToolsFilters() { return window.BlueOceanJourneyContent.normalizeMatrixCardFilters(V.cardFilters); }
+function cardToolsLinkedPersonas(note) {
+  const source = pickerReferenceTypes.includes(note.type) ? pickerReference(note) : null;
+  return [...new Set([...(note.personaIds || []),...(source?.personaIds || []),
+    ...(note.type === 'persona' && note.referenceId ? [note.referenceId] : [])])];
+}
 function cardToolsMatches(note) {
   const source = pickerReferenceTypes.includes(note.type) ? pickerReference(note) : null;
-  const names = (note.personaIds || []).map(cardToolsPersonaName).join(' ');
-  return window.BlueOceanJourneyContent.matrixCardMatches(note, cardToolsFilters(), [source?.title || source?.name || '', names].join(' '));
+  const personaIds = cardToolsLinkedPersonas(note);
+  const names = personaIds.map(cardToolsPersonaName).join(' ');
+  return window.BlueOceanJourneyContent.matrixCardMatches({...note, personaIds}, cardToolsFilters(), [source?.title || source?.name || '', names].join(' '));
 }
 function cardToolsVisibleCards() {
   const visibleRows = new Set(orderedRows().filter(row => !V.hiddenRows.includes(row.id) && !V.collapsedRows.includes(row.id)).map(row => row.id));
@@ -60,7 +66,7 @@ function cardToolsCheckbox(note) {
   return cardToolsSelecting ? '<label class="card-selection"><input type="checkbox" data-card-select="' + esc(note.i) + '" ' + (cardToolsSelection.has(note.i) ? 'checked' : '') + ' aria-label="Selecionar cartão ' + esc((note.t || contentTypes[note.type || 'card']?.[1] || '').slice(0, 80)) + '"><span>Selecionar</span></label>' : '';
 }
 function cardToolsBadges(note) {
-  const metadata = window.BlueOceanJourneyContent.normalizeMatrixCardMetadata(note);
+  const metadata = window.BlueOceanJourneyContent.normalizeMatrixCardMetadata({...note,personaIds:cardToolsLinkedPersonas(note)});
   if (!metadata.tags.length && !metadata.personaIds.length) return '';
   return '<div class="card-badges" aria-label="Classificação do cartão">' + metadata.personaIds.map(id => '<span class="card-persona-badge">' + esc(cardToolsPersonaName(id)) + '</span>').join('') + metadata.tags.map(tag => '<span class="card-tag-badge">#' + esc(tag) + '</span>').join('') + '</div>';
 }
