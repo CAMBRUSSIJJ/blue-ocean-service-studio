@@ -40,4 +40,32 @@ check('Parallel connection types remain distinct and semantic captions follow vi
  assert.deepEqual(canvasTitleLines('Confirmação por mensagem',22),['Confirmação por','mensagem']);
  assert.ok(canvasBoundary(rows[2],2,rows).includes('visibilidade'));assert.equal(canvasBoundary(rows[2],0,[rows[2],rows[1]]),'');
 });
+check('Custom stage widths resize each column without stretching neighboring cards',()=>{
+ const source=doc(),rowsWithEmotion=[{id:'em',n:'Emoções'},...rows],widths=[210,540];
+ source.steps[0].e=-1;source.steps[0].emotionRecorded=true;
+ source.steps[1].e=2;source.steps[1].emotionRecorded=true;
+ source.c['em|0']=[{i:'old-emotion',t:'Ansiosa',type:'card',canvas:{kind:'emotion'}}];
+ const layout=buildCanvasLayout(source,rowsWithEmotion,null,widths);
+ assert.equal(layout.stages[0].width,210);
+ assert.equal(layout.stages[1].x,420);
+ assert.equal(layout.stages[1].width,540);
+ assert.ok(layout.nodes.find(node=>node.id==='old-emotion'),'Old emotion card IDs remain in layout for saved links');
+ for(const node of layout.nodes.filter(value=>value.row!=='em')){
+  const stage=layout.stages[node.stageIndex];
+  assert.ok(node.x>=stage.x&&node.x+node.width<=stage.x+stage.width,'Card must fit its resized column');
+ }
+ const svg=exportCanvasSvg(source,rowsWithEmotion,note=>note.t,widths);
+ assert.match(svg,/stroke="#dc821c"/);
+ assert.match(svg,/>Ansiosa<\/text>/);
+ assert.match(svg,/>Satisfeita<\/text>/);
+ assert.doesNotMatch(svg,/old-emotion/);
+ assert.ok(svg.includes('width="'+layout.width+'"'));
+});
+check('Stage width boundaries are constrained and empty emotion cells do not become cards',()=>{
+ const source=doc(),withEmotion=[{id:'em',n:'Emoções'}];
+ const layout=buildCanvasLayout(source,withEmotion,null,[10,999]);
+ assert.deepEqual(layout.stages.map(stage=>stage.width),[210,600]);
+ assert.equal(layout.nodes.length,0);
+ assert.ok(layout.rows[0].height>=128,'Emotion plot has enough height for labels');
+});
 console.log(`Blueprint canvas: ${count}/${count} PASS`);
