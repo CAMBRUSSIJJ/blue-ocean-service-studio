@@ -90,22 +90,36 @@ export function insertCanvasStage(doc,input){
   return next;
 }
 export const CANVAS_GRID={label:210,stage:336,header:88,gap:14,cardWidth:288,cardHeight:96,padding:16};
+export const CANVAS_STAGE_MIN=210;
+export const CANVAS_STAGE_MAX=600;
+export function canvasStageWidth(value,fallback=CANVAS_GRID.stage) {
+  return value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))?Math.max(CANVAS_STAGE_MIN,Math.min(CANVAS_STAGE_MAX,Math.round(Number(value)))):fallback;
+}
+export function canvasEmotionScore(step={}) {
+  const score=Number(step.e);
+  return Math.max(-2,Math.min(2,Number.isFinite(score)?Math.round(score):0));
+}
+export function canvasEmotionPoint(stage,row) {
+  return {x:stage.x+stage.width/2,y:row.y+24+(2-canvasEmotionScore(stage.step))*16};
+}
 export function canvasBoundary(row,index,rows) {
   const previous={fl:'ac',bk:'fl',sy:'bk'}[row.id],before=rows.findIndex(value=>value.id===previous);
   if(!previous||before<0||before>=index||rows.slice(before+1,index).some(value=>['fl','bk','sy'].includes(value.id)))return '';
   return {fl:'Linha de interação',bk:'Linha de visibilidade · início dos bastidores',sy:'Linha de interação interna · apoio'}[row.id];
 }
-export function buildCanvasLayout(doc,definitions,stageIndices=null) {
-  const g=CANVAS_GRID,indices=stageIndices||doc.steps.map((_,index)=>index),nodes=[],rows=[],stages=indices.map((index,position)=>({index,step:doc.steps[index],x:g.label+position*g.stage,width:g.stage}));
+export function buildCanvasLayout(doc,definitions,stageIndices=null,stageWidths=null) {
+  const g=CANVAS_GRID,indices=stageIndices||doc.steps.map((_,index)=>index),nodes=[],rows=[];
+  let cursor=g.label;
+  const stages=indices.map(index=>{const width=canvasStageWidth(stageWidths?.[index]);const stage={index,step:doc.steps[index],x:cursor,width};cursor+=width;return stage;});
   let y=g.header;
   for(const definition of definitions) {
-    const counts=indices.map(index=>(doc.c[definition.id+'|'+index]||[]).length);
+    const counts=indices.map(index=>definition.id==='em'?0:(doc.c[definition.id+'|'+index]||[]).length);
     const count=Math.max(1,...counts),height=g.padding*2+count*g.cardHeight+(count-1)*g.gap;
     rows.push({...definition,y,height});
-    for(const stage of stages)(doc.c[definition.id+'|'+stage.index]||[]).forEach((note,position)=>nodes.push({id:note.i,note,row:definition.id,stageIndex:stage.index,position,key:definition.id+'|'+stage.index,x:stage.x+(g.stage-g.cardWidth)/2,y:y+g.padding+position*(g.cardHeight+g.gap),width:g.cardWidth,height:g.cardHeight}));
+    if(definition.id!=='em')for(const stage of stages)(doc.c[definition.id+'|'+stage.index]||[]).forEach((note,position)=>{const width=Math.min(g.cardWidth,stage.width-28);nodes.push({id:note.i,note,row:definition.id,stageIndex:stage.index,position,key:definition.id+'|'+stage.index,x:stage.x+(stage.width-width)/2,y:y+g.padding+position*(g.cardHeight+g.gap),width,height:g.cardHeight});});
     y+=height+28;
   }
-  return {stages,rows,nodes,width:g.label+Math.max(1,stages.length)*g.stage+20,height:y+20};
+  return {stages,rows,nodes,width:cursor+20,height:y+20};
 }
 export function canvasTitleLines(title,limit=32,maxLines=2) {
   const words=String(title).trim().split(/\s+/),lines=[''];
@@ -128,8 +142,8 @@ export function canvasEdgeGeometry(a,b,offset=0) {
 }
 const xml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[char]));
 const colors={sequence:'#2563eb',dependency:'#a65f00',uses:'#7355ab',handoff:'#087f75'};
-export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type||'Componente') {
-  const layout=buildCanvasLayout(doc,definitions),byId=new Map(layout.nodes.map(node=>[node.id,node])),offsets=canvasConnectionOffsets(doc.links||[]);
+export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type||'Componente',stageWidths=null) {
+  const layout=buildCanvasLayout(doc,definitions,null,stageWidths),byId=new Map(layout.nodes.map(node=>[node.id,node])),offsets=canvasConnectionOffsets(doc.links||[]);
   let out=`<svg xmlns="http://www.w3.org/2000/svg" width="${layout.width}" height="${layout.height+60}" viewBox="0 -60 ${layout.width} ${layout.height+60}" role="img" aria-label="${xml(doc.title)}"><title>${xml(doc.title)}</title><rect x="0" y="-60" width="100%" height="${layout.height+60}" fill="#ffffff"/><text x="20" y="-24" font-size="24" font-family="sans-serif" fill="#142944">${xml(doc.title)}</text><defs>`;
   for(const [type,color]of Object.entries(colors))out+=`<marker id="arrow-${type}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="${color}"/></marker>`;
   out+='</defs><g font-family="sans-serif">';
@@ -138,6 +152,12 @@ export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type
     const boundary=canvasBoundary(row,index,layout.rows);
     out+=`<rect x="0" y="${row.y}" width="${layout.width}" height="${row.height}" fill="#f5f8fc" stroke="#cfdaea"/><text x="14" y="${row.y+30}" font-size="12" fill="#142944">${xml(row.n.slice(0,22))}</text>`;
     if(row.n.length>22)out+=`<text x="14" y="${row.y+48}" font-size="12" fill="#142944">${xml(row.n.slice(22,44))}</text>`;
+    if(row.id==='em'&&layout.stages.length){
+      const pts=layout.stages.map(stage=>({...canvasEmotionPoint(stage,row),recorded:stage.step.emotionRecorded===true||stage.step.emotionRecorded===undefined&&(Number(stage.step.e)!==0||!!stage.step.note?.trim())}));
+      out+=`<line x1="${layout.stages[0].x}" y1="${row.y+56}" x2="${layout.width-20}" y2="${row.y+56}" stroke="#c8d8ed" stroke-dasharray="4 5"/>`;
+      for(let i=1;i<pts.length;i++)if(pts[i-1].recorded&&pts[i].recorded)out+=`<line x1="${pts[i-1].x}" y1="${pts[i-1].y}" x2="${pts[i].x}" y2="${pts[i].y}" stroke="#dc821c" stroke-width="3"/>`;
+      pts.forEach((p,i)=>{out+=`<circle cx="${p.x}" cy="${p.y}" r="7" fill="${p.recorded?'#dc821c':'#fff'}" stroke="#dc821c" stroke-width="2"/><text x="${p.x}" y="${row.y+116}" text-anchor="middle" font-size="12" fill="#784619">${xml(p.recorded?['Frustrada','Ansiosa','Neutra','Animada','Satisfeita'][canvasEmotionScore(layout.stages[i].step)+2]:'Sem registro')}</text>`;});
+    }
     if(boundary)out+=`<path d="M0 ${row.y-14} H${layout.width}" stroke="#7c8fa6" stroke-dasharray="3 6"/><text x="${layout.width/2}" y="${row.y-18}" text-anchor="middle" font-size="11" fill="#526885">${xml(boundary)}</text>`;
   }
   for(const raw of doc.links||[]){const link=normalizeMatrixConnection(raw),a=byId.get(link.a),b=byId.get(link.b);if(!a||!b)continue;const edge=canvasEdgeGeometry(a,b,offsets.get(link.id)||0),color=colors[link.type],label=({sequence:'Sequência',dependency:'Dependência',uses:'Usa recurso',handoff:'Passagem entre equipes'}[link.type])+(link.label?' · '+link.label:'');
