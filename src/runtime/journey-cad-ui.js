@@ -166,7 +166,7 @@ function cadSvg(){
 }
 function cadMobileMap(){
  const index=businessStageIndex(),step=S.steps[index];if(!step)return '<div class="cad-mobile-empty"><h2>Comece com uma etapa</h2>'+cadButton('step','+ Adicionar etapa')+'</div>';businessStage=step.hostLocalId||step.hostStageId;
- return '<nav class="cad-stage-nav" aria-label="Navegar entre etapas">'+cadButton('cad-prev','‹','aria-label="Etapa anterior" '+(!index?'disabled':''))+'<label>Etapa '+(index+1)+' de '+S.steps.length+'<select data-cad-stage aria-label="Etapa em foco">'+S.steps.map((value,i)=>'<option value="'+i+'" '+(i===index?'selected':'')+'>'+esc(value.n)+'</option>').join('')+'</select></label>'+cadButton('cad-next','›','aria-label="Próxima etapa" '+(index===S.steps.length-1?'disabled':''))+'</nav><div class="cad-mobile-stage"><h2>'+esc(step.n)+'</h2>'+cadButton('cad-stage-after','+','data-si="'+index+'" aria-label="Adicionar etapa ao lado"')+'</div>'+cadRows().map((row,i,rows)=>'<section class="cad-mobile-lane" data-row="'+row.id+'">'+(cadModel.canvasBoundary(row,i,rows)?'<p class="cad-mobile-boundary">'+cadModel.canvasBoundary(row,i,rows)+'</p>':'')+'<h3>'+esc(row.n)+'</h3>'+cadCellNotes(row.id,index).map(note=>'<article class="cad-mobile-card">'+cadButton(note.virtualLabel?'cad-virtual':'cad-select','<small>'+esc(note.virtualLabel||cadModel.CANVAS_COMPONENTS[cadModel.canvasKind(note,row.id)].title)+'</small><b>'+esc(cadTitle(note))+'</b>','data-id="'+esc(note.i)+'" data-row="'+row.id+'" data-si="'+index+'"')+(!note.virtualLabel?cadButton('cad-menu','···','data-id="'+esc(note.i)+'" aria-label="Ações do cartão"'):'')+'</article>').join('')+cadButton('cad-cell-add','+ Adicionar cartão','data-row="'+row.id+'" data-si="'+index+'" '+(cadLocked()?'disabled':''))+'</section>').join('');
+ return '<nav class="cad-stage-nav" aria-label="Navegar entre etapas">'+cadButton('cad-prev','‹','aria-label="Etapa anterior" '+(!index?'disabled':''))+'<label>Etapa '+(index+1)+' de '+S.steps.length+'<select data-cad-stage aria-label="Etapa em foco">'+S.steps.map((value,i)=>'<option value="'+i+'" '+(i===index?'selected':'')+'>'+esc(value.n)+'</option>').join('')+'</select></label>'+cadButton('cad-next','›','aria-label="Próxima etapa" '+(index===S.steps.length-1?'disabled':''))+'</nav><div class="cad-mobile-stage"><h2>'+esc(step.n)+'</h2>'+cadButton('cad-stage-after','+','data-si="'+index+'" aria-label="Adicionar etapa ao lado"')+'</div>'+cadRows().map((row,i,rows)=>'<section class="cad-mobile-lane" data-row="'+row.id+'">'+(cadModel.canvasBoundary(row,i,rows)?'<p class="cad-mobile-boundary">'+cadModel.canvasBoundary(row,i,rows)+'</p>':'')+'<h3>'+esc(row.n)+'</h3>'+(row.id==='em'?[]:cadCellNotes(row.id,index)).map(note=>'<article class="cad-mobile-card">'+cadButton(note.virtualLabel?'cad-virtual':'cad-select','<small>'+esc(note.virtualLabel||cadModel.CANVAS_COMPONENTS[cadModel.canvasKind(note,row.id)].title)+'</small><b>'+esc(cadTitle(note))+'</b>','data-id="'+esc(note.i)+'" data-row="'+row.id+'" data-si="'+index+'"')+(!note.virtualLabel?cadButton('cad-menu','···','data-id="'+esc(note.i)+'" aria-label="Ações do cartão"'):'')+'</article>').join('')+(row.id==='em'?cadButton('cad-emotion',cadRecordedEmotion(step)?EM[cadModel.canvasEmotionScore(step)+2]:'Registrar emoção','data-si="'+index+'" '+(cadLocked()?'disabled':'')):cadButton('cad-cell-add','+ Adicionar cartão','data-row="'+row.id+'" data-si="'+index+'" '+(cadLocked()?'disabled':'')))+'</section>').join('');
 }
 function cadRender(){
  if(!V.canvasOrderVersion){const preferred=['sd','ev','ch','ac','th','em','fl','bk','sy','im'];V.rowOrder=[...preferred,...V.rowOrder.filter(id=>!preferred.includes(id))];V.canvasOrderVersion=1;saveView()}
@@ -259,10 +259,22 @@ function cadAction(action,data,button){
  if(action==='cad-close-library'){cadState.library=false;app.querySelector('#cad-library-sheet')?.close();return true}
  if(action==='cad-library'||action==='cad-cell-add'){
   if(cadLocked())return true;
+  if(action==='cad-cell-add'){cadState.activeCell={row:data.row,index:Number(data.si)};cadState.libraryFilter='compatible';}
   if(!S.steps.length){cadStartStage();return true}
   if(action==='cad-library'&&cadMobile()){cadState.library=true;rerender();return true}
   cadState.choosing={index:data.si!==undefined?Number(data.si):businessStageIndex(),row:data.row||'',...cadQuickPosition(point)};cadState.menu=null;rerender();return true;
  }
+ if(action==='cad-toggle-library-mode'){cadState.libraryCompact=!cadState.libraryCompact;cadSaveLibraryPreferences();rerender();return true}
+ if(action==='cad-group'){cadState.groupOpen[data.group]=cadState.groupOpen[data.group]===false;cadSaveLibraryPreferences();rerender();return true}
+ if(action==='cad-favorite'){const kind=data.kind;cadState.favorites=cadState.favorites.includes(kind)?cadState.favorites.filter(x=>x!==kind):[...cadState.favorites,kind];cadSaveLibraryPreferences();rerender();return true}
+ if(action==='cad-lib-filter'){cadState.libraryFilter=data.filter;rerender();return true}
+ if(['cad-stage-narrow','cad-stage-wide','cad-stage-equal','cad-stage-reset'].includes(action)){
+  if(cadLocked())return true;const widths=cadStageWidths(),average=Math.round(S.steps.reduce((sum,_,i)=>sum+cadModel.canvasStageWidth(widths[i]),0)/Math.max(1,S.steps.length));
+  V.stageWidths=S.steps.map((_,i)=>action==='cad-stage-reset'?336:action==='cad-stage-equal'?average:cadModel.canvasStageWidth(cadModel.canvasStageWidth(widths[i])+(action==='cad-stage-wide'?48:-48)));
+  V.fitToScreen=false;saveView();cadState.camera=null;rerender();return true;
+ }
+ if(action==='cad-stage-resize')return true;
+ if(action==='cad-emotion'){if(cadState.ignoreClick){cadState.ignoreClick=false;return true}cadEditEmotion(Number(data.si),point);return true}
  if(action==='cad-toggle-library'){cadState.libraryHidden=!cadState.libraryHidden;cadState.camera=null;rerender();return true}
  if(action==='cad-close'){cadState.inspector=false;rerender();return true}
  if(action==='cad-details'){
@@ -272,7 +284,12 @@ function cadAction(action,data,button){
   if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);
   cadState.drafts.delete(cadState.selected);Object.assign(cadState,{creating:null,quick:null,link:null,menu:null,selected:'',inspector:false,error:'',connectFrom:'',pointer:null});rerender();return true;
  }
- if(action==='cad-add'){cadStartQuick(data.kind||'text',data.si!==undefined?Number(data.si):cadState.choosing?.index??businessStageIndex(),data.row||cadState.choosing?.row||'',point);return true}
+ if(action==='cad-add'){
+  const kind=data.kind||'text',active=cadState.activeCell,index=data.si!==undefined?Number(data.si):cadState.choosing?.index??active?.index??businessStageIndex();
+  const row=data.row||cadState.choosing?.row||(active&&cadModel.canvasAcceptsRow(kind,active.row)?active.row:'');
+  if(kind==='emotion'){cadEditEmotion(index,point);return true}
+  cadStartQuick(kind,index,row,point);return true;
+ }
  if(action==='cad-stage-after'){cadStartStage(Number(data.si),point);return true}
  if(action==='cad-stage-edit'){const step=S.steps[Number(data.si)];if(step&&!cadLocked()){cadStash();cadState.creating=null;cadState.quick={mode:'stage-edit',title:step.n,stageKey:cadStageKey(step),...cadQuickPosition(point)};cadState.menu=null;rerender();cadFocusQuick()}return true}
  if(action==='cad-virtual'){
