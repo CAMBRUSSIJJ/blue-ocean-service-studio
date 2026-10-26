@@ -92,7 +92,7 @@ function cadIcon(kind){
  return '<svg class="cad-professional-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(cadIconPaths[kind]||cadIconPaths.text)+'</svg>';
 }
 function cadSidebarTabs(){
- return '<div class="cad-library-tabs" role="tablist" aria-label="Biblioteca e estrutura do mapa">'+[['components','Componentes'],['lanes','Faixas']].map(([id,title])=>'<button type="button" role="tab" data-act="cad-sidebar-tab" data-tab="'+id+'" aria-selected="'+(cadState.sidebarTab===id)+'" tabindex="'+(cadState.sidebarTab===id?0:-1)+'">'+(id==='lanes'?'<span class="cad-lanes-icon" aria-hidden="true">☷</span>':'')+title+'</button>').join('')+'</div>';
+ return '<div class="cad-library-tabs" role="tablist" aria-label="Biblioteca e estrutura do mapa">'+[['components','Componentes'],['lanes','Faixas']].map(([id,title])=>'<button type="button" role="tab" data-act="cad-sidebar-tab" data-tab="'+id+'" title="'+title+'" aria-label="'+title+'" aria-selected="'+(cadState.sidebarTab===id)+'" tabindex="'+(cadState.sidebarTab===id?0:-1)+'">'+'<span class="cad-tab-icon" aria-hidden="true">'+(id==='lanes'?'<svg class="cad-professional-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2" fill="white"/><circle cx="16" cy="12" r="2" fill="white"/></svg>':cadIcon('text'))+'</span>'+title+'</button>').join('')+'</div>';
 }
 function cadLanePanel(){
  const rows=orderedRows(),visible=rows.filter(row=>!V.hiddenRows.includes(row.id)).length;
@@ -164,7 +164,7 @@ function cadEmotionSvg(row,layout){
 }
 function cadSvg(){
  const layout=cadState.layout,cam=cadState.camera||{x:16,y:16,zoom:1},small=cadState.detail==='overview'||cadState.detail==='auto'&&cam.zoom<.8;
- const font=Math.max(15,12/cam.zoom),labelFont=Math.max(13,11/cam.zoom),badgeFont=Math.max(10,9/cam.zoom),nodes=new Map(layout.nodes.map(node=>[node.id,node])),offsets=cadModel.canvasConnectionOffsets(S.links||[]);
+ const font=Math.max(18,15/cam.zoom),labelFont=Math.max(15,13/cam.zoom),badgeFont=Math.max(12,11/cam.zoom),nodes=new Map(layout.nodes.map(node=>[node.id,node])),offsets=cadModel.canvasConnectionOffsets(S.links||[]);
  let html='<defs>'+Object.entries(cadLinkColors).map(([type,color])=>'<marker id="cad-arrow-'+type+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="'+color+'"/></marker>').join('')+'</defs><g id="cad-world" transform="translate('+cam.x+' '+cam.y+') scale('+cam.zoom+')"><text x="14" y="36" class="cad-map-label" style="font-size:'+labelFont+'px">MAPA DO</text><text x="14" y="'+(36+labelFont+4)+'" class="cad-map-label" style="font-size:'+labelFont+'px">SERVIÇO</text>';
  let insertControls='';
  for(const stage of layout.stages){
@@ -176,11 +176,11 @@ function cadSvg(){
  layout.rows.forEach((row,index)=>{
   const boundary=cadModel.canvasBoundary(row,index,layout.rows),color=cadColors[row.id]||'#64748b';
   html+='<rect x="0" y="'+row.y+'" width="'+layout.width+'" height="'+row.height+'" rx="7" class="cad-lane-bg"/><path d="M2 '+(row.y+8)+' V'+(row.y+row.height-8)+'" stroke="'+color+'" stroke-width="3"/>';
-  cadModel.canvasTitleLines(row.n,Math.max(7,Math.floor(180/(labelFont*.56))),Math.min(3,Math.max(1,Math.floor((row.height-18)/(labelFont+4))))).forEach((line,i)=>{html+='<text x="15" y="'+(row.y+28+i*(labelFont+4))+'" class="cad-lane-name" style="font-size:'+labelFont+'px">'+esc(line)+'</text>'});
+  cadModel.canvasTitleLines(row.n,Math.max(7,Math.floor(192/(labelFont*.56))),Math.min(3,Math.max(1,Math.floor((row.height-18)/(labelFont+4))))).forEach((line,i)=>{html+='<text x="15" y="'+(row.y+28+i*(labelFont+4))+'" class="cad-lane-name" style="font-size:'+labelFont+'px">'+esc(line)+'</text>'});
   if(boundary)html+='<path d="M0 '+(row.y-14)+' H'+layout.width+'" class="cad-boundary"/><text x="'+(layout.width/2)+'" y="'+(row.y-18)+'" text-anchor="middle" class="cad-boundary-name">'+esc(boundary)+'</text>';
   for(const stage of layout.stages){const empty=!layout.nodes.some(node=>node.row===row.id&&node.stageIndex===stage.index&&!node.note.draft),addWidth=Math.min(stage.width-32,Math.max(140,110/cam.zoom)),addHeight=Math.max(34,28/cam.zoom);
    html+='<rect x="'+stage.x+'" y="'+row.y+'" width="'+stage.width+'" height="'+row.height+'" class="cad-cell" data-row="'+row.id+'" data-si="'+stage.index+'"/>';
-   if(!cadLocked()&&empty&&row.id!=='em')html+='<g role="button" tabindex="0" class="cad-cell-add" data-act="cad-cell-add" data-row="'+row.id+'" data-si="'+stage.index+'" aria-label="Adicionar cartão em '+esc(stage.step.n)+' — '+esc(row.n)+'"><rect x="'+(stage.x+stage.width/2-addWidth/2)+'" y="'+(row.y+row.height/2-addHeight/2)+'" width="'+addWidth+'" height="'+addHeight+'" rx="6"/><text x="'+(stage.x+stage.width/2)+'" y="'+(row.y+row.height/2+5)+'" text-anchor="middle" style="font-size:'+Math.max(12,10/cam.zoom)+'px">+ Adicionar cartão</text></g>';
+   if(!cadLocked()&&empty&&row.id!=='em')html+='<g role="button" tabindex="0" class="cad-cell-add" data-act="cad-cell-add" data-row="'+row.id+'" data-si="'+stage.index+'" aria-label="Adicionar cartão em '+esc(stage.step.n)+' — '+esc(row.n)+'"><rect x="'+(stage.x+stage.width/2-addWidth/2)+'" y="'+(row.y+row.height/2-addHeight/2)+'" width="'+addWidth+'" height="'+addHeight+'" rx="6"/><text x="'+(stage.x+stage.width/2)+'" y="'+(row.y+row.height/2+5)+'" text-anchor="middle" style="font-size:'+Math.max(14,12/cam.zoom)+'px">+ Adicionar cartão</text></g>';
   }
   if(row.id==='em'&&layout.stages.length)html+=cadEmotionSvg(row,layout);
  });
@@ -212,14 +212,21 @@ function cadRender(){
  if(cadState.selected&&!blueprintNote(cadState.selected)){cadState.selected='';cadState.inspector=false}
  const mobile=cadMobile(),showInspector=cadState.inspector&&!!cadState.selected,view=V.perspective==='journey'?'journey':'blueprint';
  const status=cadState.error||(cadState.pending?'Salvando…':S.readOnly?'Somente leitura':cadState.connectFrom?'Escolha o cartão de destino · Esc cancela':cadState.quick?'Rascunho — confirme para adicionar ao mapa':'Arraste um componente ou use + em uma célula');
- app.innerHTML='<div class="cad-shell"><header class="cad-header">'+cadButton('back','← Mapas','aria-label="Voltar para mapas do serviço"')+'<input data-f="title" aria-label="Nome do mapa" value="'+esc(S.title||'')+'"><span role="status" data-save-status>'+saveLabel+'</span><label class="cad-view-label">Visualização<select data-cad-view aria-label="Visualização do mapa"><option value="blueprint" '+(view==='blueprint'?'selected':'')+'>Blueprint</option><option value="journey" '+(view==='journey'?'selected':'')+'>Jornada</option><option value="matrix">Matriz</option></select></label></header><div class="cad-toolbar">'+cadButton('cad-library','+ Componente',cadLocked()?'disabled':'')+cadButton('step','+ Etapa','aria-label="Adicionar etapa" '+(cadLocked()?'disabled':''))+cadButton('undo','↶','aria-label="Desfazer" '+(!(HOSTED?H.canUndo:U.length)||cadLocked()?'disabled':''))+cadButton('redo','↷','aria-label="Refazer" '+(!(HOSTED?H.canRedo:R.length)||cadLocked()?'disabled':''))+cadButton('customize','Faixas','aria-label="Organizar faixas"')+cadButton('business-review','Revisar operação')+'<details class="cad-options"><summary>Mais</summary><div class="cad-options-panel">'+cadButton('cad-export','Exportar SVG')+cadButton('business-storage','Dados e backup')+cadButton('cad-fit','Ajustar mapa')+'<div class="cad-width-actions"><b>Largura das etapas</b>'+cadButton('cad-stage-narrow','− Reduzir todas')+cadButton('cad-stage-wide','+ Ampliar todas')+cadButton('cad-stage-equal','Uniformizar larguras')+cadButton('cad-stage-reset','Restaurar padrão')+'</div><label>Conexões<select data-cad-links aria-label="Exibir conexões">'+[['all','Todas'],['selected','Da seleção'],['off','Ocultar']].map(([id,name])=>'<option value="'+id+'" '+(id===V.connectionMode?'selected':'')+'>'+name+'</option>').join('')+'</select></label><label>Detalhes<select data-cad-detail aria-label="Nível de detalhe">'+[['auto','Automático'],['overview','Visão geral'],['detail','Completo']].map(([id,name])=>'<option value="'+id+'" '+(id===cadState.detail?'selected':'')+'>'+name+'</option>').join('')+'</select></label></div></details>'+(cadState.libraryHidden?cadButton('cad-toggle-library','Mostrar componentes'):'')+'<label class="cad-persona-label">Persona<select data-cad-persona aria-label="Persona do mapa">'+cadOptions(cadCatalog('persona'),S.personaId,'Sem Persona vinculada')+'</select></label></div>'+(cadState.connectFrom?'<div class="cad-connecting" role="region" aria-label="Criar conexão"><span>Escolha o cartão de destino</span><label>Relação<select data-cad-connect-type aria-label="Tipo da nova conexão">'+Object.entries(blueprintConnectionNames).map(([id,label])=>'<option value="'+id+'" '+(id===(cadState.connectType||'sequence')?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+cadButton('cad-cancel','Cancelar conexão')+'</div>':'')+'<div class="cad-workspace'+(showInspector?' has-inspector':'')+(cadState.libraryHidden?' is-library-hidden':'')+(cadState.libraryCompact?' is-library-compact':'')+'"><aside class="cad-library" aria-label="Biblioteca de componentes">'+(!mobile?cadLibrary():'')+'</aside><main class="cad-main" aria-label="Mapa do serviço">'+(mobile?'<div class="cad-mobile-map">'+cadMobileMap()+'</div>':'<div class="cad-viewport" tabindex="0" aria-label="Canvas: arraste o fundo para mover; Ctrl e roda para ampliar"><svg id="cad-svg" aria-label="Etapas e componentes do serviço">'+cadSvg()+'</svg>'+(!S.steps.length?'<div class="cad-start"><h2>Como seu serviço acontece?</h2><p>Crie uma etapa e adicione o primeiro cartão.</p>'+cadButton('step','+ Adicionar etapa',cadLocked()?'disabled':'')+'</div>':'')+'<div class="cad-camera">'+cadButton('cad-minus','−','aria-label="Diminuir canvas"')+cadButton('cad-fit','Ajustar')+'<output data-cad-zoom></output>'+cadButton('cad-plus','+','aria-label="Ampliar canvas"')+'</div></div>')+'</main>'+(showInspector&&!mobile?'<aside class="cad-inspector" aria-label="Detalhes opcionais">'+cadButton('cad-close','Fechar detalhes')+cadInspector()+'</aside>':'')+'</div><footer class="cad-footer"><span>'+Object.values(S.c).flat().length+' cartões · '+(S.links||[]).length+' conexões · '+S.steps.length+' etapas</span><span role="status" data-cad-status>'+esc(status)+'</span><span class="cad-legend"><i style="background:'+cadColors.fl+'"></i> Frente <i style="background:'+cadColors.bk+'"></i> Bastidores <i style="background:'+cadColors.sy+'"></i> Apoio</span></footer></div>'+cadQuickForm()+cadChooser()+cadContextMenu()+
+ app.innerHTML='<div class="cad-shell"><header class="cad-header">'+cadButton('back','← Mapas','aria-label="Voltar para mapas do serviço"')+'<input data-f="title" aria-label="Nome do mapa" value="'+esc(S.title||'')+'"><span role="status" data-save-status>'+saveLabel+'</span><label class="cad-view-label">Visualização<select data-cad-view aria-label="Visualização do mapa"><option value="blueprint" '+(view==='blueprint'?'selected':'')+'>Blueprint</option><option value="journey" '+(view==='journey'?'selected':'')+'>Jornada</option><option value="matrix">Matriz</option></select></label></header><div class="cad-toolbar">'+cadButton('cad-library','+ Componente',cadLocked()?'disabled':'')+cadButton('step','+ Etapa','aria-label="Adicionar etapa" '+(cadLocked()?'disabled':''))+cadButton('undo','↶','aria-label="Desfazer" '+(!(HOSTED?H.canUndo:U.length)||cadLocked()?'disabled':''))+cadButton('redo','↷','aria-label="Refazer" '+(!(HOSTED?H.canRedo:R.length)||cadLocked()?'disabled':''))+cadButton('business-review','Revisar operação')+'<details class="cad-options"><summary>Mais</summary><div class="cad-options-panel">'+cadButton('cad-export','Exportar SVG')+cadButton('business-storage','Dados e backup')+cadButton('cad-fit','Ajustar mapa')+'<div class="cad-width-actions"><b>Largura das etapas</b>'+cadButton('cad-stage-narrow','− Reduzir todas')+cadButton('cad-stage-wide','+ Ampliar todas')+cadButton('cad-stage-equal','Uniformizar larguras')+cadButton('cad-stage-reset','Restaurar padrão')+'</div><label>Conexões<select data-cad-links aria-label="Exibir conexões">'+[['all','Todas'],['selected','Da seleção'],['off','Ocultar']].map(([id,name])=>'<option value="'+id+'" '+(id===V.connectionMode?'selected':'')+'>'+name+'</option>').join('')+'</select></label><label>Detalhes<select data-cad-detail aria-label="Nível de detalhe">'+[['auto','Automático'],['overview','Visão geral'],['detail','Completo']].map(([id,name])=>'<option value="'+id+'" '+(id===cadState.detail?'selected':'')+'>'+name+'</option>').join('')+'</select></label></div></details>'+(cadState.libraryHidden?cadButton('cad-toggle-library','Mostrar componentes'):'')+'<label class="cad-persona-label">Persona<select data-cad-persona aria-label="Persona do mapa">'+cadOptions(cadCatalog('persona'),S.personaId,'Sem Persona vinculada')+'</select></label></div>'+(cadState.connectFrom?'<div class="cad-connecting" role="region" aria-label="Criar conexão"><span>Escolha o cartão de destino</span><label>Relação<select data-cad-connect-type aria-label="Tipo da nova conexão">'+Object.entries(blueprintConnectionNames).map(([id,label])=>'<option value="'+id+'" '+(id===(cadState.connectType||'sequence')?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+cadButton('cad-cancel','Cancelar conexão')+'</div>':'')+'<div class="cad-workspace'+(showInspector?' has-inspector':'')+(cadState.libraryHidden?' is-library-hidden':'')+(cadState.libraryCompact?' is-library-compact':'')+'"><aside class="cad-library" aria-label="Biblioteca de componentes">'+(!mobile?cadLibrary():'')+'</aside><main class="cad-main" aria-label="Mapa do serviço">'+(mobile?'<div class="cad-mobile-map">'+cadMobileMap()+'</div>':'<div class="cad-viewport" tabindex="0" aria-label="Canvas: arraste o fundo para mover; Ctrl e roda para ampliar"><svg id="cad-svg" aria-label="Etapas e componentes do serviço">'+cadSvg()+'</svg>'+(!S.steps.length?'<div class="cad-start"><h2>Como seu serviço acontece?</h2><p>Crie uma etapa e adicione o primeiro cartão.</p>'+cadButton('step','+ Adicionar etapa',cadLocked()?'disabled':'')+'</div>':'')+'<div class="cad-camera">'+cadButton('cad-minus','−','aria-label="Diminuir canvas"')+cadButton('cad-fit','Ajustar')+'<output data-cad-zoom></output>'+cadButton('cad-plus','+','aria-label="Ampliar canvas"')+'</div></div>')+'</main>'+(showInspector&&!mobile?'<aside class="cad-inspector" aria-label="Detalhes opcionais">'+cadButton('cad-close','Fechar detalhes')+cadInspector()+'</aside>':'')+'</div><footer class="cad-footer"><span>'+Object.values(S.c).flat().length+' cartões · '+(S.links||[]).length+' conexões · '+S.steps.length+' etapas</span><span role="status" data-cad-status>'+esc(status)+'</span><span class="cad-legend"><i style="background:'+cadColors.fl+'"></i> Frente <i style="background:'+cadColors.bk+'"></i> Bastidores <i style="background:'+cadColors.sy+'"></i> Apoio</span></footer></div>'+cadQuickForm()+cadChooser()+cadContextMenu()+
  (mobile?'<dialog id="cad-library-sheet" class="cad-sheet" aria-label="Biblioteca de componentes">'+cadButton('cad-close-library','Fechar componentes')+cadLibrary()+'</dialog><dialog id="cad-inspector-sheet" class="cad-sheet" aria-label="Detalhes opcionais">'+cadButton('cad-close','Fechar detalhes')+(showInspector?cadInspector():'')+'</dialog>':'')+'<dialog id="cad-link-sheet" class="cad-sheet" aria-label="Editar conexão">'+cadButton('cad-close-link','Fechar conexão')+(cadState.link?cadLinkForm():'')+'</dialog>'+customizer()+growthDialogs()+contentDialogs()+contextDialogs()+viewsDialogs()+cardToolsDialogs()+blueprintDialogs()+businessDialogs();
  if(mobile&&cadState.library)app.querySelector('#cad-library-sheet').showModal();else if(mobile&&showInspector)app.querySelector('#cad-inspector-sheet').showModal();
  if(cadState.link)app.querySelector('#cad-link-sheet').showModal();
  if(cadLocked()){app.querySelector('.cad-header>input').readOnly=true;app.querySelector('[data-cad-persona]').disabled=true;app.querySelectorAll('#cad-component-form input,#cad-component-form select,#cad-component-form textarea,#cad-link-form input,#cad-link-form select,#cad-link-form textarea,#cad-quick-form input,#cad-quick-form select,#cad-quick-form textarea').forEach(field=>field.disabled=true)}
- cadLinkFields();requestAnimationFrame(()=>{if(!cadState.camera)cadFit();else cadPaint()});
+ cadLinkFields();requestAnimationFrame(()=>{if(!cadState.camera)cadInitialCamera();else cadPaint()});
 }
 function cadPaint(){const svg=app.querySelector('#cad-svg');if(svg)svg.innerHTML=cadSvg();const out=app.querySelector('[data-cad-zoom]');if(out)out.value=Math.round((cadState.camera?.zoom||1)*100)+'%'}
+function cadInitialCamera(){
+ const viewport=app.querySelector('.cad-viewport');
+ if(!viewport)return;
+ /* Start at the first stage at 100%, rather than shrinking the full board into the viewport. */
+ cadState.camera={x:16,y:16,zoom:1};
+ cadPaint();
+}
 function cadFit(){const viewport=app.querySelector('.cad-viewport');if(!viewport)return;const layout=cadState.layout,zoom=Math.max(.2,Math.min(1,(viewport.clientWidth-40)/layout.width,(viewport.clientHeight-45)/layout.height));cadState.camera={x:Math.max(16,(viewport.clientWidth-layout.width*zoom)/2),y:16,zoom};cadPaint()}
 function cadEnsureVisible(id){const viewport=app.querySelector('.cad-viewport'),node=cadState.layout?.nodes.find(value=>value.id===id);if(!viewport||!node||!cadState.camera)return;const cam=cadState.camera,left=node.x*cam.zoom+cam.x,top=node.y*cam.zoom+cam.y;if(left<20)cam.x+=20-left;else if(left+node.width*cam.zoom>viewport.clientWidth-20)cam.x-=left+node.width*cam.zoom-viewport.clientWidth+20;if(top<20)cam.y+=20-top;else if(top+node.height*cam.zoom>viewport.clientHeight-80)cam.y-=top+node.height*cam.zoom-viewport.clientHeight+80;cadPaint()}
 function cadZoom(factor,x,y){const viewport=app.querySelector('.cad-viewport');if(!viewport)return;const cam=cadState.camera||{x:16,y:16,zoom:1},next=Math.max(.2,Math.min(2.4,cam.zoom*factor));x??=viewport.clientWidth/2;y??=viewport.clientHeight/2;cadState.camera={x:x-(x-cam.x)*next/cam.zoom,y:y-(y-cam.y)*next/cam.zoom,zoom:next};cadPaint()}
@@ -298,8 +305,29 @@ function cadAction(action,data,button){
   if(cadLocked())return true;
   if(action==='cad-cell-add'){cadState.activeCell={row:data.row,index:Number(data.si)};cadState.libraryFilter='compatible';}
   if(!S.steps.length){cadStartStage();return true}
-  if(action==='cad-library'&&cadMobile()){cadState.library=true;rerender();return true}
+  if(action==='cad-library'&&cadMobile()){cadState.sidebarTab='components';cadState.library=true;rerender();return true}
   cadState.choosing={index:data.si!==undefined?Number(data.si):businessStageIndex(),row:data.row||'',...cadQuickPosition(point)};cadState.menu=null;rerender();return true;
+ }
+ if(action==='cad-sidebar-tab'){
+  if(!['components','lanes'].includes(data.tab))return true;
+  cadState.sidebarTab=data.tab;
+  if(data.tab==='lanes')cadState.libraryCompact=false;
+  cadSaveLibraryPreferences();rerender();
+  requestAnimationFrame(()=>app.querySelector('[data-act="cad-sidebar-tab"][data-tab="'+data.tab+'"]')?.focus());
+  return true;
+ }
+ if(action==='cad-lane-toggle'){
+  if(cadLocked()||!orderedRows().some(row=>row.id===data.id))return true;
+  V.hiddenRows=V.hiddenRows.includes(data.id)?V.hiddenRows.filter(id=>id!==data.id):[...new Set([...V.hiddenRows,data.id])];
+  V.preset='custom';saveView();rerender();return true;
+ }
+ if(action==='cad-lane-order'){
+  if(cadLocked())return true;
+  moveLane(data.id,Number(data.direction),false);return true;
+ }
+ if(action==='cad-lanes-show-all'){
+  if(cadLocked())return true;
+  V.hiddenRows=[];V.preset='custom';saveView();rerender();return true;
  }
  if(action==='cad-toggle-library-mode'){cadState.libraryCompact=!cadState.libraryCompact;cadSaveLibraryPreferences();rerender();return true}
  if(action==='cad-group'){cadState.groupOpen[data.group]=cadState.groupOpen[data.group]===false;cadSaveLibraryPreferences();rerender();return true}
@@ -307,12 +335,12 @@ function cadAction(action,data,button){
  if(action==='cad-lib-filter'){cadState.libraryFilter=data.filter;rerender();return true}
  if(['cad-stage-narrow','cad-stage-wide','cad-stage-equal','cad-stage-reset'].includes(action)){
   if(cadLocked())return true;const widths=cadStageWidths(),average=Math.round(S.steps.reduce((sum,_,i)=>sum+cadModel.canvasStageWidth(widths[i]),0)/Math.max(1,S.steps.length));
-  V.stageWidths=S.steps.map((_,i)=>action==='cad-stage-reset'?336:action==='cad-stage-equal'?average:cadModel.canvasStageWidth(cadModel.canvasStageWidth(widths[i])+(action==='cad-stage-wide'?48:-48)));
-  V.fitToScreen=false;saveView();cadState.camera=null;rerender();return true;
+  V.stageWidths=S.steps.map((_,i)=>action==='cad-stage-reset'?392:action==='cad-stage-equal'?average:cadModel.canvasStageWidth(cadModel.canvasStageWidth(widths[i])+(action==='cad-stage-wide'?48:-48)));
+  V.fitToScreen=false;saveView();rerender();return true;
  }
  if(action==='cad-stage-resize')return true;
  if(action==='cad-emotion'){if(cadState.ignoreClick){cadState.ignoreClick=false;return true}cadEditEmotion(Number(data.si),point);return true}
- if(action==='cad-toggle-library'){cadState.libraryHidden=!cadState.libraryHidden;cadState.camera=null;rerender();return true}
+ if(action==='cad-toggle-library'){cadState.libraryHidden=!cadState.libraryHidden;rerender();return true}
  if(action==='cad-close'){cadState.inspector=false;rerender();return true}
  if(action==='cad-details'){
   const entry=blueprintNote(data.id||cadState.selected);if(!entry)return true;cadState.selected=entry.note.i;cadState.creating=null;cadState.drafts.set(entry.note.i,cadDraftFor(entry));cadOpenInspector();return true;
@@ -359,6 +387,13 @@ function cadBind(){
   const field=event.target;
   if(field.form?.id==='cad-quick-form'&&field.name==='emotionScore'){
     const checkbox=field.form.elements.emotionUnknown;if(checkbox)checkbox.checked=false;if(cadState.quick)cadState.quick.emotionUnknown=false;
+   }
+   if(field.matches('[data-cad-lane-name]')){
+    if(cadLocked())return;
+    const id=field.dataset.cadLaneName,lane=(S.lanes||[]).find(item=>item.id===id);
+    if(!lane)return;const label=field.value.trim().slice(0,90)||'Nova faixa';
+    if(lane.n!==label){lane.n=label;if(S.rowSettings?.[id])S.rowSettings[id].n=label;save();}
+    rerender();return;
    }
    if(field.matches('[data-cad-connect-type]'))cadState.connectType=field.value;
   if(field.form?.id==='cad-quick-form'&&field.name==='referenceId'){const record=cadCatalog(cadState.quick.kind).find(value=>value.id===field.value);cadState.quick.referenceId=field.value;if(record){cadState.quick.title=record.title||record.name;field.form.elements.title.value=cadState.quick.title;cadPaint()}}
@@ -448,5 +483,5 @@ function cadBind(){
  app.addEventListener('dragover',event=>{if(!event.target.closest?.('.cad-viewport')||!event.dataTransfer.types.includes('application/x-blue-ocean-component'))return;event.preventDefault();const target=cadDropTarget(cadWorld(event));event.dataTransfer.dropEffect=cadHighlight(target,cadState.libraryKind)?'copy':'none'});
  app.addEventListener('drop',event=>{const kind=event.dataTransfer.getData('application/x-blue-ocean-component');if(!kind||!event.target.closest?.('.cad-viewport'))return;event.preventDefault();const target=cadDropTarget(cadWorld(event));if(!target.row||!target.stage){cadNotice('Solte em uma célula do mapa.');return}if(!cadModel.canvasAcceptsRow(kind,target.row.id)){cadNotice('Este componente não pertence a esta faixa. Escolha uma área destacada como válida.');return}cadStartQuick(kind,target.stage.index,target.row.id,{x:event.clientX+12,y:event.clientY+12})});
  app.addEventListener('dragend',()=>{cadState.libraryKind='';app.querySelectorAll('.cad-cell').forEach(cell=>cell.classList.remove('is-target','is-invalid'));getSelection()?.removeAllRanges()});
- let wasMobile=cadMobile();window.addEventListener('resize',()=>{if(!cadEnabled())return;if(wasMobile!==cadMobile()){wasMobile=cadMobile();rerender()}else if(!cadState.quick&&!cadState.inspector)cadFit()});
+ let wasMobile=cadMobile();window.addEventListener('resize',()=>{if(!cadEnabled())return;if(wasMobile!==cadMobile()){wasMobile=cadMobile();rerender()}else if(!cadState.quick&&!cadState.inspector)cadPaint()});
 }
