@@ -497,6 +497,19 @@ function cadBind(){
   if(event.target.matches?.('.cad-library-tabs [role="tab"]')&&['ArrowLeft','ArrowRight'].includes(event.key)){
     event.preventDefault();cadAction('cad-sidebar-tab',{tab:event.target.dataset.tab==='components'?'lanes':'components'});return;
    }
+   const cardHandle=event.target.closest?.('.cad-node-resize');
+   if(cardHandle&&['ArrowRight','ArrowLeft','ArrowUp','ArrowDown','Home'].includes(event.key)&&!cadLocked()){
+     event.preventDefault();
+     const id=cardHandle.dataset.id,entry=blueprintNote(id),node=cadState.layout.nodes.find(value=>value.id===id);
+     if(!entry||!node)return;
+     const next=structuredClone(S),note=next.c[entry.key].find(value=>value.i===id);
+     if(!note)return;
+     const stage=cadState.layout.stages.find(value=>value.index===node.stageIndex);
+     const width=event.key==='Home'?null:cadModel.canvasDimension((note.canvas?.width||node.width)+(event.key==='ArrowRight'?16:event.key==='ArrowLeft'?-16:0),150,Math.min(600,stage?.width-28||600));
+     const height=event.key==='Home'?null:cadModel.canvasDimension((note.canvas?.height||node.height)+(event.key==='ArrowDown'?16:event.key==='ArrowUp'?-16:0),80,480);
+     note.canvas={...note.canvas,kind:cadModel.canvasKind(note,node.row),width,height};
+     cadSend('canvas-change',{state:next},id);return;
+   }
    const laneHandle=event.target.closest?.('.cad-lane-resize');
    if(laneHandle&&['ArrowUp','ArrowDown','Home'].includes(event.key)&&!cadLocked()){
     event.preventDefault();const id=laneHandle.dataset.id,actual=cadState.layout.rows.find(row=>row.id===id)?.height||90;
@@ -522,7 +535,16 @@ function cadBind(){
   if(event.ctrlKey||event.metaKey)cadZoom(event.deltaY<0?1.1:1/1.1,event.clientX-rect.left,event.clientY-rect.top);else{cadState.camera.x-=event.shiftKey?event.deltaY:event.deltaX;cadState.camera.y-=event.shiftKey?0:event.deltaY;cadPaint()}
  },{passive:false});
  app.addEventListener('pointerdown',event=>{
-  const laneHandle=event.target.closest?.('.cad-lane-resize');
+  const cardHandle=event.target.closest?.('.cad-node-resize');
+   if(event.button===0&&cardHandle&&!cadLocked()){
+     const id=cardHandle.dataset.id,node=cadState.layout.nodes.find(value=>value.id===id);
+     if(node&&!node.note.virtualLabel&&!node.note.draft){
+       cadState.cardResize={pointer:event.pointerId,id,startX:event.clientX,startY:event.clientY,width:node.width,height:node.height,zoom:cadState.camera.zoom,stageIndex:node.stageIndex};
+       app.querySelector('.cad-viewport')?.setPointerCapture(event.pointerId);
+       event.preventDefault();return;
+     }
+   }
+   const laneHandle=event.target.closest?.('.cad-lane-resize');
    if(event.button===0&&laneHandle&&!cadLocked()){
     const id=laneHandle.dataset.id,viewport=app.querySelector('.cad-viewport'),row=cadState.layout.rows.find(r=>r.id===id);
     cadState.laneResize={pointer:event.pointerId,id,startY:event.clientY,height:row?.height||90,zoom:cadState.camera.zoom};
@@ -539,13 +561,22 @@ function cadBind(){
     cadState.emotionDrag={pointer:event.pointerId,index:i,startY:event.clientY,moved:false,previous:{e:stage.e,emotionRecorded:stage.emotionRecorded,emotionStatus:stage.emotionStatus,emotionSource:stage.emotionSource}};
     viewport?.setPointerCapture(event.pointerId);return;
    }
-   const viewport=event.target.closest?.('.cad-viewport');if(!viewport||event.target.closest('.cad-lane-select,.cad-lane-resize,.cad-camera,.cad-port,.cad-node-menu,.cad-cell-add,.cad-stage-insert,.cad-stage')||event.button!==0&&event.button!==1)return;
+   const viewport=event.target.closest?.('.cad-viewport');if(!viewport||event.target.closest('.cad-node-resize,.cad-lane-select,.cad-lane-resize,.cad-camera,.cad-port,.cad-node-menu,.cad-cell-add,.cad-stage-insert,.cad-stage')||event.button!==0&&event.button!==1)return;
   const node=event.target.closest('.cad-node');if(node&&(cadLocked()||cadState.connectFrom||!blueprintNote(node.dataset.id)))return;
   cadState.drag={pointer:event.pointerId,startX:event.clientX,startY:event.clientY,cam:{...cadState.camera},node:node?.dataset.id,moved:false};if(!event.target.closest('[data-act]'))viewport.setPointerCapture(event.pointerId);
  });
  app.addEventListener('pointermove',event=>{
   if(cadState.connectFrom&&event.target.closest?.('.cad-viewport')){cadState.pointer=cadWorld(event);const source=cadState.layout.nodes.find(node=>node.id===cadState.connectFrom);let preview=app.querySelector('.cad-connect-preview');if(source){if(!preview){preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('class','cad-connect-preview');app.querySelector('#cad-world')?.appendChild(preview)}preview.setAttribute('d','M '+(source.x+source.width)+' '+(source.y+source.height/2)+' L '+cadState.pointer.x+' '+cadState.pointer.y)}}
-  const laneResize=cadState.laneResize;
+  const cardResize=cadState.cardResize;
+   if(cardResize&&cardResize.pointer===event.pointerId){
+     const stage=cadState.layout.stages.find(value=>value.index===cardResize.stageIndex);
+     const width=cadModel.canvasDimension(cardResize.width+(event.clientX-cardResize.startX)/cardResize.zoom,150,Math.min(600,stage?.width-28||600));
+     const height=cadModel.canvasDimension(cardResize.height+(event.clientY-cardResize.startY)/cardResize.zoom,80,480);
+     cadState.cardResizePreview={id:cardResize.id,width,height};
+     cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());
+     cadPaint();return;
+   }
+   const laneResize=cadState.laneResize;
    if(laneResize&&laneResize.pointer===event.pointerId){
     const min=cadModel.canvasRowHeight(cadProjection(false),cadRows().find(r=>r.id===laneResize.id),S.steps.map((_,i)=>i));
     const height=Math.max(min,Math.min(540,Math.round(laneResize.height+(event.clientY-laneResize.startY)/laneResize.zoom)));
@@ -569,6 +600,21 @@ function cadBind(){
   const node=cadState.layout.nodes.find(node=>node.id===drag.node),element=app.querySelector('[data-group-id="'+CSS.escape(drag.node)+'"]');element?.setAttribute('transform','translate('+(node.x+dx/drag.cam.zoom)+' '+(node.y+dy/drag.cam.zoom)+')');element?.classList.add('is-dragging');cadHighlight(cadDropTarget(cadWorld(event)),cadModel.canvasKind(node.note,node.row));
  });
  const end=(event,cancel=false)=>{
+   const cardResize=cadState.cardResize;
+   if(cardResize&&cardResize.pointer===event.pointerId){
+     const preview=cadState.cardResizePreview;
+     cadState.cardResize=null;cadState.cardResizePreview=null;
+     if(cancel||!preview||preview.width===cardResize.width&&preview.height===cardResize.height){
+       cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());cadPaint();return;
+     }
+     const entry=blueprintNote(cardResize.id);
+     if(!entry){cadPaint();return}
+     const next=structuredClone(S),note=next.c[entry.key]?.find(value=>value.i===cardResize.id);
+     if(!note){cadPaint();return}
+     note.canvas={...note.canvas,kind:cadModel.canvasKind(note,entry.key.split('|')[0]),width:preview.width,height:preview.height};
+     cadState.ignoreClick=true;setTimeout(()=>cadState.ignoreClick=false,180);
+     cadSend('canvas-change',{state:next},cardResize.id);return;
+   }
    const laneResize=cadState.laneResize;
    if(laneResize&&laneResize.pointer===event.pointerId){
     cadState.laneResize=null;const height=cadState.lanePreviewHeights?.[laneResize.id]??laneResize.height;cadState.lanePreviewHeights=null;
