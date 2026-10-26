@@ -48,7 +48,7 @@ check('Custom stage widths resize each column without stretching neighboring car
  source.c['em|0']=[{i:'old-emotion',t:'Ansiosa',type:'card',canvas:{kind:'emotion'}}];
  const layout=buildCanvasLayout(source,rowsWithEmotion,null,widths);
  assert.equal(layout.stages[0].width,210);
- assert.equal(layout.stages[1].x,420);
+ assert.equal(layout.stages[1].x,CANVAS_GRID.label+layout.stages[0].width);
  assert.equal(layout.stages[1].width,540);
  assert.ok(layout.nodes.find(node=>node.id==='old-emotion'),'Old emotion card IDs remain in layout for saved links');
  for(const node of layout.nodes.filter(value=>value.row!=='em')){
