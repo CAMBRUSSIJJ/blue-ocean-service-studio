@@ -17,6 +17,7 @@ o fluxo local. Os guias abaixo descrevem o funcionamento atual.
 
 ## Usar e evoluir os editores
 
+- [Auditoria de UX e plano de consolidação — 26/10/2026](ux-audit-service-studio-2026-10-26.md).
 - [Entrada e início da Jornada](entry-and-journey-start.md).
 - [Matriz compartilhada de Jornada e Blueprint](shared-map-matrix.md).
 - [Seletor Universal de Elementos: pesquisar, criar e vincular](journey-element-selector.md).
