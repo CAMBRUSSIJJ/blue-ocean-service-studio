@@ -27,6 +27,7 @@ const checks=[
  [cad.includes("cadState.pending?'Salvando…':saveLabel"),'Cabeçalho reflete estado pendente'],
  [css.includes('.cad-lane-item.is-drag-over'),'Arraste sinaliza destino de faixa'],
  [css.includes('.cad-inspector-advanced'),'Aparência é seccionada no inspetor'],
+ [cad.includes('cadUpdateStickyStages()')&&cad.includes('class="cad-sticky-stages"'),'Etapas permanecem identificadas durante movimento vertical'],
  [prepare.includes('canvasAcceptsNewRow,canvasPlacementHint'),'Runtime compartilha regras de compatibilidade']
 ];
 for(const [ok,description] of checks){console.log((ok?'OK':'FAIL')+' '+description)}
