@@ -300,3 +300,16 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 @media (prefers-reduced-motion:reduce){
  #cad-svg .cad-stage-resize,#cad-svg .cad-lane-resize,#cad-svg .cad-node-resize{transition:none}
 }
+
+/* Full-width hover zone: no permanent lane pills or visual resize buttons. */
+#cad-svg .cad-lane-resize{cursor:ns-resize;opacity:0}
+#cad-svg .cad-lane-resize rect,
+#cad-svg .cad-lane-resize:hover rect,
+#cad-svg .cad-lane-resize:focus-visible rect{
+  fill:transparent;stroke:none;pointer-events:all
+}
+#cad-svg .cad-lane-resize path{fill:none;stroke:#a9c9ec;stroke-width:1.5;stroke-dasharray:5 5;pointer-events:none}
+#cad-svg .cad-lane-resize:hover path,#cad-svg .cad-lane-resize:focus-visible path{stroke:#6ba1d9}
+#cad-svg .cad-lane-resize:hover,#cad-svg .cad-lane-resize:focus-visible{opacity:1}
+#cad-svg .cad-lane-select:hover + .cad-lane-resize{opacity:0}
+@media (hover:none){#cad-svg .cad-lane-resize{opacity:.35}}
