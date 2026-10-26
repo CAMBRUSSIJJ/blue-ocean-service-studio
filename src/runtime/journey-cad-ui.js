@@ -251,16 +251,18 @@ function cadEnsureVisible(id){const viewport=app.querySelector('.cad-viewport'),
 function cadZoom(factor,x,y){const viewport=app.querySelector('.cad-viewport');if(!viewport)return;const cam=cadState.camera||{x:16,y:16,zoom:1},next=Math.max(.2,Math.min(2.4,cam.zoom*factor));x??=viewport.clientWidth/2;y??=viewport.clientHeight/2;cadState.camera={x:x-(x-cam.x)*next/cam.zoom,y:y-(y-cam.y)*next/cam.zoom,zoom:next};cadPaint()}
 function cadNotice(message){cadState.error=message;const status=app.querySelector('[data-cad-status]');if(status)status.textContent=message}
 function cadOpenInspector(){cadState.inspector=true;cadState.quick=null;cadState.menu=null;cadState.library=false;rerender()}
-function cadSelect(id,point={}){
+function cadSelect(id,point={},inline=false){
  if(cadState.ignoreClick){cadState.ignoreClick=false;return}
  const entry=blueprintNote(id);if(!entry)return;
  if(cadState.connectFrom){if(id===cadState.connectFrom){cadState.connectFrom='';cadPaint();return}cadConnectTo(id);return}
- cadStash();cadState.creating=null;cadState.selected=id;cadState.menu=null;cadState.choosing=null;cadState.inspector=false;cadState.error='';
+ cadStash();cadState.creating=null;cadState.selected=id;cadState.selectedRow='';cadState.menu=null;cadState.choosing=null;cadState.error='';
  const [row,index]=entry.key.split('|');
- if(!['card','text','metric','channel','persona','need','pain','opportunity'].includes(entry.note.type)){contentCellKey=entry.key;contentOpenEditor(entry.note.type,entry.note);return}
- const draft=cadState.drafts.get(id)||cadDraftFor(entry);Object.assign(draft,{mode:'card',editingId:id,...cadQuickPosition(point)});
+ const draft=cadState.drafts.get(id)||cadDraftFor(entry);
+ Object.assign(draft,{mode:'card',editingId:id,...cadQuickPosition(point)});
  if(draft.kind==='emotion'){draft.emotionScore=S.steps[index].e;draft.emotionNote=S.steps[index].note||''}
- cadState.drafts.set(id,draft);cadState.quick=draft;rerender();cadFocusQuick();
+ cadState.drafts.set(id,draft);
+ if(inline){cadState.inspector=false;cadState.quick=draft;rerender();cadFocusQuick();}
+ else {cadState.quick=null;cadState.inspector=true;rerender();requestAnimationFrame(()=>app.querySelector('#cad-component-form [name="title"]')?.focus());}
 }
 function cadOpenLink(id='',source=''){const link=(S.links||[]).find(value=>value.id===id);if(!link){cadState.connectFrom=source||cadState.selected;cadState.quick=null;cadState.menu=null;rerender();return}cadState.link={...link,...link.handoff};cadState.quick=null;cadState.menu=null;cadState.inspector=false;cadState.error='';rerender()}
 function cadConnectTo(target){
@@ -278,7 +280,7 @@ function cadResult(data){
  if(data.requestId!==cadState.pending)return;cadState.pending='';cadState.pendingDocument=null;if(!data.ok){cadState.error=data.error||'Não foi possível salvar.';announceSave(false);rerender();cadFocusQuick();return}
  S=structuredClone(data.state);S.id=HOSTED?'host':S.id;DB={cur:S.id,js:[S]};last=JSON.stringify(S);growthLastPatch=growthPatchKey();if(data.history)H=data.history;
  if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);cadState.drafts.delete(cadState.selected);
- cadState.creating=null;cadState.quick=null;cadState.link=null;cadState.menu=null;cadState.selected=data.noteId||'';cadState.inspector=false;cadState.error='';announceSave(true);rerender();
+ cadState.creating=null;cadState.quick=null;cadState.link=null;cadState.menu=null;cadState.selected=data.noteId||'';cadState.inspector=!!cadState.selected;cadState.selectedRow='';cadState.error='';announceSave(true);rerender();
  requestAnimationFrame(()=>app.querySelector('.cad-node[data-id="'+CSS.escape(data.noteId||'')+'"]')?.focus());
 }
 function cadQuickSubmit(form){
@@ -310,6 +312,7 @@ function cadAction(action,data,button){
  const rect=button?.getBoundingClientRect(),point=rect?{x:rect.left,y:rect.bottom+8}:{};
  if(action==='cad-open'||action==='cad-matrix'){cadStash();V.blueprintRenderer=action==='cad-open'?'canvas':'matrix';saveView();rerender();return true}
  if(action==='cad-select'){cadSelect(data.id,point);return true}
+ if(action==='cad-inline'){cadSelect(data.id,point,true);return true}
  if(action==='cad-quick-focus'){cadFocusQuick();return true}
  if(action==='cad-edge'){cadOpenLink(data.id);return true}
  if(action==='cad-connect'||action==='cad-link'){
@@ -348,6 +351,20 @@ function cadAction(action,data,button){
   if(cadLocked())return true;
   V.hiddenRows=[];V.preset='custom';saveView();rerender();return true;
  }
+ if(action==='cad-lane-select'){
+  if(!rowDefs().some(row=>row.id===data.id))return true;
+  cadState.selected='';cadState.quick=null;cadState.selectedRow=data.id;cadState.inspector=true;cadState.menu=null;rerender();return true;
+ }
+ if(action==='cad-lane-advanced'){if(!cadLocked())contentOpenRow(data.id);return true}
+ if(action==='cad-lane-height-apply'){
+  const field=app.querySelector('[data-cad-height]');if(field&&!field.checkValidity()){field.reportValidity();return true}
+  cadChangeRowHeight(data.id,field?.value);return true;
+ }
+ if(action==='cad-lane-auto'){cadChangeRowHeight(data.id,null);return true}
+ if(action==='cad-open-link'){
+  const entry=blueprintNote(data.id||cadState.selected),url=cadModel.canvasSafeUrl(entry?.note.canvas?.linkUrl||entry?.note.canvas?.imageUrl||entry?.note.url);
+  if(url)window.open(url,'_blank','noopener,noreferrer');return true;
+ }
  if(action==='cad-toggle-library-mode'){cadState.libraryCompact=!cadState.libraryCompact;cadSaveLibraryPreferences();rerender();return true}
  if(action==='cad-group'){cadState.groupOpen[data.group]=cadState.groupOpen[data.group]===false;cadSaveLibraryPreferences();rerender();return true}
  if(action==='cad-favorite'){const kind=data.kind;cadState.favorites=cadState.favorites.includes(kind)?cadState.favorites.filter(x=>x!==kind):[...cadState.favorites,kind];cadSaveLibraryPreferences();rerender();return true}
@@ -360,13 +377,13 @@ function cadAction(action,data,button){
  if(action==='cad-stage-resize')return true;
  if(action==='cad-emotion'){if(cadState.ignoreClick){cadState.ignoreClick=false;return true}cadEditEmotion(Number(data.si),point);return true}
  if(action==='cad-toggle-library'){cadState.libraryHidden=!cadState.libraryHidden;rerender();return true}
- if(action==='cad-close'){cadState.inspector=false;rerender();return true}
+ if(action==='cad-close'){cadState.inspector=false;cadState.selectedRow='';rerender();return true}
  if(action==='cad-details'){
-  const entry=blueprintNote(data.id||cadState.selected);if(!entry)return true;cadState.selected=entry.note.i;cadState.creating=null;cadState.drafts.set(entry.note.i,cadDraftFor(entry));cadOpenInspector();return true;
+  cadState.selectedRow='';const entry=blueprintNote(data.id||cadState.selected);if(!entry)return true;cadState.selected=entry.note.i;cadState.creating=null;cadState.drafts.set(entry.note.i,cadDraftFor(entry));cadOpenInspector();return true;
  }
  if(action==='cad-cancel'){
   if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);
-  cadState.drafts.delete(cadState.selected);Object.assign(cadState,{creating:null,quick:null,link:null,menu:null,selected:'',inspector:false,error:'',connectFrom:'',pointer:null});rerender();return true;
+  cadState.drafts.delete(cadState.selected);Object.assign(cadState,{creating:null,quick:null,link:null,menu:null,selected:'',selectedRow:'',inspector:false,error:'',connectFrom:'',pointer:null});rerender();return true;
  }
  if(action==='cad-add'){
   const kind=data.kind||'text',active=cadState.activeCell,index=data.si!==undefined?Number(data.si):cadState.choosing?.index??active?.index??businessStageIndex();
@@ -423,6 +440,11 @@ function cadBind(){
   if(field.matches('[data-cad-links]')){V.connectionMode=field.value;saveView();cadPaint()}
   if(field.form?.id==='cad-link-form')cadLinkFields();
  });
+ app.addEventListener('dblclick',event=>{
+  const node=event.target.closest?.('.cad-node');
+  if(!cadEnabled()||!node||!blueprintNote(node.dataset.id)||cadLocked())return;
+  event.preventDefault();cadSelect(node.dataset.id,{x:event.clientX,y:event.clientY},true);
+ });
  app.addEventListener('contextmenu',event=>{
   if(!cadEnabled()||cadLocked())return;const node=event.target.closest?.('.cad-node'),edge=event.target.closest?.('.cad-edge'),stage=event.target.closest?.('.cad-stage');if(!node&&!edge&&!stage)return;if(node&&!blueprintNote(node.dataset.id))return;
   event.preventDefault();cadState.menu={id:node?.dataset.id,edgeId:edge?.dataset.id,index:stage?Number(stage.dataset.si):undefined,...cadQuickPosition({x:event.clientX,y:event.clientY})};rerender();requestAnimationFrame(()=>app.querySelector('.cad-context-menu button')?.focus());
@@ -463,7 +485,7 @@ function cadBind(){
     cadState.emotionDrag={pointer:event.pointerId,index:i,startY:event.clientY,moved:false,previous:{e:stage.e,emotionRecorded:stage.emotionRecorded,emotionStatus:stage.emotionStatus,emotionSource:stage.emotionSource}};
     viewport?.setPointerCapture(event.pointerId);return;
    }
-   const viewport=event.target.closest?.('.cad-viewport');if(!viewport||event.target.closest('.cad-camera,.cad-port,.cad-node-menu,.cad-cell-add,.cad-stage-insert,.cad-stage')||event.button!==0&&event.button!==1)return;
+   const viewport=event.target.closest?.('.cad-viewport');if(!viewport||event.target.closest('.cad-lane-select,.cad-lane-resize,.cad-camera,.cad-port,.cad-node-menu,.cad-cell-add,.cad-stage-insert,.cad-stage')||event.button!==0&&event.button!==1)return;
   const node=event.target.closest('.cad-node');if(node&&(cadLocked()||cadState.connectFrom||!blueprintNote(node.dataset.id)))return;
   cadState.drag={pointer:event.pointerId,startX:event.clientX,startY:event.clientY,cam:{...cadState.camera},node:node?.dataset.id,moved:false};if(!event.target.closest('[data-act]'))viewport.setPointerCapture(event.pointerId);
  });
