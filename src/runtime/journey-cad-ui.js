@@ -1,6 +1,6 @@
 /* Operational canvas is a projection of the shared Journey document, never a second store. */
 const cadModel=window.BlueOceanBlueprintCanvas;
-const cadState={scene:'',selected:'',creating:null,link:null,drafts:new Map(),camera:null,layout:null,pending:'',error:'',library:false,inspector:false,detail:'auto',drag:null,ignoreClick:false,quick:null,choosing:null,menu:null,connectFrom:'',connectType:'sequence',pointer:null,query:'',libraryHidden:false,libraryKind:'',pendingDocument:null,canvasPerspective:'',libraryFilter:'all',activeCell:null,sidebarTab:'components',libraryCompact:false,groupOpen:{},favorites:[],resize:null,resizePreview:null,emotionDrag:null,selectedRow:'',laneResize:null,lanePreviewHeights:null};
+const cadState={scene:'',selected:'',creating:null,link:null,drafts:new Map(),camera:null,layout:null,pending:'',error:'',library:false,inspector:false,detail:'auto',drag:null,ignoreClick:false,quick:null,choosing:null,menu:null,connectFrom:'',connectType:'sequence',pointer:null,query:'',libraryHidden:false,libraryKind:'',pendingDocument:null,canvasPerspective:'',libraryFilter:'all',activeCell:null,sidebarTab:'components',libraryCompact:false,groupOpen:{},favorites:[],resize:null,resizePreview:null,emotionDrag:null,selectedRow:'',laneResize:null,lanePreviewHeights:null,cardResize:null,cardResizePreview:null};
 try{const p=JSON.parse(localStorage.getItem('bo-cad-library-prefs-v2')||'{}');cadState.libraryCompact=!!p.compact;cadState.favorites=Array.isArray(p.favorites)?p.favorites.filter(k=>k in cadModel.CANVAS_COMPONENTS):[];cadState.groupOpen=p.groups||{};cadState.sidebarTab=p.sidebarTab==='lanes'?'lanes':'components'}catch{}
 function cadSaveLibraryPreferences(){try{localStorage.setItem('bo-cad-library-prefs-v2',JSON.stringify({compact:cadState.libraryCompact,favorites:cadState.favorites,groups:cadState.groupOpen,sidebarTab:cadState.sidebarTab}))}catch{}}
 function cadStageWidths(){return cadState.resizePreview||V.stageWidths||[]}
@@ -35,7 +35,24 @@ function cadCellNotes(row,index){
  if(row==='im')S.iss.filter(issue=>issue.s===index&&issue.x.trim()&&!Object.values(S.c).flat().some(note=>note.referenceId===issue.hostEntityId)).forEach((issue,i)=>summary('issue'+i,issue.x,issue.t==='d'?'Dor · editar na matriz':'Ideia · editar na matriz'));
  return notes;
 }
-function cadProjection(includeDraft=true){if(cadState.pendingDocument)return structuredClone(cadState.pendingDocument);const doc={...S,c:{...S.c}};for(const row of cadRows())S.steps.forEach((_,index)=>{doc.c[row.id+'|'+index]=cadCellNotes(row.id,index)});if(includeDraft&&cadState.creating&&cadState.quick){const draft=cadState.creating,index=S.steps.findIndex(step=>cadStageKey(step)===draft.stageKey);if(index>=0)(doc.c[draft.row+'|'+index]||=[]).push({i:'@draft',t:draft.title||'Novo cartão…',type:'card',canvas:{kind:draft.kind},draft:true})}return doc}
+function cadProjection(includeDraft=true){
+  if(cadState.pendingDocument)return structuredClone(cadState.pendingDocument);
+  const doc={...S,c:{...S.c}};
+  for(const row of cadRows())S.steps.forEach((_,index)=>{doc.c[row.id+'|'+index]=cadCellNotes(row.id,index)});
+  if(includeDraft&&cadState.creating&&cadState.quick){
+    const draft=cadState.creating,index=S.steps.findIndex(step=>cadStageKey(step)===draft.stageKey);
+    if(index>=0)(doc.c[draft.row+'|'+index]||=[]).push({i:'@draft',t:draft.title||'Novo cartão…',type:'card',canvas:{kind:draft.kind},draft:true});
+  }
+  if(includeDraft&&cadState.cardResizePreview){
+    const preview=cadState.cardResizePreview;
+    for(const [key,notes] of Object.entries(doc.c)){
+      if(!notes.some(note=>note.i===preview.id))continue;
+      doc.c[key]=notes.map(note=>note.i===preview.id?{...note,canvas:{...note.canvas,width:preview.width,height:preview.height}}:note);
+      break;
+    }
+  }
+  return doc;
+}
 function cadTitle(note){return note.t||pickerReference(note)?.title||pickerReference(note)?.name||contentTypes[note.type]?.[1]||'Componente'}
 function cadButton(action,label,attrs=''){return '<button type="button" data-act="'+action+'" '+attrs+'>'+label+'</button>'}
 function cadLocked(){return !!S.readOnly||!!cadState.pending}
@@ -241,7 +258,7 @@ function cadMobileMap(){
 }
 function cadRender(){
  if(!V.canvasOrderVersion){const preferred=['sd','ev','ch','ac','th','em','fl','bk','sy','im'];V.rowOrder=[...preferred,...V.rowOrder.filter(id=>!preferred.includes(id))];V.canvasOrderVersion=1;saveView()}
- const scene=S.journeyId||S.id;if(cadState.scene!==scene||cadState.canvasPerspective!==V.perspective){Object.assign(cadState,{scene,canvasPerspective:V.perspective,selected:'',selectedRow:'',creating:null,quick:null,link:null,camera:null,drafts:new Map(),inspector:false,error:'',menu:null,connectFrom:'',choosing:null,activeCell:null,libraryFilter:'all',resize:null,resizePreview:null,emotionDrag:null,laneResize:null,lanePreviewHeights:null,lastCardClick:null})}
+ const scene=S.journeyId||S.id;if(cadState.scene!==scene||cadState.canvasPerspective!==V.perspective){Object.assign(cadState,{scene,canvasPerspective:V.perspective,selected:'',selectedRow:'',creating:null,quick:null,link:null,camera:null,drafts:new Map(),inspector:false,error:'',menu:null,connectFrom:'',choosing:null,activeCell:null,libraryFilter:'all',resize:null,resizePreview:null,emotionDrag:null,laneResize:null,lanePreviewHeights:null,cardResize:null,cardResizePreview:null,lastCardClick:null})}
  document.body.classList.add('cad-mode');cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());
  if(cadState.selected&&!blueprintNote(cadState.selected)){cadState.selected='';cadState.inspector=false}
  const mobile=cadMobile(),showInspector=cadState.inspector&&(!!cadState.selected||!!cadState.selectedRow),view=V.perspective==='journey'?'journey':'blueprint';
