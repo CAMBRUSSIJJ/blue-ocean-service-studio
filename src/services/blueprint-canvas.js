@@ -21,9 +21,32 @@ export const CANVAS_COMPONENTS = {
 };
 export function canvasAcceptsRow(kind,row){const component=CANVAS_COMPONENTS[kind];return !!component&&(component.rows.includes('*')||component.rows.includes(row))}
 const text = (value,limit) => typeof value==='string'?value.trim().slice(0,limit):'';
+export function canvasSafeUrl(value) {
+  const raw=text(value,2000);
+  if(!raw)return '';
+  try{const url=new URL(raw);return ['https:','http:'].includes(url.protocol)?url.href:''}catch{return ''}
+}
+export function canvasCardHeight(note={},row='') {
+  const kind=canvasKind(note,row);
+  if(kind==='artifact'&&canvasSafeUrl(note.canvas?.imageUrl||note.url))return 164;
+  if(kind==='channel')return 88;
+  if(kind==='text')return 98;
+  return CANVAS_GRID.cardHeight;
+}
+export function canvasRowHeight(doc,definition,indices,minimum=0) {
+  if(definition.id==='em')return Math.max(132,Number(minimum)||0);
+  const g=CANVAS_GRID;
+  const total=indices.map(index=>{
+    const notes=doc.c[definition.id+'|'+index]||[];
+    return notes.length?g.padding*2+notes.reduce((sum,note)=>sum+canvasCardHeight(note,definition.id),0)+Math.max(0,notes.length-1)*g.gap:0;
+  });
+  return Math.max(90,...total,Math.min(540,Math.max(0,Number(minimum)||0)));
+}
 export function normalizeCanvasMetadata(input={}) {
   if (!Object.hasOwn(CANVAS_COMPONENTS,input.kind)) throw Error('Tipo de componente indisponível.');
-  return {version:1,kind:input.kind,description:text(input.description,1000),channelId:text(input.channelId,160),metricId:text(input.metricId,160)};
+  return {version:1,kind:input.kind,description:text(input.description,1000),channelId:text(input.channelId,160),metricId:text(input.metricId,160),
+  imageUrl:canvasSafeUrl(input.imageUrl),linkUrl:canvasSafeUrl(input.linkUrl),tone:['default','blue','teal','amber','violet','neutral'].includes(input.tone)?input.tone:'default',
+  evidenceType:['image','document','link','physical'].includes(input.evidenceType)?input.evidenceType:'physical'};
 }
 export function canvasKind(note,row) {
   if (Object.hasOwn(CANVAS_COMPONENTS,note.canvas?.kind)) return note.canvas.kind;
@@ -107,17 +130,23 @@ export function canvasBoundary(row,index,rows) {
   if(!previous||before<0||before>=index||rows.slice(before+1,index).some(value=>['fl','bk','sy'].includes(value.id)))return '';
   return {fl:'Linha de interação',bk:'Linha de visibilidade · início dos bastidores',sy:'Linha de interação interna · apoio'}[row.id];
 }
-export function buildCanvasLayout(doc,definitions,stageIndices=null,stageWidths=null) {
+export function buildCanvasLayout(doc,definitions,stageIndices=null,stageWidths=null,rowHeights=null) {
   const g=CANVAS_GRID,indices=stageIndices||doc.steps.map((_,index)=>index),nodes=[],rows=[];
   let cursor=g.label;
   const stages=indices.map(index=>{const width=canvasStageWidth(stageWidths?.[index]);const stage={index,step:doc.steps[index],x:cursor,width};cursor+=width;return stage;});
   let y=g.header;
   for(const definition of definitions) {
-    const counts=indices.map(index=>definition.id==='em'?0:(doc.c[definition.id+'|'+index]||[]).length);
-    const count=Math.max(1,...counts),height=g.padding*2+count*g.cardHeight+(count-1)*g.gap;
+    const height=canvasRowHeight(doc,definition,indices,rowHeights?.[definition.id]);
     rows.push({...definition,y,height});
     if(definition.id==='em')for(const stage of stages)(doc.c['em|'+stage.index]||[]).forEach(note=>{if(note.virtualLabel)return;const point=canvasEmotionPoint(stage,{y});nodes.push({id:note.i,note,row:'em',stageIndex:stage.index,position:0,key:'em|'+stage.index,x:point.x-1,y:point.y-1,width:2,height:2});});
-    if(definition.id!=='em')for(const stage of stages)(doc.c[definition.id+'|'+stage.index]||[]).forEach((note,position)=>{const width=Math.min(g.cardWidth,stage.width-28);nodes.push({id:note.i,note,row:definition.id,stageIndex:stage.index,position,key:definition.id+'|'+stage.index,x:stage.x+(stage.width-width)/2,y:y+g.padding+position*(g.cardHeight+g.gap),width,height:g.cardHeight});});
+    if(definition.id!=='em')for(const stage of stages){
+      let offset=0;
+      for(const [position,note] of (doc.c[definition.id+'|'+stage.index]||[]).entries()){
+        const width=Math.min(g.cardWidth,stage.width-28),cardHeight=canvasCardHeight(note,definition.id);
+        nodes.push({id:note.i,note,row:definition.id,stageIndex:stage.index,position,key:definition.id+'|'+stage.index,x:stage.x+(stage.width-width)/2,y:y+g.padding+offset,width,height:cardHeight});
+        offset+=cardHeight+g.gap;
+      }
+    }
     y+=height+28;
   }
   return {stages,rows,nodes,width:cursor+20,height:y+20};
@@ -143,8 +172,8 @@ export function canvasEdgeGeometry(a,b,offset=0) {
 }
 const xml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[char]));
 const colors={sequence:'#2563eb',dependency:'#a65f00',uses:'#7355ab',handoff:'#087f75'};
-export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type||'Componente',stageWidths=null) {
-  const layout=buildCanvasLayout(doc,definitions,null,stageWidths),byId=new Map(layout.nodes.map(node=>[node.id,node])),offsets=canvasConnectionOffsets(doc.links||[]);
+export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type||'Componente',stageWidths=null,rowHeights=null) {
+  const layout=buildCanvasLayout(doc,definitions,null,stageWidths,rowHeights),byId=new Map(layout.nodes.map(node=>[node.id,node])),offsets=canvasConnectionOffsets(doc.links||[]);
   let out=`<svg xmlns="http://www.w3.org/2000/svg" width="${layout.width}" height="${layout.height+60}" viewBox="0 -60 ${layout.width} ${layout.height+60}" role="img" aria-label="${xml(doc.title)}"><title>${xml(doc.title)}</title><rect x="0" y="-60" width="100%" height="${layout.height+60}" fill="#ffffff"/><text x="20" y="-24" font-size="24" font-family="sans-serif" fill="#142944">${xml(doc.title)}</text><defs>`;
   for(const [type,color]of Object.entries(colors))out+=`<marker id="arrow-${type}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="${color}"/></marker>`;
   out+='</defs><g font-family="sans-serif">';
