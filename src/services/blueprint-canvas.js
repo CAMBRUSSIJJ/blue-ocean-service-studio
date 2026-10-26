@@ -26,7 +26,17 @@ export function canvasSafeUrl(value) {
   if(!raw)return '';
   try{const url=new URL(raw);return ['https:','http:'].includes(url.protocol)?url.href:''}catch{return ''}
 }
+export function canvasDimension(value,min,max) {
+  if(value===null||value===undefined||value==='')return null;
+  const n=Number(value);
+  return Number.isFinite(n)?Math.max(min,Math.min(max,Math.round(n))):null;
+}
+export function canvasCardWidth(note={},stageWidth=CANVAS_GRID.stage){
+  return Math.min(stageWidth-28,canvasDimension(note.canvas?.width,150,600)??CANVAS_GRID.cardWidth);
+}
 export function canvasCardHeight(note={},row='') {
+  const custom=canvasDimension(note.canvas?.height,80,480);
+  if(custom!==null)return custom;
   const kind=canvasKind(note,row);
   if(kind==='artifact'&&canvasSafeUrl(note.canvas?.imageUrl||note.url))return 164;
   if(kind==='channel')return 88;
@@ -46,7 +56,8 @@ export function normalizeCanvasMetadata(input={}) {
   if (!Object.hasOwn(CANVAS_COMPONENTS,input.kind)) throw Error('Tipo de componente indisponível.');
   return {version:1,kind:input.kind,description:text(input.description,1000),channelId:text(input.channelId,160),metricId:text(input.metricId,160),
   imageUrl:canvasSafeUrl(input.imageUrl),linkUrl:canvasSafeUrl(input.linkUrl),iconKey:Object.hasOwn(CANVAS_COMPONENTS,input.iconKey)?input.iconKey:input.kind,tone:['default','blue','teal','amber','violet','neutral'].includes(input.tone)?input.tone:'default',
-  evidenceType:['image','document','link','physical'].includes(input.evidenceType)?input.evidenceType:'physical'};
+  evidenceType:['image','document','link','physical'].includes(input.evidenceType)?input.evidenceType:'physical',
+  width:canvasDimension(input.width,150,600),height:canvasDimension(input.height,80,480)};
 }
 export function canvasKind(note,row) {
   if (Object.hasOwn(CANVAS_COMPONENTS,note.canvas?.kind)) return note.canvas.kind;
@@ -142,7 +153,7 @@ export function buildCanvasLayout(doc,definitions,stageIndices=null,stageWidths=
     if(definition.id!=='em')for(const stage of stages){
       let offset=0;
       for(const [position,note] of (doc.c[definition.id+'|'+stage.index]||[]).entries()){
-        const width=Math.min(g.cardWidth,stage.width-28),cardHeight=canvasCardHeight(note,definition.id);
+        const width=canvasCardWidth(note,stage.width),cardHeight=canvasCardHeight(note,definition.id);
         nodes.push({id:note.i,note,row:definition.id,stageIndex:stage.index,position,key:definition.id+'|'+stage.index,x:stage.x+(stage.width-width)/2,y:y+g.padding+offset,width,height:cardHeight});
         offset+=cardHeight+g.gap;
       }
