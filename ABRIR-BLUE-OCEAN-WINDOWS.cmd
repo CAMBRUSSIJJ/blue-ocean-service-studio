@@ -37,7 +37,16 @@ if not exist "node_modules\.bin\vite.cmd" (
   )
 )
 set "BO_PORT=5173"
-for /f %%P in ('powershell -NoProfile -Command "$p=5173; while (Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction SilentlyContinue) {$p++}; $p"') do set "BO_PORT=%%P"
+set "BO_PORT_STATE=LIVRE"
+for /f %%P in ('powershell -NoProfile -Command "if(Get-NetTCPConnection -LocalPort 5173 -State Listen -ErrorAction SilentlyContinue){'OCUPADA'}else{'LIVRE'}"') do set "BO_PORT_STATE=%%P"
+if /I "%BO_PORT_STATE%"=="OCUPADA" (
+  echo.
+  echo A porta 5173 ja esta sendo utilizada.
+  echo Feche o PowerShell da versao anterior do Blue Ocean e execute este arquivo novamente.
+  echo Isso preserva o mesmo endereco e os projetos armazenados neste navegador.
+  pause
+  exit /b 1
+)
 echo.
 echo Iniciando Blue Ocean na porta %BO_PORT%...
 echo O navegador sera aberto apenas quando o servidor estiver respondendo.
