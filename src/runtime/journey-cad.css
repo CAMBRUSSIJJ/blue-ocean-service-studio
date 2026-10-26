@@ -348,3 +348,11 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
  .cad-sheet .cad-inspector-group{padding:11px}
 }
 @media(prefers-reduced-motion:reduce){.cad-lane-item{transition:none}}
+
+/* H2 — persistent stage context after the canvas has been panned vertically. */
+.cad-viewport .cad-sticky-stages{position:absolute;z-index:8;top:0;left:0;right:0;height:54px;overflow:hidden;pointer-events:none;background:linear-gradient(#ffffffed,#ffffffd8);border-bottom:1px solid #dbe5f2;box-shadow:0 4px 9px #17365b0a}
+.cad-viewport .cad-sticky-stages[hidden]{display:none!important}
+.cad-sticky-stage{position:absolute;top:5px;bottom:5px;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:4px 12px;border:1px solid #d6e3f4;border-radius:8px;background:#ffffff}
+.cad-sticky-stage small{color:#3268aa;font-weight:700;font-size:10px}
+.cad-sticky-stage b{color:#173963;font-size:13px;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:760px){.cad-sticky-stages{display:none!important}}
