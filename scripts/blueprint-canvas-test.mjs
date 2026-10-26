@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { CANVAS_COMPONENTS, CANVAS_GRID, canvasSafeUrl, canvasRowHeight, canvasCardHeight, normalizeCanvasMetadata, prepareCanvasInput, moveCanvasCard, buildCanvasLayout, exportCanvasSvg, canvasConnectionOffsets, canvasEdgeGeometry, canvasTitleLines, canvasBoundary } from '../src/services/blueprint-canvas.js';
+import { CANVAS_COMPONENTS, CANVAS_GRID, canvasSafeUrl, canvasDimension, canvasCardWidth, canvasRowHeight, canvasCardHeight, normalizeCanvasMetadata, prepareCanvasInput, moveCanvasCard, buildCanvasLayout, exportCanvasSvg, canvasConnectionOffsets, canvasEdgeGeometry, canvasTitleLines, canvasBoundary } from '../src/services/blueprint-canvas.js';
 import { matrixContentFromDocument, restoreMatrixContent, normalizeMatrixActivity } from '../src/services/journey-content.js';
 import { normalizeSavedMatrixView, switchMatrixPerspective } from '../src/services/journey-views.js';
 let count=0;const check=(name,run)=>{run();count++;console.log('PASS '+name)};
@@ -143,5 +143,33 @@ check('Every card and lane exposes controls without splitting canonical document
  assert.match(editor,/cad-duplicate/);
  assert.match(editor,/cad-photo-/);
  assert.match(editor,/function cadEmotionSvg\(row,layout\)/);
+});
+check('Cards resize independently and their new geometry survives canvas serialization',()=>{
+ const source=doc();
+ source.c['fl|0']=[{i:'card1',t:'Primeiro cartão',type:'card',canvas:normalizeCanvasMetadata({kind:'activity',width:220,height:176})},{i:'card2',t:'Segundo cartão',type:'card',canvas:normalizeCanvasMetadata({kind:'activity',width:185,height:108})}];
+ const layout=buildCanvasLayout(source,rows);
+ const a=layout.nodes.find(n=>n.id==='card1'),b=layout.nodes.find(n=>n.id==='card2');
+ assert.deepEqual([a.width,a.height,b.width,b.height],[220,176,185,108]);
+ assert.ok(b.y>=a.y+a.height);
+ assert.ok(layout.rows.find(row=>row.id==='fl').height>=b.y+b.height-layout.rows.find(row=>row.id==='fl').y);
+ const saved=matrixContentFromDocument(source,['s1','s2'],{notes:{}}),restored={c:{'fl|0':[]},links:[]};
+ restoreMatrixContent(restored,saved,['s1','s2']);
+ assert.deepEqual(restored.c['fl|0'].map(n=>[n.canvas.width,n.canvas.height]),[[220,176],[185,108]]);
+ assert.equal(canvasCardWidth({canvas:{kind:'activity',width:580}},210),182);
+ assert.equal(canvasCardHeight({canvas:{kind:'activity',height:76}},'fl'),80);
+ assert.equal(canvasDimension('nope',150,600),null);
+});
+check('Resize controls remain hidden until hover or keyboard focus',()=>{
+ const css=readFileSync(new URL('../src/runtime/journey-cad.css',import.meta.url),'utf8');
+ const editor=readFileSync(new URL('../src/runtime/journey-cad-ui.js',import.meta.url),'utf8');
+ assert.match(css,/#cad-svg \.cad-stage-resize,\s*#cad-svg \.cad-lane-resize,\s*#cad-svg \.cad-node-resize\s*\{\s*opacity:0/);
+ assert.match(css,/\.cad-node-wrap:hover > \.cad-node-resize/);
+ assert.match(css,/\.cad-lane-select:hover \+ \.cad-lane-resize/);
+ assert.match(editor,/class="cad-node-resize"/);
+ assert.match(editor,/cardResizePreview/);
+ assert.match(editor,/pointer:event.pointerId,id,startX:event.clientX,startY:event.clientY/);
+ assert.match(editor,/width:preview.width,height:preview.height/);
+ assert.match(editor,/ArrowRight','ArrowLeft','ArrowUp','ArrowDown','Home'/);
+ assert.doesNotThrow(()=>new Function(editor));
 });
 console.log(`Blueprint canvas: ${count}/${count} PASS`);
