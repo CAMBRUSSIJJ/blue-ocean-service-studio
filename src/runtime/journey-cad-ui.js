@@ -1,8 +1,8 @@
 /* Operational canvas is a projection of the shared Journey document, never a second store. */
 const cadModel=window.BlueOceanBlueprintCanvas;
-const cadState={scene:'',selected:'',creating:null,link:null,drafts:new Map(),camera:null,layout:null,pending:'',error:'',library:false,inspector:false,detail:'auto',drag:null,ignoreClick:false,quick:null,choosing:null,menu:null,connectFrom:'',connectType:'sequence',pointer:null,query:'',libraryHidden:false,libraryKind:'',pendingDocument:null,libraryFilter:'all',activeCell:null,libraryCompact:false,groupOpen:{},favorites:[],resize:null,resizePreview:null,emotionDrag:null};
-try{const p=JSON.parse(localStorage.getItem('bo-cad-library-prefs-v2')||'{}');cadState.libraryCompact=!!p.compact;cadState.favorites=Array.isArray(p.favorites)?p.favorites.filter(k=>k in cadModel.CANVAS_COMPONENTS):[];cadState.groupOpen=p.groups||{}}catch{}
-function cadSaveLibraryPreferences(){try{localStorage.setItem('bo-cad-library-prefs-v2',JSON.stringify({compact:cadState.libraryCompact,favorites:cadState.favorites,groups:cadState.groupOpen}))}catch{}}
+const cadState={scene:'',selected:'',creating:null,link:null,drafts:new Map(),camera:null,layout:null,pending:'',error:'',library:false,inspector:false,detail:'auto',drag:null,ignoreClick:false,quick:null,choosing:null,menu:null,connectFrom:'',connectType:'sequence',pointer:null,query:'',libraryHidden:false,libraryKind:'',pendingDocument:null,libraryFilter:'all',activeCell:null,sidebarTab:'components',libraryCompact:false,groupOpen:{},favorites:[],resize:null,resizePreview:null,emotionDrag:null};
+try{const p=JSON.parse(localStorage.getItem('bo-cad-library-prefs-v2')||'{}');cadState.libraryCompact=!!p.compact;cadState.favorites=Array.isArray(p.favorites)?p.favorites.filter(k=>k in cadModel.CANVAS_COMPONENTS):[];cadState.groupOpen=p.groups||{};cadState.sidebarTab=p.sidebarTab==='lanes'?'lanes':'components'}catch{}
+function cadSaveLibraryPreferences(){try{localStorage.setItem('bo-cad-library-prefs-v2',JSON.stringify({compact:cadState.libraryCompact,favorites:cadState.favorites,groups:cadState.groupOpen,sidebarTab:cadState.sidebarTab}))}catch{}}
 function cadStageWidths(){return cadState.resizePreview||V.stageWidths||[]}
 function cadStageResizeTo(index,width){if(cadLocked()||!S.steps[index])return;V.stageWidths=[...cadStageWidths()];V.stageWidths[index]=cadModel.canvasStageWidth(width);cadState.resizePreview=null;V.fitToScreen=false;saveView();rerender()}
 function cadRecordedEmotion(s){return s.emotionRecorded===true||s.emotionRecorded===undefined&&(Number(s.e)!==0||!!s.note?.trim())}
@@ -68,12 +68,49 @@ function cadSubmit(form){
   const moved=cadModel.moveCanvasCard(next,note.i,{...input,row:data.row});cadSend('canvas-change',{state:moved},note.i);
  }catch(error){cadState.error=error.message;form.querySelector('.form-error').textContent=error.message}
 }
+
+/* One consistent 24px outline language for the whole editor; glyph/emoji fonts are not used. */
+const cadIconPaths={
+ 'customer-action':'<path d="M4 12h15m-5-5 5 5-5 5"/><path d="M4 5v14"/>',
+ touchpoint:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/>',
+ thought:'<path d="M5 6h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8l-5 3v-3H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M8 11h8m-8 4h5"/>',
+ persona:'<circle cx="12" cy="8" r="4"/><path d="M4.5 20c.4-4 3-6 7.5-6s7.1 2 7.5 6"/>',
+ need:'<path d="M12 20 4.4 12.6a4.7 4.7 0 0 1 6.7-6.6L12 7l.9-1a4.7 4.7 0 0 1 6.7 6.6z"/>',
+ channel:'<rect x="3.5" y="5" width="17" height="14" rx="3"/><path d="m4 7 8 6 8-6"/>',
+ emotion:'<circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 2.3 3 4 3s3-1 4-3"/><path d="M8 9h.01M16 9h.01"/>',
+ activity:'<rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8m-8 4h8m-8 4h5"/>',
+ decision:'<path d="m12 2 10 10-10 10L2 12z"/><path d="M12 8v5m0 3h.01"/>',
+ system:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/>',
+ resource:'<rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="15" width="7" height="6" rx="1"/><rect x="14" y="15" width="7" height="6" rx="1"/>',
+ pain:'<path d="m12 3 10 18H2z"/><path d="M12 9v5m0 3h.01"/>',
+ opportunity:'<path d="M9 18h6m-5 3h4"/><path d="M9 15c-1.6-1-2.5-2.7-2.5-4.5a5.5 5.5 0 0 1 11 0c0 1.8-.9 3.5-2.5 4.5l-.7 2h-4.6z"/>',
+ metric:'<path d="M4 20V11h4v9m4 0V5h4v15m4 0v-7h-4"/>',
+ artifact:'<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h7m-7 4h7"/>',
+ text:'<path d="M5 4h14v16H5z"/><path d="M8 9h8m-8 4h8m-8 4h5"/>'
+};
+function cadIcon(kind){
+ return '<svg class="cad-professional-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(cadIconPaths[kind]||cadIconPaths.text)+'</svg>';
+}
+function cadSidebarTabs(){
+ return '<div class="cad-library-tabs" role="tablist" aria-label="Biblioteca e estrutura do mapa">'+[['components','Componentes'],['lanes','Faixas']].map(([id,title])=>'<button type="button" role="tab" data-act="cad-sidebar-tab" data-tab="'+id+'" aria-selected="'+(cadState.sidebarTab===id)+'" tabindex="'+(cadState.sidebarTab===id?0:-1)+'">'+(id==='lanes'?'<span class="cad-lanes-icon" aria-hidden="true">☷</span>':'')+title+'</button>').join('')+'</div>';
+}
+function cadLanePanel(){
+ const rows=orderedRows(),visible=rows.filter(row=>!V.hiddenRows.includes(row.id)).length;
+ return '<div class="cad-lanes-panel" role="tabpanel" aria-label="Organização das faixas"><div class="cad-lanes-intro"><strong>Estrutura do mapa</strong><p>Mostre, oculte e reordene as faixas. Os dados permanecem guardados.</p><small>'+visible+' de '+rows.length+' faixas visíveis</small></div>'+
+  '<div class="cad-lanes-list">'+rows.map((row,i)=>{
+   const hidden=V.hiddenRows.includes(row.id),custom=!!(S.lanes||[]).find(value=>value.id===row.id);
+   return '<div class="cad-lane-item'+(hidden?' is-hidden':'')+'" data-row="'+esc(row.id)+'"><button type="button" class="cad-lane-visibility" data-act="cad-lane-toggle" data-id="'+esc(row.id)+'" aria-label="'+(hidden?'Mostrar ':'Ocultar ')+esc(row.n)+'" aria-pressed="'+(!hidden)+'" '+(cadLocked()?'disabled':'')+'><span aria-hidden="true">'+(hidden?'○':'●')+'</span></button>'+
+    (custom?'<input type="text" data-cad-lane-name="'+esc(row.id)+'" value="'+esc(row.n)+'" aria-label="Nome da faixa" maxlength="90" '+(cadLocked()?'disabled':'')+'>':'<span class="cad-lane-title" title="'+esc(row.n)+'">'+esc(row.n)+'</span>')+
+    '<div class="cad-lane-reorder"><button type="button" data-act="cad-lane-order" data-id="'+esc(row.id)+'" data-direction="-1" aria-label="Subir '+esc(row.n)+'" '+(i===0||cadLocked()?'disabled':'')+'>↑</button><button type="button" data-act="cad-lane-order" data-id="'+esc(row.id)+'" data-direction="1" aria-label="Descer '+esc(row.n)+'" '+(i===rows.length-1||cadLocked()?'disabled':'')+'>↓</button></div></div>';
+  }).join('')+'</div><div class="cad-lanes-actions">'+cadButton('alane','+ Nova faixa',cadLocked()?'disabled':'')+cadButton('customize','Personalizar faixas')+cadButton('cad-lanes-show-all','Mostrar todas',cadLocked()?'disabled':'')+'</div></div>';
+}
+
 function cadLibrary(){
  const q=cadState.query.trim().toLocaleLowerCase('pt-BR'),active=cadState.activeCell,filter=cadState.libraryFilter;
  const groups={experience:['Experiência do cliente',['customer-action','touchpoint','thought','persona','need']],channels:['Canais',['channel']],emotions:['Emoções',['emotion']],operation:['Operação do serviço',['activity','decision','system','resource']],analysis:['Análise e oportunidades',['pain','opportunity','metric']],content:['Conteúdo e evidências',['artifact','text']]};
- const tile=kind=>{const item=cadModel.CANVAS_COMPONENTS[kind],fav=cadState.favorites.includes(kind);return '<div class="cad-component-item"><button type="button" class="cad-component-main" data-act="cad-add" data-kind="'+kind+'" draggable="'+!cadLocked()+'" title="'+esc(item.title+' · '+item.hint)+'" aria-label="Adicionar '+esc(item.title)+'" '+(cadLocked()?'disabled':'')+'><span aria-hidden="true">'+item.icon+'</span><b>'+esc(item.title)+'</b><small>'+esc(kind==='emotion'?'Editar a curva emocional':item.hint)+'</small></button><button type="button" class="cad-favorite'+(fav?' is-favorite':'')+'" data-act="cad-favorite" data-kind="'+kind+'" title="'+(fav?'Remover dos favoritos':'Favoritar')+'" aria-label="'+(fav?'Desfavoritar ':'Favoritar ')+esc(item.title)+'" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button></div>'};
+ const tile=kind=>{const item=cadModel.CANVAS_COMPONENTS[kind],fav=cadState.favorites.includes(kind);return '<div class="cad-component-item"><button type="button" class="cad-component-main" data-act="cad-add" data-kind="'+kind+'" draggable="'+!cadLocked()+'" title="'+esc(item.title+' · '+item.hint)+'" aria-label="Adicionar '+esc(item.title)+'" '+(cadLocked()?'disabled':'')+'><span aria-hidden="true">'+cadIcon(kind)+'</span><b>'+esc(item.title)+'</b><small>'+esc(kind==='emotion'?'Editar a curva emocional':item.hint)+'</small></button><button type="button" class="cad-favorite'+(fav?' is-favorite':'')+'" data-act="cad-favorite" data-kind="'+kind+'" title="'+(fav?'Remover dos favoritos':'Favoritar')+'" aria-label="'+(fav?'Desfavoritar ':'Favoritar ')+esc(item.title)+'" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button></div>'};
  let visible=0;const sections=Object.entries(groups).map(([key,[title,kinds]])=>{const items=kinds.filter(kind=>{const item=cadModel.CANVAS_COMPONENTS[kind];return item&&(!q||(item.title+' '+item.hint+' '+title).toLocaleLowerCase('pt-BR').includes(q))&&(filter!=='favorites'||cadState.favorites.includes(kind))&&(filter!=='compatible'||active&&cadModel.canvasAcceptsRow(kind,active.row))});visible+=items.length;if(!items.length)return '';const open=cadState.libraryCompact||!!q||cadState.groupOpen[key]!==false;return '<section class="cad-library-group"><button type="button" class="cad-group-toggle" data-act="cad-group" data-group="'+key+'" aria-expanded="'+open+'" title="'+esc(title)+'"><span>'+(open?'▾':'▸')+'</span>'+esc(title)+' <small>'+items.length+'</small></button><div class="cad-components" '+(!open?'hidden':'')+'>'+items.map(tile).join('')+'</div></section>'}).join('');
- return '<div class="cad-library-head"><h2>Componentes</h2>'+cadButton('cad-toggle-library-mode',cadState.libraryCompact?'»':'«','title="'+(cadState.libraryCompact?'Expandir':'Compactar')+' biblioteca" aria-label="'+(cadState.libraryCompact?'Expandir':'Compactar')+' biblioteca"')+'</div><label class="cad-search"><span>Buscar componente</span><input type="search" data-cad-search value="'+esc(cadState.query)+'" placeholder="Nome ou função"></label><div class="cad-library-filters" role="group" aria-label="Filtrar biblioteca">'+[['all','Todos'],['compatible','Compatíveis'],['favorites','★ Favoritos']].map(([id,title])=>cadButton('cad-lib-filter',title,'data-filter="'+id+'" aria-pressed="'+(filter===id)+'"')).join('')+'</div>'+(active?'<p class="cad-library-context">Célula: <b>'+esc(rowDefs().find(r=>r.id===active.row)?.n||active.row)+'</b> · '+esc(S.steps[active.index]?.n||'')+'</p>':'')+'<div class="cad-components-list">'+(visible?sections:'<p class="cad-library-empty">Nenhum resultado. Tente Todos.</p>')+'</div><p class="cad-library-help">Arraste para o mapa ou escolha uma célula e clique no componente.</p>';
+ return '<div class="cad-library-head"><h2>'+ (cadState.sidebarTab==='lanes'?'Faixas':'Componentes') +'</h2>'+cadButton('cad-toggle-library-mode',cadState.libraryCompact?'»':'«','title="'+(cadState.libraryCompact?'Expandir':'Compactar')+' biblioteca" aria-label="'+(cadState.libraryCompact?'Expandir':'Compactar')+' biblioteca"')+'</div>'+cadSidebarTabs()+(cadState.sidebarTab==='lanes'?cadLanePanel():'<label class="cad-search"><span>Buscar componente</span><input type="search" data-cad-search value="'+esc(cadState.query)+'" placeholder="Nome ou função"></label><div class="cad-library-filters" role="group" aria-label="Filtrar biblioteca">'+[['all','Todos'],['compatible','Compatíveis'],['favorites','★ Favoritos']].map(([id,title])=>cadButton('cad-lib-filter',title,'data-filter="'+id+'" aria-pressed="'+(filter===id)+'"')).join('')+'</div>'+(active?'<p class="cad-library-context">Célula: <b>'+esc(rowDefs().find(r=>r.id===active.row)?.n||active.row)+'</b> · '+esc(S.steps[active.index]?.n||'')+'</p>':'')+'<div class="cad-components-list">'+(visible?sections:'<p class="cad-library-empty">Nenhum resultado. Tente Todos.</p>')+'</div><p class="cad-library-help">Arraste para o mapa ou escolha uma célula e clique no componente.</p>');
 }
 
 function cadDraftFor(entry){const [row,index]=entry.key.split('|');return {...blueprintActivity(entry.note,row),kind:cadModel.canvasKind(entry.note,row),channelId:entry.note.canonicalChannelId||'',metricId:entry.note.canonicalMetricId||'',...entry.note.canvas,title:cadTitle(entry.note),description:entry.note.canvas?.description||entry.note.canonicalDescription||'',row,stageKey:cadStageKey(S.steps[index]),editingId:entry.note.i}}
@@ -105,7 +142,7 @@ function cadQuickForm(){
 }
 function cadChooser(){
  const context=cadState.choosing;if(!context)return '';
- return '<section class="cad-chooser" role="dialog" aria-label="Adicionar componente" style="left:'+context.x+'px;top:'+context.y+'px"><header><h2>Adicionar componente</h2>'+cadButton('cad-close-chooser','×','aria-label="Fechar componentes"')+'</header><div>'+Object.entries(cadModel.CANVAS_COMPONENTS).filter(([,item])=>!context.row||item.rows.includes('*')||item.rows.includes(context.row)).map(([kind,item])=>cadButton('cad-add',item.icon+' '+item.title,'data-kind="'+kind+'" data-si="'+context.index+'" data-row="'+esc(context.row||'')+'" '+(cadLocked()?'disabled':''))).join('')+'</div></section>';
+ return '<section class="cad-chooser" role="dialog" aria-label="Adicionar componente" style="left:'+context.x+'px;top:'+context.y+'px"><header><h2>Adicionar componente</h2>'+cadButton('cad-close-chooser','×','aria-label="Fechar componentes"')+'</header><div>'+Object.entries(cadModel.CANVAS_COMPONENTS).filter(([,item])=>!context.row||item.rows.includes('*')||item.rows.includes(context.row)).map(([kind,item])=>cadButton('cad-add',cadIcon(kind)+' '+item.title,'data-kind="'+kind+'" data-si="'+context.index+'" data-row="'+esc(context.row||'')+'" '+(cadLocked()?'disabled':''))).join('')+'</div></section>';
 }
 function cadContextMenu(){
  const menu=cadState.menu;if(!menu)return '';
