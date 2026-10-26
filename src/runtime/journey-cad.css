@@ -258,3 +258,45 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 .cad-evidence-preview figcaption{font-size:11px;padding:6px 9px;color:#536982}
 #cad-svg .cad-lane-select:focus-visible rect{stroke:#2b6dba;stroke-width:2}
 #cad-svg .cad-lane-resize:focus-visible rect{stroke:#2b6dba;stroke-width:2}
+
+/* Hover-only resizing: clean blueprint by default, mouse cursor at the border.
+   The hit areas remain interactive, but the affordances only appear on hover/focus. */
+#cad-svg .cad-stage-resize,
+#cad-svg .cad-lane-resize,
+#cad-svg .cad-node-resize{
+  opacity:0;
+  transition:opacity 110ms ease;
+}
+#cad-svg .cad-stage-resize:hover,
+#cad-svg .cad-stage-resize:focus-visible,
+#cad-svg .cad-lane-resize:hover,
+#cad-svg .cad-lane-resize:focus-visible,
+#cad-svg .cad-lane-select:hover + .cad-lane-resize,
+#cad-svg .cad-node-wrap:hover > .cad-node-resize,
+#cad-svg .cad-node-resize:hover,
+#cad-svg .cad-node-resize:focus-visible{
+  opacity:1;
+}
+#cad-svg .cad-stage-resize rect,
+#cad-svg .cad-lane-resize rect{
+  fill:#e8f2fd;
+  stroke:#aec8e6;
+  stroke-width:1;
+}
+#cad-svg .cad-lane-resize rect{fill:#edf6ff;stroke:#c8dced}
+#cad-svg .cad-lane-resize path{stroke:#477ca9;stroke-width:1.4}
+#cad-svg .cad-lane-select:hover + .cad-lane-resize{opacity:.65}
+#cad-svg .cad-lane-resize:hover{opacity:1}
+#cad-svg .cad-node-resize{cursor:nwse-resize;touch-action:none}
+#cad-svg .cad-node-resize .cad-node-resize-hit{fill:transparent;stroke:none;pointer-events:all}
+#cad-svg .cad-node-resize path{fill:none;stroke:#467bab;stroke-width:1.8;stroke-linecap:round;pointer-events:none}
+#cad-svg .cad-node-resize:hover path,
+#cad-svg .cad-node-resize:focus-visible path{stroke:#1757a1;stroke-width:2.3}
+#cad-svg .cad-node-resize:focus-visible .cad-node-resize-hit{stroke:#2563eb;stroke-width:1.5}
+@media (hover:none){
+ #cad-svg .cad-stage-resize,#cad-svg .cad-lane-resize,#cad-svg .cad-node-resize{opacity:1}
+ #cad-svg .cad-node-resize .cad-node-resize-hit{fill:#eef5ff55}
+}
+@media (prefers-reduced-motion:reduce){
+ #cad-svg .cad-stage-resize,#cad-svg .cad-lane-resize,#cad-svg .cad-node-resize{transition:none}
+}
