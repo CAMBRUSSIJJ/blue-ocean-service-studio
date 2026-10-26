@@ -146,6 +146,8 @@ check('Every card and lane exposes controls without splitting canonical document
 });
 check('Cards resize independently and their new geometry survives canvas serialization',()=>{
  const source=doc();
+ // This fixture replaces card a: remove its dependency before validating the roundtrip.
+ source.links=[];
  source.c['fl|0']=[{i:'card1',t:'Primeiro cartão',type:'card',canvas:normalizeCanvasMetadata({kind:'activity',width:220,height:176})},{i:'card2',t:'Segundo cartão',type:'card',canvas:normalizeCanvasMetadata({kind:'activity',width:185,height:108})}];
  const layout=buildCanvasLayout(source,rows);
  const a=layout.nodes.find(n=>n.id==='card1'),b=layout.nodes.find(n=>n.id==='card2');
