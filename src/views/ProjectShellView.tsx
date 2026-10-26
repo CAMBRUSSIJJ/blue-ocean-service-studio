@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import {
   ArrowRight, BookOpen, FolderKanban,
 } from '../design-system/icons';
-import { allContextEntities, contextEntityTitle, contextRelatedIds, type ContextKind } from '../services/context-library';
+import { contextEntityTitle, type ContextKind } from '../services/context-library';
+import { projectContextRecords, filterProjectContext, projectRelatedRecords, projectHasLinkedEvidence } from '../services/project-context-index';
 import './project-context-workspace.css';
 import type { StudioController } from '../state/useStudioController';
 
@@ -51,20 +52,12 @@ export function ProjectShellView({ studio, section, openService, openWhiteboards
   const [kind, setKind] = useState<'all' | ContextKind>('all');
   const [personaId, setPersonaId] = useState('all');
   const [hasEvidence, setHasEvidence] = useState(false);
-  const allEntities = useMemo(() => allContextEntities(graph), [graph]);
+  const allEntities = useMemo(() => projectContextRecords(graph), [graph]);
   const persons = allEntities.filter(item => item.contextKind === 'persona');
-  const entityMap = useMemo(() => new Map(allEntities.map(item => [item.id, item])), [allEntities]);
-  const relatedTo = (id: string) => allEntities.filter(item => item.id !== id && (contextRelatedIds(item).includes(id) || contextRelatedIds(entityMap.get(id)).includes(item.id)));
-  const hasLinkedEvidence = (id: string) => relatedTo(id).some(item => item.contextKind === 'evidence');
+  const relatedTo = (id: string) => projectRelatedRecords(allEntities, id);
+  const hasLinkedEvidence = (id: string) => projectHasLinkedEvidence(allEntities, id);
   const targetKinds: ContextKind[] = area === 'research' ? ['evidence','problemHypothesis','problem'] : ['persona','need','job','pain','problemHypothesis','problem','evidence'];
-  const filteredEntities = allEntities.filter(item => {
-    if (!targetKinds.includes(item.contextKind)) return false;
-    if (kind !== 'all' && item.contextKind !== kind) return false;
-    if (personaId !== 'all' && item.id !== personaId && !relatedTo(item.id).some(relation => relation.id === personaId)) return false;
-    if (hasEvidence && !hasLinkedEvidence(item.id) && item.contextKind !== 'evidence') return false;
-    const term = query.trim().toLocaleLowerCase('pt-BR');
-    return !term || `${contextEntityTitle(item)} ${item.description || ''} ${item.owner || ''}`.toLocaleLowerCase('pt-BR').includes(term);
-  });
+  const filteredEntities = filterProjectContext(allEntities, {area: area === 'research' ? 'research' : 'audience', query, kind, personaId, hasEvidence});
   const pageFor = (value: ContextKind): Parameters<Props['openLibraryPage']>[0] =>
     ({ persona:'personas',need:'needs',job:'jobs',pain:'pains',problemHypothesis:'hypotheses',problem:'problems',evidence:'evidence' } as const)[value];
   const focusEntity = (item: { id: string; contextKind: ContextKind }) => {
