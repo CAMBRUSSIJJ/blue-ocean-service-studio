@@ -246,6 +246,7 @@ function cadSvg(){
   }
   if(linkUrl&&!node.note.draft)html+='<g data-act="cad-open-link" data-id="'+esc(node.id)+'" role="button" tabindex="0" aria-label="Abrir link vinculado a '+esc(title)+'"><rect x="'+(node.width-58)+'" y="7" width="20" height="20" rx="4" fill="#edf5ff" stroke="#bcd3ef"/><path d="M '+(node.width-53)+' 21 l9 -9 M '+(node.width-49)+' 12 h5 v5" fill="none" stroke="#3267a0" stroke-width="1.5"/></g>';
   html+='</g>';
+  if(!cadLocked()&&!node.note.virtualLabel&&!node.note.draft)html+='<g class="cad-node-resize" data-act="cad-node-resize" data-id="'+esc(node.id)+'" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Redimensionar '+esc(title)+'. Arraste o canto inferior direito ou use as setas. Home restaura o tamanho." aria-valuemin="80" aria-valuemax="480" aria-valuenow="'+node.height+'" title="Arraste para ajustar largura e altura"><rect class="cad-node-resize-hit" x="'+(node.width-26)+'" y="'+(node.height-26)+'" width="26" height="26" rx="3"/><path d="M '+(node.width-16)+' '+(node.height-6)+' L '+(node.width-6)+' '+(node.height-16)+' M '+(node.width-10)+' '+(node.height-6)+' L '+(node.width-6)+' '+(node.height-10)+'"/></g>';
   if(!cadLocked()&&!node.note.virtualLabel&&!node.note.draft)html+='<g class="cad-port" role="button" tabindex="0" data-act="cad-connect" data-id="'+esc(node.id)+'" aria-label="Conectar '+esc(title)+'"><circle cx="'+node.width+'" cy="'+(node.height/2)+'" r="'+Math.max(11,11/cam.zoom)+'"/><path d="M '+(node.width-4)+' '+(node.height/2)+' h8 M '+node.width+' '+(node.height/2-4)+' v8"/></g><g class="cad-node-menu" role="button" tabindex="0" data-act="cad-menu" data-id="'+esc(node.id)+'" aria-label="Ações de '+esc(title)+'"><rect x="'+(node.width-35)+'" y="6" width="28" height="25" rx="5"/><text x="'+(node.width-21)+'" y="23" text-anchor="middle">···</text></g>';
   html+='</g>';
  }
@@ -406,7 +407,7 @@ function cadAction(action,data,button){
   V.stageWidths=S.steps.map((_,i)=>action==='cad-stage-reset'?392:action==='cad-stage-equal'?average:cadModel.canvasStageWidth(cadModel.canvasStageWidth(widths[i])+(action==='cad-stage-wide'?48:-48)));
   V.fitToScreen=false;saveView();rerender();return true;
  }
- if(action==='cad-stage-resize'||action==='cad-lane-resize')return true;
+ if(action==='cad-stage-resize'||action==='cad-lane-resize'||action==='cad-node-resize')return true;
  if(action==='cad-emotion'){if(cadState.ignoreClick){cadState.ignoreClick=false;return true}cadEditEmotion(Number(data.si),point);return true}
  if(action==='cad-toggle-library'){cadState.libraryHidden=!cadState.libraryHidden;rerender();return true}
  if(action==='cad-close'){cadState.inspector=false;cadState.selectedRow='';rerender();return true}
