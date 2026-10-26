@@ -25,7 +25,7 @@ import { EditorSurface } from './views/EditorSurface';
 import { BlueprintWorkspaceView } from './views/BlueprintWorkspaceView';
 import { ActionPlanView } from './views/ActionPlanView';
 import { ProjectHomeView, type ProjectHomeSection } from './views/ProjectHomeView';
-import type { ProjectShellSection } from './views/ProjectShellView';
+import { ProjectShellView, type ProjectShellSection } from './views/ProjectShellView';
 import { WhiteboardsView } from './views/WhiteboardsView';
 import { WorkspaceLibraryView, type WorkspaceLibraryPage } from './views/WorkspaceLibraryView';
 import { Toast } from './components/Toast';
@@ -373,22 +373,17 @@ export default function App({ authUser, onSignOut }: AppProps) {
     window.setTimeout(() => window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: tab })), 0);
   };
 
-  // The project summary is no longer an intermediate navigation surface.
-  // Preserve callers of the old project-home action, but open a real workspace.
-  const openCurrentProjectHome = (section: ProjectShellSection = 'overview') => {
-    if (section === 'library') { openLibraryPage('personas'); return; }
-    openServiceWorkspaceTab('journey');
-  };
-
-  const openCurrentProjectWorkspace = () => {
+  // Every project opens its own contextual home without changing the canonical Service Graph.
+  const openCurrentProjectHome = (_section: ProjectShellSection = 'overview') => {
+    setProjectShellOpen(true);
     setProjectHomeSection('home');
-    openServiceWorkspaceTab('journey');
+    setExternalNav(null);
+    setIsMobileNavOpen(false);
+    hideLegacyPageSurfaces();
+    window.dispatchEvent(new CustomEvent('rt-navigation', { detail: 'home' }));
   };
 
-  useEffect(() => {
-    // Restore older sessions that previously saved the removed project-home state.
-    if (isProjectHome && hasService) openServiceWorkspaceTab('journey');
-  }, [isProjectHome, hasService]);
+  const openCurrentProjectWorkspace = () => openCurrentProjectHome();
 
   useEffect(() => {
     const changed = (event: Event) => { const target = String((event as CustomEvent<string>).detail || 'overview'); setServiceWorkspaceTab(target === 'research' ? 'overview' : target === 'blueprint' ? 'journey' : target); };
@@ -483,6 +478,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
               <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.design} onClick={() => toggleSidebarSection('design')}><span>Desenho do serviço</span><span aria-hidden="true">{collapsedSidebarSections.design ? '+' : '−'}</span></button>
               <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.design}>
               <button type="button" data-service-projects-nav="1" data-unified-service-workspace-nav="1" title="Serviço" aria-label="Serviço" aria-current={isGlobalHome && projectHomeSection === 'projects' ? 'page' : undefined} className={`bo1205h3-nav-child ${isGlobalHome && projectHomeSection === 'projects' ? 'is-active' : ''}`} onClick={() => openGlobalHome('projects')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="service" size={16}/></span><span className="hidden md:inline">Serviço</span></button>
+              {hasService && <button type="button" data-project-context-nav="h1" title="Visão geral do projeto" aria-label="Visão geral do projeto" aria-current={isProjectHome ? "page" : undefined} className={`bo1205h3-nav-child ${isProjectHome ? "is-active" : ""}`} onClick={() => openCurrentProjectHome()}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="service" size={16}/></span><span className="hidden md:inline">Projeto atual</span></button>}
               <button type="button" data-service-journey-nav="1" data-service-blueprint-nav="1" title="Mapas do serviço" aria-label="Abrir Mapas do serviço" aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' && !externalNav ? 'page' : undefined} className={`bo1205h3-nav-child ${activeTab === 'canvas' && serviceWorkspaceTab === 'journey' && !externalNav ? 'is-active' : ''}`} onClick={() => openServiceWorkspaceTab('journey')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="journey" size={16}/></span><span className="hidden md:inline">Mapas do serviço</span></button>
               <button type="button" data-blue-ocean-whiteboard-nav="standard" title="Whiteboard" aria-label="Abrir Whiteboard pelo menu principal" aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'page' : undefined} className={`bo1205h3-nav-child ${activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'is-active' : ''}`} onClick={() => openServiceWorkspaceTab('whiteboard')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="whiteboard" size={16}/></span><span className="hidden md:inline">Whiteboard</span></button>
               <span className="sr-only" data-unified-service-workspace-legacy="1"><span>Journey maps</span><span>Whiteboards</span><span>Blueprints</span></span>
@@ -598,12 +594,11 @@ export default function App({ authUser, onSignOut }: AppProps) {
           </>}
         </header>
 
-        {/* A single sidebar owns navigation. Project-specific pages never render a second tab bar. */}
-        <span className="sr-only" data-project-navigation-single-source="1">Jornadas, Blueprints, Whiteboard, Biblioteca, Arquivo, Equipe e Configurações disponíveis na navegação principal.</span>
+        {/* A sidebar owns global navigation; the project workspace supplies contextual views. */}
 
         <main id="bo-main-content" data-bo-precision-workspace-native="1" data-bo-active-view={externalNav ?? activeTab} className={`flex-1 flex flex-col min-w-0 ${activeTab === 'canvas' && !externalNav ? 'overflow-hidden p-0' : activeTab === 'home' && !externalNav ? 'overflow-y-auto p-0' : 'px-4 md:px-6 overflow-y-auto'}`}>
           {isGlobalHome && <ProjectHomeView studio={studio} section={projectHomeSection} setSection={setProjectHomeSection} openProjectWorkspace={openCurrentProjectWorkspace} />}
-          {/* No project overview/intermediate shell: opening a project takes the user directly to a working editor. */}
+          {isProjectHome && hasService && <ProjectShellView key={activeProjectId || graph.service.id} studio={studio} section="overview" openService={() => openServiceWorkspaceTab('journey')} openWhiteboards={() => openServiceWorkspaceTab('whiteboard')} openLibraryPage={openLibraryPage} />}
           {!hasService && activeTab !== 'home' && !externalNav && <section className="bo-h740h2-service-gate" data-requested-view={activeTab}><div className="bo-h740h2-service-gate__icon"><BlueOceanObjectIcon kind="service" size={34}/></div><small>COMECE PELO SERVIÇO</small><h2>{activeViewTitle} está pronta para você</h2><p>Você pode navegar por toda a plataforma. Para criar, editar ou conectar objetos nesta área, crie primeiro o serviço que será desenhado.</p><div><button type="button" className="primary" onClick={requestServiceCreation}>Criar meu primeiro serviço</button><button type="button" onClick={() => { loadDemoService(); setExternalNav(null); }}>Explorar serviço de exemplo</button></div></section>}
           {hasService && activeTab === 'context' && !externalNav && <WorkspaceLibraryView studio={studio} page={libraryPage} />}
           {hasService && activeTab === 'whiteboards' && !externalNav && <WhiteboardsView studio={studio} />}
