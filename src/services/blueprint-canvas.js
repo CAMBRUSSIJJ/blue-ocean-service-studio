@@ -45,7 +45,7 @@ export function canvasRowHeight(doc,definition,indices,minimum=0) {
 export function normalizeCanvasMetadata(input={}) {
   if (!Object.hasOwn(CANVAS_COMPONENTS,input.kind)) throw Error('Tipo de componente indisponível.');
   return {version:1,kind:input.kind,description:text(input.description,1000),channelId:text(input.channelId,160),metricId:text(input.metricId,160),
-  imageUrl:canvasSafeUrl(input.imageUrl),linkUrl:canvasSafeUrl(input.linkUrl),tone:['default','blue','teal','amber','violet','neutral'].includes(input.tone)?input.tone:'default',
+  imageUrl:canvasSafeUrl(input.imageUrl),linkUrl:canvasSafeUrl(input.linkUrl),iconKey:Object.hasOwn(CANVAS_COMPONENTS,input.iconKey)?input.iconKey:input.kind,tone:['default','blue','teal','amber','violet','neutral'].includes(input.tone)?input.tone:'default',
   evidenceType:['image','document','link','physical'].includes(input.evidenceType)?input.evidenceType:'physical'};
 }
 export function canvasKind(note,row) {
