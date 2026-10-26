@@ -24,7 +24,7 @@ check('Automatic layout never overlaps densely populated cells or loses original
 });
 check('Canvas metadata and explicit zero waits survive canonical JSON roundtrip',()=>{
  const source=doc(),stored=JSON.parse(JSON.stringify(matrixContentFromDocument(source,['s1','s2'],{notes:{}}))),fresh={c:{'fl|0':[{i:'a',hostItemId:'a',t:'Confirmar'}]}};
- restoreMatrixContent(fresh,stored,['s1','s2']);assert.deepEqual(fresh.c['fl|0'][0].canvas,source.c['fl|0'][0].canvas);assert.equal(fresh.c['fl|0'][0].activity.waitMinutes,0);
+ restoreMatrixContent(fresh,stored,['s1','s2']);assert.deepEqual(fresh.c['fl|0'][0].canvas,normalizeCanvasMetadata(source.c['fl|0'][0].canvas));assert.equal(fresh.c['fl|0'][0].activity.waitMinutes,0);
 });
 check('SVG export contains arrowheads, full handoff details and escaped user text',()=>{
  const source=doc();source.links.push({id:'h',a:'a',b:'b',type:'handoff',label:'Pacote <ok>',handoff:{fromTeam:'Recepção',toTeam:'Clínica',deliverable:'Prontuário',deadlineMinutes:10,acceptance:'Identificação & histórico'}});
