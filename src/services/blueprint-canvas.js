@@ -89,7 +89,7 @@ export function insertCanvasStage(doc,input){
   next.iss=(next.iss||[]).map(issue=>({...issue,s:issue.s>=at?issue.s+1:issue.s}));
   return next;
 }
-export const CANVAS_GRID={label:210,stage:336,header:88,gap:14,cardWidth:288,cardHeight:96,padding:16};
+export const CANVAS_GRID={label:218,stage:392,header:96,gap:16,cardWidth:328,cardHeight:112,padding:18};
 export const CANVAS_STAGE_MIN=210;
 export const CANVAS_STAGE_MAX=600;
 export function canvasStageWidth(value,fallback=CANVAS_GRID.stage) {
@@ -148,7 +148,7 @@ export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type
   let out=`<svg xmlns="http://www.w3.org/2000/svg" width="${layout.width}" height="${layout.height+60}" viewBox="0 -60 ${layout.width} ${layout.height+60}" role="img" aria-label="${xml(doc.title)}"><title>${xml(doc.title)}</title><rect x="0" y="-60" width="100%" height="${layout.height+60}" fill="#ffffff"/><text x="20" y="-24" font-size="24" font-family="sans-serif" fill="#142944">${xml(doc.title)}</text><defs>`;
   for(const [type,color]of Object.entries(colors))out+=`<marker id="arrow-${type}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="${color}"/></marker>`;
   out+='</defs><g font-family="sans-serif">';
-  for(const stage of layout.stages)out+=`<rect x="${stage.x}" y="0" width="${stage.width-4}" height="78" rx="8" fill="#eaf1ff"/><text x="${stage.x+18}" y="44" font-size="17" fill="#142944">${xml(stage.step.n)}</text>`;
+  for(const stage of layout.stages)out+=`<rect x="${stage.x}" y="0" width="${stage.width-4}" height="78" rx="8" fill="#eaf1ff"/><text x="${stage.x+18}" y="44" font-size="19" font-weight="600" fill="#142944">${xml(stage.step.n)}</text>`;
   for(const [index,row]of layout.rows.entries()){
     const boundary=canvasBoundary(row,index,layout.rows);
     out+=`<rect x="0" y="${row.y}" width="${layout.width}" height="${row.height}" fill="#f5f8fc" stroke="#cfdaea"/><text x="14" y="${row.y+30}" font-size="12" fill="#142944">${xml(row.n.slice(0,22))}</text>`;
@@ -166,7 +166,7 @@ export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type
     out+=`<g><title>${xml(titleFor(a.note))} → ${xml(titleFor(b.note))} · ${xml(label+transfer)}</title><path d="${edge.d}" stroke="${color}" stroke-width="2" fill="none" marker-end="url(#arrow-${link.type})"/><text x="${edge.x}" y="${edge.y-5}" text-anchor="middle" font-size="10" fill="${color}">${xml(label.slice(0,60))}</text></g>`;
   }
   for(const node of layout.nodes){if(node.row==='em')continue;const activity=node.note.activity||{},title=titleFor(node.note),details=[activity.owner?'Responsável: '+activity.owner:'',activity.team?'Equipe: '+activity.team:'',activity.durationMinutes!=null?'Execução: '+activity.durationMinutes+' min':'',activity.waitMinutes!=null?'Espera: '+activity.waitMinutes+' min':'',activity.rule?'Regra: '+activity.rule:'',node.note.canvas?.description||''].filter(Boolean).join(' · ');
-    out+=`<g><title>${xml(title)}${details?' · '+xml(details):''}</title><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="10" fill="#fff" stroke="#536c8d"/><text x="${node.x+12}" y="${node.y+23}" font-size="10" fill="#526885">${xml(CANVAS_COMPONENTS[canvasKind(node.note,node.row)]?.title||node.note.type)}</text>`+canvasTitleLines(title,34).map((line,index)=>`<text x="${node.x+12}" y="${node.y+48+index*19}" font-size="14" fill="#142944">${xml(line)}</text>`).join('')+`<text x="${node.x+12}" y="${node.y+92}" font-size="11" fill="#526885">${xml(activity.owner||activity.team||'')}</text></g>`;
+    out+=`<g><title>${xml(title)}${details?' · '+xml(details):''}</title><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="10" fill="#fff" stroke="#536c8d"/><text x="${node.x+12}" y="${node.y+23}" font-size="12" fill="#526885">${xml(CANVAS_COMPONENTS[canvasKind(node.note,node.row)]?.title||node.note.type)}</text>`+canvasTitleLines(title,34).map((line,index)=>`<text x="${node.x+12}" y="${node.y+50+index*21}" font-size="17" font-weight="600" fill="#142944">${xml(line)}</text>`).join('')+`<text x="${node.x+12}" y="${node.y+92}" font-size="11" fill="#526885">${xml(activity.owner||activity.team||'')}</text></g>`;
   }
   return out+'</g></svg>';
 }
