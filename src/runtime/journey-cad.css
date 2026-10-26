@@ -216,3 +216,39 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
  .cad-sheet .cad-library-head{position:static}
  .cad-sheet .cad-lanes-actions{bottom:-18px}
 }
+
+/* Map interaction: adaptive lanes, rich evidence cards and optional properties. */
+#cad-svg .cad-lane-select{cursor:pointer}
+#cad-svg .cad-lane-select:hover rect,#cad-svg .cad-lane-select:focus-visible rect{fill:#b7d8ff1e;stroke:#80b5e8;stroke-dasharray:4 5}
+#cad-svg .cad-lane-select.is-selected rect{fill:#dbeafe29;stroke:#94baf0}
+#cad-svg .cad-lane-resize{cursor:ns-resize}
+#cad-svg .cad-lane-resize rect{fill:#ecf4ff;stroke:#c4d9f0;stroke-width:1}
+#cad-svg .cad-lane-resize path{stroke:#3b74b3;stroke-width:1.6;pointer-events:none}
+#cad-svg .cad-lane-resize:hover rect,#cad-svg .cad-lane-resize:focus-visible rect{fill:#d3e7fc;stroke:#3981c9}
+.cad-inspector{padding:19px 18px;overscroll-behavior:contain}
+.cad-inspector .cad-lane-inspector h2{font-size:19px;letter-spacing:-.025em;color:#1c3654;margin:8px 0 12px}
+.cad-inspector .cad-inspector-kicker{font-size:10px;letter-spacing:.09em;color:#547196;font-weight:700}
+.cad-inspector .cad-lane-count{border:1px solid #e0eaf6;border-radius:8px;padding:10px;background:#f4f8fd;font-size:12px}
+.cad-lane-inspector .cad-lane-height-controls{margin:16px 0;padding:12px;border-radius:9px;border:1px solid #dce7f4;background:#fafcff;display:grid;gap:9px}
+.cad-lane-height-controls h3{margin:0;color:#24415e;font-size:12px;letter-spacing:0;text-transform:none}
+.cad-lane-height-controls p{margin:0;font-size:12px;color:#6b8096}
+.cad-lane-height-controls label{font-size:12px;font-weight:600}
+.cad-lane-inspector>[data-act]{width:100%;margin:6px 0;justify-content:center}
+.cad-lane-inspector .cad-lane-height-controls button{width:100%;font-size:12px;min-height:34px}
+.cad-shell .cad-field-hint{margin:0;font-size:11px;line-height:1.45;color:#627d96}
+.cad-evidence-fields{border:1px solid #dce7f3;border-radius:9px;background:#f9fbff;padding:11px;display:grid;gap:10px}
+.cad-evidence-fields legend{font-size:12px;font-weight:700;color:#24507c;padding:0 4px}
+.cad-evidence-fields label{font-size:12px;font-weight:600}
+.cad-tone-field{margin:10px 0}
+#cad-svg .cad-node-wrap[data-tone="blue"] .cad-node-bg{fill:#f4f8ff;stroke:#82abe7}
+#cad-svg .cad-node-wrap[data-tone="teal"] .cad-node-bg{fill:#f0fdf9;stroke:#79bbb2}
+#cad-svg .cad-node-wrap[data-tone="amber"] .cad-node-bg{fill:#fff9ee;stroke:#e3bd77}
+#cad-svg .cad-node-wrap[data-tone="violet"] .cad-node-bg{fill:#f9f5ff;stroke:#baa2e7}
+#cad-svg .cad-node-wrap[data-tone="neutral"] .cad-node-bg{fill:#f8fafc;stroke:#b9c7d5}
+#cad-svg .cad-node-wrap .cad-media-title{font-weight:620;letter-spacing:-.01em}
+#cad-svg .cad-node-wrap [data-act="cad-open-link"]{cursor:pointer}
+#cad-svg .cad-node-wrap [data-act="cad-open-link"]:hover rect{fill:#d6e7fa;stroke:#458ccf}
+#cad-svg .cad-node-wrap .cad-node-bg{transition:stroke .1s ease,fill .1s ease}
+#cad-svg .cad-node-wrap:hover .cad-node-bg{stroke:#8aaad0}
+#cad-svg .cad-node-wrap.is-selected .cad-node-bg{stroke:#2c6fc8;stroke-width:2.4}
+@media(prefers-reduced-motion:reduce){#cad-svg .cad-node-wrap .cad-node-bg{transition:none}}
