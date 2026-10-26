@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { CANVAS_COMPONENTS, CANVAS_GRID, prepareCanvasInput, moveCanvasCard, buildCanvasLayout, exportCanvasSvg, canvasConnectionOffsets, canvasEdgeGeometry, canvasTitleLines, canvasBoundary } from '../src/services/blueprint-canvas.js';
+import { CANVAS_COMPONENTS, CANVAS_GRID, canvasSafeUrl, canvasRowHeight, canvasCardHeight, normalizeCanvasMetadata, prepareCanvasInput, moveCanvasCard, buildCanvasLayout, exportCanvasSvg, canvasConnectionOffsets, canvasEdgeGeometry, canvasTitleLines, canvasBoundary } from '../src/services/blueprint-canvas.js';
 import { matrixContentFromDocument, restoreMatrixContent, normalizeMatrixActivity } from '../src/services/journey-content.js';
 import { normalizeSavedMatrixView, switchMatrixPerspective } from '../src/services/journey-views.js';
 let count=0;const check=(name,run)=>{run();count++;console.log('PASS '+name)};
@@ -92,5 +92,56 @@ check('Editor places lane management in sidebar and keeps 100% left-aligned open
  assert.match(editor,/const cadIconPaths=\{/);
  assert.match(css,/\.cad-professional-icon/);
  assert.match(css,/\.cad-library-tabs/);
+});
+check('Empty lanes are compact, populated lanes grow and manual height never clips cards',()=>{
+ const source=doc(),lanes=[{id:'ev',n:'Evidências'},{id:'ch',n:'Canais'},{id:'fl',n:'Linha de frente'},{id:'em',n:'Emoções'}];
+ source.c['ev|0']=[{i:'image',t:'Fachada',canvas:{kind:'artifact',imageUrl:'https://example.org/fachada.jpg',tone:'teal'}}];
+ source.c['ch|0']=[{i:'channel',t:'WhatsApp',canvas:{kind:'channel'}}];
+ const auto=buildCanvasLayout(source,lanes),manual=buildCanvasLayout(source,lanes,null,null,{ch:180,ev:90});
+ assert.equal(auto.rows.find(r=>r.id==='ev').height,200);
+ assert.equal(auto.nodes.find(n=>n.id==='image').height,164);
+ assert.equal(auto.nodes.find(n=>n.id==='channel').height,88);
+ assert.equal(auto.rows.find(r=>r.id==='em').height,132);
+ assert.equal(manual.rows.find(r=>r.id==='ch').height,180);
+ assert.equal(manual.rows.find(r=>r.id==='ev').height,200);
+ assert.equal(canvasCardHeight({canvas:{kind:'text'}},'sd'),98);
+ assert.equal(canvasRowHeight(source,{id:'fl'},[1]),90);
+ for(const node of manual.nodes.filter(n=>n.row!=='em')){
+  const row=manual.rows.find(r=>r.id===node.row);
+  assert.ok(node.y>=row.y&&node.y+node.height<=row.y+row.height);
+ }
+});
+check('Safe media metadata rejects unsafe schemes, preserves kind and icon, and renders evidence in SVG',()=>{
+ const meta=normalizeCanvasMetadata({kind:'artifact',imageUrl:'https://example.org/capa.png',linkUrl:'https://example.org/documento.pdf',iconKey:'artifact',tone:'teal',evidenceType:'image'});
+ assert.equal(meta.imageUrl,'https://example.org/capa.png');
+ assert.equal(meta.linkUrl,'https://example.org/documento.pdf');
+ assert.equal(meta.iconKey,'artifact');
+ assert.equal(meta.tone,'teal');
+ assert.equal(meta.evidenceType,'image');
+ assert.equal(canvasSafeUrl('javascript:alert(1)'),'');
+ assert.equal(canvasSafeUrl('data:image/svg+xml,<svg/>'),'');
+ assert.equal(canvasSafeUrl('file:///etc/passwd'),'');
+ const fallback=normalizeCanvasMetadata({kind:'artifact',iconKey:'nonexistent',tone:'javascript:bad',imageUrl:'javascript:bad'});
+ assert.equal(fallback.iconKey,'artifact');
+ assert.equal(fallback.tone,'default');
+ assert.equal(fallback.imageUrl,'');
+ const source=doc();source.c['ev|0']=[{i:'screen',t:'Tela do app',canvas:meta}];
+ const svg=exportCanvasSvg(source,[{id:'ev',n:'Evidências'}]);
+ assert.match(svg,/<image /);
+ assert.match(svg,/https:\/\/example\.org\/capa\.png/);
+ assert.match(svg,/fill="#f0fdf9"/);
+});
+check('Every card and lane exposes controls without splitting canonical documents',()=>{
+ const editor=readFileSync(new URL('../src/runtime/journey-cad-ui.js',import.meta.url),'utf8');
+ assert.match(editor,/function cadLaneInspector\(\)/);
+ assert.match(editor,/function cadSelect\(id,point=\{\},inline=false\)/);
+ assert.match(editor,/function cadRowHeights\(\)/);
+ assert.match(editor,/data-act="cad-lane-resize"/);
+ assert.match(editor,/cad-lane-height-apply/);
+ assert.match(editor,/cad-lane-auto/);
+ assert.match(editor,/cad-evidence-fields/);
+ assert.match(editor,/cad-duplicate/);
+ assert.match(editor,/cad-photo-/);
+ assert.match(editor,/function cadEmotionSvg\(row,layout\)/);
 });
 console.log(`Blueprint canvas: ${count}/${count} PASS`);
