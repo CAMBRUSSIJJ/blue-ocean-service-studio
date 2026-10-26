@@ -125,7 +125,7 @@ const formatDate = (value: unknown) => {
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-export function BlueprintWorkspaceView({ studio }: { studio: StudioController }) {
+export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCreateMapIntentConsumed }: { studio: StudioController; createMapIntent?: boolean; onCreateMapIntentConsumed?: () => void }) {
   const { graph, hasService, setActiveTab, setGraph, showToast } = studio;
   const experience = useExperienceProfile();
   const [journeyQuery, setJourneyQuery] = useState('');
@@ -138,6 +138,13 @@ export function BlueprintWorkspaceView({ studio }: { studio: StudioController })
   const [journeyViewMode, setJourneyViewMode] = useState<LibraryViewMode>('cards');
   const [journeyEditorOpen, setJourneyEditorOpen] = useState(false);
   const [journeyCreateOpen, setJourneyCreateOpen] = useState(false);
+  useEffect(() => {
+    if (!createMapIntent) return;
+    setWorkspaceTab('journey');
+    setJourneyEditorOpen(false);
+    setJourneyCreateOpen(true);
+    onCreateMapIntentConsumed?.();
+  }, [createMapIntent, onCreateMapIntentConsumed]);
   const [journeyToDelete, setJourneyToDelete] = useState<{ id: string; name: string } | null>(null);
   const [blueprintToDelete, setBlueprintToDelete] = useState<{ id: string; name: string } | null>(null);
   const [designStartOpen, setDesignStartOpen] = useState(false);

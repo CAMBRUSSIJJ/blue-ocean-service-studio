@@ -1,6 +1,10 @@
+import { useMemo, useState } from 'react';
 import {
   ArrowRight, BookOpen, FolderKanban,
 } from '../design-system/icons';
+import { contextEntityTitle, type ContextKind } from '../services/context-library';
+import { projectContextRecords, filterProjectContext, projectRelatedRecords, projectHasLinkedEvidence } from '../services/project-context-index';
+import './project-context-workspace.css';
 import type { StudioController } from '../state/useStudioController';
 
 export type ProjectShellSection = 'overview' | 'library';
@@ -9,13 +13,14 @@ type Props = {
   studio: StudioController;
   section: ProjectShellSection;
   openService: () => void;
+  onCreateMap: () => void;
   openWhiteboards: () => void;
   openLibraryPage: (page: 'hierarchies' | 'personas' | 'needs' | 'jobs' | 'pains' | 'hypotheses' | 'problems' | 'evidence' | 'portfolio' | 'metrics' | 'templates' | 'archive') => void;
 };
 
 const count = (value: Record<string, unknown> | undefined) => Object.keys(value ?? {}).length;
 
-export function ProjectShellView({ studio, section, openService, openWhiteboards, openLibraryPage }: Props) {
+export function ProjectShellView({ studio, section, openService, onCreateMap, openWhiteboards, openLibraryPage }: Props) {
   const { graph, projects, activeProjectId } = studio;
   const project = projects.find((item) => item.id === activeProjectId) ?? projects[0] ?? null;
   const serviceName = graph.service.name || project?.serviceName || 'Serviço ainda não definido';
@@ -34,6 +39,51 @@ export function ProjectShellView({ studio, section, openService, openWhiteboards
   const opportunities = count(graph.opportunities);
   const researchEvidence = evidence;
   const serviceArtifacts = serviceMaps + whiteboards;
+  // The current ServiceGraph is the project scope; never copy entities for a dashboard.
+  const projectId = project?.id || graph.service.project?.id || graph.service.id;
+  type Area = 'overview' | 'audience' | 'research' | 'maps' | 'improvement';
+  const allowedAreas: Area[] = ['overview', 'audience', 'research', 'maps', 'improvement'];
+  const [area, setArea] = useState<Area>(() => {
+    try {
+      const saved = sessionStorage.getItem('bo-project-area:' + projectId);
+      return allowedAreas.includes(saved as Area) ? saved as Area : 'overview';
+    } catch { return 'overview'; }
+  });
+  const [query, setQuery] = useState('');
+  const [kind, setKind] = useState<'all' | ContextKind>('all');
+  const [personaId, setPersonaId] = useState('all');
+  const [hasEvidence, setHasEvidence] = useState(false);
+  const allEntities = useMemo(() => projectContextRecords(graph), [graph]);
+  const persons = allEntities.filter(item => item.contextKind === 'persona');
+  const relatedTo = (id: string) => projectRelatedRecords(allEntities, id);
+  const hasLinkedEvidence = (id: string) => projectHasLinkedEvidence(allEntities, id);
+  const targetKinds: ContextKind[] = area === 'research' ? ['evidence','problemHypothesis','problem'] : ['persona','need','job','pain','problemHypothesis','problem','evidence'];
+  const filteredEntities = filterProjectContext(allEntities, {area: area === 'research' ? 'research' : 'audience', query, kind, personaId, hasEvidence});
+  const pageFor = (value: ContextKind): Parameters<Props['openLibraryPage']>[0] =>
+    ({ persona:'personas',need:'needs',job:'jobs',pain:'pains',problemHypothesis:'hypotheses',problem:'problems',evidence:'evidence' } as const)[value];
+  const focusEntity = (item: { id: string; contextKind: ContextKind }) => {
+    // Existing detail panels understand this focus contract for Personas and Necessidades.
+    if (item.contextKind === 'need' || item.contextKind === 'persona') {
+      try { sessionStorage.setItem('bo-service-object-focus', JSON.stringify({kind:item.contextKind,id:item.id})); } catch { /* optional focus */ }
+    }
+    openLibraryPage(pageFor(item.contextKind));
+  };
+  const areaLabel: Array<{ id: Area; label: string }> = [
+    {id:'overview',label:'Visão geral'}, {id:'audience',label:'Público e contexto'},
+    {id:'research',label:'Pesquisa e evidências'}, {id:'maps',label:'Mapas e Whiteboard'},
+    {id:'improvement',label:'Análise e melhorias'},
+  ];
+  const chooseArea = (next: Area) => {
+    setArea(next);
+    setQuery('');
+    setKind('all');
+    setPersonaId('all');
+    setHasEvidence(false);
+    try { sessionStorage.setItem('bo-project-area:' + projectId, next); } catch { /* local preference */ }
+  };
+  const areaTabs = <nav className="bo-project-context-tabs" role="tablist" aria-label="Áreas deste projeto">
+    {areaLabel.map(item => <button type="button" role="tab" key={item.id} id={`bo-pctx-tab-${item.id}`} aria-controls="bo-project-context-panel" aria-selected={area === item.id} className={area === item.id ? 'is-current' : ''} onClick={() => chooseArea(item.id)}>{item.label}</button>)}
+  </nav>;
 
   if (section === 'library') {
     const groups = [
@@ -65,10 +115,14 @@ export function ProjectShellView({ studio, section, openService, openWhiteboards
       <div className="bo-h740h10-shell__status"><span>Serviço principal</span><strong>{serviceName}</strong><small>{serviceArtifacts} artefato{serviceArtifacts === 1 ? '' : 's'} de serviço</small></div>
     </header>
 
+    {areaTabs}
+    <div id="bo-project-context-panel" role="tabpanel" aria-labelledby={`bo-pctx-tab-${area}`} className="bo-project-context-panel">
+    {area === 'overview' ? <>
     <section className="bo-h740h10-primary-card">
       <div className="bo-h740h10-primary-card__icon"><FolderKanban size={22}/></div>
       <div><small>SERVIÇO PRINCIPAL</small><h2>{serviceName}</h2><p>Abra o serviço para criar mapas, definir o público-alvo e acompanhar a evolução da experiência.</p><div><span>{serviceMaps} mapa{serviceMaps === 1 ? '' : 's'} do serviço</span><span>{whiteboards} Whiteboard{whiteboards === 1 ? '' : 's'}</span></div></div>
-      <button type="button" className="primary" onClick={openService}>Abrir serviço <ArrowRight size={14}/></button>
+      <button type="button" className="primary" onClick={onCreateMap}>Criar mapa <ArrowRight size={14}/></button>
+      <button type="button" onClick={openService}>Ver mapas existentes <ArrowRight size={14}/></button>
     </section>
 
     <section className="bo-h740h10-shell__section" data-project-elements="H17.0.7"><header><div><small>MODELO DO SERVIÇO</small><h2>Elementos do projeto</h2><p>Consulte o que já foi criado ou entre diretamente na área para adicionar novos elementos.</p></div></header>
@@ -86,5 +140,18 @@ export function ProjectShellView({ studio, section, openService, openWhiteboards
       </div>
     </section>
     <section className="bo-h740h10-shell__section"><header><div><small>ATIVIDADE RECENTE</small><h2>Resumo do projeto</h2></div></header><div className="bo-h740h10-summary-grid"><article><strong>{serviceMaps}</strong><span>Mapas</span></article><article><strong>{researchEvidence}</strong><span>Evidências</span></article><article><strong>{problems}</strong><span>Problemas</span></article><article><strong>{metrics}</strong><span>Métricas</span></article></div></section>
+    </> : (area === 'audience' || area === 'research') ? <section className="bo-project-context-collection">
+      <header className="bo-project-context-section-header"><div><small>{area === 'audience' ? 'PÚBLICO E CONTEXTO' : 'PESQUISA DO PROJETO'}</small><h2>{area === 'audience' ? 'Pessoas, necessidades e relações' : 'Hipóteses, problemas e evidências'}</h2><p>Registros deste projeto, vinculados ao mesmo Service Graph usado nos mapas. Nenhum registro é duplicado.</p></div><button type="button" className="primary" onClick={() => openLibraryPage(area === 'audience' ? 'needs' : 'evidence')}>+ {area === 'audience' ? 'Nova necessidade' : 'Nova evidência'}</button></header>
+      <div className="bo-project-context-filters">
+        <label><span>Buscar registros</span><input aria-label="Buscar registros do projeto" value={query} onChange={event => setQuery(event.target.value)} placeholder="Nome, descrição ou responsável"/></label>
+        <label><span>Categoria</span><select value={kind} onChange={event => setKind(event.target.value as 'all' | ContextKind)}><option value="all">Todas as categorias</option>{targetKinds.map(value => <option value={value} key={value}>{({persona:'Personas',need:'Necessidades',job:'Jobs',pain:'Dores',problemHypothesis:'Hipóteses',problem:'Problemas',evidence:'Evidências'} as Record<ContextKind,string>)[value]}</option>)}</select></label>
+        <label><span>Persona relacionada</span><select value={personaId} onChange={event => setPersonaId(event.target.value)}><option value="all">Todas as Personas</option>{persons.map(person => <option value={person.id} key={person.id}>{contextEntityTitle(person)}</option>)}</select></label>
+        <label className="bo-project-context-check"><input type="checkbox" checked={hasEvidence} onChange={event => setHasEvidence(event.target.checked)}/> Com evidência</label>
+      </div>
+      <div className="bo-project-context-result-count"><strong>{filteredEntities.length}</strong> registro{filteredEntities.length === 1 ? '' : 's'} no projeto <button type="button" onClick={() => {setQuery('');setKind('all');setPersonaId('all');setHasEvidence(false)}}>Limpar filtros</button></div>
+      {filteredEntities.length ? <div className="bo-project-context-records">{filteredEntities.slice(0,100).map(item => { const related = relatedTo(item.id); return <button type="button" key={item.id} className="bo-project-context-record" onClick={() => focusEntity(item)}><span><small>{({persona:'PERSONA',need:'NECESSIDADE',job:'JOB',pain:'DOR',problemHypothesis:'HIPÓTESE',problem:'PROBLEMA',evidence:'EVIDÊNCIA'} as Record<ContextKind,string>)[item.contextKind]}</small><strong>{contextEntityTitle(item)}</strong><em>{item.description || 'Sem descrição'}</em><small>{related.length} relação(ões) · {hasLinkedEvidence(item.id) || item.contextKind === 'evidence' ? 'Com evidência' : 'Sem evidência vinculada'}</small></span><ArrowRight size={17}/></button>})}</div> : <div className="bo-project-context-empty">Nenhum registro corresponde aos filtros. Altere as condições ou crie um novo item na biblioteca deste projeto.</div>}
+      {filteredEntities.length > 100 && <p className="bo-project-context-result-count">Exibindo os 100 primeiros resultados; refine os filtros para localizar outros registros.</p>}
+    </section> : area === 'maps' ? <section className="bo-project-context-collection"><header className="bo-project-context-section-header"><div><small>DESENHO DO SERVIÇO</small><h2>Mapas e Whiteboards deste projeto</h2><p>Jornada, Blueprint e Matriz são perspectivas do mesmo mapa. Os Whiteboards continuam vinculados ao serviço.</p></div><button type="button" className="primary" onClick={openService}>Abrir Mapas <ArrowRight size={15}/></button></header><div className="bo-project-context-records">{Object.values(graph.journeys).map(journey => <button type="button" className="bo-project-context-record" key={journey.id} onClick={openService}><span><small>MAPA DO SERVIÇO</small><strong>{journey.name}</strong><em>{journey.stageIds.length} etapa(s) · Jornada / Blueprint / Matriz</em></span><ArrowRight size={17}/></button>)}{Object.values(graph.views?.whiteboards ?? {}).filter(board => board.viewKind === 'free').map(board => <button type="button" className="bo-project-context-record" key={board.id} onClick={openWhiteboards}><span><small>WHITEBOARD</small><strong>{board.name}</strong><em>{Object.keys(board.items ?? {}).length} objeto(s)</em></span><ArrowRight size={17}/></button>)}</div>{!serviceArtifacts && <div className="bo-project-context-empty">Este projeto ainda não tem mapas ou quadros. Comece pelo primeiro mapa do serviço.</div>}</section> : <section className="bo-project-context-collection"><header className="bo-project-context-section-header"><div><small>EVOLUÇÃO DO PROJETO</small><h2>Problemas, oportunidades e resultados</h2><p>Consulte o que já foi registrado e continue o trabalho nas bibliotecas existentes.</p></div><button type="button" className="primary" onClick={() => openLibraryPage('portfolio')}>Abrir oportunidades <ArrowRight size={15}/></button></header><div className="bo-project-context-summary">{[['Problemas',problems,'problems'],['Oportunidades',opportunities,'portfolio'],['Métricas',metrics,'metrics'],['Evidências',evidence,'evidence']].map(([label,total,page]) => <button type="button" key={String(page)} onClick={() => openLibraryPage(page as Parameters<Props['openLibraryPage']>[0])}><strong>{total}</strong><span>{label}</span><ArrowRight size={15}/></button>)}</div></section>}
+    </div>
   </section>;
 }
