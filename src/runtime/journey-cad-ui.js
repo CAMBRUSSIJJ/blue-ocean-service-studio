@@ -196,6 +196,8 @@ function cadSvg(){
   const boundary=cadModel.canvasBoundary(row,index,layout.rows),color=cadColors[row.id]||'#64748b';
   html+='<rect x="0" y="'+row.y+'" width="'+layout.width+'" height="'+row.height+'" rx="7" class="cad-lane-bg"/><path d="M2 '+(row.y+8)+' V'+(row.y+row.height-8)+'" stroke="'+color+'" stroke-width="3"/>';
   cadModel.canvasTitleLines(row.n,Math.max(7,Math.floor(192/(labelFont*.56))),Math.min(3,Math.max(1,Math.floor((row.height-18)/(labelFont+4))))).forEach((line,i)=>{html+='<text x="15" y="'+(row.y+28+i*(labelFont+4))+'" class="cad-lane-name" style="font-size:'+labelFont+'px">'+esc(line)+'</text>'});
+   html+='<g class="cad-lane-select'+(cadState.selectedRow===row.id?' is-selected':'')+'" role="button" tabindex="0" data-act="cad-lane-select" data-id="'+esc(row.id)+'" aria-label="Propriedades da faixa '+esc(row.n)+'" title="Editar faixa"><rect x="0" y="'+row.y+'" width="'+(layout.stages[0]?.x||218)+'" height="'+row.height+'" fill="transparent"/></g>';
+   if(!cadLocked())html+='<g class="cad-lane-resize" role="separator" tabindex="0" data-act="cad-lane-resize" data-id="'+esc(row.id)+'" aria-label="Ajustar altura da faixa '+esc(row.n)+'" aria-orientation="horizontal" aria-valuemin="90" aria-valuemax="540" aria-valuenow="'+Math.round(row.height)+'" title="Arraste para ajustar a altura"><rect x="84" y="'+(row.y+row.height-10)+'" width="72" height="16" rx="6"/><path d="M104 '+(row.y+row.height-4)+' H136"/></g>';
   if(boundary)html+='<path d="M0 '+(row.y-14)+' H'+layout.width+'" class="cad-boundary"/><text x="'+(layout.width/2)+'" y="'+(row.y-18)+'" text-anchor="middle" class="cad-boundary-name">'+esc(boundary)+'</text>';
   for(const stage of layout.stages){const empty=!layout.nodes.some(node=>node.row===row.id&&node.stageIndex===stage.index&&!node.note.draft),addWidth=Math.min(stage.width-32,Math.max(140,110/cam.zoom)),addHeight=Math.max(34,28/cam.zoom);
    html+='<rect x="'+stage.x+'" y="'+row.y+'" width="'+stage.width+'" height="'+row.height+'" class="cad-cell" data-row="'+row.id+'" data-si="'+stage.index+'"/>';
@@ -226,7 +228,7 @@ function cadMobileMap(){
 }
 function cadRender(){
  if(!V.canvasOrderVersion){const preferred=['sd','ev','ch','ac','th','em','fl','bk','sy','im'];V.rowOrder=[...preferred,...V.rowOrder.filter(id=>!preferred.includes(id))];V.canvasOrderVersion=1;saveView()}
- const scene=S.journeyId||S.id;if(cadState.scene!==scene||cadState.canvasPerspective!==V.perspective){Object.assign(cadState,{scene,canvasPerspective:V.perspective,selected:'',creating:null,quick:null,link:null,camera:null,drafts:new Map(),inspector:false,error:'',menu:null,connectFrom:'',choosing:null,activeCell:null,libraryFilter:'all',resize:null,resizePreview:null,emotionDrag:null})}
+ const scene=S.journeyId||S.id;if(cadState.scene!==scene||cadState.canvasPerspective!==V.perspective){Object.assign(cadState,{scene,canvasPerspective:V.perspective,selected:'',selectedRow:'',creating:null,quick:null,link:null,camera:null,drafts:new Map(),inspector:false,error:'',menu:null,connectFrom:'',choosing:null,activeCell:null,libraryFilter:'all',resize:null,resizePreview:null,emotionDrag:null})}
  document.body.classList.add('cad-mode');cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());
  if(cadState.selected&&!blueprintNote(cadState.selected)){cadState.selected='';cadState.inspector=false}
  const mobile=cadMobile(),showInspector=cadState.inspector&&(!!cadState.selected||!!cadState.selectedRow),view=V.perspective==='journey'?'journey':'blueprint';
@@ -374,7 +376,7 @@ function cadAction(action,data,button){
   V.stageWidths=S.steps.map((_,i)=>action==='cad-stage-reset'?392:action==='cad-stage-equal'?average:cadModel.canvasStageWidth(cadModel.canvasStageWidth(widths[i])+(action==='cad-stage-wide'?48:-48)));
   V.fitToScreen=false;saveView();rerender();return true;
  }
- if(action==='cad-stage-resize')return true;
+ if(action==='cad-stage-resize'||action==='cad-lane-resize')return true;
  if(action==='cad-emotion'){if(cadState.ignoreClick){cadState.ignoreClick=false;return true}cadEditEmotion(Number(data.si),point);return true}
  if(action==='cad-toggle-library'){cadState.libraryHidden=!cadState.libraryHidden;rerender();return true}
  if(action==='cad-close'){cadState.inspector=false;cadState.selectedRow='';rerender();return true}
@@ -454,6 +456,11 @@ function cadBind(){
   if(event.target.matches?.('.cad-library-tabs [role="tab"]')&&['ArrowLeft','ArrowRight'].includes(event.key)){
     event.preventDefault();cadAction('cad-sidebar-tab',{tab:event.target.dataset.tab==='components'?'lanes':'components'});return;
    }
+   const laneHandle=event.target.closest?.('.cad-lane-resize');
+   if(laneHandle&&['ArrowUp','ArrowDown','Home'].includes(event.key)&&!cadLocked()){
+    event.preventDefault();const id=laneHandle.dataset.id,actual=cadState.layout.rows.find(row=>row.id===id)?.height||90;
+    cadChangeRowHeight(id,event.key==='Home'?null:actual+(event.key==='ArrowDown'?16:-16));return;
+   }
    const grip=event.target.closest?.('.cad-stage-resize');
    if(grip&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){
     event.preventDefault();const i=Number(grip.dataset.si),current=cadModel.canvasStageWidth(cadStageWidths()[i]);
@@ -474,7 +481,13 @@ function cadBind(){
   if(event.ctrlKey||event.metaKey)cadZoom(event.deltaY<0?1.1:1/1.1,event.clientX-rect.left,event.clientY-rect.top);else{cadState.camera.x-=event.shiftKey?event.deltaY:event.deltaX;cadState.camera.y-=event.shiftKey?0:event.deltaY;cadPaint()}
  },{passive:false});
  app.addEventListener('pointerdown',event=>{
-  const grip=event.target.closest?.('.cad-stage-resize'),emotion=event.target.closest?.('.cad-emotion-control');
+  const laneHandle=event.target.closest?.('.cad-lane-resize');
+   if(event.button===0&&laneHandle&&!cadLocked()){
+    const id=laneHandle.dataset.id,viewport=app.querySelector('.cad-viewport'),row=cadState.layout.rows.find(r=>r.id===id);
+    cadState.laneResize={pointer:event.pointerId,id,startY:event.clientY,height:row?.height||90,zoom:cadState.camera.zoom};
+    viewport?.setPointerCapture(event.pointerId);event.preventDefault();return;
+   }
+   const grip=event.target.closest?.('.cad-stage-resize'),emotion=event.target.closest?.('.cad-emotion-control');
    if(event.button===0&&grip&&!cadLocked()){
     const i=Number(grip.dataset.si),viewport=app.querySelector('.cad-viewport');
     cadState.resize={pointer:event.pointerId,index:i,startX:event.clientX,width:cadModel.canvasStageWidth(cadStageWidths()[i]),zoom:cadState.camera.zoom};
@@ -491,9 +504,17 @@ function cadBind(){
  });
  app.addEventListener('pointermove',event=>{
   if(cadState.connectFrom&&event.target.closest?.('.cad-viewport')){cadState.pointer=cadWorld(event);const source=cadState.layout.nodes.find(node=>node.id===cadState.connectFrom);let preview=app.querySelector('.cad-connect-preview');if(source){if(!preview){preview=document.createElementNS('http://www.w3.org/2000/svg','path');preview.setAttribute('class','cad-connect-preview');app.querySelector('#cad-world')?.appendChild(preview)}preview.setAttribute('d','M '+(source.x+source.width)+' '+(source.y+source.height/2)+' L '+cadState.pointer.x+' '+cadState.pointer.y)}}
-  const resize=cadState.resize;if(resize&&resize.pointer===event.pointerId){
+  const laneResize=cadState.laneResize;
+   if(laneResize&&laneResize.pointer===event.pointerId){
+    const min=cadModel.canvasRowHeight(cadProjection(false),cadRows().find(r=>r.id===laneResize.id),S.steps.map((_,i)=>i));
+    const height=Math.max(min,Math.min(540,Math.round(laneResize.height+(event.clientY-laneResize.startY)/laneResize.zoom)));
+    cadState.lanePreviewHeights={...cadRowHeights(),[laneResize.id]:height};
+    cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());
+    cadPaint();return;
+   }
+   const resize=cadState.resize;if(resize&&resize.pointer===event.pointerId){
     const widths=[...cadStageWidths()];widths[resize.index]=cadModel.canvasStageWidth(resize.width+(event.clientX-resize.startX)/resize.zoom);
-    cadState.resizePreview=widths;cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,widths);cadPaint();return;
+    cadState.resizePreview=widths;cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,widths,cadRowHeights());cadPaint();return;
    }
    const emotionDrag=cadState.emotionDrag;if(emotionDrag&&emotionDrag.pointer===event.pointerId){
     const row=cadState.layout.rows.find(value=>value.id==='em');if(!row)return;
@@ -507,9 +528,16 @@ function cadBind(){
   const node=cadState.layout.nodes.find(node=>node.id===drag.node),element=app.querySelector('[data-group-id="'+CSS.escape(drag.node)+'"]');element?.setAttribute('transform','translate('+(node.x+dx/drag.cam.zoom)+' '+(node.y+dy/drag.cam.zoom)+')');element?.classList.add('is-dragging');cadHighlight(cadDropTarget(cadWorld(event)),cadModel.canvasKind(node.note,node.row));
  });
  const end=(event,cancel=false)=>{
+   const laneResize=cadState.laneResize;
+   if(laneResize&&laneResize.pointer===event.pointerId){
+    cadState.laneResize=null;const height=cadState.lanePreviewHeights?.[laneResize.id]??laneResize.height;cadState.lanePreviewHeights=null;
+    if(cancel){cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());cadPaint()}
+    else cadChangeRowHeight(laneResize.id,height);
+    return;
+   }
    const resize=cadState.resize;if(resize&&resize.pointer===event.pointerId){
     cadState.resize=null;const width=cadState.resizePreview?.[resize.index]??resize.width;cadState.resizePreview=null;
-    if(cancel){cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths());cadPaint()}
+    if(cancel){cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());cadPaint()}
     else cadStageResizeTo(resize.index,width);return;
    }
    const emotionDrag=cadState.emotionDrag;if(emotionDrag&&emotionDrag.pointer===event.pointerId){
