@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { CANVAS_COMPONENTS, prepareCanvasInput, moveCanvasCard, buildCanvasLayout, exportCanvasSvg, canvasConnectionOffsets, canvasEdgeGeometry, canvasTitleLines, canvasBoundary } from '../src/services/blueprint-canvas.js';
+import { readFileSync } from 'node:fs';
+import { CANVAS_COMPONENTS, CANVAS_GRID, prepareCanvasInput, moveCanvasCard, buildCanvasLayout, exportCanvasSvg, canvasConnectionOffsets, canvasEdgeGeometry, canvasTitleLines, canvasBoundary } from '../src/services/blueprint-canvas.js';
 import { matrixContentFromDocument, restoreMatrixContent, normalizeMatrixActivity } from '../src/services/journey-content.js';
 import { normalizeSavedMatrixView, switchMatrixPerspective } from '../src/services/journey-views.js';
 let count=0;const check=(name,run)=>{run();count++;console.log('PASS '+name)};
@@ -67,5 +68,29 @@ check('Stage width boundaries are constrained and empty emotion cells do not bec
  assert.deepEqual(layout.stages.map(stage=>stage.width),[210,600]);
  assert.equal(layout.nodes.length,0);
  assert.ok(layout.rows[0].height>=128,'Emotion plot has enough height for labels');
+});
+check('New canvas opens with readable stage and card geometry',()=>{
+ assert.equal(CANVAS_GRID.stage,392);
+ assert.equal(CANVAS_GRID.cardWidth,328);
+ assert.equal(CANVAS_GRID.cardHeight,112);
+ const source=doc(),layout=buildCanvasLayout(source,rows);
+ assert.deepEqual(layout.stages.map(stage=>stage.width),[392,392]);
+ assert.equal(layout.nodes.find(node=>node.id==='a').width,328);
+ assert.equal(layout.nodes.find(node=>node.id==='a').height,112);
+});
+check('Editor places lane management in sidebar and keeps 100% left-aligned opening',()=>{
+ const editor=readFileSync(new URL('../src/runtime/journey-cad-ui.js',import.meta.url),'utf8');
+ const css=readFileSync(new URL('../src/runtime/journey-cad.css',import.meta.url),'utf8');
+ assert.doesNotThrow(()=>new Function(editor));
+ assert.match(editor,/function cadSidebarTabs\(\)/);
+ assert.match(editor,/function cadLanePanel\(\)/);
+ assert.match(editor,/data-act="cad-lane-toggle"/);
+ assert.match(editor,/data-act="cad-lane-order"/);
+ assert.match(editor,/function cadInitialCamera\(\)/);
+ assert.match(editor,/cadState\.camera=\{x:16,y:16,zoom:1\}/);
+ assert.doesNotMatch(editor,/cadButton\('customize','Faixas'/);
+ assert.match(editor,/const cadIconPaths=\{/);
+ assert.match(css,/\.cad-professional-icon/);
+ assert.match(css,/\.cad-library-tabs/);
 });
 console.log(`Blueprint canvas: ${count}/${count} PASS`);
