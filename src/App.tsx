@@ -93,6 +93,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const [libraryPage, setLibraryPage] = useState<WorkspaceLibraryPage>('personas');
   const [projectHomeSection, setProjectHomeSection] = useState<ProjectHomeSection>('home');
   const [projectShellOpen, setProjectShellOpen] = useState(false);
+  const [createMapIntent, setCreateMapIntent] = useState(false);
   const [projectShellSection] = useState<ProjectShellSection>('overview');
   const { activeTab, graph, hasService, projects, activeProjectId, saveStatus, handleSave, handleImport, handleExport, createService, loadDemoService,
     isCreateStageOpen, setIsCreateStageOpen, stageDraft, setStageDraft, createStage,
@@ -384,6 +385,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
   };
 
   const openCurrentProjectWorkspace = () => openCurrentProjectHome();
+  const createMapFromProject = () => { setCreateMapIntent(true); openServiceWorkspaceTab('journey'); };
 
   useEffect(() => {
     const changed = (event: Event) => { const target = String((event as CustomEvent<string>).detail || 'overview'); setServiceWorkspaceTab(target === 'research' ? 'overview' : target === 'blueprint' ? 'journey' : target); };
@@ -598,12 +600,12 @@ export default function App({ authUser, onSignOut }: AppProps) {
 
         <main id="bo-main-content" data-bo-precision-workspace-native="1" data-bo-active-view={externalNav ?? activeTab} className={`flex-1 flex flex-col min-w-0 ${activeTab === 'canvas' && !externalNav ? 'overflow-hidden p-0' : activeTab === 'home' && !externalNav ? 'overflow-y-auto p-0' : 'px-4 md:px-6 overflow-y-auto'}`}>
           {isGlobalHome && <ProjectHomeView studio={studio} section={projectHomeSection} setSection={setProjectHomeSection} openProjectWorkspace={openCurrentProjectWorkspace} />}
-          {isProjectHome && hasService && <ProjectShellView key={activeProjectId || graph.service.id} studio={studio} section="overview" openService={() => openServiceWorkspaceTab('journey')} openWhiteboards={() => openServiceWorkspaceTab('whiteboard')} openLibraryPage={openLibraryPage} />}
+          {isProjectHome && hasService && <ProjectShellView key={activeProjectId || graph.service.id} studio={studio} section="overview" openService={() => openServiceWorkspaceTab('journey')} onCreateMap={createMapFromProject} openWhiteboards={() => openServiceWorkspaceTab('whiteboard')} openLibraryPage={openLibraryPage} />}
           {!hasService && activeTab !== 'home' && !externalNav && <section className="bo-h740h2-service-gate" data-requested-view={activeTab}><div className="bo-h740h2-service-gate__icon"><BlueOceanObjectIcon kind="service" size={34}/></div><small>COMECE PELO SERVIÇO</small><h2>{activeViewTitle} está pronta para você</h2><p>Você pode navegar por toda a plataforma. Para criar, editar ou conectar objetos nesta área, crie primeiro o serviço que será desenhado.</p><div><button type="button" className="primary" onClick={requestServiceCreation}>Criar meu primeiro serviço</button><button type="button" onClick={() => { loadDemoService(); setExternalNav(null); }}>Explorar serviço de exemplo</button></div></section>}
           {hasService && activeTab === 'context' && !externalNav && <WorkspaceLibraryView studio={studio} page={libraryPage} />}
           {hasService && activeTab === 'whiteboards' && !externalNav && <WhiteboardsView studio={studio} />}
           {hasService && activeTab === 'journey' && !externalNav && <EditorSurface><JourneyView studio={studio} onBack={() => { selectCore('canvas'); window.setTimeout(() => window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'journey' })), 0); }}/></EditorSurface>}
-          {hasService && activeTab === 'canvas' && !externalNav && <BlueprintWorkspaceView studio={studio} />}
+          {hasService && activeTab === 'canvas' && !externalNav && <BlueprintWorkspaceView studio={studio} createMapIntent={createMapIntent} onCreateMapIntentConsumed={() => setCreateMapIntent(false)} />}
           {hasService && activeTab === 'action' && !externalNav && <ActionPlanView studio={studio} />}
         </main>
       </div>
