@@ -7,7 +7,7 @@ const checks=[
  [app.includes('data-primary-sidebar-project-switch="7.40-H12"'),'App publica marker H12'],
  [main.includes("'bo-h740h12'"),'Host registra marker H12'],
  [app.includes('const isGlobalScope = !projectShellOpen'),'Escopo principal depende da entrada explícita no projeto'],
- [app.includes('data-project-navigation-single-source="1"'),'Uma única navegação permanece no escopo do projeto'],
+ [app.includes('data-persistent-global-nav="7.40-H13"') && app.includes('data-project-context-nav="h1"'),'Sidebar global única preservada com acesso ao projeto atual'],
  [app.includes('bo-h740h12-primary-design'),'Sidebar principal possui seção Desenho do serviço'],
  [app.includes('bo-h740h12-primary-context'),'Sidebar principal possui seção Contexto'],
  [app.includes('bo-h740h12-primary-management'),'Sidebar principal possui seção Gestão'],
@@ -32,7 +32,7 @@ const checks=[
  [app.includes('bo-h740h10-legacy-project-nav'),'Marcadores históricos preservados sem segunda navegação'],
  [app.includes("if (projectShellOpen) openLibraryPage(page); else openPrimaryLibraryPage(page);"),'Eventos de contexto respeitam escopo atual'],
  [app.includes("currentProject?.serviceName || graph.service.name || 'Serviço'"),'Switcher principal mostra serviço atual'],
- [app.includes("openServiceWorkspaceTab('journey')"),'Projeto abre Jornadas diretamente'],
+ [app.includes('const openCurrentProjectWorkspace = () => openCurrentProjectHome();'),'Projeto abre a própria visão geral antes das ferramentas'],
  [pkg.scripts['v1205h740h12:primary-sidebar-project-switch-smoke']?.includes('v1205h740h12-primary-sidebar-project-switch-smoke.mjs'),'Script H12 registrado'],
  [pkg.scripts.qa?.includes('v1205h740h12:primary-sidebar-project-switch-smoke'),'QA acumulado inclui H12'],
 ];
