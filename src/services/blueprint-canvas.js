@@ -194,8 +194,21 @@ export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type
     const transfer=link.handoff?' · '+link.handoff.fromTeam+' → '+link.handoff.toTeam+' · '+link.handoff.deliverable+' · Prazo: '+(link.handoff.deadlineMinutes??'não informado')+' min · Aceite: '+link.handoff.acceptance:'';
     out+=`<g><title>${xml(titleFor(a.note))} → ${xml(titleFor(b.note))} · ${xml(label+transfer)}</title><path d="${edge.d}" stroke="${color}" stroke-width="2" fill="none" marker-end="url(#arrow-${link.type})"/><text x="${edge.x}" y="${edge.y-5}" text-anchor="middle" font-size="10" fill="${color}">${xml(label.slice(0,60))}</text></g>`;
   }
-  for(const node of layout.nodes){if(node.row==='em')continue;const activity=node.note.activity||{},title=titleFor(node.note),details=[activity.owner?'Responsável: '+activity.owner:'',activity.team?'Equipe: '+activity.team:'',activity.durationMinutes!=null?'Execução: '+activity.durationMinutes+' min':'',activity.waitMinutes!=null?'Espera: '+activity.waitMinutes+' min':'',activity.rule?'Regra: '+activity.rule:'',node.note.canvas?.description||''].filter(Boolean).join(' · ');
-    out+=`<g><title>${xml(title)}${details?' · '+xml(details):''}</title><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="10" fill="#fff" stroke="#536c8d"/><text x="${node.x+12}" y="${node.y+23}" font-size="12" fill="#526885">${xml(CANVAS_COMPONENTS[canvasKind(node.note,node.row)]?.title||node.note.type)}</text>`+canvasTitleLines(title,34).map((line,index)=>`<text x="${node.x+12}" y="${node.y+50+index*21}" font-size="17" font-weight="600" fill="#142944">${xml(line)}</text>`).join('')+`<text x="${node.x+12}" y="${node.y+92}" font-size="11" fill="#526885">${xml(activity.owner||activity.team||'')}</text></g>`;
+  for(const node of layout.nodes){
+    if(node.row==='em')continue;
+    const activity=node.note.activity||{},kind=canvasKind(node.note,node.row),title=titleFor(node.note);
+    const details=[activity.owner?'Responsável: '+activity.owner:'',activity.team?'Equipe: '+activity.team:'',activity.durationMinutes!=null?'Execução: '+activity.durationMinutes+' min':'',activity.waitMinutes!=null?'Espera: '+activity.waitMinutes+' min':'',activity.rule?'Regra: '+activity.rule:'',node.note.canvas?.description||''].filter(Boolean).join(' · ');
+    const media=kind==='artifact'?canvasSafeUrl(node.note.canvas?.imageUrl||node.note.url):'';
+    const tones={blue:'#f4f8ff',teal:'#f0fdf9',amber:'#fff9ee',violet:'#f9f5ff',neutral:'#f8fafc'};
+    const fill=tones[node.note.canvas?.tone]||'#fff',x=node.x+12,y=node.y;
+    out+=`<g><title>${xml(title)}${details?' · '+xml(details):''}</title><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="10" fill="${fill}" stroke="#9fb4cc"/><text x="${x}" y="${y+23}" font-size="12" fill="#526885">${xml(CANVAS_COMPONENTS[kind]?.title||node.note.type)}</text>`;
+    if(media){
+      out+=`<rect x="${x}" y="${y+33}" width="${node.width-24}" height="${node.height-69}" rx="5" fill="#e8eef6"/><image x="${x}" y="${y+33}" width="${node.width-24}" height="${node.height-69}" href="${xml(media)}" preserveAspectRatio="xMidYMid slice"/><text x="${x}" y="${y+node.height-12}" font-size="15" font-weight="600" fill="#142944">${xml(title.slice(0,36))}</text>`;
+    }else{
+      out+=canvasTitleLines(title,kind==='channel'?25:34).map((line,index)=>`<text x="${x}" y="${y+50+index*21}" font-size="17" font-weight="600" fill="#142944">${xml(line)}</text>`).join('');
+      if(kind!=='channel')out+=`<text x="${x}" y="${y+node.height-14}" font-size="11" fill="#526885">${xml(activity.owner||activity.team||'')}</text>`;
+    }
+    out+='</g>';
   }
   return out+'</g></svg>';
 }
