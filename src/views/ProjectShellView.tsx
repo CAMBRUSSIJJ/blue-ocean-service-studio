@@ -13,13 +13,14 @@ type Props = {
   studio: StudioController;
   section: ProjectShellSection;
   openService: () => void;
+  onCreateMap: () => void;
   openWhiteboards: () => void;
   openLibraryPage: (page: 'hierarchies' | 'personas' | 'needs' | 'jobs' | 'pains' | 'hypotheses' | 'problems' | 'evidence' | 'portfolio' | 'metrics' | 'templates' | 'archive') => void;
 };
 
 const count = (value: Record<string, unknown> | undefined) => Object.keys(value ?? {}).length;
 
-export function ProjectShellView({ studio, section, openService, openWhiteboards, openLibraryPage }: Props) {
+export function ProjectShellView({ studio, section, openService, onCreateMap, openWhiteboards, openLibraryPage }: Props) {
   const { graph, projects, activeProjectId } = studio;
   const project = projects.find((item) => item.id === activeProjectId) ?? projects[0] ?? null;
   const serviceName = graph.service.name || project?.serviceName || 'Serviço ainda não definido';
@@ -120,7 +121,8 @@ export function ProjectShellView({ studio, section, openService, openWhiteboards
     <section className="bo-h740h10-primary-card">
       <div className="bo-h740h10-primary-card__icon"><FolderKanban size={22}/></div>
       <div><small>SERVIÇO PRINCIPAL</small><h2>{serviceName}</h2><p>Abra o serviço para criar mapas, definir o público-alvo e acompanhar a evolução da experiência.</p><div><span>{serviceMaps} mapa{serviceMaps === 1 ? '' : 's'} do serviço</span><span>{whiteboards} Whiteboard{whiteboards === 1 ? '' : 's'}</span></div></div>
-      <button type="button" className="primary" onClick={openService}>Abrir serviço <ArrowRight size={14}/></button>
+      <button type="button" className="primary" onClick={onCreateMap}>Criar mapa <ArrowRight size={14}/></button>
+      <button type="button" onClick={openService}>Ver mapas existentes <ArrowRight size={14}/></button>
     </section>
 
     <section className="bo-h740h10-shell__section" data-project-elements="H17.0.7"><header><div><small>MODELO DO SERVIÇO</small><h2>Elementos do projeto</h2><p>Consulte o que já foi criado ou entre diretamente na área para adicionar novos elementos.</p></div></header>
