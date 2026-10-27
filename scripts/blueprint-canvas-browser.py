@@ -21,12 +21,16 @@ def saved(f):expect(f.locator('[data-save-status]')).to_have_text('Salvo neste n
 def stage(f,name):
  f.get_by_role('button',name='Adicionar etapa',exact=True).first.click();field=f.locator('#cad-quick-form [name=title]');field.fill(name);field.press('Enter');saved(f)
 def details(f,note_id):
- if f.locator('.cad-shell').evaluate('()=>matchMedia("(max-width:760px)").matches'):
-  f.locator(f'[data-act="cad-menu"][data-id="{note_id}"]').click()
+ """Use the canonical card-selection interaction instead of transient context menus."""
+ mobile=f.locator('.cad-shell').evaluate('()=>matchMedia("(max-width:760px)").matches')
+ if mobile:
+  f.locator(f'.cad-mobile-card [data-act="cad-select"][data-id="{note_id}"]').click()
  else:
-  f.get_by_role('button',name='Ajustar',exact=True).click();f.locator(f'.cad-node[data-id="{note_id}"]').click(button='right')
- f.get_by_role('button',name='Detalhes opcionais',exact=True).click()
- return f.locator('#cad-component-form')
+  f.get_by_role('button',name='Ajustar',exact=True).click()
+  f.locator(f'.cad-node[data-id="{note_id}"]').click()
+ form=f.locator('#cad-component-form')
+ expect(form).to_be_visible(timeout=5000)
+ return form
 def add(f,kind,title,stage_index=0,**values):
  if f.locator('.cad-shell').evaluate('()=>matchMedia("(max-width:760px)").matches'):f.get_by_role('button',name='+ Componente',exact=True).click()
  f.locator(f'[data-act="cad-add"][data-kind="{kind}"]:visible').click();field=f.locator('#cad-quick-form [name=title]');field.fill(title);field.press('Enter');saved(f)
