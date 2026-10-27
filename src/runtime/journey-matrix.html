@@ -179,7 +179,18 @@ function saveView(){
   else{S.view=V;save()}
 }
 function choosePreset(preset,keepCustom=false){const renderer=V.blueprintRenderer,target=preset==='operational'?'blueprint':['essential','detailed','acquisition'].includes(preset)?'journey':V.perspective;if(target!==V.perspective)V=window.BlueOceanJourneyViews.switchMatrixPerspective(V,target,rowDefs());V.blueprintRenderer=renderer;V.preset=preset;if(preset==='operational')V.perspective='blueprint';else if(['essential','detailed','acquisition'].includes(preset))V.perspective='journey';V.hiddenRows=rowDefs().filter(r=>!(PRESETS[preset].includes(r.id)||r.custom&&(keepCustom||preset!=='essential'))).map(r=>r.id);saveView()}
-function announceSave(ok){saveLabel=ok==='pending'?'Salvando…':ok?'Salvo neste navegador':'Erro ao salvar';const el=app.querySelector('[data-save-status]');if(el)el.textContent=saveLabel}
+function announceSave(ok){
+  saveLabel=ok==='pending'?'Salvando…':ok?'Salvo neste navegador':'Erro ao salvar';
+  const el=app.querySelector('[data-save-status]');if(el)el.textContent=saveLabel;
+  // Some host acknowledgements arrive after a disabled render. The authoritative
+  // state is unlocked, but buttons still carry the old disabled attribute.
+  // Reconcile the control tree once, without touching the saved Service Graph.
+  if(ok===true&&cadEnabled()&&!cadLocked()&&app.querySelector('.cad-component-main[data-act="cad-add"]:disabled')){
+    requestAnimationFrame(()=>{
+      if(cadEnabled()&&!cadLocked()&&app.querySelector('.cad-component-main[data-act="cad-add"]:disabled'))rerender();
+    });
+  }
+}
 function rerender(){const bd=app.querySelector('.bd'),left=bd?.scrollLeft||0,top=window.scrollY;render();if(bd&&app.querySelector('.bd'))app.querySelector('.bd').scrollLeft=left;window.scrollTo(0,top)}
 function changeView(update,focus){Object.assign(V,update);saveView();rerender();if(focus)focusNew(focus)}
 let customizeQuery='';
