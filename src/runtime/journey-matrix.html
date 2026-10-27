@@ -83,6 +83,8 @@ button,select,input{font:inherit;color:var(--ink)}button{cursor:pointer}
 </style>
 <link rel="stylesheet" href="/journey-matrix.css">
 <link rel="stylesheet" href="/journey-cad.css">
+<!-- Shared H3 controls and dialog rules inside the isolated Blueprint iframe. -->
+<link rel="stylesheet" href="/blue-ocean-ui-h3.css">
 </head>
 <body>
 <div id="app"></div>
@@ -177,7 +179,26 @@ function saveView(){
   else{S.view=V;save()}
 }
 function choosePreset(preset,keepCustom=false){const renderer=V.blueprintRenderer,target=preset==='operational'?'blueprint':['essential','detailed','acquisition'].includes(preset)?'journey':V.perspective;if(target!==V.perspective)V=window.BlueOceanJourneyViews.switchMatrixPerspective(V,target,rowDefs());V.blueprintRenderer=renderer;V.preset=preset;if(preset==='operational')V.perspective='blueprint';else if(['essential','detailed','acquisition'].includes(preset))V.perspective='journey';V.hiddenRows=rowDefs().filter(r=>!(PRESETS[preset].includes(r.id)||r.custom&&(keepCustom||preset!=='essential'))).map(r=>r.id);saveView()}
-function announceSave(ok){saveLabel=ok==='pending'?'Salvando…':ok?'Salvo neste navegador':'Erro ao salvar';const el=app.querySelector('[data-save-status]');if(el)el.textContent=saveLabel}
+function announceSave(ok){
+  saveLabel=ok==='pending'?'Salvando…':ok?'Salvo neste navegador':'Erro ao salvar';
+  const el=app.querySelector('[data-save-status]');if(el)el.textContent=saveLabel;
+  // Some host acknowledgements arrive after a disabled render. Keep the
+  // enabled/draggable state of library controls aligned to the canonical lock,
+  // without remounting dialogs or overwriting edits already in progress.
+  if(ok===true){
+    requestAnimationFrame(()=>{
+      if(!cadEnabled())return;
+      const unlocked=!cadLocked();
+      app.querySelectorAll('.cad-component-main[data-act="cad-add"]').forEach(button=>{
+        button.disabled=!unlocked;
+        button.draggable=unlocked;
+      });
+      app.querySelectorAll('[data-act="cad-library"],[data-act="step"]').forEach(button=>{
+        button.disabled=!unlocked;
+      });
+    });
+  }
+}
 function rerender(){const bd=app.querySelector('.bd'),left=bd?.scrollLeft||0,top=window.scrollY;render();if(bd&&app.querySelector('.bd'))app.querySelector('.bd').scrollLeft=left;window.scrollTo(0,top)}
 function changeView(update,focus){Object.assign(V,update);saveView();rerender();if(focus)focusNew(focus)}
 let customizeQuery='';
@@ -468,8 +489,21 @@ if(HOSTED){
       try{
         const state=event.data.state;
         if(!state||!Array.isArray(state.steps)||typeof state.c!=='object')throw Error('Invalid host state');
+        // A host hydration is the authoritative saved snapshot. Clear any stale
+        // canvas request that has been superseded by the incoming revision.
+        // Otherwise the header says "Salvo" while cadLocked() disables the library.
+        const hadPendingCanvas=!!cadState.pending;
         S=JSON.parse(JSON.stringify(state));S.id='host';DB={cur:'host',js:[S]};hostHydrated=true;
-        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;V=viewState(S.view);H=S.history||H;growthEmotionDrafts.clear();growthLastPatch=growthPatchKey();saveLabel='Salvo neste navegador';document.title='Blue Ocean · '+(S.editorKind==='blueprint'?'Blueprint':'Jornada');render();app.inert=false;app.setAttribute('aria-busy','false');
+        if(hadPendingCanvas){
+          cadState.pending='';
+          cadState.pendingDocument=null;
+          cadState.creating=null;
+          cadState.quick=null;
+          cadState.link=null;
+          cadState.menu=null;
+          cadState.error='';
+        }
+        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;V=viewState(S.view);H=S.history||H;growthEmotionDrafts.clear();growthLastPatch=growthPatchKey();saveLabel='Salvo neste navegador';document.title='Blue Ocean · '+(S.editorKind==='blueprint'?'Blueprint':'Jornada');render();announceSave(true);app.inert=false;app.setAttribute('aria-busy','false');
       }catch(e){console.error('Blueprint: cannot hydrate service graph',e)}
       finally{applyingHost=false}
     }

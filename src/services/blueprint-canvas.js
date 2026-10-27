@@ -20,10 +20,47 @@ export const CANVAS_COMPONENTS = {
   text: { title:'Cartão livre', icon:'T', row:'sd', rows:['*'], group:'content', hint:'Uma anotação simples' },
 };
 export function canvasAcceptsRow(kind,row){const component=CANVAS_COMPONENTS[kind];return !!component&&(component.rows.includes('*')||component.rows.includes(row))}
+/** New placements keep customer behavior separate from operational activity. Legacy cards remain readable/movable. */
+export function canvasAcceptsNewRow(kind,row){if(kind==='customer-action')return row==='ac';if(kind==='activity')return ['fl','bk','sy'].includes(row);return canvasAcceptsRow(kind,row)}
+export function canvasPlacementHint(kind,row){if(kind==='customer-action'&&row!=='ac')return 'Ação do cliente pertence à faixa Ações do cliente. Para trabalho da equipe, utilize Atividade.';if(kind==='activity'&&row==='ac')return 'Atividade representa a operação. Para uma ação realizada pelo cliente, utilize Ação do cliente.';return 'Este componente não pertence a esta faixa. Escolha uma faixa compatível.'}
 const text = (value,limit) => typeof value==='string'?value.trim().slice(0,limit):'';
+export function canvasSafeUrl(value) {
+  const raw=text(value,2000);
+  if(!raw)return '';
+  try{const url=new URL(raw);return ['https:','http:'].includes(url.protocol)?url.href:''}catch{return ''}
+}
+export function canvasDimension(value,min,max) {
+  if(value===null||value===undefined||value==='')return null;
+  const n=Number(value);
+  return Number.isFinite(n)?Math.max(min,Math.min(max,Math.round(n))):null;
+}
+export function canvasCardWidth(note={},stageWidth=CANVAS_GRID.stage){
+  return Math.min(stageWidth-28,canvasDimension(note.canvas?.width,150,600)??CANVAS_GRID.cardWidth);
+}
+export function canvasCardHeight(note={},row='') {
+  const custom=canvasDimension(note.canvas?.height,80,480);
+  if(custom!==null)return custom;
+  const kind=canvasKind(note,row);
+  if(kind==='artifact'&&canvasSafeUrl(note.canvas?.imageUrl||note.url))return 164;
+  if(kind==='channel')return 88;
+  if(kind==='text')return 98;
+  return CANVAS_GRID.cardHeight;
+}
+export function canvasRowHeight(doc,definition,indices,minimum=0) {
+  if(definition.id==='em')return Math.max(132,Number(minimum)||0);
+  const g=CANVAS_GRID;
+  const total=indices.map(index=>{
+    const notes=doc.c[definition.id+'|'+index]||[];
+    return notes.length?g.padding*2+notes.reduce((sum,note)=>sum+canvasCardHeight(note,definition.id),0)+Math.max(0,notes.length-1)*g.gap:0;
+  });
+  return Math.max(90,...total,Math.min(540,Math.max(0,Number(minimum)||0)));
+}
 export function normalizeCanvasMetadata(input={}) {
   if (!Object.hasOwn(CANVAS_COMPONENTS,input.kind)) throw Error('Tipo de componente indisponível.');
-  return {version:1,kind:input.kind,description:text(input.description,1000),channelId:text(input.channelId,160),metricId:text(input.metricId,160)};
+  return {version:1,kind:input.kind,description:text(input.description,1000),channelId:text(input.channelId,160),metricId:text(input.metricId,160),
+  imageUrl:canvasSafeUrl(input.imageUrl),linkUrl:canvasSafeUrl(input.linkUrl),iconKey:Object.hasOwn(CANVAS_COMPONENTS,input.iconKey)?input.iconKey:input.kind,tone:['default','blue','teal','amber','violet','neutral'].includes(input.tone)?input.tone:'default',
+  evidenceType:['image','document','link','physical'].includes(input.evidenceType)?input.evidenceType:'physical',
+  width:canvasDimension(input.width,150,600),height:canvasDimension(input.height,80,480)};
 }
 export function canvasKind(note,row) {
   if (Object.hasOwn(CANVAS_COMPONENTS,note.canvas?.kind)) return note.canvas.kind;
@@ -43,7 +80,7 @@ export function prepareCanvasInput(doc,input) {
   const kind=input?.kind,component=CANVAS_COMPONENTS[kind];
   if(!component)throw Error('Escolha um componente disponível.');
   const index=canvasStageIndex(doc,input),row=input.row||component.row;
-  if(!canvasAcceptsRow(kind,row))throw Error('Escolha uma faixa compatível: '+component.rows.map(id=>({ev:'Evidências',ac:'Ações do cliente',fl:'Linha de frente',bk:'Bastidores',sy:'Sistemas e apoio',em:'Emoções'}[id]||id)).join(' ou ')+'.');
+  if(!canvasAcceptsNewRow(kind,row))throw Error(canvasPlacementHint(kind,row));
   const title=text(input.title,240);if(!title)throw Error('Informe o nome do componente.');
   if((doc.c[row+'|'+index]||[]).length>=100)throw Error('Esta etapa e faixa já possuem 100 elementos.');
   const activity=normalizeMatrixActivity({...input,category:row==='sy'?(['activity','customer-action'].includes(kind)?'support-process':'resource'):'activity'});
@@ -89,23 +126,44 @@ export function insertCanvasStage(doc,input){
   next.iss=(next.iss||[]).map(issue=>({...issue,s:issue.s>=at?issue.s+1:issue.s}));
   return next;
 }
-export const CANVAS_GRID={label:210,stage:336,header:88,gap:14,cardWidth:288,cardHeight:96,padding:16};
+export const CANVAS_GRID={label:218,stage:392,header:96,gap:16,cardWidth:328,cardHeight:112,padding:18};
+export const CANVAS_STAGE_MIN=210;
+export const CANVAS_STAGE_MAX=600;
+export function canvasStageWidth(value,fallback=CANVAS_GRID.stage) {
+  return value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))?Math.max(CANVAS_STAGE_MIN,Math.min(CANVAS_STAGE_MAX,Math.round(Number(value)))):fallback;
+}
+export function canvasEmotionScore(step={}) {
+  const score=Number(step.e);
+  return Math.max(-2,Math.min(2,Number.isFinite(score)?Math.round(score):0));
+}
+export function canvasEmotionPoint(stage,row) {
+  return {x:stage.x+stage.width/2,y:row.y+24+(2-canvasEmotionScore(stage.step))*16};
+}
 export function canvasBoundary(row,index,rows) {
   const previous={fl:'ac',bk:'fl',sy:'bk'}[row.id],before=rows.findIndex(value=>value.id===previous);
   if(!previous||before<0||before>=index||rows.slice(before+1,index).some(value=>['fl','bk','sy'].includes(value.id)))return '';
   return {fl:'Linha de interação',bk:'Linha de visibilidade · início dos bastidores',sy:'Linha de interação interna · apoio'}[row.id];
 }
-export function buildCanvasLayout(doc,definitions,stageIndices=null) {
-  const g=CANVAS_GRID,indices=stageIndices||doc.steps.map((_,index)=>index),nodes=[],rows=[],stages=indices.map((index,position)=>({index,step:doc.steps[index],x:g.label+position*g.stage,width:g.stage}));
+export function buildCanvasLayout(doc,definitions,stageIndices=null,stageWidths=null,rowHeights=null) {
+  const g=CANVAS_GRID,indices=stageIndices||doc.steps.map((_,index)=>index),nodes=[],rows=[];
+  let cursor=g.label;
+  const stages=indices.map(index=>{const width=canvasStageWidth(stageWidths?.[index]);const stage={index,step:doc.steps[index],x:cursor,width};cursor+=width;return stage;});
   let y=g.header;
   for(const definition of definitions) {
-    const counts=indices.map(index=>(doc.c[definition.id+'|'+index]||[]).length);
-    const count=Math.max(1,...counts),height=g.padding*2+count*g.cardHeight+(count-1)*g.gap;
+    const height=canvasRowHeight(doc,definition,indices,rowHeights?.[definition.id]);
     rows.push({...definition,y,height});
-    for(const stage of stages)(doc.c[definition.id+'|'+stage.index]||[]).forEach((note,position)=>nodes.push({id:note.i,note,row:definition.id,stageIndex:stage.index,position,key:definition.id+'|'+stage.index,x:stage.x+(g.stage-g.cardWidth)/2,y:y+g.padding+position*(g.cardHeight+g.gap),width:g.cardWidth,height:g.cardHeight}));
+    if(definition.id==='em')for(const stage of stages)(doc.c['em|'+stage.index]||[]).forEach(note=>{if(note.virtualLabel)return;const point=canvasEmotionPoint(stage,{y});nodes.push({id:note.i,note,row:'em',stageIndex:stage.index,position:0,key:'em|'+stage.index,x:point.x-1,y:point.y-1,width:2,height:2});});
+    if(definition.id!=='em')for(const stage of stages){
+      let offset=0;
+      for(const [position,note] of (doc.c[definition.id+'|'+stage.index]||[]).entries()){
+        const width=canvasCardWidth(note,stage.width),cardHeight=canvasCardHeight(note,definition.id);
+        nodes.push({id:note.i,note,row:definition.id,stageIndex:stage.index,position,key:definition.id+'|'+stage.index,x:stage.x+(stage.width-width)/2,y:y+g.padding+offset,width,height:cardHeight});
+        offset+=cardHeight+g.gap;
+      }
+    }
     y+=height+28;
   }
-  return {stages,rows,nodes,width:g.label+Math.max(1,stages.length)*g.stage+20,height:y+20};
+  return {stages,rows,nodes,width:cursor+20,height:y+20};
 }
 export function canvasTitleLines(title,limit=32,maxLines=2) {
   const words=String(title).trim().split(/\s+/),lines=[''];
@@ -128,24 +186,43 @@ export function canvasEdgeGeometry(a,b,offset=0) {
 }
 const xml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[char]));
 const colors={sequence:'#2563eb',dependency:'#a65f00',uses:'#7355ab',handoff:'#087f75'};
-export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type||'Componente') {
-  const layout=buildCanvasLayout(doc,definitions),byId=new Map(layout.nodes.map(node=>[node.id,node])),offsets=canvasConnectionOffsets(doc.links||[]);
+export function exportCanvasSvg(doc,definitions,titleFor=note=>note.t||note.type||'Componente',stageWidths=null,rowHeights=null) {
+  const layout=buildCanvasLayout(doc,definitions,null,stageWidths,rowHeights),byId=new Map(layout.nodes.map(node=>[node.id,node])),offsets=canvasConnectionOffsets(doc.links||[]);
   let out=`<svg xmlns="http://www.w3.org/2000/svg" width="${layout.width}" height="${layout.height+60}" viewBox="0 -60 ${layout.width} ${layout.height+60}" role="img" aria-label="${xml(doc.title)}"><title>${xml(doc.title)}</title><rect x="0" y="-60" width="100%" height="${layout.height+60}" fill="#ffffff"/><text x="20" y="-24" font-size="24" font-family="sans-serif" fill="#142944">${xml(doc.title)}</text><defs>`;
   for(const [type,color]of Object.entries(colors))out+=`<marker id="arrow-${type}" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="${color}"/></marker>`;
   out+='</defs><g font-family="sans-serif">';
-  for(const stage of layout.stages)out+=`<rect x="${stage.x}" y="0" width="${stage.width-4}" height="78" rx="8" fill="#eaf1ff"/><text x="${stage.x+18}" y="44" font-size="17" fill="#142944">${xml(stage.step.n)}</text>`;
+  for(const stage of layout.stages)out+=`<rect x="${stage.x}" y="0" width="${stage.width-4}" height="78" rx="8" fill="#eaf1ff"/><text x="${stage.x+18}" y="44" font-size="19" font-weight="600" fill="#142944">${xml(stage.step.n)}</text>`;
   for(const [index,row]of layout.rows.entries()){
     const boundary=canvasBoundary(row,index,layout.rows);
     out+=`<rect x="0" y="${row.y}" width="${layout.width}" height="${row.height}" fill="#f5f8fc" stroke="#cfdaea"/><text x="14" y="${row.y+30}" font-size="12" fill="#142944">${xml(row.n.slice(0,22))}</text>`;
     if(row.n.length>22)out+=`<text x="14" y="${row.y+48}" font-size="12" fill="#142944">${xml(row.n.slice(22,44))}</text>`;
+    if(row.id==='em'&&layout.stages.length){
+      const pts=layout.stages.map(stage=>({...canvasEmotionPoint(stage,row),recorded:stage.step.emotionRecorded===true||stage.step.emotionRecorded===undefined&&(Number(stage.step.e)!==0||!!stage.step.note?.trim())}));
+      out+=`<line x1="${layout.stages[0].x}" y1="${row.y+56}" x2="${layout.width-20}" y2="${row.y+56}" stroke="#c8d8ed" stroke-dasharray="4 5"/>`;
+      for(let i=1;i<pts.length;i++)if(pts[i-1].recorded&&pts[i].recorded)out+=`<line x1="${pts[i-1].x}" y1="${pts[i-1].y}" x2="${pts[i].x}" y2="${pts[i].y}" stroke="#dc821c" stroke-width="3"/>`;
+      pts.forEach((p,i)=>{out+=`<circle cx="${p.x}" cy="${p.y}" r="7" fill="${p.recorded?'#dc821c':'#fff'}" stroke="#dc821c" stroke-width="2"/><text x="${p.x}" y="${row.y+116}" text-anchor="middle" font-size="12" fill="#784619">${xml(p.recorded?['Frustrada','Ansiosa','Neutra','Animada','Satisfeita'][canvasEmotionScore(layout.stages[i].step)+2]:'Sem registro')}</text>`;});
+    }
     if(boundary)out+=`<path d="M0 ${row.y-14} H${layout.width}" stroke="#7c8fa6" stroke-dasharray="3 6"/><text x="${layout.width/2}" y="${row.y-18}" text-anchor="middle" font-size="11" fill="#526885">${xml(boundary)}</text>`;
   }
   for(const raw of doc.links||[]){const link=normalizeMatrixConnection(raw),a=byId.get(link.a),b=byId.get(link.b);if(!a||!b)continue;const edge=canvasEdgeGeometry(a,b,offsets.get(link.id)||0),color=colors[link.type],label=({sequence:'Sequência',dependency:'Dependência',uses:'Usa recurso',handoff:'Passagem entre equipes'}[link.type])+(link.label?' · '+link.label:'');
     const transfer=link.handoff?' · '+link.handoff.fromTeam+' → '+link.handoff.toTeam+' · '+link.handoff.deliverable+' · Prazo: '+(link.handoff.deadlineMinutes??'não informado')+' min · Aceite: '+link.handoff.acceptance:'';
     out+=`<g><title>${xml(titleFor(a.note))} → ${xml(titleFor(b.note))} · ${xml(label+transfer)}</title><path d="${edge.d}" stroke="${color}" stroke-width="2" fill="none" marker-end="url(#arrow-${link.type})"/><text x="${edge.x}" y="${edge.y-5}" text-anchor="middle" font-size="10" fill="${color}">${xml(label.slice(0,60))}</text></g>`;
   }
-  for(const node of layout.nodes){const activity=node.note.activity||{},title=titleFor(node.note),details=[activity.owner?'Responsável: '+activity.owner:'',activity.team?'Equipe: '+activity.team:'',activity.durationMinutes!=null?'Execução: '+activity.durationMinutes+' min':'',activity.waitMinutes!=null?'Espera: '+activity.waitMinutes+' min':'',activity.rule?'Regra: '+activity.rule:'',node.note.canvas?.description||''].filter(Boolean).join(' · ');
-    out+=`<g><title>${xml(title)}${details?' · '+xml(details):''}</title><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="10" fill="#fff" stroke="#536c8d"/><text x="${node.x+12}" y="${node.y+23}" font-size="10" fill="#526885">${xml(CANVAS_COMPONENTS[canvasKind(node.note,node.row)]?.title||node.note.type)}</text>`+canvasTitleLines(title,34).map((line,index)=>`<text x="${node.x+12}" y="${node.y+48+index*19}" font-size="14" fill="#142944">${xml(line)}</text>`).join('')+`<text x="${node.x+12}" y="${node.y+92}" font-size="11" fill="#526885">${xml(activity.owner||activity.team||'')}</text></g>`;
+  for(const node of layout.nodes){
+    if(node.row==='em')continue;
+    const activity=node.note.activity||{},kind=canvasKind(node.note,node.row),title=titleFor(node.note);
+    const details=[activity.owner?'Responsável: '+activity.owner:'',activity.team?'Equipe: '+activity.team:'',activity.durationMinutes!=null?'Execução: '+activity.durationMinutes+' min':'',activity.waitMinutes!=null?'Espera: '+activity.waitMinutes+' min':'',activity.rule?'Regra: '+activity.rule:'',node.note.canvas?.description||''].filter(Boolean).join(' · ');
+    const media=kind==='artifact'?canvasSafeUrl(node.note.canvas?.imageUrl||node.note.url):'';
+    const tones={blue:'#f4f8ff',teal:'#f0fdf9',amber:'#fff9ee',violet:'#f9f5ff',neutral:'#f8fafc'};
+    const fill=tones[node.note.canvas?.tone]||'#fff',x=node.x+12,y=node.y;
+    out+=`<g><title>${xml(title)}${details?' · '+xml(details):''}</title><rect x="${node.x}" y="${node.y}" width="${node.width}" height="${node.height}" rx="10" fill="${fill}" stroke="#9fb4cc"/><text x="${x}" y="${y+23}" font-size="12" fill="#526885">${xml(CANVAS_COMPONENTS[kind]?.title||node.note.type)}</text>`;
+    if(media){
+      out+=`<rect x="${x}" y="${y+33}" width="${node.width-24}" height="${node.height-69}" rx="5" fill="#e8eef6"/><image x="${x}" y="${y+33}" width="${node.width-24}" height="${node.height-69}" href="${xml(media)}" preserveAspectRatio="xMidYMid slice"/><text x="${x}" y="${y+node.height-12}" font-size="15" font-weight="600" fill="#142944">${xml(title.slice(0,36))}</text>`;
+    }else{
+      out+=canvasTitleLines(title,kind==='channel'?25:34).map((line,index)=>`<text x="${x}" y="${y+50+index*21}" font-size="17" font-weight="600" fill="#142944">${xml(line)}</text>`).join('');
+      if(kind!=='channel')out+=`<text x="${x}" y="${y+node.height-14}" font-size="11" fill="#526885">${xml(activity.owner||activity.team||'')}</text>`;
+    }
+    out+='</g>';
   }
   return out+'</g></svg>';
 }

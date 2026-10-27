@@ -1,9 +1,28 @@
 #!/usr/bin/env python3
 """Serve the compiled local application without Node dependencies."""
-import errno, functools, http.server, json, os, shutil, subprocess, sys, threading
+import base64, errno, functools, hashlib, http.server, json, os, re, shutil, subprocess, sys, threading
 from pathlib import Path
+from urllib.parse import urlsplit
 base = Path(__file__).resolve().parents[1]
 root = base / 'dist'
+
+# CSP hashes authorize exactly the trusted inline bootstrap of our own Blueprint
+# document. We never allow arbitrary inline scripts or cross-origin framing.
+EDITOR_PATH = '/blueprint-reference-original.html'
+def editor_inline_script_hashes(document):
+    if not document.is_file():
+        return ()
+    html = document.read_text(encoding='utf-8')
+    hashes = []
+    for tag in re.finditer(r'<script\b([^>]*)>(.*?)</script\s*>', html, flags=re.I | re.S):
+        attrs, source = tag.groups()
+        if re.search(r'\bsrc\s*=', attrs, flags=re.I) or not source.strip():
+            continue
+        digest = base64.b64encode(hashlib.sha256(source.encode('utf-8')).digest()).decode('ascii')
+        hashes.append("'sha256-" + digest + "'")
+    return tuple(hashes)
+
+EDITOR_SCRIPT_HASHES = editor_inline_script_hashes(root / EDITOR_PATH.lstrip('/'))
 try: version = json.loads((base/'package.json').read_text(encoding='utf-8')).get('version','dev')
 except Exception: version = 'dev'
 url = 'http://127.0.0.1:4173/'
@@ -13,9 +32,12 @@ class HardenedHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Pragma', 'no-cache')
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.send_header('Referrer-Policy', 'no-referrer')
-        self.send_header('X-Frame-Options', 'DENY')
+        self.send_header('X-Frame-Options', 'SAMEORIGIN')
         self.send_header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
-        self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'")
+        script_policy = "script-src 'self'"
+        if urlsplit(self.path).path == EDITOR_PATH:
+            script_policy += " " + " ".join(EDITOR_SCRIPT_HASHES)
+        self.send_header('Content-Security-Policy', "default-src 'self'; " + script_policy + "; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'")
         super().end_headers()
 if not (root/'index.html').exists():
     print('Build dist/ ausente. Execute `npm ci && npm run build` antes de iniciar.', file=sys.stderr); raise SystemExit(2)

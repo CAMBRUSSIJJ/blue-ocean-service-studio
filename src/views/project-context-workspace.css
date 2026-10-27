@@ -1,0 +1,39 @@
+/* H1 — Project-centric workspace. Scoped: does not modify the map editor or its SVG. */
+.bo-project-context-tabs{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin:20px 0 18px;padding:5px;background:#eef4fb;border:1px solid #e0e8f3;border-radius:12px}
+.bo-project-context-tabs button{min-height:40px;border:1px solid transparent;background:transparent;color:#435772;font:inherit;font-size:13px;font-weight:600;padding:9px 13px;border-radius:9px;cursor:pointer}
+.bo-project-context-tabs button:hover{background:#e3edfa;color:#174887}
+.bo-project-context-tabs button.is-current,.bo-project-context-tabs button[aria-selected="true"]{color:#1550a1;background:#fff;border-color:#d0def2;box-shadow:0 1px 4px rgba(20,65,120,.08)}
+.bo-project-context-tabs button:focus-visible,.bo-project-context-panel button:focus-visible,.bo-project-context-panel input:focus-visible,.bo-project-context-panel select:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+.bo-project-context-panel{min-width:0}
+.bo-project-context-collection{padding:18px 0 30px}
+.bo-project-context-section-header{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;flex-wrap:wrap;margin-bottom:20px}
+.bo-project-context-section-header>div{max-width:760px}
+.bo-project-context-section-header small{font-size:10px;font-weight:800;letter-spacing:.1em;color:#2563c4}
+.bo-project-context-section-header h2{font-size:21px;line-height:1.3;margin:5px 0 7px;letter-spacing:-.02em;color:#17385e}
+.bo-project-context-section-header p{font-size:13px;color:#667890;line-height:1.5;max-width:740px}
+.bo-project-context-section-header button{min-height:40px;display:inline-flex;gap:7px;align-items:center;border:1px solid #1d60cb;border-radius:9px;padding:10px 15px;color:#fff;background:#175cce;font-weight:650;cursor:pointer}
+.bo-project-context-filters{display:grid;grid-template-columns:minmax(210px,2fr) minmax(160px,1fr) minmax(170px,1fr) auto;align-items:end;gap:11px;padding:16px;background:#f6f9fe;border:1px solid #e3eaf4;border-radius:12px}
+.bo-project-context-filters label{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:12px;font-weight:650;color:#425572}
+.bo-project-context-filters input:not([type="checkbox"]),.bo-project-context-filters select{display:block;width:100%;height:40px;min-width:0;border:1px solid #cad8eb;border-radius:8px;padding:7px 10px;background:#fff;color:#1b3457;font:inherit;font-size:13px}
+.bo-project-context-filters .bo-project-context-check{display:flex;flex-direction:row;align-items:center;min-height:40px;gap:7px;white-space:nowrap}
+.bo-project-context-check input{width:17px;height:17px;accent-color:#2467c9}
+.bo-project-context-result-count{margin:16px 2px 11px;display:flex;align-items:center;gap:6px;font-size:12px;color:#647792}
+.bo-project-context-result-count strong{color:#1c4578}
+.bo-project-context-result-count button{margin-left:auto;background:none;border:none;color:#2466c4;font-weight:650;cursor:pointer}
+.bo-project-context-records{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.bo-project-context-record{display:flex;justify-content:space-between;align-items:center;text-align:left;gap:12px;min-height:130px;padding:17px;background:#fff;border:1px solid #dce5f0;border-radius:12px;color:#193d69;cursor:pointer;box-shadow:0 3px 12px rgba(20,55,100,.035)}
+.bo-project-context-record:hover{border-color:#91b7ed;background:#fafdff;box-shadow:0 6px 20px rgba(20,55,100,.08)}
+.bo-project-context-record>span{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:0;flex:1}
+.bo-project-context-record small{font-size:10px;font-weight:700;letter-spacing:.04em;color:#4d76a8}
+.bo-project-context-record strong{font-size:14px;color:#16385f;overflow-wrap:anywhere}
+.bo-project-context-record em{font-size:12px;font-style:normal;color:#738199;line-height:1.4;overflow-wrap:anywhere}
+.bo-project-context-record>svg{flex:none;color:#5480b5}
+.bo-project-context-empty{padding:28px;background:#f8fbff;border:1px dashed #b8cce5;border-radius:12px;color:#657994;font-size:13px;text-align:center}
+.bo-project-context-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px}
+.bo-project-context-summary button{display:flex;flex-direction:column;align-items:flex-start;gap:9px;position:relative;text-align:left;background:white;border:1px solid #dce5f0;border-radius:11px;padding:18px;min-height:112px;cursor:pointer}
+.bo-project-context-summary button strong{font-size:27px;color:#174b99;font-weight:700}
+.bo-project-context-summary button span{font-size:13px;color:#526780}
+.bo-project-context-summary button svg{position:absolute;right:16px;top:16px;color:#7b95b3}
+@media(max-width:1000px){.bo-project-context-filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.bo-project-context-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}.bo-project-context-tabs button{flex:none}.bo-project-context-filters{grid-template-columns:minmax(0,1fr)}.bo-project-context-records{grid-template-columns:1fr}.bo-project-context-section-header h2{font-size:19px}}
+@media(prefers-reduced-motion:reduce){.bo-project-context-record{transition:none}}

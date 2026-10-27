@@ -272,7 +272,22 @@ export function normalizeMatrixBlock(note) {
   if (note.canvas && typeof note.canvas==='object') {
     const kind=clipped(note.canvas.kind,30);
     if(!['activity','customer-action','touchpoint','artifact','decision','system','resource','metric','channel','emotion','thought','persona','need','pain','opportunity','text'].includes(kind))throw Error('Tipo de componente do canvas inválido.');
-    normalized.canvas={version:1,kind,description:clipped(note.canvas.description,1000),channelId:clipped(note.canvas.channelId,160),metricId:clipped(note.canvas.metricId,160)};
+    const secureExternal = raw => {
+      const str=clipped(raw,2000);
+      if(!str)return '';
+      try{const url=new URL(str);return ['https:','http:'].includes(url.protocol)?url.href:''}catch{return ''}
+    };
+    const dimension=(raw,min,max)=>{
+      if(raw===''||raw==null)return null;
+      const value=Number(raw);
+      return Number.isFinite(value)?Math.max(min,Math.min(max,Math.round(value))):null;
+    };
+    normalized.canvas={version:1,kind,description:clipped(note.canvas.description,1000),channelId:clipped(note.canvas.channelId,160),metricId:clipped(note.canvas.metricId,160),
+      imageUrl:secureExternal(note.canvas.imageUrl),linkUrl:secureExternal(note.canvas.linkUrl),
+      tone:['default','blue','teal','amber','violet','neutral'].includes(note.canvas.tone)?note.canvas.tone:'default',
+      iconKey:['activity','customer-action','touchpoint','artifact','decision','system','resource','metric','channel','emotion','thought','persona','need','pain','opportunity','text'].includes(note.canvas.iconKey)?note.canvas.iconKey:kind,
+      evidenceType:['image','document','link','physical'].includes(note.canvas.evidenceType)?note.canvas.evidenceType:'physical',
+      width:dimension(note.canvas.width,150,600),height:dimension(note.canvas.height,80,480)};
   }
   return normalized;
 }
