@@ -28,6 +28,7 @@ const checks=[
  [cad.includes("moveLane(data.id,Number(data.direction),false)"),'Botões de ordem acessíveis preservados'],
  [cad.includes('cad-inspector-group'),'Inspetor apresenta grupos de propriedades'],
  [cad.includes('aria-label="Detalhes opcionais"'),'Acesso direto aos detalhes de cartão selecionado'],
+ [cad.includes("button.matches('.cad-node[data-act=\"cad-select\"]')")&&cad.includes('cadSelect(button.dataset.id,{},true)'),'Teclado abre edição inline em cartões sem exigir mouse'],
  [cad.includes("cadState.pending?'Salvando…':saveLabel"),'Cabeçalho reflete estado pendente'],
  [css.includes('.cad-lane-item.is-drag-over'),'Arraste sinaliza destino de faixa'],
  [css.includes('.cad-inspector-advanced'),'Aparência é seccionada no inspetor'],
