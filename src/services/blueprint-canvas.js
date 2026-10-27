@@ -20,6 +20,9 @@ export const CANVAS_COMPONENTS = {
   text: { title:'Cartão livre', icon:'T', row:'sd', rows:['*'], group:'content', hint:'Uma anotação simples' },
 };
 export function canvasAcceptsRow(kind,row){const component=CANVAS_COMPONENTS[kind];return !!component&&(component.rows.includes('*')||component.rows.includes(row))}
+/** New placements keep customer behavior separate from operational activity. Legacy cards remain readable/movable. */
+export function canvasAcceptsNewRow(kind,row){if(kind==='customer-action')return row==='ac';if(kind==='activity')return ['fl','bk','sy'].includes(row);return canvasAcceptsRow(kind,row)}
+export function canvasPlacementHint(kind,row){if(kind==='customer-action'&&row!=='ac')return 'Ação do cliente pertence à faixa Ações do cliente. Para trabalho da equipe, utilize Atividade.';if(kind==='activity'&&row==='ac')return 'Atividade representa a operação. Para uma ação realizada pelo cliente, utilize Ação do cliente.';return 'Este componente não pertence a esta faixa. Escolha uma faixa compatível.'}
 const text = (value,limit) => typeof value==='string'?value.trim().slice(0,limit):'';
 export function canvasSafeUrl(value) {
   const raw=text(value,2000);
@@ -77,7 +80,7 @@ export function prepareCanvasInput(doc,input) {
   const kind=input?.kind,component=CANVAS_COMPONENTS[kind];
   if(!component)throw Error('Escolha um componente disponível.');
   const index=canvasStageIndex(doc,input),row=input.row||component.row;
-  if(!canvasAcceptsRow(kind,row))throw Error('Escolha uma faixa compatível: '+component.rows.map(id=>({ev:'Evidências',ac:'Ações do cliente',fl:'Linha de frente',bk:'Bastidores',sy:'Sistemas e apoio',em:'Emoções'}[id]||id)).join(' ou ')+'.');
+  if(!canvasAcceptsNewRow(kind,row))throw Error(canvasPlacementHint(kind,row));
   const title=text(input.title,240);if(!title)throw Error('Informe o nome do componente.');
   if((doc.c[row+'|'+index]||[]).length>=100)throw Error('Esta etapa e faixa já possuem 100 elementos.');
   const activity=normalizeMatrixActivity({...input,category:row==='sy'?(['activity','customer-action'].includes(kind)?'support-process':'resource'):'activity'});

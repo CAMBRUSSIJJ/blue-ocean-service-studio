@@ -313,3 +313,57 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 #cad-svg .cad-lane-resize:hover,#cad-svg .cad-lane-resize:focus-visible{opacity:1}
 #cad-svg .cad-lane-select:hover + .cad-lane-resize{opacity:0}
 @media (hover:none){#cad-svg .cad-lane-resize{opacity:.35}}
+
+/* H2 — semantic editor, denser library and structured inspector. */
+.cad-lane-item{gap:6px;transition:border-color .12s ease,background-color .12s ease}
+.cad-lane-item.is-drag-over{background:#eaf3ff;border-color:#2872d0;outline:2px solid #c4ddfa;outline-offset:-2px}
+.cad-lane-grip{flex:0 0 18px;display:grid;place-items:center;align-self:stretch;color:#6f849e;cursor:grab;font-size:18px;user-select:none;touch-action:auto}
+.cad-lane-grip:active{cursor:grabbing}
+.cad-lane-item.is-hidden .cad-lane-grip{color:#9aa9bb}
+.cad-lanes-actions [data-act="cad-lanes-hide-empty"]{grid-column:2;grid-row:2}
+.cad-lanes-actions [data-act="customize"]{grid-column:1;grid-row:2}
+.cad-lanes-intro{padding:12px 10px}
+.cad-library .cad-component-main b,.cad-sheet .cad-component-main b{font-size:12px;line-height:1.35}
+.cad-library .cad-component-main small,.cad-sheet .cad-component-main small{font-size:11px}
+.cad-library .cad-library-group .cad-group-toggle{font-size:11px;letter-spacing:.025em}
+.cad-inspector #cad-component-form{gap:11px}
+.cad-inspector #cad-component-form>h2{margin:0;font-size:19px;letter-spacing:-.025em}
+.cad-inspector #cad-component-form>.cad-kind{margin-top:-6px!important;font-size:12px!important}
+.cad-inspector .cad-inspector-group{border:1px solid #e1e9f4;border-radius:11px;padding:12px;background:#fff;display:grid;gap:11px;min-width:0}
+.cad-inspector .cad-inspector-group h3{font-size:13px;font-weight:700;color:#173e70;margin:0;border-bottom:1px solid #edf2f8;padding-bottom:8px}
+.cad-inspector .cad-inspector-group label{font-size:12px;color:#405b7a}
+.cad-inspector .cad-inspector-advanced{border:1px solid #e1e9f4;border-radius:11px;min-width:0;background:#fff}
+.cad-inspector .cad-inspector-advanced>summary{cursor:pointer;color:#173e70;font-size:13px;font-weight:700;padding:12px;list-style:revert}
+.cad-inspector .cad-inspector-advanced .cad-inspector-group{border:0;padding-top:4px}
+.cad-inspector .cad-placement-warning{background:#fff7ec;color:#7e4b15;border:1px solid #efd1a3;border-radius:8px;padding:11px;font-size:12px;line-height:1.45}
+.cad-inspector footer{gap:7px;border-top:1px solid #e6edf5}
+.cad-quick .cad-quick-guidance{color:#607c9b;font-size:11px;line-height:1.4;margin-top:-5px}
+#cad-svg .cad-node-wrap .cad-node-title{letter-spacing:-.012em}
+#cad-svg .cad-node-wrap .cad-subtitle{fill:#48637f;font-weight:650}
+#cad-svg .cad-cell.is-invalid{fill:#fff3f2;stroke:#d48e84;stroke-dasharray:4 4}
+#cad-svg .cad-cell.is-target{fill:#edf7fe;stroke:#3584ce;stroke-width:1.5}
+@media(max-width:760px){
+ .cad-lane-grip{display:none}
+ .cad-lanes-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .cad-sheet .cad-inspector-group{padding:11px}
+}
+@media(prefers-reduced-motion:reduce){.cad-lane-item{transition:none}}
+
+/* H2 — persistent stage context after the canvas has been panned vertically. */
+.cad-viewport .cad-sticky-stages{position:absolute;z-index:8;top:0;left:0;right:0;height:54px;overflow:hidden;pointer-events:none;background:linear-gradient(#ffffffed,#ffffffd8);border-bottom:1px solid #dbe5f2;box-shadow:0 4px 9px #17365b0a}
+.cad-viewport .cad-sticky-stages[hidden]{display:none!important}
+.cad-sticky-stage{position:absolute;top:5px;bottom:5px;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:4px 12px;border:1px solid #d6e3f4;border-radius:8px;background:#ffffff}
+.cad-sticky-stage small{color:#3268aa;font-weight:700;font-size:10px}
+.cad-sticky-stage b{color:#173963;font-size:13px;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:760px){.cad-sticky-stages{display:none!important}}
+
+/* H2 Linux preflight: accessible in-app confirmations for destructive and semantic actions. */
+.cad-confirm-backdrop{position:fixed;inset:0;z-index:25000;display:flex;align-items:center;justify-content:center;background:#16283b77;padding:24px}
+.cad-confirm-panel{width:min(100%,420px);max-height:calc(100dvh - 40px);overflow-y:auto;background:#fff;border:1px solid #c8d7e8;border-radius:14px;box-shadow:0 24px 65px #16283b44;padding:22px;color:#183858}
+.cad-confirm-panel h2{font-size:19px;line-height:1.3;letter-spacing:-.02em;margin:0 0 12px;font-weight:700}
+.cad-confirm-panel p{font-size:14px;line-height:1.6;margin:0 0 22px;color:#4e6481}
+.cad-confirm-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:10px}
+.cad-shell .cad-confirm-actions button,.cad-confirm-actions button{min-height:40px;padding:9px 15px;border-radius:9px;font:inherit;font-size:13px;font-weight:650;cursor:pointer;background:#fff;border:1px solid #bfcee2;color:#1b4d82}
+.cad-shell .cad-confirm-actions [data-act="cad-confirm-accept"],.cad-confirm-actions [data-act="cad-confirm-accept"]{background:#195ec8;color:#fff;border-color:#195ec8}
+.cad-confirm-actions button:focus-visible{outline:3px solid #3281e8;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.cad-confirm-backdrop,.cad-confirm-panel{transition:none}}
