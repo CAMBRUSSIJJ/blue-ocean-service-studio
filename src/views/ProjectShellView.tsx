@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
-  ArrowRight, BookOpen, FolderKanban,
+  ArrowRight, FolderKanban,
 } from '../design-system/icons';
 import { contextEntityTitle, type ContextKind } from '../services/context-library';
 import { projectContextRecords, filterProjectContext, projectRelatedRecords, projectHasLinkedEvidence } from '../services/project-context-index';
@@ -37,7 +37,6 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   const evidence = count(graph.entities?.evidence);
   const metrics = count(graph.entities?.metric);
   const opportunities = count(graph.opportunities);
-  const researchEvidence = evidence;
   const serviceArtifacts = serviceMaps + whiteboards;
   // The current ServiceGraph is the project scope; never copy entities for a dashboard.
   const projectId = project?.id || graph.service.project?.id || graph.service.id;
@@ -110,36 +109,32 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   }
 
   return <section className="bo-h740h10-shell" data-project-shell="7.40-H10" data-project-shell-section="overview">
-    <header className="bo-h740h10-shell__hero">
-      <div><small>PROJETO</small><h1>{project?.title || serviceName}</h1><p>{project?.description || 'Organize o trabalho do projeto e entre no serviço apenas quando quiser desenhar, validar ou operar a experiência.'}</p></div>
-      <div className="bo-h740h10-shell__status"><span>Serviço principal</span><strong>{serviceName}</strong><small>{serviceArtifacts} artefato{serviceArtifacts === 1 ? '' : 's'} de serviço</small></div>
+    <header className="bo-h740h10-shell__hero bo-h31-project-header">
+      <div><small>PROJETO ATUAL</small><h1>{project?.title || serviceName}</h1><p>{project?.description || 'Organize o projeto e acesse suas informações pelas abas abaixo.'}</p></div>
     </header>
 
     {areaTabs}
     <div id="bo-project-context-panel" role="tabpanel" aria-labelledby={`bo-pctx-tab-${area}`} className="bo-project-context-panel">
     {area === 'overview' ? <>
-    <section className="bo-h740h10-primary-card">
-      <div className="bo-h740h10-primary-card__icon"><FolderKanban size={22}/></div>
-      <div><small>SERVIÇO PRINCIPAL</small><h2>{serviceName}</h2><p>Abra o serviço para criar mapas, definir o público-alvo e acompanhar a evolução da experiência.</p><div><span>{serviceMaps} mapa{serviceMaps === 1 ? '' : 's'} do serviço</span><span>{whiteboards} Whiteboard{whiteboards === 1 ? '' : 's'}</span></div></div>
-      <button type="button" className="primary" onClick={onCreateMap}>Criar mapa <ArrowRight size={14}/></button>
-      <button type="button" onClick={openService}>Ver mapas existentes <ArrowRight size={14}/></button>
-    </section>
-
-    <section className="bo-h740h10-shell__section" data-project-elements="H17.0.7"><header><div><small>MODELO DO SERVIÇO</small><h2>Elementos do projeto</h2><p>Consulte o que já foi criado ou entre diretamente na área para adicionar novos elementos.</p></div></header>
-      <div className="bo-h740h10-area-grid">
-        {([
-          ['Personas', personas, 'personas', Object.values(graph.entities?.persona ?? {}).slice(0, 2).map((item) => item.title || 'Persona')],
-          ['Necessidades', needs, 'needs', Object.values(graph.entities?.need ?? {}).slice(0, 2).map((item) => item.title || 'Necessidade')],
-          ['Dores', pains, 'pains', Object.values(graph.entities?.pain ?? {}).slice(0, 2).map((item) => item.title || 'Dor')],
-          ['Evidências', evidence, 'evidence', Object.values(graph.entities?.evidence ?? {}).slice(0, 2).map((item) => item.title || 'Evidência')],
-          ['Oportunidades', opportunities, 'portfolio', Object.values(graph.opportunities ?? {}).slice(0, 2).map((item) => item.title || 'Oportunidade')],
-          ['Métricas', metrics, 'metrics', Object.values(graph.entities?.metric ?? {}).slice(0, 2).map((item) => item.title || 'Métrica')],
-        ] as const).map(([label, total, page, examples]) => <button type="button" key={page} onClick={() => openLibraryPage(page)}><span><BookOpen size={18}/></span><strong>{label}</strong><small>{total} {total === 1 ? 'registro' : 'registros'}</small><small>{examples.length ? examples.join(' · ') : 'Nenhum registro criado ainda'}</small><em>Visualizar ou criar <ArrowRight size={12}/></em></button>)}
-        <button type="button" onClick={openService}><span><FolderKanban size={18}/></span><strong>Mapas do serviço</strong><small>{serviceMaps} mapas · Blueprint e Jornada</small><em>Visualizar ou criar no serviço <ArrowRight size={12}/></em></button>
-        <button type="button" data-project-whiteboard="1" onClick={openWhiteboards}><span><FolderKanban size={18}/></span><strong>Whiteboard</strong><small>{whiteboards} quadros de exploração</small><em>Abrir ou criar Whiteboard <ArrowRight size={12}/></em></button>
+    <section className="bo-h31-overview" data-project-overview="compact-h31">
+      <div className="bo-h31-overview-service">
+        <span className="bo-h31-overview-icon"><FolderKanban size={22}/></span>
+        <div className="bo-h31-overview-copy">
+          <small>SERVIÇO PRINCIPAL</small>
+          <h2>{serviceName}</h2>
+          <p>{serviceMaps > 0 ? 'Continue o desenho do serviço e alterne entre Jornada e Blueprint.' : 'Comece pelo mapa do serviço. Pessoas, necessidades e evidências permanecem organizadas nas abas do projeto.'}</p>
+        </div>
+        {serviceMaps > 0
+          ? <button type="button" className="primary" onClick={openService}>Abrir mapas <ArrowRight size={15}/></button>
+          : <button type="button" className="primary" onClick={onCreateMap}>Criar mapa <ArrowRight size={15}/></button>}
+      </div>
+      <div className="bo-h31-overview-stats" aria-label="Indicadores do projeto">
+        <div><strong>{serviceMaps}</strong><span>Mapas</span></div>
+        <div><strong>{personas}</strong><span>Personas</span></div>
+        <div><strong>{needs}</strong><span>Necessidades</span></div>
+        <div><strong>{evidence}</strong><span>Evidências</span></div>
       </div>
     </section>
-    <section className="bo-h740h10-shell__section"><header><div><small>ATIVIDADE RECENTE</small><h2>Resumo do projeto</h2></div></header><div className="bo-h740h10-summary-grid"><article><strong>{serviceMaps}</strong><span>Mapas</span></article><article><strong>{researchEvidence}</strong><span>Evidências</span></article><article><strong>{problems}</strong><span>Problemas</span></article><article><strong>{metrics}</strong><span>Métricas</span></article></div></section>
     </> : (area === 'audience' || area === 'research') ? <section className="bo-project-context-collection">
       <header className="bo-project-context-section-header"><div><small>{area === 'audience' ? 'PÚBLICO E CONTEXTO' : 'PESQUISA DO PROJETO'}</small><h2>{area === 'audience' ? 'Pessoas, necessidades e relações' : 'Hipóteses, problemas e evidências'}</h2><p>Registros deste projeto, vinculados ao mesmo Service Graph usado nos mapas. Nenhum registro é duplicado.</p></div><button type="button" className="primary" onClick={() => openLibraryPage(area === 'audience' ? 'needs' : 'evidence')}>+ {area === 'audience' ? 'Nova necessidade' : 'Nova evidência'}</button></header>
       <div className="bo-project-context-filters">
