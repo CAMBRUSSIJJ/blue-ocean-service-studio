@@ -470,7 +470,20 @@ if(HOSTED){
       try{
         const state=event.data.state;
         if(!state||!Array.isArray(state.steps)||typeof state.c!=='object')throw Error('Invalid host state');
+        // A host hydration is the authoritative saved snapshot. Clear any stale
+        // canvas request that has been superseded by the incoming revision.
+        // Otherwise the header says "Salvo" while cadLocked() disables the library.
+        const hadPendingCanvas=!!cadState.pending;
         S=JSON.parse(JSON.stringify(state));S.id='host';DB={cur:'host',js:[S]};hostHydrated=true;
+        if(hadPendingCanvas){
+          cadState.pending='';
+          cadState.pendingDocument=null;
+          cadState.creating=null;
+          cadState.quick=null;
+          cadState.link=null;
+          cadState.menu=null;
+          cadState.error='';
+        }
         last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;V=viewState(S.view);H=S.history||H;growthEmotionDrafts.clear();growthLastPatch=growthPatchKey();saveLabel='Salvo neste navegador';document.title='Blue Ocean · '+(S.editorKind==='blueprint'?'Blueprint':'Jornada');render();app.inert=false;app.setAttribute('aria-busy','false');
       }catch(e){console.error('Blueprint: cannot hydrate service graph',e)}
       finally{applyingHost=false}
