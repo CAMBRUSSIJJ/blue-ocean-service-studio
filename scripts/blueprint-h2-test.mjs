@@ -17,6 +17,7 @@ const checks=[
  [canvasAcceptsRow('customer-action','fl'),'Leitura legada não é bloqueada'],
  [canvasPlacementHint('customer-action','fl').includes('Atividade'),'Erro instrui a usar o tipo compatível'],
  [cad.includes('cadModel.canvasAcceptsNewRow(kind,target.row.id)'),'Biblioteca valida inserções novas'],
+ [cad.includes('filter(([kind])=>!context.row||cadModel.canvasAcceptsNewRow(kind,context.row))'),'Seletor por célula filtra componentes sem variável indefinida'],
  [cad.includes('cadAskConfirmation({title:')&&cad.includes('Confirmar a conversão?'),'Mover entre áreas exige confirmação explícita'],
  [cad.includes('cad-placement-warning'),'Registros legados sinalizados sem serem apagados'],
  [cad.includes('cad-lanes-hide-empty'),'É possível ocultar faixas sem cartões'],
