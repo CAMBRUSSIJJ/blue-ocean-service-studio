@@ -12,6 +12,7 @@ const checks=[
  ['tokens oficiais de cor', tokens.includes('--bo-color-primary-600:') && tokens.includes('--bo-color-border-strong:')],
  ['família única com fallback', css.includes('--bo-ui-font:var(--bo-font-sans,')],
  ['estados dos botões', ['.bo-button--secondary','.bo-button--ghost','.bo-button--danger',':disabled',':focus-visible'].every(t=>css.includes(t))],
+ ['botão base neutro: primário explícito',css.includes('.bo-button--primary,') && !css.includes('*/\n.bo-button,')],
  ['controles de formulário',css.includes('input:not([type="checkbox"])') && css.includes('select,textarea')],
  ['pop-ups e alertdialogs', css.includes('.cad-confirm-panel') && css.includes('.bo-remote-dialog') && css.includes('[data-delete-journey-dialog]')],
  ['compatibilidade com diálogos legados',css.includes('.rt192-dialog') && css.includes('.rt1102-dialog')],
