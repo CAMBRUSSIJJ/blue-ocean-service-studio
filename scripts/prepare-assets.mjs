@@ -16,6 +16,7 @@ copyFileSync('src/runtime/journey-blueprint-ui.js', 'public/v1102-journey-bluepr
 copyFileSync('src/runtime/journey-business-ui.js', 'public/v1102-journey-business-ui.js');
 copyFileSync('src/runtime/journey-cad-ui.js', 'public/v1102-journey-cad-ui.js');
 copyFileSync('src/runtime/journey-cad.css', 'public/journey-cad.css');
+copyFileSync('src/design-system/unified-ui-h3.css','public/blue-ocean-ui-h3.css');
 writeFileSync('public/v1102-blueprint-canvas.js',readFileSync('src/services/blueprint-canvas.js','utf8').replace('./journey-content.js','./v1102-journey-content.js'));
 const canvasShared=readFileSync('src/services/blueprint-canvas.js','utf8').replace(/^import .*;\n/,'').replace(/^export /gm,'');
 writeFileSync('public/v1102-blueprint-canvas-shared.js','(()=>{const {normalizeMatrixActivity,validateMatrixDocument,normalizeMatrixConnection}=window.BlueOceanJourneyContent;'+canvasShared+';window.BlueOceanBlueprintCanvas={CANVAS_COMPONENTS,canvasAcceptsNewRow,canvasPlacementHint,CANVAS_GRID,CANVAS_STAGE_MIN,CANVAS_STAGE_MAX,canvasStageWidth,canvasEmotionScore,canvasEmotionPoint,canvasSafeUrl,canvasDimension,canvasCardWidth,canvasCardHeight,canvasRowHeight,canvasAcceptsRow,insertCanvasStage,canvasBoundary,normalizeCanvasMetadata,canvasKind,canvasStageIndex,prepareCanvasInput,moveCanvasCard,canvasTitleLines,canvasConnectionOffsets,buildCanvasLayout,canvasEdgeGeometry,exportCanvasSvg};})();');
