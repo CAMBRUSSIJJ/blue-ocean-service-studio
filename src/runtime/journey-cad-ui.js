@@ -458,7 +458,7 @@ function cadAction(action,data,button){
  }
  if(action==='cad-cancel'){
   if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);
-  cadState.drafts.delete(cadState.selected);Object.assign(cadState,{creating:null,quick:null,link:null,menu:null,selected:'',selectedRow:'',inspector:false,error:'',connectFrom:'',pointer:null});rerender();return true;
+  cadState.drafts.delete(cadState.selected);Object.assign(cadState,{creating:null,quick:null,link:null,menu:null,selected:'',selectedRow:'',inspector:false,error:'',connectFrom:'',pointer:null,lastCardClick:null});rerender();return true;
  }
  if(action==='cad-add'){
   const kind=data.kind||'text',active=cadState.activeCell,index=data.si!==undefined?Number(data.si):cadState.choosing?.index??active?.index??businessStageIndex();
