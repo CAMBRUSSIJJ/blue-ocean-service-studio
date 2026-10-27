@@ -199,7 +199,7 @@ function cadQuickForm(){
 }
 function cadChooser(){
  const context=cadState.choosing;if(!context)return '';
- return '<section class="cad-chooser" role="dialog" aria-label="Adicionar componente" style="left:'+context.x+'px;top:'+context.y+'px"><header><h2>Adicionar componente</h2>'+cadButton('cad-close-chooser','×','aria-label="Fechar componentes"')+'</header><div>'+Object.entries(cadModel.CANVAS_COMPONENTS).filter(([,item])=>!context.row||cadModel.canvasAcceptsNewRow(kind,context.row)).map(([kind,item])=>cadButton('cad-add',cadIcon(kind)+' '+item.title,'data-kind="'+kind+'" data-si="'+context.index+'" data-row="'+esc(context.row||'')+'" '+(cadLocked()?'disabled':''))).join('')+'</div></section>';
+ return '<section class="cad-chooser" role="dialog" aria-label="Adicionar componente" style="left:'+context.x+'px;top:'+context.y+'px"><header><h2>Adicionar componente</h2>'+cadButton('cad-close-chooser','×','aria-label="Fechar componentes"')+'</header><div>'+Object.entries(cadModel.CANVAS_COMPONENTS).filter(([kind])=>!context.row||cadModel.canvasAcceptsNewRow(kind,context.row)).map(([kind,item])=>cadButton('cad-add',cadIcon(kind)+' '+item.title,'data-kind="'+kind+'" data-si="'+context.index+'" data-row="'+esc(context.row||'')+'" '+(cadLocked()?'disabled':''))).join('')+'</div></section>';
 }
 function cadContextMenu(){
  const menu=cadState.menu;if(!menu)return '';
