@@ -583,7 +583,15 @@ function cadBind(){
     stage.e=event.key==='Home'?0:event.key==='End'?2:Math.max(-2,Math.min(2,cadModel.canvasEmotionScore(stage)+(event.key==='ArrowUp'?1:-1)));
     stage.emotionRecorded=true;stage.emotionStatus='hypothesis';stage.emotionSource='';cadSend('canvas-change',{state:next});return;
    }
-   const button=event.target.closest?.('#cad-svg [role="button"]');if(button&&['Enter',' '].includes(event.key)){event.preventDefault();button.dispatchEvent(new MouseEvent('click',{bubbles:true}));return}
+   const button=event.target.closest?.('#cad-svg [role="button"]');if(button&&['Enter',' '].includes(event.key)){
+      event.preventDefault();
+      // Keyboard activation edits a card inline; pointer selection opens details.
+      // Enter and Space must not rely on SVG click dispatch, which selects the inspector.
+      if(button.matches('.cad-node[data-act="cad-select"]')&&!cadLocked()){
+        cadSelect(button.dataset.id,{},true);
+      }else button.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+      return;
+    }
   if(event.key==='Escape'&&cadEnabled()&&!event.target.closest('dialog')){event.preventDefault();cadState.drag=null;if(cadState.choosing){cadState.choosing=null;rerender()}else if(cadState.menu){cadState.menu=null;rerender()}else if(cadState.quick||cadState.connectFrom)cadAction('cad-cancel',{});return}
   if(event.target.matches('.cad-viewport')&&['+','-','0','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();if(event.key==='0')cadFit();else if(event.key==='+'||event.key==='-')cadZoom(event.key==='+'?1.2:1/1.2);else{const cam=cadState.camera;cam.x+=event.key==='ArrowLeft'?40:event.key==='ArrowRight'?-40:0;cam.y+=event.key==='ArrowUp'?40:event.key==='ArrowDown'?-40:0;cadPaint()}}
  });
