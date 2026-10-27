@@ -190,3 +190,32 @@
 @media(prefers-reduced-motion:reduce){
   :where(.bo-button,.bo-remote-dialog,.bo-project-context-panel,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser) button{transition:none!important}
 }
+
+/* Older product modules already use the design-system's compatibility classes.
+ * Keep their geometry intact; align type, radius and surface with the same tokens. */
+body.bo-v1130 :is(.rt144-modalbox,.rt192-dialog,.rt193-dialog,.rt195-dialog,.rt196-dialog,.rt197-dialog,.rt1101-dialog,.rt1102-dialog,.bo-dialog){
+  font-family:var(--bo-ui-font);
+  border-radius:var(--bo-ui-radius-dialog)!important;
+  background:var(--bo-ui-surface)!important;
+  color:var(--bo-ui-ink)!important;
+  border-color:var(--bo-ui-border-subtle)!important;
+  box-shadow:var(--bo-ui-shadow-dialog)!important;
+}
+body.bo-v1130 :is(.rt144-modal,.rt192-modal,.rt193-modal,.rt195-modal,.rt196-modal,.rt197-modal,.rt1101-modal,.rt1102-modal) :is(label,legend){
+  font-family:var(--bo-ui-font);
+  font-size:var(--bo-ui-label);
+  line-height:1.4;
+}
+body.bo-v1130 :is(.rt144-modal,.rt192-modal,.rt193-modal,.rt195-modal,.rt196-modal,.rt197-modal,.rt1101-modal,.rt1102-modal) :is(button,input,select,textarea){
+  font-family:var(--bo-ui-font);
+  font-size:var(--bo-ui-label);
+}
+body.bo-v1130 :is(.rt144-modal,.rt192-modal,.rt193-modal,.rt195-modal,.rt196-modal,.rt197-modal,.rt1101-modal,.rt1102-modal) :is(button,input,select,textarea):focus-visible{
+  outline:2px solid var(--bo-ui-focus)!important;
+  outline-offset:3px;
+}
+/* The canonical dialog system and legacy variants have a common footer hierarchy. */
+.bo-dialog__header h2{font-family:var(--bo-ui-font);font-size:var(--bo-font-size-xl,20px);font-weight:700;color:var(--bo-ui-strong)}
+.bo-dialog__body{font-family:var(--bo-ui-font);font-size:var(--bo-ui-copy);line-height:1.5;color:var(--bo-ui-ink)}
+.bo-dialog__footer{border-top:1px solid var(--bo-ui-border-subtle);background:var(--bo-ui-raised)}
+.bo-dialog__footer .bo-button{min-height:var(--bo-ui-control-height)}
