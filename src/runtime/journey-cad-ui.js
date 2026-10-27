@@ -68,7 +68,12 @@ function cadInspector(){
  const entry=blueprintNote(cadState.selected),isNew=!!cadState.creating;
  if(cadState.link)return cadLinkForm();
  if(!isNew&&!entry)return '<div class="cad-empty"><span aria-hidden="true">⬡</span><h2>Inspecione seu serviço</h2><p>Selecione um componente ou uma conexão para editar o combinado da operação.</p>'+cadButton('cad-library','+ Adicionar componente',cadLocked()?'disabled':'')+'</div>';
- const draft=cadCurrentDraft(),row=entry?.key.split('|')[0]||draft.row,kind=draft.kind,component=cadModel.CANVAS_COMPONENTS[kind];
+ // A selected card may survive a host update even when its transient editing draft
+ // was cleared. Reconstruct the draft from the canonical record before rendering.
+ const draft=cadCurrentDraft()||(entry?cadDraftFor(entry):null);
+ if(!draft)return '<div class="cad-empty" role="status"><h2>Selecione um componente</h2><p>O cartão não está disponível para edição.</p></div>';
+ const row=entry?.key.split('|')[0]||draft.row,kind=draft.kind,component=cadModel.CANVAS_COMPONENTS[kind];
+ if(!component)return '<div class="cad-empty" role="status"><h2>Componente indisponível</h2><p>Selecione outro cartão ou atualize o mapa.</p></div>';
  /* Preserve native metadata for legacy cards while exposing generic properties. */
  const allowed=component.rows.includes('*')?rowDefs().map(value=>value.id):component.rows.includes(row)?component.rows:[...component.rows,row];
  const legacyPlacement=!cadModel.canvasAcceptsNewRow(kind,row);
