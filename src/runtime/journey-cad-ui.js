@@ -352,7 +352,7 @@ function cadResult(data){
  if(data.requestId!==cadState.pending)return;cadState.pending='';cadState.pendingDocument=null;if(!data.ok){cadState.error=data.error||'Não foi possível salvar.';announceSave(false);rerender();cadFocusQuick();return}
  S=structuredClone(data.state);S.id=HOSTED?'host':S.id;DB={cur:S.id,js:[S]};last=JSON.stringify(S);growthLastPatch=growthPatchKey();if(data.history)H=data.history;
  if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);cadState.drafts.delete(cadState.selected);
- cadState.creating=null;cadState.quick=null;cadState.link=null;cadState.menu=null;cadState.selected=data.noteId||'';cadState.inspector=!!cadState.selected;cadState.selectedRow='';cadState.error='';announceSave(true);rerender();
+ cadState.creating=null;cadState.quick=null;cadState.link=null;cadState.menu=null;cadState.selected=data.noteId||'';cadState.inspector=!!cadState.selected&&!cadMobile();cadState.selectedRow='';cadState.error='';announceSave(true);rerender();
  requestAnimationFrame(()=>app.querySelector('.cad-node[data-id="'+CSS.escape(data.noteId||'')+'"]')?.focus());
 }
 function cadQuickSubmit(form){
