@@ -367,3 +367,23 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 .cad-shell .cad-confirm-actions [data-act="cad-confirm-accept"],.cad-confirm-actions [data-act="cad-confirm-accept"]{background:#195ec8;color:#fff;border-color:#195ec8}
 .cad-confirm-actions button:focus-visible{outline:3px solid #3281e8;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.cad-confirm-backdrop,.cad-confirm-panel{transition:none}}
+
+
+/* Keep expanded card forms usable near the lower edge of the canvas. */
+.cad-quick{
+  max-height:max(180px,calc(100dvh - var(--cad-popup-y,170px) - 12px));
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.cad-quick form>footer{
+  position:sticky;
+  bottom:-16px;
+  z-index:2;
+  margin-bottom:-16px;
+  padding:12px 0 16px;
+  background:#fff;
+  border-top:1px solid #e3ebf6;
+}
+@media(max-width:760px){
+  .cad-quick{max-height:calc(100dvh - 190px)}
+}
