@@ -4,6 +4,7 @@ import {canvasAcceptsRow,canvasAcceptsNewRow,canvasPlacementHint,CANVAS_COMPONEN
 
 const read=(p)=>readFileSync(p,'utf8');
 const cad=read('src/runtime/journey-cad-ui.js'),css=read('src/runtime/journey-cad.css'),prepare=read('scripts/prepare-assets.mjs');
+const html=read('src/runtime/journey-matrix.html');
 const checks=[
  [CANVAS_COMPONENTS['customer-action'].row==='ac','Ação do cliente tem faixa canônica'],
  [canvasAcceptsNewRow('customer-action','ac'),'Ação do cliente pode ser criada em Ações'],
@@ -20,6 +21,7 @@ const checks=[
  [cad.includes('filter(([kind])=>!context.row||cadModel.canvasAcceptsNewRow(kind,context.row))'),'Seletor por célula filtra componentes sem variável indefinida'],
  [cad.includes('cadAskConfirmation({title:')&&cad.includes('Confirmar a conversão?'),'Mover entre áreas exige confirmação explícita'],
  [cad.includes('cad-placement-warning'),'Registros legados sinalizados sem serem apagados'],
+ [html.includes('const hadPendingCanvas=!!cadState.pending')&&html.includes("cadState.pending='';")&&html.includes('cadState.pendingDocument=null'),'A reidratação do host desbloqueia salvamentos confirmados do Blueprint'],
  [cad.includes('cad-lanes-hide-empty'),'É possível ocultar faixas sem cartões'],
  [cad.includes('application/x-blue-ocean-lane'),'Faixas podem ser reordenadas por arraste'],
  [cad.includes("moveLane(data.id,Number(data.direction),false)"),'Botões de ordem acessíveis preservados'],
