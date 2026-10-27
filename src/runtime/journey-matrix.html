@@ -182,12 +182,20 @@ function choosePreset(preset,keepCustom=false){const renderer=V.blueprintRendere
 function announceSave(ok){
   saveLabel=ok==='pending'?'Salvando…':ok?'Salvo neste navegador':'Erro ao salvar';
   const el=app.querySelector('[data-save-status]');if(el)el.textContent=saveLabel;
-  // Some host acknowledgements arrive after a disabled render. The authoritative
-  // state is unlocked, but buttons still carry the old disabled attribute.
-  // Reconcile the control tree once, without touching the saved Service Graph.
-  if(ok===true&&cadEnabled()&&!cadLocked()&&app.querySelector('.cad-component-main[data-act="cad-add"]:disabled')){
+  // Some host acknowledgements arrive after a disabled render. Keep the
+  // enabled/draggable state of library controls aligned to the canonical lock,
+  // without remounting dialogs or overwriting edits already in progress.
+  if(ok===true){
     requestAnimationFrame(()=>{
-      if(cadEnabled()&&!cadLocked()&&app.querySelector('.cad-component-main[data-act="cad-add"]:disabled'))rerender();
+      if(!cadEnabled())return;
+      const unlocked=!cadLocked();
+      app.querySelectorAll('.cad-component-main[data-act="cad-add"]').forEach(button=>{
+        button.disabled=!unlocked;
+        button.draggable=unlocked;
+      });
+      app.querySelectorAll('[data-act="cad-library"],[data-act="step"]').forEach(button=>{
+        button.disabled=!unlocked;
+      });
     });
   }
 }
