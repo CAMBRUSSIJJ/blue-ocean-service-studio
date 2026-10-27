@@ -47,6 +47,8 @@ with tempfile.TemporaryDirectory(prefix="bo-frame-test-") as tmp:
             assert "frame-ancestors 'none'" not in csp
             assert "default-src 'self'" in csp
             assert "object-src 'none'" in csp
+            assert "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com" in csp
+            assert "font-src 'self' data: https://fonts.gstatic.com" in csp
             assert "'sha256-" not in csp, "Somente o editor deve receber hashes"
             assert response.headers["X-Content-Type-Options"] == "nosniff"
             assert response.headers["Cache-Control"].startswith("no-store")
