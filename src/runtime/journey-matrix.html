@@ -495,7 +495,7 @@ if(HOSTED){
           cadState.menu=null;
           cadState.error='';
         }
-        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;V=viewState(S.view);H=S.history||H;growthEmotionDrafts.clear();growthLastPatch=growthPatchKey();saveLabel='Salvo neste navegador';document.title='Blue Ocean · '+(S.editorKind==='blueprint'?'Blueprint':'Jornada');render();app.inert=false;app.setAttribute('aria-busy','false');
+        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;V=viewState(S.view);H=S.history||H;growthEmotionDrafts.clear();growthLastPatch=growthPatchKey();saveLabel='Salvo neste navegador';document.title='Blue Ocean · '+(S.editorKind==='blueprint'?'Blueprint':'Jornada');render();announceSave(true);app.inert=false;app.setAttribute('aria-busy','false');
       }catch(e){console.error('Blueprint: cannot hydrate service graph',e)}
       finally{applyingHost=false}
     }
