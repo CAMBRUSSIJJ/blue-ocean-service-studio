@@ -42,7 +42,7 @@ try:
   expect(page.get_by_role('heading',name='Visão geral do projeto',exact=True)).to_be_visible()
   page.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click()
   expect(page.locator('[data-service-map-library]')).to_be_visible();check('One map library replaces separate Journey and Blueprint libraries',page.locator('[data-blueprint-library]').count()==0)
-  page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name='Em branco',exact=False).first.click()
+  page.get_by_role('button',name='Começar mapa',exact=True).click();page.get_by_role('button',name='Em branco',exact=False).first.click()
   f=page.frame_locator('.bo-blueprint-reference-frame');saved(f);expect(f.locator('#cad-svg')).to_be_visible()
   check('Unified editor uses the light Journey layout',frame(page).evaluate("()=>getComputedStyle(document.body).backgroundColor==='rgb(255, 255, 255)'"))
   if f.locator('[data-cad-view]').input_value()!='blueprint':f.locator('[data-cad-view]').select_option('blueprint');saved(f)
