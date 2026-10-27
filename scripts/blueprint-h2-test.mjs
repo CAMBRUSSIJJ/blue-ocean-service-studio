@@ -21,6 +21,7 @@ const checks=[
  [cad.includes('filter(([kind])=>!context.row||cadModel.canvasAcceptsNewRow(kind,context.row))'),'Seletor por célula filtra componentes sem variável indefinida'],
  [cad.includes('cadAskConfirmation({title:')&&cad.includes('Confirmar a conversão?'),'Mover entre áreas exige confirmação explícita'],
  [cad.includes('cad-placement-warning'),'Registros legados sinalizados sem serem apagados'],
+ [cad.includes("type==='canvas-create'&&payload?.input&&!cadModel.canvasAcceptsNewRow"),'Inserções incompatíveis são rejeitadas antes do estado pendente'],
  [html.includes('const hadPendingCanvas=!!cadState.pending')&&html.includes("cadState.pending='';")&&html.includes('cadState.pendingDocument=null'),'A reidratação do host desbloqueia salvamentos confirmados do Blueprint'],
  [html.includes("app.querySelectorAll('.cad-component-main[data-act=\"cad-add\"]')")&&html.includes('button.disabled=!unlocked'),'Salvamento confirmado reconcilia os controles de criação com o estado efetivo'],
  [cad.includes('cad-lanes-hide-empty'),'É possível ocultar faixas sem cartões'],
