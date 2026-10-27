@@ -17,7 +17,7 @@ const checks=[
  [canvasAcceptsRow('customer-action','fl'),'Leitura legada não é bloqueada'],
  [canvasPlacementHint('customer-action','fl').includes('Atividade'),'Erro instrui a usar o tipo compatível'],
  [cad.includes('cadModel.canvasAcceptsNewRow(kind,target.row.id)'),'Biblioteca valida inserções novas'],
- [cad.includes('Converter explicitamente este cartão?'),'Mover entre áreas exige confirmação explícita'],
+ [cad.includes('cadAskConfirmation({title:')&&cad.includes('Confirmar a conversão?'),'Mover entre áreas exige confirmação explícita'],
  [cad.includes('cad-placement-warning'),'Registros legados sinalizados sem serem apagados'],
  [cad.includes('cad-lanes-hide-empty'),'É possível ocultar faixas sem cartões'],
  [cad.includes('application/x-blue-ocean-lane'),'Faixas podem ser reordenadas por arraste'],
@@ -28,7 +28,11 @@ const checks=[
  [css.includes('.cad-lane-item.is-drag-over'),'Arraste sinaliza destino de faixa'],
  [css.includes('.cad-inspector-advanced'),'Aparência é seccionada no inspetor'],
  [cad.includes('cadUpdateStickyStages()')&&cad.includes('class="cad-sticky-stages"'),'Etapas permanecem identificadas durante movimento vertical'],
- [prepare.includes('canvasAcceptsNewRow,canvasPlacementHint'),'Runtime compartilha regras de compatibilidade']
+ [prepare.includes('canvasAcceptsNewRow,canvasPlacementHint'),'Runtime compartilha regras de compatibilidade'],
+ [!/(?:window\\.)?(?:prompt|confirm)\\s*\\(/.test(cad),'Runtime sem prompt/confirm nativos'],
+ [cad.includes('role="alertdialog"')&&cad.includes('aria-modal="true"'),'Confirmação acessível com modal interno'],
+ [cad.includes("action==='cad-confirm-cancel'")&&cad.includes("action==='cad-confirm-accept'"),'Ações de confirmação e cancelamento disponíveis'],
+ [css.includes('.cad-confirm-panel')&&css.includes('.cad-confirm-backdrop'),'Estilos de diálogo próprios do Blue Ocean']
 ];
 for(const [ok,description] of checks){console.log((ok?'OK':'FAIL')+' '+description)}
 assert(checks.every(([ok])=>ok),'Falha em contrato de UX do Blueprint H2');
