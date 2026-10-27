@@ -29,7 +29,7 @@ const checks=[
  [css.includes('.cad-inspector-advanced'),'Aparência é seccionada no inspetor'],
  [cad.includes('cadUpdateStickyStages()')&&cad.includes('class="cad-sticky-stages"'),'Etapas permanecem identificadas durante movimento vertical'],
  [prepare.includes('canvasAcceptsNewRow,canvasPlacementHint'),'Runtime compartilha regras de compatibilidade'],
- [!/(?:window\\.)?(?:prompt|confirm)\\s*\\(/.test(cad),'Runtime sem prompt/confirm nativos'],
+ [!cad.includes('prompt(')&&!cad.includes('confirm('),'Runtime sem prompt/confirm nativos'],
  [cad.includes('role="alertdialog"')&&cad.includes('aria-modal="true"'),'Confirmação acessível com modal interno'],
  [cad.includes("action==='cad-confirm-cancel'")&&cad.includes("action==='cad-confirm-accept'"),'Ações de confirmação e cancelamento disponíveis'],
  [css.includes('.cad-confirm-panel')&&css.includes('.cad-confirm-backdrop'),'Estilos de diálogo próprios do Blue Ocean']
