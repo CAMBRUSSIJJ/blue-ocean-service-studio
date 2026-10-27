@@ -101,6 +101,8 @@ jobs:
           path: dist
       - run: python -m pip install playwright
       - run: python -m playwright install --with-deps chromium
+      - name: Abrir Blueprint com CSP do servidor Linux
+        run: npm run blueprint:csp:browser
       - run: npm run journey:selector:browser
       - run: npm run journey:observation:browser
       - run: npm run maps:ux:browser
