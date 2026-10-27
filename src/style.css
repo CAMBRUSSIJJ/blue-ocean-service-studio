@@ -90,6 +90,8 @@
 @import './runtime/entry-journey-refresh.css';
 @import './runtime/product-experience.css';
 @import './runtime/map-actions.css';
+/* H3 final shared UI layer: inherits official tokens and precedes Tailwind layers. */
+@import './design-system/unified-ui-h3.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

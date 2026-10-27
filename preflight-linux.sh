@@ -321,3 +321,8 @@ node scripts/v1205h1704-reference-workflow-smoke.mjs
 [ -f src/views/JourneyCanvasFree.tsx ] || { echo "ERRO: Journey Free Canvas ausente"; exit 1; }
 [ -f src/runtime/journey-free-canvas-h1705.css ] || { echo "ERRO: CSS H17.0.5 ausente"; exit 1; }
 node scripts/v1205h1705-free-canvas-smoke.mjs || exit 1
+
+# H3 — Unified Design System for React and isolated Journey/Blueprint.
+[ -f src/design-system/unified-ui-h3.css ] || { echo "ERRO: design system H3 ausente"; exit 1; }
+[ -f scripts/design-system-h3-test.mjs ] || { echo "ERRO: validação H3 ausente"; exit 1; }
+node scripts/design-system-h3-test.mjs || exit 1
