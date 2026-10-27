@@ -27,6 +27,7 @@ const checks=[
  [cad.includes('application/x-blue-ocean-lane'),'Faixas podem ser reordenadas por arraste'],
  [cad.includes("moveLane(data.id,Number(data.direction),false)"),'Botões de ordem acessíveis preservados'],
  [cad.includes('cad-inspector-group'),'Inspetor apresenta grupos de propriedades'],
+ [cad.includes('cadState.inspector=!!cadState.selected&&!cadMobile()'),'Criação rápida em telas móveis retorna ao mapa sem modal bloqueante'],
  [cad.includes('--cad-popup-y:')&&css.includes('overflow-y:auto')&&css.includes('.cad-quick form>footer'),'Edição rápida rolável mantém ação de salvar acessível'],
  [cad.includes('cadCurrentDraft()||(entry?cadDraftFor(entry):null)'),'Inspetor reconstrói rascunho se estado transitório desaparecer'],
  [cad.includes("pointer:null,lastCardClick:null"),'Cancelar reinicia a detecção de duplo clique para nova seleção'],
