@@ -33,7 +33,19 @@ def details(f,note_id):
  return form
 def add(f,kind,title,stage_index=0,**values):
  if f.locator('.cad-shell').evaluate('()=>matchMedia("(max-width:760px)").matches'):f.get_by_role('button',name='+ Componente',exact=True).click()
- f.locator(f'[data-act="cad-add"][data-kind="{kind}"]:visible').click();field=f.locator('#cad-quick-form [name=title]');field.fill(title);field.press('Enter');saved(f)
+ button=f.locator(f'[data-act="cad-add"][data-kind="{kind}"]:visible')
+ if button.is_disabled():
+  frame=page.locator('.bo-blueprint-reference-frame').element_handle().content_frame()
+  diagnostics=frame.evaluate("""() => ({
+    pending:cadState.pending,
+    readOnly:S.readOnly,
+    saveLabel,
+    quick:cadState.quick?.kind||null,
+    creating:cadState.creating?.kind||null,
+    error:cadState.error
+  })""")
+  raise AssertionError(f'Editor permanece bloqueado antes de criar {kind}: {diagnostics}')
+ button.click();field=f.locator('#cad-quick-form [name=title]');field.fill(title);field.press('Enter');saved(f)
  fr=page.locator('.bo-blueprint-reference-frame').element_handle().content_frame();note_id=fr.evaluate('(title)=>Object.values(S.c).flat().find(note=>note.t===title).i',title)
  form=details(f,note_id);form.locator('[name=stageKey]').select_option(index=stage_index)
  for name,value in values.items():form.locator(f'[name={name}]').fill(str(value))
