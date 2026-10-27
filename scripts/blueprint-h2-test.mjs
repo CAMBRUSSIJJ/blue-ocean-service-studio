@@ -22,7 +22,7 @@ const checks=[
  [cad.includes('cadAskConfirmation({title:')&&cad.includes('Confirmar a conversão?'),'Mover entre áreas exige confirmação explícita'],
  [cad.includes('cad-placement-warning'),'Registros legados sinalizados sem serem apagados'],
  [html.includes('const hadPendingCanvas=!!cadState.pending')&&html.includes("cadState.pending='';")&&html.includes('cadState.pendingDocument=null'),'A reidratação do host desbloqueia salvamentos confirmados do Blueprint'],
- [html.includes('cadEnabled()&&!cadLocked()&&app.querySelector(\'.cad-component-main[data-act="cad-add"]:disabled\')'),'Salvamento confirmado reconcilia controles de criação desabilitados'] ,
+ [html.includes("app.querySelectorAll('.cad-component-main[data-act=\"cad-add\"]')")&&html.includes('button.disabled=!unlocked'),'Salvamento confirmado reconcilia os controles de criação com o estado efetivo'],
  [cad.includes('cad-lanes-hide-empty'),'É possível ocultar faixas sem cartões'],
  [cad.includes('application/x-blue-ocean-lane'),'Faixas podem ser reordenadas por arraste'],
  [cad.includes("moveLane(data.id,Number(data.direction),false)"),'Botões de ordem acessíveis preservados'],
