@@ -54,7 +54,7 @@
 }
 
 /* Component contract: action buttons only, never card-tile, lane grip or graph nodes. */
-.bo-button,.bo-remote-dialog :is(.bo-remote-actions button,form button[type="submit"]),
+.bo-button--primary,.bo-remote-dialog :is(.bo-remote-actions button,form button[type="submit"]),
 .bo-project-context-section-header button.primary,
 .bo-project-context-panel button.primary,
 .cad-toolbar [data-act="cad-library"],
