@@ -235,6 +235,7 @@
     "blueprint:h2:test": "node scripts/blueprint-h2-test.mjs",
     "design:h3:test": "node scripts/design-system-h3-test.mjs",
     "project:h31:test": "node scripts/project-firefox-h31-test.mjs && python3 scripts/linux-frame-security-test.py",
+    "blueprint:csp:browser": "python3 scripts/blueprint-csp-browser.py",
     "maps:flow:browser": "python3 scripts/service-map-flow-browser.py"
   },
   "dependencies": {
