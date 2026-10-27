@@ -14,9 +14,9 @@ def editor_inline_script_hashes(document):
         return ()
     html = document.read_text(encoding='utf-8')
     hashes = []
-    for tag in re.finditer(r'<script\\b([^>]*)>(.*?)</script\\s*>', html, flags=re.I | re.S):
+    for tag in re.finditer(r'<script\b([^>]*)>(.*?)</script\s*>', html, flags=re.I | re.S):
         attrs, source = tag.groups()
-        if re.search(r'\\bsrc\\s*=', attrs, flags=re.I) or not source.strip():
+        if re.search(r'\bsrc\s*=', attrs, flags=re.I) or not source.strip():
             continue
         digest = base64.b64encode(hashlib.sha256(source.encode('utf-8')).digest()).decode('ascii')
         hashes.append("'sha256-" + digest + "'")
