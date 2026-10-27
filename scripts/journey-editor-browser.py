@@ -234,7 +234,8 @@ def desktop(page):
     expect(sidebar).to_have_attribute('data-sidebar-collapsed', '1')
     check('Sidebar stays collapsed after reload', page.get_by_role('button', name='Expandir sidebar', exact=True).is_visible())
     page.get_by_role('button', name='Continuar projeto', exact=True).click()
-    page.get_by_role('button', name='Ver mapas existentes', exact=True).click()
+    page.get_by_role('tab', name='Mapas e Whiteboard', exact=True).click()
+    page.get_by_role('button', name='Abrir Mapas', exact=True).click()
     page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir mapa', exact=True).click()
     expect(editor).to_be_visible()
     # Journey, library and service navigation must not rewrite the document.
