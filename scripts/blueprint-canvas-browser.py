@@ -41,6 +41,9 @@ def add(f,kind,title,stage_index=0,**values):
   diagnostics=frame.evaluate("""() => ({
     pending:cadState.pending,
     readOnly:S.readOnly,
+    locked:cadLocked(),
+    canvasEnabled:cadEnabled(),
+    buttonDisabled:document.querySelector('[data-act="cad-add"][data-kind="touchpoint"]')?.disabled,
     saveLabel,
     quick:cadState.quick?.kind||null,
     creating:cadState.creating?.kind||null,
