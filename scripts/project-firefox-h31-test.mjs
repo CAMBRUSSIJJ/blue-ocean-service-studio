@@ -6,6 +6,7 @@ const home = read('src/views/ProjectHomeView.tsx');
 const styles = read('src/runtime/project-ux-h31.css');
 const app = read('src/style.css');
 const server = read('scripts/serve-linux.py');
+const journeyBrowser = read('scripts/journey-editor-browser.py');
 const cases = [
   ['tabs still navigate project context',project.includes('role="tablist"')&&project.includes("id:'audience'")&&project.includes("id:'maps'")],
   ['project overview is compact and informational',project.includes('data-project-overview="compact-h31"')&&project.includes('bo-h31-overview-stats')],
@@ -20,6 +21,7 @@ const cases = [
   ['project CSS imported last',app.includes("@import './runtime/project-ux-h31.css';")],
   ['map editor allowed only in same origin',server.includes("X-Frame-Options', 'SAMEORIGIN'")&&server.includes("frame-ancestors 'self'")],
   ['cross-origin embedding not explicitly permitted',!server.includes("frame-ancestors *")&&!server.includes("X-Frame-Options', 'ALLOWALL'")],
+  ['journey reopen test uses project map tab',journeyBrowser.includes("name='Mapas e Whiteboard'") && !journeyBrowser.includes("name='Ver mapas existentes'")],
 ];
 for(const [name,ok] of cases){console.log((ok?'PASS':'FAIL')+' '+name)}
 assert(cases.every(([,ok])=>ok),'H3.1 regression failed');
