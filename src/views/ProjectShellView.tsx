@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight, FolderKanban,
 } from '../design-system/icons';
@@ -40,6 +40,19 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   const serviceArtifacts = serviceMaps + whiteboards;
   // The current ServiceGraph is the project scope; never copy entities for a dashboard.
   const projectId = project?.id || graph.service.project?.id || graph.service.id;
+  const shellRef = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    // Project switching must not preserve an old editor scroll offset beneath the sticky header.
+    let parent = shellRef.current?.parentElement;
+    while (parent) {
+      const style = window.getComputedStyle(parent);
+      if (/(auto|scroll)/.test(style.overflowY) && parent.scrollHeight > parent.clientHeight + 12) {
+        parent.scrollTop = 0;
+        break;
+      }
+      parent = parent.parentElement;
+    }
+  }, [projectId, section]);
   type Area = 'overview' | 'audience' | 'research' | 'maps' | 'improvement';
   const allowedAreas: Area[] = ['overview', 'audience', 'research', 'maps', 'improvement'];
   const [area, setArea] = useState<Area>(() => {
@@ -102,13 +115,13 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
         ] as const,
       },
     ];
-    return <section className="bo-h740h10-shell bo-h740h10-library" data-project-shell="7.40-H10" data-project-shell-section="library">
+    return <section ref={shellRef} className="bo-h740h10-shell bo-h740h10-library" data-project-shell="7.40-H10" data-project-shell-section="library">
       <header className="bo-h740h10-shell__hero"><div><small>BIBLIOTECA DO PROJETO</small><h1>Pessoas, necessidades e registros do serviço</h1><p>As entidades ficam acessíveis sob demanda. Elas apoiam o serviço, mas não precisam ocupar permanentemente a navegação principal.</p></div><button type="button" onClick={openService}>Abrir serviço <ArrowRight size={14}/></button></header>
       <div className="bo-h740h10-library-grid">{groups.map((group) => <article key={group.title}><header><h2>{group.title}</h2><p>{group.detail}</p></header><div>{group.items.map(([label, total, page]) => <button type="button" key={page} onClick={() => openLibraryPage(page)}><span><strong>{label}</strong><small>{total} {total === 1 ? 'item' : 'itens'}</small></span><ArrowRight size={14}/></button>)}</div></article>)}</div>
     </section>;
   }
 
-  return <section className="bo-h740h10-shell" data-project-shell="7.40-H10" data-project-shell-section="overview">
+  return <section ref={shellRef} className="bo-h740h10-shell" data-project-shell="7.40-H10" data-project-shell-section="overview">
     <header className="bo-h740h10-shell__hero bo-h31-project-header">
       <div><small>PROJETO ATUAL</small><h1>{project?.title || serviceName}</h1><p>{project?.description || 'Organize o projeto e acesse suas informações pelas abas abaixo.'}</p></div>
     </header>
