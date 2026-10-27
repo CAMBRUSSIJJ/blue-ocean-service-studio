@@ -344,7 +344,14 @@ function cadConnectTo(target){
  }catch(error){cadNotice(error.message)}
 }
 function cadSend(type,payload,noteId=''){
- if(cadLocked())return;cadState.pendingDocument=type==='canvas-change'?structuredClone(payload.state):null;cadState.pending=uid();cadState.error='';announceSave('pending');
+ if(cadLocked())return;
+ // Reject invalid raw canvas requests before entering the pending/render path.
+ // Invalid placements must not change the Service Graph or crash the inspector.
+ if(type==='canvas-create'&&payload?.input&&!cadModel.canvasAcceptsNewRow(payload.input.kind,payload.input.row)){
+  cadState.error='Componente não compatível com esta faixa.';
+  cadState.pending='';cadState.pendingDocument=null;
+  rerender();return;
+ }cadState.pendingDocument=type==='canvas-change'?structuredClone(payload.state):null;cadState.pending=uid();cadState.error='';announceSave('pending');
  if(HOSTED){window.parent.postMessage({boBlueprintHost:1,type,requestId:cadState.pending,...payload,noteId},location.origin);rerender();return}
  try{let next=payload.state;if(type==='canvas-create'){const data=cadModel.prepareCanvasInput(S,payload.input);next=structuredClone(S);noteId=uid();(next.c[data.row+'|'+data.index]||=[]).push({i:noteId,type:'card',t:data.title,canvas:data.canvas,activity:data.activity});if(data.kind==='emotion')Object.assign(next.steps[data.index],{e:Number(payload.input.emotionScore||0),emotionRecorded:true,note:payload.input.emotionNote||'',emotionStatus:'hypothesis'})}window.BlueOceanJourneyContent.validateMatrixDocument(next);Object.assign(S,next);save();cadResult({requestId:cadState.pending,ok:true,state:S,noteId})}catch(error){cadResult({requestId:cadState.pending,ok:false,error:error.message})}
 }
