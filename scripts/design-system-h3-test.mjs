@@ -23,7 +23,7 @@ const checks=[
  ['stylesheet inserido após CAD original',html.indexOf('/blue-ocean-ui-h3.css')>html.indexOf('/journey-cad.css')],
  ['assets gerados do único source CSS',assets.includes("copyFileSync('src/design-system/unified-ui-h3.css','public/blue-ocean-ui-h3.css')")],
  ['regra de preflight ainda verifica diálogos nativos',preflight.includes("diálogo nativo presente no runtime")],
- ['CSS com delimitadores estruturais balanceados',(css.match(/\\{/g)||[]).length === (css.match(/\\}/g)||[]).length],
+ ['CSS com delimitadores estruturais balanceados',css.split('{').length === css.split('}').length],
 ];
 for(const [label,passed] of checks){console.log((passed?'PASS':'FAIL')+' '+label)}
 assert(checks.every(([,ok])=>ok),'H3 — Regras de interface não atendidas');
