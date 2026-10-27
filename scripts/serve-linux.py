@@ -37,7 +37,7 @@ class HardenedHandler(http.server.SimpleHTTPRequestHandler):
         script_policy = "script-src 'self'"
         if urlsplit(self.path).path == EDITOR_PATH:
             script_policy += " " + " ".join(EDITOR_SCRIPT_HASHES)
-        self.send_header('Content-Security-Policy', "default-src 'self'; " + script_policy + "; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'")
+        self.send_header('Content-Security-Policy', "default-src 'self'; " + script_policy + "; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'")
         super().end_headers()
 if not (root/'index.html').exists():
     print('Build dist/ ausente. Execute `npm ci && npm run build` antes de iniciar.', file=sys.stderr); raise SystemExit(2)
