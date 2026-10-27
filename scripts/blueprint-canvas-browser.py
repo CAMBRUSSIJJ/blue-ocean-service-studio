@@ -34,7 +34,9 @@ def details(f,note_id):
 def add(f,kind,title,stage_index=0,**values):
  if f.locator('.cad-shell').evaluate('()=>matchMedia("(max-width:760px)").matches'):f.get_by_role('button',name='+ Componente',exact=True).click()
  button=f.locator(f'[data-act="cad-add"][data-kind="{kind}"]:visible')
- if button.is_disabled():
+ try:
+  expect(button).to_be_enabled(timeout=4000)
+ except AssertionError:
   frame=page.locator('.bo-blueprint-reference-frame').element_handle().content_frame()
   diagnostics=frame.evaluate("""() => ({
     pending:cadState.pending,
