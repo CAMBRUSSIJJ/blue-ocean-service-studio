@@ -20,7 +20,7 @@ const checks=[
  [app.includes('bo-h740h10-legacy-project-nav'),'Historical navigation marker retained without displaying it'],
  [css.includes('.bo-h740h10-legacy-project-nav{display:none!important}'),'Historical navigation remains visually hidden'],
  [shell.includes('SERVIÇO PRINCIPAL') && shell.includes('Abrir serviço'),'Project Shell preserves the service summary and opening action'],
- [shell.includes('Elementos do projeto') && !shell.includes('Ferramentas e configurações'),'Project Shell preserves existing project elements'],
+ [shell.includes('data-project-overview="compact-h31"') && shell.includes('bo-h31-overview-stats') && !shell.includes('Elementos do projeto'),'Project Shell shows compact service indicators without duplicate navigation cards'],
  [shell.includes('BIBLIOTECA DO PROJETO'),'Old library data and components remain recoverable'],
  [app.includes('data-project-context-nav="h1"') && shell.includes('bo-project-context-tabs') && shell.includes('role="tablist"'),'Project-specific navigation and tabs are available'],
  [app.includes("onClick={() => openCurrentProjectHome('overview')}>{projectTitle}") && app.includes("const openCurrentProjectWorkspace = () => openCurrentProjectHome();"),'Breadcrumb returns to the correct project'],

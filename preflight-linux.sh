@@ -326,3 +326,8 @@ node scripts/v1205h1705-free-canvas-smoke.mjs || exit 1
 [ -f src/design-system/unified-ui-h3.css ] || { echo "ERRO: design system H3 ausente"; exit 1; }
 [ -f scripts/design-system-h3-test.mjs ] || { echo "ERRO: validação H3 ausente"; exit 1; }
 node scripts/design-system-h3-test.mjs || exit 1
+
+# H3.1 — Firefox accepts the internal map editor and continues blocking external framing.
+[ -f scripts/linux-frame-security-test.py ] || { echo "ERRO: teste de seguranca iframe ausente"; exit 1; }
+python3 scripts/linux-frame-security-test.py || exit 1
+node scripts/project-firefox-h31-test.mjs || exit 1
