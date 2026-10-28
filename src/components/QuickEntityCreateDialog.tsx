@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { X } from '../design-system/icons';
 import { parseQuickEntityInput, type QuickEntityKind } from '../services/quick-entity-input';
 import './quick-entity-create.css';
@@ -45,7 +45,7 @@ export function QuickEntityCreateDialog({ kind, value, onChange, onClose, onCrea
   }, [onClose]);
   const info = copy[kind];
   const parsed = parseQuickEntityInput(value, kind);
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+  const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAttempted(true);
     if (!parsed.title) { fieldRef.current?.focus(); return; }
