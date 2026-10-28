@@ -58,7 +58,9 @@ ok(personaVisualTemplate('research').some(c=>c.id==='behaviors'), 'template de p
 const restored = updatePersonaProfile({graph,personaId:persona.id,draft:{...visualReopened,visualCards:[{id:'identity',width:'full'}]},connectedIds:[]});
 ok(personaProfileFromEntity(restored.entities.persona[persona.id]).primaryGoal==='Melhorar atendimento', 'ocultar bloco não apaga o campo correspondente');
 const visual = fs.readFileSync('src/views/PersonaVisualEditor.tsx','utf8');
-ok(['data-persona-visual-editor','data-persona-visual-card','Adicionar bloco','onDrop','Alterar largura','personaVisualTemplate'].every(s=>visual.includes(s)), 'UI visual tem biblioteca, drag, largura e modelos');
+ok(['data-persona-visual-editor','data-persona-visual-card','Adicionar bloco','onDrop','Alterar largura','bo-ec-workspace','bo-ec-core-column','EntityCanvasResizeHandle'].every(marker=>visual.includes(marker)), 'UI visual tem canvas compacto, biblioteca, drag e largura');
+const compactCss=fs.readFileSync('src/views/entity-canvas-compact.css','utf8');
+ok(['.bo-ec-workspace','.bo-ec-core-column','.bo-ec-relations-column','.bo-ec-supporting-grid'].every(marker=>compactCss.includes(marker)), 'canvas compacto usa colunas de identidade, conteúdo e relações');
 const view = fs.readFileSync('src/views/PersonasView.tsx', 'utf8');
 const css = fs.readFileSync('src/runtime/personas-h713.css', 'utf8');
 const style = fs.readFileSync('src/style.css', 'utf8');
