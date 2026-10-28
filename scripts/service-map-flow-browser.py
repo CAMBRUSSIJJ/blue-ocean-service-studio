@@ -68,6 +68,9 @@ try:
   check('Cards move between stage and operational blocks with stable identity',frame(page).evaluate('(id)=>(S.c["bk|1"]||[]).some(note=>note.i===id)',activity))
   f.get_by_role('button',name='Desfazer',exact=True).click();saved(f);check('Drag supports undo',frame(page).evaluate('(id)=>(S.c["fl|0"]||[]).some(note=>note.i===id)',activity));f.get_by_role('button',name='Refazer',exact=True).click();saved(f)
   # Context menu creates a connection directly, without a properties sidebar.
+  # Restore the full canvas viewport after moving the card into backstage.
+  # SVG nodes cannot be clicked while outside the visible camera area.
+  f.get_by_role('button',name='Ajustar',exact=True).click()
   f.locator(f'.cad-node[data-id="{customer}"]').click(button='right');f.get_by_role('button',name='Conectar a outro cartão',exact=True).click();f.locator(f'.cad-node[data-id="{activity}"]').click();saved(f)
   check('Right-click and target click create a connection without the sidebar',len(graph(page)['journeys'][jid]['matrixContent']['connections'])==1 and f.locator('#cad-link-form').count()==0)
   f.locator(f'[data-act="cad-connect"][data-id="{activity}"]').focus();f.locator(f'[data-act="cad-connect"][data-id="{activity}"]').press('Enter');f.locator(f'.cad-node[data-id="{channel}"]').click();saved(f);check('Connection handle supports keyboard activation',len(graph(page)['journeys'][jid]['matrixContent']['connections'])==2)
