@@ -380,10 +380,17 @@ export function PersonasView({ studio }: { studio: StudioController }) {
                 evidence:evidenceConnections.length, related:connectedIds.length }}
               onNavigate={setDetailTab}/>
           </main>
-          <aside className="bo-h724-overview-aside">
-            <section className="bo-h724-completeness-card"><header><div><small>COMPLETUDE</small><strong>{completeness}%</strong></div><span>{draft.mode === 'professional' ? 'Avançada' : 'Simples'}</span></header><i><b style={{ width: `${completeness}%` }}/></i><div className="bo-h71-check-list bo-h724-check-list">{completenessChecks.map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span>{check.label}</span></div>)}</div></section>
-            <section className="bo-h724-organization-card"><header><small>ORGANIZAÇÃO</small><strong>Responsabilidade e tags</strong></header><label><span>Responsável</span><div className="bo-h724-owner-field"><UserRound size={14}/><input list="bo-h724-owner-options" value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></div><datalist id="bo-h724-owner-options">{ownerSuggestions.map((item) => <option key={item} value={item}/>)}</datalist></label><div className="bo-h724-tags-field"><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map((tag) => <button key={tag} type="button" className="bo-h724-chip" onClick={() => removeTag(tag)}>{tag}<X size={11}/></button>)}<input value={tagEntry} onChange={(event) => setTagEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addTag(); } }} placeholder={tagValues.length ? 'Adicionar tag…' : 'Ex.: B2C'}/></div></div></section>
-            <section className="bo-h724-context-card"><small>BASE ATUAL</small><strong>{connectedIds.length} conexões</strong><p>{evidenceConnections.length} evidência(s) · {usage.instances} instância(s) visual(is)</p><button type="button" onClick={() => setDetailTab('relations')}>Ver relações</button></section>
+          <aside className="bo-h724-overview-aside bo-p6-aside">
+            <section className="bo-p6-progress"><header><small>FORÇA DO PERFIL</small><strong>{completeness}%</strong></header><i><b style={{ width: `${completeness}%` }}/></i>
+              <p>A completude mede o preenchimento, não a validação. Evidências continuam necessárias.</p>
+              <div className="bo-p6-next-steps">{completenessChecks.filter(check=>!check.complete).slice(0,3).map(check=><button type="button" key={check.id} onClick={()=>{setDetailTab('overview');window.setTimeout(()=>document.querySelector('[data-persona-visual-card="goal"]')?.scrollIntoView({behavior:'smooth',block:'center'}),30)}}>{check.label} <span>→</span></button>)}</div>
+            </section>
+            <details className="bo-p6-metadata"><summary>Organização e etiquetas</summary><div>
+              <label><span>Responsável</span><input list="bo-p6-owner-options" value={owner} onChange={event=>setOwner(event.target.value)} placeholder="Nome ou papel"/></label>
+              <datalist id="bo-p6-owner-options">{ownerSuggestions.map(item=><option key={item} value={item}/>)}</datalist>
+              <label><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map(tag=><button key={tag} type="button" className="bo-h724-chip" onClick={()=>removeTag(tag)}>{tag}<X size={11}/></button>)}<input value={tagEntry} onChange={e=>setTagEntry(e.target.value)} onBlur={()=>{if(tagEntry.trim())addTag()}} onKeyDown={e=>{if(e.key==='Enter'||e.key===','){e.preventDefault();addTag()}}} placeholder="Adicionar etiqueta"/></div></label>
+              <p>{connectedIds.length} conexões · {evidenceConnections.length} evidências · {usage.instances} usos no serviço</p>
+            </div></details>
           </aside>
         </div>}
 
