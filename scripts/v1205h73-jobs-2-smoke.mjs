@@ -21,8 +21,8 @@ ok('Completude exige persona e evidência', service.includes('connectionCounts.p
 ok('Completude exige contexto relacionado', service.includes('connectionCounts.need + connectionCounts.pain + connectionCounts.problemHypothesis + connectionCounts.problem > 0'));
 ok('Relações incluem necessidade dor hipótese problema', ['need','pain','problemHypothesis','problem'].every((x)=>service.includes(`'${x}'`)));
 ok('Update mantém jobIds e relatedIds', service.includes('jobIds') && service.includes('relatedIds'));
-ok('Criação usa timestamp explícito sem entity.updatedAt', view.includes("kind: 'job', title: createTitle, description: createDescription, now") && !view.includes('String(entity.updatedAt)'));
-ok('Needs também usa timestamp explícito', needs.includes("kind: 'need', title: createTitle, description: createDescription, now") && !needs.includes('String(entity.updatedAt)'));
+ok('Criação usa timestamp explícito sem entity.updatedAt', view.includes("kind: 'job', title, description, now") && view.includes('const createJob = (title = createTitle, description = createDescription)') && !view.includes('String(entity.updatedAt)'));
+ok('Needs também usa timestamp explícito', needs.includes("kind: 'need', title, description, now") && needs.includes('const createNeed = (title = createTitle, description = createDescription)') && !needs.includes('String(entity.updatedAt)'));
 ok('CSS H7.3 está antes do Tailwind', style.indexOf("@import './runtime/jobs-h73.css';") >= 0 && style.indexOf("@import './runtime/jobs-h73.css';") < style.indexOf('@tailwind base'));
 ok('CSS cria Job Summary lateral', css.includes('.bo-h73-job-summary') && css.includes('position:sticky'));
 ok('CSS não usa verde estrutural legado', !css.toLowerCase().includes('#1d9e75'));
