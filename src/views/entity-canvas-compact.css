@@ -1,0 +1,103 @@
+/* Entity Canvas compact: structure is inspired by a visual profile editor,
+   not a page of forms. Isolated from service Journey/Blueprint styles. */
+.bo-h71-persona-detail .bo-h724-overview-layout{display:flex!important;flex-direction:column!important;gap:0!important;padding-top:0!important;position:relative!important;min-width:0!important}
+.bo-h71-persona-detail .bo-h724-overview-main{order:0;min-width:0!important;max-width:100%!important}
+.bo-h71-persona-detail .bo-h724-overview-aside.bo-ec-aside{order:1;position:static!important;width:100%!important;max-width:none!important;display:flex;justify-content:flex-end;margin:6px 0 0;pointer-events:none}
+.bo-h71-persona-detail .bo-ec-inspector{width:min(245px,100%);pointer-events:auto;box-shadow:none!important;border-color:#dbe4ef}
+.bo-h71-persona-detail .bo-ec-inspector>summary{min-height:32px;padding:7px 11px;font-size:12px}
+.bo-h71-persona-detail .bo-ec-inspector>summary span{font-size:10px}
+.bo-h71-persona-detail .bo-h71-detail-head{padding-bottom:10px!important}
+.bo-h71-persona-detail .bo-h71-detail-title{gap:9px}
+.bo-h71-persona-detail .bo-h71-detail-tabs{margin-bottom:6px}
+.bo-h71-persona-detail .bo-h71-detail-body{min-height:0;background:transparent!important}
+.bo-h71-persona-detail .bo-h71-detail-body:has(.bo-ec-compact){background:transparent!important}
+.bo-h71-persona-detail .bo-p6-local-note{margin:8px 0 18px!important}
+.bo-ec-editor.bo-ec-compact{padding:0!important;border:0!important;background:transparent!important}
+.bo-h71-persona-detail .bo-ec-compact .bo-p5-toolbar.bo-ec-compact-toolbar{
+  min-height:40px!important;padding:4px 2px 8px!important;margin:0!important;border:0!important;
+  background:transparent!important;box-shadow:none!important;border-radius:0!important;
+  display:flex!important;flex-wrap:wrap;justify-content:space-between;gap:10px
+}
+.bo-ec-compact-caption{display:flex;gap:11px;align-items:baseline;flex-wrap:wrap}
+.bo-ec-compact-caption strong{font-size:13px;font-weight:730;color:var(--ec-ink)}
+.bo-ec-compact-caption span{font-size:12px;color:var(--ec-muted)!important;font-weight:400}
+.bo-ec-compact .bo-p5-toolbar-actions{gap:7px}
+.bo-ec-compact .bo-ec-theme-toggle,.bo-ec-compact .bo-p5-add-button{
+  min-height:31px!important;font-size:12px!important;line-height:1.2!important;padding:5px 9px!important;
+  border-radius:7px!important;white-space:nowrap
+}
+.bo-ec-compact .bo-ec-workspace{display:grid;grid-template-columns:minmax(138px,180px) minmax(260px,1fr) minmax(238px,295px);gap:11px;align-items:stretch;min-width:0}
+.bo-ec-compact .bo-ec-workspace>*{min-width:0}
+.bo-ec-compact .bo-ec-portrait-column{display:flex;flex-direction:column;gap:9px}
+.bo-ec-compact .bo-ec-portrait-card{position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:182px;flex:1;padding:0 0 35px;border:1px solid var(--ec-border);border-radius:9px;background:var(--ec-surface2);overflow:hidden}
+.bo-ec-compact .bo-ec-portrait-card>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bo-ec-compact .bo-ec-portrait-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--ec-muted);font-size:12px;line-height:1.3}
+.bo-ec-compact .bo-ec-portrait-empty svg{color:var(--ec-accent);opacity:.62}
+.bo-ec-compact .bo-ec-photo-edit{position:absolute;bottom:0;left:0;right:0;min-width:0;z-index:3;background:var(--ec-surface);border-top:1px solid var(--ec-border)}
+.bo-ec-compact .bo-ec-photo-edit>summary{list-style:none;cursor:pointer;padding:9px 8px;text-align:center;font-size:12px;color:var(--ec-accent);font-weight:650}
+.bo-ec-compact .bo-ec-photo-edit>summary::-webkit-details-marker{display:none}
+.bo-ec-compact .bo-ec-photo-edit[open]{padding:4px 8px 9px}
+.bo-ec-compact .bo-ec-photo-edit[open]>summary{padding:4px}
+.bo-ec-compact .bo-ec-photo-edit label{display:block;color:var(--ec-muted);font-size:11px}
+.bo-ec-compact .bo-ec-photo-edit input{width:100%;min-width:0;max-width:100%;font-size:12px;padding:7px 5px;border-radius:5px;border:1px solid var(--ec-border);background:var(--ec-surface);color:var(--ec-ink)}
+.bo-ec-compact .bo-ec-portrait-tip{font-size:11px;color:var(--ec-accent);border:1px dashed var(--ec-border);border-radius:7px;background:var(--ec-surface2);min-height:32px;cursor:pointer}
+.bo-ec-compact .bo-ec-portrait-tip:hover{background:var(--ec-hover)}
+.bo-ec-compact .bo-ec-core-column{display:flex;flex-direction:column;gap:10px;min-height:0}
+.bo-ec-compact .bo-ec-core-column .bo-ec-card{flex:1}
+.bo-ec-compact .bo-ec-core-column .bo-ec-card:first-child{flex:1.25}
+.bo-ec-compact .bo-ec-card{min-width:0;border-radius:9px!important;box-shadow:none!important;overflow:visible}
+.bo-ec-compact .bo-ec-card .bo-p5-card-head{min-height:30px!important;height:auto;padding:5px 10px!important;gap:8px;border-radius:9px 9px 0 0;background:var(--ec-surface)!important}
+.bo-ec-compact .bo-ec-card .bo-p5-card-head h3{font-size:13px!important;line-height:1.25;color:var(--ec-ink);font-weight:730}
+.bo-ec-compact .bo-ec-card .bo-p5-card-head small{display:none}
+.bo-ec-compact .bo-ec-card .bo-p5-drag-handle{font-size:13px;color:var(--ec-muted);opacity:0;transition:opacity .13s}
+.bo-ec-compact .bo-ec-card:hover .bo-p5-drag-handle,.bo-ec-compact .bo-ec-card .bo-p5-drag-handle:focus-visible{opacity:1}
+.bo-ec-compact .bo-ec-card .bo-p6-card-menu>summary{width:24px;height:24px;font-size:15px}
+.bo-ec-compact .bo-ec-card .bo-p5-card-content{padding:5px 10px 10px!important}
+.bo-ec-compact .bo-ec-card .bo-p5-field{display:block;min-width:0}
+.bo-ec-compact .bo-ec-card .bo-p5-field>span{display:none!important}
+.bo-h71-persona-detail .bo-ec-compact .bo-p5-field :is(textarea,input){
+  display:block;min-width:0;width:100%;min-height:48px!important;height:auto!important;padding:4px 3px!important;
+  background:transparent!important;border:1px solid transparent!important;box-shadow:none!important;
+  font-size:13px!important;line-height:1.5!important;resize:vertical!important;color:var(--ec-ink)!important
+}
+.bo-h71-persona-detail .bo-ec-compact .bo-ec-core-column .bo-p5-field textarea{min-height:56px!important}
+.bo-h71-persona-detail .bo-ec-compact .bo-p5-field :is(textarea,input):focus{background:var(--ec-surface2)!important;border-color:var(--ec-accent)!important}
+.bo-ec-compact .bo-ec-relations-column{min-width:0;display:flex;align-items:stretch}
+.bo-ec-compact .bo-ec-relations{width:100%;height:100%;min-width:0;padding:10px!important;margin:0!important;position:relative}
+.bo-ec-compact .bo-ec-relations-head{gap:8px;align-items:flex-start;margin-bottom:9px}
+.bo-ec-compact .bo-ec-relations-head small{display:none}
+.bo-ec-compact .bo-ec-relations-head h3{font-size:13px!important;font-weight:730;line-height:1.25;margin:2px 0 5px}
+.bo-ec-compact .bo-ec-relations-head p{font-size:11px;line-height:1.4}
+.bo-ec-compact .bo-ec-relations-head>button{min-height:28px;max-width:115px;padding:4px 6px;font-size:11px;line-height:1.25;white-space:normal;text-align:center}
+.bo-ec-compact .bo-ec-relations-layout{display:block;position:relative}
+.bo-ec-compact .bo-ec-graph{min-height:142px!important;height:142px;position:relative;background:var(--ec-surface2);border:1px solid var(--ec-border)}
+.bo-ec-compact .bo-ec-graph:has(.bo-ec-graph-empty){background:transparent;border:1px dashed var(--ec-border)}
+.bo-ec-compact .bo-ec-graph:has(.bo-ec-graph-empty) .bo-ec-central,.bo-ec-compact .bo-ec-graph:has(.bo-ec-graph-empty) .bo-ec-edges{display:none}
+.bo-ec-compact .bo-ec-graph-empty{position:absolute;inset:0;display:grid;place-items:center;padding:10px 16px;color:var(--ec-muted)}
+.bo-ec-compact .bo-ec-graph-empty p{font-size:11.5px;line-height:1.55;text-align:center;margin:0;max-width:215px}
+.bo-ec-compact .bo-ec-central{width:35%;min-height:39px;padding:6px 4px;max-width:none}
+.bo-ec-compact .bo-ec-central small{font-size:8px}
+.bo-ec-compact .bo-ec-central strong{font-size:10px}
+.bo-ec-compact .bo-ec-node{width:28%;max-width:none;min-height:31px;padding:3px}
+.bo-ec-compact .bo-ec-node span{font-size:9px;line-height:1.2;-webkit-line-clamp:2}
+.bo-ec-compact .bo-ec-node small{font-size:8px}
+.bo-ec-compact .bo-ec-bank{position:absolute;top:-55px;right:0;z-index:70;width:min(312px,calc(100vw - 50px));max-height:420px;overflow:auto;box-shadow:0 18px 45px rgba(15,39,72,.22);background:var(--ec-surface)!important}
+.bo-ec-compact .bo-ec-relations-layout.has-bank{display:block!important}
+.bo-ec-compact .bo-ec-bank-items{max-height:270px}
+.bo-ec-compact .bo-p5-grid.bo-ec-supporting-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px;align-items:stretch;margin-top:11px!important}
+.bo-ec-compact .bo-ec-supporting-grid .bo-ec-card{grid-column:span 1!important;min-height:96px}
+.bo-ec-compact .bo-ec-supporting-grid .bo-ec-card.bo-p5-card--full{grid-column:span 2!important}
+.bo-ec-compact .bo-ec-supporting-grid .bo-ec-card .bo-p5-card-content{padding:4px 10px 7px!important}
+.bo-ec-compact .bo-ec-compact-add{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;min-height:94px;padding:10px 6px;border:1px dashed var(--ec-border);border-radius:9px;background:var(--ec-surface2);color:var(--ec-muted);cursor:pointer}
+.bo-ec-compact .bo-ec-compact-add:hover,.bo-ec-compact .bo-ec-compact-add:focus-visible{background:var(--ec-hover);border-color:var(--ec-accent);color:var(--ec-accent)}
+.bo-ec-compact .bo-ec-compact-add span{font-size:19px;line-height:1;color:var(--ec-accent)}
+.bo-ec-compact .bo-ec-compact-add strong{font-size:11.5px;font-weight:650}
+.bo-ec-compact .bo-ec-compact-help{font-size:11px;color:var(--ec-muted);margin:8px 1px 0}
+.bo-ec-compact .bo-ec-resize{width:24px;height:18px}
+.bo-ec-compact .bo-ec-library{position:absolute;top:38px;left:auto;right:0;z-index:65;max-width:min(620px,96%);width:100%;box-shadow:0 20px 50px rgba(18,49,89,.17)}
+.bo-ec-compact{position:relative}
+.bo-ec-theme-dark.bo-ec-compact .bo-ec-portrait-card{background:var(--ec-surface2)}
+.bo-ec-theme-dark.bo-ec-compact .bo-ec-photo-edit{color:var(--ec-ink)}
+@media(max-width:1120px){.bo-ec-compact .bo-ec-workspace{grid-template-columns:minmax(120px,150px) minmax(210px,1fr) minmax(200px,255px)}}
+@media(max-width:840px){.bo-ec-compact .bo-ec-workspace{grid-template-columns:minmax(118px,150px) minmax(0,1fr)}.bo-ec-compact .bo-ec-relations-column{grid-column:span 2}.bo-ec-compact .bo-ec-relations{height:auto}.bo-ec-compact .bo-ec-graph{height:122px!important;min-height:122px!important}.bo-ec-compact .bo-ec-supporting-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:580px){.bo-ec-compact .bo-ec-workspace{display:flex;flex-direction:column}.bo-ec-compact .bo-ec-portrait-column{display:none}.bo-ec-compact .bo-ec-core-column{gap:7px}.bo-ec-compact .bo-ec-supporting-grid{grid-template-columns:minmax(0,1fr)!important}.bo-ec-compact .bo-ec-supporting-grid>*{grid-column:span 1!important}.bo-ec-compact .bo-ec-relations{padding:9px!important}.bo-ec-compact .bo-ec-compact-caption>span{display:none}.bo-ec-compact .bo-p5-toolbar-actions{margin-left:auto}}
