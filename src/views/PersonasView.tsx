@@ -349,7 +349,9 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     return <section className={`bo-h71-persona-detail bo-h713-layout-${draft.layout}`} data-personas-h71="detail">
       <header className="bo-h71-detail-head bo-h724-detail-head">
         <button type="button" className="bo-h71-back" onClick={closePersona}><ArrowLeft size={16}/> Personas</button>
-        <div className="bo-h71-detail-title bo-h724-detail-title"><span className="bo-h71-avatar bo-h724-avatar"><UserRound size={20}/></span><div><small>PERSONA</small><h1><input className="bo-p6-title-input" aria-label="Nome da Persona" value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})} placeholder="Nome da Persona"/></h1><p>{draft.description || 'Clique no bloco Resumo para descrever esta persona.'}</p><div className="bo-h724-persona-meta">{visibleTags.map((tag) => <span key={tag}>{tag}</span>)}{tagValues.length > visibleTags.length && <span>+{tagValues.length - visibleTags.length}</span>}</div></div></div>
+        <div className="bo-h71-detail-title bo-h724-detail-title"><span className="bo-h71-avatar bo-h724-avatar bo-ec-title-avatar">
+  {draft.imageUrl ? <img src={draft.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer"/> : <UserRound size={20}/>}
+</span><div><small>PERSONA</small><h1><input className="bo-p6-title-input" aria-label="Nome da Persona" value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})} placeholder="Nome da Persona"/></h1><p>{draft.description || 'Clique no bloco Resumo para descrever esta persona.'}</p><div className="bo-h724-persona-meta">{visibleTags.map((tag) => <span key={tag}>{tag}</span>)}{tagValues.length > visibleTags.length && <span>+{tagValues.length - visibleTags.length}</span>}</div></div></div>
         <div className="bo-h724-detail-tools"><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Salvando alterações…' : 'Salvo neste dispositivo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
       </header>
 
@@ -378,9 +380,11 @@ export function PersonasView({ studio }: { studio: StudioController }) {
             <PersonaVisualEditor key={selected.id} draft={draft} onChange={setDraft} legacyDefaultCards={!Array.isArray(selected.personaVisualCards)}
               counts={{ need:completenessReport.connectionCounts.need, pain:completenessReport.connectionCounts.pain,
                 evidence:evidenceConnections.length, related:connectedIds.length }}
+              relationOptions={relationOptions} connectedIds={connectedIds} onToggleRelation={toggleRelation}
               onNavigate={setDetailTab}/>
           </main>
-          <aside className="bo-h724-overview-aside bo-p6-aside">
+          <aside className="bo-h724-overview-aside bo-p6-aside bo-ec-aside">
+            <details className="bo-ec-inspector"><summary>Detalhes do perfil <span>Completude · Responsável</span></summary>
             <section className="bo-p6-progress"><header><small>FORÇA DO PERFIL</small><strong>{completeness}%</strong></header><i><b style={{ width: `${completeness}%` }}/></i>
               <p>A completude mede o preenchimento, não a validação. Evidências continuam necessárias.</p>
               <div className="bo-p6-next-steps">{completenessChecks.filter(check=>!check.complete).slice(0,3).map(check=><button type="button" key={check.id} onClick={()=>{setDetailTab('overview');window.setTimeout(()=>document.querySelector('[data-persona-visual-card="goal"]')?.scrollIntoView({behavior:'smooth',block:'center'}),30)}}>{check.label} <span>→</span></button>)}</div>
@@ -391,6 +395,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
               <label><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map(tag=><button key={tag} type="button" className="bo-h724-chip" onClick={()=>removeTag(tag)}>{tag}<X size={11}/></button>)}<input value={tagEntry} onChange={e=>setTagEntry(e.target.value)} onBlur={()=>{if(tagEntry.trim())addTag()}} onKeyDown={e=>{if(e.key==='Enter'||e.key===','){e.preventDefault();addTag()}}} placeholder="Adicionar etiqueta"/></div></label>
               <p>{connectedIds.length} conexões · {evidenceConnections.length} evidências · {usage.instances} usos no serviço</p>
             </div></details>
+            </details>
           </aside>
         </div>}
 
