@@ -39,7 +39,7 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   const opportunities = count(graph.opportunities);
   const serviceArtifacts = serviceMaps + whiteboards;
   const recentMap = Object.values(graph.journeys).sort((a, b) => String(b.updatedAt ?? '').localeCompare(String(a.updatedAt ?? '')))[0] ?? null;
-  const mapStageNames = recentMap?.stageIds.map((id) => graph.stages[id]?.name?.trim()).filter((name): name is string => Boolean(name)).slice(0, 4) ?? [];
+  const mapStageNames = recentMap?.stageIds.map((id) => graph.stages[id]?.title?.trim()).filter((name): name is string => Boolean(name)).slice(0, 4) ?? [];
   const mapUpdatedAt = recentMap?.updatedAt ? new Date(recentMap.updatedAt) : null;
   const elapsedMs = mapUpdatedAt && !Number.isNaN(mapUpdatedAt.getTime()) ? Date.now() - mapUpdatedAt.getTime() : null;
   const updatedLabel = elapsedMs !== null && elapsedMs >= 0
