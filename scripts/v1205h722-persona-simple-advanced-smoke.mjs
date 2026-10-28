@@ -58,12 +58,12 @@ ok(personaVisualTemplate('research').some(c=>c.id==='behaviors'), 'template de p
 const restored = updatePersonaProfile({graph,personaId:persona.id,draft:{...visualReopened,visualCards:[{id:'identity',width:'full'}]},connectedIds:[]});
 ok(personaProfileFromEntity(restored.entities.persona[persona.id]).primaryGoal==='Melhorar atendimento', 'ocultar bloco não apaga o campo correspondente');
 const visual = fs.readFileSync('src/views/PersonaVisualEditor.tsx','utf8');
-ok(['data-persona-visual-editor','data-persona-visual-card','Adicionar bloco','onDrop','Alternar largura','personaVisualTemplate'].every(s=>visual.includes(s)), 'UI visual tem biblioteca, drag, largura e modelos');
+ok(['data-persona-visual-editor','data-persona-visual-card','Adicionar bloco','onDrop','Alterar largura','personaVisualTemplate'].every(s=>visual.includes(s)), 'UI visual tem biblioteca, drag, largura e modelos');
 const view = fs.readFileSync('src/views/PersonasView.tsx', 'utf8');
 const css = fs.readFileSync('src/runtime/personas-h713.css', 'utf8');
 const style = fs.readFileSync('src/style.css', 'utf8');
-for (const marker of ['Criar Persona e continuar', 'Profundidade da Persona', 'Personalizar interface', 'Blocos do perfil', 'profile-left', 'story-first', 'createSections']) ok(view.includes(marker), `UI contém ${marker}`);
-ok(view.includes('data-personas-h71="create"') && !view.includes('bo-h713-builder-backdrop'), 'criação usa página própria e não modal');
+for (const marker of ['QuickEntityCreateDialog', 'Personalizar interface', 'Blocos do perfil', 'profile-left', 'story-first', 'personaVisualCards']) ok(view.includes(marker), `UI contém ${marker}`);
+ok(view.includes('<QuickEntityCreateDialog kind="persona"') && !view.includes('bo-p2-create-page'), 'criação usa modal compacto, sem página de formulário');
 ok(view.includes("layout:id") && view.includes("draft.sections.filter"), 'layout e blocos podem ser alterados no perfil');
 for (const marker of ['.bo-h713-persona-builder', '.bo-h713-block-grid', '.bo-h713-layout-options', '.bo-h713-layout-balanced', '.bo-h713-layout-story-first']) ok(css.includes(marker), `CSS contém ${marker}`);
 ok(style.includes("@import './runtime/personas-h713.css';"), 'CSS H7.2.2 carregado no pipeline');
