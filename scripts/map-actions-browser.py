@@ -47,6 +47,8 @@ def flow(page, width):
     page.get_by_label('Serviço principal', exact=True).fill('Atendimento')
     page.get_by_role('button', name='Criar projeto', exact=True).click()
     expect(page.get_by_role('heading', name='Visão geral do projeto', exact=True)).to_be_visible()
+    if width <= 760:
+        page.get_by_role('button', name='Abrir navegação', exact=True).click()
     page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
     pane = page.locator('[data-service-map-library]')
     expect(pane).to_be_visible()
