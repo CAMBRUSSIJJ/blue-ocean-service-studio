@@ -80,8 +80,8 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const [collapsedSidebarSections, setCollapsedSidebarSections] = useState<Record<'design' | 'context' | 'management', boolean>>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('bo-sidebar-sections') || '{}') as Partial<Record<'design' | 'context' | 'management', boolean>>;
-      return { design: Boolean(stored.design), context: Boolean(stored.context), management: Boolean(stored.management) };
-    } catch { return { design: false, context: false, management: false }; }
+      return { design: Boolean(stored.design), context: stored.context === undefined ? true : Boolean(stored.context), management: stored.management === undefined ? true : Boolean(stored.management) };
+    } catch { return { design: false, context: true, management: true }; }
   });
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const experience = useExperienceProfile();
@@ -435,7 +435,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
         </div>
 
         <div className="bo1163-service-context relative px-2.5 pt-2.5" data-project-context="7.40-H10" data-persistent-switcher="7.40-H13">
-          <button type="button" className="bo1163-service-switcher bo-h740h13-persistent-switcher" onClick={() => setIsServiceMenuOpen((value) => !value)} aria-haspopup="menu" aria-expanded={isServiceMenuOpen} title="Serviço e projetos">
+          <button type="button" className="bo1163-service-switcher bo-h740h13-persistent-switcher" onClick={() => setIsServiceMenuOpen((value) => !value)} aria-haspopup="menu" aria-expanded={isServiceMenuOpen} title="Selecionar projeto ou serviço">
             <span className="bo1163-service-switcher__mark"><span /></span>
             <span className="bo1163-service-switcher__copy"><small>{projectShellOpen ? 'Projeto atual' : 'Serviço'}</small><strong>{currentProject?.serviceName || graph.service.name || 'Serviço'}</strong><em>{projectShellOpen ? projectTitle : 'Abrir projetos'}</em></span>
             <ChevronsUpDown size={14} />
@@ -454,6 +454,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
             <span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="dashboard"><BlueOceanUtilityIcon kind="dashboard" size={16}/></span><span className="hidden md:inline">Home</span>
           </button>
 
+          <button type="button" className="bo-h33-sidebar-density" onClick={() => setCollapsedSidebarSections(current => ({ design: false, context: !(current.context && current.management), management: !(current.context && current.management) }))} aria-label={collapsedSidebarSections.context && collapsedSidebarSections.management ? 'Mostrar mais grupos de ferramentas' : 'Recolher grupos de ferramentas'} title="Organizar grupos da sidebar"><span>{collapsedSidebarSections.context && collapsedSidebarSections.management ? 'Mostrar ferramentas' : 'Recolher grupos'}</span></button>
           <span className="sr-only bo-h740h11-legacy-global-projects" aria-hidden="true">Projetos · Todos os projetos</span>
           {/* H7.40-H13: a sidebar principal é persistente em Home, Serviço e dentro dos projetos. */}
           <div data-persistent-global-nav="7.40-H13">
@@ -477,20 +478,20 @@ export default function App({ authUser, onSignOut }: AppProps) {
             </div>}
             <div className={experience.level === 'foundation' ? 'bo-h161-standard-nav is-hidden' : 'bo-h161-standard-nav'}>
             <div className={`bo-h701-nav-section bo-h740h12-primary-design ${collapsedSidebarSections.design ? 'is-section-collapsed' : ''}`} data-sidebar-section="design">
-              <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.design} onClick={() => toggleSidebarSection('design')}><span>Desenho do serviço</span><span aria-hidden="true">{collapsedSidebarSections.design ? '+' : '−'}</span></button>
+              <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.design} onClick={() => toggleSidebarSection('design')}><span>Desenhar</span><span aria-hidden="true">{collapsedSidebarSections.design ? '+' : '−'}</span></button>
               <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.design}>
-              <button type="button" data-service-projects-nav="1" data-unified-service-workspace-nav="1" title="Serviço" aria-label="Serviço" aria-current={isGlobalHome && projectHomeSection === 'projects' ? 'page' : undefined} className={`bo1205h3-nav-child ${isGlobalHome && projectHomeSection === 'projects' ? 'is-active' : ''}`} onClick={() => openGlobalHome('projects')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="service" size={16}/></span><span className="hidden md:inline">Serviço</span></button>
-              {hasService && <button type="button" data-project-context-nav="h1" title="Visão geral do projeto" aria-label="Visão geral do projeto" aria-current={isProjectHome ? "page" : undefined} className={`bo1205h3-nav-child ${isProjectHome ? "is-active" : ""}`} onClick={() => openCurrentProjectHome()}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="service" size={16}/></span><span className="hidden md:inline">Projeto atual</span></button>}
+              <button type="button" data-service-projects-nav="1" data-unified-service-workspace-nav="1" title="Serviço" aria-label="Serviço" aria-current={isGlobalHome && projectHomeSection === 'projects' ? 'page' : undefined} className={`bo1205h3-nav-child ${isGlobalHome && projectHomeSection === 'projects' ? 'is-active' : ''}`} onClick={() => openGlobalHome('projects')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="service" size={16}/></span><span className="hidden md:inline">Projetos</span></button>
+              {hasService && <button type="button" data-project-context-nav="h1" title="Visão geral do projeto" aria-label="Visão geral do projeto" aria-current={isProjectHome ? "page" : undefined} className={`bo1205h3-nav-child ${isProjectHome ? "is-active" : ""}`} onClick={() => openCurrentProjectHome()}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="service" size={16}/></span><span className="hidden md:inline">Visão geral</span></button>}
               <button type="button" data-service-journey-nav="1" data-service-blueprint-nav="1" title="Mapas do serviço" aria-label="Abrir Mapas do serviço" aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' && !externalNav ? 'page' : undefined} className={`bo1205h3-nav-child ${activeTab === 'canvas' && serviceWorkspaceTab === 'journey' && !externalNav ? 'is-active' : ''}`} onClick={() => openServiceWorkspaceTab('journey')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="journey" size={16}/></span><span className="hidden md:inline">Mapas do serviço</span></button>
               <button type="button" data-blue-ocean-whiteboard-nav="standard" title="Whiteboard" aria-label="Abrir Whiteboard pelo menu principal" aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'page' : undefined} className={`bo1205h3-nav-child ${activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'is-active' : ''}`} onClick={() => openServiceWorkspaceTab('whiteboard')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="whiteboard" size={16}/></span><span className="hidden md:inline">Whiteboard</span></button>
               <span className="sr-only" data-unified-service-workspace-legacy="1"><span>Journey maps</span><span>Whiteboards</span><span>Blueprints</span></span>
-              <button type="button" data-experience-nav="expanded" title="Hierarquias" aria-label="Hierarquias" aria-current={isPrimaryLibrary && libraryPage === 'hierarchies' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'hierarchies' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('hierarchies')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="hierarchy" size={16}/></span><span className="hidden md:inline">Hierarquias</span></button>
               </div>
             </div>
 
             <div className={`bo-h701-nav-section bo-h740h12-primary-context ${collapsedSidebarSections.context ? 'is-section-collapsed' : ''}`} data-sidebar-section="context">
-              <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.context} onClick={() => toggleSidebarSection('context')}><span>Público-alvo</span><span aria-hidden="true">{collapsedSidebarSections.context ? '+' : '−'}</span></button>
+              <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.context} onClick={() => toggleSidebarSection('context')}><span>Conhecer</span><span aria-hidden="true">{collapsedSidebarSections.context ? '+' : '−'}</span></button>
               <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.context}>
+              <button type="button" data-experience-nav="expanded" title="Hierarquias" aria-label="Hierarquias" aria-current={isPrimaryLibrary && libraryPage === 'hierarchies' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'hierarchies' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('hierarchies')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="hierarchy" size={16}/></span><span className="hidden md:inline">Hierarquias</span></button>
               <button type="button" title="Personas" aria-label="Personas" aria-current={isPrimaryLibrary && libraryPage === 'personas' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'personas' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('personas')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="persona" size={16}/></span><span className="hidden md:inline">Personas</span></button>
               <button type="button" title="Necessidades" aria-label="Necessidades" aria-current={isPrimaryLibrary && libraryPage === 'needs' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'needs' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('needs')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="need" size={16}/></span><span className="hidden md:inline">Necessidades</span></button>
               <button type="button" data-experience-nav="expanded" title="Jobs" aria-label="Jobs" aria-current={isPrimaryLibrary && libraryPage === 'jobs' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'jobs' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('jobs')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="job" size={16}/></span><span className="hidden md:inline">Jobs</span></button>
@@ -502,7 +503,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
             </div>
 
             <div className={`bo-h701-nav-section bo-h740h12-primary-management ${collapsedSidebarSections.management ? 'is-section-collapsed' : ''}`} data-sidebar-section="management">
-              <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.management} onClick={() => toggleSidebarSection('management')}><span>Gestão</span><span aria-hidden="true">{collapsedSidebarSections.management ? '+' : '−'}</span></button>
+              <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.management} onClick={() => toggleSidebarSection('management')}><span>Organizar</span><span aria-hidden="true">{collapsedSidebarSections.management ? '+' : '−'}</span></button>
               <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.management}>
               <button type="button" title="Oportunidades" aria-label="Oportunidades" aria-current={isPrimaryLibrary && libraryPage === 'portfolio' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'portfolio' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('portfolio')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="portfolio" size={16}/></span><span className="hidden md:inline">Oportunidades</span></button>
               <button type="button" data-experience-nav="expanded" title="Catálogo de métricas" aria-label="Catálogo de métricas" aria-current={isPrimaryLibrary && libraryPage === 'metrics' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'metrics' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('metrics')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="metric" size={16}/></span><span className="hidden md:inline">Catálogo de métricas</span></button>
@@ -534,11 +535,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
             <p className="text-xs font-semibold text-slate-700 truncate">{isGlobalScope ? 'Blue Ocean' : projectTitle}</p>
             <p className="text-[11px] text-slate-500 mt-0.5 truncate">{isGlobalScope ? `${projects.length} projeto${projects.length === 1 ? '' : 's'}` : graph.service.name}</p>
           </div>
-          <div className="bo1187-sidebar-footer">
-            <button type="button" onClick={() => openExternal('settings', 'unifiedWorkspaces')}>Configurações</button>
-            <button type="button" onClick={() => openExternal('collaboration', 'collaboration', 'workspace')}>Equipe</button>
-            <small>{`V${APP_VERSION}`}</small>
-          </div>
+          <div className="bo1187-sidebar-footer bo-h33-sidebar-footer"><small>Dados neste navegador</small><small>{`V${APP_VERSION}`}</small></div>
         </div>
       </aside>
 
@@ -576,7 +573,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
             <div className="relative flex items-center gap-1.5 shrink-0">
               <button type="button" className="bo1188-header-help" onClick={openGuidance} title="Ajuda contextual"><CircleHelp size={15} /><span className="hidden lg:inline">Ajuda</span></button>
               <button type="button" data-bo-global-search-native="1" onClick={() => window.BlueOceanRuntime?.api<{ open(): void }>('globalNavigation')?.open?.()} className="bo115-search-trigger" title="Busca global · Ctrl+K" aria-label="Abrir busca global"><Search size={15} /><span>Buscar</span><kbd>Ctrl K</kbd></button>
-              <button type="button" onClick={handleSave} className={`bo1163-save-status bo-h740h14-save-status ${saveStatus}`} role="status" aria-live="polite" title="Salvamento automático e local deste projeto">
+              <button type="button" onClick={handleSave} className={`bo1163-save-status bo-h740h14-save-status ${saveStatus}`} role="status" aria-live="polite" title="Dados locais: não sincronizados automaticamente com outros dispositivos. Exporte um backup periodicamente.">
                 {saveStatus === 'saving' ? <Loader2 size={13} className="animate-spin" /> : saveStatus === 'error' ? <AlertCircle size={13} /> : <CheckCircle2 size={13} />}
                 <span>{saveStatus === 'saving' ? 'Salvando…' : saveStatus === 'error' ? 'Não foi possível salvar' : 'Salvo neste dispositivo'}</span>
               </button>

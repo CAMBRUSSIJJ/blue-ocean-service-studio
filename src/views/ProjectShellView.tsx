@@ -38,6 +38,17 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   const metrics = count(graph.entities?.metric);
   const opportunities = count(graph.opportunities);
   const serviceArtifacts = serviceMaps + whiteboards;
+  const recentMap = Object.values(graph.journeys).sort((a, b) => String(b.updatedAt ?? '').localeCompare(String(a.updatedAt ?? '')))[0] ?? null;
+  const mapStageNames = recentMap?.stageIds.map((id) => graph.stages[id]?.title?.trim()).filter((name): name is string => Boolean(name)).slice(0, 4) ?? [];
+  const mapUpdatedAt = recentMap?.updatedAt ? new Date(recentMap.updatedAt) : null;
+  const elapsedMs = mapUpdatedAt && !Number.isNaN(mapUpdatedAt.getTime()) ? Date.now() - mapUpdatedAt.getTime() : null;
+  const updatedLabel = elapsedMs !== null && elapsedMs >= 0
+    ? elapsedMs < 60_000 ? 'Editado agora'
+      : elapsedMs < 3_600_000 ? `Editado há ${Math.floor(elapsedMs / 60_000)} min`
+      : elapsedMs < 86_400_000 ? `Editado há ${Math.floor(elapsedMs / 3_600_000)} h`
+      : `Editado em ${mapUpdatedAt!.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}`
+    : 'Disponível neste projeto';
+  const registeredCount = personas + needs + evidence;
   // The current ServiceGraph is the project scope; never copy entities for a dashboard.
   const projectId = project?.id || graph.service.project?.id || graph.service.id;
   const shellRef = useRef<HTMLElement>(null);
@@ -123,29 +134,60 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
 
   return <section ref={shellRef} className="bo-h740h10-shell" data-project-shell="7.40-H10" data-project-shell-section="overview">
     <header className="bo-h740h10-shell__hero bo-h31-project-header">
-      <div><small>PROJETO ATUAL</small><h1>{project?.title || serviceName}</h1><p>{project?.description || 'Organize o projeto e acesse suas informações pelas abas abaixo.'}</p></div>
+      <div><small>VISÃO GERAL DO PROJETO</small><h1>{project?.title || serviceName}</h1><p>{project?.description || `Serviço: ${serviceName}. Organize os registros e continue o desenho quando desejar.`}</p></div>
     </header>
 
-    {areaTabs}
+    <details className="bo-h33-project-more" key={projectId} >
+      <summary>Outras visões do projeto <span>{area !== 'overview' ? `· ${areaLabel.find(item => item.id === area)?.label ?? ''}` : ''}</span></summary>
+      {areaTabs}
+    </details>
     <div id="bo-project-context-panel" role="tabpanel" aria-labelledby={`bo-pctx-tab-${area}`} className="bo-project-context-panel">
     {area === 'overview' ? <>
-    <section className="bo-h31-overview" data-project-overview="compact-h31">
-      <div className="bo-h31-overview-service">
+    <section className="bo-h31-overview bo-h33-focus-overview" data-project-overview="compact-h31">
+      <div className="bo-h31-overview-service bo-h33-context-strip">
         <span className="bo-h31-overview-icon"><FolderKanban size={22}/></span>
         <div className="bo-h31-overview-copy">
           <small>SERVIÇO PRINCIPAL</small>
           <h2>{serviceName}</h2>
-          <p>{serviceMaps > 0 ? 'Continue o desenho do serviço e alterne entre Jornada e Blueprint.' : 'Comece pelo mapa do serviço. Pessoas, necessidades e evidências permanecem organizadas nas abas do projeto.'}</p>
+          <p>{project?.description || 'Este serviço reúne seus mapas, pessoas, pesquisa e oportunidades no mesmo projeto.'}</p>
         </div>
-        {serviceMaps > 0
-          ? <button type="button" className="primary" onClick={openService}>Abrir mapas <ArrowRight size={15}/></button>
-          : <button type="button" className="primary" onClick={onCreateMap}>Criar mapa <ArrowRight size={15}/></button>}
+        <span className="bo-h33-context-label">Projeto · Serviço · Mapa</span>
       </div>
-      <div className="bo-h31-overview-stats" aria-label="Indicadores do projeto">
-        <div><strong>{serviceMaps}</strong><span>Mapas</span></div>
-        <div><strong>{personas}</strong><span>Personas</span></div>
-        <div><strong>{needs}</strong><span>Necessidades</span></div>
-        <div><strong>{evidence}</strong><span>Evidências</span></div>
+
+      <section className="bo-h33-work-focus" aria-label={recentMap ? 'Retomar mapa do serviço' : 'Começar o mapa do serviço'}>
+        <div className="bo-h33-map-preview" role="img" aria-label={recentMap ? `Miniatura estrutural do mapa ${recentMap.name} com ${recentMap.stageIds.length} etapas` : 'Nenhum mapa criado neste projeto'}>
+          <div className="bo-h33-map-preview__top"><span>MAPA DO SERVIÇO</span><span>{recentMap ? `${recentMap.stageIds.length} ${recentMap.stageIds.length === 1 ? 'etapa' : 'etapas'}` : 'Novo mapa'}</span></div>
+          <div className="bo-h33-map-preview__stages">
+            {recentMap ? (mapStageNames.length ? mapStageNames : ['Etapas do serviço']).map((name, index) =>
+              <div key={index} className="bo-h33-map-preview__stage"><span>{index + 1}</span><strong>{name}</strong></div>
+            ) : <div className="bo-h33-map-preview__placeholder">Seu mapa aparecerá aqui</div>}
+          </div>
+          <div className="bo-h33-map-preview__lines" aria-hidden="true"><i/><i/><i/></div>
+        </div>
+        <div className="bo-h33-work-focus__content">
+          <small>{recentMap ? 'CONTINUE DE ONDE PAROU' : 'PRIMEIRO PASSO'}</small>
+          <h2>{recentMap ? recentMap.name : 'Crie seu primeiro mapa'}</h2>
+          <p>{recentMap ? 'Edite a experiência na Jornada ou detalhe a operação no Blueprint. As duas visualizações compartilham o mesmo mapa.' : 'Desenhe as etapas e interações do serviço. Você pode começar sem preencher outros formulários.'}</p>
+          <span className="bo-h33-updated">{updatedLabel}</span>
+          <button type="button" className="primary bo-h33-main-cta" onClick={recentMap ? openService : onCreateMap}>
+            {recentMap ? 'Continuar mapa' : 'Criar mapa'} <ArrowRight size={16}/>
+          </button>
+        </div>
+      </section>
+
+      <section className="bo-h33-guided-section" aria-label="Registros e próximos passos">
+        <header className="bo-h33-guided-heading"><div><small>CONTEXTO DO SERVIÇO</small><h2>Complete quando fizer sentido</h2><p>{registeredCount ? 'Mantenha pessoas, necessidades e evidências conectadas ao mapa.' : 'Você não precisa seguir uma ordem. Comece pelo registro que ajuda seu trabalho agora.'}</p></div><span>{registeredCount} {registeredCount === 1 ? 'registro' : 'registros'}</span></header>
+        <div className="bo-h31-overview-stats bo-h33-overview-stats bo-h33-guided-grid" aria-label="Acessos aos registros do projeto">
+          <div className="bo-h33-map-count"><strong>{serviceMaps}</strong><span>{serviceMaps === 1 ? 'Mapa' : 'Mapas'}</span><small>O desenho do seu serviço</small></div>
+          <div><button type="button" onClick={() => openLibraryPage('personas')} aria-label={personas ? 'Ver Personas' : 'Cadastrar primeira Persona'}><strong>{personas}</strong><span>Personas <ArrowRight size={14}/></span><small>{personas ? 'Ver e editar perfis' : 'Quem utiliza este serviço?'}</small><em>{personas ? 'Ver Personas' : 'Adicionar Persona'}</em></button></div>
+          <div><button type="button" onClick={() => openLibraryPage('needs')} aria-label={needs ? 'Ver Necessidades' : 'Cadastrar primeira Necessidade'}><strong>{needs}</strong><span>Necessidades <ArrowRight size={14}/></span><small>{needs ? 'Revisar necessidades' : 'O que essas pessoas precisam?'}</small><em>{needs ? 'Ver Necessidades' : 'Adicionar Necessidade'}</em></button></div>
+          <div><button type="button" onClick={() => openLibraryPage('evidence')} aria-label={evidence ? 'Ver Evidências' : 'Cadastrar primeira Evidência'}><strong>{evidence}</strong><span>Evidências <ArrowRight size={14}/></span><small>{evidence ? 'Consultar fontes existentes' : 'O que sustenta as decisões?'}</small><em>{evidence ? 'Ver Evidências' : 'Adicionar Evidência'}</em></button></div>
+        </div>
+      </section>
+
+      <div className="bo-h33-local-backup" role="note">
+        <div><strong>Seus dados estão salvos apenas neste dispositivo.</strong><span>O navegador não é um backup. Guarde uma cópia antes de limpar dados ou trocar de computador.</span></div>
+        <button type="button" onClick={studio.handleExport}>Exportar backup <ArrowRight size={14}/></button>
       </div>
     </section>
     </> : (area === 'audience' || area === 'research') ? <section className="bo-project-context-collection">

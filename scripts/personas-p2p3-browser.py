@@ -29,7 +29,12 @@ try:
         page.get_by_label('Nome do projeto',exact=True).fill('Personas UX QA')
         page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
         page.get_by_role('button',name='Criar projeto',exact=True).click()
-        page.locator('button[aria-label="Personas"]').click()
+        persona_nav=page.locator('button[aria-label="Personas"]')
+        if not persona_nav.is_visible():
+            group=page.locator('[data-sidebar-section="context"] .bo-h740h14-section-toggle')
+            if group.get_attribute('aria-expanded') == 'false':
+                group.click()
+        persona_nav.click()
         library=page.locator('[data-personas-h71="library"]')
         expect(library).to_be_visible()
         check('Default mode uses cards',library.get_attribute('data-persona-view')=='cards')
@@ -116,7 +121,12 @@ try:
         library.get_by_role('button',name='Sem evidências QA',exact=True).click()
         check('Saved view restores cards and rule',library.get_attribute('data-persona-view')=='cards' and library.locator('[data-persona-card]').count()==1)
         page.reload(wait_until='domcontentloaded')
-        page.locator('button[aria-label="Personas"]').click()
+        persona_nav=page.locator('button[aria-label="Personas"]')
+        if not persona_nav.is_visible():
+            group=page.locator('[data-sidebar-section="context"] .bo-h740h14-section-toggle')
+            if group.get_attribute('aria-expanded') == 'false':
+                group.click()
+        persona_nav.click()
         page.get_by_role('button',name='Visualizações',exact=False).click()
         check('Saved view persists across reload',page.get_by_role('button',name='Sem evidências QA',exact=True).count()==1)
         browser.close()
