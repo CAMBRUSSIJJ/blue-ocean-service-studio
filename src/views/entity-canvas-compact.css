@@ -101,3 +101,14 @@
 @media(max-width:1120px){.bo-ec-compact .bo-ec-workspace{grid-template-columns:minmax(120px,150px) minmax(210px,1fr) minmax(200px,255px)}}
 @media(max-width:840px){.bo-ec-compact .bo-ec-workspace{grid-template-columns:minmax(118px,150px) minmax(0,1fr)}.bo-ec-compact .bo-ec-relations-column{grid-column:span 2}.bo-ec-compact .bo-ec-relations{height:auto}.bo-ec-compact .bo-ec-graph{height:122px!important;min-height:122px!important}.bo-ec-compact .bo-ec-supporting-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:580px){.bo-ec-compact .bo-ec-workspace{display:flex;flex-direction:column}.bo-ec-compact .bo-ec-portrait-column{display:none}.bo-ec-compact .bo-ec-core-column{gap:7px}.bo-ec-compact .bo-ec-supporting-grid{grid-template-columns:minmax(0,1fr)!important}.bo-ec-compact .bo-ec-supporting-grid>*{grid-column:span 1!important}.bo-ec-compact .bo-ec-relations{padding:9px!important}.bo-ec-compact .bo-ec-compact-caption>span{display:none}.bo-ec-compact .bo-p5-toolbar-actions{margin-left:auto}}
+
+/* Width controls must visibly affect the core, not only the lower grid. */
+.bo-ec-compact .bo-ec-core-column>.bo-ec-card.bo-p5-card--half{width:78%;align-self:flex-start}
+.bo-ec-compact .bo-ec-core-column>.bo-ec-card.bo-p5-card--full{width:100%;align-self:stretch}
+@media(max-width:580px){
+ .bo-ec-compact .bo-ec-portrait-column{display:flex!important;flex-direction:row;gap:7px;align-items:center}
+ .bo-ec-compact .bo-ec-portrait-card{flex:0 0 116px;min-height:124px;max-height:144px}
+ .bo-ec-compact .bo-ec-portrait-empty svg{width:27px;height:27px}
+ .bo-ec-compact .bo-ec-portrait-tip{align-self:center;flex:0 0 auto;padding:7px 10px}
+ .bo-ec-compact .bo-ec-core-column>.bo-ec-card.bo-p5-card--half{width:100%}
+}
