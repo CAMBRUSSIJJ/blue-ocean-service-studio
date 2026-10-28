@@ -4,7 +4,7 @@ import './entity-canvas.css';
 import './entity-canvas-compact.css';
 import { UserRound } from '../design-system/icons';
 import {
-  normalizePersonaVisualCards, personaVisualTemplate, switchPersonaDepth,
+  normalizePersonaVisualCards, switchPersonaDepth,
   type PersonaProfileDraft, type PersonaVisualCard,
   type PersonaVisualCardId, type PersonaVisualWidth,
 } from '../services/persona-studio';
