@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { EntityCanvasRelations, EntityCanvasResizeHandle, type EntityConnectionOption } from '../components/EntityCanvas';
 import './entity-canvas.css';
+import './entity-canvas-compact.css';
+import { UserRound } from '../design-system/icons';
 import {
   normalizePersonaVisualCards, personaVisualTemplate, switchPersonaDepth,
   type PersonaProfileDraft, type PersonaVisualCard,
@@ -139,55 +141,82 @@ export function PersonaVisualEditor({draft,onChange,counts,onNavigate,legacyDefa
   // with the dedicated Relations tab for full details. Keep legacy card data.
   const visibleCards=cards.filter(c=>c.id!=='relations'&&(!legacyDefaultCards||!optional.has(c.id)||hasContent(c.id)||revealed.includes(c.id)));
   const available=OPTIONS.filter(x=>x.id!=='relations'&&!visibleCards.some(c=>c.id===x.id));
-  return <div className={`bo-p5-editor bo-ec-editor bo-ec-theme-${theme}`} data-persona-visual-editor="1" data-entity-canvas="persona">
-    <header className="bo-p5-toolbar">
-      <div><span>ENTITY CANVAS</span><h2>Construa o perfil visualmente</h2><p>Clique no conteúdo para editar · arraste para organizar · redimensione pelas bordas.</p></div>
+  const coreCards=visibleCards.filter(card=>card.id==='identity'||card.id==='goal');
+  const supportingCards=visibleCards.filter(card=>card.id!=='identity'&&card.id!=='goal'&&card.id!=='portrait');
+  const renderCard=(card:PersonaVisualCard)=>{
+    const meta=OPTIONS.find(x=>x.id===card.id);
+    if(!meta)return null;
+    const index=cards.findIndex(item=>item.id===card.id);
+    return <section key={card.id}
+      className={`bo-p5-card bo-ec-card bo-p5-card--${card.width} ${dragging===card.id?'is-dragging':''}`}
+      data-persona-visual-card={card.id} data-width={card.width}
+      onDragOver={event=>{if(dragging&&dragging!==card.id)event.preventDefault()}}
+      onDrop={event=>{event.preventDefault();if(dragging)move(dragging,card.id);setDragging(null)}}>
+      <header className="bo-p5-card-head">
+        <span className="bo-p5-drag-handle" draggable tabIndex={0} aria-label={`Arrastar bloco ${meta.title}`} title="Arraste para reorganizar"
+          onDragStart={event=>{setDragging(card.id);event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',card.id)}}
+          onDragEnd={()=>setDragging(null)}>⠿</span>
+        <div><h3>{card.id==='identity'?'Resumo':card.id==='goal'?'Objetivo':meta.title}</h3></div>
+        <details className="bo-p6-card-menu"><summary aria-label={`Opções do bloco ${meta.title}`} title="Opções do bloco">⋯</summary><div>
+          <button type="button" disabled={index===0} onClick={e=>{step(card.id,-1);e.currentTarget.closest('details')!.open=false}}>Mover para cima</button>
+          <button type="button" disabled={index===cards.length-1} onClick={e=>{step(card.id,1);e.currentTarget.closest('details')!.open=false}}>Mover para baixo</button>
+          <button type="button" onClick={e=>{setWidth(card.id,card.width==='full'?'half':'full');e.currentTarget.closest('details')!.open=false}}>Alterar largura</button>
+          {card.id!=='identity'&&<button type="button" onClick={e=>{updateCards(cards.filter(item=>item.id!==card.id));setRevealed(old=>old.filter(id=>id!==card.id));e.currentTarget.closest('details')!.open=false}}>Ocultar bloco</button>}
+        </div></details>
+      </header>
+      <div className="bo-p5-card-content">{body(card.id)}</div>
+      <EntityCanvasResizeHandle title={meta.title} width={card.width} onChange={width=>setWidth(card.id,width)} />
+    </section>;
+  };
+  return <div className={`bo-p5-editor bo-ec-editor bo-ec-compact bo-ec-theme-${theme}`}
+     data-persona-visual-editor="1" data-entity-canvas="persona">
+    <header className="bo-p5-toolbar bo-ec-compact-toolbar">
+      <div className="bo-ec-compact-caption"><strong>Perfil visual</strong><span>Edite diretamente nos cartões</span></div>
       <div className="bo-p5-toolbar-actions">
-        <div className="bo-p5-template-actions" role="group" aria-label="Modelos de composição">
-          <button type="button" onClick={()=>updateCards(personaVisualTemplate('essential'))}>Modelo essencial</button>
-          <button type="button" onClick={()=>updateCards(personaVisualTemplate('research'))}>Modelo pesquisa</button>
-        </div>
-        <button type="button" className="bo-ec-theme-toggle" aria-label={theme==='dark'?'Usar tema claro no canvas':'Usar tema escuro no canvas'} aria-pressed={theme==='dark'} onClick={switchTheme}>{theme==='dark'?'☀ Tema claro':'☾ Tema escuro'}</button>
-        <button type="button" className="bo-p5-add-button" aria-expanded={showLibrary} aria-controls="bo-p5-library" onClick={()=>setShowLibrary(v=>!v)}>+ Adicionar bloco</button>
+        <button type="button" className="bo-ec-theme-toggle" aria-label={theme==='dark'?'Usar tema claro no canvas':'Usar tema escuro no canvas'} aria-pressed={theme==='dark'} onClick={switchTheme}>{theme==='dark'?'☀ Claro':'☾ Escuro'}</button>
+        <button type="button" className="bo-p5-add-button" aria-expanded={showLibrary} aria-controls="bo-p5-library" onClick={()=>setShowLibrary(value=>!value)}>+ Adicionar bloco</button>
       </div>
     </header>
-    <EntityCanvasRelations entityTitle={draft.title} options={relationOptions}
-      connectedIds={connectedIds} onToggle={onToggleRelation}
-      onViewAll={()=>onNavigate('relations')}/>
-    {showLibrary&&<section className="bo-p5-library" id="bo-p5-library" aria-label="Biblioteca de blocos">
-      <div><strong>Adicionar à composição</strong><button type="button" onClick={()=>setShowLibrary(false)} aria-label="Fechar biblioteca de blocos">×</button></div>
-      <p>Os blocos aproveitam o perfil existente. Ocultá-los não apaga suas informações.</p>
-      {available.length?<div className="bo-p5-library-grid">{available.map(opt=><button key={opt.id} type="button" onClick={()=>add(opt.id)}><strong>+ {opt.title}</strong><small>{opt.caption}</small></button>)}</div>:<p>Todos os blocos disponíveis já estão na composição.</p>}
+    {showLibrary&&<section className="bo-p5-library bo-ec-library" id="bo-p5-library" aria-label="Biblioteca de blocos">
+      <div><strong>Componentes da Persona</strong><button type="button" onClick={()=>setShowLibrary(false)} aria-label="Fechar biblioteca de blocos">×</button></div>
+      <p>Escolha apenas os campos necessários. Ocultar não apaga o conteúdo.</p>
+      {available.length?<div className="bo-p5-library-grid">{available.filter(opt=>opt.id!=='portrait').map(opt=>
+        <button key={opt.id} type="button" onClick={()=>add(opt.id)}><strong>+ {opt.title}</strong><small>{opt.caption}</small></button>)}</div>
+        :<p>Todos os componentes já estão disponíveis no perfil.</p>}
     </section>}
-    <div className={`bo-p5-grid bo-p5-layout-${draft.layout}`} aria-label="Cartões da Persona">
-      {visibleCards.map((card,index)=>{
-        const meta=OPTIONS.find(x=>x.id===card.id);
-        if(!meta)return null;
-        return <section key={card.id} className={`bo-p5-card bo-ec-card bo-p5-card--${card.width} ${dragging===card.id?'is-dragging':''}`}
-          data-persona-visual-card={card.id} data-width={card.width}
-          onDragOver={e=>{if(dragging&&dragging!==card.id)e.preventDefault()}}
-          onDrop={e=>{e.preventDefault();if(dragging)move(dragging,card.id);setDragging(null)}}>
-          <header className="bo-p5-card-head">
-            <span className="bo-p5-drag-handle" draggable tabIndex={0} aria-label={`Arrastar bloco ${meta.title}`} title="Arraste para reorganizar"
-              onDragStart={e=>{setDragging(card.id);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.id)}} onDragEnd={()=>setDragging(null)}>⠿</span>
-            <div><small>{meta.caption}</small><h3>{card.id==='identity'?'Resumo':meta.title}</h3></div>
-            <details className="bo-p6-card-menu"><summary aria-label={`Opções do bloco ${meta.title}`} title="Opções do bloco">⋯</summary><div>
-               <button type="button" disabled={index===0} onClick={e=>{step(card.id,-1);e.currentTarget.closest('details')!.open=false}}>Mover para cima</button>
-               <button type="button" disabled={index===visibleCards.length-1} onClick={e=>{step(card.id,1);e.currentTarget.closest('details')!.open=false}}>Mover para baixo</button>
-               <button type="button" onClick={e=>{setWidth(card.id,card.width==='full'?'half':'full');e.currentTarget.closest('details')!.open=false}}>Alterar largura</button>
-               {card.id!=='identity' && <button type="button" onClick={e=>{updateCards(cards.filter(c=>c.id!==card.id));setRevealed(old=>old.filter(id=>id!==card.id));e.currentTarget.closest('details')!.open=false}}>Ocultar bloco</button>}
-             </div></details>
-          </header>
-          <div className="bo-p5-card-content">{body(card.id)}</div>
-          <EntityCanvasResizeHandle title={meta.title} width={card.width} onChange={width=>setWidth(card.id,width)} />
-        </section>;
-      })}
+    <div className="bo-ec-workspace">
+      <div className="bo-ec-portrait-column">
+        <section className="bo-ec-portrait-card" aria-label="Foto ilustrativa da Persona">
+          {draft.imageUrl?<img src={draft.imageUrl} alt="Retrato ilustrativo da Persona" loading="lazy" referrerPolicy="no-referrer"/>:
+            <div className="bo-ec-portrait-empty"><UserRound size={43}/><span>Sem imagem</span></div>}
+          <details className="bo-ec-photo-edit"><summary>{draft.imageUrl?'Alterar imagem':'+ Adicionar imagem'}</summary>
+            <label htmlFor="bo-ec-portrait-url">URL HTTPS da imagem</label>
+            <input id="bo-ec-portrait-url" type="url" value={draft.imageUrl??''} placeholder="https://..."
+              onChange={event=>update({imageUrl:event.target.value})}/>
+          </details>
+        </section>
+        <button type="button" className="bo-ec-portrait-tip" onClick={()=>{setShowLibrary(true)}}>
+          + Outros blocos
+        </button>
+      </div>
+      <div className="bo-ec-core-column" aria-label="Informações essenciais da Persona">
+        {coreCards.map(renderCard)}
+      </div>
+      <div className="bo-ec-relations-column">
+        <EntityCanvasRelations entityTitle={draft.title} options={relationOptions}
+          connectedIds={connectedIds} onToggle={onToggleRelation} onViewAll={()=>onNavigate('relations')}/>
+      </div>
     </div>
-    <div className="bo-ec-ghost-row" aria-label="Adicionar novos componentes">
-      {(['needs','channels','quote'] as PersonaVisualCardId[]).filter(id=>available.some(x=>x.id===id)).map(id=>
-        <button key={id} type="button" onClick={()=>add(id)}><span aria-hidden="true">＋</span><strong>{OPTIONS.find(o=>o.id===id)?.title}</strong><small>Adicionar ao perfil</small></button>)}
-      <button type="button" onClick={()=>setShowLibrary(true)}><span aria-hidden="true">＋</span><strong>Outros componentes</strong><small>Escolher da biblioteca</small></button>
+    <div className="bo-p5-grid bo-ec-supporting-grid" aria-label="Outros cartões da Persona">
+      {supportingCards.map(renderCard)}
+      {(['channels','quote','needs'] as PersonaVisualCardId[]).filter(id=>available.some(opt=>opt.id===id)).slice(0,2).map(id=>
+        <button className="bo-ec-compact-add" type="button" key={id} onClick={()=>add(id)}>
+          <span aria-hidden="true">＋</span><strong>{OPTIONS.find(item=>item.id===id)?.title}</strong>
+        </button>)}
+      <button type="button" className="bo-ec-compact-add" onClick={()=>setShowLibrary(true)}>
+        <span aria-hidden="true">＋</span><strong>Adicionar componente</strong>
+      </button>
     </div>
-    <p className="bo-p5-hint">Clique para editar os cartões. Arraste ⠿ para ordenar; passe o mouse na borda e arraste ⋮⋮ para expandir ou reduzir. Salvo apenas neste navegador.</p>
+    <p className="bo-ec-compact-help">Arraste ⠿ para reorganizar · Redimensione pela borda ⋮⋮ · Salvo neste dispositivo</p>
   </div>;
 }
