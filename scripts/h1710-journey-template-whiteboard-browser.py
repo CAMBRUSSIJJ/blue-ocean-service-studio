@@ -39,7 +39,9 @@ def create_from_project_template(page, template, project):
     page.get_by_label('Nome do projeto', exact=True).fill(project)
     page.get_by_label('Serviço principal', exact=True).fill(project + ' serviço')
     page.get_by_role('button', name='Criar projeto', exact=True).click()
-    expect(page.locator('[data-journey-library="1"]')).to_be_visible()
+    expect(page.get_by_role('heading', name='Visão geral do projeto', exact=True)).to_be_visible()
+    page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
+    expect(page.locator('[data-service-map-library]')).to_be_visible()
 
 def deletion_and_whiteboard(page):
     create_from_project_template(page, 'Redesenho de serviço', 'QA Redesenho')
@@ -50,7 +52,7 @@ def deletion_and_whiteboard(page):
           'Template scaffolds do not fabricate customer actions')
 
     expect(page.locator('[data-blue-ocean-whiteboard-nav="standard"]')).to_be_visible()
-    check(page.locator('[data-project-context-nav]').count() == 0, 'No duplicate project tab navigation')
+    check(page.locator('main [data-project-context-nav]').count() == 0, 'No duplicate project tab navigation')
     expect(page.locator('[data-journey-library="1"]')).to_be_visible()
     check(page.locator('.bo-h722-journey-delete').count() == 2,
           'Journey card library exposes delete action for each Journey')
@@ -85,7 +87,9 @@ def library_templates(page):
     page.get_by_label('Nome do projeto', exact=True).fill('QA Templates')
     page.get_by_label('Serviço principal', exact=True).fill('QA Modelos')
     page.get_by_role('button', name='Criar projeto', exact=True).click()
-    expect(page.locator('[data-journey-library="1"]')).to_be_visible()
+    expect(page.get_by_role('heading', name='Visão geral do projeto', exact=True)).to_be_visible()
+    page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
+    expect(page.locator('[data-service-map-library]')).to_be_visible()
     page.get_by_role('button', name='Templates', exact=True).click()
     expect(page.locator('[data-workspace-page="templates"]')).to_be_visible()
     row = page.locator('[data-workspace-page="templates"] tbody tr').filter(has_text='Journey map — Discovery')
