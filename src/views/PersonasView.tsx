@@ -375,7 +375,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       <div className="bo-h71-detail-body">
         {detailTab === 'overview' && <div className="bo-h724-overview-layout">
           <main className="bo-h724-overview-main">
-            <PersonaVisualEditor key={selected.id} draft={draft} onChange={setDraft}
+            <PersonaVisualEditor key={selected.id} draft={draft} onChange={setDraft} legacyDefaultCards={!Array.isArray(selected.personaVisualCards)}
               counts={{ need:completenessReport.connectionCounts.need, pain:completenessReport.connectionCounts.pain,
                 evidence:evidenceConnections.length, related:connectedIds.length }}
               onNavigate={setDetailTab}/>
