@@ -55,7 +55,9 @@ def project(page):
     page.get_by_label('Nome do projeto', exact=True).fill('Projeto — experiência validada')
     page.get_by_label('Serviço principal', exact=True).fill('Atendimento ao cliente')
     page.get_by_role('button', name='Criar projeto', exact=True).click()
-    expect(page.locator('[data-journey-library="1"]')).to_be_visible()
+    expect(page.get_by_role('heading', name='Visão geral do projeto', exact=True)).to_be_visible()
+    page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
+    expect(page.locator('[data-service-map-library]')).to_be_visible()
 
 
 def create_journey(page):
@@ -79,8 +81,8 @@ def aligned(page, selector):
 def desktop(page):
     enter(page)
     project(page)
-    pane = page.locator('[data-journey-library="1"]')
-    check('Estado vazio tem uma ação principal e dispensa filtros', pane.get_by_role('button', name='Começar mapa', exact=True).count() == 1 and pane.get_by_role('textbox').count() == 0)
+    pane = page.locator('[data-service-map-library]')
+    check('Estado vazio tem uma ação principal sem mapas duplicados', pane.get_by_role('button', name='Começar mapa', exact=True).count() == 1 and pane.locator('[data-service-map-card]').count() == 0)
     audit(page, 'biblioteca-desktop')
     page.locator('[data-rt-collab-nav="1"]').first.click()
     expect(page.locator('#rt1101-collaboration')).to_be_visible()
