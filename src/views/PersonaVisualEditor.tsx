@@ -135,8 +135,10 @@ export function PersonaVisualEditor({draft,onChange,counts,onNavigate,legacyDefa
     if(id==='relations')return counts.related>0;
     return false;
   };
-  const visibleCards=cards.filter(c=>!legacyDefaultCards||!optional.has(c.id)||hasContent(c.id)||revealed.includes(c.id));
-  const available=OPTIONS.filter(x=>!visibleCards.some(c=>c.id===x.id));
+  // Relationship management has one canonical entry: the linked graph above,
+  // with the dedicated Relations tab for full details. Keep legacy card data.
+  const visibleCards=cards.filter(c=>c.id!=='relations'&&(!legacyDefaultCards||!optional.has(c.id)||hasContent(c.id)||revealed.includes(c.id)));
+  const available=OPTIONS.filter(x=>x.id!=='relations'&&!visibleCards.some(c=>c.id===x.id));
   return <div className={`bo-p5-editor bo-ec-editor bo-ec-theme-${theme}`} data-persona-visual-editor="1" data-entity-canvas="persona">
     <header className="bo-p5-toolbar">
       <div><span>ENTITY CANVAS</span><h2>Construa o perfil visualmente</h2><p>Clique no conteúdo para editar · arraste para organizar · redimensione pelas bordas.</p></div>
