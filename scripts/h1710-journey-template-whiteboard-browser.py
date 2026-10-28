@@ -90,6 +90,9 @@ def library_templates(page):
     expect(page.get_by_role('heading', name='Visão geral do projeto', exact=True)).to_be_visible()
     page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
     expect(page.locator('[data-service-map-library]')).to_be_visible()
+    # H3.3 sidebar groups can start collapsed; expand Organizar to reach Templates.
+    if not page.get_by_role('button', name='Templates', exact=True).is_visible():
+        page.locator('[data-sidebar-section="management"] .bo-h740h14-section-toggle').click()
     page.get_by_role('button', name='Templates', exact=True).click()
     expect(page.locator('[data-workspace-page="templates"]')).to_be_visible()
     row = page.locator('[data-workspace-page="templates"] tbody tr').filter(has_text='Journey map — Discovery')
