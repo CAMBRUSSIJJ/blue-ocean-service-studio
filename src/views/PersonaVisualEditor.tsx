@@ -43,7 +43,7 @@ function ListTextEditor({label,value,placeholder,onChange}: {label:string;value:
   // Keep trailing newlines while typing; normalized domain arrays alone cannot represent them.
   const [raw,setRaw]=useState(value.join('\n'));
   return <label className="bo-p5-field"><span>Um item por linha</span>
-    <textarea aria-label={label} rows={3} value={raw} placeholder={placeholder}
+    <textarea aria-label={label} rows={2} value={raw} placeholder={placeholder}
       onChange={e=>{setRaw(e.target.value);onChange(e.target.value.split(/\n|,/).map(v=>v.trim()).filter(Boolean))}}/>
   </label>;
 }
@@ -88,10 +88,10 @@ export function PersonaVisualEditor({draft,onChange,counts,onNavigate,legacyDefa
   const listField=(id:ListField,placeholder:string)=><ListTextEditor label={OPTIONS.find(o=>o.id===id)?.title??id}
     value={draft[id]} placeholder={placeholder} onChange={items=>update({[id]:items} as Partial<PersonaProfileDraft>)}/>;
   const textField=(key:'context'|'primaryGoal'|'situation'|'quote',label:string,placeholder:string)=><label className="bo-p5-field"><span>{label}</span>
-    <textarea aria-label={label} rows={3} value={draft[key]} placeholder={placeholder} onChange={e=>update({[key]:e.target.value})}/></label>;
+    <textarea aria-label={label} rows={2} value={draft[key]} placeholder={placeholder} onChange={e=>update({[key]:e.target.value})}/></label>;
   const body=(id:PersonaVisualCardId)=>{
     if(id==='identity')return <div className="bo-p5-identity-body">
-      <label className="bo-p5-field"><span>Resumo da Persona</span><textarea aria-label="Resumo da Persona" rows={3} value={draft.description} onChange={e=>update({description:e.target.value})} placeholder="Quem é essa pessoa neste serviço?"/></label>
+      <label className="bo-p5-field"><span>Resumo da Persona</span><textarea aria-label="Resumo da Persona" rows={2} value={draft.description} onChange={e=>update({description:e.target.value})} placeholder="Quem é essa pessoa neste serviço?"/></label>
     </div>;
     if(id==='portrait')return <div className="bo-p5-portrait">
       {draft.imageUrl&&<img src={draft.imageUrl} alt="Imagem ilustrativa da Persona" loading="lazy" referrerPolicy="no-referrer"/>}
@@ -141,8 +141,11 @@ export function PersonaVisualEditor({draft,onChange,counts,onNavigate,legacyDefa
   // with the dedicated Relations tab for full details. Keep legacy card data.
   const visibleCards=cards.filter(c=>c.id!=='relations'&&(!legacyDefaultCards||!optional.has(c.id)||hasContent(c.id)||revealed.includes(c.id)));
   const available=OPTIONS.filter(x=>x.id!=='relations'&&!visibleCards.some(c=>c.id===x.id));
-  const coreCards=visibleCards.filter(card=>card.id==='identity'||card.id==='goal');
-  const supportingCards=visibleCards.filter(card=>card.id!=='identity'&&card.id!=='goal'&&card.id!=='portrait');
+  const orderedCards=visibleCards.filter(card=>card.id!=='portrait');
+  // First two visible cards occupy the main workspace; drag-and-drop may change
+  // those slots rather than updating an order invisible to the user.
+  const coreCards=orderedCards.slice(0,2);
+  const supportingCards=orderedCards.slice(2);
   const renderCard=(card:PersonaVisualCard)=>{
     const meta=OPTIONS.find(x=>x.id===card.id);
     if(!meta)return null;
