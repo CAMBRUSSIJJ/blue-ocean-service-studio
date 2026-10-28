@@ -60,7 +60,7 @@ try:
   check('Stage insertion preserves the previous card placement',frame(page).evaluate('(id)=>S.c["ev|2"].some(note=>note.i===id)',artifact))
   add(f,'customer-action','Pedir horário');customer=card_id(page,'Pedir horário');add(f,'channel','WhatsApp');channel=card_id(page,'WhatsApp')
   check('Customer action and channel use canonical service records',bool(graph(page)['entities']['customerAction']) and bool(graph(page)['entities']['channel']))
-  f.locator('[data-act="cad-add"][data-kind="emotion"]').click();form=f.locator('#cad-quick-form');form.locator('[name=emotionScore]').select_option('-1');form.locator('[name=emotionNote]').fill('Demora na confirmação');form.get_by_role('button',name='Criar cartão',exact=True).click();saved(f)
+  f.locator('[data-act="cad-add"][data-kind="emotion"]').click();form=f.locator('#cad-quick-form');form.locator('[name=emotionScore]').select_option('-1');form.locator('[name=emotionNote]').fill('Demora na confirmação');form.get_by_role('button',name='Salvar emoção',exact=True).click();saved(f)
   g=graph(page);sid=g['journeys'][jid]['stageIds'][0];check('Emotion is recorded on the current canonical stage',g['stages'][sid]['emotionScore']==-1 and g['stages'][sid]['emotionRecorded'])
   add(f,'thought','Será que tem horário?');add(f,'need','Atendimento rápido');add(f,'pain','Espera pela resposta');add(f,'opportunity','Confirmar por mensagem');check('Additional experience cards can be created without operational forms')
   # Refit after revealing additional lanes before dragging between blocks.
@@ -68,6 +68,9 @@ try:
   check('Cards move between stage and operational blocks with stable identity',frame(page).evaluate('(id)=>(S.c["bk|1"]||[]).some(note=>note.i===id)',activity))
   f.get_by_role('button',name='Desfazer',exact=True).click();saved(f);check('Drag supports undo',frame(page).evaluate('(id)=>(S.c["fl|0"]||[]).some(note=>note.i===id)',activity));f.get_by_role('button',name='Refazer',exact=True).click();saved(f)
   # Context menu creates a connection directly, without a properties sidebar.
+  # Restore the full canvas viewport after moving the card into backstage.
+  # SVG nodes cannot be clicked while outside the visible camera area.
+  f.get_by_role('button',name='Ajustar',exact=True).click()
   f.locator(f'.cad-node[data-id="{customer}"]').click(button='right');f.get_by_role('button',name='Conectar a outro cartão',exact=True).click();f.locator(f'.cad-node[data-id="{activity}"]').click();saved(f)
   check('Right-click and target click create a connection without the sidebar',len(graph(page)['journeys'][jid]['matrixContent']['connections'])==1 and f.locator('#cad-link-form').count()==0)
   f.locator(f'[data-act="cad-connect"][data-id="{activity}"]').focus();f.locator(f'[data-act="cad-connect"][data-id="{activity}"]').press('Enter');f.locator(f'.cad-node[data-id="{channel}"]').click();saved(f);check('Connection handle supports keyboard activation',len(graph(page)['journeys'][jid]['matrixContent']['connections'])==2)
@@ -77,6 +80,7 @@ try:
   f.get_by_role('button',name='Refazer',exact=True).click();saved(f);expect(f.locator('[data-cad-view]')).to_have_value('journey');check('Redo restores content while keeping the chosen visualization',len(graph(page)['journeys'][jid]['matrixContent']['connections'])==2)
   f.locator('[data-cad-view]').select_option('blueprint');saved(f)
   page.screenshot(path=str(OUT/'desktop.png'),animations='disabled');audit(page,'desktop')
+  f.get_by_role('button',name='Ajustar',exact=True).click()  # Reframe after switching perspectives.
   f.locator(f'.cad-node[data-id="{activity}"]').click(button='right');f.get_by_role('button',name='Detalhes opcionais',exact=True).click();expect(f.locator('.cad-inspector')).to_be_visible();check('Advanced properties are optional and explicitly requested');f.get_by_role('button',name='Fechar detalhes',exact=True).click()
   # One canonical map and real lane previews survive returning to the library.
   f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click();expect(page.locator('[data-service-map-card]')).to_have_count(1);check('Library shows one map instead of duplicate perspectives',page.locator('[data-service-map-card] button.bo-h722-open').count()==1)
@@ -89,7 +93,9 @@ try:
   page.set_viewport_size({'width':834,'height':1000});expect(f.locator('#cad-svg')).to_be_visible();audit(page,'tablet');page.screenshot(path=str(OUT/'tablet.png'),animations='disabled')
   page.set_viewport_size({'width':1600,'height':1000});drag_palette(f,'channel','ch',0);quick(f,'E-mail');check('Drop in the first stage stays there after another stage was in focus',frame(page).evaluate('()=>S.c["ch|0"].some(note=>note.t==="E-mail")'))
   add(f,'persona','Cliente A');add(f,'persona','Cliente B');f.locator('[data-cad-persona]').select_option(label='Cliente A');saved(f);check('Selecting a Persona does not copy the generic emotion',frame(page).evaluate('()=>S.steps[0].emotionRecorded===false'))
-  emotion_id=frame(page).evaluate('()=>S.c["em|0"].find(note=>note.canvas?.kind==="emotion").i');f.get_by_role('button',name='Ajustar',exact=True).click();f.locator(f'.cad-node[data-id="{emotion_id}"]').click();form=f.locator('#cad-quick-form');form.locator('[name=emotionScore]').select_option('-2');form.get_by_role('button',name='Salvar',exact=True).click();saved(f)
+  # Persona observations are isolated: an emotion on the generic map is not a card on Cliente A.
+  # Create the observation for Cliente A instead of trying to edit the generic card.
+  f.locator('[data-act="cad-add"][data-kind="emotion"]:visible').click();form=f.locator('#cad-quick-form');form.locator('[name=emotionScore]').select_option('-2');form.get_by_role('button',name='Salvar emoção',exact=True).click();saved(f)
   f.locator('[data-cad-persona]').select_option(label='Cliente B');saved(f);check('Emotions remain isolated between Personas',frame(page).evaluate('()=>S.steps[0].emotionRecorded===false'))
   f.locator('[data-cad-persona]').select_option(label='Cliente A');saved(f);check('Returning to a Persona restores its own observation',frame(page).evaluate('()=>S.steps[0].emotionRecorded===true&&S.steps[0].e===-2'))
   check('No JavaScript errors',not errors);browser.close()

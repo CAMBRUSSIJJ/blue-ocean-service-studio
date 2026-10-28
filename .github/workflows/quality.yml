@@ -106,6 +106,12 @@ jobs:
       - name: Canvas do Blueprint — escrita repetida e edição
         run: npm run blueprint:canvas:browser
       - run: npm run maps:flow:browser
+      # Check startup/product navigation early to fail fast on stale legacy routes.
+      - run: npm run entry:browser
+      - run: npm run product:browser
+      - run: npm run maps:browser
+      - name: Verificar Jornada, modelos e Whiteboard no Chromium
+        run: python3 scripts/h1710-journey-template-whiteboard-browser.py
       - run: npm run journey:selector:browser
       - run: npm run journey:observation:browser
       - run: npm run maps:ux:browser
@@ -126,11 +132,6 @@ jobs:
       - run: npm run journey:context:browser
       - run: npm run journey:cards:browser
       - run: npm run maps:matrix:browser
-      - run: npm run entry:browser
-      - run: npm run product:browser
-      - run: npm run maps:browser
-      - name: Verificar Jornada, modelos e Whiteboard no Chromium
-        run: python3 scripts/h1710-journey-template-whiteboard-browser.py
       - name: Armazenar evidências dos editores
         if: always()
         uses: actions/upload-artifact@v4
