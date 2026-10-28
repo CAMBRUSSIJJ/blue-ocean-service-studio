@@ -6,13 +6,13 @@ import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
 import { PersonaVisualEditor } from './PersonaVisualEditor';
+import { QuickEntityCreateDialog } from '../components/QuickEntityCreateDialog';
+import './persona-inline.css';
 import { PersonaEvidenceTrace } from './PersonaEvidenceTrace';
 import { createDiscoveryEntity } from '../services/discovery-workspace';
 import { contextEntityTitle, contextEntityUsage, listContextEntities } from '../services/context-library';
 import {
-  ADVANCED_PERSONA_SECTIONS,
   SIMPLE_PERSONA_SECTIONS,
-  switchPersonaDepth,
   visiblePersonaSections,
   buildPersonaStudioReport,
   personaProfileFromEntity,
@@ -146,9 +146,6 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [createTitle, setCreateTitle] = useState('');
-  const [createDescription, setCreateDescription] = useState('');
-  const [createMode, setCreateMode] = useState<PersonaDepth>('simple');
-  const [createSections, setCreateSections] = useState<PersonaSectionId[]>([...SIMPLE_PERSONA_SECTIONS]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const selected = selectedId ? graph.entities?.persona?.[selectedId] : undefined;
@@ -269,65 +266,49 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setMenuId(null); };
   const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
 
-  const chooseCreateMode = (mode: PersonaDepth) => {
-    setCreateMode(mode);
-    setCreateSections(mode === 'professional' ? [...ADVANCED_PERSONA_SECTIONS] : [...SIMPLE_PERSONA_SECTIONS]);
-  };
-
-  const createPersona = () => {
-    if (!createTitle.trim()) return;
+  const createPersona = (title: string, context: string) => {
+    if (!title.trim()) return;
     const now = new Date().toISOString();
-    const baseEntity = createDiscoveryEntity({ graph, kind: 'persona', title: createTitle, description: createDescription, now });
-    const entity = { ...baseEntity, personaMode: createMode, personaLayout: 'profile-left' as PersonaLayout, personaSections: [...new Set(createSections)] };
+    const baseEntity = createDiscoveryEntity({ graph, kind: 'persona', title, description: context, now });
+    const entity = { ...baseEntity, personaMode: 'simple' as PersonaDepth, personaLayout: 'profile-left' as PersonaLayout,
+      personaSections: [...SIMPLE_PERSONA_SECTIONS],
+      personaVisualCards: [{id:'identity',width:'full'},{id:'goal',width:'half'},{id:'situation',width:'half'}] };
     setGraph((current) => ({
       ...current,
       service: { ...current.service, updatedAt: now },
       entities: { ...current.entities, persona: { ...(current.entities?.persona ?? {}), [entity.id]: entity } },
-    }), 'Personas 2.0: criar');
-    setCreateOpen(false); setCreateTitle(''); setCreateDescription('');
-    setCreateMode('simple'); setCreateSections([...SIMPLE_PERSONA_SECTIONS]);
-    setSelectedId(entity.id); setDetailTab(createMode === 'professional' ? 'behavior' : 'overview');
-    showToast('Persona criada. Complete o perfil e salve.');
+    }), 'Personas: criar');
+    setCreateOpen(false); setCreateTitle('');
+    setSelectedId(entity.id); setDetailTab('overview');
+    showToast('Persona criada. Edite diretamente no perfil.');
   };
 
   const cancelCreate = () => {
-    if ((createTitle.trim() || createDescription.trim()) && !window.confirm('Descartar as informações ainda não salvas?')) return;
     setCreateOpen(false);
     setCreateTitle('');
-    setCreateDescription('');
-    chooseCreateMode('simple');
   };
 
-  const savePersona = () => {
-    if (!selectedId || !draft?.title.trim()) return;
-    const effectiveDraft = draft;
-    const tags = stringList([tagsText, tagEntry].filter(Boolean).join(','));
-    setGraph((current) => patchPersonaMeta(
-      updatePersonaProfile({ graph: current, personaId: selectedId, draft: effectiveDraft, connectedIds }),
-      selectedId,
-      owner,
-      tags,
-    ), 'Personas 2.0: salvar');
-    setDraft(effectiveDraft);
-    setTagsText(tags.join(', '));
-    setTagEntry('');
-    showToast('Persona salva.');
-  };
+  // Apply edits to the canonical graph after a quiet typing interval.
+  // The existing project-level storage handles local persistence and backups.
+  useEffect(() => {
+    if (!selectedId || !selected || !draft || !draft.title.trim()) return;
+    const saved = personaProfileFromEntity(selected);
+    const oldTags = Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '';
+    const oldConnections = report?.connections.map(item => item.id).sort() ?? [];
+    const changed = JSON.stringify(draft) !== JSON.stringify(saved)
+      || owner !== String(selected.owner ?? '')
+      || tagsText !== oldTags
+      || JSON.stringify([...connectedIds].sort()) !== JSON.stringify(oldConnections);
+    if (!changed) return;
+    const timer = window.setTimeout(() => {
+      const currentTags = stringList(tagsText);
+      setGraph((current) => patchPersonaMeta(updatePersonaProfile({
+        graph: current, personaId: selectedId, draft, connectedIds,
+      }), selectedId, owner, currentTags), 'Persona: autosave');
+    }, 850);
+    return () => window.clearTimeout(timer);
+  }, [selectedId, selected?.updatedAt, draft, owner, tagsText, connectedIds]);
 
-  const discardPersona = () => {
-    if (!selected || !report) return;
-    setDraft(personaProfileFromEntity(selected));
-    setOwner(String(selected.owner ?? ''));
-    setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
-    setTagEntry('');
-    setConnectedIds(report.connections.map((item) => item.id));
-    showToast('Alterações descartadas.');
-  };
-
-  const changeDetailMode = (mode: PersonaDepth) => {
-    setDraft(current => current ? switchPersonaDepth(current, mode) : current);
-    if (mode === 'simple' && ['behavior','decisions','barriers'].includes(detailTab)) setDetailTab('overview');
-  };
   const activeDetailSections = draft ? visiblePersonaSections(draft) : [];
 
   const removePersona = (id: string) => {
@@ -368,8 +349,8 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     return <section className={`bo-h71-persona-detail bo-h713-layout-${draft.layout}`} data-personas-h71="detail">
       <header className="bo-h71-detail-head bo-h724-detail-head">
         <button type="button" className="bo-h71-back" onClick={closePersona}><ArrowLeft size={16}/> Personas</button>
-        <div className="bo-h71-detail-title bo-h724-detail-title"><span className="bo-h71-avatar bo-h724-avatar"><UserRound size={20}/></span><div><small>PERSONA</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Complete o perfil para documentar quem vive essa experiência.'}</p><div className="bo-h724-persona-meta"><span className="mode">{draft.mode === 'professional' ? 'Persona avançada' : 'Persona simples'}</span>{visibleTags.map((tag) => <span key={tag}>{tag}</span>)}{tagValues.length > visibleTags.length && <span>+{tagValues.length - visibleTags.length}</span>}</div></div></div>
-        <div className="bo-h724-detail-tools"><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Alterações pendentes' : 'Tudo salvo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
+        <div className="bo-h71-detail-title bo-h724-detail-title"><span className="bo-h71-avatar bo-h724-avatar"><UserRound size={20}/></span><div><small>PERSONA</small><h1><input className="bo-p6-title-input" aria-label="Nome da Persona" value={draft.title} onChange={e=>setDraft({...draft,title:e.target.value})} placeholder="Nome da Persona"/></h1><p>{draft.description || 'Clique no bloco Resumo para descrever esta persona.'}</p><div className="bo-h724-persona-meta">{visibleTags.map((tag) => <span key={tag}>{tag}</span>)}{tagValues.length > visibleTags.length && <span>+{tagValues.length - visibleTags.length}</span>}</div></div></div>
+        <div className="bo-h724-detail-tools"><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Salvando alterações…' : 'Salvo neste dispositivo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
       </header>
 
       <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Persona">
@@ -384,7 +365,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
         <div><h2>Como deseja visualizar esta Persona?</h2><p>Altere a apresentação sem apagar informações já preenchidas.</p></div>
         <fieldset><legend>Layout</legend><div className="bo-p2-customize-options">{layoutLabels.map(([id,label])=><button type="button" key={id} aria-pressed={draft.layout===id} onClick={()=>setDraft({...draft,layout:id})}>{label}</button>)}</div></fieldset>
         <fieldset><legend>Blocos do perfil</legend><div className="bo-p2-customize-blocks">{personaCustomSections.filter(item=>draft.mode==='professional'||!['bio','behaviors','expectations','constraints','triggers','alternatives','relations'].includes(item.id)).map(item=><label key={item.id}><input type="checkbox" disabled={item.id==='identity'} checked={activeDetailSections.includes(item.id)} onChange={(e)=>setDraft({...draft,sections:e.target.checked?[...new Set([...draft.sections,item.id])]:draft.sections.filter(x=>x!==item.id)})}/>{item.label}</label>)}</div></fieldset>
-        <p className="bo-p2-customize-tip">Use “Salvar alterações” ao terminar. Ocultar um bloco não exclui seus dados.</p>
+        <p className="bo-p2-customize-tip">Os ajustes no perfil são salvos automaticamente neste dispositivo. Ocultar um bloco não exclui seus dados.</p>
       </section>}
 
       {draft.mode === 'professional' && <div className="bo-p4-advanced-guide" role="status">
@@ -394,15 +375,22 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       <div className="bo-h71-detail-body">
         {detailTab === 'overview' && <div className="bo-h724-overview-layout">
           <main className="bo-h724-overview-main">
-            <PersonaVisualEditor draft={draft} onChange={setDraft} onChangeMode={changeDetailMode}
+            <PersonaVisualEditor key={selected.id} draft={draft} onChange={setDraft} legacyDefaultCards={!Array.isArray(selected.personaVisualCards)}
               counts={{ need:completenessReport.connectionCounts.need, pain:completenessReport.connectionCounts.pain,
                 evidence:evidenceConnections.length, related:connectedIds.length }}
               onNavigate={setDetailTab}/>
           </main>
-          <aside className="bo-h724-overview-aside">
-            <section className="bo-h724-completeness-card"><header><div><small>COMPLETUDE</small><strong>{completeness}%</strong></div><span>{draft.mode === 'professional' ? 'Avançada' : 'Simples'}</span></header><i><b style={{ width: `${completeness}%` }}/></i><div className="bo-h71-check-list bo-h724-check-list">{completenessChecks.map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span>{check.label}</span></div>)}</div></section>
-            <section className="bo-h724-organization-card"><header><small>ORGANIZAÇÃO</small><strong>Responsabilidade e tags</strong></header><label><span>Responsável</span><div className="bo-h724-owner-field"><UserRound size={14}/><input list="bo-h724-owner-options" value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></div><datalist id="bo-h724-owner-options">{ownerSuggestions.map((item) => <option key={item} value={item}/>)}</datalist></label><div className="bo-h724-tags-field"><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map((tag) => <button key={tag} type="button" className="bo-h724-chip" onClick={() => removeTag(tag)}>{tag}<X size={11}/></button>)}<input value={tagEntry} onChange={(event) => setTagEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addTag(); } }} placeholder={tagValues.length ? 'Adicionar tag…' : 'Ex.: B2C'}/></div></div></section>
-            <section className="bo-h724-context-card"><small>BASE ATUAL</small><strong>{connectedIds.length} conexões</strong><p>{evidenceConnections.length} evidência(s) · {usage.instances} instância(s) visual(is)</p><button type="button" onClick={() => setDetailTab('relations')}>Ver relações</button></section>
+          <aside className="bo-h724-overview-aside bo-p6-aside">
+            <section className="bo-p6-progress"><header><small>FORÇA DO PERFIL</small><strong>{completeness}%</strong></header><i><b style={{ width: `${completeness}%` }}/></i>
+              <p>A completude mede o preenchimento, não a validação. Evidências continuam necessárias.</p>
+              <div className="bo-p6-next-steps">{completenessChecks.filter(check=>!check.complete).slice(0,3).map(check=><button type="button" key={check.id} onClick={()=>{setDetailTab('overview');window.setTimeout(()=>document.querySelector('[data-persona-visual-card="goal"]')?.scrollIntoView({behavior:'smooth',block:'center'}),30)}}>{check.label} <span>→</span></button>)}</div>
+            </section>
+            <details className="bo-p6-metadata"><summary>Organização e etiquetas</summary><div>
+              <label><span>Responsável</span><input list="bo-p6-owner-options" value={owner} onChange={event=>setOwner(event.target.value)} placeholder="Nome ou papel"/></label>
+              <datalist id="bo-p6-owner-options">{ownerSuggestions.map(item=><option key={item} value={item}/>)}</datalist>
+              <label><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map(tag=><button key={tag} type="button" className="bo-h724-chip" onClick={()=>removeTag(tag)}>{tag}<X size={11}/></button>)}<input value={tagEntry} onChange={e=>setTagEntry(e.target.value)} onBlur={()=>{if(tagEntry.trim())addTag()}} onKeyDown={e=>{if(e.key==='Enter'||e.key===','){e.preventDefault();addTag()}}} placeholder="Adicionar etiqueta"/></div></label>
+              <p>{connectedIds.length} conexões · {evidenceConnections.length} evidências · {usage.instances} usos no serviço</p>
+            </div></details>
           </aside>
         </div>}
 
@@ -442,60 +430,11 @@ export function PersonasView({ studio }: { studio: StudioController }) {
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="persona" id={selected.id} title="Uso e relações" />}
       </div>
 
-      <footer className="bo-h71-detail-actions bo-h724-detail-actions"><div className="bo-h724-save-state"><b className={isDirty ? 'is-dirty' : 'is-saved'}/><span>{isDirty ? 'Alterações ainda não salvas' : 'Todas as alterações estão salvas'}</span></div><span/><button type="button" disabled={!isDirty} onClick={discardPersona}>Descartar</button><button type="button" className="primary" disabled={!draft.title.trim() || !isDirty} onClick={savePersona}>Salvar alterações</button></footer>
+      <p className="bo-p6-local-note" role="status">{isDirty ? 'As alterações serão salvas neste navegador após uma pausa na edição.' : 'Perfil registrado neste dispositivo. Faça backup regularmente.'}</p>
 
       {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER PERSONA</small><h2>Remover “{contextEntityTitle(graph.entities?.persona?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações com Necessidades, Jobs, Dores, Hipóteses e Evidências serão desvinculadas. Esta ação pode ser desfeita pelo histórico da aplicação.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removePersona(deleteId)}>Remover Persona</button></footer></div></div>}
     </section>;
   }
-
-  if (createOpen) return <section className="bo-p2-create-page" data-personas-h71="create">
-    <header className="bo-p2-header">
-      <button type="button" className="bo-p2-back" onClick={cancelCreate}><ArrowLeft size={16}/> Voltar para Personas</button>
-      <span>PUBLICO-ALVO / PERSONAS / CRIAR</span>
-    </header>
-    <form className="bo-p2-create-form" onSubmit={(event) => { event.preventDefault(); createPersona(); }}>
-      <div className="bo-p2-title"><small>CRIAÇÃO DE PERSONA</small><h1>Criar Persona</h1>
-        <p>Comece com as informações essenciais. Você poderá aprofundar a pesquisa e personalizar os blocos depois.</p></div>
-      <div className="bo-p2-create-grid">
-        <main className="bo-p2-create-main">
-          <section className="bo-p2-section">
-            <span className="bo-p2-step">01 · IDENTIFICAÇÃO</span>
-            <h2>Como vamos reconhecer esta pessoa?</h2>
-            <label htmlFor="bo-p2-name">Nome da Persona <strong>Obrigatório</strong></label>
-            <input id="bo-p2-name" autoFocus required maxLength={140} value={createTitle} onChange={(event) => setCreateTitle(event.target.value)}
-              placeholder="Ex.: Profissional que mora sozinho"/>
-            <label htmlFor="bo-p2-description">Resumo <small>Opcional</small></label>
-            <textarea id="bo-p2-description" rows={4} maxLength={2000} value={createDescription}
-              onChange={(event) => setCreateDescription(event.target.value)} placeholder="Quem é essa pessoa, em que contexto utiliza o serviço e por que é relevante?"/>
-          </section>
-          <section className="bo-p2-section">
-            <span className="bo-p2-step">02 · PROFUNDIDADE</span><h2>Como deseja começar?</h2>
-            <div className="bo-p2-modes" role="group" aria-label="Profundidade da Persona">
-              <button type="button" className={createMode === 'simple' ? 'is-selected' : ''} aria-pressed={createMode === 'simple'} onClick={() => chooseCreateMode('simple')}><strong>Simples</strong><span>Identidade, objetivo, situação, canais e necessidades. Ideal para começar.</span></button>
-              <button type="button" className={createMode === 'professional' ? 'is-selected' : ''} aria-pressed={createMode === 'professional'} onClick={() => chooseCreateMode('professional')}><strong>Avançada</strong><span>Adiciona comportamento, expectativas, restrições, alternativas e mais conexões.</span></button>
-            </div>
-            <div className="bo-p4-create-explainer" aria-live="polite">
-              {createMode === 'professional' ? <>
-                <strong>Persona Avançada selecionada</strong>
-                <p>Após criar, você entrará na área de Comportamento. Também poderá pesquisar Decisões e Barreiras, além de conectar Evidências.</p>
-                <span>Comportamentos · Expectativas · Gatilhos · Alternativas · Restrições</span>
-              </> : <>
-                <strong>Persona Simples selecionada</strong><p>Comece com identidade, situação e objetivo. Você poderá ativar a pesquisa avançada depois sem perder informações.</p>
-              </>}
-            </div>
-          </section>
-          <footer className="bo-p2-actions"><button type="button" onClick={cancelCreate}>Cancelar</button>
-            <button className="primary" type="submit" disabled={!createTitle.trim()}>Criar Persona e continuar <span aria-hidden="true">→</span></button>
-          </footer>
-        </main>
-        <aside className="bo-p2-create-aside">
-          <div className="bo-p2-help-card"><strong>Construa progressivamente</strong><p>Você só precisa de um nome para começar. Depois de criar, poderá completar objetivos, relações e evidências sem perder o contexto.</p>
-            <div><span>✓</span> Informações essenciais</div><div><span>✓</span> Salvar e editar no próprio perfil</div><div><span>✓</span> Personalizar layout e blocos depois</div></div>
-          <div className="bo-p2-help-note"><strong>Sobre a validação</strong><p>Uma Persona com todos os campos preenchidos não está automaticamente validada. As evidências serão vinculadas durante a pesquisa.</p></div>
-        </aside>
-      </div>
-    </form>
-  </section>;
 
   const hasSearchOrFilter = Boolean(query.trim()) || filter !== 'all' || filterRules.length>0;
   const filters: Array<[FilterMode, string]> = [
@@ -604,6 +543,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       {hasSearchOrFilter ? <button type="button" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar busca e filtros</button> : <button type="button" onClick={() => setCreateOpen(true)}><Plus size={14}/> Criar persona</button>}
     </div>}
 
+    {createOpen && <QuickEntityCreateDialog kind="persona" value={createTitle} onChange={setCreateTitle} onClose={cancelCreate} onCreate={createPersona} />}
     {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER PERSONA</small><h2>Remover “{contextEntityTitle(graph.entities?.persona?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações existentes serão desvinculadas do Service Graph.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removePersona(deleteId)}>Remover Persona</button></footer></div></div>}
   </section>;
 }

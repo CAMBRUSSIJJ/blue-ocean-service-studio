@@ -1,0 +1,22 @@
+/* Shared one-field creation for Persona, Need and Job. */
+.bo-qe-overlay{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:20px;background:rgba(15,23,42,.44)}
+.bo-qe-dialog{width:min(100%,540px);display:grid;gap:13px;padding:24px;background:var(--bo-color-surface,#fff);border:1px solid var(--bo-color-border,#e2e8f0);border-radius:14px;box-shadow:0 18px 64px rgba(15,23,42,.17)}
+.bo-qe-dialog>header{display:flex;align-items:start;justify-content:space-between;gap:15px}
+.bo-qe-dialog>header small{font-size:11px;letter-spacing:.05em;color:var(--bo-color-primary-700,#174fc0);font-weight:700}
+.bo-qe-dialog>header h2{margin:5px 0 2px;font-size:23px;line-height:1.2;color:var(--bo-color-text,#172033);font-weight:750}
+.bo-qe-dialog>header button{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--bo-color-border,#e2e8f0);border-radius:8px;color:var(--bo-color-text-secondary,#475467);background:#fff;cursor:pointer}
+.bo-qe-dialog>label{font-size:14px;font-weight:650;text-align:left;color:var(--bo-color-text,#172033)}
+.bo-qe-dialog>textarea{min-height:72px!important;width:100%!important;padding:12px 13px!important;resize:vertical;border:1px solid var(--bo-color-border-strong,#b8c4d6)!important;border-radius:9px!important;outline:0!important;box-shadow:none!important;background:#fff!important;color:var(--bo-color-text,#172033)!important;font:400 14px/1.5 var(--bo-font-sans,system-ui)!important}
+.bo-qe-dialog>textarea:focus{border-color:var(--bo-color-primary-600,#1e63f0)!important;box-shadow:0 0 0 3px rgba(30,99,240,.12)!important}
+.bo-qe-dialog>textarea[aria-invalid="true"]{border-color:#bb2222!important}
+.bo-qe-dialog>p{margin:0;color:var(--bo-color-text-secondary,#475467);font-size:13px;line-height:1.45}
+.bo-qe-dialog .bo-qe-error{color:#b42318;font-weight:650}
+.bo-qe-parsed{display:grid;gap:3px;padding:11px 13px;border:1px solid #cddaf0;border-radius:9px;background:#f7faff}
+.bo-qe-parsed span{font-size:11px;color:#475467;font-weight:650}
+.bo-qe-parsed strong{font-size:14px;color:#172033}
+.bo-qe-parsed p{font-size:12px;color:#344054;line-height:1.5;margin:0}
+.bo-qe-dialog>footer{display:flex;gap:10px;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--bo-color-border,#e2e8f0)}
+.bo-qe-dialog>footer button{min-height:40px;padding:9px 16px;border:1px solid var(--bo-color-border-strong,#b8c4d6);border-radius:8px;font-size:13px;font-weight:650;background:#fff;color:var(--bo-color-text,#172033);cursor:pointer}
+.bo-qe-dialog>footer button.primary{background:var(--bo-color-primary-600,#1e63f0);color:#fff;border-color:var(--bo-color-primary-600,#1e63f0)}
+.bo-qe-dialog :is(button,textarea):focus-visible{outline:2px solid var(--bo-color-primary-600,#1e63f0);outline-offset:2px}
+@media(max-width:600px){.bo-qe-dialog{padding:18px}.bo-qe-dialog>footer button{flex:1}}
