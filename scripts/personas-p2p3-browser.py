@@ -109,10 +109,16 @@ try:
         library.get_by_role('button',name='Visualizações',exact=False).click()
         library.get_by_role('button',name='Sem evidências QA',exact=True).click()
         check('Saved view restores cards and rule',library.get_attribute('data-persona-view')=='cards' and library.locator('[data-persona-card]').count()==1)
-        page.reload(wait_until='domcontentloaded')
-        if not page.locator('button[aria-label="Personas"]').is_visible():
-            page.locator('[data-sidebar-section="context"] .bo-h740h14-section-toggle').click()
-        page.locator('button[aria-label="Personas"]').click()
+        page.reload(wait_until='networkidle')
+        library=page.locator('[data-personas-h71="library"]')
+        if not library.is_visible():
+            menu=page.locator('[data-sidebar-section="context"] .bo-h740h14-section-toggle')
+            expect(menu).to_be_visible()
+            if menu.get_attribute('aria-expanded') == 'false':
+                menu.click()
+            expect(page.locator('button[aria-label="Personas"]')).to_be_visible()
+            page.locator('button[aria-label="Personas"]').click()
+        expect(library).to_be_visible()
         page.get_by_role('button',name='Visualizações',exact=False).click()
         check('Saved view persists across reload',page.get_by_role('button',name='Sem evidências QA',exact=True).count()==1)
         browser.close()
