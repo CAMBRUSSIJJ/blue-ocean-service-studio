@@ -234,6 +234,10 @@ def desktop(page):
     expect(sidebar).to_have_attribute('data-sidebar-collapsed', '1')
     check('Sidebar stays collapsed after reload', page.get_by_role('button', name='Expandir sidebar', exact=True).is_visible())
     page.get_by_role('button', name='Continuar projeto', exact=True).click()
+    # H3.3 keeps auxiliary project views inside a collapsed disclosure.
+    project_more = page.locator('details.bo-h33-project-more')
+    if project_more.get_attribute('open') is None:
+        project_more.locator('summary').click()
     page.get_by_role('tab', name='Mapas e Whiteboard', exact=True).click()
     page.get_by_role('button', name='Abrir Mapas', exact=True).click()
     page.locator('.bo-h724-journey-card').filter(has_text='Atendimento configurável').get_by_role('button', name='Abrir mapa', exact=True).click()
