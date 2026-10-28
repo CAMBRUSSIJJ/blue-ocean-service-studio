@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import {
-  normalizePersonaVisualCards, personaVisualTemplate,
-  type PersonaDepth, type PersonaProfileDraft, type PersonaVisualCard,
+  normalizePersonaVisualCards, personaVisualTemplate, switchPersonaDepth,
+  type PersonaProfileDraft, type PersonaVisualCard,
   type PersonaVisualCardId, type PersonaVisualWidth,
 } from '../services/persona-studio';
 
 type Props = {
   draft: PersonaProfileDraft;
   onChange: (next: PersonaProfileDraft) => void;
-  onChangeMode: (mode: PersonaDepth) => void;
   counts: { need: number; pain: number; evidence: number; related: number };
   onNavigate: (tab: 'relations' | 'evidence') => void;
 };
@@ -41,9 +40,10 @@ function ListTextEditor({label,value,placeholder,onChange}: {label:string;value:
   </label>;
 }
 
-export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNavigate}: Props) {
+export function PersonaVisualEditor({draft,onChange,counts,onNavigate}: Props) {
   const [showLibrary,setShowLibrary]=useState(false);
   const [dragging,setDragging]=useState<PersonaVisualCardId|null>(null);
+  const [revealed,setRevealed]=useState<PersonaVisualCardId[]>([]);
   const cards=normalizePersonaVisualCards(draft.visualCards,draft.mode);
   const update=(changes:Partial<PersonaProfileDraft>)=>onChange({...draft,...changes});
   const updateCards=(next:PersonaVisualCard[])=>update({visualCards:normalizePersonaVisualCards(next,draft.mode)});
@@ -60,11 +60,15 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
     move(id,cards[target].id);
   };
   const add=(id:PersonaVisualCardId)=>{
-    if(cards.some(card=>card.id===id))return;
-    const section = id !== 'portrait' && id !== 'scale' ? id : null;
-    onChange({...draft,sections:section&&!draft.sections.includes(section)?[...draft.sections,section]:draft.sections,
-      visualCards:normalizePersonaVisualCards([...cards,{id,width:id==='quote'?'full':'half'}],draft.mode)});
+    setRevealed(current=>current.includes(id)?current:[...current,id]);
+    const nextCards=cards.some(card=>card.id===id)?cards:[...cards,{id,width:(id==='quote'?'full':'half') as PersonaVisualWidth}];
+    const advanced=Boolean(OPTIONS.find(opt=>opt.id===id)?.advanced);
+    const next=advanced&&draft.mode==='simple'?switchPersonaDepth(draft,'professional'):draft;
+    const section=id!=='portrait'&&id!=='scale'?id:null;
+    onChange({...next,sections:section&&!next.sections.includes(section)?[...next.sections,section]:next.sections,
+      visualCards:normalizePersonaVisualCards(nextCards,next.mode)});
     setShowLibrary(false);
+    window.setTimeout(()=>document.querySelector('[data-persona-visual-card="'+id+'"]')?.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
   };
   const setWidth=(id:PersonaVisualCardId,width:PersonaVisualWidth)=>updateCards(cards.map(c=>c.id===id?{...c,width}:c));
   const listField=(id:ListField,placeholder:string)=><ListTextEditor label={OPTIONS.find(o=>o.id===id)?.title??id}
@@ -73,12 +77,7 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
     <textarea aria-label={label} rows={3} value={draft[key]} placeholder={placeholder} onChange={e=>update({[key]:e.target.value})}/></label>;
   const body=(id:PersonaVisualCardId)=>{
     if(id==='identity')return <div className="bo-p5-identity-body">
-      <div className="bo-p5-mode-switch bo-h724-depth-switch" role="group" aria-label="Profundidade da Persona">
-        <button type="button" aria-pressed={draft.mode==='simple'} onClick={()=>onChangeMode('simple')}>Simples</button>
-        <button type="button" aria-pressed={draft.mode==='professional'} onClick={()=>onChangeMode('professional')}>Avançada</button>
-      </div>
-      <label className="bo-p5-field"><span>Nome da Persona</span><input aria-label="Nome da Persona" value={draft.title} onChange={e=>update({title:e.target.value})} placeholder="Ex.: Cliente com pouco tempo"/></label>
-      <label className="bo-p5-field"><span>Resumo</span><textarea aria-label="Resumo da Persona" rows={2} value={draft.description} onChange={e=>update({description:e.target.value})} placeholder="Quem é a pessoa neste serviço?"/></label>
+      <label className="bo-p5-field"><span>Resumo da Persona</span><textarea aria-label="Resumo da Persona" rows={3} value={draft.description} onChange={e=>update({description:e.target.value})} placeholder="Quem é essa pessoa neste serviço?"/></label>
     </div>;
     if(id==='portrait')return <div className="bo-p5-portrait">
       {draft.imageUrl&&<img src={draft.imageUrl} alt="Imagem ilustrativa da Persona" loading="lazy" referrerPolicy="no-referrer"/>}
@@ -113,10 +112,22 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
     </div>;
     return null;
   };
-  const available=OPTIONS.filter(x=>!cards.some(c=>c.id===x.id)&&(!x.advanced||draft.mode==='professional'));
+  const optional = new Set<PersonaVisualCardId>(['portrait','bio','needs','quote','channels','behaviors','expectations','constraints','triggers','alternatives','evidence','relations','scale']);
+  const hasContent = (id:PersonaVisualCardId) => {
+    if(id==='portrait')return Boolean(draft.imageUrl);
+    if(id==='quote')return Boolean(draft.quote.trim());
+    if(id==='bio')return Boolean(draft.context.trim());
+    if(id==='channels'||id==='behaviors'||id==='expectations'||id==='constraints'||id==='triggers'||id==='alternatives')return draft[id].length>0;
+    if(id==='needs')return counts.need>0;
+    if(id==='evidence')return counts.evidence>0;
+    if(id==='relations')return counts.related>0;
+    return false;
+  };
+  const visibleCards=cards.filter(c=>!optional.has(c.id)||hasContent(c.id)||revealed.includes(c.id));
+  const available=OPTIONS.filter(x=>!visibleCards.some(c=>c.id===x.id));
   return <div className="bo-p5-editor" data-persona-visual-editor="1">
     <header className="bo-p5-toolbar">
-      <div><span>PERSONA VISUAL</span><h2>Composição do perfil</h2><p>Organize as informações como cartões. A edição acontece diretamente no quadro.</p></div>
+      <div><span>PERFIL EDITÁVEL</span><h2>Edite diretamente no perfil</h2><p>O essencial já está à vista. Acrescente outros blocos à medida que precisar.</p></div>
       <div className="bo-p5-toolbar-actions">
         <div className="bo-p5-template-actions" role="group" aria-label="Modelos de composição">
           <button type="button" onClick={()=>updateCards(personaVisualTemplate('essential'))}>Modelo essencial</button>
@@ -131,7 +142,7 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
       {available.length?<div className="bo-p5-library-grid">{available.map(opt=><button key={opt.id} type="button" onClick={()=>add(opt.id)}><strong>+ {opt.title}</strong><small>{opt.caption}</small></button>)}</div>:<p>Todos os blocos disponíveis já estão na composição.</p>}
     </section>}
     <div className={`bo-p5-grid bo-p5-layout-${draft.layout}`} aria-label="Cartões da Persona">
-      {cards.filter(c=>c.id==='identity'||draft.mode==='professional'||!OPTIONS.find(o=>o.id===c.id)?.advanced).map((card,index)=>{
+      {visibleCards.map((card,index)=>{
         const meta=OPTIONS.find(x=>x.id===card.id);
         if(!meta)return null;
         return <section key={card.id} className={`bo-p5-card bo-p5-card--${card.width} ${dragging===card.id?'is-dragging':''}`}
@@ -141,7 +152,7 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
           <header className="bo-p5-card-head">
             <span className="bo-p5-drag-handle" draggable tabIndex={0} aria-label={`Arrastar bloco ${meta.title}`} title="Arraste para reorganizar"
               onDragStart={e=>{setDragging(card.id);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.id)}} onDragEnd={()=>setDragging(null)}>⠿</span>
-            <div><small>{meta.caption}</small><h3>{meta.title}</h3></div>
+            <div><small>{meta.caption}</small><h3>{card.id==='identity'?'Resumo':meta.title}</h3></div>
             <div className="bo-p5-card-actions" role="group" aria-label={`Ações do bloco ${meta.title}`}>
               <button type="button" title="Mover para cima" aria-label={`Mover ${meta.title} para cima`} onClick={()=>step(card.id,-1)} disabled={index===0}>↑</button>
               <button type="button" title="Mover para baixo" aria-label={`Mover ${meta.title} para baixo`} onClick={()=>step(card.id,1)} disabled={index===cards.length-1}>↓</button>
@@ -153,6 +164,6 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
         </section>;
       })}
     </div>
-    <p className="bo-p5-hint">Arraste pela alça ⠿ ou use as setas ↑ ↓. Alterações na composição são salvas junto com a Persona pelo botão “Salvar alterações”.</p>
+    <p className="bo-p5-hint">Arraste pela alça ⠿ ou use ⋯ para mover, ajustar largura ou ocultar. As alterações são salvas automaticamente neste dispositivo.</p>
   </div>;
 }
