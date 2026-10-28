@@ -67,6 +67,13 @@ try:
         check('Quick input preserves Persona title',detail.get_by_role('textbox',name='Nome da Persona').input_value()=='Marcos')
         visual=detail.locator('[data-persona-visual-editor]')
         expect(visual).to_be_visible()
+        portrait=visual.locator('.bo-ec-portrait-card').bounding_box()
+        core=visual.locator('.bo-ec-core-column').bounding_box()
+        relations=visual.locator('.bo-ec-relations-column').bounding_box()
+        check('Compact canvas places portrait, inline editor and relation rail on one row',
+              bool(portrait and core and relations and portrait['x'] < core['x'] < relations['x']
+                   and abs(portrait['y'] - core['y']) < 35 and abs(core['y'] - relations['y']) < 35))
+        check('Empty relation graph does not dominate the page',visual.locator('.bo-ec-graph').bounding_box()['height'] < 190)
         check('Context supplied by the user becomes profile summary','gerente de loja' in visual.get_by_role('textbox',name='Resumo da Persona').input_value())
         check('Simple profile starts with the three essential cards',visual.locator('[data-persona-visual-card]').count()==3)
         check('Canvas uses the actual editable summary rather than a duplicate preview', visual.locator('.bo-p6-live-profile').count()==0 and 'gerente de loja' in visual.locator('[data-persona-visual-card="identity"]').get_by_role('textbox').input_value())
