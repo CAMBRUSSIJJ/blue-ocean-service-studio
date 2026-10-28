@@ -9,6 +9,7 @@ type Props = {
   draft: PersonaProfileDraft;
   onChange: (next: PersonaProfileDraft) => void;
   counts: { need: number; pain: number; evidence: number; related: number };
+  legacyDefaultCards?: boolean;
   onNavigate: (tab: 'relations' | 'evidence') => void;
 };
 const OPTIONS: Array<{ id: PersonaVisualCardId; title: string; caption: string; advanced?: boolean }> = [
@@ -40,7 +41,7 @@ function ListTextEditor({label,value,placeholder,onChange}: {label:string;value:
   </label>;
 }
 
-export function PersonaVisualEditor({draft,onChange,counts,onNavigate}: Props) {
+export function PersonaVisualEditor({draft,onChange,counts,onNavigate,legacyDefaultCards=false}: Props) {
   const [showLibrary,setShowLibrary]=useState(false);
   const [dragging,setDragging]=useState<PersonaVisualCardId|null>(null);
   const [revealed,setRevealed]=useState<PersonaVisualCardId[]>([]);
@@ -123,7 +124,7 @@ export function PersonaVisualEditor({draft,onChange,counts,onNavigate}: Props) {
     if(id==='relations')return counts.related>0;
     return false;
   };
-  const visibleCards=cards.filter(c=>!optional.has(c.id)||hasContent(c.id)||revealed.includes(c.id));
+  const visibleCards=cards.filter(c=>!legacyDefaultCards||!optional.has(c.id)||hasContent(c.id)||revealed.includes(c.id));
   const available=OPTIONS.filter(x=>!visibleCards.some(c=>c.id===x.id));
   return <div className="bo-p5-editor" data-persona-visual-editor="1">
     <header className="bo-p5-toolbar">
