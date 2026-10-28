@@ -45,7 +45,6 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
     ? `Atualizado em ${mapUpdatedAt.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}`
     : 'Disponível neste projeto';
   const registeredCount = personas + needs + evidence;
-  const savedAreaHint = 'Navegue pelas ferramentas na lateral ou consulte as áreas adicionais do projeto.';
   // The current ServiceGraph is the project scope; never copy entities for a dashboard.
   const projectId = project?.id || graph.service.project?.id || graph.service.id;
   const shellRef = useRef<HTMLElement>(null);
