@@ -80,6 +80,7 @@ try:
   f.get_by_role('button',name='Refazer',exact=True).click();saved(f);expect(f.locator('[data-cad-view]')).to_have_value('journey');check('Redo restores content while keeping the chosen visualization',len(graph(page)['journeys'][jid]['matrixContent']['connections'])==2)
   f.locator('[data-cad-view]').select_option('blueprint');saved(f)
   page.screenshot(path=str(OUT/'desktop.png'),animations='disabled');audit(page,'desktop')
+  f.get_by_role('button',name='Ajustar',exact=True).click()  # Reframe after switching perspectives.
   f.locator(f'.cad-node[data-id="{activity}"]').click(button='right');f.get_by_role('button',name='Detalhes opcionais',exact=True).click();expect(f.locator('.cad-inspector')).to_be_visible();check('Advanced properties are optional and explicitly requested');f.get_by_role('button',name='Fechar detalhes',exact=True).click()
   # One canonical map and real lane previews survive returning to the library.
   f.get_by_role('button',name='Voltar para mapas do serviço',exact=True).click();expect(page.locator('[data-service-map-card]')).to_have_count(1);check('Library shows one map instead of duplicate perspectives',page.locator('[data-service-map-card] button.bo-h722-open').count()==1)
