@@ -70,14 +70,14 @@ export function EntityCanvasRelations({
     <header className="bo-ec-relations-head"><div><small>SERVICE GRAPH</small><h3>Relações do perfil</h3><p>{selected.length} ${selected.length===1?'registro vinculado':'registros vinculados'} · sem duplicação de dados</p></div>
       <button type="button" aria-expanded={bankOpen} aria-controls="bo-ec-bank" onClick={()=>setBankOpen(x=>!x)}>{bankOpen?'Ocultar banco':'Banco de conexões'} <span aria-hidden="true">↗</span></button></header>
     <div className={`bo-ec-relations-layout ${bankOpen?'has-bank':''}`}>
-      <div className={`bo-ec-graph ${dragActive?'is-drop-target':''}`} role="group" aria-label="Grafo de relações da Persona"
+      <div className={`bo-ec-graph ${dragActive?'is-drop-target':''}`} style={{minHeight:height}} role="group" aria-label="Grafo de relações da Persona"
         onDragOver={event=>{if(event.dataTransfer.types.includes('application/x-blueocean-entity')){event.preventDefault();event.dataTransfer.dropEffect='link';setDragActive(true)}}}
         onDragLeave={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node))setDragActive(false)}}
         onDrop={event=>{event.preventDefault();receive(event.dataTransfer.getData('application/x-blueocean-entity'));setDragActive(false)}}>
         <svg viewBox={`0 0 460 ${height}`} className="bo-ec-edges" preserveAspectRatio="none" aria-hidden="true">
           {positions.map(p=><line key={p.id} x1="230" y1={height/2} x2={p.x} y2={p.y} stroke={p.kind==='need'?'#258e77':'#5992dd'} strokeWidth="1.7" opacity=".78" />)}
         </svg>
-        <div className="bo-ec-central" style={{top:`${height/2}px`}}><small>PERSONA</small><strong>{entityTitle||'Sem nome'}</strong></div>
+        <div className="bo-ec-central" style={{top:'50%'}}><small>PERSONA</small><strong>{entityTitle||'Sem nome'}</strong></div>
         {positions.map(pos=><button key={pos.id} type="button"
           className={`bo-ec-node bo-ec-node--${pos.kind}`}
           title="Clique para desvincular; o registro original será preservado"
