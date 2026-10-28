@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { EntityCanvasRelations, EntityCanvasResizeHandle, type EntityConnectionOption } from '../components/EntityCanvas';
+import './entity-canvas.css';
 import {
   normalizePersonaVisualCards, personaVisualTemplate, switchPersonaDepth,
   type PersonaProfileDraft, type PersonaVisualCard,
@@ -11,6 +13,9 @@ type Props = {
   counts: { need: number; pain: number; evidence: number; related: number };
   legacyDefaultCards?: boolean;
   onNavigate: (tab: 'relations' | 'evidence') => void;
+  relationOptions: EntityConnectionOption[];
+  connectedIds: string[];
+  onToggleRelation: (id: string) => void;
 };
 const OPTIONS: Array<{ id: PersonaVisualCardId; title: string; caption: string; advanced?: boolean }> = [
   {id:'identity',title:'Identidade',caption:'Nome e resumo'},
@@ -41,10 +46,16 @@ function ListTextEditor({label,value,placeholder,onChange}: {label:string;value:
   </label>;
 }
 
-export function PersonaVisualEditor({draft,onChange,counts,onNavigate,legacyDefaultCards=false}: Props) {
+export function PersonaVisualEditor({draft,onChange,counts,onNavigate,legacyDefaultCards=false,relationOptions,connectedIds,onToggleRelation}: Props) {
   const [showLibrary,setShowLibrary]=useState(false);
   const [dragging,setDragging]=useState<PersonaVisualCardId|null>(null);
   const [revealed,setRevealed]=useState<PersonaVisualCardId[]>([]);
+  const [theme,setTheme]=useState<'light'|'dark'>(()=>{try{return localStorage.getItem('bo-entity-canvas-theme')==='dark'?'dark':'light'}catch{return 'light'}});
+  const switchTheme=()=>setTheme(current=>{
+    const next=current==='dark'?'light':'dark';
+    try{localStorage.setItem('bo-entity-canvas-theme',next)}catch{/* Optional local preference */}
+    return next;
+  });
   const cards=normalizePersonaVisualCards(draft.visualCards,draft.mode);
   const update=(changes:Partial<PersonaProfileDraft>)=>onChange({...draft,...changes});
   const updateCards=(next:PersonaVisualCard[])=>update({visualCards:normalizePersonaVisualCards(next,draft.mode)});
@@ -126,27 +137,21 @@ export function PersonaVisualEditor({draft,onChange,counts,onNavigate,legacyDefa
   };
   const visibleCards=cards.filter(c=>!legacyDefaultCards||!optional.has(c.id)||hasContent(c.id)||revealed.includes(c.id));
   const available=OPTIONS.filter(x=>!visibleCards.some(c=>c.id===x.id));
-  return <div className="bo-p5-editor" data-persona-visual-editor="1">
+  return <div className={`bo-p5-editor bo-ec-editor bo-ec-theme-${theme}`} data-persona-visual-editor="1" data-entity-canvas="persona">
     <header className="bo-p5-toolbar">
-      <div><span>PERFIL EDITÁVEL</span><h2>Edite diretamente no perfil</h2><p>O essencial já está à vista. Acrescente outros blocos à medida que precisar.</p></div>
+      <div><span>ENTITY CANVAS</span><h2>Construa o perfil visualmente</h2><p>Clique no conteúdo para editar · arraste para organizar · redimensione pelas bordas.</p></div>
       <div className="bo-p5-toolbar-actions">
         <div className="bo-p5-template-actions" role="group" aria-label="Modelos de composição">
           <button type="button" onClick={()=>updateCards(personaVisualTemplate('essential'))}>Modelo essencial</button>
           <button type="button" onClick={()=>updateCards(personaVisualTemplate('research'))}>Modelo pesquisa</button>
         </div>
+        <button type="button" className="bo-ec-theme-toggle" aria-label={theme==='dark'?'Usar tema claro no canvas':'Usar tema escuro no canvas'} aria-pressed={theme==='dark'} onClick={switchTheme}>{theme==='dark'?'☀ Tema claro':'☾ Tema escuro'}</button>
         <button type="button" className="bo-p5-add-button" aria-expanded={showLibrary} aria-controls="bo-p5-library" onClick={()=>setShowLibrary(v=>!v)}>+ Adicionar bloco</button>
       </div>
     </header>
-    <section className="bo-p6-live-profile" aria-label="Pré-visualização ao vivo da Persona">
-      <div className="bo-p6-live-person"><span className="bo-p6-person-avatar">{draft.imageUrl ? <img src={draft.imageUrl} alt="Retrato ilustrativo" loading="lazy"/> : (draft.title.trim().slice(0,1).toUpperCase()||'P')}</span>
-        <div><small>PERSONA EM CONSTRUÇÃO</small><h3>{draft.title.trim()||'Persona sem nome'}</h3><p>{draft.description.trim()||'O resumo aparecerá aqui enquanto você escreve.'}</p></div>
-      </div>
-      <div className="bo-p6-live-details">
-        <div><small>OBJETIVO</small><p className={draft.primaryGoal.trim()?'':'is-ghost'}>{draft.primaryGoal.trim()||'Qual resultado esta pessoa procura?'}</p></div>
-        <div><small>SITUAÇÃO</small><p className={draft.situation.trim()?'':'is-ghost'}>{draft.situation.trim()||'Quando essa experiência acontece?'}</p></div>
-      </div>
-      {draft.channels.length>0 && <div className="bo-p6-live-channels">{draft.channels.slice(0,5).map(channel=><span key={channel}>{channel}</span>)}</div>}
-    </section>
+    <EntityCanvasRelations entityTitle={draft.title} options={relationOptions}
+      connectedIds={connectedIds} onToggle={onToggleRelation}
+      onViewAll={()=>onNavigate('relations')}/>
     {showLibrary&&<section className="bo-p5-library" id="bo-p5-library" aria-label="Biblioteca de blocos">
       <div><strong>Adicionar à composição</strong><button type="button" onClick={()=>setShowLibrary(false)} aria-label="Fechar biblioteca de blocos">×</button></div>
       <p>Os blocos aproveitam o perfil existente. Ocultá-los não apaga suas informações.</p>
@@ -156,7 +161,7 @@ export function PersonaVisualEditor({draft,onChange,counts,onNavigate,legacyDefa
       {visibleCards.map((card,index)=>{
         const meta=OPTIONS.find(x=>x.id===card.id);
         if(!meta)return null;
-        return <section key={card.id} className={`bo-p5-card bo-p5-card--${card.width} ${dragging===card.id?'is-dragging':''}`}
+        return <section key={card.id} className={`bo-p5-card bo-ec-card bo-p5-card--${card.width} ${dragging===card.id?'is-dragging':''}`}
           data-persona-visual-card={card.id} data-width={card.width}
           onDragOver={e=>{if(dragging&&dragging!==card.id)e.preventDefault()}}
           onDrop={e=>{e.preventDefault();if(dragging)move(dragging,card.id);setDragging(null)}}>
@@ -172,9 +177,15 @@ export function PersonaVisualEditor({draft,onChange,counts,onNavigate,legacyDefa
              </div></details>
           </header>
           <div className="bo-p5-card-content">{body(card.id)}</div>
+          <EntityCanvasResizeHandle title={meta.title} width={card.width} onChange={width=>setWidth(card.id,width)} />
         </section>;
       })}
     </div>
-    <p className="bo-p5-hint">Arraste pela alça ⠿ ou use ⋯ para mover, ajustar largura ou ocultar. As alterações são salvas automaticamente neste dispositivo.</p>
+    <div className="bo-ec-ghost-row" aria-label="Adicionar novos componentes">
+      {(['needs','channels','quote'] as PersonaVisualCardId[]).filter(id=>available.some(x=>x.id===id)).map(id=>
+        <button key={id} type="button" onClick={()=>add(id)}><span aria-hidden="true">＋</span><strong>{OPTIONS.find(o=>o.id===id)?.title}</strong><small>Adicionar ao perfil</small></button>)}
+      <button type="button" onClick={()=>setShowLibrary(true)}><span aria-hidden="true">＋</span><strong>Outros componentes</strong><small>Escolher da biblioteca</small></button>
+    </div>
+    <p className="bo-p5-hint">Clique para editar os cartões. Arraste ⠿ para ordenar; passe o mouse na borda e arraste ⋮⋮ para expandir ou reduzir. Salvo apenas neste navegador.</p>
   </div>;
 }
