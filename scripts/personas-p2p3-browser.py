@@ -30,6 +30,8 @@ try:
         page.get_by_label('Nome do projeto',exact=True).fill('Personas UX QA')
         page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
         page.get_by_role('button',name='Criar projeto',exact=True).click()
+        if not page.locator('button[aria-label="Personas"]').is_visible():
+            page.locator('[data-sidebar-section="context"] .bo-h740h14-section-toggle').click()
         page.locator('button[aria-label="Personas"]').click()
         library=page.locator('[data-personas-h71="library"]')
         expect(library).to_be_visible()
@@ -108,6 +110,8 @@ try:
         library.get_by_role('button',name='Sem evidências QA',exact=True).click()
         check('Saved view restores cards and rule',library.get_attribute('data-persona-view')=='cards' and library.locator('[data-persona-card]').count()==1)
         page.reload(wait_until='domcontentloaded')
+        if not page.locator('button[aria-label="Personas"]').is_visible():
+            page.locator('[data-sidebar-section="context"] .bo-h740h14-section-toggle').click()
         page.locator('button[aria-label="Personas"]').click()
         page.get_by_role('button',name='Visualizações',exact=False).click()
         check('Saved view persists across reload',page.get_by_role('button',name='Sem evidências QA',exact=True).count()==1)
