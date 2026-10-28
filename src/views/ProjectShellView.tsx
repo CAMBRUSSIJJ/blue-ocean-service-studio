@@ -38,6 +38,7 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   const metrics = count(graph.entities?.metric);
   const opportunities = count(graph.opportunities);
   const serviceArtifacts = serviceMaps + whiteboards;
+  const recentMap = Object.values(graph.journeys).sort((a, b) => String(b.updatedAt ?? '').localeCompare(String(a.updatedAt ?? '')))[0] ?? null;
   // The current ServiceGraph is the project scope; never copy entities for a dashboard.
   const projectId = project?.id || graph.service.project?.id || graph.service.id;
   const shellRef = useRef<HTMLElement>(null);
@@ -123,7 +124,7 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
 
   return <section ref={shellRef} className="bo-h740h10-shell" data-project-shell="7.40-H10" data-project-shell-section="overview">
     <header className="bo-h740h10-shell__hero bo-h31-project-header">
-      <div><small>PROJETO ATUAL</small><h1>{project?.title || serviceName}</h1><p>{project?.description || 'Organize o projeto e acesse suas informações pelas abas abaixo.'}</p></div>
+      <div><small>PROJETO ATUAL</small><h1>{project?.title || serviceName}</h1><p>{project?.description || 'Consulte as informações do serviço ou continue diretamente nos seus mapas.'}</p></div>
     </header>
 
     {areaTabs}
@@ -141,12 +142,25 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
           ? <button type="button" className="primary" onClick={openService}>Abrir mapas <ArrowRight size={15}/></button>
           : <button type="button" className="primary" onClick={onCreateMap}>Criar mapa <ArrowRight size={15}/></button>}
       </div>
-      <div className="bo-h31-overview-stats" aria-label="Indicadores do projeto">
-        <div><strong>{serviceMaps}</strong><span>Mapas</span></div>
-        <div><strong>{personas}</strong><span>Personas</span></div>
-        <div><strong>{needs}</strong><span>Necessidades</span></div>
-        <div><strong>{evidence}</strong><span>Evidências</span></div>
+      <div className="bo-h31-overview-stats bo-h33-overview-stats" aria-label="Acessos aos registros do projeto">
+        <div><button type="button" onClick={serviceMaps ? openService : onCreateMap} aria-label={serviceMaps ? 'Abrir mapas do serviço' : 'Criar primeiro mapa'}><strong>{serviceMaps}</strong><span>Mapas <ArrowRight size={13}/></span></button></div>
+        <div><button type="button" onClick={() => openLibraryPage('personas')} aria-label="Abrir Personas"><strong>{personas}</strong><span>Personas <ArrowRight size={13}/></span></button></div>
+        <div><button type="button" onClick={() => openLibraryPage('needs')} aria-label="Abrir Necessidades"><strong>{needs}</strong><span>Necessidades <ArrowRight size={13}/></span></button></div>
+        <div><button type="button" onClick={() => openLibraryPage('evidence')} aria-label="Abrir Evidências"><strong>{evidence}</strong><span>Evidências <ArrowRight size={13}/></span></button></div>
       </div>
+      <section className="bo-h33-next-work" aria-label="Continuar trabalho no projeto">
+        <div className="bo-h33-next-work__main">
+          <small>{recentMap ? 'ÚLTIMO MAPA' : 'COMECE PELO ESSENCIAL'}</small>
+          <h2>{recentMap ? recentMap.name : 'Estruture seu serviço no seu ritmo'}</h2>
+          <p>{recentMap ? `${recentMap.stageIds.length} etapa(s) · Jornada e Blueprint utilizam o mesmo mapa.` : 'Crie um mapa quando desejar. Personas, pesquisa e evidências podem ser registradas em qualquer ordem.'}</p>
+        </div>
+        <div className="bo-h33-next-work__actions">
+          {recentMap && <button type="button" className="bo-h33-action" onClick={openService}>Continuar mapa <ArrowRight size={14}/></button>}
+          <button type="button" className="bo-h33-action" onClick={() => openLibraryPage('personas')}>Personas <ArrowRight size={14}/></button>
+          <button type="button" className="bo-h33-action" onClick={() => openLibraryPage('problems')}>Problemas{problems > 0 ? ` (${problems})` : ''} <ArrowRight size={14}/></button>
+          <button type="button" className="bo-h33-action" onClick={openWhiteboards}>Whiteboard <ArrowRight size={14}/></button>
+        </div>
+      </section>
     </section>
     </> : (area === 'audience' || area === 'research') ? <section className="bo-project-context-collection">
       <header className="bo-project-context-section-header"><div><small>{area === 'audience' ? 'PÚBLICO E CONTEXTO' : 'PESQUISA DO PROJETO'}</small><h2>{area === 'audience' ? 'Pessoas, necessidades e relações' : 'Hipóteses, problemas e evidências'}</h2><p>Registros deste projeto, vinculados ao mesmo Service Graph usado nos mapas. Nenhum registro é duplicado.</p></div><button type="button" className="primary" onClick={() => openLibraryPage(area === 'audience' ? 'needs' : 'evidence')}>+ {area === 'audience' ? 'Nova necessidade' : 'Nova evidência'}</button></header>
