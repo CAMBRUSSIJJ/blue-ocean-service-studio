@@ -56,6 +56,10 @@ def project(page):
     page.get_by_label('Serviço principal', exact=True).fill('Atendimento ao cliente')
     page.get_by_role('button', name='Criar projeto', exact=True).click()
     expect(page.get_by_role('heading', name='Visão geral do projeto', exact=True)).to_be_visible()
+    # On narrow viewports the primary navigation is an off-canvas drawer.
+    # Open it as a user would; the button is otherwise outside the viewport.
+    if page.viewport_size['width'] <= 760:
+        page.get_by_role('button', name='Abrir navegação', exact=True).click()
     page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
     expect(page.locator('[data-service-map-library]')).to_be_visible()
 
