@@ -93,7 +93,9 @@ try:
   page.set_viewport_size({'width':834,'height':1000});expect(f.locator('#cad-svg')).to_be_visible();audit(page,'tablet');page.screenshot(path=str(OUT/'tablet.png'),animations='disabled')
   page.set_viewport_size({'width':1600,'height':1000});drag_palette(f,'channel','ch',0);quick(f,'E-mail');check('Drop in the first stage stays there after another stage was in focus',frame(page).evaluate('()=>S.c["ch|0"].some(note=>note.t==="E-mail")'))
   add(f,'persona','Cliente A');add(f,'persona','Cliente B');f.locator('[data-cad-persona]').select_option(label='Cliente A');saved(f);check('Selecting a Persona does not copy the generic emotion',frame(page).evaluate('()=>S.steps[0].emotionRecorded===false'))
-  emotion_id=frame(page).evaluate('()=>S.c["em|0"].find(note=>note.canvas?.kind==="emotion").i');f.get_by_role('button',name='Ajustar',exact=True).click();f.locator(f'.cad-node[data-id="{emotion_id}"]').click();form=f.locator('#cad-quick-form');form.locator('[name=emotionScore]').select_option('-2');form.get_by_role('button',name='Salvar emoção',exact=True).click();saved(f)
+  # Persona observations are isolated: an emotion on the generic map is not a card on Cliente A.
+  # Create the observation for Cliente A instead of trying to edit the generic card.
+  f.locator('[data-act="cad-add"][data-kind="emotion"]:visible').click();form=f.locator('#cad-quick-form');form.locator('[name=emotionScore]').select_option('-2');form.get_by_role('button',name='Salvar emoção',exact=True).click();saved(f)
   f.locator('[data-cad-persona]').select_option(label='Cliente B');saved(f);check('Emotions remain isolated between Personas',frame(page).evaluate('()=>S.steps[0].emotionRecorded===false'))
   f.locator('[data-cad-persona]').select_option(label='Cliente A');saved(f);check('Returning to a Persona restores its own observation',frame(page).evaluate('()=>S.steps[0].emotionRecorded===true&&S.steps[0].e===-2'))
   check('No JavaScript errors',not errors);browser.close()
