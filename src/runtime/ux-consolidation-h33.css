@@ -444,3 +444,27 @@
   .bo-h740h10-shell .bo-h33-guided-grid{grid-template-columns:minmax(0,1fr)}
   .bo-h33-guided-grid>div>button,.bo-h33-guided-grid .bo-h33-map-count{min-height:110px}
 }
+
+
+/* Compact sidebar: new users open the most relevant group first. */
+.bo-h33-sidebar-density{
+  display:block;
+  width:calc(100% - 20px);
+  margin:8px 10px 10px;
+  min-height:32px;
+  padding:7px 12px;
+  border:1px solid var(--bo-color-border,#e3e7ed);
+  border-radius:7px;
+  background:var(--bo-color-surface,#fff);
+  color:var(--bo-color-text-secondary,#475467);
+  text-align:left;
+  font:600 12px var(--bo-font-sans,system-ui);
+  cursor:pointer;
+}
+.bo-h33-sidebar-density:hover{background:var(--bo-color-primary-50,#f4f8ff);color:var(--bo-color-primary-700,#174fc0)}
+.bo-h33-sidebar-density:focus-visible{outline:2px solid var(--bo-color-primary-600,#1e63f0);outline-offset:2px}
+.bo1205h3-sidebar.is-collapsed .bo-h33-sidebar-density{display:none}
+.bo1205h3-sidebar .bo-h701-nav-section__label{color:var(--bo-color-text-secondary,#475467)}
+.bo1205h3-sidebar .bo-h701-nav-section__label span:first-child{font-weight:700}
+.bo-h740h10-shell .bo-h33-focus-overview :is(p,small,em){letter-spacing:normal}
+.bo-h33-focus-overview .bo-h33-guided-heading>div>p{max-width:75ch}
