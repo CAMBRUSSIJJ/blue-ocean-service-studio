@@ -136,6 +136,16 @@ export function PersonaVisualEditor({draft,onChange,counts,onNavigate}: Props) {
         <button type="button" className="bo-p5-add-button" aria-expanded={showLibrary} aria-controls="bo-p5-library" onClick={()=>setShowLibrary(v=>!v)}>+ Adicionar bloco</button>
       </div>
     </header>
+    <section className="bo-p6-live-profile" aria-label="Pré-visualização ao vivo da Persona">
+      <div className="bo-p6-live-person"><span className="bo-p6-person-avatar">{draft.imageUrl ? <img src={draft.imageUrl} alt="Retrato ilustrativo" loading="lazy"/> : (draft.title.trim().slice(0,1).toUpperCase()||'P')}</span>
+        <div><small>PERSONA EM CONSTRUÇÃO</small><h3>{draft.title.trim()||'Persona sem nome'}</h3><p>{draft.description.trim()||'O resumo aparecerá aqui enquanto você escreve.'}</p></div>
+      </div>
+      <div className="bo-p6-live-details">
+        <div><small>OBJETIVO</small><p className={draft.primaryGoal.trim()?'':'is-ghost'}>{draft.primaryGoal.trim()||'Qual resultado esta pessoa procura?'}</p></div>
+        <div><small>SITUAÇÃO</small><p className={draft.situation.trim()?'':'is-ghost'}>{draft.situation.trim()||'Quando essa experiência acontece?'}</p></div>
+      </div>
+      {draft.channels.length>0 && <div className="bo-p6-live-channels">{draft.channels.slice(0,5).map(channel=><span key={channel}>{channel}</span>)}</div>}
+    </section>
     {showLibrary&&<section className="bo-p5-library" id="bo-p5-library" aria-label="Biblioteca de blocos">
       <div><strong>Adicionar à composição</strong><button type="button" onClick={()=>setShowLibrary(false)} aria-label="Fechar biblioteca de blocos">×</button></div>
       <p>Os blocos aproveitam o perfil existente. Ocultá-los não apaga suas informações.</p>
@@ -153,12 +163,12 @@ export function PersonaVisualEditor({draft,onChange,counts,onNavigate}: Props) {
             <span className="bo-p5-drag-handle" draggable tabIndex={0} aria-label={`Arrastar bloco ${meta.title}`} title="Arraste para reorganizar"
               onDragStart={e=>{setDragging(card.id);e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.id)}} onDragEnd={()=>setDragging(null)}>⠿</span>
             <div><small>{meta.caption}</small><h3>{card.id==='identity'?'Resumo':meta.title}</h3></div>
-            <div className="bo-p5-card-actions" role="group" aria-label={`Ações do bloco ${meta.title}`}>
-              <button type="button" title="Mover para cima" aria-label={`Mover ${meta.title} para cima`} onClick={()=>step(card.id,-1)} disabled={index===0}>↑</button>
-              <button type="button" title="Mover para baixo" aria-label={`Mover ${meta.title} para baixo`} onClick={()=>step(card.id,1)} disabled={index===cards.length-1}>↓</button>
-              <button type="button" title="Alternar largura" aria-label={`Alternar largura de ${meta.title}`} onClick={()=>setWidth(card.id,card.width==='full'?'half':'full')}>{card.width==='full'?'½':'↔'}</button>
-              {card.id!=='identity'&&<button type="button" title="Ocultar sem excluir os dados" aria-label={`Ocultar bloco ${meta.title}`} onClick={()=>updateCards(cards.filter(c=>c.id!==card.id))}>×</button>}
-            </div>
+            <details className="bo-p6-card-menu"><summary aria-label={`Opções do bloco ${meta.title}`} title="Opções do bloco">⋯</summary><div>
+               <button type="button" disabled={index===0} onClick={e=>{step(card.id,-1);e.currentTarget.closest('details')!.open=false}}>Mover para cima</button>
+               <button type="button" disabled={index===visibleCards.length-1} onClick={e=>{step(card.id,1);e.currentTarget.closest('details')!.open=false}}>Mover para baixo</button>
+               <button type="button" onClick={e=>{setWidth(card.id,card.width==='full'?'half':'full');e.currentTarget.closest('details')!.open=false}}>Alterar largura</button>
+               {card.id!=='identity' && <button type="button" onClick={e=>{updateCards(cards.filter(c=>c.id!==card.id));setRevealed(old=>old.filter(id=>id!==card.id));e.currentTarget.closest('details')!.open=false}}>Ocultar bloco</button>}
+             </div></details>
           </header>
           <div className="bo-p5-card-content">{body(card.id)}</div>
         </section>;
