@@ -9,14 +9,14 @@ const style = fs.readFileSync('src/style.css', 'utf8');
 
 ok('cartões possuem edição inline no quadro', visual.includes('function PersonaVisualEditor') && visual.includes('bo-p5-field') && visual.includes('onChange'));
 ok('overview usa layout principal + lateral', personas.includes('bo-h724-overview-layout') && personas.includes('bo-h724-overview-aside'));
-ok('completude migrou para painel lateral', personas.includes('bo-h724-completeness-card'));
+ok('completude migrou para painel lateral', personas.includes('bo-p6-progress'));
 ok('canais usam cartão editável', visual.includes("listField('channels'") && visual.includes('ListTextEditor'));
 ok('tags usam editor por chips', personas.includes('addTag') && personas.includes('removeTag'));
-ok('responsável possui sugestões', personas.includes('bo-h724-owner-options') && personas.includes('<datalist'));
+ok('responsável possui sugestões', personas.includes('bo-p6-owner-options') && personas.includes('<datalist'));
 ok('remoção saiu da barra fixa', !personas.includes('bo-h71-detail-actions"><button type="button" className="danger"'));
 ok('remoção continua acessível por menu', personas.includes('bo-h724-detail-menu') && personas.includes('Remover persona'));
-ok('barra inferior informa estado de salvamento', personas.includes('bo-h724-save-state') && personas.includes('Alterações ainda não salvas'));
-ok('salvar usa rascunho canônico do editor visual', personas.includes('effectiveDraft = draft') && personas.includes('updatePersonaProfile'));
+ok('autosave discreto substitui barra de ações conflitante', personas.includes('bo-h724-save-badge') && personas.includes('bo-p6-local-note') && !personas.includes('Salvar alterações</button>'));
+ok('autosave usa draft e atualiza Service Graph canônico', personas.includes('window.setTimeout') && personas.includes('updatePersonaProfile') && personas.includes('Persona: autosave'));
 ok('CSS H7.2.4 importado no bloco inicial', style.includes("@import './runtime/personas-h724.css';") && style.indexOf('personas-h724.css') < style.indexOf('@tailwind base'));
 ok('CSS cria rail sticky e grid amplo', css.includes('.bo-h724-overview-aside') && css.includes('position:sticky') && css.includes('grid-template-columns:minmax(560px,1fr) 290px'));
 ok('CSS reduz caixas e usa autogrow', css.includes('.bo-h724-field textarea') && css.includes('min-height:48px') && css.includes('resize:none'));
