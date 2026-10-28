@@ -6,13 +6,13 @@ import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
 import { PersonaVisualEditor } from './PersonaVisualEditor';
+import { QuickEntityCreateDialog } from '../components/QuickEntityCreateDialog';
+import './persona-inline.css';
 import { PersonaEvidenceTrace } from './PersonaEvidenceTrace';
 import { createDiscoveryEntity } from '../services/discovery-workspace';
 import { contextEntityTitle, contextEntityUsage, listContextEntities } from '../services/context-library';
 import {
-  ADVANCED_PERSONA_SECTIONS,
   SIMPLE_PERSONA_SECTIONS,
-  switchPersonaDepth,
   visiblePersonaSections,
   buildPersonaStudioReport,
   personaProfileFromEntity,
@@ -146,9 +146,6 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [createTitle, setCreateTitle] = useState('');
-  const [createDescription, setCreateDescription] = useState('');
-  const [createMode, setCreateMode] = useState<PersonaDepth>('simple');
-  const [createSections, setCreateSections] = useState<PersonaSectionId[]>([...SIMPLE_PERSONA_SECTIONS]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const selected = selectedId ? graph.entities?.persona?.[selectedId] : undefined;
@@ -269,65 +266,49 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setMenuId(null); };
   const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
 
-  const chooseCreateMode = (mode: PersonaDepth) => {
-    setCreateMode(mode);
-    setCreateSections(mode === 'professional' ? [...ADVANCED_PERSONA_SECTIONS] : [...SIMPLE_PERSONA_SECTIONS]);
-  };
-
-  const createPersona = () => {
-    if (!createTitle.trim()) return;
+  const createPersona = (title: string, context: string) => {
+    if (!title.trim()) return;
     const now = new Date().toISOString();
-    const baseEntity = createDiscoveryEntity({ graph, kind: 'persona', title: createTitle, description: createDescription, now });
-    const entity = { ...baseEntity, personaMode: createMode, personaLayout: 'profile-left' as PersonaLayout, personaSections: [...new Set(createSections)] };
+    const baseEntity = createDiscoveryEntity({ graph, kind: 'persona', title, description: context, now });
+    const entity = { ...baseEntity, personaMode: 'simple' as PersonaDepth, personaLayout: 'profile-left' as PersonaLayout,
+      personaSections: [...SIMPLE_PERSONA_SECTIONS],
+      personaVisualCards: [{id:'identity',width:'full'},{id:'goal',width:'half'},{id:'situation',width:'half'}] };
     setGraph((current) => ({
       ...current,
       service: { ...current.service, updatedAt: now },
       entities: { ...current.entities, persona: { ...(current.entities?.persona ?? {}), [entity.id]: entity } },
-    }), 'Personas 2.0: criar');
-    setCreateOpen(false); setCreateTitle(''); setCreateDescription('');
-    setCreateMode('simple'); setCreateSections([...SIMPLE_PERSONA_SECTIONS]);
-    setSelectedId(entity.id); setDetailTab(createMode === 'professional' ? 'behavior' : 'overview');
-    showToast('Persona criada. Complete o perfil e salve.');
+    }), 'Personas: criar');
+    setCreateOpen(false); setCreateTitle('');
+    setSelectedId(entity.id); setDetailTab('overview');
+    showToast('Persona criada. Edite diretamente no perfil.');
   };
 
   const cancelCreate = () => {
-    if ((createTitle.trim() || createDescription.trim()) && !window.confirm('Descartar as informações ainda não salvas?')) return;
     setCreateOpen(false);
     setCreateTitle('');
-    setCreateDescription('');
-    chooseCreateMode('simple');
   };
 
-  const savePersona = () => {
-    if (!selectedId || !draft?.title.trim()) return;
-    const effectiveDraft = draft;
-    const tags = stringList([tagsText, tagEntry].filter(Boolean).join(','));
-    setGraph((current) => patchPersonaMeta(
-      updatePersonaProfile({ graph: current, personaId: selectedId, draft: effectiveDraft, connectedIds }),
-      selectedId,
-      owner,
-      tags,
-    ), 'Personas 2.0: salvar');
-    setDraft(effectiveDraft);
-    setTagsText(tags.join(', '));
-    setTagEntry('');
-    showToast('Persona salva.');
-  };
+  // Apply edits to the canonical graph after a quiet typing interval.
+  // The existing project-level storage handles local persistence and backups.
+  useEffect(() => {
+    if (!selectedId || !selected || !draft || !draft.title.trim()) return;
+    const saved = personaProfileFromEntity(selected);
+    const oldTags = Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '';
+    const oldConnections = report?.connections.map(item => item.id).sort() ?? [];
+    const changed = JSON.stringify(draft) !== JSON.stringify(saved)
+      || owner !== String(selected.owner ?? '')
+      || tagsText !== oldTags
+      || JSON.stringify([...connectedIds].sort()) !== JSON.stringify(oldConnections);
+    if (!changed) return;
+    const timer = window.setTimeout(() => {
+      const currentTags = stringList(tagsText);
+      setGraph((current) => patchPersonaMeta(updatePersonaProfile({
+        graph: current, personaId: selectedId, draft, connectedIds,
+      }), selectedId, owner, currentTags), 'Persona: autosave');
+    }, 850);
+    return () => window.clearTimeout(timer);
+  }, [selectedId, selected?.updatedAt, draft, owner, tagsText, connectedIds]);
 
-  const discardPersona = () => {
-    if (!selected || !report) return;
-    setDraft(personaProfileFromEntity(selected));
-    setOwner(String(selected.owner ?? ''));
-    setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
-    setTagEntry('');
-    setConnectedIds(report.connections.map((item) => item.id));
-    showToast('Alterações descartadas.');
-  };
-
-  const changeDetailMode = (mode: PersonaDepth) => {
-    setDraft(current => current ? switchPersonaDepth(current, mode) : current);
-    if (mode === 'simple' && ['behavior','decisions','barriers'].includes(detailTab)) setDetailTab('overview');
-  };
   const activeDetailSections = draft ? visiblePersonaSections(draft) : [];
 
   const removePersona = (id: string) => {
@@ -448,55 +429,6 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     </section>;
   }
 
-  if (createOpen) return <section className="bo-p2-create-page" data-personas-h71="create">
-    <header className="bo-p2-header">
-      <button type="button" className="bo-p2-back" onClick={cancelCreate}><ArrowLeft size={16}/> Voltar para Personas</button>
-      <span>PUBLICO-ALVO / PERSONAS / CRIAR</span>
-    </header>
-    <form className="bo-p2-create-form" onSubmit={(event) => { event.preventDefault(); createPersona(); }}>
-      <div className="bo-p2-title"><small>CRIAÇÃO DE PERSONA</small><h1>Criar Persona</h1>
-        <p>Comece com as informações essenciais. Você poderá aprofundar a pesquisa e personalizar os blocos depois.</p></div>
-      <div className="bo-p2-create-grid">
-        <main className="bo-p2-create-main">
-          <section className="bo-p2-section">
-            <span className="bo-p2-step">01 · IDENTIFICAÇÃO</span>
-            <h2>Como vamos reconhecer esta pessoa?</h2>
-            <label htmlFor="bo-p2-name">Nome da Persona <strong>Obrigatório</strong></label>
-            <input id="bo-p2-name" autoFocus required maxLength={140} value={createTitle} onChange={(event) => setCreateTitle(event.target.value)}
-              placeholder="Ex.: Profissional que mora sozinho"/>
-            <label htmlFor="bo-p2-description">Resumo <small>Opcional</small></label>
-            <textarea id="bo-p2-description" rows={4} maxLength={2000} value={createDescription}
-              onChange={(event) => setCreateDescription(event.target.value)} placeholder="Quem é essa pessoa, em que contexto utiliza o serviço e por que é relevante?"/>
-          </section>
-          <section className="bo-p2-section">
-            <span className="bo-p2-step">02 · PROFUNDIDADE</span><h2>Como deseja começar?</h2>
-            <div className="bo-p2-modes" role="group" aria-label="Profundidade da Persona">
-              <button type="button" className={createMode === 'simple' ? 'is-selected' : ''} aria-pressed={createMode === 'simple'} onClick={() => chooseCreateMode('simple')}><strong>Simples</strong><span>Identidade, objetivo, situação, canais e necessidades. Ideal para começar.</span></button>
-              <button type="button" className={createMode === 'professional' ? 'is-selected' : ''} aria-pressed={createMode === 'professional'} onClick={() => chooseCreateMode('professional')}><strong>Avançada</strong><span>Adiciona comportamento, expectativas, restrições, alternativas e mais conexões.</span></button>
-            </div>
-            <div className="bo-p4-create-explainer" aria-live="polite">
-              {createMode === 'professional' ? <>
-                <strong>Persona Avançada selecionada</strong>
-                <p>Após criar, você entrará na área de Comportamento. Também poderá pesquisar Decisões e Barreiras, além de conectar Evidências.</p>
-                <span>Comportamentos · Expectativas · Gatilhos · Alternativas · Restrições</span>
-              </> : <>
-                <strong>Persona Simples selecionada</strong><p>Comece com identidade, situação e objetivo. Você poderá ativar a pesquisa avançada depois sem perder informações.</p>
-              </>}
-            </div>
-          </section>
-          <footer className="bo-p2-actions"><button type="button" onClick={cancelCreate}>Cancelar</button>
-            <button className="primary" type="submit" disabled={!createTitle.trim()}>Criar Persona e continuar <span aria-hidden="true">→</span></button>
-          </footer>
-        </main>
-        <aside className="bo-p2-create-aside">
-          <div className="bo-p2-help-card"><strong>Construa progressivamente</strong><p>Você só precisa de um nome para começar. Depois de criar, poderá completar objetivos, relações e evidências sem perder o contexto.</p>
-            <div><span>✓</span> Informações essenciais</div><div><span>✓</span> Salvar e editar no próprio perfil</div><div><span>✓</span> Personalizar layout e blocos depois</div></div>
-          <div className="bo-p2-help-note"><strong>Sobre a validação</strong><p>Uma Persona com todos os campos preenchidos não está automaticamente validada. As evidências serão vinculadas durante a pesquisa.</p></div>
-        </aside>
-      </div>
-    </form>
-  </section>;
-
   const hasSearchOrFilter = Boolean(query.trim()) || filter !== 'all' || filterRules.length>0;
   const filters: Array<[FilterMode, string]> = [
     ['all', 'Todas'], ['used', 'Em Jornadas ou mapas'], ['unused', 'Não usadas'],
@@ -604,6 +536,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       {hasSearchOrFilter ? <button type="button" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar busca e filtros</button> : <button type="button" onClick={() => setCreateOpen(true)}><Plus size={14}/> Criar persona</button>}
     </div>}
 
+    {createOpen && <QuickEntityCreateDialog kind="persona" value={createTitle} onChange={setCreateTitle} onClose={cancelCreate} onCreate={createPersona} />}
     {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER PERSONA</small><h2>Remover “{contextEntityTitle(graph.entities?.persona?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações existentes serão desvinculadas do Service Graph.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removePersona(deleteId)}>Remover Persona</button></footer></div></div>}
   </section>;
 }
