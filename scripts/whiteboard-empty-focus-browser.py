@@ -27,6 +27,8 @@ try:
     with sync_playwright() as p:
         browser=p.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
         page=browser.new_page(viewport={'width':1440,'height':900})
+        page_errors=[]
+        page.on('pageerror',lambda error: page_errors.append(str(error)))
         page.goto(url,wait_until='networkidle')
         page.get_by_role('button',name='Abrir workspace local sem conta').click()
         page.get_by_role('button',name='Novo projeto',exact=True).click()
@@ -57,6 +59,8 @@ try:
         verify(board_data(page)[0]['itemCount']>0,'Post-it editável criado no canvas')
         page.locator('.bo1174-board').screenshot(path=str(OUT/'canvas-with-note.png'),animations='disabled')
         page.locator('.bo1174-board').get_by_role('button',name='Voltar para Whiteboards').click()
+        page.wait_for_timeout(300)
+        print('RETURN_DIAGNOSTIC',json.dumps({'overlay':page.locator('.bo1174-board').count(),'rootInert':page.locator('#root').get_attribute('inert'),'errors':page_errors[-5:]},ensure_ascii=False),flush=True)
         expect(page.locator('[data-whiteboard-library="1"]')).to_be_visible()
         expect(page.locator('.bo1189-board-grid')).to_be_visible()
         verify(page.locator('[data-whiteboard-empty-state="1"]').count()==0,'Biblioteca substitui estado vazio após criar')
