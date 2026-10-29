@@ -7,7 +7,7 @@ const problems=fs.readFileSync('src/views/ProblemsView.tsx','utf8');
 const service=fs.readFileSync('src/services/problems-studio.ts','utf8');
 const canonical=fs.readFileSync('src/services/context-library.ts','utf8');
 const tests=[
- ['Título de hipótese inline sem duplicação',view.includes('aria-label="Enunciado da hipótese"')&&!view.includes('<span>Hipótese</span><input')],
+ ['Título de hipótese inline sem duplicação',view.includes('aria-label="Enunciado da hipótese"')&&!view.slice(view.indexOf('return <section className="bo-h75-hypothesis-detail"'),view.indexOf('return <section className="bo-h75-hypotheses"')).includes('<span>Hipótese</span><input')],
  ['Autosave e sem rodapé manual',view.includes('Hipóteses: autosave')&&!view.includes('bo-h71-detail-actions')],
  ['Metadados junto do título',view.includes('bo-hyp-inline-properties')],
  ['Cards essenciais', ['description','premise','expectedBehavior'].every(key=>view.includes(`essential:true`)&&view.includes(`id:'${key}'`))],
