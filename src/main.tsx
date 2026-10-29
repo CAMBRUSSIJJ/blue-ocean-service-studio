@@ -6,6 +6,7 @@ import { installWorkspaceActivityTracking } from './services/workspace-preferenc
 import { RemoteWorkspaceDialog } from './components/RemoteWorkspaceDialog';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
 import './style.css';
+import './runtime/entity-inline-canvas.css';
 
 document.body.classList.add(
   'rt182-host','rt183-host','rt184-host','rt185-host','rt186-host','rt189-host',
