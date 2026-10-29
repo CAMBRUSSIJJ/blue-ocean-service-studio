@@ -1,6 +1,6 @@
 import type { GraphEntity, ServiceGraph } from '../domain/model';
 import { createDiscoveryEntity } from './discovery-workspace.ts';
-import { makeId } from '../domain/graph-operations.ts';
+
 
 export type ContextKind = 'persona' | 'need' | 'job' | 'pain' | 'problemHypothesis' | 'problem' | 'evidence';
 
@@ -89,7 +89,9 @@ export function createContextEntity(graph: ServiceGraph, kind: ContextKind, titl
   if (kind === 'problem') {
     // A problem can be recorded directly, but never falsely marked as validated.
     const timestamp = nowIso();
-    const id = makeId('problem');
+    const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? `problem-${crypto.randomUUID()}`
+      : `problem-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
     next.entities.problem ||= {};
     next.entities.problem[id] = {
       id, type: 'problem', serviceId: next.service.id,
