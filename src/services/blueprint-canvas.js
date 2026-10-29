@@ -53,7 +53,10 @@ export function canvasRowHeight(doc,definition,indices,minimum=0) {
     const notes=doc.c[definition.id+'|'+index]||[];
     return notes.length?g.padding*2+notes.reduce((sum,note)=>sum+canvasCardHeight(note,definition.id),0)+Math.max(0,notes.length-1)*g.gap:0;
   });
-  return Math.max(90,...total,Math.min(540,Math.max(0,Number(minimum)||0)));
+  // Keep a small footer under populated cells for their persistent "+ cartão" action.
+  // This room is part of the canonical layout projection, so cards never overlap
+  // the control and another stage cannot truncate it.
+  return Math.max(90,...total.map(height=>height>0?height+44:0),Math.min(540,Math.max(0,Number(minimum)||0)));
 }
 export function normalizeCanvasMetadata(input={}) {
   if (!Object.hasOwn(CANVAS_COMPONENTS,input.kind)) throw Error('Tipo de componente indisponível.');
