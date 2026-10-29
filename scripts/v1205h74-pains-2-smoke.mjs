@@ -54,7 +54,7 @@ const inlineCss = fs.readFileSync('src/runtime/pain-context-editor.css','utf8');
 const entry = fs.readFileSync('src/main.tsx','utf8');
 ok('Editor de Dor usa o canvas progressivo', view.includes('<ContextEntityCanvas') && view.includes('bo-pain-inline-title') && canvas.includes('bo-context-ghost'));
 ok('Editor tem autosave e não usa barra inferior', view.includes('Dores: salvamento automático') && !view.includes('bo-h71-detail-actions'));
-ok('Propriedades da Dor no cabeçalho', view.includes('bo-pain-properties') && view.includes('Bo-pain-dont-exist') === false);
+ok('Propriedades da Dor no cabeçalho', view.includes('bo-pain-properties') && view.includes('Severidade:') && view.includes('Frequência:'));
 ok('Relações rápidas são interativas e suportam arrastar', canvas.includes('application/x-bo-context-relation') && canvas.includes('onToggleRelation(relation.id)'));
 ok('Blocos têm opções contextuais e redimensionamento', canvas.includes('bo-context-card-menu') && canvas.includes('Redimensionar') && canvas.includes('Mover para antes'));
 ok('Estilo claro carrega após Tailwind',entry.indexOf("import './runtime/pain-context-editor.css'") > entry.indexOf("import './style.css'") && inlineCss.includes('bo-context-ghost'));
