@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+"""Spatial blueprint capture: no modal, Enter commit, optional reuse, deeper editing and shallow marker."""
+import functools, json, threading
+from pathlib import Path
+from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
+from playwright.sync_api import sync_playwright,expect
+
+ROOT=Path(__file__).resolve().parents[1]
+OUT=ROOT/'artifacts'/'blueprint-inline-capture'
+OUT.mkdir(parents=True,exist_ok=True)
+assert (ROOT/'dist'/'index.html').exists()
+class Quiet(SimpleHTTPRequestHandler):
+ def log_message(self,*_):pass
+server=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT/'dist')))
+threading.Thread(target=server.serve_forever,daemon=True).start()
+checks=[]
+def check(name,ok):
+ checks.append({'name':name,'passed':bool(ok)})
+ if not ok:raise AssertionError(name)
+ print('PASS '+name,flush=True)
+def status(f):expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
+try:
+ with sync_playwright() as pw:
+  browser=pw.chromium.launch(headless=True)
+  page=browser.new_page(viewport={'width':1500,'height':980})
+  page.goto(f'http://127.0.0.1:{server.server_port}',wait_until='networkidle')
+  page.get_by_role('button',name='Abrir workspace local sem conta').click()
+  page.get_by_role('button',name='Novo projeto',exact=True).click()
+  page.get_by_label('Nome do projeto',exact=True).fill('Blueprint Inline QA')
+  page.get_by_label('Serviço principal',exact=True).fill('Lavanderia')
+  page.get_by_role('button',name='Criar projeto',exact=True).click()
+  page.evaluate("""()=>window.BlueOceanRuntime.api('dataBridge').transact(g=>{
+   g.entities.pain||={};g.entities.pain['qa-fila']={id:'qa-fila',type:'pain',serviceId:g.service.id,title:'Fila demorada na lavanderia',description:'Longa espera',createdAt:new Date().toISOString()};
+   return g},'Dor usada no teste')""")
+  page.get_by_role('button',name='Criar mapa',exact=True).click()
+  page.get_by_role('button',name='Em branco',exact=False).first.click()
+  f=page.frame_locator('.bo-blueprint-reference-frame');status(f)
+  f.get_by_role('button',name='Adicionar etapa',exact=True).first.click()
+  f.locator('#cad-quick-form [name=title]').fill('Receber roupas')
+  f.locator('#cad-quick-form [name=title]').press('Enter');status(f)
+  f.locator('[data-cad-view]').select_option('blueprint');status(f)
+  f.locator('[data-act="cad-cell-add"][data-row="fl"][data-si="0"]').click()
+  inline=f.locator('[data-cad-inline-title]')
+  expect(inline).to_be_visible()
+  expect(inline).to_be_focused()
+  check('Inline title has no quick popup or inspector',f.locator('#cad-quick-form').count()==0 and f.locator('#cad-component-form').count()==0)
+  frame=page.locator('.bo-blueprint-reference-frame').element_handle().content_frame()
+  check('Provisional node not in canonical document',frame.evaluate("()=>!(S.c['fl|0']||[]).length"))
+  inline.fill('Conferir roupas e etiquetas')
+  check('Typing does not prematurely save record',frame.evaluate("()=>!(S.c['fl|0']||[]).length"))
+  inline.press('Enter');status(f)
+  node_id=frame.evaluate("()=>S.c['fl|0'].find(n=>n.t==='Conferir roupas e etiquetas')?.i")
+  check('Enter saves correct card in Blueprint',bool(node_id))
+  node=f.locator(f'.cad-node[data-id="{node_id}"]')
+  expect(node).to_be_visible()
+  check('Title-only status is visible',f.locator('.cad-depth-indicator').count()>0)
+  check('No inspector opened after Enter',f.locator('#cad-component-form').count()==0)
+  node.click()
+  check('Single click selects without opening inspector',f.locator('#cad-component-form').count()==0)
+  f.get_by_role('button',name='Detalhes opcionais').click()
+  form=f.locator('#cad-component-form')
+  expect(form).to_be_visible()
+  form.locator('[name=description]').fill('Conferência rápida antes da separação')
+  form.get_by_role('button',name='Salvar componente',exact=True).click()
+  status(f)
+  check('Detailed card no longer has only-title marker',f.locator('.cad-depth-indicator').count()==0)
+  f.locator('[data-act="cad-cell-add"][data-row="im"][data-si="0"]').click()
+  inline=f.locator('[data-cad-inline-title]');expect(inline).to_be_visible()
+  inline.fill('Fi')
+  check('Reuse options remain hidden for two characters',f.locator('[data-cad-inline-suggestions]:visible').count()==0)
+  inline.fill('Fila')
+  suggestions=f.locator('[data-cad-inline-suggestions]')
+  expect(suggestions).to_be_visible()
+  check('Suggestions activate after three characters',suggestions.locator('[data-act="cad-inline-reuse"]').count()>0)
+  suggestions.get_by_role('button',name='Ignorar e criar novo').click()
+  check('User can dismiss suggestion without losing title',inline.input_value()=='Fila' and suggestions.is_hidden())
+  inline.press('Escape')
+  check('Escape discards provisional card',frame.evaluate("()=>!(S.c['im|0']||[]).length"))
+  f.locator('[data-act="cad-cell-add"][data-row="im"][data-si="0"]').click()
+  inline=f.locator('[data-cad-inline-title]');inline.fill('Fila')
+  suggestions=f.locator('[data-cad-inline-suggestions]')
+  expect(suggestions).to_be_visible()
+  suggestions.locator('[data-act="cad-inline-reuse"]').first.click()
+  status(f)
+  check('Reusing an existing record does not erase it',frame.evaluate("()=>S.serviceElements.pain.some(x=>x.id==='qa-fila')"))
+  check('Reused title is on the map',frame.evaluate("()=>Object.values(S.c).flat().some(n=>n.t==='Fila demorada na lavanderia')"))
+  page.screenshot(path=str(OUT/'inline-blueprint.png'),full_page=True)
+  (OUT/'results.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
+  browser.close()
+finally:server.shutdown()
