@@ -5,7 +5,7 @@ import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
 import { contextEntityTitle, contextEntityUsage, listContextEntities, removeContextEntity } from '../services/context-library';
-import { createDiscoveryEntity } from '../services/discovery-workspace';
+import { makeId } from '../domain/graph-operations';
 import {
   buildProblemStudioReport,
   problemProfileFromEntity,
@@ -124,9 +124,9 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
   const createProblem = () => {
     if (!createTitle.trim()) return;
     const now = new Date().toISOString();
-    const entity = createDiscoveryEntity({graph,kind:'problem',title:createTitle.trim(),description:createDescription.trim(),now});
-    setGraph(current=>({...current,service:{...current.service,updatedAt:now},entities:{...current.entities,problem:{...(current.entities?.problem??{}),[entity.id]:{...entity,status:'draft',severity:'medium',priority:'medium',updatedAt:now}}}}),'Problemas: criar rascunho');
-    setCreateOpen(false);setCreateTitle('');setCreateDescription('');setSelectedId(entity.id);setDetailTab('overview');
+    const id = makeId('problem');
+    setGraph(current=>({...current,service:{...current.service,updatedAt:now},entities:{...current.entities,problem:{...(current.entities?.problem??{}),[id]:{id,type:'problem',serviceId:current.service.id,title:createTitle.trim(),description:createDescription.trim(),status:'draft',severity:'medium',priority:'medium',createdAt:now,updatedAt:now,relatedIds:[]}}}}),'Problemas: criar rascunho');
+    setCreateOpen(false);setCreateTitle('');setCreateDescription('');setSelectedId(id);setDetailTab('overview');
     showToast('Problema criado como rascunho. Conecte evidências antes da validação.');
   };
   const closeProblem = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
