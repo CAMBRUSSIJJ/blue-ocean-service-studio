@@ -77,9 +77,9 @@ def main():
               page.get_by_role('navigation',name='Navegação rápida').get_by_role('button',name='Abrir Whiteboard pelo atalho móvel').click()
             else:
               page.locator('[data-blue-ocean-whiteboard-nav="standard"]').click()
-            page.get_by_role('button',name='Novo whiteboard',exact=True).click()
-            page.get_by_label('Nome do quadro',exact=True).fill('E2E Visual')
-            page.get_by_role('button',name='Começar livre',exact=True).click()
+            page.locator('[data-whiteboard-empty-state="1"]').wait_for(state='visible',timeout=10000)
+            page.screenshot(path=str(ART/f'whiteboard-empty-{name}.png'),full_page=False,animations='disabled')
+            page.get_by_role('button',name='Criar whiteboard',exact=True).click()
             board=page.locator('.bo1174-board')
             board.wait_for(state='visible',timeout=10000)
             if page.locator('.rt144-view').bounding_box()['height']<200:

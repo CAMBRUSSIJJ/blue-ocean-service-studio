@@ -2480,6 +2480,10 @@ import { GUIDANCE_TOPICS, guidanceTopic, normalizeAssistanceMode, topicForBuilde
       else closeToWhiteboards();
     },'icon rt181-back rt190-back');
     back.title='Voltar para '+(kind==='blueprint'?'Blueprints':kind==='journey'?'Jornadas':'Whiteboards');back.setAttribute('aria-label',back.title);
+    // Keep the back click alive when quick-create/context menus are open: the document-level
+    // pointerdown listener otherwise re-renders the toolbar before the click is dispatched.
+    back.addEventListener('pointerdown',event=>event.stopPropagation());
+    back.addEventListener('pointerup',event=>event.stopPropagation());
     const copy=document.createElement('div');copy.className='rt181-context-copy rt183-context-copy rt190-context-copy';
     copy.innerHTML=`<small class="bo1174-board-crumb">${label} <i>·</i> ${esc(graph.service.name)}</small><div class="rt183-doc-title rt190-doc-title"><b>${esc(board().name||label)}</b></div>`;
     context.append(back,copy);

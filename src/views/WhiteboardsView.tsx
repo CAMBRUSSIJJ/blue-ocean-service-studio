@@ -47,6 +47,7 @@ const statusLabel = (status: string) => ({ blank: 'Em branco', contextual: 'Cont
 export function WhiteboardsView({ studio }: { studio: StudioController }) {
   const { graph, hasService, setActiveTab, setGraph, showToast } = studio;
   const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [guidedFreeStart, setGuidedFreeStart] = useState(false);
   const [name, setName] = useState('');
   const [menuBoardId, setMenuBoardId] = useState<string | null>(null);
@@ -108,12 +109,34 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
     showToast('Whiteboard 2.0 criado com Contexto canônico e frames de composição.');
   };
 
-  const create = async () => {
-    const title = name.trim() || 'Novo Whiteboard';
+  const create = async (direct = false) => {
+    if (creating) return;
     const runtime = api<WhiteboardCoreApi>('whiteboardCore');
-    if (!runtime?.createBlank) return;
-    setShowCreate(false); setGuidedFreeStart(false); setName('');
-    await runtime.createBlank(title);
+    if (!runtime?.createBlank) {
+      showToast('O editor não está disponível. Reabra o serviço e tente novamente.');
+      return;
+    }
+    setCreating(true);
+    try {
+      // The runtime creates and opens the actual canvas, persisting the board in the Service Graph.
+      const created = await runtime.createBlank(direct ? 'Novo Whiteboard' : (name.trim() || 'Novo Whiteboard'));
+      if (!created?.id) {
+        showToast('Não foi possível criar o quadro. Verifique se o serviço está salvo.');
+        return;
+      }
+      setShowCreate(false);
+      setGuidedFreeStart(false);
+      setName('');
+      // Older runtime builds may create the board without opening the editor.
+      if (!document.body.classList.contains('bo-whiteboard-open')) {
+        const opened = await runtime.openBoard?.(created.id);
+        if (!opened) showToast('Quadro criado. Abra-o pela biblioteca para continuar.');
+      }
+    } catch {
+      showToast('Falha ao iniciar o Whiteboard. Você pode tentar novamente.');
+    } finally {
+      setCreating(false);
+    }
   };
 
   const syncContext = (id: string) => {
@@ -169,11 +192,11 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
 
   if (!hasService) return <section className="bo1189-module-empty"><LayoutTemplate size={30}/><h2>Crie um serviço antes de abrir quadros</h2><p>Whiteboards pertencem a um serviço. Volte à Visão geral e crie o primeiro serviço.</p><button type="button" onClick={() => setActiveTab('home')}>Ir para a Visão geral</button></section>;
 
-  return <section className="bo1189-whiteboards bo-h711-whiteboards" data-whiteboard-library="1" data-whiteboard-2="1">
+  return <section className={`bo1189-whiteboards bo-h711-whiteboards ${boards.length === 0 ? 'bo-whiteboard-zero-page' : ''}`} data-whiteboard-library="1" data-whiteboard-2="1" data-whiteboard-empty={boards.length === 0 ? '1' : '0'}>
     <p className="bo-mobile-read-note" role="note">No celular, Whiteboards abrem para leitura e comentários. Para criar ou editar o quadro, use um tablet ou computador.</p>
-    <header><div><span>WORKSPACE</span><h1>Whiteboard</h1><p>Explore possibilidades sem precisar seguir uma etapa obrigatória. Quando quiser estruturar a experiência ou a operação, continue nas Jornadas ou Blueprints.</p></div><div className="bo1190-whiteboard-actions"><button type="button" onClick={() => openJourneys()}>Ir para Jornadas</button><button type="button" onClick={openBlueprints}><LayoutTemplate size={16}/> Ir para Blueprints</button>{handoff.readyForWhiteboard && <button type="button" onClick={createFromDefinition}><Plus size={16}/> Com contexto</button>}<button type="button" className="primary" onClick={() => setShowCreate(true)}><Plus size={16}/> Novo whiteboard</button></div></header>
+    <header className="bo-whiteboard-library-head"><div><h1>Whiteboard</h1><p>Espaço livre para explorar ideias, mapear fluxos e rascunhar processos.</p></div>{boards.length > 0 && <div className="bo1190-whiteboard-actions">{handoff.readyForWhiteboard && <button type="button" onClick={createFromDefinition}><Plus size={16}/> Com contexto</button>}<button type="button" className="primary" onClick={() => setShowCreate(true)}><Plus size={16}/> Novo whiteboard</button></div>}</header>
 
-    <div className="bo-h1711-flow-hint" data-design-flow="whiteboard" role="note"><span><strong>Whiteboard</strong><span>·</span><span>Espaço livre para explorar. Leve o aprendizado para Jornada ou Blueprint quando fizer sentido.</span></span><div><button type="button" onClick={() => openJourneys()}>Organizar em Jornadas <ArrowRight size={13}/></button><button type="button" onClick={openBlueprints}>Desenhar operação no Blueprint <ArrowRight size={13}/></button></div></div>
+    {boards.length > 0 && <div className="bo-h1711-flow-hint" data-design-flow="whiteboard" role="note"><span><strong>Whiteboard</strong><span>·</span><span>Espaço livre para explorar. Leve o aprendizado para Jornada ou Blueprint quando fizer sentido.</span></span><div><button type="button" onClick={() => openJourneys()}>Organizar em Jornadas <ArrowRight size={13}/></button><button type="button" onClick={openBlueprints}>Desenhar operação no Blueprint <ArrowRight size={13}/></button></div></div>}
     {boards.length > 0 && <div className="bo-h711-summary" data-whiteboard-health-summary="1">
       <div><span>QUADROS</span><strong>{summary.total}</strong><small>Whiteboards livres</small></div>
       <div><span>OBJETOS VINCULADOS</span><strong>{summary.smart}</strong><small>Usados em outros contextos</small></div>
@@ -181,16 +204,25 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
       <div><span>COM CONTEXTO</span><strong>{summary.contextual}</strong><small>Ligados à Definition</small></div>
     </div>}
 
-    {handoff.readyForWhiteboard && <div className="bo-h78-library-hint" data-whiteboard-context-handoff="1"><strong>Pessoas, problemas e evidências já disponíveis</strong><span>{handoff.counts.persona} Persona · {handoff.counts.problem} Problema · {handoff.counts.evidence} Evidência · {handoff.supporting.length} relações de suporte.</span><button type="button" onClick={createFromDefinition}>Criar com registros existentes</button></div>}
+    {boards.length > 0 && handoff.readyForWhiteboard && <div className="bo-h78-library-hint" data-whiteboard-context-handoff="1"><strong>Pessoas, problemas e evidências já disponíveis</strong><span>{handoff.counts.persona} Persona · {handoff.counts.problem} Problema · {handoff.counts.evidence} Evidência · {handoff.supporting.length} relações de suporte.</span><button type="button" onClick={createFromDefinition}>Criar com registros existentes</button></div>}
 
-    <div className="bo-h711-commandbar">
+    {boards.length > 0 && <div className="bo-h711-commandbar">
       <label><Search size={16}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar whiteboard..."/></label>
       <div aria-label="Filtros do Whiteboard"><Filter size={15}/>{([
         ['all', 'Todos'], ['context', 'Com contexto'], ['journey', 'Com Jornada'], ['attention', 'Precisa atenção'],
       ] as Array<[BoardFilter, string]>).map(([key, label]) => <button type="button" key={key} className={filter === key ? 'active' : ''} onClick={() => setFilter(key)}>{label}</button>)}</div>
-    </div>
+    </div>}
 
-    {filteredBoards.length ? <div className="bo1189-board-grid">{filteredBoards.map((board) => <article key={board.id} className="bo1193-board-card bo-h711-board-card" data-whiteboard-studio-status={board.report?.status ?? 'blank'}>
+    {boards.length === 0 ? <div className="bo-whiteboard-zero" data-whiteboard-empty-state="1">
+      <img className="bo-whiteboard-zero-art" src="/whiteboard-empty-state.svg" alt="" aria-hidden="true" />
+      <h2>Nenhum Whiteboard ainda</h2>
+      <p>Crie um quadro livre para começar a explorar o seu serviço.</p>
+      <button type="button" className="bo-whiteboard-zero-create" disabled={creating} onClick={() => void create(true)}><Plus size={17}/>{creating ? 'Criando whiteboard…' : 'Criar whiteboard'}</button>
+      <div className="bo-whiteboard-zero-links" aria-label="Outras áreas do serviço">
+        <button type="button" onClick={openBlueprints}>Ir para Blueprints <ArrowRight size={13}/></button>
+        <button type="button" onClick={() => openJourneys()}>Ir para Jornadas <ArrowRight size={13}/></button>
+      </div>
+    </div> : filteredBoards.length ? <div className="bo1189-board-grid">{filteredBoards.map((board) => <article key={board.id} className="bo1193-board-card bo-h711-board-card" data-whiteboard-studio-status={board.report?.status ?? 'blank'}>
       <button type="button" className="bo1193-card-menu-trigger" aria-label={`Ações de ${board.name}`} onClick={() => setMenuBoardId(menuBoardId === board.id ? null : board.id)}>•••</button>
       {menuBoardId === board.id && <div className="bo1193-card-menu bo-h711-card-menu">
         {board.contextCount > 0 && <button type="button" onClick={() => syncContext(board.id)}><RefreshCw size={13}/> Sincronizar contexto</button>}
@@ -205,9 +237,9 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
       {board.report && board.report.danglingSmartObjects > 0 && <div className="bo-h711-health"><span><ShieldCheck size={13}/> Referências para revisar</span><strong>{board.report.danglingSmartObjects}</strong><div><i style={{ width: `${board.report.qualityScore}%` }}/></div><small>{board.report.contextTotal ? `${board.report.contextCoverage}% do contexto representado` : 'Quadro livre sem contexto obrigatório'}{board.report.danglingSmartObjects ? ` · ${board.report.danglingSmartObjects} referência(s) ausente(s)` : ''}</small></div>}
       <button type="button" onClick={() => void open(board.id)}>Abrir <ArrowRight size={14}/></button>
       {board.journeyId && graph.journeys[board.journeyId] && <button type="button" className="bo-h1711-link" data-whiteboard-to-journey={board.id} onClick={() => openJourneys(board.journeyId)}>Jornada vinculada: {graph.journeys[board.journeyId].name} <ArrowRight size={13}/></button>}
-    </article>)}</div> : <div className="bo1189-board-empty"><LayoutTemplate size={28}/><strong>{boards.length ? 'Nenhum Whiteboard corresponde aos filtros' : 'Nenhum Whiteboard ainda'}</strong><p>{boards.length ? 'Ajuste a busca ou os filtros para voltar a exibir seus quadros.' : 'Crie um quadro livre ou comece diretamente do Contexto validado do serviço.'}</p><div className="bo1190-empty-actions"><button type="button" onClick={openBlueprints}><LayoutTemplate size={15}/> Abrir Blueprints</button><button type="button" className="secondary" onClick={() => setShowCreate(true)}><Plus size={15}/> Criar whiteboard</button></div></div>}
+    </article>)}</div> : <div className="bo1189-board-empty"><LayoutTemplate size={28}/><strong>'Nenhum Whiteboard corresponde aos filtros'</strong><p>'Ajuste a busca ou os filtros para voltar a exibir seus quadros.'</p><div className="bo1190-empty-actions"><button type="button" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar filtros</button></div></div>}
 
     {renameBoard && <div className="bo1189-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) setRenameBoard(null); }}><form className="bo1189-modal bo1193-rename-modal" onSubmit={(e) => { e.preventDefault(); rename(); }}><header><div><span>WHITEBOARD</span><h2>Renomear quadro</h2><p>O novo nome será usado na biblioteca e no cabeçalho do Whiteboard.</p></div><button type="button" aria-label="Fechar" onClick={() => setRenameBoard(null)}><X size={18}/></button></header><label>Nome do quadro<input autoFocus value={renameValue} onChange={(e) => setRenameValue(e.target.value)} /></label><footer><button type="button" onClick={() => setRenameBoard(null)}>Cancelar</button><button type="submit">Salvar nome</button></footer></form></div>}
-    {showCreate && <div className="bo1189-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) { setShowCreate(false); setGuidedFreeStart(false); } }}><form className="bo1189-modal bo-h167-whiteboard-start" onSubmit={(e) => { e.preventDefault(); void create(); }}><header><div><span>NOVO WHITEBOARD</span><h2>{guidedFreeStart ? 'Começar livre no Whiteboard' : 'Como você quer começar?'}</h2><p>{guidedFreeStart ? 'Dê um nome ao quadro e comece visualmente. Pessoas, necessidades, dores e evidências podem ser registradas no próprio raciocínio e organizadas depois.' : 'Não existe ordem obrigatória. Traga o que já sabe ou comece livre e registre pessoas, necessidades, dores e problemas conforme eles aparecerem.'}</p></div><button type="button" aria-label="Fechar" onClick={() => { setShowCreate(false); setGuidedFreeStart(false); }}><X size={18}/></button></header>{!guidedFreeStart && <div className="bo-h167-whiteboard-start__choices"><article><strong>Começar livre</strong><p>Abra um quadro vazio. Dentro do Whiteboard você pode criar Persona, Necessidade, Dor, Evidência e outros objetos canônicos sem sair do raciocínio visual.</p></article>{handoff.readyForWhiteboard && <article><strong>Usar o que já foi pesquisado</strong><p>Leve Personas, Necessidades/Dores relacionadas, Problemas e Evidências já estruturados para o quadro.</p><button type="button" onClick={() => { setShowCreate(false); setGuidedFreeStart(false); createFromDefinition(); }}>Criar com registros existentes <ArrowRight size={13}/></button></article>}</div>}<label>Nome do quadro<input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Exploração da coleta e entrega" /></label><footer><button type="button" onClick={() => { setShowCreate(false); setGuidedFreeStart(false); }}>Cancelar</button><button type="submit">{guidedFreeStart ? 'Criar e começar' : 'Começar livre'}</button></footer></form></div>}
+    {showCreate && <div className="bo1189-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) { setShowCreate(false); setGuidedFreeStart(false); } }}><form className="bo1189-modal bo-h167-whiteboard-start" onSubmit={(e) => { e.preventDefault(); void create(); }}><header><div><span>NOVO WHITEBOARD</span><h2>{guidedFreeStart ? 'Começar livre no Whiteboard' : 'Como você quer começar?'}</h2><p>{guidedFreeStart ? 'Dê um nome ao quadro e comece visualmente. Pessoas, necessidades, dores e evidências podem ser registradas no próprio raciocínio e organizadas depois.' : 'Não existe ordem obrigatória. Traga o que já sabe ou comece livre e registre pessoas, necessidades, dores e problemas conforme eles aparecerem.'}</p></div><button type="button" aria-label="Fechar" onClick={() => { setShowCreate(false); setGuidedFreeStart(false); }}><X size={18}/></button></header>{!guidedFreeStart && <div className="bo-h167-whiteboard-start__choices"><article><strong>Começar livre</strong><p>Abra um quadro vazio. Dentro do Whiteboard você pode criar Persona, Necessidade, Dor, Evidência e outros objetos canônicos sem sair do raciocínio visual.</p></article>{handoff.readyForWhiteboard && <article><strong>Usar o que já foi pesquisado</strong><p>Leve Personas, Necessidades/Dores relacionadas, Problemas e Evidências já estruturados para o quadro.</p><button type="button" onClick={() => { setShowCreate(false); setGuidedFreeStart(false); createFromDefinition(); }}>Criar com registros existentes <ArrowRight size={13}/></button></article>}</div>}<label>Nome do quadro<input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Exploração da coleta e entrega" /></label><footer><button type="button" onClick={() => { setShowCreate(false); setGuidedFreeStart(false); }}>Cancelar</button><button type="submit" disabled={creating}>{creating ? 'Criando…' : (guidedFreeStart ? 'Criar e começar' : 'Começar livre')}</button></footer></form></div>}
   </section>;
 }
