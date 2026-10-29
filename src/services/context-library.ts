@@ -1,6 +1,6 @@
 import type { GraphEntity, ServiceGraph } from '../domain/model';
 import { createDiscoveryEntity } from './discovery-workspace.ts';
-import { makeId } from '../domain/graph-operations';
+import { makeId } from '../domain/graph-operations.ts';
 
 export type ContextKind = 'persona' | 'need' | 'job' | 'pain' | 'problemHypothesis' | 'problem' | 'evidence';
 
