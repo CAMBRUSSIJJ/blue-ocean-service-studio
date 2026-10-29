@@ -17,6 +17,7 @@ const tests=[
  ['CSS importado após estilos legados',main.includes("import './style.css';\nimport './runtime/entity-inline-canvas.css';")&&style.includes('.bo-inline-cards')],
  ['Problemas têm criação direta',problems.includes("type:'problem'")&&problems.includes("status:'draft'")&&problems.includes('Criar problema')],
  ['Problemas não redirecionam para Hipóteses',!problems.includes('requestHypothesisCreation')&&!problems.includes("detail: 'hypotheses'")],
+ ['Intento de criação externo respeita aba Problemas',problems.includes("sessionStorage.getItem('bo-workspace-create-page') !== 'problems'")],
  ['Rascunho não vira validado automaticamente ao editar',service.includes("existing.status === 'draft' ? 'draft'")],
  ['API canônica cria Problemas sem redirecionar',canonical.includes("if (kind === 'problem')")&&canonical.includes("status: 'draft'")&&!canonical.includes("kind === 'problem' ? 'problemHypothesis'")],
 ];
