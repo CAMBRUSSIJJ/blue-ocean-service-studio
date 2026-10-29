@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { EntityInlineCanvas, type EntityInlineBlock } from '../components/EntityInlineCanvas';
 import { AlertCircle, ArrowLeft, Check, CheckCircle2, Filter, Lightbulb, MoreVertical, Plus, Search, Table2, Trash2, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
@@ -69,6 +70,7 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
   const [createTitle, setCreateTitle] = useState('');
   const [createDescription, setCreateDescription] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const flushRef = useRef<() => void>(() => {});
 
   const selected = selectedId ? graph.entities?.problemHypothesis?.[selectedId] : undefined;
   const report = useMemo(() => selectedId ? buildHypothesisStudioReport(graph, selectedId) : null, [graph, selectedId]);
@@ -89,7 +91,7 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
     setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
     setContextIds(report.contextConnections.map((item) => item.id));
     setEvidenceLinks(report.evidenceConnections.map((item) => ({ evidenceId: item.id, stance: item.stance })));
-  }, [selectedId, selected?.updatedAt]);
+  }, [selectedId]);
 
   useEffect(() => {
     if (sessionStorage.getItem('bo-workspace-create-page') !== 'hypotheses') return;
@@ -144,7 +146,7 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
   }), [rows, query, filter]);
 
   const openHypothesis = (id: string) => { setSelectedId(id); setDetailTab('overview'); setMenuId(null); };
-  const closeHypothesis = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
+  const closeHypothesis = (commit = true) => { if (commit) flushRef.current(); setSelectedId(null); setDraft(null); setDetailTab('overview'); };
   const createHypothesis = () => {
     if (!createTitle.trim()) return;
     const now = new Date().toISOString();
@@ -163,24 +165,36 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
     setCreateOpen(false); setCreateTitle(''); setCreateDescription(''); setSelectedId(entity.id); setDetailTab('overview');
     showToast('Hipótese criada. Conecte contexto e evidências antes de validá-la.');
   };
-  const saveHypothesis = () => {
-    if (!selectedId || !draft?.title.trim()) return;
-    const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
-    setGraph((current) => patchHypothesisMeta(updateHypothesisProfile({ graph: current, hypothesisId: selectedId, draft, contextIds, evidenceLinks }), selectedId, owner, tags), 'Hipóteses 2.0: salvar');
-    showToast('Hipótese salva.');
+  const tags = tagsText.split(',').map(item => item.trim()).filter(Boolean);
+  const original = selected ? hypothesisProfileFromEntity(selected) : null;
+  const oldTags = Array.isArray(selected?.tags) ? selected.tags.map(String) : [];
+  const sameIds = (a: string[],b: string[]) => [...a].sort().join('|') === [...b].sort().join('|');
+  const linkSignature = (links: HypothesisEvidenceLink[]) => links.map(item => item.evidenceId + ':' + item.stance).sort().join('|');
+  const dirty = Boolean(draft && original && (
+    (Object.keys(draft) as Array<keyof HypothesisProfileDraft>).some(key => draft[key].trim() !== original[key].trim())
+    || owner.trim() !== String(selected?.owner ?? '').trim()
+    || tags.join('|') !== oldTags.join('|')
+    || !sameIds(contextIds, report?.contextConnections.map(item=>item.id) ?? [])
+    || linkSignature(evidenceLinks) !== linkSignature(report?.evidenceConnections.map(item=>({evidenceId:item.id, stance:item.stance})) ?? [])
+  ));
+  const persist = (id: string, value: HypothesisProfileDraft, nextOwner: string, nextTags: string[], linked: string[], links: HypothesisEvidenceLink[]) => {
+    if (!value.title.trim()) return;
+    setGraph(current => patchHypothesisMeta(updateHypothesisProfile({
+      graph: current, hypothesisId: id, draft: value, contextIds: linked, evidenceLinks: links,
+    }), id, nextOwner, nextTags), 'Hipóteses: autosave');
   };
-  const discardHypothesis = () => {
-    if (!selected || !report) return;
-    setDraft(hypothesisProfileFromEntity(selected));
-    setOwner(String(selected.owner ?? ''));
-    setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
-    setContextIds(report.contextConnections.map((item) => item.id));
-    setEvidenceLinks(report.evidenceConnections.map((item) => ({ evidenceId: item.id, stance: item.stance })));
-    showToast('Alterações descartadas.');
+  flushRef.current = () => {
+    if (selectedId && draft?.title.trim() && dirty) persist(selectedId,draft,owner,tags,contextIds,evidenceLinks);
   };
+  useEffect(() => () => flushRef.current(), []);
+  useEffect(() => {
+    if (!selectedId || !draft?.title.trim() || !dirty) return;
+    const timer = window.setTimeout(() => persist(selectedId,draft,owner,tags,contextIds,evidenceLinks), 800);
+    return () => window.clearTimeout(timer);
+  }, [selectedId,draft,owner,tagsText,contextIds,evidenceLinks,dirty]);
   const removeHypothesis = (id: string) => {
     setGraph((current) => removeContextEntity(current, 'problemHypothesis', id), 'Hipóteses 2.0: remover');
-    if (selectedId === id) closeHypothesis();
+    if (selectedId === id) closeHypothesis(false);
     setDeleteId(null); setMenuId(null);
     showToast('Hipótese removida e relações desvinculadas.');
   };
@@ -201,39 +215,54 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
 
   if (selected && draft && report) {
     const preview = previewReport ?? report;
-    return <section className="bo-h75-hypothesis-detail" data-hypotheses-h75="detail">
-      <header className="bo-h71-detail-head bo-h75-detail-head">
-        <button type="button" className="bo-h71-back" onClick={closeHypothesis}><ArrowLeft size={16}/> Hipóteses</button>
-        <div className="bo-h71-detail-title"><span className="bo-h71-avatar bo-h75-avatar"><Lightbulb size={19}/></span><div><small>HIPÓTESE DE PROBLEMA</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Formule uma explicação provisória que possa ser confrontada com evidências.'}</p></div></div>
-        <div className="bo-h75-header-status"><span className={`bo-h75-status is-${preview.status}`}>{statusLabel[preview.status]}</span><div className="bo-h71-detail-score"><span>PRONTIDÃO</span><strong>{preview.validationScore}%</strong><i><b style={{ width: `${preview.validationScore}%` }}/></i></div></div>
+    const blocks: EntityInlineBlock[] = [
+      {id:'description',label:'Descrição (por que acreditamos nisso?)',value:draft.description,essential:true,wide:true,placeholder:'Explique a lógica da hipótese sem tratá-la como fato confirmado.',onChange:value=>setDraft(current=>current?{...current,description:value}:current)},
+      {id:'premise',label:'Premissa',value:draft.premise,essential:true,placeholder:'Que crença precisa ser verdadeira?',onChange:value=>setDraft(current=>current?{...current,premise:value}:current)},
+      {id:'expectedBehavior',label:'Comportamento esperado',value:draft.expectedBehavior,essential:true,placeholder:'O que deveríamos observar se estivesse correta?',onChange:value=>setDraft(current=>current?{...current,expectedBehavior:value}:current)},
+      {id:'validationCriterion',label:'Critério de validação',value:draft.validationCriterion,placeholder:'Que resultado aceitaria ou rejeitaria a hipótese?',onChange:value=>setDraft(current=>current?{...current,validationCriterion:value}:current)},
+      {id:'impactIfWrong',label:'Impacto se estiver errada',value:draft.impactIfWrong,placeholder:'Qual decisão ou esforço pode ser desperdiçado?',onChange:value=>setDraft(current=>current?{...current,impactIfWrong:value}:current)},
+    ];
+    const guidance = draft.title.trim().length < 30 || !/\b(que|porque|result|quando|se|causa|devido|aument|reduz)\b/i.test(draft.title);
+    return <section className="bo-h75-hypothesis-detail bo-hyp-inline" data-hypotheses-h75="detail">
+      <header className="bo-hyp-inline-header">
+        <div className="bo-hyp-inline-top">
+          <button type="button" className="bo-hyp-inline-back" onClick={()=>closeHypothesis()}><ArrowLeft size={15}/> Hipóteses</button>
+          <div className="bo-hyp-inline-top-actions">
+            <span className="bo-hyp-inline-save" role="status" aria-live="polite">{!draft.title.trim()?'Enunciado obrigatório':dirty?'Salvando…':studio.saveStatus==='error'?'Erro ao salvar':<><Check size={13}/> Salvo</>}</span>
+            <span className="bo-hyp-inline-ready">Prontidão: <b>{preview.validationScore}%</b></span>
+            <button type="button" className="bo-hyp-inline-delete" onClick={()=>setDeleteId(selected.id)}><Trash2 size={14}/> Excluir</button>
+          </div>
+        </div>
+        <div className="bo-hyp-inline-statement"><span className="bo-hyp-inline-icon"><Lightbulb size={19}/></span>
+          <textarea aria-label="Enunciado da hipótese" rows={1} value={draft.title} onChange={event=>setDraft(current=>current?{...current,title:event.target.value}:current)} placeholder="Acreditamos que..."/>
+        </div>
+        {guidance&&<p className="bo-hyp-inline-guidance"><AlertCircle size={15}/> Esta hipótese parece incompleta. Experimente: “Acreditamos que [ação] resultará em [resultado] porque [razão]”.</p>}
+        <div className="bo-hyp-inline-properties">
+          <label>Confiança: <select value={draft.confidence} onChange={event=>setDraft(current=>current?{...current,confidence:event.target.value as HypothesisConfidence}:current)}>{Object.entries(confidenceLabel).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+          <label>Risco: <select value={draft.riskLevel} onChange={event=>setDraft(current=>current?{...current,riskLevel:event.target.value as HypothesisRisk}:current)}>{Object.entries(riskLabel).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+          <label>Responsável: <input value={owner} onChange={event=>setOwner(event.target.value)} placeholder="Adicionar responsável"/></label>
+          <label>Tags: <input value={tagsText} onChange={event=>setTagsText(event.target.value)} placeholder="+ Adicionar tags"/></label>
+        </div>
       </header>
-      <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Hipótese">
-        {([['overview','Visão geral'],['context','Contexto'],['evidence','Evidências'],['validation','Validação'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'context' && <b>{contextIds.length}</b>}{id === 'evidence' && <b>{evidenceLinks.length}</b>}{id === 'validation' && <b>{preview.validationScore}%</b>}</button>)}
+      <nav className="bo-h71-detail-tabs bo-hyp-inline-tabs" aria-label="Detalhes da Hipótese">
+        {([['overview','Visão geral'],['context','Contexto'],['evidence','Evidências'],['validation','Validação'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label]) => <button key={id} type="button" className={detailTab===id?'is-active':''} onClick={()=>setDetailTab(id)}>{label}{id==='context'&&<b>{contextIds.length}</b>}{id==='evidence'&&<b>{evidenceLinks.length}</b>}</button>)}
       </nav>
-      <div className="bo-h71-detail-body">
-        {detailTab === 'overview' && <div className="bo-h75-overview-grid">
-          <section className="bo-h71-editor-card bo-h75-card"><header><div><small>FORMULAÇÃO</small><strong>O que acreditamos que explica a fricção?</strong></div><span className={`bo-h75-confidence is-${draft.confidence}`}>Confiança {confidenceLabel[draft.confidence].toLowerCase()}</span></header>
-            <div className="bo-h71-form two-col">
-              <label className="wide"><span>Hipótese</span><input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="Ex.: O deslocamento é a principal razão para abandonar o serviço"/></label>
-              <label className="wide"><span>Descrição <small>por que acreditamos nisso?</small></span><textarea rows={3} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Explique a lógica da hipótese sem tratá-la como fato confirmado."/></label>
-              <label><span>Premissa</span><textarea rows={3} value={draft.premise} onChange={(event) => setDraft({ ...draft, premise: event.target.value })} placeholder="Que crença precisa ser verdadeira?"/></label>
-              <label><span>Comportamento esperado</span><textarea rows={3} value={draft.expectedBehavior} onChange={(event) => setDraft({ ...draft, expectedBehavior: event.target.value })} placeholder="O que deveríamos observar se a hipótese estiver correta?"/></label>
-              <label><span>Critério de validação</span><textarea rows={3} value={draft.validationCriterion} onChange={(event) => setDraft({ ...draft, validationCriterion: event.target.value })} placeholder="Qual resultado faria aceitar ou rejeitar a hipótese?"/></label>
-              <label><span>Impacto se estiver errada</span><textarea rows={3} value={draft.impactIfWrong} onChange={(event) => setDraft({ ...draft, impactIfWrong: event.target.value })} placeholder="Que decisão ou esforço pode ser desperdiçado?"/></label>
-              <label><span>Confiança atual</span><select value={draft.confidence} onChange={(event) => setDraft({ ...draft, confidence: event.target.value as HypothesisConfidence })}>{Object.entries(confidenceLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-              <label><span>Risco de estar errada</span><select value={draft.riskLevel} onChange={(event) => setDraft({ ...draft, riskLevel: event.target.value as HypothesisRisk })}>{Object.entries(riskLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-              <label><span>Responsável <small>opcional</small></span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></label>
-              <label><span>Tags <small>separadas por vírgula</small></span><input value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="Ex.: descoberta, risco, comportamento"/></label>
-            </div>
-          </section>
-          <aside className="bo-h75-summary"><small>LEITURA DA HIPÓTESE</small><strong>Se isso for verdade...</strong><p>{draft.premise ? <><b>Assumimos que</b> {draft.premise}. </> : null}{draft.expectedBehavior ? <><b>Então esperamos observar</b> {draft.expectedBehavior}. </> : null}{draft.validationCriterion ? <><b>Vamos considerar válida quando</b> {draft.validationCriterion}.</> : null}{!draft.premise && !draft.expectedBehavior && !draft.validationCriterion ? 'Preencha premissa, comportamento esperado e critério para tornar a hipótese testável.' : null}</p><div><span>Prontidão para validar</span><strong>{preview.validationScore}%</strong><i><b style={{ width: `${preview.validationScore}%` }}/></i></div><small>RISCO {riskLabel[draft.riskLevel].toUpperCase()} · CONFIANÇA {confidenceLabel[draft.confidence].toUpperCase()}</small></aside>
-        </div>}
+      {detailTab==='overview'
+        ? <EntityInlineCanvas entityId={selected.id} kind="hypothesis" blocks={blocks}
+            criteria={preview.validationChecks.map(item=>({...item,relationKinds:item.id==='evidence'?['evidence']:item.id==='pain'?['pain']:item.id==='customer-context'?['persona','need','job']:undefined}))}
+            relations={[
+              ...contextOptions.map(item=>({id:item.id,kind:item.kind,title:item.title,linked:contextIds.includes(item.id)})),
+              ...evidenceOptions.map(item=>({id:item.id,kind:'evidence',title:item.title,linked:evidenceLinks.some(link=>link.evidenceId===item.id)})),
+            ]}
+            onToggleRelation={id=>evidenceOptions.some(item=>item.id===id)?toggleEvidence(id):toggleContext(id)}
+            onViewValidation={()=>setDetailTab('validation')}
+          />
+        : <div className="bo-h71-detail-body bo-hyp-inline-secondary">
         {detailTab === 'context' && <div><div className="bo-h71-section-intro"><div><small>CONTEXTO</small><h2>Onde esta hipótese acontece?</h2><p>Conecte a hipótese às pessoas, necessidades, Jobs e principalmente à Dor que originou a investigação.</p></div><strong>{contextIds.length} conexão(ões)</strong></div><div className="bo-h71-relation-grid">{(['persona','need','job','pain'] as ProblemContextKind[]).map((kind) => { const options = contextOptions.filter((item) => item.kind === kind); return <section key={kind}><header><strong>{contextLabel[kind]}</strong><span>{options.filter((item) => contextIds.includes(item.id)).length}/{options.length}</span></header>{options.length ? <div>{options.map((item) => <button key={item.id} type="button" className={contextIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleContext(item.id)}><b>{contextIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <p>Nenhum item criado ainda.</p>}</section>; })}</div></div>}
         {detailTab === 'evidence' && <div><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que sustenta ou contradiz esta hipótese?</h2><p>Cada evidência deve ter uma posição explícita. Contradição não é erro: ela ajuda a evitar confirmação seletiva.</p></div><strong>{evidenceLinks.length} conectada(s)</strong></div>{evidenceOptions.length ? <div className="bo-h75-evidence-list">{evidenceOptions.map((item) => { const link = evidenceLinks.find((entry) => entry.evidenceId === item.id); return <article key={item.id} className={link ? 'is-linked' : ''}><button type="button" className="bo-h75-evidence-main" onClick={() => toggleEvidence(item.id)}><b>{link ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>{link && <div className="bo-h75-stance">{(['supports','contradicts','neutral'] as EvidenceStance[]).map((stance) => <button key={stance} type="button" className={link.stance === stance ? `is-active is-${stance}` : ''} onClick={() => setStance(item.id, stance)}>{stanceLabel[stance]}</button>)}</div>}</article>; })}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma evidência criada</strong><p>Crie evidências na aba Evidências e depois classifique como sustentação, contradição ou contexto.</p></div>}</div>}
         {detailTab === 'validation' && <div className="bo-h75-validation"><div className="bo-h71-section-intro"><div><small>VALIDAÇÃO</small><h2>A hipótese já pode virar Problema?</h2><p>A promoção só é liberada quando a formulação, contexto e evidências formam uma base coerente.</p></div><strong>{preview.validationScore}%</strong></div><div className="bo-h75-validation-layout"><section><header><strong>Critérios</strong><span>{preview.validationChecks.filter((item) => item.complete).length}/{preview.validationChecks.length}</span></header>{preview.validationChecks.map((item) => <article key={item.id} className={item.complete ? 'is-done' : ''}><b>{item.complete ? <CheckCircle2 size={14}/> : <AlertCircle size={14}/>}</b><span><strong>{item.label}</strong><small>{item.detail}</small></span></article>)}</section><aside><small>SINAL DAS EVIDÊNCIAS</small><div><span>Sustenta</span><strong>{preview.supportCount}</strong></div><div><span>Contradiz</span><strong>{preview.contradictionCount}</strong></div><div><span>Contextual</span><strong>{preview.neutralCount}</strong></div>{preview.status === 'validated' && preview.validatedProblem ? <div className="bo-h75-validated"><CheckCircle2 size={18}/><span><strong>Problema validado</strong><small>{contextEntityTitle(preview.validatedProblem)}</small></span></div> : <button type="button" className="bo-h75-validate-button" disabled={!preview.readyToValidate} onClick={validateHypothesis}>Validar como Problema</button>}</aside></div></div>}
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="hypothesis" id={selected.id} title="Uso e relações" />}
-      </div>
-      <footer className="bo-h71-detail-actions"><button type="button" className="danger" onClick={() => setDeleteId(selected.id)}><Trash2 size={14}/> Remover</button><span/><button type="button" onClick={discardHypothesis}>Descartar alterações</button><button type="button" className="primary" disabled={!draft.title.trim()} onClick={saveHypothesis}>Salvar Hipótese</button></footer>
+        </div>}
       {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER HIPÓTESE</small><h2>Remover “{contextEntityTitle(graph.entities?.problemHypothesis?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>Contextos e evidências serão desvinculados. Problemas já validados permanecem rastreáveis no Service Graph.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeHypothesis(deleteId)}>Remover Hipótese</button></footer></div></div>}
     </section>;
   }

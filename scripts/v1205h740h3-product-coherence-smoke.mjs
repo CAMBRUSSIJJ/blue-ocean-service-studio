@@ -19,7 +19,7 @@ for(const [v,l] of [
  [cock.includes("{ detail: action.targetTab }")&&!cock.includes("detail: { id: action.targetTab }"),'Cockpit envia tab no contrato correto'],
  [controller.includes('autosaveWatchdogRef'),'autosave possui watchdog'],
  [controller.includes('5000'),'watchdog limita estado Salvando'],
- [problems.includes('Validar novo problema'),'Problemas usa CTA conceitualmente claro'],
+ [problems.includes('Criar problema') && problems.includes("status:'draft'"),'Problemas usa CTA direto sem validação fictícia'],
  [whiteboard.includes('<h1>Whiteboard</h1>')&&!whiteboard.includes('<h1>Whiteboard 2.0</h1>'),'versão interna removida do Whiteboard'],
  [css.includes('grid-template-columns:repeat(6,minmax(0,1fr))'),'desktop sem mega linha horizontal'],
  [css.includes('overflow-x:hidden!important'),'workspace impede overflow global'],

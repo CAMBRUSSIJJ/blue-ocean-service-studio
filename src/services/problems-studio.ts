@@ -88,7 +88,7 @@ export function buildProblemStudioReport(graph: ServiceGraph, problemId: Id): Pr
   const sourceHypothesisId = String(problem.sourceHypothesisId ?? '');
   const sourceHypothesis = sourceHypothesisId ? graph.entities?.problemHypothesis?.[sourceHypothesisId] ?? null : null;
   const qualityChecks = [
-    { id: 'validated', label: 'Problema validado', complete: String(problem.status ?? '') === 'validated', detail: 'O problema foi promovido a partir de uma hipótese sustentada.' },
+    { id: 'validated', label: 'Problema validado', complete: String(problem.status ?? '') === 'validated', detail: 'Validação registrada após reunir contexto, informações e evidências suficientes.' },
     { id: 'statement', label: 'Problema claramente enunciado', complete: Boolean(draft.title.trim() && draft.description.trim()), detail: 'O problema é compreensível sem depender de uma solução proposta.' },
     { id: 'cause', label: 'Causa raiz registrada', complete: Boolean(draft.rootCause.trim()), detail: 'Existe uma explicação causal explícita para orientar investigação e melhoria.' },
     { id: 'impact', label: 'Impacto explícito', complete: Boolean(draft.impact.trim()), detail: 'Está claro por que este problema importa para cliente ou operação.' },
@@ -128,7 +128,7 @@ export function updateProblemProfile(input: { graph: ServiceGraph; problemId: Id
 
   problems[input.problemId] = {
     ...existing,
-    type: 'problem', serviceId: input.graph.service.id, status: 'validated',
+    type: 'problem', serviceId: input.graph.service.id, status: existing.status === 'draft' ? 'draft' : (existing.status ?? 'validated'),
     title: input.draft.title.trim(), description: input.draft.description.trim(),
     rootCause: input.draft.rootCause.trim(), impact: input.draft.impact.trim(),
     affectedPopulation: input.draft.affectedPopulation.trim(), observableSignal: input.draft.observableSignal.trim(),
