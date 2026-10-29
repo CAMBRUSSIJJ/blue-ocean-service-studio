@@ -6,6 +6,8 @@ import { installWorkspaceActivityTracking } from './services/workspace-preferenc
 import { RemoteWorkspaceDialog } from './components/RemoteWorkspaceDialog';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
 import './style.css';
+// Must load after Tailwind and legacy components so the focused dark editor remains consistent.
+import './runtime/entity-editor-final.css';
 
 document.body.classList.add(
   'rt182-host','rt183-host','rt184-host','rt185-host','rt186-host','rt189-host',
