@@ -14,8 +14,8 @@ const style=fs.readFileSync('src/style.css','utf8');
 
 ok('ProblemsView dedicada existe', view.includes('data-problems-h76="library"') && view.includes('data-problems-h76="detail"'));
 ok('WorkspaceLibrary delega problemas', library.includes("if (page === 'problems') return <ProblemsView studio={studio}/>"));
-ok('Problemas não permite criação direta', !view.includes('Criar Problema') && view.includes('Criar hipótese'));
-ok('CTA de problema abre Hipóteses', view.includes("sessionStorage.setItem('bo-workspace-create-page', 'hypotheses')") && view.includes("bo-open-context-page"));
+ok('Problemas permite criação direta como rascunho', view.includes('Criar problema') && view.includes("status:'draft'"));
+ok('CTA de problema abre cadastro próprio', view.includes('setCreateOpen(true)') && !view.includes("detail: 'hypotheses'"));
 ok('App possui coordenador de página contextual', app.includes("window.addEventListener('bo-open-context-page'") && app.includes('openLibraryPage(page)'));
 ok('Biblioteca tem filtros próprios', ['Prontos para definição','Base incompleta','Críticos','Com evidência'].every((x)=>view.includes(x)));
 ok('Detalhe possui cinco abas próprias', ['Visão geral','Contexto','Evidências','Definição','Uso'].every((x)=>view.includes(x)));
