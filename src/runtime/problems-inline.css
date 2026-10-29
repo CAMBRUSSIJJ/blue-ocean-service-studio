@@ -1,0 +1,41 @@
+/* Problem editor: light diagnostic surface extending the shared inline canvas. */
+body.bo-v1130 .bo-problem-inline{background:#fafcff!important;color:#1c2b40}
+.bo-problem-inline .bo-hyp-inline-header{background:#fff!important}
+.bo-problem-inline .bo-problem-statement-icon{background:#ecf3ff!important;color:#376bb7!important;border-color:#d1e1fa!important}
+.bo-problem-inline .bo-problem-statement-field{display:grid;flex:1;min-width:0;gap:3px}
+.bo-problem-inline .bo-problem-statement-field>small{font-size:10px;letter-spacing:.08em;font-weight:750;color:#718199}
+body.bo-v1130 .bo-problem-inline .bo-problem-statement-field textarea{width:100%;min-height:42px;max-height:175px;resize:vertical;overflow:auto;background:transparent!important;color:#182943!important;border:1px solid transparent!important;border-radius:6px!important;padding:5px 7px!important;font-size:22px!important;font-weight:700!important;line-height:1.36!important;box-shadow:none!important}
+body.bo-v1130 .bo-problem-inline .bo-problem-statement-field textarea:focus{border-color:#aec4e6!important;outline:0!important}
+.bo-problem-inline .bo-problem-detail-actions{position:relative}
+body.bo-v1130 .bo-problem-inline .bo-problem-menu-trigger{width:31px;height:30px;display:grid;place-items:center;color:#4c627e!important;background:#f9fbff!important;border:1px solid #dce4ef!important;border-radius:7px!important;box-shadow:none!important;cursor:pointer}
+.bo-problem-inline .bo-problem-actions-popover{position:absolute;top:36px;right:0;z-index:32;min-width:180px;background:#fff;border:1px solid #d9e2ed;border-radius:9px;padding:5px;box-shadow:0 12px 30px #2030492b;display:grid;gap:3px}
+body.bo-v1130 .bo-problem-inline .bo-problem-actions-popover button{display:flex;align-items:center;gap:7px;border:0!important;padding:9px!important;background:transparent!important;color:#33465e!important;border-radius:6px!important;font-size:11px!important;text-align:left!important;box-shadow:none!important}
+body.bo-v1130 .bo-problem-inline .bo-problem-actions-popover button:hover{background:#f0f4fb!important}
+body.bo-v1130 .bo-problem-inline .bo-problem-actions-popover button.danger{color:#af2e43!important}
+.bo-problem-inline .bo-problem-origin{border:1px solid #dce2eb;border-radius:9px;padding:13px;background:#fff;display:grid;gap:8px;min-width:0}
+.bo-problem-inline .bo-problem-origin>header{padding-bottom:9px;border-bottom:1px solid #ebeff4}
+.bo-problem-inline .bo-problem-origin>header strong{font-size:12px;color:#20334d}
+.bo-problem-inline .bo-problem-origin>strong{font-size:12px;color:#2b4261}
+.bo-problem-inline .bo-problem-origin>p{margin:0;color:#66778c;font-size:11px;line-height:1.5}
+.bo-problem-inline .bo-problem-origin-links{display:grid;gap:7px;padding-top:3px}
+.bo-problem-inline .bo-problem-origin-links>span{font-size:10px;color:#65778e;font-weight:600}
+body.bo-v1130 .bo-problem-inline .bo-problem-origin-links button{display:flex;align-items:center;gap:7px;text-align:left;padding:7px 8px;border:1px solid #dce5f0!important;border-radius:6px!important;background:#f8faff!important;color:#385778!important;box-shadow:none!important;font-size:11px!important}
+body.bo-v1130 .bo-problem-inline .bo-problem-origin-links button[aria-pressed=true]{background:#f1faf5!important;color:#246e52!important;border-color:#9acdb5!important}
+body.bo-v1130 .bo-problem-inline .bo-problem-origin-links button:hover{border-color:#8da9d4!important;background:#f0f5ff!important}
+body.bo-v1130 .bo-problem-inline .bo-inline-canvas{grid-template-columns:minmax(0,1fr) minmax(264px,28%);max-width:1530px;padding-top:17px}
+body.bo-v1130 .bo-problem-inline .bo-inline-card.is-wide{min-height:150px}
+body.bo-v1130 .bo-problem-inline .bo-inline-ghost{background:#fafcff!important;border-style:dashed!important;border-color:#c7d2e1!important;color:#637892!important}
+body.bo-v1130 .bo-problem-inline .bo-inline-ghost:hover{background:#eef4ff!important;border-color:#84a5d2!important}
+body.bo-v1130 .bo-problem-inline .bo-inline-check{grid-template-columns:17px minmax(0,1fr) auto}
+body.bo-v1130 .bo-problem-inline .bo-inline-check>strong{overflow-wrap:anywhere}
+body.bo-v1130 .bo-problem-inline .bo-inline-criteria>header strong{font-size:12px}
+body.bo-v1130 .bo-problem-inline .bo-inline-side{gap:12px}
+body.bo-v1130 .bo-problem-inline .bo-inline-quick>button[aria-pressed=true]{background:#f1faf5!important}
+body.bo-v1130 .bo-problem-inline .bo-hyp-inline-save{color:#23885a!important}
+body.bo-v1130 .bo-problem-inline .bo-hyp-inline-ready{color:#465b7b!important;background:#f4f7ff!important}
+body.bo-v1130 .bo-problem-inline .bo-hyp-inline-ready b{color:#3159b3!important}
+body.bo-v1130 .bo-problem-inline .bo-hyp-inline-guidance{color:#806323!important;background:#fff8df!important}
+body.bo-v1130 .bo-problem-inline .bo-hyp-inline-tabs{border-bottom:1px solid #dce4ee}
+body.bo-v1130 .bo-problem-inline .bo-hyp-inline-secondary{max-width:none}
+@media(max-width:1050px){body.bo-v1130 .bo-problem-inline .bo-inline-canvas{grid-template-columns:1fr}body.bo-v1130 .bo-problem-inline .bo-inline-side{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){body.bo-v1130 .bo-problem-inline .bo-inline-side{grid-template-columns:1fr}body.bo-v1130 .bo-problem-inline .bo-inline-check{grid-template-columns:17px minmax(0,1fr)}body.bo-v1130 .bo-problem-inline .bo-inline-connect{grid-column:2;justify-self:start}body.bo-v1130 .bo-problem-inline .bo-hyp-inline-top-actions{flex-wrap:wrap;justify-content:flex-end}}
