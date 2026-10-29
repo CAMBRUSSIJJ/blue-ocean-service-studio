@@ -8,6 +8,8 @@ import { AppErrorBoundary } from './components/AppErrorBoundary';
 import './style.css';
 // Must load after Tailwind and legacy components so the focused dark editor remains consistent.
 import './runtime/entity-editor-final.css';
+// Pains canvas stays in light mode; both layers are scoped to their editors.
+import './runtime/pain-context-editor.css';
 
 document.body.classList.add(
   'rt182-host','rt183-host','rt184-host','rt185-host','rt186-host','rt189-host',
