@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { EntityEditor, type EntityEditorBlock } from '../components/EntityEditor';
 import { ArrowLeft, Check, Filter, MoreVertical, Plus, Search, Table2, Target, Trash2, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
@@ -19,6 +20,7 @@ type DetailTab = 'overview' | 'people' | 'relations' | 'evidence' | 'usage';
 type FilterMode = 'all' | 'unused' | 'evidence' | 'incomplete' | 'high';
 const relationLabel: Record<NeedRelationKind, string> = { persona: 'Personas', job: 'Jobs', pain: 'Dores', problemHypothesis: 'Hipóteses', problem: 'Problemas', evidence: 'Evidências' };
 const importanceLabel: Record<NeedImportance, string> = { low: 'Baixa', medium: 'Média', high: 'Alta', critical: 'Crítica' };
+const looksLikeSolution = (statement: string) => /\\b(app|aplicativo|sistema|software|plataforma|criar um|criar uma|desenvolver um|desenvolver uma|implementar um|implementar uma)\\b/i.test(statement);
 const formatDate = (value: unknown) => { const date = new Date(String(value ?? '')); return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }); };
 
 function patchNeedMeta(graph: ServiceGraph, needId: string, owner: string, tags: string[]): ServiceGraph {
@@ -61,7 +63,7 @@ export function NeedsView({ studio }: { studio: StudioController }) {
     setOwner(String(selected.owner ?? ''));
     setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
     setConnectedIds(report.connections.map((item) => item.id));
-  }, [selectedId, selected?.updatedAt]);
+  }, [selectedId]);
 
   useEffect(() => {
     if (sessionStorage.getItem('bo-workspace-create-page') !== 'needs') return;
@@ -107,7 +109,6 @@ export function NeedsView({ studio }: { studio: StudioController }) {
   }), [rows, query, filter]);
 
   const openNeed = (id: string) => { setSelectedId(id); setDetailTab('overview'); setMenuId(null); };
-  const closeNeed = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
   const createNeed = () => {
     if (!createTitle.trim()) return;
     const now = new Date().toISOString();
@@ -116,17 +117,31 @@ export function NeedsView({ studio }: { studio: StudioController }) {
     setCreateOpen(false); setCreateTitle(''); setCreateDescription(''); setSelectedId(entity.id); setDetailTab('overview');
     showToast('Necessidade criada. Complete contexto, resultado e relações.');
   };
-  const saveNeed = () => {
-    if (!selectedId || !draft?.title.trim()) return;
-    const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
-    setGraph((current) => patchNeedMeta(updateNeedProfile({ graph: current, needId: selectedId, draft, connectedIds }), selectedId, owner, tags), 'Necessidades 2.0: salvar');
-    showToast('Necessidade salva.');
+  const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
+  const persistedDraft = selected ? needProfileFromEntity(selected) : null;
+  const persistedTags = Array.isArray(selected?.tags) ? selected.tags.map(String) : [];
+  const currentLinks = [...connectedIds].sort().join('|');
+  const persistedLinks = [...(report?.connections.map((item) => item.id) ?? [])].sort().join('|');
+  const isDirty = Boolean(draft && persistedDraft && (
+    (Object.keys(draft) as Array<keyof NeedProfileDraft>).some((key) => draft[key] !== persistedDraft[key])
+    || owner.trim() !== String(selected?.owner ?? '').trim()
+    || tags.join('|') !== persistedTags.join('|')
+    || currentLinks !== persistedLinks
+  ));
+  const persistNeed = (id: string, data: NeedProfileDraft, nextOwner: string, nextTags: string[], links: string[]) => {
+    if (!data.title.trim()) return;
+    setGraph((current) => patchNeedMeta(updateNeedProfile({ graph: current, needId: id, draft: data, connectedIds: links }), id, nextOwner, nextTags), 'Necessidades: edição automática');
   };
-  const discardNeed = () => {
-    if (!selected || !report) return;
-    setDraft(needProfileFromEntity(selected)); setOwner(String(selected.owner ?? '')); setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : ''); setConnectedIds(report.connections.map((item) => item.id)); showToast('Alterações descartadas.');
+  useEffect(() => {
+    if (!selectedId || !draft?.title.trim() || !isDirty) return;
+    const timer = window.setTimeout(() => persistNeed(selectedId, draft, owner, tags, connectedIds), 700);
+    return () => window.clearTimeout(timer);
+  }, [selectedId, draft, owner, tagsText, connectedIds, isDirty]);
+  const closeNeed = (savePending = true) => {
+    if (savePending && isDirty && selectedId && draft?.title.trim()) persistNeed(selectedId, draft, owner, tags, connectedIds);
+    setSelectedId(null); setDraft(null); setDetailTab('overview');
   };
-  const removeNeed = (id: string) => { setGraph((current) => removeContextEntity(current, 'need', id), 'Necessidades 2.0: remover'); if (selectedId === id) closeNeed(); setDeleteId(null); setMenuId(null); showToast('Necessidade removida e relações desvinculadas.'); };
+  const removeNeed = (id: string) => { setGraph((current) => removeContextEntity(current, 'need', id), 'Necessidades 2.0: remover'); if (selectedId === id) closeNeed(false); setDeleteId(null); setMenuId(null); showToast('Necessidade removida e relações desvinculadas.'); };
   const toggleRelation = (id: string) => setConnectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
 
   if (selected && draft && report) {
@@ -134,19 +149,50 @@ export function NeedsView({ studio }: { studio: StudioController }) {
     const evidenceConnections = evidence.filter((item) => connectedIds.includes(item.id));
     const personaOptions = relationOptions.filter((item) => item.kind === 'persona');
     const score = previewReport?.foundationScore ?? report.foundationScore;
-    return <section className="bo-h72-need-detail" data-needs-h72="detail">
-      <header className="bo-h71-detail-head bo-h72-detail-head"><button type="button" className="bo-h71-back" onClick={closeNeed}><ArrowLeft size={16}/> Necessidades</button><div className="bo-h71-detail-title"><span className="bo-h71-avatar bo-h72-avatar"><Target size={19}/></span><div><small>NECESSIDADE</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Descreva o que precisa ser resolvido sem antecipar a solução.'}</p></div></div><div className="bo-h71-detail-score"><span>COMPLETUDE</span><strong>{score}%</strong><i><b style={{ width: `${score}%` }}/></i></div></header>
-      <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Necessidade">{([['overview','Visão geral'],['people','Pessoas'],['relations','Relações'],['evidence','Evidências'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'people' && <b>{previewReport?.connectionCounts.persona ?? report.connectionCounts.persona}</b>}{id === 'relations' && <b>{connectedIds.length}</b>}{id === 'evidence' && <b>{evidenceConnections.length}</b>}</button>)}</nav>
-      <div className="bo-h71-detail-body">
-        {detailTab === 'overview' && <div className="bo-h71-editor-grid"><section className="bo-h71-editor-card bo-h71-editor-card--wide"><header><div><small>ENUNCIADO</small><strong>O que precisa ser resolvido?</strong></div><span className={`bo-h72-importance is-${draft.importance}`}>{importanceLabel[draft.importance]}</span></header><div className="bo-h71-form two-col"><label className="wide"><span>Nome da necessidade</span><input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })}/></label><label className="wide"><span>Descrição <small>sem antecipar a solução</small></span><textarea rows={4} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })}/></label><label><span>Contexto</span><textarea rows={5} value={draft.context} onChange={(event) => setDraft({ ...draft, context: event.target.value })} placeholder="Quando, onde e em qual situação essa necessidade aparece?"/></label><label><span>Resultado desejado</span><textarea rows={5} value={draft.desiredOutcome} onChange={(event) => setDraft({ ...draft, desiredOutcome: event.target.value })} placeholder="O que a pessoa precisa conseguir alcançar?"/></label><label><span>Alternativa atual</span><textarea rows={4} value={draft.currentWorkaround} onChange={(event) => setDraft({ ...draft, currentWorkaround: event.target.value })} placeholder="Como isso é resolvido hoje?"/></label><label><span>Sinal de sucesso</span><textarea rows={4} value={draft.successSignal} onChange={(event) => setDraft({ ...draft, successSignal: event.target.value })} placeholder="Como saberemos que a necessidade foi atendida?"/></label></div></section><section className="bo-h71-editor-card"><header><div><small>ORGANIZAÇÃO</small><strong>Prioridade e responsabilidade</strong></div></header><div className="bo-h71-form"><label><span>Importância</span><select className="bo-h72-select" value={draft.importance} onChange={(event) => setDraft({ ...draft, importance: event.target.value as NeedImportance })}><option value="low">Baixa</option><option value="medium">Média</option><option value="high">Alta</option><option value="critical">Crítica</option></select></label><label><span>Responsável</span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></label><label><span>Tags</span><input value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="ex.: onboarding, recorrente"/></label></div></section><section className="bo-h71-editor-card"><header><div><small>BASE</small><strong>Critérios mínimos</strong></div><span>{score}%</span></header><div className="bo-h71-check-list">{(previewReport?.foundationChecks ?? report.foundationChecks).map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span>{check.label}</span></div>)}</div></section></div>}
+    const blocks: EntityEditorBlock[] = [
+      { id: 'context', label: 'Contexto', value: draft.context, essential: true, placeholder: 'Quando, onde e em que situação a necessidade aparece?', onChange: (value) => setDraft((current) => current ? { ...current, context: value } : current) },
+      { id: 'desiredOutcome', label: 'Resultado desejado', value: draft.desiredOutcome, essential: true, placeholder: 'O que a pessoa precisa conseguir alcançar?', onChange: (value) => setDraft((current) => current ? { ...current, desiredOutcome: value } : current) },
+      { id: 'description', label: 'Descrição', value: draft.description, placeholder: 'Registre informações adicionais, sem antecipar uma solução.', onChange: (value) => setDraft((current) => current ? { ...current, description: value } : current) },
+      { id: 'currentWorkaround', label: 'Alternativa atual', value: draft.currentWorkaround, placeholder: 'Como isso é resolvido hoje?', onChange: (value) => setDraft((current) => current ? { ...current, currentWorkaround: value } : current) },
+      { id: 'successSignal', label: 'Sinal de sucesso', value: draft.successSignal, placeholder: 'Como reconheceremos que a necessidade foi atendida?', onChange: (value) => setDraft((current) => current ? { ...current, successSignal: value } : current) },
+    ];
+    const saveStatus = !draft.title.trim() || isDirty ? 'pending' : studio.saveStatus;
+    const warning = !draft.title.trim() ? 'Dê um enunciado a esta necessidade para salvar as alterações.'
+      : looksLikeSolution(draft.title) ? 'Isso parece uma solução. Experimente descrever o problema ou o resultado esperado, sem definir como resolvê-lo.' : undefined;
+    return <>
+      <EntityEditor
+        entityId={selected.id}
+        kind="Necessidade"
+        backLabel="Necessidades"
+        onBack={() => closeNeed()}
+        title={draft.title}
+        onTitleChange={(value) => setDraft((current) => current ? { ...current, title: value } : current)}
+        warning={warning}
+        properties={<>
+          <label className="bo-entity-property"><span>Importância</span><select value={draft.importance} onChange={(event) => setDraft((current) => current ? { ...current, importance: event.target.value as NeedImportance } : current)}><option value="low">Baixa</option><option value="medium">Média</option><option value="high">Alta</option><option value="critical">Crítica</option></select></label>
+          <label className="bo-entity-property"><span>Responsável</span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou equipe" aria-label="Responsável"/></label>
+          <label className="bo-entity-property tags"><span>Tags</span><input value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="Separe com vírgulas" aria-label="Tags"/></label>
+        </>}
+        score={score}
+        saveStatus={saveStatus}
+        onRemove={() => setDeleteId(selected.id)}
+        overview={detailTab === 'overview'}
+        tabs={<>{([['overview','Visão geral'],['people','Pessoas'],['relations','Relações'],['evidence','Evidências'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'people' && <b>{previewReport?.connectionCounts.persona ?? report.connectionCounts.persona}</b>}{id === 'relations' && <b>{connectedIds.length}</b>}{id === 'evidence' && <b>{evidenceConnections.length}</b>}</button>)}</>}
+        blocks={blocks}
+        checks={(previewReport?.foundationChecks ?? report.foundationChecks).map((check) => ({
+          ...check,
+          connectTo: check.id === 'persona' ? ['persona'] : check.id === 'friction' ? ['job','pain','problemHypothesis','problem'] : check.id === 'evidence' ? ['evidence'] : undefined,
+        }))}
+        relations={relationOptions.map((item) => ({ id: item.id, kind: item.kind, title: item.title, linked: connectedIds.includes(item.id) }))}
+        onToggleRelation={toggleRelation}
+      >
         {detailTab === 'people' && <div><div className="bo-h71-section-intro"><div><small>PESSOAS</small><h2>Quem vive esta necessidade?</h2><p>Conecte somente Personas para as quais essa necessidade é realmente relevante. Isso evita necessidades genéricas sem público claro.</p></div><strong>{personaOptions.filter((item) => connectedIds.includes(item.id)).length} conectada(s)</strong></div>{personaOptions.length ? <div className="bo-h72-people-grid">{personaOptions.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma Persona criada</strong><p>Crie Personas primeiro e depois conecte-as a esta necessidade.</p></div>}</div>}
         {detailTab === 'relations' && <div><div className="bo-h71-section-intro"><div><small>SERVICE GRAPH</small><h2>O que explica ou deriva desta necessidade?</h2><p>Jobs, dores e problemas ajudam a transformar uma necessidade ampla em contexto utilizável no desenho do serviço.</p></div><strong>{connectedIds.filter((id) => !personaOptions.some((item) => item.id === id) && !evidence.some((item) => item.id === id)).length} conexões</strong></div><div className="bo-h71-relation-grid">{(['job','pain','problemHypothesis','problem'] as NeedRelationKind[]).map((kind) => { const options = relationOptions.filter((item) => item.kind === kind); return <section key={kind}><header><strong>{relationLabel[kind]}</strong><span>{options.filter((item) => connectedIds.includes(item.id)).length}/{options.length}</span></header>{options.length ? <div>{options.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <p>Nenhum item criado ainda.</p>}</section>; })}</div></div>}
         {detailTab === 'evidence' && <div><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que comprova esta necessidade?</h2><p>Conecte observações, entrevistas e dados que sustentem a existência ou a importância desta necessidade.</p></div><strong>{evidenceConnections.length} conectada(s)</strong></div>{evidence.length ? <div className="bo-h71-evidence-list">{evidence.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma evidência criada</strong><p>Crie evidências na aba Evidências e depois conecte-as aqui.</p></div>}</div>}
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="need" id={selected.id} title="Uso e relações" />}
-      </div>
-      <footer className="bo-h71-detail-actions"><button type="button" className="danger" onClick={() => setDeleteId(selected.id)}><Trash2 size={14}/> Remover</button><span/><button type="button" onClick={discardNeed}>Descartar alterações</button><button type="button" className="primary" disabled={!draft.title.trim()} onClick={saveNeed}>Salvar Necessidade</button></footer>
+      </EntityEditor>
       {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER NECESSIDADE</small><h2>Remover “{contextEntityTitle(graph.entities?.need?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações serão desvinculadas do Service Graph, mas Personas, Jobs, Dores, Problemas e Evidências serão preservados.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeNeed(deleteId)}>Remover Necessidade</button></footer></div></div>}
-    </section>;
+    </>;
   }
 
   return <section className="bo-h72-needs" data-needs-h72="library"><div className="bo-h71-page-head"><div><span>Workspace /</span><h1>Necessidades</h1></div></div><div className="bo-h71-toolbar"><strong>{filtered.length} {filtered.length === 1 ? 'resultado' : 'resultados'}</strong><div><label className="bo-h71-search"><Search size={15}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar necessidades"/></label><button type="button" className={showFilters ? 'is-active' : ''} onClick={() => setShowFilters((value) => !value)} aria-label="Filtros"><Filter size={16}/></button><button type="button" className="is-active"><Table2 size={16}/><span>Tabela</span></button><button type="button" className="primary" onClick={() => setCreateOpen(true)}><Plus size={16}/> Criar necessidade</button></div></div>
