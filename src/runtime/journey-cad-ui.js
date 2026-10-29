@@ -280,9 +280,20 @@ function cadSvg(){
   cadModel.canvasTitleLines(row.n,Math.max(7,Math.floor(192/(labelFont*.56))),Math.min(3,Math.max(1,Math.floor((row.height-18)/(labelFont+4))))).forEach((line,i)=>{html+='<text x="15" y="'+(row.y+28+i*(labelFont+4))+'" class="cad-lane-name" style="font-size:'+labelFont+'px">'+esc(line)+'</text>'});
    html+='<g class="cad-lane-select'+(cadState.selectedRow===row.id?' is-selected':'')+'" role="button" tabindex="0" data-act="cad-lane-select" data-id="'+esc(row.id)+'" aria-label="Propriedades da faixa '+esc(row.n)+'" title="Editar faixa"><rect x="0" y="'+row.y+'" width="'+(layout.stages[0]?.x||218)+'" height="'+row.height+'" fill="transparent"/></g>';
   if(boundary)html+='<path d="M0 '+(row.y-14)+' H'+layout.width+'" class="cad-boundary"/><text x="'+(layout.width/2)+'" y="'+(row.y-18)+'" text-anchor="middle" class="cad-boundary-name">'+esc(boundary)+'</text>';
-  for(const stage of layout.stages){const empty=!layout.nodes.some(node=>node.row===row.id&&node.stageIndex===stage.index&&!node.note.draft),addWidth=Math.min(stage.width-32,Math.max(140,110/cam.zoom)),addHeight=Math.max(34,28/cam.zoom);
+  for(const stage of layout.stages){
+   const notes=layout.nodes.filter(node=>node.row===row.id&&node.stageIndex===stage.index);
+   const empty=!notes.some(node=>!node.note.draft);
+   const drafting=notes.some(node=>node.note.draft);
+   const addWidth=empty?Math.min(stage.width-32,Math.max(140,110/cam.zoom)):Math.min(stage.width-32,132);
+   const addHeight=empty?Math.max(34,28/cam.zoom):28;
+   const addY=empty?row.y+row.height/2-addHeight/2:row.y+row.height-addHeight-10;
    html+='<rect x="'+stage.x+'" y="'+row.y+'" width="'+stage.width+'" height="'+row.height+'" class="cad-cell" data-row="'+row.id+'" data-si="'+stage.index+'"/>';
-   if(!cadLocked()&&empty&&row.id!=='em')html+='<g role="button" tabindex="0" class="cad-cell-add" data-act="cad-cell-add" data-row="'+row.id+'" data-si="'+stage.index+'" aria-label="Adicionar cartão em '+esc(stage.step.n)+' — '+esc(row.n)+'"><rect x="'+(stage.x+stage.width/2-addWidth/2)+'" y="'+(row.y+row.height/2-addHeight/2)+'" width="'+addWidth+'" height="'+addHeight+'" rx="6"/><text x="'+(stage.x+stage.width/2)+'" y="'+(row.y+row.height/2+5)+'" text-anchor="middle" style="font-size:'+Math.max(14,12/cam.zoom)+'px">+ Adicionar cartão</text></g>';
+   // An occupied cell must remain editable. A compact footer follows existing cards,
+   // instead of placing the large empty-state action on top of their content.
+   if(!cadLocked()&&!drafting&&row.id!=='em'){
+    const label=empty?'+ Adicionar cartão':'+ Novo cartão';
+    html+='<g role="button" tabindex="0" class="cad-cell-add'+(empty?'':' is-occupied')+'" data-act="cad-cell-add" data-row="'+row.id+'" data-si="'+stage.index+'" aria-label="'+(empty?'Adicionar cartão':'Adicionar outro cartão')+' em '+esc(stage.step.n)+' — '+esc(row.n)+'"><rect x="'+(stage.x+stage.width/2-addWidth/2)+'" y="'+addY+'" width="'+addWidth+'" height="'+addHeight+'" rx="6"/><text x="'+(stage.x+stage.width/2)+'" y="'+(addY+addHeight/2+5)+'" text-anchor="middle" style="font-size:'+Math.max(12,Math.min(15,12/cam.zoom))+'px">'+label+'</text></g>';
+   }
   }
   if(row.id==='em'&&layout.stages.length)html+=cadEmotionSvg(row,layout);
   if(!cadLocked())html+='<g class="cad-lane-resize" role="separator" tabindex="0" data-act="cad-lane-resize" data-id="'+esc(row.id)+'" aria-label="Redimensionar faixa '+esc(row.n)+'. Arraste a borda inferior." aria-orientation="horizontal" aria-valuemin="90" aria-valuemax="540" aria-valuenow="'+Math.round(row.height)+'" title="Arraste a borda inferior para ajustar a altura"><rect x="0" y="'+(row.y+row.height-8)+'" width="'+layout.width+'" height="14"/><path d="M4 '+(row.y+row.height)+' H'+(layout.width-20)+'"/></g>';
