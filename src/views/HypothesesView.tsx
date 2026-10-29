@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, ArrowLeft, Check, CheckCircle2, Filter, Lightbulb, MoreVertical, Plus, Search, Table2, Trash2, X } from '../design-system/icons';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { EntityCanvas } from '../components/entity-editor/EntityCanvas';
+import { EntityEditorHeader, EntityTags } from '../components/entity-editor/EntityEditor';
+import { parseCustomBlocks, type CustomEntityBlock, type EntityCanvasBlock, type EditorFieldKind } from '../components/entity-editor/types';
+import { AlertCircle, Check, CheckCircle2, Filter, Lightbulb, MoreVertical, Plus, Search, Table2, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
@@ -65,6 +68,8 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
   const [tagsText, setTagsText] = useState('');
   const [contextIds, setContextIds] = useState<string[]>([]);
   const [evidenceLinks, setEvidenceLinks] = useState<HypothesisEvidenceLink[]>([]);
+  const [customBlocks,setCustomBlocks] = useState<CustomEntityBlock[]>([]);
+  const flushRef = useRef<()=>void>(()=>{});
   const [createOpen, setCreateOpen] = useState(false);
   const [createTitle, setCreateTitle] = useState('');
   const [createDescription, setCreateDescription] = useState('');
@@ -82,14 +87,15 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
 
   useEffect(() => {
     if (!selected || !report) {
-      setDraft(null); setOwner(''); setTagsText(''); setContextIds([]); setEvidenceLinks([]); return;
+      setDraft(null); setOwner(''); setTagsText(''); setContextIds([]); setEvidenceLinks([]);setCustomBlocks([]);return;
     }
     setDraft(hypothesisProfileFromEntity(selected));
     setOwner(String(selected.owner ?? ''));
     setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
     setContextIds(report.contextConnections.map((item) => item.id));
     setEvidenceLinks(report.evidenceConnections.map((item) => ({ evidenceId: item.id, stance: item.stance })));
-  }, [selectedId, selected?.updatedAt]);
+    setCustomBlocks(parseCustomBlocks(selected.canvasCustomBlocks));
+  }, [selectedId]);
 
   useEffect(() => {
     if (sessionStorage.getItem('bo-workspace-create-page') !== 'hypotheses') return;
@@ -144,7 +150,7 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
   }), [rows, query, filter]);
 
   const openHypothesis = (id: string) => { setSelectedId(id); setDetailTab('overview'); setMenuId(null); };
-  const closeHypothesis = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
+  const closeHypothesis = (commit=true) => {if(commit)flushRef.current();setSelectedId(null);setDraft(null);setDetailTab('overview'); };
   const createHypothesis = () => {
     if (!createTitle.trim()) return;
     const now = new Date().toISOString();
@@ -163,24 +169,38 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
     setCreateOpen(false); setCreateTitle(''); setCreateDescription(''); setSelectedId(entity.id); setDetailTab('overview');
     showToast('Hipótese criada. Conecte contexto e evidências antes de validá-la.');
   };
-  const saveHypothesis = () => {
-    if (!selectedId || !draft?.title.trim()) return;
-    const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
-    setGraph((current) => patchHypothesisMeta(updateHypothesisProfile({ graph: current, hypothesisId: selectedId, draft, contextIds, evidenceLinks }), selectedId, owner, tags), 'Hipóteses 2.0: salvar');
-    showToast('Hipótese salva.');
+  const tags=tagsText.split(',').map(x=>x.trim()).filter(Boolean);
+  const original=selected?hypothesisProfileFromEntity(selected):null;
+  const storedTags=Array.isArray(selected?.tags)?selected.tags.map(String):[];
+  const signatures=(links:HypothesisEvidenceLink[])=>links.map(x=>x.evidenceId+':'+x.stance).sort().join('|');
+  const sameIds=(a:string[],b:string[])=>[...a].sort().join('|')===[...b].sort().join('|');
+  const dirty=Boolean(draft&&original&&(
+    (Object.keys(draft) as Array<keyof HypothesisProfileDraft>).some(key=>draft[key].trim()!==original[key].trim())
+    ||owner.trim()!==String(selected?.owner??'').trim()
+    ||tags.join('|')!==storedTags.join('|')
+    ||!sameIds(contextIds,report?.contextConnections.map(x=>x.id)??[])
+    ||signatures(evidenceLinks)!==signatures(report?.evidenceConnections.map(x=>({evidenceId:x.id,stance:x.stance}))??[])
+    ||JSON.stringify(customBlocks)!==JSON.stringify(parseCustomBlocks(selected?.canvasCustomBlocks))
+  ));
+  const persistHypothesis=(id:string,data:HypothesisProfileDraft,nextOwner:string,nextTags:string[],contexts:string[],evidences:HypothesisEvidenceLink[],custom:CustomEntityBlock[])=>{
+    if(!data.title.trim())return;
+    setGraph(current=>{
+      const next=patchHypothesisMeta(updateHypothesisProfile({graph:current,hypothesisId:id,draft:data,contextIds:contexts,evidenceLinks:evidences}),id,nextOwner,nextTags);
+      const updated=next.entities?.problemHypothesis?.[id];
+      if(!updated)return next;
+      return {...next,entities:{...next.entities,problemHypothesis:{...next.entities.problemHypothesis,[id]:{...updated,canvasCustomBlocks:custom}}}};
+    },'Hipóteses: autosave');
   };
-  const discardHypothesis = () => {
-    if (!selected || !report) return;
-    setDraft(hypothesisProfileFromEntity(selected));
-    setOwner(String(selected.owner ?? ''));
-    setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
-    setContextIds(report.contextConnections.map((item) => item.id));
-    setEvidenceLinks(report.evidenceConnections.map((item) => ({ evidenceId: item.id, stance: item.stance })));
-    showToast('Alterações descartadas.');
-  };
+  flushRef.current=()=>{if(selectedId&&draft?.title.trim()&&dirty)persistHypothesis(selectedId,draft,owner,tags,contextIds,evidenceLinks,customBlocks)};
+  useEffect(()=>()=>flushRef.current(),[]);
+  useEffect(()=>{
+    if(!selectedId||!draft?.title.trim()||!dirty)return;
+    const timer=window.setTimeout(()=>persistHypothesis(selectedId,draft,owner,tags,contextIds,evidenceLinks,customBlocks),800);
+    return()=>window.clearTimeout(timer);
+  },[selectedId,draft,owner,tagsText,contextIds,evidenceLinks,customBlocks,dirty]);
   const removeHypothesis = (id: string) => {
     setGraph((current) => removeContextEntity(current, 'problemHypothesis', id), 'Hipóteses 2.0: remover');
-    if (selectedId === id) closeHypothesis();
+    if (selectedId === id) closeHypothesis(false);
     setDeleteId(null); setMenuId(null);
     showToast('Hipótese removida e relações desvinculadas.');
   };
@@ -194,9 +214,25 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
     const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
     setGraph((current) => {
       const saved = patchHypothesisMeta(updateHypothesisProfile({ graph: current, hypothesisId: selectedId, draft, contextIds, evidenceLinks }), selectedId, owner, tags);
-      return validateHypothesisAsProblem(saved, selectedId);
+      const updated=saved.entities?.problemHypothesis?.[selectedId];
+      const withCustom=updated?{...saved,entities:{...saved.entities,problemHypothesis:{...saved.entities.problemHypothesis,[selectedId]:{...updated,canvasCustomBlocks:customBlocks}}}}:saved;
+      return validateHypothesisAsProblem(withCustom, selectedId);
     }, 'Hipóteses 2.0: validar');
     showToast('Hipótese promovida a Problema validado.');
+  };
+
+  const addCustom = (kind:EditorFieldKind)=>{
+    if(customBlocks.length>=60){showToast('Limite de 60 campos personalizados por entidade.');return;}
+    const labels:Record<EditorFieldKind,string>={text:'Texto',checklist:'Checklist',number:'Número',date:'Data',image:'Imagem (URL)',document:'Documento (link)'};
+    const id='custom-'+(typeof crypto!=='undefined'&&'randomUUID' in crypto?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2,7));
+    setCustomBlocks(items=>[...items,{id,label:labels[kind],kind,value:''}]);
+  };
+  const changeCustom=(id:string,value:string)=>setCustomBlocks(items=>items.map(item=>item.id===id?{...item,value}:item));
+  const removeCustom=(id:string)=>setCustomBlocks(items=>items.filter(item=>item.id!==id));
+  const renameCustom=(id:string,label:string)=>setCustomBlocks(items=>items.map(item=>item.id===id?{...item,label}:item));
+  const toggleRelation=(id:string)=>{
+    if(hypothesisEvidenceOptions(graph).some(item=>item.id===id))toggleEvidence(id);
+    else toggleContext(id);
   };
 
   if (selected && draft && report) {
