@@ -20,4 +20,13 @@ ok('Uso vem do Service Graph', view.includes("contextEntityUsage(graph, 'need'")
 ok('CSS H7.2 está importado antes do Tailwind', style.indexOf("@import './runtime/needs-h72.css';")>=0 && style.indexOf("@import './runtime/needs-h72.css';") < style.indexOf('@tailwind base'));
 ok('CSS H7.2 existe e diferencia importância', css.includes('.bo-h72-importance.is-critical') && css.includes('.bo-h72-people-grid'));
 ok('Personas continua dedicada', library.includes("if (page === 'personas') return <PersonasView studio={studio}/>"));
+const editor=fs.readFileSync('src/components/EntityEditor.tsx','utf8');
+const darkCss=fs.readFileSync('src/runtime/entity-editor-final.css','utf8');
+const main=fs.readFileSync('src/main.tsx','utf8');
+ok('Editor usa tema escuro após CSS legado',main.indexOf("import './runtime/entity-editor-final.css'") > main.indexOf("import './style.css'") && darkCss.includes('body.bo-v1130 .bo-entity-focus-overlay .bo-entity-ghost-grid .bo-entity-ghost'));
+ok('Blocos opcionais e botões conectores nunca ficam brancos',darkCss.includes('background:transparent !important') && darkCss.includes('.bo-entity-check .bo-entity-connect') && darkCss.includes('.bo-entity-sections-menu button'));
+ok('Editor tem excluir visível e menu de ações',editor.includes('className="bo-entity-delete"') && editor.includes('onClick={onRemove}') && editor.includes('className="bo-entity-menu"'));
+ok('Biblioteca pode excluir diretamente',view.includes('className="bo-h72-row-delete"') && view.includes('setDeleteId(row.need.id)'));
+ok('Confirmação de exclusão é acessível',view.includes('role="alertdialog"') && view.includes('aria-modal="true"') && view.includes('removeNeed(deleteId)'));
+ok('Remoção canônica preserva as outras entidades',view.includes("removeContextEntity(current, 'need', id)") && !view.includes('delete current.entities.need'));
 const failed=checks.filter(([,v])=>!v); console.log(`\nH7.2 Needs 2.0: ${checks.length-failed.length}/${checks.length} OK`); if(failed.length) process.exit(1);

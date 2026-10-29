@@ -75,7 +75,7 @@ export function buildNeedStudioReport(graph: ServiceGraph, needId: Id): NeedStud
 
   const draft = needProfileFromEntity(need);
   const foundationChecks = [
-    { id: 'statement', label: 'Necessidade claramente enunciada', complete: Boolean(draft.title.trim() && draft.description.trim()) },
+    { id: 'statement', label: 'Necessidade claramente enunciada', complete: Boolean(draft.title.trim()) },
     { id: 'context', label: 'Contexto registrado', complete: Boolean(draft.context.trim()) },
     { id: 'outcome', label: 'Resultado desejado explícito', complete: Boolean(draft.desiredOutcome.trim()) },
     { id: 'persona', label: 'Persona conectada', complete: connectionCounts.persona > 0 },

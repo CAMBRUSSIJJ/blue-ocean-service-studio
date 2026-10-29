@@ -118,6 +118,10 @@ jobs:
       - run: npm run blueprint:connections:browser
       - run: npm run editor:browser
       - run: python3 scripts/personas-p2p3-browser.py
+      - name: Dores — edição inline, salvamento e blocos opcionais
+        run: python3 scripts/pain-inline-browser.py
+      - name: Contraste escuro e exclusão de Necessidades
+        run: python3 scripts/needs-editor-browser.py
       - run: npm run journey:browser
       - run: npm run blueprint:methodology:browser
       - run: python3 scripts/blueprint-guided-reading-browser.py
@@ -140,6 +144,8 @@ jobs:
           retention-days: 14
           path: |
             artifacts/editor-ux
+            artifacts/needs-editor
+            artifacts/pain-inline-canvas
             artifacts/journey-editor
             artifacts/blueprint-methodology
             artifacts/entry-journey
