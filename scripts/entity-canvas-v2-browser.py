@@ -49,7 +49,7 @@ try:
         check('Custom text field is editable',canvas.get_by_role('textbox',name='Texto',exact=True).input_value()=='Observação personalizada persistente.')
         detail.get_by_role('textbox',name='Adicionar tag').fill('Pagamento')
         detail.get_by_role('textbox',name='Adicionar tag').press('Enter')
-        check('Tags editable as chips',detail.get_by_text('Pagamento',exact=True).count()>=1)
+        check('Tags editable as chips',detail.locator('.bo-entity-tag').filter(has_text='Pagamento').count()==1)
         # Optional fields must not discard content on hide.
         canvas.get_by_role('button',name='Sinal observável',exact=True).click()
         canvas.get_by_role('textbox',name='Sinal observável',exact=True).fill('Elevação da taxa de abandono no checkout.')
