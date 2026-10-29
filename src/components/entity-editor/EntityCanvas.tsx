@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DragEvent, PointerEvent } from 'react';
-import { Check, ChevronDown, GripVertical, Maximize2, MoreHorizontal, Plus, Trash2 } from '../../design-system/icons';
+import { ChevronDown, GripVertical, Maximize2, MoreHorizontal, Plus, Trash2 } from '../../design-system/icons';
 import { EntityCriteria } from './EntityCriteria';
 import { EntityRelations, RELATION_DRAG_MIME } from './EntityRelations';
 import type { EditorFieldKind, EntityCanvasBlock, EntityCriterion, EntityRelation } from './types';
