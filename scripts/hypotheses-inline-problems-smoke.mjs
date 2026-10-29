@@ -14,7 +14,7 @@ const tests=[
  ['Verificação de prontidão completa preservada',view.includes('preview.validationChecks.map')&&view.includes("onViewValidation={()=>setDetailTab('validation')}")],
  ['Relações rápidas no Service Graph',editor.includes('application/x-bo-relation')&&view.includes('hypothesisEvidenceOptions(graph)')],
  ['CSS importado após estilos legados',main.includes("import './style.css';\nimport './runtime/entity-inline-canvas.css';")&&style.includes('.bo-inline-cards')],
- ['Problemas têm criação direta',problems.includes("kind:'problem'")&&problems.includes("status:'draft'")&&problems.includes('Criar problema')],
+ ['Problemas têm criação direta',problems.includes("type:'problem'")&&problems.includes("status:'draft'")&&problems.includes('Criar problema')],
  ['Problemas não redirecionam para Hipóteses',!problems.includes('requestHypothesisCreation')&&!problems.includes("detail: 'hypotheses'")],
  ['Rascunho não vira validado automaticamente ao editar',service.includes("existing.status === 'draft' ? 'draft'")],
 ];
