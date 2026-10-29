@@ -30,6 +30,7 @@ jobs:
       - run: python3 -m py_compile scripts/journey-selector-browser.py scripts/journey-observation-browser.py scripts/journey-editor-ux-browser.py scripts/blueprint-connections-browser.py
       - run: node scripts/entity-canvas-v2-smoke.mjs
       - run: node scripts/entity-canvas-needs-smoke.mjs
+      - run: node scripts/entity-canvas-jobs-smoke.mjs
       - run: npm run docs:check
       - run: node scripts/journey-visualization-test.mjs
       - run: node scripts/blueprint-guided-reading-test.mjs
@@ -107,6 +108,8 @@ jobs:
         run: python3 scripts/entity-canvas-v2-browser.py
       - name: Canvas universal de Necessidades — salvamento e critérios
         run: python3 scripts/entity-canvas-needs-browser.py
+      - name: Canvas universal de Jobs — experiência JTBD e dados persistentes
+        run: python3 scripts/entity-canvas-jobs-browser.py
       - name: Abrir Blueprint com CSP do servidor Linux
         run: npm run blueprint:csp:browser
       - name: Canvas do Blueprint — escrita repetida e edição
@@ -148,6 +151,7 @@ jobs:
             artifacts/editor-ux
             artifacts/entity-canvas-v2
             artifacts/entity-canvas-needs
+            artifacts/entity-canvas-jobs
             artifacts/journey-editor
             artifacts/blueprint-methodology
             artifacts/entry-journey
