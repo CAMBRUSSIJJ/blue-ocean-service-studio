@@ -39,3 +39,6 @@ body.bo-v1130 .bo-problem-inline .bo-hyp-inline-tabs{border-bottom:1px solid #dc
 body.bo-v1130 .bo-problem-inline .bo-hyp-inline-secondary{max-width:none}
 @media(max-width:1050px){body.bo-v1130 .bo-problem-inline .bo-inline-canvas{grid-template-columns:1fr}body.bo-v1130 .bo-problem-inline .bo-inline-side{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){body.bo-v1130 .bo-problem-inline .bo-inline-side{grid-template-columns:1fr}body.bo-v1130 .bo-problem-inline .bo-inline-check{grid-template-columns:17px minmax(0,1fr)}body.bo-v1130 .bo-problem-inline .bo-inline-connect{grid-column:2;justify-self:start}body.bo-v1130 .bo-problem-inline .bo-hyp-inline-top-actions{flex-wrap:wrap;justify-content:flex-end}}
+
+/* Contextual card resizing supplements the native textarea resize handle. */
+body.bo-v1130 .bo-problem-inline .bo-inline-card.is-tall textarea{min-height:270px!important}
