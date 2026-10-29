@@ -85,3 +85,17 @@ body.bo-v1130 .bo-h711-whiteboards:not(.bo-whiteboard-zero-page) .bo-whiteboard-
 @media(prefers-reduced-motion:reduce){
   body.bo-v1130 .bo-whiteboard-zero-page .bo-whiteboard-zero-create{transition:none}
 }
+
+/* The Whiteboard entry already supplies a clear title and two navigation links.
+   Hide the redundant phase ribbon, subordinate nav and breadcrumb only while empty. */
+body.bo-v1130 .bo-h722-service-workspace.is-whiteboard-empty>.bo-h740h7-compact-head,
+body.bo-v1130 .bo-h722-service-workspace.is-whiteboard-empty>.bo-h740h7-tool-phases,
+body.bo-v1130 .bo-h722-service-workspace.is-whiteboard-empty>.bo-h740h7-tool-subnav{
+  display:none!important;
+}
+body.bo-v1130 .bo-h722-service-workspace.is-whiteboard-empty>.bo-h722-embedded--whiteboard{
+  flex:1;min-height:0;margin:0!important;padding:0!important;border:0!important;background:transparent!important;
+}
+body.bo-v1130 .bo-h722-service-workspace.is-whiteboard-empty{
+  background:#fbfdff!important;min-height:100%;gap:0;
+}
