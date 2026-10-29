@@ -33,6 +33,7 @@ jobs:
       - run: node scripts/entity-canvas-jobs-smoke.mjs
       - run: node scripts/entity-canvas-hypotheses-smoke.mjs
       - run: node scripts/entity-canvas-problems-smoke.mjs
+      - run: node scripts/entity-canvas-personas-smoke.mjs
       - run: npm run docs:check
       - run: node scripts/journey-visualization-test.mjs
       - run: node scripts/blueprint-guided-reading-test.mjs

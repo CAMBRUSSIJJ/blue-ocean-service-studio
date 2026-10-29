@@ -81,3 +81,23 @@ body.bo-v1130 .bo-problem-entity-editor .bo-problem-draft-review{padding:13px;bo
 body.bo-v1130 .bo-problem-entity-editor .bo-problem-draft-review p{font-size:11px;color:#566c84;line-height:1.5}
 body.bo-v1130 .bo-problem-entity-editor .bo-problem-draft-review button{border:1px solid #4b83ce!important;background:#306fbd!important;color:white!important;border-radius:7px!important;padding:8px 12px!important}
 body.bo-v1130 .bo-problem-entity-editor .bo-problem-draft-review button:disabled{opacity:.45;cursor:not-allowed}
+
+/* Persona specialisation of universal entity editor. Preserve dedicated PersonaVisualEditor. */
+body.bo-v1130 .bo-persona-entity-editor{background:#f9fbff!important}
+body.bo-v1130 .bo-persona-entity-editor .bo-entity-editor-header{margin:0!important;border:0!important;border-bottom:1px solid #e1e8f2!important;background:#fff!important;box-shadow:none!important}
+body.bo-v1130 .bo-persona-entity-editor .bo-h724-overview-aside{gap:12px}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-criteria,
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-quick{background:#fff;border:1px solid #dce5ef;border-radius:9px;padding:13px;min-width:0}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-criteria header,
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-quick header{display:flex;align-items:center;justify-content:space-between;gap:6px}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-criteria strong,
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-quick strong{color:#263c58}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-checks{display:grid;gap:9px}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-check{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:7px;align-items:center;font-size:11px}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-check>span{border:1px solid #bdcada;border-radius:4px;height:15px;width:15px;display:grid;place-items:center}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-check>span.done{background:#e7f7ee;color:#27704e;border-color:#9ecdb6}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-check button{border:1px solid #d3e1f1!important;background:#f5f9ff!important;color:#315b91!important;padding:5px 8px!important;font-size:11px!important;border-radius:5px!important}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-quick>button{display:grid;gap:4px;text-align:left;width:100%;border:1px solid #edf0f5!important;background:#fafcff!important;border-radius:6px!important;padding:8px!important;margin-top:5px;box-shadow:none!important;font-size:11px!important}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-quick>button span{font-size:10px;color:#5072a1}
+body.bo-v1130 .bo-persona-entity-editor .bo-pain-canvas-connection{background:#fff;border:1px solid #d9e4f3;padding:9px;border-radius:8px;margin-top:9px}
+body.bo-v1130 .bo-persona-entity-editor .bo-h724-overview-aside>.bo-h724-context-card{margin-top:4px}

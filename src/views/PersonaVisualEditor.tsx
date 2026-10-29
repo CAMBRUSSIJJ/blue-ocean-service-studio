@@ -11,6 +11,7 @@ type Props = {
   onChangeMode: (mode: PersonaDepth) => void;
   counts: { need: number; pain: number; evidence: number; related: number };
   onNavigate: (tab: 'relations' | 'evidence') => void;
+  titleInHeader?: boolean;
 };
 const OPTIONS: Array<{ id: PersonaVisualCardId; title: string; caption: string; advanced?: boolean }> = [
   {id:'identity',title:'Identidade',caption:'Nome e resumo'},
@@ -41,7 +42,7 @@ function ListTextEditor({label,value,placeholder,onChange}: {label:string;value:
   </label>;
 }
 
-export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNavigate}: Props) {
+export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNavigate,titleInHeader=false}: Props) {
   const [showLibrary,setShowLibrary]=useState(false);
   const [dragging,setDragging]=useState<PersonaVisualCardId|null>(null);
   const cards=normalizePersonaVisualCards(draft.visualCards,draft.mode);
@@ -73,11 +74,11 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
     <textarea aria-label={label} rows={3} value={draft[key]} placeholder={placeholder} onChange={e=>update({[key]:e.target.value})}/></label>;
   const body=(id:PersonaVisualCardId)=>{
     if(id==='identity')return <div className="bo-p5-identity-body">
-      <div className="bo-p5-mode-switch bo-h724-depth-switch" role="group" aria-label="Profundidade da Persona">
+      {!titleInHeader&&<div className="bo-p5-mode-switch bo-h724-depth-switch" role="group" aria-label="Profundidade da Persona">
         <button type="button" aria-pressed={draft.mode==='simple'} onClick={()=>onChangeMode('simple')}>Simples</button>
         <button type="button" aria-pressed={draft.mode==='professional'} onClick={()=>onChangeMode('professional')}>Avançada</button>
-      </div>
-      <label className="bo-p5-field"><span>Nome da Persona</span><input aria-label="Nome da Persona" value={draft.title} onChange={e=>update({title:e.target.value})} placeholder="Ex.: Cliente com pouco tempo"/></label>
+      </div>}
+      {!titleInHeader&&<label className="bo-p5-field"><span>Nome da Persona</span><input aria-label="Nome da Persona" value={draft.title} onChange={e=>update({title:e.target.value})} placeholder="Ex.: Cliente com pouco tempo"/></label>}
       <label className="bo-p5-field"><span>Resumo</span><textarea aria-label="Resumo da Persona" rows={2} value={draft.description} onChange={e=>update({description:e.target.value})} placeholder="Quem é a pessoa neste serviço?"/></label>
     </div>;
     if(id==='portrait')return <div className="bo-p5-portrait">
