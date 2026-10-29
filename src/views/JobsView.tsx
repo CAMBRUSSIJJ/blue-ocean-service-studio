@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Check, Filter, ListTodo, MoreVertical, Plus, Search, Table2, Trash2, X } from '../design-system/icons';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { EntityCanvas } from '../components/entity-editor/EntityCanvas';
+import { EntityEditorHeader, EntityTags } from '../components/entity-editor/EntityEditor';
+import { parseCustomBlocks, type CustomEntityBlock, type EntityCanvasBlock, type EditorFieldKind } from '../components/entity-editor/types';
+import { Check, Filter, ListTodo, MoreVertical, Plus, Search, Table2, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
@@ -41,6 +44,8 @@ export function JobsView({ studio }: { studio: StudioController }) {
   const [owner, setOwner] = useState('');
   const [tagsText, setTagsText] = useState('');
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
+  const [customBlocks, setCustomBlocks] = useState<CustomEntityBlock[]>([]);
+  const flushRef = useRef<()=>void>(()=>{});
   const [createOpen, setCreateOpen] = useState(false);
   const [createTitle, setCreateTitle] = useState('');
   const [createDescription, setCreateDescription] = useState('');
@@ -56,12 +61,13 @@ export function JobsView({ studio }: { studio: StudioController }) {
   const relationOptions = useMemo(() => jobRelationOptions(graph), [graph]);
 
   useEffect(() => {
-    if (!selected || !report) { setDraft(null); setOwner(''); setTagsText(''); setConnectedIds([]); return; }
+    if (!selected || !report) { setDraft(null); setOwner(''); setTagsText(''); setConnectedIds([]); setCustomBlocks([]); return; }
     setDraft(jobProfileFromEntity(selected));
     setOwner(String(selected.owner ?? ''));
     setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
     setConnectedIds(report.connections.map((item) => item.id));
-  }, [selectedId, selected?.updatedAt]);
+    setCustomBlocks(parseCustomBlocks(selected.canvasCustomBlocks));
+  }, [selectedId]);
 
   useEffect(() => {
     if (sessionStorage.getItem('bo-workspace-create-page') !== 'jobs') return;
@@ -107,7 +113,7 @@ export function JobsView({ studio }: { studio: StudioController }) {
   }), [rows, query, filter]);
 
   const openJob = (id: string) => { setSelectedId(id); setDetailTab('overview'); setMenuId(null); };
-  const closeJob = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
+  const closeJob = (commit=true) => { if(commit)flushRef.current();setSelectedId(null);setDraft(null);setDetailTab('overview'); };
   const createJob = () => {
     if (!createTitle.trim()) return;
     const now = new Date().toISOString();
@@ -116,36 +122,101 @@ export function JobsView({ studio }: { studio: StudioController }) {
     setCreateOpen(false); setCreateTitle(''); setCreateDescription(''); setSelectedId(entity.id); setDetailTab('overview');
     showToast('Job criado. Complete situação, progresso e relações.');
   };
-  const saveJob = () => {
-    if (!selectedId || !draft?.title.trim()) return;
-    const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
-    setGraph((current) => patchJobMeta(updateJobProfile({ graph: current, jobId: selectedId, draft, connectedIds }), selectedId, owner, tags), 'Jobs 2.0: salvar');
-    showToast('Job salvo.');
+  const tags=tagsText.split(',').map(t=>t.trim()).filter(Boolean);
+  const original=selected?jobProfileFromEntity(selected):null;
+  const storedTags=Array.isArray(selected?.tags)?selected.tags.map(String):[];
+  const sameIds=(a:string[],b:string[])=>[...a].sort().join('|')===[...b].sort().join('|');
+  const dirty=Boolean(draft&&original&&(
+    (Object.keys(draft) as Array<keyof JobProfileDraft>).some(key=>draft[key].trim()!==original[key].trim())
+    ||owner.trim()!==String(selected?.owner??'').trim()
+    ||tags.join('|')!==storedTags.join('|')
+    ||!sameIds(connectedIds,report?.connections.map(item=>item.id)??[])
+    ||JSON.stringify(customBlocks)!==JSON.stringify(parseCustomBlocks(selected?.canvasCustomBlocks))
+  ));
+  const persistJob=(id:string,data:JobProfileDraft,nextOwner:string,nextTags:string[],links:string[],custom:CustomEntityBlock[])=>{
+    if(!data.title.trim())return;
+    setGraph(current=>{
+      const next=patchJobMeta(updateJobProfile({graph:current,jobId:id,draft:data,connectedIds:links}),id,nextOwner,nextTags);
+      const saved=next.entities?.job?.[id];
+      if(!saved)return next;
+      return {...next,entities:{...next.entities,job:{...next.entities.job,[id]:{...saved,canvasCustomBlocks:custom}}}};
+    },'Jobs: autosave');
   };
-  const discardJob = () => {
-    if (!selected || !report) return;
-    setDraft(jobProfileFromEntity(selected)); setOwner(String(selected.owner ?? '')); setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : ''); setConnectedIds(report.connections.map((item) => item.id)); showToast('Alterações descartadas.');
+  flushRef.current=()=>{if(selectedId&&draft?.title.trim()&&dirty)persistJob(selectedId,draft,owner,tags,connectedIds,customBlocks)};
+  useEffect(()=>()=>flushRef.current(),[]);
+  useEffect(()=>{
+    if(!selectedId||!draft?.title.trim()||!dirty)return;
+    const timer=window.setTimeout(()=>persistJob(selectedId,draft,owner,tags,connectedIds,customBlocks),800);
+    return()=>window.clearTimeout(timer);
+  },[selectedId,draft,owner,tagsText,connectedIds,customBlocks,dirty]);
+  const removeJob=(id:string)=>{
+    setGraph(current=>removeContextEntity(current,'job',id),'Jobs: remover');
+    if(selectedId===id)closeJob(false);
+    setDeleteId(null);setMenuId(null);
+    showToast('Job removido e relações desvinculadas.');
   };
-  const removeJob = (id: string) => { setGraph((current) => removeContextEntity(current, 'job', id), 'Jobs 2.0: remover'); if (selectedId === id) closeJob(); setDeleteId(null); setMenuId(null); showToast('Job removido e relações desvinculadas.'); };
-  const toggleRelation = (id: string) => setConnectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  const toggleRelation=(id:string)=>setConnectedIds(current=>current.includes(id)?current.filter(item=>item!==id):[...current,id]);
+  const addCustom=(kind:EditorFieldKind)=>{
+    if(customBlocks.length>=60){showToast('Limite de 60 campos personalizados por entidade.');return;}
+    const names:Record<EditorFieldKind,string>={text:'Texto',checklist:'Checklist',number:'Número',date:'Data',image:'Imagem (URL)',document:'Documento (link)'};
+    const id='custom-'+(typeof crypto!=='undefined'&&'randomUUID' in crypto?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2,7));
+    setCustomBlocks(items=>[...items,{id,label:names[kind],kind,value:''}]);
+  };
+  const changeCustom=(id:string,value:string)=>setCustomBlocks(items=>items.map(item=>item.id===id?{...item,value}:item));
+  const removeCustom=(id:string)=>setCustomBlocks(items=>items.filter(item=>item.id!==id));
+  const renameCustom=(id:string,label:string)=>setCustomBlocks(items=>items.map(item=>item.id===id?{...item,label}:item));
 
   if (selected && draft && report) {
     const evidence = relationOptions.filter((item) => item.kind === 'evidence');
     const evidenceConnections = evidence.filter((item) => connectedIds.includes(item.id));
     const personaOptions = relationOptions.filter((item) => item.kind === 'persona');
     const score = previewReport?.foundationScore ?? report.foundationScore;
-    return <section className="bo-h73-job-detail" data-jobs-h73="detail">
-      <header className="bo-h71-detail-head bo-h73-detail-head"><button type="button" className="bo-h71-back" onClick={closeJob}><ArrowLeft size={16}/> Jobs</button><div className="bo-h71-detail-title"><span className="bo-h71-avatar bo-h73-avatar"><ListTodo size={19}/></span><div><small>JOB TO BE DONE</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Descreva o progresso que a pessoa tenta realizar, não a funcionalidade que ela quer usar.'}</p></div></div><div className="bo-h71-detail-score"><span>COMPLETUDE</span><strong>{score}%</strong><i><b style={{ width: `${score}%` }}/></i></div></header>
-      <nav className="bo-h71-detail-tabs" aria-label="Detalhes do Job">{([['overview','Visão geral'],['people','Pessoas'],['relations','Relações'],['evidence','Evidências'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'people' && <b>{previewReport?.connectionCounts.persona ?? report.connectionCounts.persona}</b>}{id === 'relations' && <b>{connectedIds.length}</b>}{id === 'evidence' && <b>{evidenceConnections.length}</b>}</button>)}</nav>
-      <div className="bo-h71-detail-body">
-        {detailTab === 'overview' && <div className="bo-h73-overview-grid"><section className="bo-h71-editor-card bo-h73-job-card"><header><div><small>PROGRESSO</small><strong>Que mudança a pessoa tenta realizar?</strong></div><span className={`bo-h72-importance is-${draft.importance}`}>{importanceLabel[draft.importance]}</span></header><div className="bo-h71-form two-col"><label className="wide"><span>Nome do Job</span><input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="Ex.: Ter roupas limpas sem interromper a rotina"/></label><label className="wide"><span>Descrição <small>progresso, não solução</small></span><textarea rows={3} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="O que a pessoa está tentando conseguir?"/></label><label><span>Situação / gatilho</span><textarea rows={3} value={draft.situation} onChange={(event) => setDraft({ ...draft, situation: event.target.value })} placeholder="Quando esse Job aparece?"/></label><label><span>Progresso desejado</span><textarea rows={3} value={draft.desiredProgress} onChange={(event) => setDraft({ ...draft, desiredProgress: event.target.value })} placeholder="Qual mudança concreta a pessoa quer alcançar?"/></label><label><span>Motivação</span><textarea rows={3} value={draft.motivation} onChange={(event) => setDraft({ ...draft, motivation: event.target.value })} placeholder="Por que esse progresso importa?"/></label><label><span>Barreiras</span><textarea rows={3} value={draft.barriers} onChange={(event) => setDraft({ ...draft, barriers: event.target.value })} placeholder="O que dificulta avançar hoje?"/></label><label><span>Alternativa atual</span><textarea rows={3} value={draft.currentAlternative} onChange={(event) => setDraft({ ...draft, currentAlternative: event.target.value })} placeholder="Como a pessoa resolve isso hoje?"/></label><label><span>Sinal de sucesso</span><textarea rows={3} value={draft.successSignal} onChange={(event) => setDraft({ ...draft, successSignal: event.target.value })} placeholder="Como saber que o Job foi bem realizado?"/></label><label><span>Importância</span><select className="bo-h72-select" value={draft.importance} onChange={(event) => setDraft({ ...draft, importance: event.target.value as JobImportance })}><option value="low">Baixa</option><option value="medium">Média</option><option value="high">Alta</option><option value="critical">Crítica</option></select></label><label><span>Responsável</span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></label><label className="wide"><span>Tags</span><input value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="ex.: recorrência, conveniência, rotina"/></label></div></section><aside className="bo-h73-job-summary"><small>JOB STATEMENT</small><strong>Quando… eu quero… para poder…</strong><p><b>Quando</b> {draft.situation.trim() || 'a situação ainda não foi registrada'}, <b>eu quero</b> {draft.desiredProgress.trim() || draft.title.trim() || 'realizar um progresso'}, <b>para poder</b> {draft.motivation.trim() || 'alcançar um resultado relevante'}.</p><div><span>Base mínima</span><strong>{score}%</strong><i><b style={{ width: `${score}%` }}/></i></div>{(previewReport?.foundationChecks ?? report.foundationChecks).map((item) => <em key={item.id} className={item.complete ? 'is-done' : ''}><b>{item.complete ? <Check size={10}/> : '○'}</b>{item.label}</em>)}</aside></div>}
+    const blocks:EntityCanvasBlock[]=[
+      {id:'situation',label:'Situação / gatilho',essential:true,value:draft.situation,placeholder:'Quando esse Job aparece na rotina da pessoa?',onChange:value=>setDraft(current=>current?{...current,situation:value}:current)},
+      {id:'desiredProgress',label:'Progresso desejado',essential:true,value:draft.desiredProgress,placeholder:'Que mudança concreta a pessoa tenta alcançar?',onChange:value=>setDraft(current=>current?{...current,desiredProgress:value}:current)},
+      {id:'motivation',label:'Motivação',essential:true,value:draft.motivation,placeholder:'Para que esse progresso importa?',onChange:value=>setDraft(current=>current?{...current,motivation:value}:current)},
+      {id:'description',label:'Descrição',value:draft.description,placeholder:'Descreva o progresso buscado, não a funcionalidade.',onChange:value=>setDraft(current=>current?{...current,description:value}:current)},
+      {id:'barriers',label:'Barreiras',value:draft.barriers,placeholder:'O que impede a pessoa de avançar?',onChange:value=>setDraft(current=>current?{...current,barriers:value}:current)},
+      {id:'currentAlternative',label:'Alternativa atual',value:draft.currentAlternative,placeholder:'Como esse Job é realizado hoje?',onChange:value=>setDraft(current=>current?{...current,currentAlternative:value}:current)},
+      {id:'successSignal',label:'Sinal de sucesso',value:draft.successSignal,placeholder:'Como saber que o Job foi concluído?',onChange:value=>setDraft(current=>current?{...current,successSignal:value}:current)},
+      ...customBlocks.map(block=>({id:block.id,label:block.label,value:block.value,custom:true,kind:block.kind,placeholder:'Preencha o campo personalizado',onChange:(value:string)=>changeCustom(block.id,value)})),
+    ];
+    const checks=(previewReport?.foundationChecks??report.foundationChecks).map(check=>({
+      ...check,
+      kinds:check.id==='persona'?['persona']:check.id==='context'?['need','pain','problemHypothesis','problem']:check.id==='evidence'?['evidence']:undefined,
+      fieldId:check.id==='statement'?'description':check.id==='situation'?'situation':check.id==='progress'?'desiredProgress':check.id==='motivation'?'motivation':undefined,
+    }));
+    const statement = draft.situation.trim()&&draft.desiredProgress.trim()&&draft.motivation.trim()
+      ? `Quando ${draft.situation.trim()}, quero ${draft.desiredProgress.trim()}, para poder ${draft.motivation.trim()}.`
+      : 'Enuncie o Job como progresso: “Quando [situação], quero [progresso], para poder [resultado]”.';
+    return <section className="bo-h73-job-detail bo-pain-editor bo-job-editor" data-jobs-h73="detail">
+      <EntityEditorHeader kind="Jobs" eyebrow="JOB TO BE DONE" title={draft.title} score={score}
+        status={!draft.title.trim()?'invalid':studio.saveStatus==='error'?'error':dirty?'saving':'saved'}
+        guidance={statement}
+        onChangeTitle={value=>setDraft(current=>current?{...current,title:value}:current)}
+        onBack={()=>closeJob()} onDelete={()=>setDeleteId(selected.id)}
+        properties={<>
+          <label>Importância: <select value={draft.importance} onChange={e=>setDraft(current=>current?{...current,importance:e.target.value as JobImportance}:current)}>{Object.entries(importanceLabel).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
+          <label>Responsável: <input aria-label="Responsável" value={owner} onChange={e=>setOwner(e.target.value)} placeholder="Atribuir responsável"/></label>
+          <EntityTags value={tagsText} onChange={setTagsText}/>
+        </>}
+      />
+      <nav className="bo-h71-detail-tabs bo-pain-detail-tabs" aria-label="Detalhes do Job">
+        {([['overview','Visão geral'],['people','Pessoas'],['relations','Relações'],['evidence','Evidências'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label])=><button type="button" key={id} className={detailTab===id?'is-active':''} onClick={()=>setDetailTab(id)}>{label}{id==='people'&&<b>{previewReport?.connectionCounts.persona??report.connectionCounts.persona}</b>}{id==='relations'&&<b>{connectedIds.length}</b>}{id==='evidence'&&<b>{evidenceConnections.length}</b>}</button>)}
+      </nav>
+      {detailTab==='overview'?
+        <EntityCanvas entityKey={'job:'+selected.id} blocks={blocks} checks={checks}
+          relations={relationOptions.map(item=>({id:item.id,kind:item.kind,title:item.title,linked:connectedIds.includes(item.id)}))}
+          onToggleRelation={toggleRelation} onAddCustom={addCustom} onRemoveCustom={removeCustom} onRenameCustom={renameCustom}
+          onRemoveEntity={()=>setDeleteId(selected.id)}/>
+        : <div className="bo-h71-detail-body">
         {detailTab === 'people' && <div><div className="bo-h71-section-intro"><div><small>PESSOAS</small><h2>Quem tenta realizar este Job?</h2><p>Conecte Personas para manter o Job ancorado em pessoas e situações reais.</p></div><strong>{personaOptions.filter((item) => connectedIds.includes(item.id)).length} conectada(s)</strong></div>{personaOptions.length ? <div className="bo-h72-people-grid">{personaOptions.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma Persona criada</strong><p>Crie Personas primeiro e depois conecte-as ao Job.</p></div>}</div>}
         {detailTab === 'relations' && <div><div className="bo-h71-section-intro"><div><small>SERVICE GRAPH</small><h2>Que contexto explica este Job?</h2><p>Necessidades, dores, hipóteses e problemas ajudam a entender por que esse progresso importa e o que impede sua realização.</p></div><strong>{connectedIds.filter((id) => !personaOptions.some((item) => item.id === id) && !evidence.some((item) => item.id === id)).length} conexões</strong></div><div className="bo-h71-relation-grid">{(['need','pain','problemHypothesis','problem'] as JobRelationKind[]).map((kind) => { const options = relationOptions.filter((item) => item.kind === kind); return <section key={kind}><header><strong>{relationLabel[kind]}</strong><span>{options.filter((item) => connectedIds.includes(item.id)).length}/{options.length}</span></header>{options.length ? <div>{options.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <p>Nenhum item criado ainda.</p>}</section>; })}</div></div>}
         {detailTab === 'evidence' && <div><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que comprova este Job?</h2><p>Conecte entrevistas, observações e dados que demonstrem que esse progresso realmente é buscado pelas pessoas.</p></div><strong>{evidenceConnections.length} conectada(s)</strong></div>{evidence.length ? <div className="bo-h71-evidence-list">{evidence.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma evidência criada</strong><p>Crie evidências na aba Evidências e depois conecte-as aqui.</p></div>}</div>}
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="job" id={selected.id} title="Uso e relações" />}
-      </div>
-      <footer className="bo-h71-detail-actions"><button type="button" className="danger" onClick={() => setDeleteId(selected.id)}><Trash2 size={14}/> Remover</button><span/><button type="button" onClick={discardJob}>Descartar alterações</button><button type="button" className="primary" disabled={!draft.title.trim()} onClick={saveJob}>Salvar Job</button></footer>
-      {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER JOB</small><h2>Remover “{contextEntityTitle(graph.entities?.job?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações serão desvinculadas do Service Graph, mas Personas, Necessidades, Dores, Problemas e Evidências serão preservados.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeJob(deleteId)}>Remover Job</button></footer></div></div>}
+      </div>}
+      {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm" role="alertdialog" aria-modal="true" aria-label="Excluir Job"><header><div><small>REMOVER JOB</small><h2>Remover “{contextEntityTitle(graph.entities?.job?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações serão desvinculadas do Service Graph, mas Personas, Necessidades, Dores, Problemas e Evidências serão preservados.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeJob(deleteId)}>Remover Job</button></footer></div></div>}
+    </section>;
     </section>;
   }
 
