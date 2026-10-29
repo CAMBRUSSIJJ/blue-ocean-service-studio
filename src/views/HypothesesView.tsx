@@ -223,7 +223,7 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
       {id:'impactIfWrong',label:'Impacto se estiver errada',value:draft.impactIfWrong,placeholder:'Qual decisão ou esforço pode ser desperdiçado?',onChange:value=>setDraft(current=>current?{...current,impactIfWrong:value}:current)},
     ];
     const guidance = draft.title.trim().length < 30 || !/\b(que|porque|result|quando|se|causa|devido|aument|reduz)\b/i.test(draft.title);
-    return <section className="bo-h75-hypothesis-detail bo-hyp-inline" data-hypotheses-h75="detail">
+    return <section className="bo-h75-hypothesis-detail bo-entity-inline-detail bo-hyp-inline" data-hypotheses-h75="detail">
       <header className="bo-hyp-inline-header">
         <div className="bo-hyp-inline-top">
           <button type="button" className="bo-hyp-inline-back" onClick={()=>closeHypothesis()}><ArrowLeft size={15}/> Hipóteses</button>

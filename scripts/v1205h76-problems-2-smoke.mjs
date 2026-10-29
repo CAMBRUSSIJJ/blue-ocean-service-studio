@@ -18,7 +18,7 @@ ok('Problemas permite criação direta como rascunho', view.includes('Criar prob
 ok('CTA de problema abre cadastro próprio', view.includes('setCreateOpen(true)') && !view.includes("detail: 'hypotheses'"));
 ok('App possui coordenador de página contextual', app.includes("window.addEventListener('bo-open-context-page'") && app.includes('openLibraryPage(page)'));
 ok('Biblioteca tem filtros próprios', ['Prontos para definição','Base incompleta','Críticos','Com evidência'].every((x)=>view.includes(x)));
-ok('Detalhe possui cinco abas próprias', ['Visão geral','Contexto','Evidências','Definição','Uso'].every((x)=>view.includes(x)));
+ok('Detalhe possui cinco abas próprias', ['Visão geral','Contexto','Evidências','Validação','Uso'].every((x)=>view.includes(x)));
 ok('Problema possui campos de estrutura', ['rootCause','impact','affectedPopulation','observableSignal','severity','priority'].every((x)=>view.includes(x) && service.includes(x)));
 ok('Qualidade é determinística', service.includes('qualityChecks') && service.includes('qualityScore') && service.includes('readyForDefinition'));
 ok('Qualidade exige problema validado', service.includes("String(problem.status ?? '') === 'validated'"));
