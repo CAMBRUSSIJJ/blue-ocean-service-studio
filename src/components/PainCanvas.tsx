@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { DragEvent, ReactNode } from 'react';
+import type { DragEvent } from 'react';
 import { Check, GripVertical, MoreHorizontal, Plus, Trash2, X } from '../design-system/icons';
 
 export type PainCanvasBlock = {
