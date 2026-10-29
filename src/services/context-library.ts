@@ -83,13 +83,27 @@ export function contextEntityUsage(graph: ServiceGraph, kind: ContextKind, id: s
 }
 
 export function createContextEntity(graph: ServiceGraph, kind: ContextKind, title: string, description = ''): ServiceGraph {
-  // Problemas validados são sempre promovidos a partir de uma hipótese; criar em "Problemas" inicia uma hipótese.
-  const targetKind = kind === 'problem' ? 'problemHypothesis' : kind;
   const next = clone(graph);
-  const entity = createDiscoveryEntity({ graph: next, kind: targetKind, title, description });
   next.entities ||= {};
-  next.entities[targetKind] ||= {};
-  next.entities[targetKind][entity.id] = entity;
+  if (kind === 'problem') {
+    // A problem can be recorded directly, but never falsely marked as validated.
+    const timestamp = nowIso();
+    const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? `problem-${crypto.randomUUID()}`
+      : `problem-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    next.entities.problem ||= {};
+    next.entities.problem[id] = {
+      id, type: 'problem', serviceId: next.service.id,
+      title: title.trim(), description: description.trim(),
+      status: 'draft', severity: 'medium', priority: 'medium',
+      relatedIds: [], createdAt: timestamp, updatedAt: timestamp,
+    };
+    next.service.updatedAt = timestamp;
+    return next;
+  }
+  const entity = createDiscoveryEntity({ graph: next, kind, title, description });
+  next.entities[kind] ||= {};
+  next.entities[kind][entity.id] = entity;
   next.service.updatedAt = String(entity.updatedAt ?? nowIso());
   return next;
 }
