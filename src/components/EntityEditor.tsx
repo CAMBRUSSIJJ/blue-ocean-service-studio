@@ -24,6 +24,7 @@ type EntityEditorProps = {
   backLabel: string;
   onBack: () => void;
   title: string;
+  titlePlaceholder?: string;
   onTitleChange: (value: string) => void;
   warning?: string;
   properties: ReactNode;
@@ -52,7 +53,7 @@ function BlockTextarea({ block }: { block: EntityEditorBlock }) {
 /** Editor compartilhado: os dados continuam pertencendo ao Service Graph de cada entidade. */
 export function EntityEditor(props: EntityEditorProps) {
   const {
-    entityId, kind, backLabel, onBack, title, onTitleChange, warning, properties, score,
+    entityId, kind, backLabel, onBack, title, titlePlaceholder, onTitleChange, warning, properties, score,
     saveStatus, onRemove, tabs, overview, blocks, checks, relations, onToggleRelation, children,
   } = props;
   const storageKey = `bo-entity-block-order:${kind}:${entityId}`;
@@ -104,7 +105,7 @@ export function EntityEditor(props: EntityEditorProps) {
   const pickerOptions = relations.filter((relation) => activeCheck?.connectTo?.includes(relation.kind)
     && relation.title.toLocaleLowerCase('pt-BR').includes(relationSearch.toLocaleLowerCase('pt-BR')));
 
-  return <section className="bo-entity-editor bo-h72-need-detail" data-needs-h72="detail" data-entity-editor={kind}>
+  return <section className="bo-entity-editor" data-entity-editor={kind}>
     <header className="bo-entity-top">
       <div className="bo-entity-topline">
         <button type="button" className="bo-entity-back" onClick={onBack}><ArrowLeft size={16}/> {backLabel}</button>
@@ -120,7 +121,7 @@ export function EntityEditor(props: EntityEditorProps) {
       </div>
       <div className="bo-entity-statement">
         <label htmlFor="bo-entity-title">{kind}</label>
-        <textarea id="bo-entity-title" className="bo-entity-title" rows={2} value={title} onChange={(event) => onTitleChange(event.target.value)} aria-label={`Enunciado da ${kind.toLowerCase()}`} placeholder="Descreva o que precisa ser resolvido"/>
+        <textarea id="bo-entity-title" className="bo-entity-title" rows={2} value={title} onChange={(event) => onTitleChange(event.target.value)} aria-label={`Enunciado da ${kind.toLowerCase()}`} placeholder={titlePlaceholder || "Descreva o objetivo principal"}/>
         {warning && <p className="bo-entity-warning" role="note">{warning}</p>}
       </div>
       <div className="bo-entity-properties">{properties}</div>
