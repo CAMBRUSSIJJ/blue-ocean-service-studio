@@ -32,6 +32,7 @@ jobs:
       - run: node scripts/entity-canvas-needs-smoke.mjs
       - run: node scripts/entity-canvas-jobs-smoke.mjs
       - run: node scripts/entity-canvas-hypotheses-smoke.mjs
+      - run: node scripts/entity-canvas-problems-smoke.mjs
       - run: npm run docs:check
       - run: node scripts/journey-visualization-test.mjs
       - run: node scripts/blueprint-guided-reading-test.mjs
@@ -113,6 +114,8 @@ jobs:
         run: python3 scripts/entity-canvas-jobs-browser.py
       - name: Canvas universal de Hipóteses — evidências e validação
         run: python3 scripts/entity-canvas-hypotheses-browser.py
+      - name: Canvas universal de Problemas — criação direta e validação
+        run: python3 scripts/entity-canvas-problems-browser.py
       - name: Abrir Blueprint com CSP do servidor Linux
         run: npm run blueprint:csp:browser
       - name: Canvas do Blueprint — escrita repetida e edição
@@ -156,6 +159,7 @@ jobs:
             artifacts/entity-canvas-needs
             artifacts/entity-canvas-jobs
             artifacts/entity-canvas-hypotheses
+            artifacts/entity-canvas-problems
             artifacts/journey-editor
             artifacts/blueprint-methodology
             artifacts/entry-journey
