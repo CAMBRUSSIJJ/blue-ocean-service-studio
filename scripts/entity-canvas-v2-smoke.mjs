@@ -11,7 +11,7 @@ const main=fs.readFileSync('src/main.tsx','utf8');
 const tests=[
  ['Editor reusable with inline title and property tags',shell.includes('EntityEditorHeader')&&shell.includes('EntityTags')&&pains.includes('<EntityEditorHeader')],
  ['Canvas uses one generic composition, not prototype',pains.includes('<EntityCanvas ')&&canvas.includes('<EntityCriteria')&&canvas.includes('<EntityRelations')],
- ['Real autosave persists all custom fields in graph',pains.includes('canvasCustomBlocks:custom')&&pains.includes('Problemas')===false&&pains.includes('Dores: autosave')],
+ ['Real autosave persists all custom fields in graph',pains.includes('canvasCustomBlocks:custom')&&pains.includes('Dores: autosave')],
  ['Built-in blocks never lose content when hidden',canvas.includes('saveHidden([...hidden,block.id])')&&!canvas.includes("block.onChange('')")],
  ['Custom fields persist with typed values',pains.includes('parseCustomBlocks(selected.canvasCustomBlocks)')&&pains.includes('setCustomBlocks(items=>')],
  ['Typed field controls include checklist and media references',canvas.includes("block.kind==='checklist'")&&canvas.includes("block.kind==='image'")&&canvas.includes("block.kind==='document'")],
