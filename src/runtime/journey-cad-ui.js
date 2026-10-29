@@ -435,7 +435,7 @@ function cadAction(action,data,button){
  if(!action.startsWith('cad-'))return false;
  const rect=button?.getBoundingClientRect(),point=rect?{x:rect.left,y:rect.bottom+8}:{};
  if(action==='cad-open'||action==='cad-matrix'){cadStash();V.blueprintRenderer=action==='cad-open'?'canvas':'matrix';saveView();rerender();return true}
- if(action==='cad-select'){const was=cadState.lastCardClick,now=Date.now();const isDouble=!cadMobile()&&was?.id===data.id&&now-was.time<420;cadState.lastCardClick={id:data.id,time:now};cadSelect(data.id,point,isDouble?false:'select');return true}
+ if(action==='cad-select'){const was=cadState.lastCardClick,now=Date.now();const isDouble=!cadMobile()&&was?.id===data.id&&now-was.time<420;cadState.lastCardClick={id:data.id,time:now};cadSelect(data.id,point,cadMobile()?false:isDouble?false:'select');return true}
  if(action==='cad-inline'){cadSelect(data.id,point,true);return true}
  if(action==='cad-quick-focus'){cadFocusQuick();return true}
  if(action==='cad-edge'){cadOpenLink(data.id);return true}
