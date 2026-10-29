@@ -58,6 +58,11 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
   const [createOpen,setCreateOpen] = useState(false);
   const [createTitle,setCreateTitle] = useState('');
   const [createDescription,setCreateDescription] = useState('');
+  useEffect(() => {
+    if (sessionStorage.getItem('bo-workspace-create-page') !== 'problems') return;
+    sessionStorage.removeItem('bo-workspace-create-page');
+    setCreateOpen(true);
+  }, []);
 
   const selected = selectedId ? graph.entities?.problem?.[selectedId] : undefined;
   const report = useMemo(() => selectedId ? buildProblemStudioReport(graph, selectedId) : null, [graph, selectedId]);
