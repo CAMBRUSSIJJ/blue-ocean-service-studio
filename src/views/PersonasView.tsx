@@ -346,7 +346,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     const completenessChecks = draft.mode === 'professional'
       ? [...completenessReport.foundationChecks, ...completenessReport.professionalChecks]
       : completenessReport.foundationChecks;
-    return <section className={`bo-h71-persona-detail bo-h713-layout-${draft.layout}`} data-personas-h71="detail">
+    return <section className={`bo-h71-persona-detail bo-pain-editor bo-persona-entity-editor bo-h713-layout-${draft.layout}`} data-personas-h71="detail">
       <EntityEditorHeader kind="Personas" eyebrow={draft.mode==='professional'?'PERSONA AVANÇADA':'PERSONA SIMPLES'}
         title={draft.title} score={completeness}
         status={!draft.title.trim()?'invalid':studio.saveStatus==='error'?'error':isPersonaDirty?'saving':'saved'}
