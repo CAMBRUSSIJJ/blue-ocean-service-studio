@@ -25,7 +25,7 @@ const relationLabel: Record<PainRelationKind, string> = {
 };
 const severityLabel: Record<PainSeverity, string> = { low: 'Baixa', medium: 'Média', high: 'Alta', critical: 'Crítica' };
 const frequencyLabel: Record<PainFrequency, string> = { rare: 'Rara', occasional: 'Ocasional', frequent: 'Frequente', constant: 'Constante' };
-const mayBeSymptom = (value: string) => /\\b(abandona|desiste|cancela|fecha|sai|não clica|reclama|para de usar|deixa de comprar)\\b/i.test(value);
+const mayBeSymptom = (value: string) => /\b(abandona|desiste|cancela|fecha|sai|não clica|reclama|para de usar|deixa de comprar)\b/i.test(value);
 const formatDate = (value: unknown) => {
   const date = new Date(String(value ?? ''));
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -180,7 +180,7 @@ export function PainsView({ studio }: { studio: StudioController }) {
   }, [draft?.title, selectedId]);
   const closePain = (save = true) => {
     if (save && isDirty && selectedId && draft?.title.trim()) persistPain(selectedId, draft, owner, tags, connectedIds);
-    if (!save) skipFlushRef.current = true;
+    skipFlushRef.current = true;
     setSelectedId(null); setDraft(null); setDetailTab('overview'); setDetailMenu(false);
   };
   const removePain = (id: string) => {
