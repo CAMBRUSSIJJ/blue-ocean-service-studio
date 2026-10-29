@@ -283,7 +283,6 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
       </div>}
       {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm" role="alertdialog" aria-modal="true" aria-label="Excluir hipótese"><header><div><small>REMOVER HIPÓTESE</small><h2>Remover “{contextEntityTitle(graph.entities?.problemHypothesis?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>Contextos e evidências serão desvinculados. Problemas já validados permanecem rastreáveis no Service Graph.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeHypothesis(deleteId)}>Remover Hipótese</button></footer></div></div>}
     </section>;
-    </section>;
   }
 
   return <section className="bo-h75-hypotheses" data-hypotheses-h75="library">
