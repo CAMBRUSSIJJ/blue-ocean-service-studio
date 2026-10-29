@@ -102,6 +102,8 @@ jobs:
           path: dist
       - run: python -m pip install playwright
       - run: python -m playwright install --with-deps chromium
+      - name: Canvas universal de Dores — salvamento e campos personalizados
+        run: python3 scripts/entity-canvas-v2-browser.py
       - name: Abrir Blueprint com CSP do servidor Linux
         run: npm run blueprint:csp:browser
       - name: Canvas do Blueprint — escrita repetida e edição
@@ -119,8 +121,6 @@ jobs:
       - run: npm run blueprint:connections:browser
       - run: npm run editor:browser
       - run: python3 scripts/personas-p2p3-browser.py
-      - name: Canvas universal de Dores — salvamento e campos personalizados
-        run: python3 scripts/entity-canvas-v2-browser.py
       - run: npm run journey:browser
       - run: npm run blueprint:methodology:browser
       - run: python3 scripts/blueprint-guided-reading-browser.py
