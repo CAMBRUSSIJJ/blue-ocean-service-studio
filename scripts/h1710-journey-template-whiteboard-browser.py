@@ -71,11 +71,12 @@ def deletion_and_whiteboard(page):
     # Sidebar navigation is the accessible entry point outside the Design dashboard.
     page.locator('[data-blue-ocean-whiteboard-nav="standard"]').click()
     expect(page.locator('[data-whiteboard-library="1"]')).to_be_visible()
-    check(page.get_by_role('button', name='Novo whiteboard').is_visible(),
-          'Whiteboard library is accessible by primary sidebar')
-    page.get_by_role('button', name='Novo whiteboard').click()
-    page.get_by_label('Nome do quadro', exact=True).fill('QA Quadro livre')
-    page.get_by_role('button', name='Começar livre', exact=True).click()
+    expect(page.locator('[data-whiteboard-empty-state="1"]')).to_be_visible()
+    check(page.get_by_role('button', name='Criar whiteboard', exact=True).is_visible(),
+          'Whiteboard empty state provides immediate creation')
+    check(page.locator('.bo-h711-commandbar').count() == 0,
+          'Empty state hides search and filters until a board exists')
+    page.get_by_role('button', name='Criar whiteboard', exact=True).click()
     expect(page.locator('.bo1174-board')).to_be_visible()
     check(any(b.get('viewKind') == 'free' for b in graph(page)['views']['whiteboards'].values()),
           'Whiteboard creation opens a real free canvas')
