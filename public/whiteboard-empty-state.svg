@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="270" viewBox="0 0 360 270" fill="none">
+<title>Quadro livre com post-its e conexões</title>
+<ellipse cx="180" cy="139" rx="129" ry="111" fill="#E9F4FC"/>
+<ellipse cx="263" cy="66" rx="31" ry="19" fill="#F2F8FE"/>
+<rect x="48" y="59" width="265" height="164" rx="11" fill="#BCD2E3" opacity=".46"/>
+<rect x="56" y="44" width="247" height="165" rx="9" fill="white" stroke="#6D879D" stroke-width="3"/>
+<rect x="63" y="50" width="233" height="150" rx="6" fill="#F9FCFF" stroke="#C5D6E5"/>
+<path d="M63 70H296" stroke="#D4E0EA"/>
+<circle cx="77" cy="60" r="4" fill="#ED9A91"/><circle cx="89" cy="60" r="4" fill="#E8C17C"/><circle cx="101" cy="60" r="4" fill="#87C0A8"/>
+<path d="M113 60H156" stroke="#C1D3E0" stroke-width="3" stroke-linecap="round"/>
+<path d="M116 113C140 100 155 102 175 125C191 144 210 138 233 122" stroke="#5F8FAF" stroke-width="2.8" stroke-linecap="round" stroke-dasharray="4 5"/>
+<path d="M160 172C179 150 197 159 221 162C245 165 251 145 271 136" stroke="#78A1BE" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M268 138L273 132L277 141" stroke="#78A1BE" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="85" y="97" width="49" height="49" rx="3" fill="#BBE5D4" stroke="#7EB7A6" stroke-width="2" transform="rotate(-7 85 97)"/>
+<path d="M94 110H118M93 118H115" stroke="#83B9A8" stroke-width="2" stroke-linecap="round"/>
+<rect x="156" y="142" width="48" height="46" rx="3" fill="#C9DBFA" stroke="#90B3E5" stroke-width="2" transform="rotate(6 156 142)"/>
+<path d="M167 156H186" stroke="#9BBCE7" stroke-width="2.5" stroke-linecap="round"/>
+<rect x="239" y="93" width="45" height="49" rx="3" fill="#FFE4A3" stroke="#D9BC76" stroke-width="2" transform="rotate(-5 239 93)"/>
+<path d="M249 105H271M248 112H270M247 119H267" stroke="#CDB477" stroke-width="2" stroke-linecap="round"/>
+<rect x="99" y="169" width="30" height="13" rx="3" fill="#F2F7FC" stroke="#C7D9E9"/>
+<path d="M106 175H121" stroke="#9CAFC2" stroke-width="2" stroke-linecap="round"/>
+<path d="M135 202L127 224H239L231 202" fill="#7A96AE" stroke="#5F7F9D" stroke-width="2"/>
+<path d="M117 224H248" stroke="#6686A2" stroke-width="4" stroke-linecap="round"/>
+<path d="M273 207L281 223L290 217L284 207" fill="#7B9AB6" stroke="#5D7891" stroke-width="2"/>
+<circle cx="57" cy="181" r="3" fill="#C7DAE7"/><circle cx="303" cy="89" r="3" fill="#D6E6F2"/>
+</svg>
