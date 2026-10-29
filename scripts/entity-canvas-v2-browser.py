@@ -57,7 +57,7 @@ try:
         item.get_by_role('button',name='Opções de Sinal observável').click()
         item.get_by_role('button',name='Ocultar bloco (preserva conteúdo)').click()
         check('Hidden optional field retains its data',canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Sinal observável').inner_text().find('Conteúdo preservado')>=0)
-        detail.screenshot(path=str(OUT/'entity-canvas-v2.png'),full_page=True)
+        page.screenshot(path=str(OUT/'entity-canvas-v2.png'),full_page=True)
         detail.locator('.bo-pain-back').click()
         expect(library).to_be_visible()
         library.locator('.bo-h74-pain-name').first.click()
