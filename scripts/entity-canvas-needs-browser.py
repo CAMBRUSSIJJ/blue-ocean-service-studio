@@ -51,7 +51,7 @@ try:
   card=canvas.locator('.bo-pain-canvas-card').filter(has=canvas.get_by_role('textbox',name='Alternativa atual',exact=True))
   card.get_by_role('button',name='Opções de Alternativa atual').click()
   card.get_by_role('button',name='Ocultar bloco (preserva conteúdo)').click()
-  check('Hidden block indicates preserved text','Conteúdo preservado' in canvas.get_by_role('button',name='Alternativa atual',exact=True).inner_text())
+  check('Hidden block indicates preserved text','Conteúdo preservado' in canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Alternativa atual').inner_text())
   detail.screenshot(path=str(OUT/'needs-canvas.png'),full_page=True)
   detail.locator('.bo-pain-back').click()
   expect(library).to_be_visible()
