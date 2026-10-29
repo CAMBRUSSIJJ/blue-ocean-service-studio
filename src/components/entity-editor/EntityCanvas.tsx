@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { DragEvent, PointerEvent } from 'react';
+import type { DragEvent, PointerEvent, ReactNode } from 'react';
 import { ChevronDown, GripVertical, Maximize2, MoreHorizontal, Plus, Trash2 } from '../../design-system/icons';
 import { EntityCriteria } from './EntityCriteria';
 import { EntityRelations, RELATION_DRAG_MIME } from './EntityRelations';
@@ -16,6 +16,8 @@ type Props = {
   onRemoveCustom?: (id: string) => void;
   onRenameCustom?: (id: string, label: string) => void;
   onRemoveEntity: () => void;
+  sidebarTop?: ReactNode;
+  sidebarBottom?: ReactNode;
 };
 const fieldTypes: Array<{kind:EditorFieldKind;label:string}> = [
   {kind:'text',label:'Texto'}, {kind:'checklist',label:'Checklist'},
@@ -54,7 +56,7 @@ function BlockControl({block}:{block:EntityCanvasBlock}) {
   }
   return <textarea id={'bo-canvas-field-'+block.id} aria-label={block.label} rows={4} value={block.value} onChange={e=>block.onChange(e.target.value)} placeholder={block.placeholder}/>;
 }
-export function EntityCanvas({entityKey,blocks,checks,relations,onToggleRelation,onAddCustom,onRemoveCustom,onRenameCustom,onRemoveEntity}:Props) {
+export function EntityCanvas({entityKey,blocks,checks,relations,onToggleRelation,onAddCustom,onRemoveCustom,onRenameCustom,onRemoveEntity,sidebarTop,sidebarBottom}:Props) {
   const orderKey='bo-entity-canvas:order:'+entityKey;
   const hiddenKey='bo-entity-canvas:hidden:'+entityKey;
   const layoutKey='bo-entity-canvas:layout:'+entityKey;
@@ -149,8 +151,10 @@ export function EntityCanvas({entityKey,blocks,checks,relations,onToggleRelation
       </div>}
     </main>
     <aside className="bo-pain-canvas-aside">
+      {sidebarTop}
       <EntityCriteria checks={checks} relations={relations} onToggleRelation={onToggleRelation} onEditField={activate}/>
       <EntityRelations relations={relations} onToggleRelation={onToggleRelation}/>
+      {sidebarBottom}
       <button className="bo-pain-canvas-delete" type="button" onClick={onRemoveEntity}><Trash2 size={14}/> Excluir esta entidade</button>
     </aside>
   </div>;
