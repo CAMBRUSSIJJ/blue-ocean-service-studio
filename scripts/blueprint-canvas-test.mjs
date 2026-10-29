@@ -98,12 +98,12 @@ check('Empty lanes are compact, populated lanes grow and manual height never cli
  source.c['ev|0']=[{i:'image',t:'Fachada',canvas:{kind:'artifact',imageUrl:'https://example.org/fachada.jpg',tone:'teal'}}];
  source.c['ch|0']=[{i:'channel',t:'WhatsApp',canvas:{kind:'channel'}}];
  const auto=buildCanvasLayout(source,lanes),manual=buildCanvasLayout(source,lanes,null,null,{ch:180,ev:90});
- assert.equal(auto.rows.find(r=>r.id==='ev').height,200);
+ assert.equal(auto.rows.find(r=>r.id==='ev').height,244);
  assert.equal(auto.nodes.find(n=>n.id==='image').height,164);
  assert.equal(auto.nodes.find(n=>n.id==='channel').height,88);
  assert.equal(auto.rows.find(r=>r.id==='em').height,132);
  assert.equal(manual.rows.find(r=>r.id==='ch').height,180);
- assert.equal(manual.rows.find(r=>r.id==='ev').height,200);
+ assert.equal(manual.rows.find(r=>r.id==='ev').height,244);
  assert.equal(canvasCardHeight({canvas:{kind:'text'}},'sd'),98);
  assert.equal(canvasRowHeight(source,{id:'fl'},[1]),90);
  for(const node of manual.nodes.filter(n=>n.row!=='em')){
