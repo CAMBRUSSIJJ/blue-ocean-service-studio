@@ -31,12 +31,12 @@ const readBoxes=(key:string):Record<string,Box>=>{try{
   });return Object.fromEntries(entries);
 }catch{return {}}};
 function BlockControl({block}:{block:EntityCanvasBlock}) {
-  if(block.kind==='number')return <input type="number" value={block.value} aria-label={block.label} onChange={e=>block.onChange(e.target.value)} placeholder={block.placeholder}/>;
-  if(block.kind==='date')return <input type="date" value={block.value} aria-label={block.label} onChange={e=>block.onChange(e.target.value)}/>;
+  if(block.kind==='number')return <input id={'bo-canvas-field-'+block.id} type="number" value={block.value} aria-label={block.label} onChange={e=>block.onChange(e.target.value)} placeholder={block.placeholder}/>;
+  if(block.kind==='date')return <input id={'bo-canvas-field-'+block.id} type="date" value={block.value} aria-label={block.label} onChange={e=>block.onChange(e.target.value)}/>;
   if(block.kind==='image'||block.kind==='document'){
     const safe=/^https?:\/\//i.test(block.value.trim());
     return <div className="bo-canvas-asset">
-      <input type="url" value={block.value} aria-label={block.label} onChange={e=>block.onChange(e.target.value)} placeholder={block.kind==='image'?'https://.../imagem.png':'https://.../arquivo.pdf'}/>
+      <input id={'bo-canvas-field-'+block.id} type="url" value={block.value} aria-label={block.label} onChange={e=>block.onChange(e.target.value)} placeholder={block.kind==='image'?'https://.../imagem.png':'https://.../arquivo.pdf'}/>
       {safe&&block.kind==='image'&&<img src={block.value} loading="lazy" alt={block.label}/>}
       {safe&&block.kind==='document'&&<a href={block.value} target="_blank" rel="noopener noreferrer">Abrir documento ↗</a>}
     </div>;
@@ -52,7 +52,7 @@ function BlockControl({block}:{block:EntityCanvasBlock}) {
         onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();const val=e.currentTarget.value.trim();if(val){block.onChange([...entries,'[ ] '+val].join('\n'));e.currentTarget.value='';}}}}/>
     </div>;
   }
-  return <textarea aria-label={block.label} rows={4} value={block.value} onChange={e=>block.onChange(e.target.value)} placeholder={block.placeholder}/>;
+  return <textarea id={'bo-canvas-field-'+block.id} aria-label={block.label} rows={4} value={block.value} onChange={e=>block.onChange(e.target.value)} placeholder={block.placeholder}/>;
 }
 export function EntityCanvas({entityKey,blocks,checks,relations,onToggleRelation,onAddCustom,onRemoveCustom,onRenameCustom,onRemoveEntity}:Props) {
   const orderKey='bo-entity-canvas:order:'+entityKey;
