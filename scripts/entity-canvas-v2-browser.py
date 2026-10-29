@@ -64,7 +64,7 @@ try:
         expect(detail).to_be_visible()
         page.wait_for_timeout(250)
         check('Custom content persisted after reopen',canvas.get_by_role('textbox',name='Texto',exact=True).input_value()=='Observação personalizada persistente.')
-        canvas.get_by_role('button',name='Sinal observável',exact=True).click()
+        canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Sinal observável').click()
         check('Optional content recovered after reopen',canvas.get_by_role('textbox',name='Sinal observável',exact=True).input_value()=='Elevação da taxa de abandono no checkout.')
         check('Existing graph fields persisted',detail.get_by_role('textbox',name='Contexto').input_value()=='Compra pelo telefone celular.')
         (OUT/'result.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
