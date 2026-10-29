@@ -162,6 +162,7 @@ export function PainsView({ studio }: { studio: StudioController }) {
     if (!value.title.trim()) return;
     setGraph((current) => patchPainMeta(updatePainProfile({ graph: current, painId: id, draft: value, connectedIds: links }), id, nextOwner, nextTags), 'Dores: salvamento automático');
   };
+  useEffect(() => { if (selectedId) skipFlushRef.current = false; }, [selectedId]);
   const flushRef = useRef<() => void>(() => {});
   flushRef.current = () => {
     if (!skipFlushRef.current && selectedId && draft?.title.trim() && isDirty) persistPain(selectedId, draft, owner, tags, connectedIds);
