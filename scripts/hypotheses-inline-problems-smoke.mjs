@@ -5,6 +5,7 @@ const style=fs.readFileSync('src/runtime/entity-inline-canvas.css','utf8');
 const main=fs.readFileSync('src/main.tsx','utf8');
 const problems=fs.readFileSync('src/views/ProblemsView.tsx','utf8');
 const service=fs.readFileSync('src/services/problems-studio.ts','utf8');
+const canonical=fs.readFileSync('src/services/context-library.ts','utf8');
 const tests=[
  ['Título de hipótese inline sem duplicação',view.includes('aria-label="Enunciado da hipótese"')&&!view.includes('<span>Hipótese</span><input')],
  ['Autosave e sem rodapé manual',view.includes('Hipóteses: autosave')&&!view.includes('bo-h71-detail-actions')],
@@ -17,6 +18,7 @@ const tests=[
  ['Problemas têm criação direta',problems.includes("type:'problem'")&&problems.includes("status:'draft'")&&problems.includes('Criar problema')],
  ['Problemas não redirecionam para Hipóteses',!problems.includes('requestHypothesisCreation')&&!problems.includes("detail: 'hypotheses'")],
  ['Rascunho não vira validado automaticamente ao editar',service.includes("existing.status === 'draft' ? 'draft'")],
+ ['API canônica cria Problemas sem redirecionar',canonical.includes("if (kind === 'problem')")&&canonical.includes("status: 'draft'")&&!canonical.includes("kind === 'problem' ? 'problemHypothesis'")],
 ];
 for(const [name,pass] of tests)console.log((pass?'OK   ':'FAIL ')+name);
 if(tests.some(test=>!test[1]))process.exit(1);
