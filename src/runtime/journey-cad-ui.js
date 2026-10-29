@@ -196,6 +196,39 @@ function cadStartStage(index=S.steps.length-1,point={}){
  if(cadLocked())return;cadStash();cadState.creating=null;cadState.choosing=null;cadState.menu=null;cadState.inspector=false;cadState.quick={mode:'stage',title:'',after:cadStageKey(S.steps[index]||{}),...cadQuickPosition(point)};rerender();cadFocusQuick();
 }
 function cadFocusQuick(){requestAnimationFrame(()=>{const field=app.querySelector('#cad-quick-form input:not([type=hidden]),#cad-quick-form select,#cad-quick-form textarea');field?.focus();if(field?.value&&typeof field.select==='function')field.select()})}
+/* Capture on canvas: do not enter the Service Graph until the user confirms. */
+function cadInlineKind(row){
+ return ({ac:'customer-action',fl:'activity',bk:'activity',sy:'system',ev:'artifact',ch:'channel',th:'thought',im:'pain',sd:'text'})[row]||'text';
+}
+function cadFocusInline(){
+ requestAnimationFrame(()=>{const input=app.querySelector('[data-cad-inline-title]');input?.focus();if(input?.value)input.select()});
+}
+function cadReuseMatches(kind,query){
+ const fold=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+ const needle=fold(query.trim());
+ if(needle.length<3)return [];
+ return cadCatalog(kind).filter(item=>fold(item.title||item.name).includes(needle)).slice(0,5);
+}
+function cadRefreshInlineSuggestions(input){
+ const draft=cadState.creating,menu=app.querySelector('[data-cad-inline-suggestions]');
+ if(!draft?.inline||!menu)return;
+ const matches=cadReuseMatches(draft.kind,input.value);
+ menu.hidden=!matches.length;input.setAttribute('aria-expanded',String(!!matches.length));
+ menu.innerHTML=matches.map(item=>'<button type="button" role="option" data-act="cad-inline-reuse" data-id="'+esc(item.id)+'"><small>Reaproveitar</small> '+esc(item.title||item.name)+'</button>').join('')+
+  (matches.length?'<button type="button" data-act="cad-inline-ignore" class="cad-inline-ignore">Ignorar e criar novo</button>':'');
+}
+function cadSubmitInline(){
+ const draft=cadState.creating;if(!draft?.inline||cadLocked())return;
+ const title=String(draft.title||'').trim();
+ if(!title){cadNotice('Escreva o título antes de criar.');cadFocusInline();return}
+ const step=S.steps.find(item=>cadStageKey(item)===draft.stageKey);
+ if(!step){cadNotice('Esta etapa não está disponível.');return}
+ try{
+  const input={...draft,title,stageId:step.hostStageId,stageLocalId:step.hostLocalId};
+  cadModel.prepareCanvasInput(S,input);
+  cadSend('canvas-create',{input});
+ }catch(error){cadNotice(error.message);cadFocusInline()}
+}
 function cadQuickForm(){
  const draft=cadState.quick;if(!draft||draft.inline)return '';
  const stageMode=['stage','stage-edit'].includes(draft.mode),isEmotion=draft.kind==='emotion',step=S.steps.find(value=>cadStageKey(value)===draft.stageKey);
@@ -272,7 +305,14 @@ function cadSvg(){
   }
   if(linkUrl&&!node.note.draft)html+='<g data-act="cad-open-link" data-id="'+esc(node.id)+'" role="button" tabindex="0" aria-label="Abrir link vinculado a '+esc(title)+'"><rect x="'+(node.width-64)+'" y="4" width="26" height="26" rx="4" fill="#edf5ff" stroke="#bcd3ef"/><path d="M '+(node.width-53)+' 21 l9 -9 M '+(node.width-49)+' 12 h5 v5" fill="none" stroke="#3267a0" stroke-width="1.5"/></g>';
   html+='</g>';
-  if(!cadLocked()&&!node.note.virtualLabel&&!node.note.draft)html+='<g class="cad-node-resize" data-act="cad-node-resize" data-id="'+esc(node.id)+'" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Redimensionar '+esc(title)+'. Arraste o canto inferior direito ou use as setas. Home restaura o tamanho." aria-valuemin="80" aria-valuemax="480" aria-valuenow="'+node.height+'" title="Arraste para ajustar largura e altura"><rect class="cad-node-resize-hit" x="'+(node.width-26)+'" y="'+(node.height-26)+'" width="26" height="26" rx="3"/><path d="M '+(node.width-16)+' '+(node.height-6)+' L '+(node.width-6)+' '+(node.height-16)+' M '+(node.width-10)+' '+(node.height-6)+' L '+(node.width-6)+' '+(node.height-10)+'"/></g>';
+  if(node.note.draft&&cadState.creating?.inline){
+    html+='<foreignObject x="9" y="35" width="'+(node.width-18)+'" height="'+Math.max(86,node.height-43)+'" class="cad-inline-object"><div xmlns="http://www.w3.org/1999/xhtml" class="cad-inline-edit"><label for="cad-inline-title" class="sr-only">Nome do cartão</label><input id="cad-inline-title" data-cad-inline-title type="text" maxlength="240" value="'+esc(cadState.creating.title||'')+'" placeholder="Nome do cartão…" autocomplete="off" aria-expanded="false" aria-controls="cad-inline-suggestions"/><div id="cad-inline-suggestions" class="cad-inline-suggestions" role="listbox" data-cad-inline-suggestions hidden></div><small>Enter cria · Esc cancela</small></div></foreignObject>';
+   }
+   if(!node.note.virtualLabel&&!node.note.draft){
+    const shallow=!String(node.note.canvas?.description||'').trim()&&!String(node.note.activity?.owner||'').trim()&&!String(node.note.activity?.team||'').trim()&&!String(node.note.referenceId||'').trim()&&!String(node.note.canvas?.linkUrl||'').trim();
+    if(shallow)html+='<text class="cad-depth-indicator" x="'+(node.width-12)+'" y="'+(node.height-11)+'" text-anchor="end">Só título</text>';
+   }
+   if(!cadLocked()&&!node.note.virtualLabel&&!node.note.draft)html+='<g class="cad-node-resize" data-act="cad-node-resize" data-id="'+esc(node.id)+'" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Redimensionar '+esc(title)+'. Arraste o canto inferior direito ou use as setas. Home restaura o tamanho." aria-valuemin="80" aria-valuemax="480" aria-valuenow="'+node.height+'" title="Arraste para ajustar largura e altura"><rect class="cad-node-resize-hit" x="'+(node.width-26)+'" y="'+(node.height-26)+'" width="26" height="26" rx="3"/><path d="M '+(node.width-16)+' '+(node.height-6)+' L '+(node.width-6)+' '+(node.height-16)+' M '+(node.width-10)+' '+(node.height-6)+' L '+(node.width-6)+' '+(node.height-10)+'"/></g>';
   if(!cadLocked()&&!node.note.virtualLabel&&!node.note.draft)html+='<g class="cad-port" role="button" tabindex="0" data-act="cad-connect" data-id="'+esc(node.id)+'" aria-label="Conectar '+esc(title)+'"><circle cx="'+node.width+'" cy="'+(node.height/2)+'" r="'+Math.max(11,11/cam.zoom)+'"/><path d="M '+(node.width-4)+' '+(node.height/2)+' h8 M '+node.width+' '+(node.height/2-4)+' v8"/></g><g class="cad-node-menu" role="button" tabindex="0" data-act="cad-menu" data-id="'+esc(node.id)+'" aria-label="Ações de '+esc(title)+'"><rect x="'+(node.width-35)+'" y="6" width="28" height="25" rx="5"/><text x="'+(node.width-21)+'" y="23" text-anchor="middle">···</text></g>';
   html+='</g>';
  }
