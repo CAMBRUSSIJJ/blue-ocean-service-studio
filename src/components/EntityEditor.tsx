@@ -160,6 +160,7 @@ export function EntityEditor(props: EntityEditorProps) {
               <span className={`bo-entity-save is-${saveStatus}`} role="status" aria-live="polite">
                 {saveStatus === 'error' ? 'Erro ao salvar' : saveStatus === 'saved' ? <><Check size={14}/> Salvo</> : 'Salvando…'}
               </span>
+              <button type="button" className="bo-entity-delete" aria-label={`Excluir ${kind.toLowerCase()}`} title={`Excluir ${kind.toLowerCase()}`} onClick={onRemove}><Trash2 size={14}/> Excluir</button>
               <div className="bo-entity-menu-wrap">
                 <button type="button" className="bo-entity-icon-button" aria-label="Mais ações" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><MoreHorizontal size={17}/></button>
                 {menuOpen && <div className="bo-entity-menu">
