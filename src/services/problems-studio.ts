@@ -128,7 +128,7 @@ export function updateProblemProfile(input: { graph: ServiceGraph; problemId: Id
 
   problems[input.problemId] = {
     ...existing,
-    type: 'problem', serviceId: input.graph.service.id, status: 'validated',
+    type: 'problem', serviceId: input.graph.service.id, status: existing.status === 'draft' ? 'draft' : (existing.status ?? 'validated'),
     title: input.draft.title.trim(), description: input.draft.description.trim(),
     rootCause: input.draft.rootCause.trim(), impact: input.draft.impact.trim(),
     affectedPopulation: input.draft.affectedPopulation.trim(), observableSignal: input.draft.observableSignal.trim(),

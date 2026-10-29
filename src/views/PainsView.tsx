@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Check, Filter, HeartCrack, MoreVertical, Plus, Search, Table2, Trash2, X } from '../design-system/icons';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { EntityCanvas } from '../components/entity-editor/EntityCanvas';
+import { EntityEditorHeader, EntityTags } from '../components/entity-editor/EntityEditor';
+import { parseCustomBlocks, type CustomEntityBlock, type EntityCanvasBlock, type EditorFieldKind } from '../components/entity-editor/types';
+import { Check, Filter, HeartCrack, MoreVertical, Plus, Search, Table2, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
@@ -53,6 +56,8 @@ export function PainsView({ studio }: { studio: StudioController }) {
   const [owner, setOwner] = useState('');
   const [tagsText, setTagsText] = useState('');
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
+  const [customBlocks, setCustomBlocks] = useState<CustomEntityBlock[]>([]);
+  const flushRef = useRef<() => void>(() => {});
   const [createOpen, setCreateOpen] = useState(false);
   const [createTitle, setCreateTitle] = useState('');
   const [createDescription, setCreateDescription] = useState('');
@@ -69,13 +74,14 @@ export function PainsView({ studio }: { studio: StudioController }) {
 
   useEffect(() => {
     if (!selected || !report) {
-      setDraft(null); setOwner(''); setTagsText(''); setConnectedIds([]); return;
+      setDraft(null); setOwner(''); setTagsText(''); setConnectedIds([]); setCustomBlocks([]); return;
     }
     setDraft(painProfileFromEntity(selected));
     setOwner(String(selected.owner ?? ''));
     setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
     setConnectedIds(report.connections.map((item) => item.id));
-  }, [selectedId, selected?.updatedAt]);
+    setCustomBlocks(parseCustomBlocks(selected.canvasCustomBlocks));
+  }, [selectedId]);
 
   useEffect(() => {
     if (sessionStorage.getItem('bo-workspace-create-page') !== 'pains') return;
@@ -129,7 +135,7 @@ export function PainsView({ studio }: { studio: StudioController }) {
   }), [rows, query, filter]);
 
   const openPain = (id: string) => { setSelectedId(id); setDetailTab('overview'); setMenuId(null); };
-  const closePain = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
+  const closePain = (commit = true) => { if(commit)flushRef.current();setSelectedId(null);setDraft(null);setDetailTab('overview'); };
   const createPain = () => {
     if (!createTitle.trim()) return;
     const now = new Date().toISOString();
@@ -142,27 +148,48 @@ export function PainsView({ studio }: { studio: StudioController }) {
     setCreateOpen(false); setCreateTitle(''); setCreateDescription(''); setSelectedId(entity.id); setDetailTab('overview');
     showToast('Dor criada. Complete contexto, impacto e evidências.');
   };
-  const savePain = () => {
-    if (!selectedId || !draft?.title.trim()) return;
-    const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
-    setGraph((current) => patchPainMeta(updatePainProfile({ graph: current, painId: selectedId, draft, connectedIds }), selectedId, owner, tags), 'Dores 2.0: salvar');
-    showToast('Dor salva.');
+  const tags = tagsText.split(',').map(item=>item.trim()).filter(Boolean);
+  const original = selected ? painProfileFromEntity(selected) : null;
+  const storedTags = Array.isArray(selected?.tags) ? selected.tags.map(String) : [];
+  const dirty = Boolean(draft && original && (
+    (Object.keys(draft) as Array<keyof PainProfileDraft>).some(key=>draft[key].trim()!==original[key].trim())
+    || owner.trim()!==String(selected?.owner??'').trim()
+    || tags.join('|')!==storedTags.join('|')
+    || [...connectedIds].sort().join('|')!==[...(report?.connections.map(x=>x.id)??[])].sort().join('|')
+    || JSON.stringify(customBlocks)!==JSON.stringify(parseCustomBlocks(selected?.canvasCustomBlocks))
+  ));
+  const persistPain = (id:string, data:PainProfileDraft, nextOwner:string, nextTags:string[], links:string[], custom:CustomEntityBlock[])=>{
+    if(!data.title.trim())return;
+    setGraph(current=>{
+      const next=patchPainMeta(updatePainProfile({graph:current,painId:id,draft:data,connectedIds:links}),id,nextOwner,nextTags);
+      const updated=next.entities.pain?.[id];
+      if(!updated)return next;
+      return {...next,entities:{...next.entities,pain:{...next.entities.pain,[id]:{...updated,canvasCustomBlocks:custom}}}};
+    },'Dores: autosave');
   };
-  const discardPain = () => {
-    if (!selected || !report) return;
-    setDraft(painProfileFromEntity(selected));
-    setOwner(String(selected.owner ?? ''));
-    setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
-    setConnectedIds(report.connections.map((item) => item.id));
-    showToast('Alterações descartadas.');
-  };
+  flushRef.current=()=>{if(selectedId&&draft?.title.trim()&&dirty)persistPain(selectedId,draft,owner,tags,connectedIds,customBlocks);};
+  useEffect(()=>()=>flushRef.current(),[]);
+  useEffect(()=>{
+    if(!selectedId||!draft?.title.trim()||!dirty)return;
+    const timer=window.setTimeout(()=>persistPain(selectedId,draft,owner,tags,connectedIds,customBlocks),750);
+    return ()=>window.clearTimeout(timer);
+  },[selectedId,draft,owner,tagsText,connectedIds,customBlocks,dirty]);
   const removePain = (id: string) => {
     setGraph((current) => removeContextEntity(current, 'pain', id), 'Dores 2.0: remover');
-    if (selectedId === id) closePain();
+    if (selectedId === id) closePain(false);
     setDeleteId(null); setMenuId(null);
     showToast('Dor removida e relações desvinculadas.');
   };
   const toggleRelation = (id: string) => setConnectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  const addCustom = (kind:EditorFieldKind)=>{
+    if(customBlocks.length>=60){showToast('Limite de 60 campos personalizados por entidade.');return;}
+    const title:Record<EditorFieldKind,string>={text:'Texto',checklist:'Checklist',number:'Número',date:'Data',image:'Imagem (URL)',document:'Documento (link)'};
+    const id='custom-'+(typeof crypto!=='undefined'&&'randomUUID' in crypto?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2,7));
+    setCustomBlocks(items=>[...items,{id,label:title[kind],kind,value:''}]);
+  };
+  const changeCustom=(id:string,value:string)=>setCustomBlocks(items=>items.map(b=>b.id===id?{...b,value}:b));
+  const removeCustom=(id:string)=>setCustomBlocks(items=>items.filter(b=>b.id!==id));
+  const renameCustom=(id:string,label:string)=>setCustomBlocks(items=>items.map(b=>b.id===id?{...b,label}:b));
 
   if (selected && draft && report) {
     const evidence = relationOptions.filter((item) => item.kind === 'evidence');
@@ -170,40 +197,46 @@ export function PainsView({ studio }: { studio: StudioController }) {
     const personaOptions = relationOptions.filter((item) => item.kind === 'persona');
     const score = previewReport?.foundationScore ?? report.foundationScore;
     const checks = previewReport?.foundationChecks ?? report.foundationChecks;
-    return <section className="bo-h74-pain-detail" data-pains-h74="detail">
-      <header className="bo-h71-detail-head bo-h74-detail-head">
-        <button type="button" className="bo-h71-back" onClick={closePain}><ArrowLeft size={16}/> Dores</button>
-        <div className="bo-h71-detail-title"><span className="bo-h71-avatar bo-h74-avatar"><HeartCrack size={19}/></span><div><small>FRICÇÃO OBSERVADA</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Descreva a fricção observada sem transformá-la prematuramente em solução ou problema validado.'}</p></div></div>
-        <div className="bo-h71-detail-score"><span>COMPLETUDE</span><strong>{score}%</strong><i><b style={{ width: `${score}%` }}/></i></div>
-      </header>
-      <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Dor">
-        {([['overview','Visão geral'],['people','Pessoas'],['relations','Relações'],['evidence','Evidências'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'people' && <b>{previewReport?.connectionCounts.persona ?? report.connectionCounts.persona}</b>}{id === 'relations' && <b>{connectedIds.length}</b>}{id === 'evidence' && <b>{evidenceConnections.length}</b>}</button>)}
+    const looksLikeSymptom = /\b(abandona|desiste|cancela|reclama|sai|não compra|não conclui)\b/i.test(draft.title);
+    const blocks: EntityCanvasBlock[] = [
+      {id:'description',label:'Descrição (o que acontece?)',essential:true,value:draft.description,placeholder:'Descreva o que foi observado.',onChange:value=>setDraft(current=>current?{...current,description:value}:current)},
+      {id:'context',label:'Contexto',essential:true,value:draft.context,placeholder:'Quando e onde essa dor aparece?',onChange:value=>setDraft(current=>current?{...current,context:value}:current)},
+      {id:'impact',label:'Impacto',essential:true,value:draft.impact,placeholder:'O que a pessoa perde ou deixa de conseguir?',onChange:value=>setDraft(current=>current?{...current,impact:value}:current)},
+      {id:'consequence',label:'Consequência',value:draft.consequence,placeholder:'O que acontece se a dor continuar?',onChange:value=>setDraft(current=>current?{...current,consequence:value}:current)},
+      {id:'observableSignal',label:'Sinal observável',value:draft.observableSignal,placeholder:'Quais comportamentos ou dados demonstram a dor?',onChange:value=>setDraft(current=>current?{...current,observableSignal:value}:current)},
+      {id:'currentWorkaround',label:'Alternativa atual',value:draft.currentWorkaround,placeholder:'Como isso é contornado hoje?',onChange:value=>setDraft(current=>current?{...current,currentWorkaround:value}:current)},
+      ...customBlocks.map(block=>({id:block.id,label:block.label,value:block.value,custom:true,kind:block.kind,placeholder:'Preencha o campo personalizado',onChange:(value:string)=>changeCustom(block.id,value)})),
+    ];
+    return <section className="bo-h74-pain-detail bo-pain-editor" data-pains-h74="detail">
+      <EntityEditorHeader
+        kind="Dores" eyebrow="FRICÇÃO OBSERVADA" title={draft.title} score={score}
+        status={!draft.title.trim()?'invalid':studio.saveStatus==='error'?'error':dirty?'saving':'saved'}
+        guidance={looksLikeSymptom?'Isso parece um sintoma. Procure aprofundar o motivo pelo qual essa etapa gera fricção.':undefined}
+        onChangeTitle={value=>setDraft(current=>current?{...current,title:value}:current)}
+        onBack={()=>closePain()} onDelete={()=>setDeleteId(selected.id)}
+        properties={<>
+          <label>Severidade: <select value={draft.severity} onChange={e=>setDraft(current=>current?{...current,severity:e.target.value as PainSeverity}:current)}>{Object.entries(severityLabel).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
+          <label>Frequência: <select value={draft.frequency} onChange={e=>setDraft(current=>current?{...current,frequency:e.target.value as PainFrequency}:current)}>{Object.entries(frequencyLabel).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
+          <label>Responsável: <input aria-label="Responsável" value={owner} onChange={e=>setOwner(e.target.value)} placeholder="Atribuir responsável"/></label>
+          <EntityTags value={tagsText} onChange={setTagsText}/>
+        </>}
+      />
+      <nav className="bo-h71-detail-tabs bo-pain-detail-tabs" aria-label="Detalhes da Dor">
+        {([['overview','Visão geral'],['people','Pessoas'],['relations','Relações'],['evidence','Evidências'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label])=><button key={id} type="button" className={detailTab===id?'is-active':''} onClick={()=>setDetailTab(id)}>{label}</button>)}
       </nav>
-      <div className="bo-h71-detail-body">
-        {detailTab === 'overview' && <div className="bo-h74-overview-grid">
-          <section className="bo-h71-editor-card bo-h74-pain-card"><header><div><small>FRICÇÃO</small><strong>O que está tornando a experiência difícil?</strong></div><span className={`bo-h74-severity is-${draft.severity}`}>{severityLabel[draft.severity]}</span></header>
-            <div className="bo-h71-form two-col">
-              <label className="wide"><span>Nome da Dor</span><input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="Ex.: Perder tempo esperando disponibilidade para lavar roupas"/></label>
-              <label className="wide"><span>Descrição <small>o que acontece, sem prescrever solução</small></span><textarea rows={3} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Descreva a fricção de forma observável."/></label>
-              <label><span>Contexto</span><textarea rows={3} value={draft.context} onChange={(event) => setDraft({ ...draft, context: event.target.value })} placeholder="Quando e onde essa dor aparece?"/></label>
-              <label><span>Impacto</span><textarea rows={3} value={draft.impact} onChange={(event) => setDraft({ ...draft, impact: event.target.value })} placeholder="O que a pessoa perde, atrasa ou deixa de conseguir?"/></label>
-              <label><span>Sinal observável</span><textarea rows={3} value={draft.observableSignal} onChange={(event) => setDraft({ ...draft, observableSignal: event.target.value })} placeholder="Que comportamento ou dado demonstra a dor?"/></label>
-              <label><span>Alternativa atual</span><textarea rows={3} value={draft.currentWorkaround} onChange={(event) => setDraft({ ...draft, currentWorkaround: event.target.value })} placeholder="Como a pessoa contorna isso hoje?"/></label>
-              <label className="wide"><span>Consequência</span><textarea rows={2} value={draft.consequence} onChange={(event) => setDraft({ ...draft, consequence: event.target.value })} placeholder="O que acontece se essa dor continuar?"/></label>
-              <label><span>Severidade</span><select value={draft.severity} onChange={(event) => setDraft({ ...draft, severity: event.target.value as PainSeverity })}>{Object.entries(severityLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-              <label><span>Frequência</span><select value={draft.frequency} onChange={(event) => setDraft({ ...draft, frequency: event.target.value as PainFrequency })}>{Object.entries(frequencyLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-              <label><span>Responsável <small>opcional</small></span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></label>
-              <label><span>Tags <small>separadas por vírgula</small></span><input value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="Ex.: operação, tempo, confiança"/></label>
-            </div>
-          </section>
-          <aside className="bo-h74-pain-summary"><small>LEITURA DA DOR</small><strong>Fricção em uma frase</strong><p>{draft.context ? <><b>Quando</b> {draft.context}, </> : null}{draft.description ? <><b>a pessoa enfrenta</b> {draft.description}. </> : null}{draft.impact ? <><b>Isso provoca</b> {draft.impact}.</> : null}{!draft.context && !draft.description && !draft.impact ? 'Preencha contexto, descrição e impacto para formar uma leitura clara da dor.' : null}</p><div><span>Base mínima</span><strong>{score}%</strong><i><b style={{ width: `${score}%` }}/></i></div>{checks.map((item) => <em key={item.id} className={item.complete ? 'is-done' : ''}><b>{item.complete ? <Check size={11}/> : '·'}</b>{item.label}</em>)}</aside>
-        </div>}
+      {detailTab==='overview'
+        ? <EntityCanvas entityKey={'pain:'+selected.id} blocks={blocks}
+          checks={checks.map(check=>({...check,kinds:check.id==='persona'?['persona']:check.id==='evidence'?['evidence']:check.id==='journeyContext'?['need','job']:undefined,
+            fieldId:check.id==='context'?'context':check.id==='signal'?'observableSignal':check.id==='impact'?'impact':check.id==='statement'?'description':undefined}))}
+          relations={relationOptions.map(item=>({id:item.id,kind:item.kind,title:item.title,linked:connectedIds.includes(item.id)}))}
+          onToggleRelation={toggleRelation} onAddCustom={addCustom} onRemoveCustom={removeCustom} onRenameCustom={renameCustom}
+          onRemoveEntity={()=>setDeleteId(selected.id)}/>
+        : <div className="bo-h71-detail-body">
         {detailTab === 'people' && <div><div className="bo-h71-section-intro"><div><small>PESSOAS</small><h2>Quem sente esta dor?</h2><p>Conecte Personas que realmente experimentam esta fricção.</p></div><strong>{connectedIds.filter((id) => personaOptions.some((item) => item.id === id)).length} conectada(s)</strong></div>{personaOptions.length ? <div className="bo-h71-evidence-list">{personaOptions.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma Persona criada</strong><p>Crie Personas primeiro e depois conecte-as à Dor.</p></div>}</div>}
         {detailTab === 'relations' && <div><div className="bo-h71-section-intro"><div><small>SERVICE GRAPH</small><h2>Que contexto explica esta Dor?</h2><p>Necessidades e Jobs mostram onde a fricção aparece; hipóteses e problemas mostram como ela pode evoluir para investigação ou validação.</p></div><strong>{connectedIds.filter((id) => !personaOptions.some((item) => item.id === id) && !evidence.some((item) => item.id === id)).length} conexões</strong></div><div className="bo-h71-relation-grid">{(['need','job','problemHypothesis','problem'] as PainRelationKind[]).map((kind) => { const options = relationOptions.filter((item) => item.kind === kind); return <section key={kind}><header><strong>{relationLabel[kind]}</strong><span>{options.filter((item) => connectedIds.includes(item.id)).length}/{options.length}</span></header>{options.length ? <div>{options.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <p>Nenhum item criado ainda.</p>}</section>; })}</div></div>}
         {detailTab === 'evidence' && <div><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que demonstra esta Dor?</h2><p>Conecte entrevistas, observações, reclamações e dados que sustentem que a fricção existe e importa.</p></div><strong>{evidenceConnections.length} conectada(s)</strong></div>{evidence.length ? <div className="bo-h71-evidence-list">{evidence.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma evidência criada</strong><p>Crie evidências na aba Evidências e depois conecte-as aqui.</p></div>}</div>}
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="pain" id={selected.id} title="Uso e relações" />}
-      </div>
-      <footer className="bo-h71-detail-actions"><button type="button" className="danger" onClick={() => setDeleteId(selected.id)}><Trash2 size={14}/> Remover</button><span/><button type="button" onClick={discardPain}>Descartar alterações</button><button type="button" className="primary" disabled={!draft.title.trim()} onClick={savePain}>Salvar Dor</button></footer>
+        </div>}
       {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER DOR</small><h2>Remover “{contextEntityTitle(graph.entities?.pain?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações serão desvinculadas do Service Graph, mas Personas, Necessidades, Jobs, Hipóteses, Problemas e Evidências serão preservados.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removePain(deleteId)}>Remover Dor</button></footer></div></div>}
     </section>;
   }

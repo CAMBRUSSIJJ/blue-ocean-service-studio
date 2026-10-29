@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""Jobs: interactive Entity Canvas regression with JTBD fields, autosave, tags and custom fields."""
+import functools,json,threading
+from pathlib import Path
+from http.server import SimpleHTTPRequestHandler,ThreadingHTTPServer
+from playwright.sync_api import sync_playwright,expect
+
+ROOT=Path(__file__).resolve().parents[1]
+OUT=ROOT/'artifacts'/'entity-canvas-jobs';OUT.mkdir(parents=True,exist_ok=True)
+assert (ROOT/'dist'/'index.html').exists(),'Must build dist first'
+server=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(SimpleHTTPRequestHandler,directory=str(ROOT/'dist')))
+threading.Thread(target=server.serve_forever,daemon=True).start()
+checks=[]
+def check(name,condition):
+ checks.append({'name':name,'passed':bool(condition)})
+ if not condition: raise AssertionError(name)
+ print('PASS '+name,flush=True)
+try:
+ with sync_playwright() as p:
+  browser=p.chromium.launch(headless=True)
+  page=browser.new_page(viewport={'width':1460,'height':920})
+  page.goto(f'http://127.0.0.1:{server.server_port}',wait_until='domcontentloaded')
+  page.get_by_role('button',name='Abrir workspace local sem conta').click()
+  page.get_by_role('button',name='Novo projeto',exact=True).click()
+  page.get_by_label('Nome do projeto',exact=True).fill('Jobs Entity Canvas QA')
+  page.get_by_label('Serviço principal',exact=True).fill('Entrega de compras')
+  page.get_by_role('button',name='Criar projeto',exact=True).click()
+  page.locator('button[aria-label="Jobs"]').first.click()
+  library=page.locator('[data-jobs-h73="library"]')
+  expect(library).to_be_visible()
+  library.locator('.bo-h71-toolbar').get_by_role('button',name='Criar Job').click()
+  form=page.locator('form.bo-h71-create-modal')
+  form.locator('input').first.fill('Saber o custo total antes de comprar')
+  form.get_by_role('button',name='Criar e abrir').click()
+  detail=page.locator('[data-jobs-h73="detail"]')
+  expect(detail).to_be_visible()
+  canvas=detail.locator('[data-entity-canvas="1"]')
+  check('Three initial JTBD blocks',canvas.locator('.bo-pain-canvas-card').count()==3)
+  check('Four progressive blocks',canvas.locator('.bo-pain-canvas-ghost').count()==4)
+  detail.get_by_role('textbox',name='Situação / gatilho',exact=True).fill('Ao finalizar uma compra no celular')
+  detail.get_by_role('textbox',name='Progresso desejado',exact=True).fill('Conferir frete e preço total')
+  detail.get_by_role('textbox',name='Motivação',exact=True).fill('Decidir com confiança')
+  check('JTBD formula updates in context','Quando Ao finalizar uma compra no celular' in detail.locator('.bo-pain-hint').inner_text())
+  detail.get_by_role('textbox',name='Adicionar tag').fill('Checkout')
+  detail.get_by_role('textbox',name='Adicionar tag').press('Enter')
+  check('Tag chip rendered',detail.locator('.bo-entity-tag').filter(has_text='Checkout').count()==1)
+  canvas.get_by_role('button',name='Adicionar campo').click()
+  canvas.get_by_role('button',name='Texto',exact=True).click()
+  canvas.get_by_role('textbox',name='Texto',exact=True).fill('Dado JTBD adicional')
+  canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Barreiras').click()
+  canvas.get_by_role('textbox',name='Barreiras',exact=True).fill('Frete só aparece depois da compra')
+  card=canvas.locator('.bo-pain-canvas-card').filter(has=page.get_by_role('textbox',name='Barreiras',exact=True))
+  card.get_by_role('button',name='Opções de Barreiras').click()
+  card.get_by_role('button',name='Ocultar bloco (preserva conteúdo)').click()
+  check('Hidden Job field keeps data','Conteúdo preservado' in canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Barreiras').inner_text())
+  page.screenshot(path=str(OUT/'jobs-canvas.png'),full_page=True)
+  detail.locator('.bo-pain-back').click()
+  expect(library).to_be_visible()
+  library.locator('.bo-h73-job-name').first.click()
+  expect(detail).to_be_visible()
+  check('Primary JTBD situation persisted',detail.get_by_role('textbox',name='Situação / gatilho',exact=True).input_value()=='Ao finalizar uma compra no celular')
+  check('Custom text persisted',canvas.get_by_role('textbox',name='Texto',exact=True).input_value()=='Dado JTBD adicional')
+  check('Tag persisted',detail.locator('.bo-entity-tag').filter(has_text='Checkout').count()==1)
+  canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Barreiras').click()
+  check('Hidden content restored',canvas.get_by_role('textbox',name='Barreiras',exact=True).input_value()=='Frete só aparece depois da compra')
+  detail.get_by_role('button',name='Excluir',exact=True).first.click()
+  dialog=page.get_by_role('alertdialog',name='Excluir Job')
+  expect(dialog).to_be_visible()
+  dialog.get_by_role('button',name='Cancelar').click()
+  check('Cancel deletion keeps the Job open',detail.is_visible())
+  (OUT/'results.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
+  browser.close()
+finally:server.shutdown()

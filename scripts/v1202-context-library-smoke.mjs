@@ -21,9 +21,10 @@ for (const [kind,title] of [['persona','João'],['need','Previsibilidade'],['job
 }
 const ids=Object.fromEntries(['persona','need','job','pain','problemHypothesis','evidence'].map(kind=>[kind,listContextEntities(graph,kind)[0].id]));
 const beforeProblems=listContextEntities(graph,'problemHypothesis').length;
-graph=createContextEntity(graph,'problem','Novo problema','deve começar como hipótese');
-ok(listContextEntities(graph,'problem').length===0,'validated problem cannot be directly created');
-ok(listContextEntities(graph,'problemHypothesis').length===beforeProblems+1,'problem quick create starts as hypothesis');
+graph=createContextEntity(graph,'problem','Novo problema','iniciar investigação direta');
+ok(listContextEntities(graph,'problem').length===1,'problem draft can be created directly');
+ok(listContextEntities(graph,'problem')[0].status==='draft','direct problem has not been validated');
+ok(listContextEntities(graph,'problemHypothesis').length===beforeProblems,'direct problem does not create hypothesis');
 
 const firstHypothesis=ids.problemHypothesis;
 graph=setContextRelation(graph,'persona',ids.persona,ids.need,true);
@@ -44,7 +45,7 @@ ok(graph.entities.evidence[ids.evidence].sourceType==='interview','evidence sour
 const stats=contextLibraryStats(graph);
 ok(stats.total>=7,'library total includes context objects');
 ok(stats.counts.persona===1,'persona stats');
-ok(stats.counts.problem===0,'no direct validated problem');
+ok(stats.counts.problem===1,'direct problem draft appears in stats');
 ok(allContextEntities(graph).some(x=>x.contextKind==='pain'),'all context stream includes pain');
 ok(contextEntityById(graph,ids.job)?.kind==='job','lookup resolves kind');
 ok(contextEntityUsage(graph,'persona',ids.persona).relatedCount>=1,'usage reports relationships');
@@ -65,7 +66,7 @@ const view=fs.readFileSync('src/views/WorkspaceLibraryView.tsx','utf8');
 for (const marker of ['data-workspace-page','Personas','Necessidades','Jobs','Dores','Hipóteses','Problemas','Evidências','Portfólio','Métricas','Templates','Arquivo']) ok(view.includes(marker),`workspace page marker ${marker}`);
 for (const marker of ['NOME','ATUALIZADO','CRIADO','TAGS','USADO EM','Criar persona','Criar métrica','Criar template']) ok(view.includes(marker),`table pattern marker ${marker}`);
 const service=fs.readFileSync('src/services/context-library.ts','utf8');
-for (const marker of ['createContextEntity','setContextRelation','removeContextEntity','contextEntityUsage',"kind === 'problem' ? 'problemHypothesis'",'Personas','Necessidades','Jobs','Dores','Hipóteses','Problemas','Evidências']) ok(service.includes(marker),`service marker ${marker}`);
+for (const marker of ['createContextEntity','setContextRelation','removeContextEntity','contextEntityUsage',"if (kind === 'problem')",'Personas','Necessidades','Jobs','Dores','Hipóteses','Problemas','Evidências']) ok(service.includes(marker),`service marker ${marker}`);
 const app=fs.readFileSync('src/App.tsx','utf8');
 for (const marker of ["activeTab === 'context'",'<WorkspaceLibraryView','Dashboard','Workspace','Journey maps','Blueprints','Whiteboards','Hierarquias','Personas','Portfólio','Métricas','Pesquisa','Templates','Arquivo']) ok(app.includes(marker),`app marker ${marker}`);
 ok(!app.includes('<ContextLibraryView'),'Context Library monolítica não é renderizada');

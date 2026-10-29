@@ -15,7 +15,7 @@ ok('WorkspaceLibrary delega jobs para JobsView', library.includes("if (page === 
 ok('Biblioteca tem busca filtros e criação', view.includes('Buscar Jobs') && view.includes('Base incompleta') && view.includes('Criar Job'));
 ok('Detalhe tem cinco abas', ['Visão geral','Pessoas','Relações','Evidências','Uso'].every((x)=>view.includes(x)));
 ok('Job possui campos JTBD próprios', ['situation','desiredProgress','motivation','barriers','currentAlternative','successSignal'].every((x)=>view.includes(x) && service.includes(x)));
-ok('Job Statement é apresentado no editor', view.includes('Quando… eu quero… para poder…'));
+ok('Job Statement é apresentado dinamicamente no editor', view.includes('Quando ${draft.situation.trim()}, quero ${draft.desiredProgress.trim()}, para poder ${draft.motivation.trim()}') && view.includes('guidance={statement}'));
 ok('Completude é determinística', service.includes('foundationChecks') && service.includes('readyForDesign'));
 ok('Completude exige persona e evidência', service.includes('connectionCounts.persona > 0') && service.includes('connectionCounts.evidence > 0'));
 ok('Completude exige contexto relacionado', service.includes('connectionCounts.need + connectionCounts.pain + connectionCounts.problemHypothesis + connectionCounts.problem > 0'));

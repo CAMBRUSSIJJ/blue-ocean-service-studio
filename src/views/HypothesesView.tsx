@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, ArrowLeft, Check, CheckCircle2, Filter, Lightbulb, MoreVertical, Plus, Search, Table2, Trash2, X } from '../design-system/icons';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { EntityCanvas } from '../components/entity-editor/EntityCanvas';
+import { EntityEditorHeader, EntityTags } from '../components/entity-editor/EntityEditor';
+import { parseCustomBlocks, type CustomEntityBlock, type EntityCanvasBlock, type EditorFieldKind } from '../components/entity-editor/types';
+import { AlertCircle, Check, CheckCircle2, Filter, Lightbulb, MoreVertical, Plus, Search, Table2, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
@@ -65,6 +68,8 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
   const [tagsText, setTagsText] = useState('');
   const [contextIds, setContextIds] = useState<string[]>([]);
   const [evidenceLinks, setEvidenceLinks] = useState<HypothesisEvidenceLink[]>([]);
+  const [customBlocks,setCustomBlocks] = useState<CustomEntityBlock[]>([]);
+  const flushRef = useRef<()=>void>(()=>{});
   const [createOpen, setCreateOpen] = useState(false);
   const [createTitle, setCreateTitle] = useState('');
   const [createDescription, setCreateDescription] = useState('');
@@ -82,14 +87,15 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
 
   useEffect(() => {
     if (!selected || !report) {
-      setDraft(null); setOwner(''); setTagsText(''); setContextIds([]); setEvidenceLinks([]); return;
+      setDraft(null); setOwner(''); setTagsText(''); setContextIds([]); setEvidenceLinks([]);setCustomBlocks([]);return;
     }
     setDraft(hypothesisProfileFromEntity(selected));
     setOwner(String(selected.owner ?? ''));
     setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
     setContextIds(report.contextConnections.map((item) => item.id));
     setEvidenceLinks(report.evidenceConnections.map((item) => ({ evidenceId: item.id, stance: item.stance })));
-  }, [selectedId, selected?.updatedAt]);
+    setCustomBlocks(parseCustomBlocks(selected.canvasCustomBlocks));
+  }, [selectedId]);
 
   useEffect(() => {
     if (sessionStorage.getItem('bo-workspace-create-page') !== 'hypotheses') return;
@@ -144,7 +150,7 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
   }), [rows, query, filter]);
 
   const openHypothesis = (id: string) => { setSelectedId(id); setDetailTab('overview'); setMenuId(null); };
-  const closeHypothesis = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
+  const closeHypothesis = (commit=true) => {if(commit)flushRef.current();setSelectedId(null);setDraft(null);setDetailTab('overview'); };
   const createHypothesis = () => {
     if (!createTitle.trim()) return;
     const now = new Date().toISOString();
@@ -163,24 +169,38 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
     setCreateOpen(false); setCreateTitle(''); setCreateDescription(''); setSelectedId(entity.id); setDetailTab('overview');
     showToast('Hipótese criada. Conecte contexto e evidências antes de validá-la.');
   };
-  const saveHypothesis = () => {
-    if (!selectedId || !draft?.title.trim()) return;
-    const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
-    setGraph((current) => patchHypothesisMeta(updateHypothesisProfile({ graph: current, hypothesisId: selectedId, draft, contextIds, evidenceLinks }), selectedId, owner, tags), 'Hipóteses 2.0: salvar');
-    showToast('Hipótese salva.');
+  const tags=tagsText.split(',').map(x=>x.trim()).filter(Boolean);
+  const original=selected?hypothesisProfileFromEntity(selected):null;
+  const storedTags=Array.isArray(selected?.tags)?selected.tags.map(String):[];
+  const signatures=(links:HypothesisEvidenceLink[])=>links.map(x=>x.evidenceId+':'+x.stance).sort().join('|');
+  const sameIds=(a:string[],b:string[])=>[...a].sort().join('|')===[...b].sort().join('|');
+  const dirty=Boolean(draft&&original&&(
+    (Object.keys(draft) as Array<keyof HypothesisProfileDraft>).some(key=>draft[key].trim()!==original[key].trim())
+    ||owner.trim()!==String(selected?.owner??'').trim()
+    ||tags.join('|')!==storedTags.join('|')
+    ||!sameIds(contextIds,report?.contextConnections.map(x=>x.id)??[])
+    ||signatures(evidenceLinks)!==signatures(report?.evidenceConnections.map(x=>({evidenceId:x.id,stance:x.stance}))??[])
+    ||JSON.stringify(customBlocks)!==JSON.stringify(parseCustomBlocks(selected?.canvasCustomBlocks))
+  ));
+  const persistHypothesis=(id:string,data:HypothesisProfileDraft,nextOwner:string,nextTags:string[],contexts:string[],evidences:HypothesisEvidenceLink[],custom:CustomEntityBlock[])=>{
+    if(!data.title.trim())return;
+    setGraph(current=>{
+      const next=patchHypothesisMeta(updateHypothesisProfile({graph:current,hypothesisId:id,draft:data,contextIds:contexts,evidenceLinks:evidences}),id,nextOwner,nextTags);
+      const updated=next.entities?.problemHypothesis?.[id];
+      if(!updated)return next;
+      return {...next,entities:{...next.entities,problemHypothesis:{...next.entities.problemHypothesis,[id]:{...updated,canvasCustomBlocks:custom}}}};
+    },'Hipóteses: autosave');
   };
-  const discardHypothesis = () => {
-    if (!selected || !report) return;
-    setDraft(hypothesisProfileFromEntity(selected));
-    setOwner(String(selected.owner ?? ''));
-    setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
-    setContextIds(report.contextConnections.map((item) => item.id));
-    setEvidenceLinks(report.evidenceConnections.map((item) => ({ evidenceId: item.id, stance: item.stance })));
-    showToast('Alterações descartadas.');
-  };
+  flushRef.current=()=>{if(selectedId&&draft?.title.trim()&&dirty)persistHypothesis(selectedId,draft,owner,tags,contextIds,evidenceLinks,customBlocks)};
+  useEffect(()=>()=>flushRef.current(),[]);
+  useEffect(()=>{
+    if(!selectedId||!draft?.title.trim()||!dirty)return;
+    const timer=window.setTimeout(()=>persistHypothesis(selectedId,draft,owner,tags,contextIds,evidenceLinks,customBlocks),800);
+    return()=>window.clearTimeout(timer);
+  },[selectedId,draft,owner,tagsText,contextIds,evidenceLinks,customBlocks,dirty]);
   const removeHypothesis = (id: string) => {
     setGraph((current) => removeContextEntity(current, 'problemHypothesis', id), 'Hipóteses 2.0: remover');
-    if (selectedId === id) closeHypothesis();
+    if (selectedId === id) closeHypothesis(false);
     setDeleteId(null); setMenuId(null);
     showToast('Hipótese removida e relações desvinculadas.');
   };
@@ -194,47 +214,74 @@ export function HypothesesView({ studio }: { studio: StudioController }) {
     const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
     setGraph((current) => {
       const saved = patchHypothesisMeta(updateHypothesisProfile({ graph: current, hypothesisId: selectedId, draft, contextIds, evidenceLinks }), selectedId, owner, tags);
-      return validateHypothesisAsProblem(saved, selectedId);
+      const updated=saved.entities?.problemHypothesis?.[selectedId];
+      const withCustom=updated?{...saved,entities:{...saved.entities,problemHypothesis:{...saved.entities.problemHypothesis,[selectedId]:{...updated,canvasCustomBlocks:customBlocks}}}}:saved;
+      return validateHypothesisAsProblem(withCustom, selectedId);
     }, 'Hipóteses 2.0: validar');
     showToast('Hipótese promovida a Problema validado.');
   };
 
+  const addCustom = (kind:EditorFieldKind)=>{
+    if(customBlocks.length>=60){showToast('Limite de 60 campos personalizados por entidade.');return;}
+    const labels:Record<EditorFieldKind,string>={text:'Texto',checklist:'Checklist',number:'Número',date:'Data',image:'Imagem (URL)',document:'Documento (link)'};
+    const id='custom-'+(typeof crypto!=='undefined'&&'randomUUID' in crypto?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2,7));
+    setCustomBlocks(items=>[...items,{id,label:labels[kind],kind,value:''}]);
+  };
+  const changeCustom=(id:string,value:string)=>setCustomBlocks(items=>items.map(item=>item.id===id?{...item,value}:item));
+  const removeCustom=(id:string)=>setCustomBlocks(items=>items.filter(item=>item.id!==id));
+  const renameCustom=(id:string,label:string)=>setCustomBlocks(items=>items.map(item=>item.id===id?{...item,label}:item));
+  const toggleRelation=(id:string)=>{
+    if(hypothesisEvidenceOptions(graph).some(item=>item.id===id))toggleEvidence(id);
+    else toggleContext(id);
+  };
+
   if (selected && draft && report) {
     const preview = previewReport ?? report;
-    return <section className="bo-h75-hypothesis-detail" data-hypotheses-h75="detail">
-      <header className="bo-h71-detail-head bo-h75-detail-head">
-        <button type="button" className="bo-h71-back" onClick={closeHypothesis}><ArrowLeft size={16}/> Hipóteses</button>
-        <div className="bo-h71-detail-title"><span className="bo-h71-avatar bo-h75-avatar"><Lightbulb size={19}/></span><div><small>HIPÓTESE DE PROBLEMA</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Formule uma explicação provisória que possa ser confrontada com evidências.'}</p></div></div>
-        <div className="bo-h75-header-status"><span className={`bo-h75-status is-${preview.status}`}>{statusLabel[preview.status]}</span><div className="bo-h71-detail-score"><span>PRONTIDÃO</span><strong>{preview.validationScore}%</strong><i><b style={{ width: `${preview.validationScore}%` }}/></i></div></div>
-      </header>
-      <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Hipótese">
-        {([['overview','Visão geral'],['context','Contexto'],['evidence','Evidências'],['validation','Validação'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'context' && <b>{contextIds.length}</b>}{id === 'evidence' && <b>{evidenceLinks.length}</b>}{id === 'validation' && <b>{preview.validationScore}%</b>}</button>)}
+    const blocks:EntityCanvasBlock[]=[
+      {id:'description',label:'Descrição (por que acreditamos?)',essential:true,value:draft.description,placeholder:'Descreva a hipótese sem apresentá-la como fato confirmado.',onChange:value=>setDraft(current=>current?{...current,description:value}:current)},
+      {id:'premise',label:'Premissa',essential:true,value:draft.premise,placeholder:'Que crença precisa ser verdadeira?',onChange:value=>setDraft(current=>current?{...current,premise:value}:current)},
+      {id:'expectedBehavior',label:'Comportamento esperado',essential:true,value:draft.expectedBehavior,placeholder:'O que observaríamos se fosse verdadeira?',onChange:value=>setDraft(current=>current?{...current,expectedBehavior:value}:current)},
+      {id:'validationCriterion',label:'Critério de validação',value:draft.validationCriterion,placeholder:'O que confirmaria ou refutaria esta hipótese?',onChange:value=>setDraft(current=>current?{...current,validationCriterion:value}:current)},
+      {id:'impactIfWrong',label:'Impacto se estiver errada',value:draft.impactIfWrong,placeholder:'Que esforço ou decisão seria afetado?',onChange:value=>setDraft(current=>current?{...current,impactIfWrong:value}:current)},
+      ...customBlocks.map(block=>({id:block.id,label:block.label,value:block.value,custom:true,kind:block.kind,placeholder:'Preencha o campo personalizado',onChange:(value:string)=>changeCustom(block.id,value)})),
+    ];
+    const checks=preview.validationChecks.map(check=>({
+      ...check,
+      kinds:check.id==='evidence'?['evidence']:check.id==='pain'?['pain']:check.id==='customer-context'?['persona','need','job']:check.id==='support'?['evidence']:undefined,
+      fieldId:check.id==='statement'?'description':check.id==='premise'?'premise':check.id==='expected'?'expectedBehavior':check.id==='criterion'?'validationCriterion':undefined,
+    }));
+    const relations=[
+      ...contextOptions.map(item=>({id:item.id,kind:item.kind,title:item.title,linked:contextIds.includes(item.id)})),
+      ...evidenceOptions.map(item=>({id:item.id,kind:'evidence',title:item.title,linked:evidenceLinks.some(link=>link.evidenceId===item.id)})),
+    ];
+    return <section className="bo-h75-hypothesis-detail bo-pain-editor bo-hypothesis-entity-editor" data-hypotheses-h75="detail">
+      <EntityEditorHeader kind="Hipóteses" eyebrow={preview.status==='validated'?'HIPÓTESE VALIDADA':preview.status==='testing'?'EM VALIDAÇÃO':'HIPÓTESE DE PROBLEMA'}
+        title={draft.title} score={preview.validationScore}
+        status={!draft.title.trim()?'invalid':studio.saveStatus==='error'?'error':dirty?'saving':'saved'}
+        guidance={draft.title.trim().length<30?'Formule uma hipótese testável: “Acreditamos que [ação] resultará em [resultado] porque [razão]”.':undefined}
+        onChangeTitle={value=>setDraft(current=>current?{...current,title:value}:current)}
+        onBack={()=>closeHypothesis()} onDelete={()=>setDeleteId(selected.id)}
+        properties={<>
+          <label>Confiança: <select value={draft.confidence} onChange={e=>setDraft(current=>current?{...current,confidence:e.target.value as HypothesisConfidence}:current)}>{Object.entries(confidenceLabel).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
+          <label>Risco: <select value={draft.riskLevel} onChange={e=>setDraft(current=>current?{...current,riskLevel:e.target.value as HypothesisRisk}:current)}>{Object.entries(riskLabel).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
+          <label>Responsável: <input aria-label="Responsável" value={owner} onChange={e=>setOwner(e.target.value)} placeholder="Atribuir responsável"/></label>
+          <EntityTags value={tagsText} onChange={setTagsText}/>
+        </>}
+      />
+      <nav className="bo-h71-detail-tabs bo-pain-detail-tabs" aria-label="Detalhes da Hipótese">
+        {([['overview','Visão geral'],['context','Contexto'],['evidence','Evidências'],['validation','Validação'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label])=><button key={id} type="button" className={detailTab===id?'is-active':''} onClick={()=>setDetailTab(id)}>{label}{id==='context'&&<b>{contextIds.length}</b>}{id==='evidence'&&<b>{evidenceLinks.length}</b>}{id==='validation'&&<b>{preview.validationScore}%</b>}</button>)}
       </nav>
-      <div className="bo-h71-detail-body">
-        {detailTab === 'overview' && <div className="bo-h75-overview-grid">
-          <section className="bo-h71-editor-card bo-h75-card"><header><div><small>FORMULAÇÃO</small><strong>O que acreditamos que explica a fricção?</strong></div><span className={`bo-h75-confidence is-${draft.confidence}`}>Confiança {confidenceLabel[draft.confidence].toLowerCase()}</span></header>
-            <div className="bo-h71-form two-col">
-              <label className="wide"><span>Hipótese</span><input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="Ex.: O deslocamento é a principal razão para abandonar o serviço"/></label>
-              <label className="wide"><span>Descrição <small>por que acreditamos nisso?</small></span><textarea rows={3} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Explique a lógica da hipótese sem tratá-la como fato confirmado."/></label>
-              <label><span>Premissa</span><textarea rows={3} value={draft.premise} onChange={(event) => setDraft({ ...draft, premise: event.target.value })} placeholder="Que crença precisa ser verdadeira?"/></label>
-              <label><span>Comportamento esperado</span><textarea rows={3} value={draft.expectedBehavior} onChange={(event) => setDraft({ ...draft, expectedBehavior: event.target.value })} placeholder="O que deveríamos observar se a hipótese estiver correta?"/></label>
-              <label><span>Critério de validação</span><textarea rows={3} value={draft.validationCriterion} onChange={(event) => setDraft({ ...draft, validationCriterion: event.target.value })} placeholder="Qual resultado faria aceitar ou rejeitar a hipótese?"/></label>
-              <label><span>Impacto se estiver errada</span><textarea rows={3} value={draft.impactIfWrong} onChange={(event) => setDraft({ ...draft, impactIfWrong: event.target.value })} placeholder="Que decisão ou esforço pode ser desperdiçado?"/></label>
-              <label><span>Confiança atual</span><select value={draft.confidence} onChange={(event) => setDraft({ ...draft, confidence: event.target.value as HypothesisConfidence })}>{Object.entries(confidenceLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-              <label><span>Risco de estar errada</span><select value={draft.riskLevel} onChange={(event) => setDraft({ ...draft, riskLevel: event.target.value as HypothesisRisk })}>{Object.entries(riskLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-              <label><span>Responsável <small>opcional</small></span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></label>
-              <label><span>Tags <small>separadas por vírgula</small></span><input value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="Ex.: descoberta, risco, comportamento"/></label>
-            </div>
-          </section>
-          <aside className="bo-h75-summary"><small>LEITURA DA HIPÓTESE</small><strong>Se isso for verdade...</strong><p>{draft.premise ? <><b>Assumimos que</b> {draft.premise}. </> : null}{draft.expectedBehavior ? <><b>Então esperamos observar</b> {draft.expectedBehavior}. </> : null}{draft.validationCriterion ? <><b>Vamos considerar válida quando</b> {draft.validationCriterion}.</> : null}{!draft.premise && !draft.expectedBehavior && !draft.validationCriterion ? 'Preencha premissa, comportamento esperado e critério para tornar a hipótese testável.' : null}</p><div><span>Prontidão para validar</span><strong>{preview.validationScore}%</strong><i><b style={{ width: `${preview.validationScore}%` }}/></i></div><small>RISCO {riskLabel[draft.riskLevel].toUpperCase()} · CONFIANÇA {confidenceLabel[draft.confidence].toUpperCase()}</small></aside>
-        </div>}
+      {detailTab==='overview'?
+        <EntityCanvas entityKey={'hypothesis:'+selected.id} blocks={blocks} checks={checks}
+          relations={relations} onToggleRelation={toggleRelation} onAddCustom={addCustom} onRemoveCustom={removeCustom} onRenameCustom={renameCustom}
+          onRemoveEntity={()=>setDeleteId(selected.id)}/>
+        : <div className="bo-h71-detail-body">
         {detailTab === 'context' && <div><div className="bo-h71-section-intro"><div><small>CONTEXTO</small><h2>Onde esta hipótese acontece?</h2><p>Conecte a hipótese às pessoas, necessidades, Jobs e principalmente à Dor que originou a investigação.</p></div><strong>{contextIds.length} conexão(ões)</strong></div><div className="bo-h71-relation-grid">{(['persona','need','job','pain'] as ProblemContextKind[]).map((kind) => { const options = contextOptions.filter((item) => item.kind === kind); return <section key={kind}><header><strong>{contextLabel[kind]}</strong><span>{options.filter((item) => contextIds.includes(item.id)).length}/{options.length}</span></header>{options.length ? <div>{options.map((item) => <button key={item.id} type="button" className={contextIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleContext(item.id)}><b>{contextIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <p>Nenhum item criado ainda.</p>}</section>; })}</div></div>}
         {detailTab === 'evidence' && <div><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que sustenta ou contradiz esta hipótese?</h2><p>Cada evidência deve ter uma posição explícita. Contradição não é erro: ela ajuda a evitar confirmação seletiva.</p></div><strong>{evidenceLinks.length} conectada(s)</strong></div>{evidenceOptions.length ? <div className="bo-h75-evidence-list">{evidenceOptions.map((item) => { const link = evidenceLinks.find((entry) => entry.evidenceId === item.id); return <article key={item.id} className={link ? 'is-linked' : ''}><button type="button" className="bo-h75-evidence-main" onClick={() => toggleEvidence(item.id)}><b>{link ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>{link && <div className="bo-h75-stance">{(['supports','contradicts','neutral'] as EvidenceStance[]).map((stance) => <button key={stance} type="button" className={link.stance === stance ? `is-active is-${stance}` : ''} onClick={() => setStance(item.id, stance)}>{stanceLabel[stance]}</button>)}</div>}</article>; })}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma evidência criada</strong><p>Crie evidências na aba Evidências e depois classifique como sustentação, contradição ou contexto.</p></div>}</div>}
         {detailTab === 'validation' && <div className="bo-h75-validation"><div className="bo-h71-section-intro"><div><small>VALIDAÇÃO</small><h2>A hipótese já pode virar Problema?</h2><p>A promoção só é liberada quando a formulação, contexto e evidências formam uma base coerente.</p></div><strong>{preview.validationScore}%</strong></div><div className="bo-h75-validation-layout"><section><header><strong>Critérios</strong><span>{preview.validationChecks.filter((item) => item.complete).length}/{preview.validationChecks.length}</span></header>{preview.validationChecks.map((item) => <article key={item.id} className={item.complete ? 'is-done' : ''}><b>{item.complete ? <CheckCircle2 size={14}/> : <AlertCircle size={14}/>}</b><span><strong>{item.label}</strong><small>{item.detail}</small></span></article>)}</section><aside><small>SINAL DAS EVIDÊNCIAS</small><div><span>Sustenta</span><strong>{preview.supportCount}</strong></div><div><span>Contradiz</span><strong>{preview.contradictionCount}</strong></div><div><span>Contextual</span><strong>{preview.neutralCount}</strong></div>{preview.status === 'validated' && preview.validatedProblem ? <div className="bo-h75-validated"><CheckCircle2 size={18}/><span><strong>Problema validado</strong><small>{contextEntityTitle(preview.validatedProblem)}</small></span></div> : <button type="button" className="bo-h75-validate-button" disabled={!preview.readyToValidate} onClick={validateHypothesis}>Validar como Problema</button>}</aside></div></div>}
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="hypothesis" id={selected.id} title="Uso e relações" />}
-      </div>
-      <footer className="bo-h71-detail-actions"><button type="button" className="danger" onClick={() => setDeleteId(selected.id)}><Trash2 size={14}/> Remover</button><span/><button type="button" onClick={discardHypothesis}>Descartar alterações</button><button type="button" className="primary" disabled={!draft.title.trim()} onClick={saveHypothesis}>Salvar Hipótese</button></footer>
-      {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER HIPÓTESE</small><h2>Remover “{contextEntityTitle(graph.entities?.problemHypothesis?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>Contextos e evidências serão desvinculados. Problemas já validados permanecem rastreáveis no Service Graph.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeHypothesis(deleteId)}>Remover Hipótese</button></footer></div></div>}
+      </div>}
+      {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm" role="alertdialog" aria-modal="true" aria-label="Excluir hipótese"><header><div><small>REMOVER HIPÓTESE</small><h2>Remover “{contextEntityTitle(graph.entities?.problemHypothesis?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>Contextos e evidências serão desvinculados. Problemas já validados permanecem rastreáveis no Service Graph.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeHypothesis(deleteId)}>Remover Hipótese</button></footer></div></div>}
     </section>;
   }
 
