@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { DragEvent, ReactNode } from 'react';
-import { ArrowLeft, Check, ChevronDown, GripVertical, MoreHorizontal, Plus, Trash2, X } from '../design-system/icons';
+import { ArrowLeft, BriefcaseBusiness, Check, ChevronDown, GripVertical, HeartCrack, Layers3, Lightbulb, MoreHorizontal, Plus, Target, Trash2, UsersRound, X } from '../design-system/icons';
 
 export type EntityEditorBlock = {
   id: string;
@@ -64,6 +64,11 @@ export function EntityEditor(props: EntityEditorProps) {
   const [picker, setPicker] = useState<string | null>(null);
   const [relationSearch, setRelationSearch] = useState('');
   const [dragId, setDragId] = useState<string | null>(null);
+  const [sectionMenuOpen, setSectionMenuOpen] = useState(false);
+  const titleRef = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => { if (titleRef.current) { titleRef.current.style.height = 'auto'; titleRef.current.style.height = `${titleRef.current.scrollHeight}px`; } }, [title]);
+  useEffect(() => { const previous = document.body.style.overflow; document.body.style.overflow = 'hidden'; return () => { document.body.style.overflow = previous; }; }, []);
 
   useEffect(() => {
     try {
@@ -105,72 +110,107 @@ export function EntityEditor(props: EntityEditorProps) {
   const pickerOptions = relations.filter((relation) => activeCheck?.connectTo?.includes(relation.kind)
     && relation.title.toLocaleLowerCase('pt-BR').includes(relationSearch.toLocaleLowerCase('pt-BR')));
 
-  return <section className="bo-entity-editor" data-entity-editor={kind}>
-    <header className="bo-entity-top">
-      <div className="bo-entity-topline">
-        <button type="button" className="bo-entity-back" onClick={onBack}><ArrowLeft size={16}/> {backLabel}</button>
-        <div className="bo-entity-top-actions">
-          <span className={`bo-entity-save is-${saveStatus}`} role="status" aria-live="polite">
-            {saveStatus === 'error' ? 'Erro ao salvar' : saveStatus === 'saved' ? <><Check size={14}/> Salvo</> : 'Salvando…'}
-          </span>
-          <div className="bo-entity-menu-wrap">
-            <button type="button" className="bo-entity-icon-button" aria-label="Mais ações" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><MoreHorizontal size={18}/></button>
-            {menuOpen && <div className="bo-entity-menu"><button type="button" className="danger" onClick={() => { setMenuOpen(false); onRemove(); }}><Trash2 size={14}/> Remover {kind.toLowerCase()}</button></div>}
+  const navigation = [
+    { page: 'personas', label: 'Personas', Icon: UsersRound },
+    { page: 'needs', label: 'Necessidades', Icon: Target },
+    { page: 'jobs', label: 'Jobs', Icon: BriefcaseBusiness },
+    { page: 'pains', label: 'Dores', Icon: HeartCrack },
+    { page: 'hypotheses', label: 'Hipóteses', Icon: Lightbulb },
+  ] as const;
+  const navigateTo = (page: typeof navigation[number]['page']) => {
+    if (page === 'needs') { onBack(); return; }
+    onBack();
+    window.dispatchEvent(new CustomEvent('bo-open-context-page', { detail: page }));
+  };
+  const removeOptionalBlock = (block: EntityEditorBlock) => {
+    if (block.value.trim() && !window.confirm(`Apagar o conteúdo de “${block.label}” e remover o bloco?`)) return;
+    block.onChange('');
+    setAdded((value) => value.filter((id) => id !== block.id));
+  };
+
+  return <section className="bo-entity-editor" data-entity-editor={kind} aria-label={`Editor de ${kind}`}>
+    <aside className="bo-entity-rail" aria-label="Navegação do público-alvo">
+      <div className="bo-entity-brand" title="Blue Ocean Service Studio"><Layers3 size={23}/></div>
+      <nav>{navigation.map(({page,label,Icon}) => <button key={page} type="button" className={page === 'needs' ? 'is-active' : ''} title={label} aria-label={label} aria-current={page === 'needs' ? 'page' : undefined} onClick={() => navigateTo(page)}><Icon size={17}/><span>{label}</span></button>)}</nav>
+      <button className="bo-entity-rail-exit" type="button" onClick={onBack} title="Voltar à biblioteca" aria-label="Voltar à biblioteca"><ArrowLeft size={17}/></button>
+    </aside>
+    <div className="bo-entity-shell">
+      <header className="bo-entity-global-bar">
+        <strong>Edição de {backLabel}</strong>
+        <div className="bo-entity-global-actions">
+          <div className="bo-entity-sections-wrap">
+            <button type="button" className="bo-entity-sections-trigger" aria-expanded={sectionMenuOpen} onClick={() => setSectionMenuOpen((state) => !state)}>Seções <ChevronDown size={13}/></button>
+            {sectionMenuOpen && <nav className="bo-entity-sections-menu" aria-label="Seções da entidade" onClick={() => setSectionMenuOpen(false)}>{tabs}</nav>}
+          </div>
+          <div className="bo-entity-fitness" aria-label={`Força do perfil: ${score}%`}>
+            <span className="bo-entity-fitness-ring" style={{ background: `conic-gradient(#4dc68c ${score}%, #404a50 0)` }} aria-hidden="true"><i/></span>
+            <span>Força do Perfil <b>({score}%)</b></span>
           </div>
         </div>
-      </div>
-      <div className="bo-entity-statement">
-        <label htmlFor="bo-entity-title">{kind}</label>
-        <textarea id="bo-entity-title" className="bo-entity-title" rows={2} value={title} onChange={(event) => onTitleChange(event.target.value)} aria-label={`Enunciado da ${kind.toLowerCase()}`} placeholder={titlePlaceholder || "Descreva o objetivo principal"}/>
-        {warning && <p className="bo-entity-warning" role="note">{warning}</p>}
-      </div>
-      <div className="bo-entity-properties">{properties}</div>
-      <div className="bo-entity-score" title="Progresso dos critérios mínimos">
-        <span>Completude do perfil</span><div className="bo-entity-progress" role="progressbar" aria-label="Completude do perfil" aria-valuenow={score} aria-valuemin={0} aria-valuemax={100}><b style={{ width: `${score}%` }}/></div><strong>{score}%</strong>
-      </div>
-    </header>
-    <nav className="bo-h71-detail-tabs bo-entity-tabs">{tabs}</nav>
-    {overview
-      ? <div className="bo-entity-workspace">
-        <main className="bo-entity-blocks" aria-label="Blocos de edição">
-          <div className="bo-entity-block-grid">
-            {visible.map((block) => <section key={block.id} className="bo-entity-block" onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropBlock(event, block.id)}>
-              <header>
-                <strong>{block.label}</strong>
-                <div className="bo-entity-block-controls">
-                  <button type="button" className="bo-entity-drag" draggable onDragStart={(event) => { event.dataTransfer.effectAllowed = 'move'; setDragId(block.id); }} onDragEnd={() => setDragId(null)} aria-label={`Arrastar ${block.label}`} title="Arrastar para reorganizar"><GripVertical size={15}/></button>
-                  <button type="button" onClick={() => moveBlock(block.id, -1)} aria-label={`Mover ${block.label} para cima`} title="Mover para antes">↑</button>
-                  <button type="button" onClick={() => moveBlock(block.id, 1)} aria-label={`Mover ${block.label} para baixo`} title="Mover para depois">↓</button>
-                  {!block.essential && <button type="button" onClick={() => {
-                    if (block.value.trim() && !window.confirm(`Apagar o conteúdo de “${block.label}” e remover o bloco?`)) return;
-                    block.onChange(''); setAdded((value) => value.filter((id) => id !== block.id));
-                  }} aria-label={`Remover bloco ${block.label}`} title="Remover bloco"><X size={14}/></button>}
-                </div>
-              </header>
-              <BlockTextarea block={block}/>
-            </section>)}
+      </header>
+      <div className="bo-entity-scroll">
+        <div className="bo-entity-main-container">
+          <section className="bo-entity-statement">
+            <textarea ref={titleRef} id="bo-entity-title" className="bo-entity-title" rows={1} value={title} onChange={(event) => onTitleChange(event.target.value)} aria-label={`Enunciado da ${kind.toLowerCase()}`} placeholder={titlePlaceholder || 'Descreva o que precisa ser resolvido'}/>
+            {warning && <p className="bo-entity-warning" role="note"><span aria-hidden="true">⚠</span> {warning}</p>}
+          </section>
+          <div className="bo-entity-meta">
+            <div className="bo-entity-properties">{properties}</div>
+            <div className="bo-entity-top-actions">
+              <span className={`bo-entity-save is-${saveStatus}`} role="status" aria-live="polite">
+                {saveStatus === 'error' ? 'Erro ao salvar' : saveStatus === 'saved' ? <><Check size={14}/> Salvo</> : 'Salvando…'}
+              </span>
+              <div className="bo-entity-menu-wrap">
+                <button type="button" className="bo-entity-icon-button" aria-label="Mais ações" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><MoreHorizontal size={17}/></button>
+                {menuOpen && <div className="bo-entity-menu">
+                  <button type="button" onClick={() => { setMenuOpen(false); onBack(); }}><ArrowLeft size={14}/> Voltar à biblioteca</button>
+                  <button type="button" className="danger" onClick={() => { setMenuOpen(false); onRemove(); }}><Trash2 size={14}/> Remover {kind.toLowerCase()}</button>
+                </div>}
+              </div>
+            </div>
           </div>
-          <div className="bo-entity-add">
-            <button type="button" aria-expanded={addOpen} onClick={() => setAddOpen(!addOpen)}><Plus size={16}/> Adicionar bloco <ChevronDown size={14}/></button>
-            {addOpen && <div className="bo-entity-add-menu">{hidden.length ? hidden.map((block) => <button type="button" key={block.id} onClick={() => { setAdded((value) => [...value, block.id]); setAddOpen(false); }}>{block.label}</button>) : <span>Todos os blocos estão visíveis</span>}</div>}
-          </div>
-        </main>
-        <aside className="bo-entity-criteria" aria-label="Critérios mínimos">
-          <header><strong>Critérios mínimos</strong><span>{checks.filter((check) => check.complete).length}/{checks.length}</span></header>
-          <p>Os critérios são atualizados conforme você preenche e conecta informações.</p>
-          <div className="bo-entity-criteria-list">
-            {checks.map((check) => <div className="bo-entity-check" key={check.id}>
-              <span className={check.complete ? 'is-done' : ''} aria-hidden="true">{check.complete && <Check size={12}/>}</span>
-              <div><strong>{check.label}</strong>{check.connectTo && !check.complete && <button type="button" className="bo-entity-connect" onClick={() => { setPicker(picker === check.id ? null : check.id); setRelationSearch(''); }}>Conectar</button>}</div>
-            </div>)}
-          </div>
-          {activeCheck?.connectTo && <div className="bo-entity-relation-picker">
-            <div className="bo-entity-picker-head"><strong>Conectar {activeCheck.label.toLowerCase()}</strong><button type="button" aria-label="Fechar seletor" onClick={() => setPicker(null)}><X size={14}/></button></div>
-            <input type="search" placeholder="Buscar no Service Graph" aria-label="Buscar relação" value={relationSearch} onChange={(event) => setRelationSearch(event.target.value)}/>
-            <div className="bo-entity-picker-options">{pickerOptions.length ? pickerOptions.map((relation) => <button type="button" key={relation.id} onClick={() => onToggleRelation(relation.id)} aria-pressed={relation.linked}><span>{relation.title}</span>{relation.linked ? <Check size={14}/> : <Plus size={14}/>}</button>) : <p>Nenhum item encontrado. Crie-o na aba correspondente.</p>}</div>
-          </div>}
-        </aside>
+          {overview ? <div className="bo-entity-workspace">
+            <main className="bo-entity-blocks" aria-label="Blocos de edição">
+              <div className="bo-entity-block-grid">
+                {visible.map((block) => <section key={block.id} className="bo-entity-block" onDragOver={(event) => event.preventDefault()} onDrop={(event) => dropBlock(event, block.id)}>
+                  <header>
+                    <strong>{block.label}</strong>
+                    <div className="bo-entity-block-controls">
+                      <button type="button" className="bo-entity-drag" draggable onDragStart={(event) => { event.dataTransfer.effectAllowed = 'move'; setDragId(block.id); }} onDragEnd={() => setDragId(null)} aria-label={`Arrastar ${block.label}`} title="Arrastar para reorganizar"><GripVertical size={15}/></button>
+                      <button type="button" onClick={() => moveBlock(block.id, -1)} aria-label={`Mover ${block.label} para cima`} title="Mover para antes">↑</button>
+                      <button type="button" onClick={() => moveBlock(block.id, 1)} aria-label={`Mover ${block.label} para baixo`} title="Mover para depois">↓</button>
+                      {!block.essential && <button type="button" onClick={() => removeOptionalBlock(block)} aria-label={`Remover bloco ${block.label}`} title="Remover bloco"><X size={14}/></button>}
+                    </div>
+                  </header>
+                  <BlockTextarea block={block}/>
+                </section>)}
+              </div>
+              {hidden.length > 0 && <div className="bo-entity-ghost-grid" aria-label="Adicionar blocos opcionais">
+                {hidden.map((block) => <button type="button" className="bo-entity-ghost" key={block.id} onClick={() => setAdded((value) => [...value,block.id])}><Plus size={23}/><span>{block.label}</span></button>)}
+              </div>}
+              <div className="bo-entity-add">
+                <button type="button" aria-expanded={addOpen} onClick={() => setAddOpen(!addOpen)}><Plus size={15}/> Adicionar bloco <ChevronDown size={13}/></button>
+                {addOpen && <div className="bo-entity-add-menu">{hidden.length ? hidden.map((block) => <button type="button" key={block.id} onClick={() => { setAdded((value) => [...value,block.id]); setAddOpen(false); }}>{block.label}</button>) : <span>Todos os blocos estão visíveis</span>}</div>}
+              </div>
+            </main>
+            <aside className="bo-entity-criteria" aria-label="Critérios mínimos">
+              <header><strong>Critérios mínimos</strong><div className="bo-entity-criteria-strength"><span>{checks.filter((check) => check.complete).length}/{checks.length}</span><i><b style={{width:`${score}%`}}/></i></div></header>
+              <div className="bo-entity-criteria-list">
+                {checks.map((check) => <div className="bo-entity-check" key={check.id}>
+                  <span className={check.complete ? 'is-done' : ''} aria-hidden="true">{check.complete && <Check size={12}/>}</span>
+                  <strong>{check.label}</strong>
+                  {check.connectTo && <button type="button" className="bo-entity-connect" onClick={() => { setPicker(picker === check.id ? null : check.id); setRelationSearch(''); }}>{check.complete ? 'Editar' : 'Conectar'}</button>}
+                </div>)}
+              </div>
+              {activeCheck?.connectTo && <div className="bo-entity-relation-picker">
+                <div className="bo-entity-picker-head"><strong>Conectar {activeCheck.label.toLowerCase()}</strong><button type="button" aria-label="Fechar seletor" onClick={() => setPicker(null)}><X size={14}/></button></div>
+                <input type="search" placeholder="Buscar no Service Graph" aria-label="Buscar relação" value={relationSearch} onChange={(event) => setRelationSearch(event.target.value)}/>
+                <div className="bo-entity-picker-options">{pickerOptions.length ? pickerOptions.map((relation) => <button type="button" key={relation.id} onClick={() => onToggleRelation(relation.id)} aria-pressed={relation.linked}><span>{relation.title}</span>{relation.linked ? <Check size={14}/> : <Plus size={14}/>}</button>) : <p>Nenhum item encontrado. Crie-o na aba correspondente.</p>}</div>
+              </div>}
+            </aside>
+          </div> : <section className="bo-entity-secondary">{children}</section>}
+        </div>
       </div>
-      : <div className="bo-h71-detail-body bo-entity-secondary">{children}</div>}
+    </div>
   </section>;
 }
