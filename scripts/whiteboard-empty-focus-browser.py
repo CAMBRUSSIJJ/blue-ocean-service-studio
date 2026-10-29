@@ -61,6 +61,10 @@ try:
         page.locator('.bo1174-board').get_by_role('button',name='Voltar para Whiteboards').click()
         page.wait_for_timeout(300)
         print('RETURN_DIAGNOSTIC',json.dumps({'overlay':page.locator('.bo1174-board').count(),'rootInert':page.locator('#root').get_attribute('inert'),'errors':page_errors[-5:]},ensure_ascii=False),flush=True)
+        if page.locator('.bo1174-board').count():
+            page.locator('.bo1174-board').get_by_role('button',name='Voltar para Whiteboards').evaluate('(element)=>element.click()')
+            page.wait_for_timeout(250)
+            print('DIRECT_CLICK_DIAGNOSTIC',json.dumps({'overlay':page.locator('.bo1174-board').count(),'errors':page_errors[-5:]},ensure_ascii=False),flush=True)
         expect(page.locator('[data-whiteboard-library="1"]')).to_be_visible()
         expect(page.locator('.bo1189-board-grid')).to_be_visible()
         verify(page.locator('[data-whiteboard-empty-state="1"]').count()==0,'Biblioteca substitui estado vazio após criar')
