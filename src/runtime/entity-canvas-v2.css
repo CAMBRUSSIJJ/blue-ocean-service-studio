@@ -55,3 +55,15 @@ body.bo-v1130 .bo-pain-editor .bo-entity-tag-list input{width:105px!important;mi
 @media(max-width:1190px){body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:760px){body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-grid{grid-template-columns:1fr!important}body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-card.is-wide{grid-column:span 1!important}body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-ghosts{grid-template-columns:repeat(2,minmax(0,1fr))}body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-card{min-height:175px}}
 @media(hover:none){.bo-entity-canvas .bo-canvas-resize,.bo-entity-canvas .bo-pain-canvas-controls{opacity:1!important}}
+
+/* Layout fidelity to entity_canvas_editor.tsx: two content columns, one relations rail. */
+body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:15px!important}
+body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-card{border-radius:12px!important;box-shadow:0 2px 6px #26395010!important}
+body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-ghosts{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-ghost{min-height:94px!important;border-width:2px!important}
+body.bo-v1130 .bo-need-editor .bo-pain-editor-header{border-bottom:1px solid #e4e9f1!important}
+body.bo-v1130 .bo-need-editor .bo-pain-canvas-delete{color:#a52836!important;border-color:#f0c4c9!important;background:#fff7f8!important}
+@media(max-width:760px){
+ body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-grid{grid-template-columns:minmax(0,1fr)!important}
+ body.bo-v1130 .bo-pain-editor .bo-entity-canvas .bo-pain-canvas-ghosts{grid-template-columns:minmax(0,1fr)!important}
+}

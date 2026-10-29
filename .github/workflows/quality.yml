@@ -29,6 +29,7 @@ jobs:
       - run: rm -f src/generated/app-version.ts && npm run typecheck
       - run: python3 -m py_compile scripts/journey-selector-browser.py scripts/journey-observation-browser.py scripts/journey-editor-ux-browser.py scripts/blueprint-connections-browser.py
       - run: node scripts/entity-canvas-v2-smoke.mjs
+      - run: node scripts/entity-canvas-needs-smoke.mjs
       - run: npm run docs:check
       - run: node scripts/journey-visualization-test.mjs
       - run: node scripts/blueprint-guided-reading-test.mjs
@@ -104,6 +105,8 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - name: Canvas universal de Dores — salvamento e campos personalizados
         run: python3 scripts/entity-canvas-v2-browser.py
+      - name: Canvas universal de Necessidades — salvamento e critérios
+        run: python3 scripts/entity-canvas-needs-browser.py
       - name: Abrir Blueprint com CSP do servidor Linux
         run: npm run blueprint:csp:browser
       - name: Canvas do Blueprint — escrita repetida e edição
@@ -144,6 +147,7 @@ jobs:
           path: |
             artifacts/editor-ux
             artifacts/entity-canvas-v2
+            artifacts/entity-canvas-needs
             artifacts/journey-editor
             artifacts/blueprint-methodology
             artifacts/entry-journey
