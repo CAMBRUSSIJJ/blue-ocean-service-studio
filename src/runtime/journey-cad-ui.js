@@ -306,7 +306,7 @@ function cadSvg(){
   if(linkUrl&&!node.note.draft)html+='<g data-act="cad-open-link" data-id="'+esc(node.id)+'" role="button" tabindex="0" aria-label="Abrir link vinculado a '+esc(title)+'"><rect x="'+(node.width-64)+'" y="4" width="26" height="26" rx="4" fill="#edf5ff" stroke="#bcd3ef"/><path d="M '+(node.width-53)+' 21 l9 -9 M '+(node.width-49)+' 12 h5 v5" fill="none" stroke="#3267a0" stroke-width="1.5"/></g>';
   html+='</g>';
   if(node.note.draft&&cadState.creating?.inline){
-    html+='<foreignObject x="9" y="35" width="'+(node.width-18)+'" height="'+Math.max(86,node.height-43)+'" class="cad-inline-object"><div xmlns="http://www.w3.org/1999/xhtml" class="cad-inline-edit"><label for="cad-inline-title" class="sr-only">Nome do cartão</label><input id="cad-inline-title" data-cad-inline-title type="text" maxlength="240" value="'+esc(cadState.creating.title||'')+'" placeholder="Nome do cartão…" autocomplete="off" aria-expanded="false" aria-controls="cad-inline-suggestions"/><div id="cad-inline-suggestions" class="cad-inline-suggestions" role="listbox" data-cad-inline-suggestions hidden></div><small>Enter cria · Esc cancela</small></div></foreignObject>';
+    html+='<foreignObject x="9" y="35" width="'+(node.width-18)+'" height="'+Math.max(175,node.height+70)+'" class="cad-inline-object"><div xmlns="http://www.w3.org/1999/xhtml" class="cad-inline-edit"><label for="cad-inline-title" class="sr-only">Nome do cartão</label><input id="cad-inline-title" data-cad-inline-title type="text" maxlength="240" value="'+esc(cadState.creating.title||'')+'" placeholder="Nome do cartão…" autocomplete="off" aria-expanded="false" aria-controls="cad-inline-suggestions"/><div id="cad-inline-suggestions" class="cad-inline-suggestions" role="listbox" data-cad-inline-suggestions hidden></div><small>Enter cria · Esc cancela</small></div></foreignObject>';
    }
    if(!node.note.virtualLabel&&!node.note.draft){
     const shallow=!String(node.note.canvas?.description||'').trim()&&!String(node.note.activity?.owner||'').trim()&&!String(node.note.activity?.team||'').trim()&&!String(node.note.referenceId||'').trim()&&!String(node.note.canvas?.linkUrl||'').trim();
@@ -527,7 +527,7 @@ function cadAction(action,data,button){
   const kind=data.kind||'text',active=cadState.activeCell,index=data.si!==undefined?Number(data.si):cadState.choosing?.index??active?.index??businessStageIndex();
   const row=data.row||cadState.choosing?.row||(active&&cadModel.canvasAcceptsNewRow(kind,active.row)?active.row:'');
   if(kind==='emotion'){cadEditEmotion(index,point);return true}
-  cadStartQuick(kind,index,row,point,!cadMobile());return true;
+  cadStartQuick(kind,index,row,point);return true;
  }
  if(action==='cad-stage-after'){cadStartStage(Number(data.si),point);return true}
  if(action==='cad-stage-edit'){const step=S.steps[Number(data.si)];if(step&&!cadLocked()){cadStash();cadState.creating=null;cadState.quick={mode:'stage-edit',title:step.n,stageKey:cadStageKey(step),...cadQuickPosition(point)};cadState.menu=null;rerender();cadFocusQuick()}return true}
