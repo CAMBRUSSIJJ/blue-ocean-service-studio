@@ -284,3 +284,19 @@ body.bo-v1130 .bo-entity-focus-overlay .bo-h71-confirm button.danger:hover {
  body.bo-v1130 .bo-entity-focus-overlay .bo-entity-delete{font-size:0 !important;gap:0 !important}
  body.bo-v1130 .bo-entity-focus-overlay .bo-entity-delete svg{width:16px !important;height:16px !important}
 }
+
+/* Always-available library deletion, independent of the editor overlay. */
+body.bo-v1130 .bo-h72-needs .bo-h72-row-actions{width:86px;white-space:nowrap;text-align:right}
+body.bo-v1130 .bo-h72-needs .bo-h72-row-delete{
+ display:inline-flex !important;align-items:center !important;justify-content:center !important;gap:5px !important;
+ background:#fff4f3 !important;color:#ac2738 !important;border:1px solid #f3c5c6 !important;
+ border-radius:7px !important;padding:6px 9px !important;min-height:30px !important;
+ font-size:11px !important;font-weight:650 !important;white-space:nowrap;box-shadow:none !important
+}
+body.bo-v1130 .bo-h72-needs .bo-h72-row-delete:hover{
+ background:#ffe7e7 !important;color:#861725 !important;border-color:#e8a7ad !important
+}
+body.bo-v1130 .bo-h72-needs .bo-h72-row-delete:focus-visible,
+body.bo-v1130 .bo-entity-focus-overlay .bo-entity-delete:focus-visible{
+ outline:2px solid #78a9ff !important;outline-offset:2px !important
+}
