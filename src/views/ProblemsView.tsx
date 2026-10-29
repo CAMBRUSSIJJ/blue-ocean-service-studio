@@ -1,7 +1,9 @@
 // H7.40-H3 legacy CTA: Criar hipótese
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { EntityInlineCanvas, type EntityInlineBlock } from '../components/EntityInlineCanvas';
-import { AlertTriangle, ArrowLeft, Check, Filter, MoreVertical, Plus, Search, ShieldCheck, Table2, Trash2, X } from '../design-system/icons';
+import { EntityCanvas } from '../components/entity-editor/EntityCanvas';
+import { EntityEditorHeader, EntityTags } from '../components/entity-editor/EntityEditor';
+import { parseCustomBlocks, type CustomEntityBlock, type EntityCanvasBlock, type EditorFieldKind } from '../components/entity-editor/types';
+import { AlertTriangle, Check, Filter, MoreVertical, Plus, Search, ShieldCheck, Table2, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
@@ -56,7 +58,7 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
   const [tagsText, setTagsText] = useState('');
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [detailActionsOpen, setDetailActionsOpen] = useState(false);
+  const [customBlocks,setCustomBlocks] = useState<CustomEntityBlock[]>([]);
   const flushRef = useRef<() => void>(() => {});
   const [createOpen,setCreateOpen] = useState(false);
   const [createTitle,setCreateTitle] = useState('');
@@ -77,11 +79,12 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
   }, [graph, selectedId, draft, connectedIds, report, selected?.updatedAt]);
 
   useEffect(() => {
-    if (!selected || !report) { setDraft(null); setOwner(''); setTagsText(''); setConnectedIds([]); return; }
+    if (!selected || !report) { setDraft(null); setOwner(''); setTagsText(''); setConnectedIds([]);setCustomBlocks([]);return; }
     setDraft(problemProfileFromEntity(selected));
     setOwner(String(selected.owner ?? ''));
     setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
     setConnectedIds(report.connections.map((item) => item.id));
+    setCustomBlocks(parseCustomBlocks(selected.canvasCustomBlocks));
   }, [selectedId]);
 
 
@@ -146,23 +149,27 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
     || owner.trim()!==String(selected?.owner??'').trim()
     || tags.join('|')!==savedTags.join('|')
     || !sameIds(connectedIds,report?.connections.map(item=>item.id)??[])
+    || JSON.stringify(customBlocks)!==JSON.stringify(parseCustomBlocks(selected?.canvasCustomBlocks))
   ));
-  const persistProblem=(id:string,value:ProblemProfileDraft,newOwner:string,newTags:string[],links:string[])=>{
+  const persistProblem=(id:string,value:ProblemProfileDraft,newOwner:string,newTags:string[],links:string[],custom:CustomEntityBlock[])=>{
     if(!value.title.trim())return;
-    setGraph(current=>patchProblemMeta(updateProblemProfile({
-      graph:current,problemId:id,draft:value,connectedIds:links,
-    }),id,newOwner,newTags),'Problemas: autosave');
+    setGraph(current=>{
+      const next=patchProblemMeta(updateProblemProfile({graph:current,problemId:id,draft:value,connectedIds:links}),id,newOwner,newTags);
+      const record=next.entities?.problem?.[id];
+      if(!record)return next;
+      return {...next,entities:{...next.entities,problem:{...next.entities.problem,[id]:{...record,canvasCustomBlocks:custom}}}};
+    },'Problemas: autosave');
   };
   flushRef.current=()=>{
-    if(selectedId&&draft?.title.trim()&&dirty)persistProblem(selectedId,draft,owner,tags,connectedIds);
+    if(selectedId&&draft?.title.trim()&&dirty)persistProblem(selectedId,draft,owner,tags,connectedIds,customBlocks);
   };
   useEffect(()=>()=>flushRef.current(),[]);
   useEffect(()=>{
     if(!selectedId||!draft?.title.trim()||!dirty)return;
-    const timer=window.setTimeout(()=>persistProblem(selectedId,draft,owner,tags,connectedIds),800);
+    const timer=window.setTimeout(()=>persistProblem(selectedId,draft,owner,tags,connectedIds,customBlocks),800);
     return()=>window.clearTimeout(timer);
-  },[selectedId,draft,owner,tagsText,connectedIds,dirty]);
-  const closeProblem=(commit=true)=>{if(commit)flushRef.current();setSelectedId(null);setDraft(null);setDetailTab('overview');setDetailActionsOpen(false);};
+  },[selectedId,draft,owner,tagsText,connectedIds,customBlocks,dirty]);
+  const closeProblem=(commit=true)=>{if(commit)flushRef.current();setSelectedId(null);setDraft(null);setDetailTab('overview');};
   const removeProblem = (id: string) => {
     setGraph((current) => removeContextEntity(current, 'problem', id), 'Problemas 2.0: remover');
     if (selectedId === id) closeProblem(false);
@@ -181,10 +188,11 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
       }), selectedId, owner, tags);
       const record = saved.entities?.problem?.[selectedId];
       if (!record) return saved;
+      const withCustom={...record,canvasCustomBlocks:customBlocks};
       const now = new Date().toISOString();
       return { ...saved, service: { ...saved.service, updatedAt: now },
         entities: { ...saved.entities, problem: { ...saved.entities.problem,
-          [selectedId]: { ...record, status: 'validated', validatedAt: now, updatedAt: now },
+          [selectedId]: { ...withCustom, status: 'validated', validatedAt: now, updatedAt: now },
         } } };
     }, 'Problemas: validação explícita');
     showToast('Problema validado com evidências registradas.');
@@ -194,6 +202,16 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
     if (isSource) { showToast('A hipótese de origem faz parte da rastreabilidade e não pode ser desvinculada aqui.'); return; }
     setConnectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   };
+
+  const addCustom=(kind:EditorFieldKind)=>{
+    if(customBlocks.length>=60){showToast('Limite de 60 campos personalizados por entidade.');return;}
+    const labels:Record<EditorFieldKind,string>={text:'Texto',checklist:'Checklist',number:'Número',date:'Data',image:'Imagem (URL)',document:'Documento (link)'};
+    const id='custom-'+(typeof crypto!=='undefined'&&'randomUUID' in crypto?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2,7));
+    setCustomBlocks(items=>[...items,{id,label:labels[kind],kind,value:''}]);
+  };
+  const changeCustom=(id:string,value:string)=>setCustomBlocks(items=>items.map(item=>item.id===id?{...item,value}:item));
+  const removeCustom=(id:string)=>setCustomBlocks(items=>items.filter(item=>item.id!==id));
+  const renameCustom=(id:string,label:string)=>setCustomBlocks(items=>items.map(item=>item.id===id?{...item,label}:item));
 
   if (selected && draft && report) {
     const preview = previewReport ?? report;
