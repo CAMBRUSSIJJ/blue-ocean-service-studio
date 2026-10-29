@@ -272,7 +272,6 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
       </div>}
       {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm" role="alertdialog" aria-modal="true" aria-label="Excluir problema"><header><div><small>REMOVER PROBLEMA</small><h2>Remover “{contextEntityTitle(graph.entities?.problem?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>Este problema e suas conexões serão removidos. Hipóteses e evidências relacionadas serão preservadas.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeProblem(deleteId)}>Remover Problema</button></footer></div></div>}
     </section>;
-    </section>;
   }
 
   return <section className="bo-h76-problems" data-problems-h76="library">
