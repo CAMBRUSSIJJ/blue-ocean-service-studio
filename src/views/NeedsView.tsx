@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { EntityEditor, type EntityEditorBlock } from '../components/EntityEditor';
 import { Check, Filter, MoreVertical, Plus, Search, Table2, Target, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
@@ -132,6 +132,12 @@ export function NeedsView({ studio }: { studio: StudioController }) {
     if (!data.title.trim()) return;
     setGraph((current) => patchNeedMeta(updateNeedProfile({ graph: current, needId: id, draft: data, connectedIds: links }), id, nextOwner, nextTags), 'Necessidades: edição automática');
   };
+  // Persist pending edits when another workspace route unmounts the editor.
+  const flushRef = useRef<() => void>(() => {});
+  flushRef.current = () => {
+    if (selectedId && draft?.title.trim() && isDirty) persistNeed(selectedId, draft, owner, tags, connectedIds);
+  };
+  useEffect(() => () => flushRef.current(), []);
   useEffect(() => {
     if (!selectedId || !draft?.title.trim() || !isDirty) return;
     const timer = window.setTimeout(() => persistNeed(selectedId, draft, owner, tags, connectedIds), 700);
