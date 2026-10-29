@@ -28,6 +28,7 @@ def details(f,note_id):
  else:
   f.get_by_role('button',name='Ajustar',exact=True).click()
   f.locator(f'.cad-node[data-id="{note_id}"]').click()
+  f.get_by_role('button',name='Detalhes opcionais').click()
  form=f.locator('#cad-component-form')
  expect(form).to_be_visible(timeout=5000)
  return form
