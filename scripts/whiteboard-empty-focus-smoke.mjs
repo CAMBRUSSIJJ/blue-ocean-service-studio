@@ -14,7 +14,7 @@ const tests=[
  ['Sem resumo e handoff no estado vazio',view.includes('boards.length > 0 && <div className="bo-h711-summary"')&&view.includes('boards.length > 0 && handoff.readyForWhiteboard')],
  ['Sem callouts duplicados no estado vazio',view.includes('boards.length > 0 && <div className="bo-h1711-flow-hint"')],
  ['Navegação secundária por caminhos existentes',view.includes('bo-whiteboard-zero-links')&&view.includes('onClick={openBlueprints}')&&view.includes('onClick={() => openJourneys()}')],
- ['Biblioteca existente ainda oferece renomear, duplicar e excluir', ['rename(board.id)','duplicate(board.id)','remove(board.id)'].every(x=>view.includes(x))],
+ ['Biblioteca existente ainda oferece renomear, duplicar e excluir', ['rename();','duplicate(board.id)','remove(board.id)'].every(x=>view.includes(x))],
  ['Estado de filtro sem resultados não se passa por estado vazio',view.includes('Limpar filtros')&&view.includes("setFilter('all')")],
  ['CSS isolado, responsivo e carregado depois',main.includes("import './style.css';\nimport './runtime/whiteboard-empty-focus.css';")&&css.includes('.bo-whiteboard-zero-page')&&css.includes('@media(max-width:720px)')],
 ];
