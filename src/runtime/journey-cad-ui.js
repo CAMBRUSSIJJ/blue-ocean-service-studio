@@ -286,7 +286,8 @@ function cadSvg(){
    const drafting=notes.some(node=>node.note.draft);
    const addWidth=empty?Math.min(stage.width-32,Math.max(140,110/cam.zoom)):Math.min(stage.width-32,132);
    const addHeight=empty?Math.max(34,28/cam.zoom):28;
-   const addY=empty?row.y+row.height/2-addHeight/2:row.y+row.height-addHeight-10;
+   const lastCardBottom=notes.reduce((bottom,node)=>Math.max(bottom,node.y+node.height),row.y+18);
+   const addY=empty?row.y+row.height/2-addHeight/2:Math.min(lastCardBottom+10,row.y+row.height-addHeight-10);
    html+='<rect x="'+stage.x+'" y="'+row.y+'" width="'+stage.width+'" height="'+row.height+'" class="cad-cell" data-row="'+row.id+'" data-si="'+stage.index+'"/>';
    // An occupied cell must remain editable. A compact footer follows existing cards,
    // instead of placing the large empty-state action on top of their content.
