@@ -56,6 +56,7 @@ try:
   check('Title-only status is visible',f.locator('.cad-depth-indicator').count()>0)
   check('No inspector opened after Enter',f.locator('#cad-component-form').count()==0)
   check('Occupied Frontstage cell retains an accessible add button',f.locator('[data-act="cad-cell-add"].is-occupied[data-row="fl"][data-si="0"]').count()==1)
+  check('New-card action sits after the last card without overlapping it',frame.evaluate("""()=>{const add=document.querySelector('[data-act="cad-cell-add"].is-occupied[data-row="fl"][data-si="0"]');const nodes=cadState.layout.nodes.filter(n=>n.row==='fl'&&n.stageIndex===0&&!n.note.draft);return !!add&&add.getBBox().y>=Math.max(...nodes.map(n=>n.y+n.height))}"""))
   node.click()
   check('Single click opens optional properties',f.locator('#cad-component-form').count()>0)
   form=f.locator('#cad-component-form')
