@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { EntityEditor, type EntityEditorBlock } from '../components/EntityEditor';
 import { Check, Filter, MoreVertical, Plus, Search, Table2, Target, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
@@ -42,6 +43,7 @@ export function NeedsView({ studio }: { studio: StudioController }) {
   const [draft, setDraft] = useState<NeedProfileDraft | null>(null);
   const [owner, setOwner] = useState('');
   const [tagsText, setTagsText] = useState('');
+  const [newTag, setNewTag] = useState('');
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [createTitle, setCreateTitle] = useState('');
@@ -118,6 +120,7 @@ export function NeedsView({ studio }: { studio: StudioController }) {
     showToast('Necessidade criada. Complete contexto, resultado e relações.');
   };
   const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
+  const addTag = () => { const value = newTag.trim(); if (value && !tags.some((tag) => tag.toLowerCase() === value.toLowerCase())) setTagsText([...tags, value].join(', ')); setNewTag(''); };
   const persistedDraft = selected ? needProfileFromEntity(selected) : null;
   const persistedTags = Array.isArray(selected?.tags) ? selected.tags.map(String) : [];
   const currentLinks = [...connectedIds].sort().join('|');
@@ -165,7 +168,7 @@ export function NeedsView({ studio }: { studio: StudioController }) {
     const saveStatus = !draft.title.trim() || isDirty ? 'pending' : studio.saveStatus;
     const warning = !draft.title.trim() ? 'Dê um enunciado a esta necessidade para salvar as alterações.'
       : looksLikeSolution(draft.title) ? 'Isso parece uma solução. Experimente descrever o problema ou o resultado esperado, sem definir como resolvê-lo.' : undefined;
-    return <div data-needs-h72="detail">
+    return createPortal(<div className="bo-entity-focus-overlay" data-needs-h72="detail">
       <EntityEditor
         entityId={selected.id}
         kind="Necessidade"
@@ -175,9 +178,12 @@ export function NeedsView({ studio }: { studio: StudioController }) {
         onTitleChange={(value) => setDraft((current) => current ? { ...current, title: value } : current)}
         warning={warning}
         properties={<>
-          <label className="bo-entity-property"><span>Importância</span><select value={draft.importance} onChange={(event) => setDraft((current) => current ? { ...current, importance: event.target.value as NeedImportance } : current)}><option value="low">Baixa</option><option value="medium">Média</option><option value="high">Alta</option><option value="critical">Crítica</option></select></label>
-          <label className="bo-entity-property"><span>Responsável</span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou equipe" aria-label="Responsável"/></label>
-          <label className="bo-entity-property tags"><span>Tags</span><input value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="Separe com vírgulas" aria-label="Tags"/></label>
+          <label className="bo-entity-property importance"><span>Importância:</span><select aria-label="Importância" value={draft.importance} onChange={(event) => setDraft((current) => current ? { ...current, importance: event.target.value as NeedImportance } : current)}><option value="low">Baixa</option><option value="medium">Média</option><option value="high">Alta</option><option value="critical">Crítica</option></select></label>
+          <label className="bo-entity-property owner"><span>Responsável:</span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Atribuir responsável" aria-label="Responsável"/></label>
+          <div className="bo-entity-property tags"><span>Tags:</span><div className="bo-entity-tags-list">
+            {tags.map((tag) => <span className="bo-entity-tag-chip" key={tag}>{tag}<button type="button" aria-label={`Remover tag ${tag}`} onClick={() => setTagsText(tags.filter((item) => item !== tag).join(', '))}>×</button></span>)}
+            <input value={newTag} onChange={(event) => setNewTag(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addTag(); } }} onBlur={addTag} aria-label="Adicionar tag" placeholder="+ Tag"/>
+          </div></div>
         </>}
         score={score}
         saveStatus={saveStatus}
@@ -198,7 +204,7 @@ export function NeedsView({ studio }: { studio: StudioController }) {
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="need" id={selected.id} title="Uso e relações" />}
       </EntityEditor>
       {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER NECESSIDADE</small><h2>Remover “{contextEntityTitle(graph.entities?.need?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações serão desvinculadas do Service Graph, mas Personas, Jobs, Dores, Problemas e Evidências serão preservados.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeNeed(deleteId)}>Remover Necessidade</button></footer></div></div>}
-    </div>;
+    </div>, document.body);
   }
 
   return <section className="bo-h72-needs" data-needs-h72="library"><div className="bo-h71-page-head"><div><span>Workspace /</span><h1>Necessidades</h1></div></div><div className="bo-h71-toolbar"><strong>{filtered.length} {filtered.length === 1 ? 'resultado' : 'resultados'}</strong><div><label className="bo-h71-search"><Search size={15}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar necessidades"/></label><button type="button" className={showFilters ? 'is-active' : ''} onClick={() => setShowFilters((value) => !value)} aria-label="Filtros"><Filter size={16}/></button><button type="button" className="is-active"><Table2 size={16}/><span>Tabela</span></button><button type="button" className="primary" onClick={() => setCreateOpen(true)}><Plus size={16}/> Criar necessidade</button></div></div>
