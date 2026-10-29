@@ -74,10 +74,10 @@ export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNaviga
     <textarea aria-label={label} rows={3} value={draft[key]} placeholder={placeholder} onChange={e=>update({[key]:e.target.value})}/></label>;
   const body=(id:PersonaVisualCardId)=>{
     if(id==='identity')return <div className="bo-p5-identity-body">
-      <div className="bo-p5-mode-switch bo-h724-depth-switch" role="group" aria-label="Profundidade da Persona">
+      {!titleInHeader&&<div className="bo-p5-mode-switch bo-h724-depth-switch" role="group" aria-label="Profundidade da Persona">
         <button type="button" aria-pressed={draft.mode==='simple'} onClick={()=>onChangeMode('simple')}>Simples</button>
         <button type="button" aria-pressed={draft.mode==='professional'} onClick={()=>onChangeMode('professional')}>Avançada</button>
-      </div>
+      </div>}
       {!titleInHeader&&<label className="bo-p5-field"><span>Nome da Persona</span><input aria-label="Nome da Persona" value={draft.title} onChange={e=>update({title:e.target.value})} placeholder="Ex.: Cliente com pouco tempo"/></label>}
       <label className="bo-p5-field"><span>Resumo</span><textarea aria-label="Resumo da Persona" rows={2} value={draft.description} onChange={e=>update({description:e.target.value})} placeholder="Quem é a pessoa neste serviço?"/></label>
     </div>;
