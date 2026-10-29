@@ -123,7 +123,7 @@ export function NeedsView({ studio }: { studio: StudioController }) {
   const currentLinks = [...connectedIds].sort().join('|');
   const persistedLinks = [...(report?.connections.map((item) => item.id) ?? [])].sort().join('|');
   const isDirty = Boolean(draft && persistedDraft && (
-    (Object.keys(draft) as Array<keyof NeedProfileDraft>).some((key) => draft[key] !== persistedDraft[key])
+    (Object.keys(draft) as Array<keyof NeedProfileDraft>).some((key) => draft[key].trim() !== persistedDraft[key].trim())
     || owner.trim() !== String(selected?.owner ?? '').trim()
     || tags.join('|') !== persistedTags.join('|')
     || currentLinks !== persistedLinks
