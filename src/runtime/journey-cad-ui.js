@@ -187,7 +187,7 @@ function cadStartQuick(kind,index=businessStageIndex(),row='',point={},inline=fa
  if(kind==='emotion'){
   const existing=(S.c['em|'+index]||[]).find(note=>note.canvas?.kind==='emotion');if(existing){cadSelect(existing.i);return}
  }
- cadStash();const stage=S.steps[index],stageKey=cadStageKey(stage),key='new:'+kind+':'+stageKey+':'+row;
+ cadStash();cadState.inlineOpenDetails=false;const stage=S.steps[index],stageKey=cadStageKey(stage),key='new:'+kind+':'+stageKey+':'+row;
  cadState.selected='';cadState.link=null;cadState.inspector=false;cadState.library=false;cadState.choosing=null;cadState.menu=null;cadState.error='';
  cadState.creating={kind,row,stageKey,title:'',description:'',resourceRefs:[],...cadState.drafts.get(key),mode:'card',inline,emotionScore:stage.e??0,emotionNote:stage.note||'',...cadQuickPosition(point)};
  cadState.quick=cadState.creating;cadReveal(row);rerender();if(inline)cadFocusInline();else cadFocusQuick();requestAnimationFrame(()=>{cadEnsureVisible('@draft');if(inline)cadFocusInline()});
@@ -199,6 +199,10 @@ function cadFocusQuick(){requestAnimationFrame(()=>{const field=app.querySelecto
 /* Capture on canvas: do not enter the Service Graph until the user confirms. */
 function cadInlineKind(row){
  return ({ac:'customer-action',fl:'activity',bk:'activity',sy:'system',ev:'artifact',ch:'channel',th:'thought',im:'pain',sd:'text'})[row]||'text';
+}
+function cadInlinePlaceholder(kind){
+ const placeholders={'customer-action':'Escreva a ação…',pain:'Escreva a dor…',need:'Escreva a necessidade…',activity:'Escreva a atividade…',touchpoint:'Escreva o ponto de contato…',channel:'Escreva o canal…',thought:'Escreva o pensamento…',artifact:'Escreva a evidência…',system:'Escreva o sistema…',text:'Escreva aqui…'};
+ return placeholders[kind]||'Escreva o cartão…';
 }
 function cadFocusInline(){
  requestAnimationFrame(()=>{const input=app.querySelector('[data-cad-inline-title]');input?.focus();if(input?.value)input.select()});
@@ -217,7 +221,7 @@ function cadRefreshInlineSuggestions(input){
  menu.innerHTML=matches.map(item=>'<button type="button" role="option" data-act="cad-inline-reuse" data-id="'+esc(item.id)+'"><small>Reaproveitar</small> '+esc(item.title||item.name)+'</button>').join('')+
   (matches.length?'<button type="button" data-act="cad-inline-ignore" class="cad-inline-ignore">Ignorar e criar novo</button>':'');
 }
-function cadSubmitInline(){
+function cadSubmitInline(openDetails=false){
  const draft=cadState.creating;if(!draft?.inline||cadLocked())return;
  const title=String(draft.title||'').trim();
  if(!title){cadNotice('Escreva o título antes de criar.');cadFocusInline();return}
@@ -226,8 +230,9 @@ function cadSubmitInline(){
  try{
   const input={...draft,title,stageId:step.hostStageId,stageLocalId:step.hostLocalId};
   cadModel.prepareCanvasInput(S,input);
+  cadState.inlineOpenDetails=!!openDetails;
   cadSend('canvas-create',{input});
- }catch(error){cadNotice(error.message);cadFocusInline()}
+ }catch(error){cadState.inlineOpenDetails=false;cadNotice(error.message);cadFocusInline()}
 }
 function cadQuickForm(){
  const draft=cadState.quick;if(!draft||draft.inline)return '';
@@ -300,13 +305,15 @@ function cadSvg(){
   }else{
     if(kind==='channel')html+='<circle cx="24" cy="56" r="12" fill="#eaf4fd" stroke="#4090bf" stroke-width="1.6"/><circle cx="24" cy="56" r="5" fill="none" stroke="#4090bf" stroke-width="1.6"/>';
     const x=kind==='channel'?47:13,ybase=kind==='channel'?60:22+font+8;
-    cadModel.canvasTitleLines(title,Math.max(7,Math.floor((node.width-x-12)/(font*.58))),cam.zoom<.4?1:2).forEach((line,index)=>{html+='<text x="'+x+'" y="'+(cam.zoom<.4?node.height/2+font/3:ybase+index*(font+4))+'" class="cad-node-title" style="font-size:'+font+'px">'+esc(line)+'</text>'});
+    if(!(node.note.draft&&cadState.creating?.inline))cadModel.canvasTitleLines(title,Math.max(7,Math.floor((node.width-x-12)/(font*.58))),cam.zoom<.4?1:2).forEach((line,index)=>{html+='<text x="'+x+'" y="'+(cam.zoom<.4?node.height/2+font/3:ybase+index*(font+4))+'" class="cad-node-title" style="font-size:'+font+'px">'+esc(line)+'</text>'});
     if(!small&&kind!=='channel'&&title.length<Math.floor((node.width-26)/(font*.58))&&node.note.activity?.owner)html+='<text x="13" y="'+(node.height-14)+'" class="cad-node-meta">'+esc(node.note.activity.owner)+'</text>';
   }
   if(linkUrl&&!node.note.draft)html+='<g data-act="cad-open-link" data-id="'+esc(node.id)+'" role="button" tabindex="0" aria-label="Abrir link vinculado a '+esc(title)+'"><rect x="'+(node.width-64)+'" y="4" width="26" height="26" rx="4" fill="#edf5ff" stroke="#bcd3ef"/><path d="M '+(node.width-53)+' 21 l9 -9 M '+(node.width-49)+' 12 h5 v5" fill="none" stroke="#3267a0" stroke-width="1.5"/></g>';
   html+='</g>';
   if(node.note.draft&&cadState.creating?.inline){
-    html+='<foreignObject x="9" y="35" width="'+(node.width-18)+'" height="'+Math.max(175,node.height+70)+'" class="cad-inline-object"><div xmlns="http://www.w3.org/1999/xhtml" class="cad-inline-edit"><label for="cad-inline-title" class="sr-only">Nome do cartão</label><input id="cad-inline-title" data-cad-inline-title type="text" maxlength="240" value="'+esc(cadState.creating.title||'')+'" placeholder="Nome do cartão…" autocomplete="off" aria-expanded="false" aria-controls="cad-inline-suggestions"/><div id="cad-inline-suggestions" class="cad-inline-suggestions" role="listbox" data-cad-inline-suggestions hidden></div><small>Enter cria · Esc cancela</small></div></foreignObject>';
+    const hintTop=Math.max(38,node.height-36+9),suggestTop=hintTop+33;
+     html+='<foreignObject x="12" y="36" width="'+(node.width-24)+'" height="'+Math.max(185,node.height+160)+'" class="cad-inline-object"><div xmlns="http://www.w3.org/1999/xhtml" class="cad-inline-edit" style="--cad-inline-hint-top:'+hintTop+'px;--cad-inline-suggest-top:'+suggestTop+'px"><label for="cad-inline-title" class="sr-only">Nome do cartão</label><input id="cad-inline-title" data-cad-inline-title type="text" maxlength="240" value="'+esc(cadState.creating.title||'')+'" placeholder="'+esc(cadInlinePlaceholder(cadState.creating.kind))+'" autocomplete="off" aria-expanded="false" aria-controls="cad-inline-suggestions" aria-keyshortcuts="Enter Shift+Enter Escape"/><small class="cad-inline-hint">Enter guarda · Shift+Enter detalha · Esc cancela</small><div id="cad-inline-suggestions" class="cad-inline-suggestions" role="listbox" data-cad-inline-suggestions hidden></div></div></foreignObject>';
+     html+='<g class="cad-inline-expand" data-act="cad-inline-expand" role="button" tabindex="0" aria-label="Guardar e abrir propriedades" title="Guardar e abrir propriedades (Shift+Enter)"><rect x="'+(node.width-35)+'" y="4" width="29" height="27" rx="6" class="cad-inline-expand-bg"/><path d="M '+(node.width-27)+' 17 V 12 H '+(node.width-22)+' M '+(node.width-13)+' 17 V 12 H '+(node.width-18)+' M '+(node.width-27)+' 20 V 24 H '+(node.width-22)+' M '+(node.width-13)+' 20 V 24 H '+(node.width-18)+'" class="cad-inline-expand-glyph"/></g>';
    }
    if(!node.note.virtualLabel&&!node.note.draft){
     const shallow=!String(node.note.canvas?.description||'').trim()&&!String(node.note.activity?.owner||'').trim()&&!String(node.note.activity?.team||'').trim()&&!String(node.note.referenceId||'').trim()&&!String(node.note.canvas?.linkUrl||'').trim();
@@ -397,12 +404,13 @@ function cadSend(type,payload,noteId=''){
  try{let next=payload.state;if(type==='canvas-create'){const data=cadModel.prepareCanvasInput(S,payload.input);next=structuredClone(S);noteId=uid();(next.c[data.row+'|'+data.index]||=[]).push({i:noteId,type:'card',t:data.title,canvas:data.canvas,activity:data.activity});if(data.kind==='emotion')Object.assign(next.steps[data.index],{e:Number(payload.input.emotionScore||0),emotionRecorded:true,note:payload.input.emotionNote||'',emotionStatus:'hypothesis'})}window.BlueOceanJourneyContent.validateMatrixDocument(next);Object.assign(S,next);save();cadResult({requestId:cadState.pending,ok:true,state:S,noteId})}catch(error){cadResult({requestId:cadState.pending,ok:false,error:error.message})}
 }
 function cadResult(data){
- if(data.requestId!==cadState.pending)return;cadState.pending='';cadState.pendingDocument=null;if(!data.ok){cadState.error=data.error||'Não foi possível salvar.';announceSave(false);rerender();cadFocusQuick();return}
+ if(data.requestId!==cadState.pending)return;cadState.pending='';cadState.pendingDocument=null;if(!data.ok){cadState.error=data.error||'Não foi possível salvar.';cadState.inlineOpenDetails=false;announceSave(false);rerender();if(cadState.creating?.inline)cadFocusInline();else cadFocusQuick();return}
  S=structuredClone(data.state);S.id=HOSTED?'host':S.id;DB={cur:S.id,js:[S]};last=JSON.stringify(S);growthLastPatch=growthPatchKey();if(data.history)H=data.history;
- const wasInline=!!cadState.creating?.inline;
+ const wasInline=!!cadState.creating?.inline,openInlineDetails=wasInline&&!!cadState.inlineOpenDetails&&!!data.noteId;
+ cadState.inlineOpenDetails=false;
  if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);cadState.drafts.delete(cadState.selected);
- cadState.creating=null;cadState.quick=null;cadState.link=null;cadState.menu=null;cadState.lastCardClick=null;cadState.selected=data.noteId||'';cadState.inspector=!wasInline&&!!cadState.selected&&!cadMobile();cadState.selectedRow='';cadState.error='';announceSave(true);rerender();
- requestAnimationFrame(()=>app.querySelector('.cad-node[data-id="'+CSS.escape(data.noteId||'')+'"]')?.focus());
+ cadState.creating=null;cadState.quick=null;cadState.link=null;cadState.menu=null;cadState.lastCardClick=null;cadState.selected=data.noteId||'';cadState.inspector=(!wasInline||openInlineDetails)&&!!cadState.selected&&!cadMobile();cadState.selectedRow='';cadState.error='';if(openInlineDetails){const entry=blueprintNote(data.noteId);if(entry)cadState.drafts.set(data.noteId,cadDraftFor(entry))}announceSave(true);rerender();
+ requestAnimationFrame(()=>{if(openInlineDetails)app.querySelector('#cad-component-form [name="description"]')?.focus();else app.querySelector('.cad-node[data-id="'+CSS.escape(data.noteId||'')+'"]')?.focus()});
 }
 function cadQuickSubmit(form){
  if(cadLocked()||!form.reportValidity())return;try{
@@ -438,6 +446,7 @@ function cadAction(action,data,button){
  if(action==='cad-select'){cadState.lastCardClick={id:data.id,time:Date.now()};cadSelect(data.id,point,false);return true}
  if(action==='cad-inline'){cadSelect(data.id,point,true);return true}
  if(action==='cad-quick-focus'){if(cadState.creating?.inline)cadFocusInline();else cadFocusQuick();return true}
+ if(action==='cad-inline-expand'){cadSubmitInline(true);return true}
  if(action==='cad-edge'){cadOpenLink(data.id);return true}
  if(action==='cad-connect'||action==='cad-link'){
   if(cadLocked())return true;cadState.connectFrom=data.id||cadState.selected;cadState.connectType='sequence';cadState.menu=null;cadState.quick=null;cadState.inspector=false;cadState.error='';rerender();return true;
@@ -520,6 +529,7 @@ function cadAction(action,data,button){
   cadState.selectedRow='';const entry=blueprintNote(data.id||cadState.selected);if(!entry)return true;cadState.selected=entry.note.i;cadState.creating=null;cadState.drafts.set(entry.note.i,cadDraftFor(entry));cadOpenInspector();return true;
  }
  if(action==='cad-cancel'){
+  cadState.inlineOpenDetails=false;
   if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);
   cadState.drafts.delete(cadState.selected);Object.assign(cadState,{creating:null,quick:null,link:null,menu:null,selected:'',selectedRow:'',inspector:false,error:'',connectFrom:'',pointer:null,lastCardClick:null});rerender();return true;
  }
@@ -611,7 +621,7 @@ function cadBind(){
  app.addEventListener('cancel',event=>{if(event.target.id==='cad-library-sheet')cadState.library=false;if(event.target.id==='cad-inspector-sheet')cadState.inspector=false;if(event.target.id==='cad-link-sheet')cadState.link=null},true);
  app.addEventListener('keydown',event=>{
    if(event.target.matches?.('[data-cad-inline-title]')){
-     if(event.key==='Enter'){event.preventDefault();cadSubmitInline();return}
+     if(event.key==='Enter'){event.preventDefault();cadSubmitInline(event.shiftKey);return}
      if(event.key==='Escape'){event.preventDefault();cadAction('cad-cancel',{});return}
      if(event.key==='ArrowDown'){const first=app.querySelector('[data-cad-inline-suggestions]:not([hidden]) [data-act="cad-inline-reuse"]');if(first){event.preventDefault();first.focus()}return}
    }
@@ -659,7 +669,7 @@ function cadBind(){
       event.preventDefault();
       // Keyboard activation edits a card inline; pointer selection opens details.
       // Enter and Space must not rely on SVG click dispatch, which selects the inspector.
-      if(button.matches('.cad-node[data-act="cad-select"]')&&!cadLocked()){
+      if(button.matches('.cad-inline-expand')){cadSubmitInline(true)}else if(button.matches('.cad-node[data-act="cad-select"]')&&!cadLocked()){
         cadSelect(button.dataset.id,{},true);
       }else button.dispatchEvent(new MouseEvent('click',{bubbles:true}));
       return;
