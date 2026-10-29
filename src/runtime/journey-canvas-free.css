@@ -7,3 +7,9 @@
 .bo-h1709-drag-handle { cursor: grab; border: 0; background: transparent; color: #64748b; padding: 3px 7px; font-size: 17px; touch-action: none; }
 .bo-h1709-drag-handle:active { cursor: grabbing; }
 .bo-h1709-drag-handle:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; border-radius: 4px; }
+
+/* Same occupied-cell affordance as Blueprint: a compact, discoverable add action. */
+.bo-h1709-card-stack .bo-h1709-add-card[data-empty="false"]{font-size:11px;min-height:28px;padding:4px 8px;border-radius:6px;background:transparent;color:#496989;opacity:.64}
+.bo-h1709-card-stack .bo-h1709-add-card[data-empty="false"]:hover,.bo-h1709-card-stack .bo-h1709-add-card[data-empty="false"]:focus-visible{opacity:1;background:#edf4ff;color:#1d5ca6}
+.bo-h1709-card-stack .bo-h1709-add-card:focus-visible{outline:2px solid #2876c4;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.bo-h1709-card-stack .bo-h1709-add-card{transition:none}}
