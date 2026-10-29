@@ -5,7 +5,7 @@ const shared=fs.readFileSync('src/services/blueprint-canvas.js','utf8');
 const checks=[
 ['Cell click creates inline draft instead of opening component chooser',cad.includes("if(action==='cad-cell-add')")&&cad.includes("cadStartQuick(cadInlineKind(data.row),Number(data.si),data.row,point,true)")],
 ['Inline title is inside provisional canvas node',cad.includes('<foreignObject')&&cad.includes('data-cad-inline-title')&&cad.includes("node.note.draft&&cadState.creating?.inline")],
-['A draft is not persisted until Enter',cad.includes('function cadSubmitInline()')&&cad.includes("cadSend('canvas-create',{input})")&&cad.includes("if(!title){cadNotice")],
+['A draft is not persisted until Enter',cad.includes('function cadSubmitInline(openDetails=false)')&&cad.includes("cadSend('canvas-create',{input})")&&cad.includes("if(!title){cadNotice")],
 ['Escape cancels without creating an item',cad.includes("if(event.key==='Escape'){event.preventDefault();cadAction('cad-cancel',{})")],
 ['Keyboard starts in title',cad.includes('cadFocusInline()')&&cad.includes("input?.focus()")],
 ['Suggestions appear after at least three characters',cad.includes('needle.length<3')&&cad.includes('function cadRefreshInlineSuggestions')],
