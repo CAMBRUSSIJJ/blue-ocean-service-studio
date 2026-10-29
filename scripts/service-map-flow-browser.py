@@ -20,7 +20,12 @@ def graph(page):return page.evaluate("()=>window.BlueOceanRuntime.api('dataBridg
 def saved(f):expect(f.locator('[data-save-status]')).to_have_text('Salvo neste navegador')
 def frame(page):return page.locator('.bo-blueprint-reference-frame').element_handle().content_frame()
 def quick(f,title):
- form=f.locator('#cad-quick-form');form.locator('[name=title]:not([type=hidden])').fill(title);form.locator('[name=title]:not([type=hidden])').press('Enter');saved(f);expect(f.locator('#cad-quick-form')).to_have_count(0)
+ inline=f.locator('[data-cad-inline-title]')
+ if inline.count() and inline.is_visible():
+  inline.fill(title);inline.press('Enter')
+ else:
+  form=f.locator('#cad-quick-form');form.locator('[name=title]:not([type=hidden])').fill(title);form.locator('[name=title]:not([type=hidden])').press('Enter')
+ saved(f);expect(f.locator('#cad-quick-form')).to_have_count(0);expect(f.locator('[data-cad-inline-title]')).to_have_count(0)
 def stage(f,title):f.get_by_role('button',name='Adicionar etapa',exact=True).click();quick(f,title)
 def card_id(page,title):return frame(page).evaluate('(title)=>Object.values(S.c).flat().find(note=>note.t===title)?.i',title)
 def add(f,kind,title):
@@ -50,11 +55,11 @@ try:
   for kind in ['customer-action','channel','emotion','thought','activity','touchpoint','artifact','decision','system','resource','metric','persona','need','pain','opportunity','text']:expect(f.locator(f'[data-act="cad-add"][data-kind="{kind}"]')).to_have_count(1)
   check('Palette exposes the experience and operational service components')
   drag_palette(f,'activity','fl',0);expect(f.locator('.cad-node.is-draft')).to_have_count(1);expect(f.locator('#cad-component-form')).to_have_count(0)
-  check('Palette drop produces a provisional card and a small editor without the inspector',frame(page).evaluate('()=>Object.values(S.c).flat().length===0') and len(f.locator('#cad-quick-form input:not([type=hidden])').all())==1)
+  check('Palette drop writes inline on a provisional card without the inspector',frame(page).evaluate('()=>Object.values(S.c).flat().length===0') and f.locator('[data-cad-inline-title]').count()==1)
   quick(f,'Confirmar atendimento');activity=card_id(page,'Confirmar atendimento');check('Name and Enter create exactly one canonical card',bool(activity) and len(graph(page)['entities']['frontstage'])==1)
   check('Palette dragging does not select unrelated text',frame(page).evaluate("()=>getSelection().toString()===''"))
   before=graph(page);drag_palette(f,'activity','ev',0);expect(f.locator('#cad-quick-form')).to_have_count(0);check('Incompatible lane does not silently create a different placement',graph(page)==before)
-  drag_palette(f,'artifact','ev',0);f.locator('#cad-quick-form [name=title]').fill('Rascunho cancelado');f.locator('#cad-quick-form [name=title]').press('Escape');expect(f.locator('.cad-node.is-draft')).to_have_count(0);check('Escape cancels creation without an orphan record',not graph(page)['entities'].get('evidence'))
+  drag_palette(f,'artifact','ev',0);f.locator('[data-cad-inline-title]').fill('Rascunho cancelado');f.locator('[data-cad-inline-title]').press('Escape');expect(f.locator('.cad-node.is-draft')).to_have_count(0);check('Escape cancels creation without an orphan record',not graph(page)['entities'].get('evidence'))
   drag_palette(f,'artifact','ev',1);quick(f,'Mensagem de confirmação');artifact=card_id(page,'Mensagem de confirmação')
   f.locator('[data-act="cad-stage-after"][data-si="0"]').click();quick(f,'Preparar');g=graph(page);jid=next(iter(g['journeys']));check('Adjacent plus inserts a stage between existing stages', [g['stages'][sid]['title'] for sid in g['journeys'][jid]['stageIds']]==['Agendar','Preparar','Atender'])
   check('Stage insertion preserves the previous card placement',frame(page).evaluate('(id)=>S.c["ev|2"].some(note=>note.i===id)',artifact))
