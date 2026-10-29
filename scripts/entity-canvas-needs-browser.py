@@ -60,7 +60,7 @@ try:
   check('Primary value persisted',detail.get_by_role('textbox',name='Contexto',exact=True).input_value()=='No checkout pelo telefone celular.')
   check('Custom field persisted',canvas.get_by_role('textbox',name='Texto',exact=True).input_value()=='Campo extra com informação persistida.')
   check('Tag persisted after reopening',detail.locator('.bo-entity-tag').filter(has_text='Checkout').count()==1)
-  canvas.get_by_role('button',name='Alternativa atual',exact=True).click()
+  canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Alternativa atual').click()
   check('Previously hidden data recovered',canvas.get_by_role('textbox',name='Alternativa atual',exact=True).input_value()=='Consultar tabela externa.')
   detail.get_by_role('button',name='Excluir',exact=True).first.click()
   dialog=page.get_by_role('alertdialog',name='Excluir necessidade')
