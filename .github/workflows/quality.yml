@@ -110,6 +110,8 @@ jobs:
       # Check startup/product navigation early to fail fast on stale legacy routes.
       - run: npm run entry:browser
       - run: npm run product:browser
+      - name: Whiteboard vazio, criação direta e reabertura
+        run: python3 scripts/whiteboard-empty-focus-browser.py
       - run: npm run maps:browser
       - name: Verificar Jornada, modelos e Whiteboard no Chromium
         run: python3 scripts/h1710-journey-template-whiteboard-browser.py
@@ -145,6 +147,7 @@ jobs:
             artifacts/blueprint-methodology
             artifacts/entry-journey
             artifacts/journey-template-whiteboard
+            artifacts/whiteboard-empty-focus
             artifacts/product-experience
             artifacts/map-actions
             artifacts/blueprint-reference-exact
