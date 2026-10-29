@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { EntityCanvas } from '../components/entity-editor/EntityCanvas';
 import { EntityEditorHeader, EntityTags } from '../components/entity-editor/EntityEditor';
 import { parseCustomBlocks, type CustomEntityBlock, type EntityCanvasBlock, type EditorFieldKind } from '../components/entity-editor/types';
-import { ArrowLeft, Check, Filter, HeartCrack, MoreVertical, Plus, Search, Table2, Trash2, X } from '../design-system/icons';
+import { Check, Filter, HeartCrack, MoreVertical, Plus, Search, Table2, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
@@ -171,7 +171,7 @@ export function PainsView({ studio }: { studio: StudioController }) {
   useEffect(()=>()=>flushRef.current(),[]);
   useEffect(()=>{
     if(!selectedId||!draft?.title.trim()||!dirty)return;
-    const timer=window.setTimeout(()=>persistPain(selectedId,draft,owner,tags,connectedIds),750);
+    const timer=window.setTimeout(()=>persistPain(selectedId,draft,owner,tags,connectedIds,customBlocks),750);
     return ()=>window.clearTimeout(timer);
   },[selectedId,draft,owner,tagsText,connectedIds,customBlocks,dirty]);
   const removePain = (id: string) => {
