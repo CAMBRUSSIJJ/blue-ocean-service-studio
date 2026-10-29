@@ -19,6 +19,7 @@ const tests=[
  ['Problemas não redirecionam para Hipóteses',!problems.includes('requestHypothesisCreation')&&!problems.includes("detail: 'hypotheses'")],
  ['Intento de criação externo respeita aba Problemas',problems.includes("sessionStorage.getItem('bo-workspace-create-page') !== 'problems'")],
  ['Rascunho não vira validado automaticamente ao editar',service.includes("existing.status === 'draft' ? 'draft'")],
+ ['Validação direta exige evidências e confirmação explícita',problems.includes('validateDraftProblem')&&problems.includes('qualityChecks.filter(item => item.id !== \'validated\')')&&problems.includes('window.confirm(')],
  ['API canônica cria Problemas sem redirecionar',canonical.includes("if (kind === 'problem')")&&canonical.includes("status: 'draft'")&&!canonical.includes("kind === 'problem' ? 'problemHypothesis'")],
 ];
 for(const [name,pass] of tests)console.log((pass?'OK   ':'FAIL ')+name);
