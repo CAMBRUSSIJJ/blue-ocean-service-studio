@@ -1,5 +1,6 @@
 import type { GraphEntity, ServiceGraph } from '../domain/model';
 import { createDiscoveryEntity } from './discovery-workspace.ts';
+import { makeId } from '../domain/graph-operations';
 
 export type ContextKind = 'persona' | 'need' | 'job' | 'pain' | 'problemHypothesis' | 'problem' | 'evidence';
 
@@ -18,7 +19,7 @@ export const CONTEXT_KIND_DEFINITIONS: ContextKindDefinition[] = [
   { kind: 'job', label: 'Jobs', singular: 'Job', eyebrow: 'PROGRESSO', question: 'Que progresso essa pessoa tenta fazer?', createLabel: 'Novo Job' },
   { kind: 'pain', label: 'Dores', singular: 'Dor', eyebrow: 'FRICÇÕES', question: 'Onde a experiência quebra hoje?', createLabel: 'Nova dor' },
   { kind: 'problemHypothesis', label: 'Hipóteses', singular: 'Hipótese', eyebrow: 'HIPÓTESES', question: 'O que ainda precisa ser provado?', createLabel: 'Nova hipótese' },
-  { kind: 'problem', label: 'Problemas', singular: 'Problema', eyebrow: 'VALIDADOS', question: 'Quais problemas já têm sustentação?', createLabel: 'Nova hipótese de problema' },
+  { kind: 'problem', label: 'Problemas', singular: 'Problema', eyebrow: 'PROBLEMAS', question: 'Que problemas precisam ser investigados ou já foram validados?', createLabel: 'Novo problema' },
   { kind: 'evidence', label: 'Evidências', singular: 'Evidência', eyebrow: 'EVIDÊNCIAS', question: 'O que sustenta ou contradiz nossas decisões?', createLabel: 'Nova evidência' },
 ];
 
@@ -83,13 +84,25 @@ export function contextEntityUsage(graph: ServiceGraph, kind: ContextKind, id: s
 }
 
 export function createContextEntity(graph: ServiceGraph, kind: ContextKind, title: string, description = ''): ServiceGraph {
-  // Problemas validados são sempre promovidos a partir de uma hipótese; criar em "Problemas" inicia uma hipótese.
-  const targetKind = kind === 'problem' ? 'problemHypothesis' : kind;
   const next = clone(graph);
-  const entity = createDiscoveryEntity({ graph: next, kind: targetKind, title, description });
   next.entities ||= {};
-  next.entities[targetKind] ||= {};
-  next.entities[targetKind][entity.id] = entity;
+  if (kind === 'problem') {
+    // A problem can be recorded directly, but never falsely marked as validated.
+    const timestamp = nowIso();
+    const id = makeId('problem');
+    next.entities.problem ||= {};
+    next.entities.problem[id] = {
+      id, type: 'problem', serviceId: next.service.id,
+      title: title.trim(), description: description.trim(),
+      status: 'draft', severity: 'medium', priority: 'medium',
+      relatedIds: [], createdAt: timestamp, updatedAt: timestamp,
+    };
+    next.service.updatedAt = timestamp;
+    return next;
+  }
+  const entity = createDiscoveryEntity({ graph: next, kind, title, description });
+  next.entities[kind] ||= {};
+  next.entities[kind][entity.id] = entity;
   next.service.updatedAt = String(entity.updatedAt ?? nowIso());
   return next;
 }
