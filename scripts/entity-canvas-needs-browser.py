@@ -48,7 +48,7 @@ try:
   canvas.get_by_role('textbox',name='Texto',exact=True).fill('Campo extra com informação persistida.')
   canvas.get_by_role('button',name='Alternativa atual',exact=True).click()
   canvas.get_by_role('textbox',name='Alternativa atual',exact=True).fill('Consultar tabela externa.')
-  card=canvas.locator('.bo-pain-canvas-card').filter(has=canvas.get_by_role('textbox',name='Alternativa atual',exact=True))
+  card=canvas.locator('.bo-pain-canvas-card').filter(has=page.get_by_role('textbox',name='Alternativa atual',exact=True))
   card.get_by_role('button',name='Opções de Alternativa atual').click()
   card.get_by_role('button',name='Ocultar bloco (preserva conteúdo)').click()
   check('Hidden block indicates preserved text','Conteúdo preservado' in canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Alternativa atual').inner_text())
