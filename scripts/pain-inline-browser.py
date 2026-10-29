@@ -39,6 +39,7 @@ try:
         lib.get_by_role('button', name='Criar Dor').click()
         form = page.locator('.bo-h71-create-modal')
         form.locator('input').first.fill('O cliente abandona o carrinho no pagamento')
+        form.locator('textarea').first.fill('Abandono de compras durante a escolha do frete')
         form.get_by_role('button', name='Criar e abrir').click()
         detail = page.locator('[data-pains-h74="detail"]')
         expect(detail).to_be_visible()
