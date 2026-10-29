@@ -33,13 +33,14 @@ export function EntityInlineCanvas({entityId,kind,blocks,criteria,relations,onTo
   const [expanded,setExpanded] = useState<string[]>([]);
   const [dragging,setDragging] = useState<string|null>(null);
   const [menu,setMenu] = useState<string|null>(null);
+  const [tall,setTall] = useState<string[]>([]);
   const [connect,setConnect] = useState<string|null>(null);
   const [search,setSearch] = useState('');
   const [showAll,setShowAll] = useState(false);
   useEffect(()=>{
     try { const saved=JSON.parse(localStorage.getItem(storageKey)||'[]');setOrder(Array.isArray(saved)?saved.filter((x):x is string=>typeof x==='string'):[]); }
     catch {setOrder([]);}
-    setExpanded([]);setMenu(null);setConnect(null);setSearch('');setShowAll(false);
+    setExpanded([]);setTall([]);setMenu(null);setConnect(null);setSearch('');setShowAll(false);
   },[storageKey]);
   const ordered=useMemo(()=>[...blocks].sort((a,b)=>{
     const ia=order.indexOf(a.id),ib=order.indexOf(b.id);
@@ -81,7 +82,7 @@ export function EntityInlineCanvas({entityId,kind,blocks,criteria,relations,onTo
   return <div className="bo-inline-canvas" data-inline-entity={kind}>
     <main className="bo-inline-main">
       <div className="bo-inline-cards">
-        {visible.map(block=><section key={block.id} className={`bo-inline-card ${block.wide?'is-wide':''}`}
+        {visible.map(block=><section key={block.id} className={`bo-inline-card ${block.wide?'is-wide':''} ${tall.includes(block.id)?'is-tall':''}`}
           onDragOver={event=>event.preventDefault()} onDrop={event=>drop(event,block.id)}>
           <header><strong>{block.label}</strong><div className="bo-inline-controls">
             <button type="button" draggable aria-label={`Arrastar ${block.label}`} title="Arrastar bloco" onDragStart={event=>{event.dataTransfer.effectAllowed='move';setDragging(block.id);}} onDragEnd={()=>setDragging(null)}><GripVertical size={14}/></button>
@@ -90,6 +91,7 @@ export function EntityInlineCanvas({entityId,kind,blocks,criteria,relations,onTo
           {menu===block.id&&<div className="bo-inline-menu">
             <button type="button" onClick={()=>move(block.id,-1)}>Mover para antes</button>
             <button type="button" onClick={()=>move(block.id,1)}>Mover para depois</button>
+            <button type="button" onClick={()=>{setTall(ids=>ids.includes(block.id)?ids.filter(x=>x!==block.id):[...ids,block.id]);setMenu(null)}}>{tall.includes(block.id)?'Reduzir altura':'Ampliar altura'}</button>
             {!block.essential&&<button type="button" onClick={()=>removeBlock(block)}>Remover bloco</button>}
           </div>}
           <textarea id={`bo-inline-${kind}-${entityId}-${block.id}`} aria-label={block.label} rows={4} value={block.value} onChange={event=>block.onChange(event.target.value)} placeholder={block.placeholder}/>
