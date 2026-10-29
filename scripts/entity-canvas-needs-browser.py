@@ -52,7 +52,7 @@ try:
   card.get_by_role('button',name='Opções de Alternativa atual').click()
   card.get_by_role('button',name='Ocultar bloco (preserva conteúdo)').click()
   check('Hidden block indicates preserved text','Conteúdo preservado' in canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Alternativa atual').inner_text())
-  detail.screenshot(path=str(OUT/'needs-canvas.png'),full_page=True)
+  page.screenshot(path=str(OUT/'needs-canvas.png'),full_page=True)
   detail.locator('.bo-pain-back').click()
   expect(library).to_be_visible()
   library.locator('.bo-h72-need-name').first.click()
