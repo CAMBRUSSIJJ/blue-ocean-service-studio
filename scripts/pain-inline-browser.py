@@ -36,7 +36,7 @@ try:
         page.locator('button[aria-label="Dores"]').first.click()
         lib = page.locator('[data-pains-h74="library"]')
         expect(lib).to_be_visible()
-        lib.get_by_role('button', name='Criar Dor').click()
+        lib.get_by_role('button', name='Criar Dor').first.click()
         form = page.locator('.bo-h71-create-modal')
         form.locator('input').first.fill('O cliente abandona o carrinho no pagamento')
         form.locator('textarea').first.fill('Abandono de compras durante a escolha do frete')
