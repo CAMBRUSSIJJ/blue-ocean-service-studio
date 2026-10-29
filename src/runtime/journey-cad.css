@@ -36,6 +36,13 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 #cad-svg .cad-edge{cursor:pointer}#cad-svg .cad-edge-label{font-size:11px;paint-order:stroke;stroke:#fbfcff;stroke-width:5px;stroke-linejoin:round}
 #cad-svg .cad-stage-insert{cursor:pointer;opacity:.45}#cad-svg .cad-stage-insert:hover,#cad-svg .cad-stage-insert:focus{opacity:1}#cad-svg .cad-stage-insert circle{fill:#fff;stroke:#91afd6;stroke-width:1}#cad-svg .cad-stage-insert path{stroke:#426eaa;stroke-width:1.6}
 #cad-svg .cad-cell-add{cursor:pointer;opacity:.5}#cad-svg .cad-cell-add:hover,#cad-svg .cad-cell-add:focus{opacity:1}#cad-svg .cad-cell-add rect{fill:#fff;stroke:#b8cde8;stroke-dasharray:3 3}#cad-svg .cad-cell-add text{fill:#44678f;font-size:12px}
+/* Populated cells keep one low-noise, keyboard-accessible insertion slot below their notes. */
+#cad-svg .cad-cell-add.is-occupied{opacity:.38;transition:opacity .15s}
+#cad-svg .cad-cell-add.is-occupied rect{fill:#f8fbff;stroke:#c6d9ed;stroke-dasharray:none}
+#cad-svg .cad-cell-add.is-occupied:hover,#cad-svg .cad-cell-add.is-occupied:focus-visible{opacity:1}
+#cad-svg .cad-cell-add.is-occupied:hover rect,#cad-svg .cad-cell-add.is-occupied:focus-visible rect{fill:#e8f2ff;stroke:#5a95d8}
+@media(prefers-reduced-motion:reduce){#cad-svg .cad-cell-add.is-occupied{transition:none}}
+
 #cad-svg .cad-port,#cad-svg .cad-node-menu{cursor:pointer;opacity:0}#cad-svg .cad-node-wrap:hover .cad-port,#cad-svg .is-selected .cad-port,#cad-svg .cad-port:focus,#cad-svg .cad-node-wrap:hover .cad-node-menu,#cad-svg .is-selected .cad-node-menu,#cad-svg .cad-node-menu:focus{opacity:1}
 #cad-svg .cad-port circle{fill:#fff;stroke:#2563eb;stroke-width:2}#cad-svg .cad-port path{stroke:#2563eb;stroke-width:1.6}#cad-svg .cad-node-menu rect{fill:#f4f8ff;stroke:#dae5f3}#cad-svg .cad-node-menu text{fill:#365c8b;font-size:21px}
 #cad-svg .is-connect-target .cad-node-bg{stroke:#0f766e;stroke-width:2}#cad-svg .cad-connect-preview{stroke:#2563eb;stroke-width:2;stroke-dasharray:6 4;fill:none;pointer-events:none}
