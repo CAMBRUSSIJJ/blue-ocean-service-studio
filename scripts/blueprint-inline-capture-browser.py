@@ -64,6 +64,7 @@ try:
   form.get_by_role('button',name='Salvar componente',exact=True).click()
   status(f)
   check('Detailed card no longer has only-title marker',f.locator('.cad-depth-indicator').count()==0)
+  frame.evaluate("()=>{cadReveal('im');rerender()}")
   f.locator('[data-act="cad-cell-add"][data-row="im"][data-si="0"]').click()
   inline=f.locator('[data-cad-inline-title]');expect(inline).to_be_visible()
   inline.fill('Fi')
