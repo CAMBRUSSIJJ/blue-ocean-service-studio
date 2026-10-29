@@ -49,7 +49,7 @@ try:
   canvas.get_by_role('textbox',name='Texto',exact=True).fill('Dado JTBD adicional')
   canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Barreiras').click()
   canvas.get_by_role('textbox',name='Barreiras',exact=True).fill('Frete só aparece depois da compra')
-  card=canvas.locator('.bo-pain-canvas-card').filter(has=canvas.get_by_role('textbox',name='Barreiras',exact=True))
+  card=canvas.locator('.bo-pain-canvas-card').filter(has=page.get_by_role('textbox',name='Barreiras',exact=True))
   card.get_by_role('button',name='Opções de Barreiras').click()
   card.get_by_role('button',name='Ocultar bloco (preserva conteúdo)').click()
   check('Hidden Job field keeps data','Conteúdo preservado' in canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Barreiras').inner_text())
