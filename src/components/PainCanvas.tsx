@@ -39,7 +39,13 @@ export function PainCanvas({ entityId, blocks, checks, relations, onToggleRelati
  };
  const drop=(e:DragEvent<HTMLElement>,onto:string)=>{
   e.preventDefault();
-  if(!dragging||dragging===onto){setDragging(null);return;}
+  if (!dragging) {
+   const externalId=e.dataTransfer.getData('text/plain');
+   const relation=relations.find(r=>r.id===externalId);
+   if(relation&&!relation.linked)onToggleRelation(relation.id);
+   return;
+  }
+  if(dragging===onto){setDragging(null);return;}
   const ids=sorted.map(b=>b.id).filter(id=>id!==dragging);
   ids.splice(ids.indexOf(onto),0,dragging);changeOrder(ids);setDragging(null);
  };
