@@ -1,5 +1,6 @@
 // H7.40-H3 legacy CTA: Criar hipótese
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { EntityInlineCanvas, type EntityInlineBlock } from '../components/EntityInlineCanvas';
 import { AlertTriangle, ArrowLeft, Check, Filter, MoreVertical, Plus, Search, ShieldCheck, Table2, Trash2, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
@@ -55,6 +56,8 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
   const [tagsText, setTagsText] = useState('');
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [detailActionsOpen, setDetailActionsOpen] = useState(false);
+  const flushRef = useRef<() => void>(() => {});
   const [createOpen,setCreateOpen] = useState(false);
   const [createTitle,setCreateTitle] = useState('');
   const [createDescription,setCreateDescription] = useState('');
@@ -79,7 +82,7 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
     setOwner(String(selected.owner ?? ''));
     setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
     setConnectedIds(report.connections.map((item) => item.id));
-  }, [selectedId, selected?.updatedAt]);
+  }, [selectedId]);
 
 
   useEffect(() => {
@@ -134,24 +137,35 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
     setCreateOpen(false);setCreateTitle('');setCreateDescription('');setSelectedId(id);setDetailTab('overview');
     showToast('Problema criado como rascunho. Conecte evidências antes da validação.');
   };
-  const closeProblem = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
-  const saveProblem = () => {
-    if (!selectedId || !draft?.title.trim()) return;
-    const tags = tagsText.split(',').map((item) => item.trim()).filter(Boolean);
-    setGraph((current) => patchProblemMeta(updateProblemProfile({ graph: current, problemId: selectedId, draft, connectedIds }), selectedId, owner, tags), 'Problemas 2.0: salvar');
-    showToast('Problema salvo.');
+  const tags = tagsText.split(',').map(item => item.trim()).filter(Boolean);
+  const persisted = selected ? problemProfileFromEntity(selected) : null;
+  const savedTags = Array.isArray(selected?.tags) ? selected.tags.map(String) : [];
+  const sameIds = (a:string[],b:string[])=>[...a].sort().join('|')===[...b].sort().join('|');
+  const dirty = Boolean(draft && persisted && (
+    (Object.keys(draft) as Array<keyof ProblemProfileDraft>).some(key=>draft[key].trim()!==persisted[key].trim())
+    || owner.trim()!==String(selected?.owner??'').trim()
+    || tags.join('|')!==savedTags.join('|')
+    || !sameIds(connectedIds,report?.connections.map(item=>item.id)??[])
+  ));
+  const persistProblem=(id:string,value:ProblemProfileDraft,newOwner:string,newTags:string[],links:string[])=>{
+    if(!value.title.trim())return;
+    setGraph(current=>patchProblemMeta(updateProblemProfile({
+      graph:current,problemId:id,draft:value,connectedIds:links,
+    }),id,newOwner,newTags),'Problemas: autosave');
   };
-  const discardProblem = () => {
-    if (!selected || !report) return;
-    setDraft(problemProfileFromEntity(selected));
-    setOwner(String(selected.owner ?? ''));
-    setTagsText(Array.isArray(selected.tags) ? selected.tags.map(String).join(', ') : '');
-    setConnectedIds(report.connections.map((item) => item.id));
-    showToast('Alterações descartadas.');
+  flushRef.current=()=>{
+    if(selectedId&&draft?.title.trim()&&dirty)persistProblem(selectedId,draft,owner,tags,connectedIds);
   };
+  useEffect(()=>()=>flushRef.current(),[]);
+  useEffect(()=>{
+    if(!selectedId||!draft?.title.trim()||!dirty)return;
+    const timer=window.setTimeout(()=>persistProblem(selectedId,draft,owner,tags,connectedIds),800);
+    return()=>window.clearTimeout(timer);
+  },[selectedId,draft,owner,tagsText,connectedIds,dirty]);
+  const closeProblem=(commit=true)=>{if(commit)flushRef.current();setSelectedId(null);setDraft(null);setDetailTab('overview');setDetailActionsOpen(false);};
   const removeProblem = (id: string) => {
     setGraph((current) => removeContextEntity(current, 'problem', id), 'Problemas 2.0: remover');
-    if (selectedId === id) closeProblem();
+    if (selectedId === id) closeProblem(false);
     setDeleteId(null); setMenuId(null);
     showToast('Problema removido e relações desvinculadas.');
   };
@@ -183,20 +197,81 @@ export function ProblemsView({ studio }: { studio: StudioController }) {
 
   if (selected && draft && report) {
     const preview = previewReport ?? report;
-    const contexts = relationOptions.filter((item) => item.kind !== 'evidence' && item.kind !== 'problemHypothesis');
-    const evidences = relationOptions.filter((item) => item.kind === 'evidence');
-    return <section className="bo-h76-problems" data-problems-h76="detail">
-      <div className="bo-h71-detail-head"><button type="button" className="bo-h71-back" onClick={closeProblem}><ArrowLeft size={16}/> Problemas</button><div className="bo-h71-detail-title"><span className="bo-h76-problem-icon"><ShieldCheck size={17}/></span><div><small>{String(selected.status)==='draft'?'PROBLEMA EM INVESTIGAÇÃO':'PROBLEMA VALIDADO'}</small><h1>{draft.title || 'Sem título'}</h1><p>Estruture causa, impacto e rastreabilidade sem perder a origem da validação.</p></div></div><div className="bo-h76-score"><small>QUALIDADE</small><strong>{preview?.qualityScore ?? 0}%</strong><span>{preview?.readyForDefinition ? 'Pronto para Definição' : 'Base incompleta'}</span></div></div>
-      <nav className="bo-h71-detail-tabs">{([['overview','Visão geral'],['context','Contexto'],['evidence','Evidências'],['definition','Definição'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}</button>)}</nav>
-      <div className="bo-h71-detail-body">
-        {detailTab === 'overview' && <div className="bo-h76-overview-grid"><section className="bo-h71-editor-card"><header><div><small>ESTRUTURA DO PROBLEMA</small><h2>O que foi validado?</h2></div><span className="bo-h76-validated-pill">{String(selected.status)==='draft'?'Rascunho':<><Check size={12}/> Validado</>}</span></header><div className="bo-h71-fields"><label className="full"><span>Problema</span><input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })}/></label><label className="full"><span>Descrição</span><textarea rows={3} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Descreva o problema sem antecipar a solução."/></label><label><span>Causa raiz</span><textarea rows={3} value={draft.rootCause} onChange={(event) => setDraft({ ...draft, rootCause: event.target.value })} placeholder="O que está causando este problema?"/></label><label><span>Impacto</span><textarea rows={3} value={draft.impact} onChange={(event) => setDraft({ ...draft, impact: event.target.value })} placeholder="Qual é a consequência para cliente ou operação?"/></label><label><span>População afetada</span><textarea rows={2} value={draft.affectedPopulation} onChange={(event) => setDraft({ ...draft, affectedPopulation: event.target.value })} placeholder="Quem é afetado e em qual contexto?"/></label><label><span>Sinal observável</span><textarea rows={2} value={draft.observableSignal} onChange={(event) => setDraft({ ...draft, observableSignal: event.target.value })} placeholder="Como percebemos que o problema está acontecendo?"/></label><label><span>Severidade</span><select value={draft.severity} onChange={(event) => setDraft({ ...draft, severity: event.target.value as ProblemSeverity })}>{Object.entries(severityLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label><span>Prioridade</span><select value={draft.priority} onChange={(event) => setDraft({ ...draft, priority: event.target.value as ProblemPriority })}>{Object.entries(priorityLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label><span>Responsável</span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Você"/></label><label><span>Tags</span><input value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="ex.: retenção, onboarding"/></label></div></section><aside className="bo-h76-side"><section><small>ORIGEM DA VALIDAÇÃO</small>{preview?.sourceHypothesis ? <><strong>{contextEntityTitle(preview.sourceHypothesis)}</strong><p>{String(preview.sourceHypothesis.description ?? 'Hipótese que originou este problema.')}</p><span>Hipótese → Problema validado</span></> : <><strong>Origem não registrada</strong><p>Este problema foi criado diretamente ou importado. Registre e conecte evidências para manter sua rastreabilidade.</p></>}</section><section><small>CRITÉRIOS</small>{preview?.qualityChecks.map((item) => <div key={item.id} className={item.complete ? 'is-complete' : ''}><b>{item.complete ? <Check size={12}/> : '·'}</b><span>{item.label}</span></div>)}</section></aside></div>}
+    const contexts = relationOptions.filter(item=>item.kind!=='evidence'&&item.kind!=='problemHypothesis');
+    const evidences = relationOptions.filter(item=>item.kind==='evidence');
+    const isDraft=String(selected.status)==='draft';
+    const needsGuidance = draft.title.trim().length < 24 || !draft.description.trim();
+    const blocks:EntityInlineBlock[]=[
+      {id:'description',label:'Descrição (o que está acontecendo?)',value:draft.description,essential:true,wide:true,placeholder:'Descreva o problema observado sem antecipar a solução.',onChange:value=>setDraft(current=>current?{...current,description:value}:current)},
+      {id:'rootCause',label:'Causa raiz',value:draft.rootCause,essential:true,placeholder:'Quais fatores parecem provocar esse problema? Registre o que ainda precisa ser comprovado.',onChange:value=>setDraft(current=>current?{...current,rootCause:value}:current)},
+      {id:'impact',label:'Impacto',value:draft.impact,essential:true,placeholder:'Quais consequências para a pessoa, o serviço ou a operação?',onChange:value=>setDraft(current=>current?{...current,impact:value}:current)},
+      {id:'affectedPopulation',label:'População afetada',value:draft.affectedPopulation,placeholder:'Quem é afetado e em quais situações?',onChange:value=>setDraft(current=>current?{...current,affectedPopulation:value}:current)},
+      {id:'observableSignal',label:'Sinal observável',value:draft.observableSignal,placeholder:'Qual indicador ou comportamento comprova a ocorrência?',onChange:value=>setDraft(current=>current?{...current,observableSignal:value}:current)},
+    ];
+    const lineage=relationOptions.filter(item=>item.kind==='problemHypothesis');
+    const quality=preview.qualityChecks.map(check=>({
+      ...check,
+      relationKinds:check.id==='evidence'?['evidence']:check.id==='context'?['persona','need','job','pain']:undefined,
+      fieldId:check.id==='population'?'affectedPopulation':check.id==='signal'?'observableSignal':check.id==='cause'?'rootCause':check.id==='impact'?'impact':check.id==='statement'?'description':undefined,
+    }));
+    return <section className="bo-h76-problems bo-entity-inline-detail bo-problem-inline" data-problems-h76="detail">
+      <header className="bo-hyp-inline-header">
+        <div className="bo-hyp-inline-top">
+          <button type="button" className="bo-hyp-inline-back" onClick={()=>closeProblem()}><ArrowLeft size={15}/> Problemas</button>
+          <div className="bo-hyp-inline-top-actions">
+            <span className="bo-hyp-inline-save" role="status" aria-live="polite">{!draft.title.trim()?'Preencha o enunciado':dirty?'Salvando…':studio.saveStatus==='error'?'Erro ao salvar':<><Check size={13}/> Salvo</>}</span>
+            <span className="bo-hyp-inline-ready">Qualidade: <b>{preview.qualityScore}%</b></span>
+            <div className="bo-problem-detail-actions">
+              <button type="button" className="bo-problem-menu-trigger" aria-label="Mais ações do problema" aria-expanded={detailActionsOpen} onClick={()=>setDetailActionsOpen(value=>!value)}><MoreVertical size={16}/></button>
+              {detailActionsOpen&&<div className="bo-problem-actions-popover">
+                <button type="button" onClick={()=>{setDetailActionsOpen(false);closeProblem()}}>Voltar à lista</button>
+                <button type="button" className="danger" onClick={()=>{setDetailActionsOpen(false);setDeleteId(selected.id)}}><Trash2 size={14}/> Excluir problema</button>
+              </div>}
+            </div>
+          </div>
+        </div>
+        <div className="bo-hyp-inline-statement"><span className="bo-hyp-inline-icon bo-problem-statement-icon"><ShieldCheck size={18}/></span>
+          <div className="bo-problem-statement-field">
+            <small>{isDraft?'PROBLEMA EM INVESTIGAÇÃO':'PROBLEMA VALIDADO'}</small>
+            <textarea rows={1} aria-label="Enunciado do problema" value={draft.title} onChange={event=>setDraft(current=>current?{...current,title:event.target.value}:current)} placeholder="O que está falhando, para quem e em qual situação?"/>
+          </div>
+        </div>
+        {needsGuidance&&<p className="bo-hyp-inline-guidance"><AlertTriangle size={15}/> Este enunciado parece superficial. Descreva o que está acontecendo, quem é afetado e onde a falha ocorre, sem presumir a causa.</p>}
+        <div className="bo-hyp-inline-properties">
+          <label>Severidade: <select value={draft.severity} onChange={event=>setDraft(current=>current?{...current,severity:event.target.value as ProblemSeverity}:current)}>{Object.entries(severityLabel).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+          <label>Prioridade: <select value={draft.priority} onChange={event=>setDraft(current=>current?{...current,priority:event.target.value as ProblemPriority}:current)}>{Object.entries(priorityLabel).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label>
+          <label>Responsável: <input value={owner} onChange={event=>setOwner(event.target.value)} placeholder="Atribuir responsável"/></label>
+          <label>Tags: <input value={tagsText} onChange={event=>setTagsText(event.target.value)} placeholder="+ Adicionar tags"/></label>
+        </div>
+      </header>
+      <nav className="bo-h71-detail-tabs bo-hyp-inline-tabs" aria-label="Detalhes do problema">
+        {([['overview','Visão geral'],['context','Contexto'],['evidence','Evidências'],['definition','Validação'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label])=><button type="button" key={id} className={detailTab===id?'is-active':''} onClick={()=>setDetailTab(id)}>{label}{id==='evidence'&&<b>{evidences.filter(item=>connectedIds.includes(item.id)).length}</b>}{id==='context'&&<b>{contexts.filter(item=>connectedIds.includes(item.id)).length}</b>}</button>)}
+      </nav>
+      {detailTab==='overview' ? <EntityInlineCanvas entityId={selected.id} kind="problem"
+        blocks={blocks} criteria={quality} criterionTitle="Critérios de qualidade"
+        primaryCriterionIds={['validated','statement','cause','impact','population','signal','context','evidence']}
+        quickKinds={['pain','evidence','problemHypothesis']}
+        relations={relationOptions.map(item=>({id:item.id,kind:item.kind,title:item.title,linked:connectedIds.includes(item.id)}))}
+        onToggleRelation={toggleRelation} onViewValidation={()=>setDetailTab('definition')}
+        sidebarTop={<section className="bo-problem-origin">
+          <header><strong>Origem e rastreabilidade</strong></header>
+          {preview.sourceHypothesis ? <><strong>{contextEntityTitle(preview.sourceHypothesis)}</strong><p>Hipótese de origem vinculada à validação.</p></>
+            : <><strong>Criado diretamente</strong><p>Relacione hipóteses, dores e evidências sem marcar o problema como validado.</p></>}
+          {!preview.sourceHypothesis&&lineage.length>0&&<div className="bo-problem-origin-links"><span>Hipóteses relacionadas:</span>
+            {lineage.slice(0,4).map(item=><button type="button" key={item.id} aria-pressed={connectedIds.includes(item.id)} onClick={()=>toggleRelation(item.id)}>
+              {connectedIds.includes(item.id)?<Check size={12}/>:<Plus size={12}/>} {item.title}
+            </button>)}
+          </div>}
+          {!preview.sourceHypothesis&&lineage.length===0&&<p>Não há hipóteses cadastradas para relacionar.</p>}
+        </section>}
+      /> : <div className="bo-h71-detail-body bo-hyp-inline-secondary">
         {detailTab === 'context' && <div><div className="bo-h71-section-intro"><div><small>SERVICE GRAPH</small><h2>Onde este problema acontece?</h2><p>Conecte Personas, Necessidades, Jobs e Dores que delimitam o problema validado.</p></div><strong>{contexts.filter((item) => connectedIds.includes(item.id)).length} conexões</strong></div><div className="bo-h71-relation-grid">{(['persona','need','job','pain'] as ProblemRelationKind[]).map((kind) => { const options = contexts.filter((item) => item.kind === kind); return <section key={kind}><header><strong>{relationLabel[kind]}</strong><span>{options.filter((item) => connectedIds.includes(item.id)).length}/{options.length}</span></header>{options.length ? <div>{options.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <p>Nenhum item criado ainda.</p>}</section>; })}</div></div>}
         {detailTab === 'evidence' && <div><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que sustenta este Problema?</h2><p>Mantenha a base observável usada na validação e conecte novas evidências sem apagar o histórico.</p></div><strong>{evidences.filter((item) => connectedIds.includes(item.id)).length} conectada(s)</strong></div>{evidences.length ? <div className="bo-h71-evidence-list">{evidences.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma evidência criada</strong><p>Crie evidências na aba Evidências e depois conecte-as aqui.</p></div>}</div>}
         {detailTab === 'definition' && <div className="bo-h76-definition"><div className="bo-h71-section-intro"><div><small>PRONTO PARA DEFINIR</small><h2>Este problema já pode orientar o desenho do serviço?</h2><p>A definição deve começar quando causa, impacto, contexto e evidência estiverem suficientemente claros.</p></div><strong>{preview?.qualityScore ?? 0}%</strong></div>{String(selected.status)==='draft'&&<section className="bo-problem-draft-review"><strong>Problema em investigação</strong><p>Você pode estruturar o problema diretamente nesta aba. A validação só é liberada depois que todos os critérios metodológicos e as evidências estiverem completos.</p><button type="button" disabled={!preview?.qualityChecks.filter(item=>item.id!=='validated').every(item=>item.complete)} onClick={validateDraftProblem}><Check size={13}/> Validar problema com evidências</button></section>}<div className="bo-h76-quality-list">{preview?.qualityChecks.map((item) => <article key={item.id} className={item.complete ? 'is-complete' : ''}><b>{item.complete ? <Check size={14}/> : <AlertTriangle size={14}/>}</b><div><strong>{item.label}</strong><p>{item.detail}</p></div></article>)}</div><div className={`bo-h76-definition-status ${preview?.readyForDefinition ? 'is-ready' : ''}`}><ShieldCheck size={20}/><div><strong>{preview?.readyForDefinition ? 'Pronto para Service Definition' : 'Ainda não está pronto para Service Definition'}</strong><p>{preview?.readyForDefinition ? 'O problema possui estrutura e rastreabilidade suficientes para orientar escopo, promessa e critérios de sucesso.' : 'Complete os critérios pendentes antes de usar este problema como âncora da definição.'}</p></div></div></div>}
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="validatedProblem" id={selected.id} title="Uso e relações" />}
-      </div>
-      <footer className="bo-h71-detail-actions"><button type="button" className="danger" onClick={() => setDeleteId(selected.id)}><Trash2 size={14}/> Remover</button><span/><button type="button" onClick={discardProblem}>Descartar alterações</button><button type="button" className="primary" disabled={!draft.title.trim()} onClick={saveProblem}>Salvar Problema</button></footer>
-      {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER PROBLEMA</small><h2>Remover “{contextEntityTitle(graph.entities?.problem?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>O Problema validado será removido e a hipótese de origem voltará a ficar sem problema associado.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeProblem(deleteId)}>Remover Problema</button></footer></div></div>}
+      </div>}
+      {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm" role="alertdialog" aria-modal="true" aria-label="Excluir problema"><header><div><small>REMOVER PROBLEMA</small><h2>Remover “{contextEntityTitle(graph.entities?.problem?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>Este problema e suas conexões serão removidos. Hipóteses e evidências relacionadas serão preservadas.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeProblem(deleteId)}>Remover Problema</button></footer></div></div>}
+    </section>;
     </section>;
   }
 
