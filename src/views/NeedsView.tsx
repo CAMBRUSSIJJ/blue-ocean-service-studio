@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { EntityEditor, type EntityEditorBlock } from '../components/EntityEditor';
-import { ArrowLeft, Check, Filter, MoreVertical, Plus, Search, Table2, Target, Trash2, X } from '../design-system/icons';
+import { Check, Filter, MoreVertical, Plus, Search, Table2, Target, X } from '../design-system/icons';
 import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
@@ -20,7 +20,7 @@ type DetailTab = 'overview' | 'people' | 'relations' | 'evidence' | 'usage';
 type FilterMode = 'all' | 'unused' | 'evidence' | 'incomplete' | 'high';
 const relationLabel: Record<NeedRelationKind, string> = { persona: 'Personas', job: 'Jobs', pain: 'Dores', problemHypothesis: 'Hipóteses', problem: 'Problemas', evidence: 'Evidências' };
 const importanceLabel: Record<NeedImportance, string> = { low: 'Baixa', medium: 'Média', high: 'Alta', critical: 'Crítica' };
-const looksLikeSolution = (statement: string) => /\\b(app|aplicativo|sistema|software|plataforma|criar um|criar uma|desenvolver um|desenvolver uma|implementar um|implementar uma)\\b/i.test(statement);
+const looksLikeSolution = (statement: string) => /\b(app|aplicativo|sistema|software|plataforma|criar um|criar uma|desenvolver um|desenvolver uma|implementar um|implementar uma)\b/i.test(statement);
 const formatDate = (value: unknown) => { const date = new Date(String(value ?? '')); return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }); };
 
 function patchNeedMeta(graph: ServiceGraph, needId: string, owner: string, tags: string[]): ServiceGraph {
@@ -159,7 +159,7 @@ export function NeedsView({ studio }: { studio: StudioController }) {
     const saveStatus = !draft.title.trim() || isDirty ? 'pending' : studio.saveStatus;
     const warning = !draft.title.trim() ? 'Dê um enunciado a esta necessidade para salvar as alterações.'
       : looksLikeSolution(draft.title) ? 'Isso parece uma solução. Experimente descrever o problema ou o resultado esperado, sem definir como resolvê-lo.' : undefined;
-    return <>
+    return <div data-needs-h72="detail">
       <EntityEditor
         entityId={selected.id}
         kind="Necessidade"
@@ -192,7 +192,7 @@ export function NeedsView({ studio }: { studio: StudioController }) {
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="need" id={selected.id} title="Uso e relações" />}
       </EntityEditor>
       {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER NECESSIDADE</small><h2>Remover “{contextEntityTitle(graph.entities?.need?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações serão desvinculadas do Service Graph, mas Personas, Jobs, Dores, Problemas e Evidências serão preservados.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removeNeed(deleteId)}>Remover Necessidade</button></footer></div></div>}
-    </>;
+    </div>;
   }
 
   return <section className="bo-h72-needs" data-needs-h72="library"><div className="bo-h71-page-head"><div><span>Workspace /</span><h1>Necessidades</h1></div></div><div className="bo-h71-toolbar"><strong>{filtered.length} {filtered.length === 1 ? 'resultado' : 'resultados'}</strong><div><label className="bo-h71-search"><Search size={15}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar necessidades"/></label><button type="button" className={showFilters ? 'is-active' : ''} onClick={() => setShowFilters((value) => !value)} aria-label="Filtros"><Filter size={16}/></button><button type="button" className="is-active"><Table2 size={16}/><span>Tabela</span></button><button type="button" className="primary" onClick={() => setCreateOpen(true)}><Plus size={16}/> Criar necessidade</button></div></div>
