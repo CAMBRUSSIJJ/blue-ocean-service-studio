@@ -119,6 +119,8 @@ jobs:
       - run: npm run blueprint:connections:browser
       - run: npm run editor:browser
       - run: python3 scripts/personas-p2p3-browser.py
+      - name: Canvas universal de Dores — salvamento e campos personalizados
+        run: python3 scripts/entity-canvas-v2-browser.py
       - run: npm run journey:browser
       - run: npm run blueprint:methodology:browser
       - run: python3 scripts/blueprint-guided-reading-browser.py
@@ -141,6 +143,7 @@ jobs:
           retention-days: 14
           path: |
             artifacts/editor-ux
+            artifacts/entity-canvas-v2
             artifacts/journey-editor
             artifacts/blueprint-methodology
             artifacts/entry-journey
