@@ -61,7 +61,7 @@ try:
   check('Tags persisted',detail.locator('.bo-entity-tag').filter(has_text='Frete').count()==1)
   canvas.locator('.bo-pain-canvas-ghost').filter(has_text='Impacto se estiver errada').click()
   check('Hidden hypothesis content restored',canvas.get_by_role('textbox',name='Impacto se estiver errada',exact=True).input_value()=='Investimento em recurso irrelevante')
-  detail.get_by_role('button',name='Validação',exact=True).click()
+  detail.locator('.bo-pain-detail-tabs').get_by_role('button',name='Validação',exact=False).click()
   expect(detail.get_by_role('button',name='Validar como Problema')).to_be_disabled()
   check('Validation remains blocked without graph evidence',True)
   detail.get_by_role('button',name='Excluir',exact=True).first.click()
