@@ -65,7 +65,8 @@ export function legacyItemsForCanvas(graph: ServiceGraph, boardId: Id): LegacyCa
   const board = graph.views.whiteboards[boardId];
   if (!board) return [];
   return Object.values(board.items ?? {}).slice(0, 250).map(item => ({
-    id: item.id, text: item.kind === 'free' ? item.text : smartTitle(graph, item.objectKind, item.objectId),
+    id: item.kind === 'smart' ? `smart:${item.objectKind}:${item.objectId}` : item.id,
+    text: item.kind === 'free' ? item.text : smartTitle(graph, item.objectKind, item.objectId),
     x: Math.max(-100000, Math.min(100000, item.x)),
     y: Math.max(-100000, Math.min(100000, item.y)),
     width: Math.max(160, Math.min(1800, item.width)),
