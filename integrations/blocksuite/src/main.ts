@@ -92,7 +92,8 @@ async function main() {
     const y = Number.isFinite(item.y) ? Math.max(-100000, Math.min(100000, Number(item.y))) : 100 + Math.floor(placed / 4) * 220;
     const width = Number.isFinite(item.width) ? Math.max(160, Math.min(1800, Number(item.width))) : 280;
     const height = Number.isFinite(item.height) ? Math.max(100, Math.min(1200, Number(item.height))) : 160;
-    const noteId = doc.addBlock('affine:note', { xywh: JSON.stringify([x, y, width, height]) }, rootPage.id);
+    const xywh = `[${x},${y},${width},${height}]` as `[${number},${number},${number},${number}]`;
+    const noteId = doc.addBlock('affine:note', { xywh }, rootPage.id);
     doc.addBlock('affine:paragraph', { text: new Text(item.text.slice(0, 5000)) }, noteId);
     imported.set(item.id, true);
     placed += 1;
