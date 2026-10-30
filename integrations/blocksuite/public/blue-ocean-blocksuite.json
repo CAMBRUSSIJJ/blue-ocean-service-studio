@@ -1,0 +1,6 @@
+{
+  "integration": "blue-ocean-blocksuite",
+  "version": 1,
+  "storage": "indexeddb-local",
+  "remoteCollaboration": false
+}
