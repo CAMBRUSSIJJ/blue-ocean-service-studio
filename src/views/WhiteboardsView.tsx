@@ -107,7 +107,9 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
     const prepared = prepareWhiteboardFromDefinition(graph);
     if (!prepared.boardId) { showToast('Feche a Service Definition e conecte Persona, Problema e Evidência antes de criar um quadro contextual.'); return; }
     setGraph(() => prepared.graph, 'H7.11: Whiteboard 2.0 a partir da Definition');
-    showToast('Whiteboard 2.0 criado com Contexto canônico e frames de composição.');
+    const board = prepared.graph.views.whiteboards[prepared.boardId];
+    if (board) setVisualBoard({ id: board.id, name: board.name });
+    showToast('Whiteboard contextual criado. Os objetos existentes podem ser copiados para o canvas visual.');
   };
 
   const create = async () => {
@@ -115,7 +117,9 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
     const runtime = api<WhiteboardCoreApi>('whiteboardCore');
     if (!runtime?.createBlank) return;
     setShowCreate(false); setGuidedFreeStart(false); setName('');
-    await runtime.createBlank(title);
+    const board = await runtime.createBlank(title);
+    if (board?.id) setVisualBoard({ id: board.id, name: board.name || title });
+    else showToast('O quadro foi criado, mas não foi possível abrir o editor visual.');
   };
 
   const syncContext = (id: string) => {
@@ -153,7 +157,8 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
   };
   const duplicate = (id: string) => { api<WhiteboardCoreApi>('whiteboardCore')?.duplicateBoard?.(id); setMenuBoardId(null); };
   const remove = async (id: string) => { await api<WhiteboardCoreApi>('whiteboardCore')?.deleteBoard?.(id); setMenuBoardId(null); };
-  const open = async (id: string) => { const runtime = api<WhiteboardCoreApi>('whiteboardCore'); if (runtime?.openBoard) await runtime.openBoard(id); };
+  const openLegacy = async (id: string) => { const runtime = api<WhiteboardCoreApi>('whiteboardCore'); if (runtime?.openBoard) await runtime.openBoard(id); };
+  const open = (id: string) => { const board = graph.views.whiteboards[id]; if (board) setVisualBoard({ id: board.id, name: board.name }); };
   const openJourneys = (journeyId?: string) => {
     setActiveTab('canvas');
     window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'journey' }));
@@ -171,9 +176,9 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
 
   if (!hasService) return <section className="bo1189-module-empty"><LayoutTemplate size={30}/><h2>Crie um serviço antes de abrir quadros</h2><p>Whiteboards pertencem a um serviço. Volte à Visão geral e crie o primeiro serviço.</p><button type="button" onClick={() => setActiveTab('home')}>Ir para a Visão geral</button></section>;
 
-  return <section className="bo1189-whiteboards bo-h711-whiteboards" data-whiteboard-library="1" data-whiteboard-2="1">
-    <p className="bo-mobile-read-note" role="note">No celular, Whiteboards abrem para leitura e comentários. Para criar ou editar o quadro, use um tablet ou computador.</p>
-    <header><div><span>WORKSPACE</span><h1>Whiteboard</h1><p>Explore possibilidades sem precisar seguir uma etapa obrigatória. Quando quiser estruturar a experiência ou a operação, continue nas Jornadas ou Blueprints.</p></div><div className="bo1190-whiteboard-actions"><button type="button" onClick={() => openJourneys()}>Ir para Jornadas</button><button type="button" onClick={openBlueprints}><LayoutTemplate size={16}/> Ir para Blueprints</button>{handoff.readyForWhiteboard && <button type="button" onClick={createFromDefinition}><Plus size={16}/> Com contexto</button>}<button type="button" className="primary" onClick={() => setShowCreate(true)}><Plus size={16}/> Novo whiteboard</button></div></header>
+  return <section className="bo1189-whiteboards bo-h711-whiteboards" data-whiteboard-library="1" data-whiteboard-2="1" data-whiteboard-default="blocksuite">
+    <p className="bo-mobile-read-note" role="note">O canvas visual usa armazenamento local. Faça cópias periódicas; quadros clássicos permanecem disponíveis para recuperação.</p>
+    <header><div><span>WORKSPACE</span><h1>Whiteboard</h1><p>Canvas visual para desenhar, conectar ideias e transformar descobertas em objetos do serviço. Os quadros anteriores seguem preservados.</p></div><div className="bo1190-whiteboard-actions"><button type="button" onClick={() => openJourneys()}>Ir para Jornadas</button><button type="button" onClick={openBlueprints}><LayoutTemplate size={16}/> Ir para Blueprints</button>{handoff.readyForWhiteboard && <button type="button" onClick={createFromDefinition}><Plus size={16}/> Com contexto</button>}<button type="button" className="primary" onClick={() => setShowCreate(true)}><Plus size={16}/> Novo whiteboard</button></div></header>
 
     <div className="bo-h1711-flow-hint" data-design-flow="whiteboard" role="note"><span><strong>Whiteboard</strong><span>·</span><span>Espaço livre para explorar. Leve o aprendizado para Jornada ou Blueprint quando fizer sentido.</span></span><div><button type="button" onClick={() => openJourneys()}>Organizar em Jornadas <ArrowRight size={13}/></button><button type="button" onClick={openBlueprints}>Desenhar operação no Blueprint <ArrowRight size={13}/></button></div></div>
     {boards.length > 0 && <div className="bo-h711-summary" data-whiteboard-health-summary="1">
@@ -199,19 +204,21 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
         <button type="button" onClick={() => syncJourney(board.id, board.journeyId)}><GitBranch size={13}/> Trazer Journey</button>
         {blueprintCount > 0 && <button type="button" onClick={() => syncBlueprint(board.id)}><LayoutTemplate size={13}/> Trazer Blueprint</button>}
         <button type="button" onClick={() => { setRenameBoard({ id: board.id, name: board.name }); setRenameValue(board.name); setMenuBoardId(null); }}>Renomear</button>
-        <button type="button" onClick={() => duplicate(board.id)}>Duplicar</button>
+        <button type="button" onClick={() => duplicate(board.id)}>Duplicar quadro clássico</button>
+        <button type="button" onClick={() => { setMenuBoardId(null); void openLegacy(board.id); }}>Abrir quadro clássico</button>
         <button type="button" className="danger" onClick={() => void remove(board.id)}>Excluir</button>
       </div>}
-      <button type="button" className="bo1189-board-preview bo-editor-board-preview" aria-label={`Abrir ${board.name}`} onClick={() => void open(board.id)}><BoardPreview board={graph.views.whiteboards[board.id]} graph={graph}/></button>
+      <button type="button" className="bo1189-board-preview bo-editor-board-preview" aria-label={`Abrir ${board.name}`} onClick={() => open(board.id)}><BoardPreview board={graph.views.whiteboards[board.id]} graph={graph}/></button>
       <div className="bo1193-board-copy"><span>WHITEBOARD · {statusLabel(board.report?.status ?? 'blank')}</span><strong>{board.name}</strong><small>{board.itemCount} objetos · {board.edgeCount} conexões{board.contextCount ? ` · ${board.contextCount} vínculos de contexto` : ''}</small></div>
       {board.report && board.report.danglingSmartObjects > 0 && <div className="bo-h711-health"><span><ShieldCheck size={13}/> Referências para revisar</span><strong>{board.report.danglingSmartObjects}</strong><div><i style={{ width: `${board.report.qualityScore}%` }}/></div><small>{board.report.contextTotal ? `${board.report.contextCoverage}% do contexto representado` : 'Quadro livre sem contexto obrigatório'}{board.report.danglingSmartObjects ? ` · ${board.report.danglingSmartObjects} referência(s) ausente(s)` : ''}</small></div>}
-      <button type="button" onClick={() => void open(board.id)}>Abrir <ArrowRight size={14}/></button>
-      <button type="button" aria-label={`Abrir editor visual de ${board.name}`} onClick={() => setVisualBoard({ id: board.id, name: board.name })}>Editor visual (BlockSuite)</button>
+      <button type="button" onClick={() => open(board.id)}>Abrir canvas <ArrowRight size={14}/></button>
       {board.journeyId && graph.journeys[board.journeyId] && <button type="button" className="bo-h1711-link" data-whiteboard-to-journey={board.id} onClick={() => openJourneys(board.journeyId)}>Jornada vinculada: {graph.journeys[board.journeyId].name} <ArrowRight size={13}/></button>}
     </article>)}</div> : <div className="bo1189-board-empty"><LayoutTemplate size={28}/><strong>{boards.length ? 'Nenhum Whiteboard corresponde aos filtros' : 'Nenhum Whiteboard ainda'}</strong><p>{boards.length ? 'Ajuste a busca ou os filtros para voltar a exibir seus quadros.' : 'Crie um quadro livre ou comece diretamente do Contexto validado do serviço.'}</p><div className="bo1190-empty-actions"><button type="button" onClick={openBlueprints}><LayoutTemplate size={15}/> Abrir Blueprints</button><button type="button" className="secondary" onClick={() => setShowCreate(true)}><Plus size={15}/> Criar whiteboard</button></div></div>}
 
     {renameBoard && <div className="bo1189-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) setRenameBoard(null); }}><form className="bo1189-modal bo1193-rename-modal" onSubmit={(e) => { e.preventDefault(); rename(); }}><header><div><span>WHITEBOARD</span><h2>Renomear quadro</h2><p>O novo nome será usado na biblioteca e no cabeçalho do Whiteboard.</p></div><button type="button" aria-label="Fechar" onClick={() => setRenameBoard(null)}><X size={18}/></button></header><label>Nome do quadro<input autoFocus value={renameValue} onChange={(e) => setRenameValue(e.target.value)} /></label><footer><button type="button" onClick={() => setRenameBoard(null)}>Cancelar</button><button type="submit">Salvar nome</button></footer></form></div>}
     {showCreate && <div className="bo1189-modal-backdrop" role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget) { setShowCreate(false); setGuidedFreeStart(false); } }}><form className="bo1189-modal bo-h167-whiteboard-start" onSubmit={(e) => { e.preventDefault(); void create(); }}><header><div><span>NOVO WHITEBOARD</span><h2>{guidedFreeStart ? 'Começar livre no Whiteboard' : 'Como você quer começar?'}</h2><p>{guidedFreeStart ? 'Dê um nome ao quadro e comece visualmente. Pessoas, necessidades, dores e evidências podem ser registradas no próprio raciocínio e organizadas depois.' : 'Não existe ordem obrigatória. Traga o que já sabe ou comece livre e registre pessoas, necessidades, dores e problemas conforme eles aparecerem.'}</p></div><button type="button" aria-label="Fechar" onClick={() => { setShowCreate(false); setGuidedFreeStart(false); }}><X size={18}/></button></header>{!guidedFreeStart && <div className="bo-h167-whiteboard-start__choices"><article><strong>Começar livre</strong><p>Abra um quadro vazio. Dentro do Whiteboard você pode criar Persona, Necessidade, Dor, Evidência e outros objetos canônicos sem sair do raciocínio visual.</p></article>{handoff.readyForWhiteboard && <article><strong>Usar o que já foi pesquisado</strong><p>Leve Personas, Necessidades/Dores relacionadas, Problemas e Evidências já estruturados para o quadro.</p><button type="button" onClick={() => { setShowCreate(false); setGuidedFreeStart(false); createFromDefinition(); }}>Criar com registros existentes <ArrowRight size={13}/></button></article>}</div>}<label>Nome do quadro<input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: Exploração da coleta e entrega" /></label><footer><button type="button" onClick={() => { setShowCreate(false); setGuidedFreeStart(false); }}>Cancelar</button><button type="submit">{guidedFreeStart ? 'Criar e começar' : 'Começar livre'}</button></footer></form></div>}
-    {visualBoard && <BlockSuiteWorkspace boardId={visualBoard.id} boardName={visualBoard.name} serviceId={graph.service.id} onClose={() => setVisualBoard(null)} />}
+    {visualBoard && <BlockSuiteWorkspace boardId={visualBoard.id} boardName={visualBoard.name} serviceId={graph.service.id} graph={graph}
+      onChangeGraph={(next, label) => setGraph(() => next, label)} onClose={() => setVisualBoard(null)}
+      onOpenLegacy={() => { const id = visualBoard.id; setVisualBoard(null); window.setTimeout(() => { void openLegacy(id); }, 0); }} />}
   </section>;
 }
