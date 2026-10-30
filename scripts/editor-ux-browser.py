@@ -41,7 +41,7 @@ def project(page):
     page.get_by_label('Serviço principal', exact=True).fill('Atendimento ao cliente')
     page.get_by_role('button', name='Criar projeto', exact=True).click()
 
-def open_whiteboard(page):
+def open_whiteboard(page, *, classic=True):
     project(page)
     if page.viewport_size['width'] <= 700:
         page.get_by_role('navigation', name='Navegação rápida').get_by_role('button', name='Abrir Whiteboard pelo atalho móvel').click()
@@ -56,8 +56,9 @@ def open_whiteboard(page):
     expect(page.frame_locator('.bo-bs-frame').locator('.bo-bs-canvas')).to_be_visible(timeout=30000)
     # Legacy-compatibility suite intentionally enters the retained classic editor.
     # The normal product entrypoint is BlockSuite, verified just above.
-    visual.get_by_role('button', name='Quadro clássico', exact=True).click()
-    expect(page.locator('.bo1174-board')).to_be_visible()
+    if classic:
+        visual.get_by_role('button', name='Quadro clássico', exact=True).click()
+        expect(page.locator('.bo1174-board')).to_be_visible()
 
 def note(page, text):
     page.locator('.rt144-tool[aria-label="Post-it"]').click()
@@ -264,10 +265,25 @@ def blueprint_flow(page):
     page.screenshot(path=str(OUT / 'blueprint-inline.png'), full_page=False)
 
 def tablet_flow(page):
-    open_whiteboard(page)
-    check('Tablet canvas remains usable', page.locator('.rt144-view').bounding_box()['height'] > 700)
-    note(page, 'Anotação no tablet')
-    check('Tablet can create visible content', page.locator('.rt144-item.card').first.is_visible())
+    # Tablets use the primary BlockSuite editor rather than treating the
+    # optional classic editor as the default editing surface.
+    open_whiteboard(page, classic=False)
+    overlay = page.locator('[data-whiteboard-primary-editor="blocksuite"]')
+    frame_box = page.locator('.bo-bs-frame').bounding_box()
+    check('Tablet primary canvas remains usable', bool(frame_box and frame_box['height'] > 700))
+    overlay.get_by_role('button', name='Objetos do serviço').click()
+    panel = page.get_by_label('Objetos do serviço', exact=True)
+    expect(panel).to_be_visible()
+    panel.get_by_label('Título').fill('Anotação no tablet')
+    panel.get_by_role('button', name='Criar e vincular').click()
+    page.wait_for_function("() => Object.keys(window.BlueOceanRuntime.api('dataBridge').get().entities.need || {}).length > 0")
+    current = graph(page)
+    board = next(board for board in current['views']['whiteboards'].values() if board.get('viewKind') == 'free')
+    check('Tablet can create a canonical service object',
+          any(e.get('title') == 'Anotação no tablet' for e in current['entities']['need'].values()))
+    check('Tablet visual editor links it to the Whiteboard',
+          any(item.get('kind') == 'smart' and item.get('objectKind') == 'need' for item in board['items'].values()))
+    check('Tablet keeps the classic editor available', overlay.get_by_role('button', name='Quadro clássico').is_visible())
     page.screenshot(path=str(OUT / 'tablet-whiteboard.png'), full_page=False)
 
 def mobile_flow(page):
