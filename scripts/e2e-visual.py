@@ -93,7 +93,14 @@ def main():
             page.get_by_role('dialog',name='Montar serviço',exact=True).wait_for(state='visible',timeout=10000)
             page.screenshot(path=str(ART/f'wizard-{name}.png'),full_page=False,animations='disabled')
           except Exception as exc:
-            errors.append(f'{name}: whiteboard/wizard: {exc}')
+            diagnostics=[]
+            try:
+              frame=page.frame_locator('.bo-bs-frame')
+              diagnostics.append('frame: '+frame.locator('body').inner_text(timeout=2500)[:800])
+              diagnostics.append('iframe_src: '+str(page.locator('.bo-bs-frame').get_attribute('src')))
+            except Exception as frame_exc:
+              diagnostics.append('frame unavailable: '+str(frame_exc)[:180])
+            errors.append(f'{name}: whiteboard/wizard: {exc} | '+ ' | '.join(diagnostics))
           page.close()
         browser.close()
     finally: server.shutdown(); server.server_close()
