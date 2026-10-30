@@ -35,6 +35,7 @@ function api<T>(name: string): T | null { return window.BlueOceanRuntime?.api<T>
 type WhiteboardCoreApi = {
   list?(): Array<{ id: string; name: string; itemCount: number; edgeCount: number; updatedAt?: string }>;
   createBlank(name?: string): Promise<{ id: string; name: string } | null> | { id: string; name: string } | null;
+  createBlankSilent?(name?: string): Promise<{ id: string; name: string } | null> | { id: string; name: string } | null;
   openBoard?(id: string): Promise<boolean> | boolean;
   renameBoard?(id: string, name: string): boolean;
   duplicateBoard?(id: string): string | null;
@@ -117,7 +118,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
     const runtime = api<WhiteboardCoreApi>('whiteboardCore');
     if (!runtime?.createBlank) return;
     setShowCreate(false); setGuidedFreeStart(false); setName('');
-    const board = await runtime.createBlank(title);
+    const board = await (runtime.createBlankSilent ? runtime.createBlankSilent(title) : runtime.createBlank(title));
     if (board?.id) setVisualBoard({ id: board.id, name: board.name || title });
     else showToast('O quadro foi criado, mas não foi possível abrir o editor visual.');
   };
@@ -209,7 +210,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
         <button type="button" className="danger" onClick={() => void remove(board.id)}>Excluir</button>
       </div>}
       <button type="button" className="bo1189-board-preview bo-editor-board-preview" aria-label={`Abrir ${board.name}`} onClick={() => open(board.id)}><BoardPreview board={graph.views.whiteboards[board.id]} graph={graph}/></button>
-      <div className="bo1193-board-copy"><span>WHITEBOARD · {statusLabel(board.report?.status ?? 'blank')}</span><strong>{board.name}</strong><small>{board.itemCount} objetos · {board.edgeCount} conexões{board.contextCount ? ` · ${board.contextCount} vínculos de contexto` : ''}</small></div>
+      <div className="bo1193-board-copy"><span>WHITEBOARD · {statusLabel(board.report?.status ?? 'blank')}</span><strong>{board.name}</strong><small>{board.itemCount} objetos do grafo · {board.edgeCount} conexões{board.contextCount ? ` · ${board.contextCount} vínculos de contexto` : ''} · Canvas visual local</small></div>
       {board.report && board.report.danglingSmartObjects > 0 && <div className="bo-h711-health"><span><ShieldCheck size={13}/> Referências para revisar</span><strong>{board.report.danglingSmartObjects}</strong><div><i style={{ width: `${board.report.qualityScore}%` }}/></div><small>{board.report.contextTotal ? `${board.report.contextCoverage}% do contexto representado` : 'Quadro livre sem contexto obrigatório'}{board.report.danglingSmartObjects ? ` · ${board.report.danglingSmartObjects} referência(s) ausente(s)` : ''}</small></div>}
       <button type="button" onClick={() => open(board.id)}>Abrir canvas <ArrowRight size={14}/></button>
       {board.journeyId && graph.journeys[board.journeyId] && <button type="button" className="bo-h1711-link" data-whiteboard-to-journey={board.id} onClick={() => openJourneys(board.journeyId)}>Jornada vinculada: {graph.journeys[board.journeyId].name} <ArrowRight size={13}/></button>}
