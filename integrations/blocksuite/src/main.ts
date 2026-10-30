@@ -1,4 +1,6 @@
 import { AffineSchemas } from '@blocksuite/blocks';
+import { effects as blocksEffects } from '@blocksuite/blocks/effects';
+import { effects as presetsEffects } from '@blocksuite/presets/effects';
 import { EdgelessEditor, PageEditor } from '@blocksuite/presets';
 import { DocCollection, Job, Schema, Text } from '@blocksuite/store';
 import { IndexeddbPersistence } from 'y-indexeddb';
@@ -71,8 +73,14 @@ async function main() {
     }, window.location.origin);
   };
 
-  const edgeless = new EdgelessEditor();
-  const page = new PageEditor();
+  // BlockSuite 0.19.x needs custom-element registration before construction.
+  // The effect bundles register block services/commands used by both presets.
+  blocksEffects();
+  presetsEffects();
+  if (!customElements.get('edgeless-editor')) customElements.define('edgeless-editor', EdgelessEditor);
+  if (!customElements.get('page-editor')) customElements.define('page-editor', PageEditor);
+  const edgeless = document.createElement('edgeless-editor') as EdgelessEditor;
+  const page = document.createElement('page-editor') as PageEditor;
   edgeless.doc = doc;
   page.doc = doc;
   edgeless.style.cssText = 'display:block;width:100%;height:100%';
