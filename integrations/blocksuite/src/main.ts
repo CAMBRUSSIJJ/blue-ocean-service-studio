@@ -31,6 +31,8 @@ async function main() {
   }
 
   const storageKey = `blue-ocean-blocksuite-v1:${encodeURIComponent(serviceId)}:${encodeURIComponent(boardId)}`;
+  blocksEffects();
+  presetsEffects();
   const schema = new Schema().register(AffineSchemas);
   const collection = new DocCollection({ schema });
   collection.meta.initialize();
@@ -74,9 +76,7 @@ async function main() {
   };
 
   // BlockSuite 0.19.x needs custom-element registration before construction.
-  // The effect bundles register block services/commands used by both presets.
-  blocksEffects();
-  presetsEffects();
+  // The effects are initialized before the document is loaded.
   if (!customElements.get('edgeless-editor')) customElements.define('edgeless-editor', EdgelessEditor);
   if (!customElements.get('page-editor')) customElements.define('page-editor', PageEditor);
   const edgeless = document.createElement('edgeless-editor') as EdgelessEditor;
