@@ -21,11 +21,10 @@ function blocksuite0195IconCompatibility(): Plugin {
 }
 
 import wasm from 'vite-plugin-wasm';
-import topLevelAwait from 'vite-plugin-top-level-await';
 
 export default defineConfig({
   base: '/blocksuite/',
-  plugins: [blocksuite0195IconCompatibility(), wasm(), topLevelAwait()],
+  plugins: [blocksuite0195IconCompatibility(), wasm()],
   build: {
     outDir: '../../public/blocksuite',
     emptyOutDir: true,
