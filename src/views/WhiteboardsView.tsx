@@ -205,7 +205,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
         <button type="button" onClick={() => syncJourney(board.id, board.journeyId)}><GitBranch size={13}/> Trazer Journey</button>
         {blueprintCount > 0 && <button type="button" onClick={() => syncBlueprint(board.id)}><LayoutTemplate size={13}/> Trazer Blueprint</button>}
         <button type="button" onClick={() => { setRenameBoard({ id: board.id, name: board.name }); setRenameValue(board.name); setMenuBoardId(null); }}>Renomear</button>
-        <button type="button" onClick={() => duplicate(board.id)}>Duplicar quadro clássico</button>
+        <button type="button" title="Duplica os objetos clássicos; o documento visual local não é copiado." onClick={() => duplicate(board.id)}>Duplicar</button>
         <button type="button" onClick={() => { setMenuBoardId(null); void openLegacy(board.id); }}>Abrir quadro clássico</button>
         <button type="button" className="danger" onClick={() => void remove(board.id)}>Excluir</button>
       </div>}
