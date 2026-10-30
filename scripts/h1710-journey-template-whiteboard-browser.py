@@ -76,10 +76,15 @@ def deletion_and_whiteboard(page):
     page.get_by_role('button', name='Novo whiteboard').click()
     page.get_by_label('Nome do quadro', exact=True).fill('QA Quadro livre')
     page.get_by_role('button', name='Começar livre', exact=True).click()
-    expect(page.locator('.bo1174-board')).to_be_visible()
+    expect(page.locator('[data-whiteboard-primary-editor="blocksuite"]')).to_be_visible()
+    editor = page.frame_locator('.bo-bs-frame')
+    expect(editor.locator('.bo-bs-canvas')).to_be_visible(timeout=30000)
     check(any(b.get('viewKind') == 'free' for b in graph(page)['views']['whiteboards'].values()),
-          'Whiteboard creation opens a real free canvas')
-    page.screenshot(path=str(OUT / 'free-whiteboard.png'), animations='disabled')
+          'Whiteboard creation opens BlockSuite as the primary free canvas')
+    page.screenshot(path=str(OUT / 'visual-whiteboard.png'), animations='disabled')
+    page.locator('[data-whiteboard-primary-editor="blocksuite"]').get_by_role('button', name='Quadro clássico').click()
+    expect(page.locator('.bo1174-board')).to_be_visible()
+    check(page.locator('.bo1174-board').count() > 0, 'Classic Whiteboard remains accessible for legacy cards')
 
 def library_templates(page):
     enter(page)
