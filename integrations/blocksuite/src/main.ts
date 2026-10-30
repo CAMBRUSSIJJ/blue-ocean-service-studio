@@ -2,7 +2,6 @@ import { AffineSchemas } from '@blocksuite/blocks';
 import { EdgelessEditor, PageEditor } from '@blocksuite/presets';
 import { DocCollection, Job, Schema, Text } from '@blocksuite/store';
 import { IndexeddbPersistence } from 'y-indexeddb';
-import '@blocksuite/presets/themes/affine.css';
 import './style.css';
 
 /**
