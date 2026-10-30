@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/prepare-assets.mjs && vite",
-    "build": "node scripts/prepare-assets.mjs && tsc -b && vite build && node scripts/build-provenance.mjs && npm run dist:verify",
+    "build": "npm run blocksuite:build && node scripts/prepare-assets.mjs && tsc -b && vite build && node scripts/build-provenance.mjs && npm run dist:verify",
     "preview": "vite preview --host 127.0.0.1 --port 4173",
     "pretypecheck": "node scripts/prepare-assets.mjs",
     "typecheck": "tsc --noEmit",
@@ -236,7 +236,8 @@
     "design:h3:test": "node scripts/design-system-h3-test.mjs",
     "project:h31:test": "node scripts/project-firefox-h31-test.mjs && python3 scripts/linux-frame-security-test.py",
     "blueprint:csp:browser": "python3 scripts/blueprint-csp-browser.py",
-    "maps:flow:browser": "python3 scripts/service-map-flow-browser.py"
+    "maps:flow:browser": "python3 scripts/service-map-flow-browser.py",
+    "blocksuite:build": "npm --prefix integrations/blocksuite install --no-audit --no-fund --package-lock=false && npm --prefix integrations/blocksuite run build"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",
