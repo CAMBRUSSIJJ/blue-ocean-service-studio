@@ -103,6 +103,13 @@ indisponíveis de nuvem e o conteúdo real do backup baixado durante a edição.
 Também executa axe-core nas páginas inteiras dos cenários auditados em desktop
 e celular. O pacote axe-core é instalado por `npm ci`; essa suíte não depende de AXE_PATH.
 
+`blueprint:inspector:browser` verifica campos contextuais por tipo, metadados
+recolhidos com resumo de localização, auto-save após 800 ms ou blur, foco durante
+gravações, troca de cartões, tratamento de falhas, preservação de atributos
+legados e persistência após recarregar. Inclui edição no celular e auditoria
+axe-core. Execute após `npm run build`; as evidências ficam em
+`work/blueprint-inspector/`.
+
 `journey-progressive-browser.py` cobre a matriz integrada: visão essencial,
 faixas ocultas sem perda de conteúdo, ordem e preferências por Jornada, desfazer
 e refazer, emoções e observações, painel de Insights, reabertura e edição por

@@ -1,0 +1,221 @@
+/* Blue Ocean Service Studio — H3 Unified UI contract.
+ * Authoritative values live in design-system/tokens.css. This file also runs in
+ * the isolated Journey/Blueprint iframe using explicit fallback values.
+ * Deliberately excludes graphic handles, SVG cards, draggable notes and navigation tiles.
+ */
+:root{
+  --bo-ui-font:var(--bo-font-sans,"Geist",Inter,"Segoe UI",Arial,sans-serif);
+  --bo-ui-ink:var(--bo-color-text,#172033);
+  --bo-ui-ink-secondary:var(--bo-color-text-secondary,#475467);
+  --bo-ui-muted:var(--bo-color-text-muted,#667085);
+  --bo-ui-strong:var(--bo-color-primary-900,#0b1f3b);
+  --bo-ui-brand:var(--bo-color-primary-600,#1e63f0);
+  --bo-ui-brand-hover:var(--bo-color-primary-700,#174fc0);
+  --bo-ui-brand-soft:var(--bo-color-primary-100,#eaf2ff);
+  --bo-ui-border:var(--bo-color-border-strong,#d0d7e2);
+  --bo-ui-border-subtle:var(--bo-color-border,#e3e7ed);
+  --bo-ui-surface:var(--bo-color-surface,#fff);
+  --bo-ui-raised:var(--bo-color-surface-subtle,#f8fafc);
+  --bo-ui-danger:var(--bo-color-danger-700,#b42318);
+  --bo-ui-danger-soft:var(--bo-color-danger-100,#fee2e2);
+  --bo-ui-radius:var(--bo-radius-md,8px);
+  --bo-ui-radius-dialog:var(--bo-radius-xl,16px);
+  --bo-ui-shadow:var(--bo-shadow-md,0 12px 32px rgba(11,31,59,.10));
+  --bo-ui-shadow-dialog:var(--bo-shadow-lg,0 28px 70px rgba(11,31,59,.16));
+  --bo-ui-control-height:var(--bo-control-h-lg,40px);
+  --bo-ui-control-compact:var(--bo-control-h-md,36px);
+  --bo-ui-copy:var(--bo-font-size-md,14px);
+  --bo-ui-small:var(--bo-font-size-xs,12px);
+  --bo-ui-label:var(--bo-font-size-sm,13px);
+  --bo-ui-focus:var(--bo-color-primary-600,#1e63f0);
+}
+
+/* Typography, including isolated Blueprint iframe. */
+:where(.bo-h740,.bo-project-context-panel,.bo-remote-dialog,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser,.cad-context-menu,.cad-confirm-panel){
+  font-family:var(--bo-ui-font);
+  color:var(--bo-ui-ink);
+}
+:where(.bo-project-context-panel,.bo-remote-dialog,.cad-inspector,.cad-sheet,.cad-quick,.cad-chooser) :is(p,li,textarea){
+  line-height:1.5;
+}
+:where(.bo-project-context-panel,.bo-remote-dialog,.cad-inspector,.cad-sheet,.cad-quick,.cad-chooser) :is(h1,h2,h3){
+  color:var(--bo-ui-strong);
+  line-height:1.28;
+  letter-spacing:-.015em;
+}
+:where(.bo-project-context-panel,.bo-remote-dialog,.cad-inspector,.cad-sheet,.cad-quick,.cad-chooser) :is(label,legend){
+  color:var(--bo-ui-ink-secondary);
+  font-size:var(--bo-ui-label);
+  font-weight:600;
+}
+:where(.bo-project-context-panel,.bo-remote-dialog,.cad-inspector,.cad-sheet,.cad-quick,.cad-chooser) small{
+  color:var(--bo-ui-muted);
+  font-size:var(--bo-ui-small);
+}
+
+/* Component contract: action buttons only, never card-tile, lane grip or graph nodes. */
+.bo-button--primary,.bo-remote-dialog :is(.bo-remote-actions button,form button[type="submit"]),
+.bo-project-context-section-header button.primary,
+.bo-project-context-panel button.primary,
+.cad-toolbar [data-act="cad-library"],
+.cad-shell #cad-component-form button[type="submit"],
+.cad-shell #cad-link-form button[type="submit"],
+.cad-quick button[type="submit"],
+.cad-confirm-actions [data-act="cad-confirm-accept"]{
+  background:var(--bo-ui-brand);
+  border-color:var(--bo-ui-brand);
+  color:#fff;
+  border-radius:var(--bo-ui-radius);
+  font-family:var(--bo-ui-font);
+  font-size:var(--bo-ui-label);
+  font-weight:650;
+  line-height:1.2;
+}
+.bo-button--secondary,.bo-button--ghost,.bo-button--danger{background:var(--bo-ui-surface);border-color:var(--bo-ui-border);color:var(--bo-ui-ink-secondary)}
+.bo-button--ghost{background:transparent;border-color:transparent}
+.bo-button--danger{color:var(--bo-ui-danger);border-color:#efc8c8}
+.bo-button--danger:hover:not(:disabled){background:var(--bo-ui-danger-soft)}
+:where(.bo-remote-dialog,.bo-project-context-panel,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser,.cad-context-menu) button{
+  font-family:var(--bo-ui-font);
+  line-height:1.25;
+}
+:where(.bo-remote-dialog,.bo-project-context-panel,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser) :is(button,[role="button"]):disabled{
+  opacity:.52;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+:where(.bo-remote-dialog,.bo-project-context-panel,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser) button:not(:disabled){transition:background-color 120ms ease,border-color 120ms ease,color 120ms ease}
+:where(.bo-project-context-panel,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser) :is(button,input:not([type="checkbox"]),select,textarea){
+  border-radius:var(--bo-ui-radius);
+}
+:where(.bo-remote-dialog,.bo-project-context-panel,.cad-inspector,.cad-sheet,.cad-quick,.cad-chooser,.cad-confirm-panel) :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){
+  background:var(--bo-ui-surface);
+  color:var(--bo-ui-ink);
+  border:1px solid var(--bo-ui-border);
+  border-radius:var(--bo-ui-radius);
+  font-family:var(--bo-ui-font);
+  font-size:var(--bo-ui-label);
+  line-height:1.45;
+  min-height:var(--bo-ui-control-height);
+}
+:where(.bo-remote-dialog,.bo-project-context-panel,.cad-inspector,.cad-sheet,.cad-quick,.cad-chooser) :is(input,select,textarea)::placeholder{color:var(--bo-ui-muted);opacity:1}
+:where(.bo-remote-dialog,.bo-project-context-panel,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser,.cad-confirm-panel) :is(button,input,select,textarea,summary,[role="button"]):focus-visible{
+  outline:2px solid var(--bo-ui-focus);
+  outline-offset:3px;
+}
+:where(.bo-remote-dialog,.bo-project-context-panel,.cad-inspector,.cad-sheet,.cad-quick,.cad-chooser) :is(input,select,textarea):focus-visible{
+  border-color:var(--bo-ui-focus);
+  box-shadow:0 0 0 3px rgba(30,99,240,.14);
+}
+:where(.bo-project-context-panel,.bo-remote-dialog,.cad-inspector,.cad-sheet) :is(input[type="checkbox"],input[type="radio"]){
+  accent-color:var(--bo-ui-brand);
+}
+
+/* Explicit hierarchy for content actions, not entire navigation button surfaces. */
+.bo-project-context-section-header button.primary,
+.bo-project-context-panel button.primary,
+.cad-toolbar [data-act="cad-library"],
+.cad-shell #cad-component-form button[type="submit"],
+.cad-shell #cad-link-form button[type="submit"],
+.cad-quick button[type="submit"]{
+  min-height:var(--bo-ui-control-height);
+  padding:8px 14px;
+}
+.bo-project-context-panel button.primary:hover:not(:disabled),
+.bo-project-context-section-header button.primary:hover:not(:disabled),
+.cad-toolbar [data-act="cad-library"]:hover:not(:disabled),
+.cad-shell #cad-component-form button[type="submit"]:hover:not(:disabled),
+.cad-shell #cad-link-form button[type="submit"]:hover:not(:disabled),
+.cad-quick button[type="submit"]:hover:not(:disabled){
+  background:var(--bo-ui-brand-hover);
+  border-color:var(--bo-ui-brand-hover);
+  color:#fff;
+}
+
+/* Popups and dialogs share radius, border, shadow and surface even across iframe. */
+:where(.bo-remote-dialog,.cad-sheet,.cad-quick,.cad-chooser,.cad-context-menu,.cad-confirm-panel,[data-delete-journey-dialog]){
+  border-radius:var(--bo-ui-radius-dialog);
+  border:1px solid var(--bo-ui-border-subtle);
+  background:var(--bo-ui-surface);
+  color:var(--bo-ui-ink);
+  box-shadow:var(--bo-ui-shadow-dialog);
+  font-family:var(--bo-ui-font);
+}
+:where(.bo-remote-dialog,.cad-sheet,[data-delete-journey-dialog])::backdrop{background:rgba(7,22,43,.42)}
+.cad-confirm-backdrop{background:rgba(7,22,43,.42)}
+:where(.cad-quick,.cad-chooser,.cad-confirm-panel) h2{
+  font-size:var(--bo-font-size-lg,16px);
+  font-weight:700;
+  margin-top:0;
+}
+.cad-confirm-panel h2{font-size:var(--bo-font-size-xl,20px)}
+:where(.cad-quick,.cad-chooser,.cad-confirm-panel) :is(p,small){color:var(--bo-ui-muted)}
+:where(.cad-quick,.cad-chooser,.cad-context-menu) button{min-height:var(--bo-ui-control-compact)}
+:where(.cad-quick,.cad-chooser,.cad-confirm-panel) :is(form,fieldset){gap:12px}
+:where(.cad-confirm-panel,.bo-remote-dialog) :is([role="alert"],.form-error,.bo-remote-error){color:var(--bo-ui-danger)}
+.cad-confirm-actions [data-act="cad-confirm-accept"]{
+  min-height:var(--bo-ui-control-height);
+  background:var(--bo-ui-brand);
+  border-color:var(--bo-ui-brand);
+  color:#fff;
+}
+.cad-confirm-actions [data-act="cad-confirm-accept"]:hover:not(:disabled){background:var(--bo-ui-brand-hover);border-color:var(--bo-ui-brand-hover)}
+:where(.bo-remote-dialog,.cad-confirm-panel) :is(.bo-remote-actions,.cad-confirm-actions){gap:8px}
+.cad-confirm-panel{width:min(420px,calc(100vw - 32px))}
+
+/* Tabs and contextual filters: consistent proportions without changing tab logic. */
+.bo-project-context-tabs{border-color:var(--bo-ui-border-subtle);border-radius:var(--bo-radius-lg,12px)}
+.bo-project-context-tabs button{font-size:var(--bo-ui-label);min-height:var(--bo-ui-control-height)}
+.bo-project-context-tabs button[aria-selected="true"]{color:var(--bo-ui-brand-hover);border-color:var(--bo-ui-border)}
+.bo-project-context-filters{border-color:var(--bo-ui-border-subtle);border-radius:var(--bo-radius-lg,12px)}
+.bo-project-context-filters :is(input:not([type="checkbox"]),select){font-size:var(--bo-ui-label);min-height:var(--bo-ui-control-height)}
+
+/* Blueprint's font otherwise diverges from the main app's Geist scale. */
+.cad-shell,.cad-sheet,.cad-quick,.cad-chooser,.cad-context-menu{font-family:var(--bo-ui-font);font-size:var(--bo-ui-label)}
+.cad-shell .cad-header>input{font-family:var(--bo-ui-font);font-size:var(--bo-font-size-xl,20px);font-weight:650}
+.cad-shell .cad-header [data-save-status]{font-size:var(--bo-ui-small)}
+.cad-shell .cad-toolbar button{font-size:var(--bo-ui-label)}
+.cad-shell .cad-library-head,.cad-shell .cad-lanes-intro strong{font-size:var(--bo-ui-label)}
+.cad-shell .cad-inspector label,.cad-shell .cad-inspector select,.cad-shell .cad-inspector input,.cad-shell .cad-inspector textarea{font-size:var(--bo-ui-label)}
+.cad-context-menu button,.cad-chooser button{font-size:var(--bo-ui-label)}
+.cad-quick .cad-quick-guidance{font-size:var(--bo-ui-small)}
+.cad-shell .cad-status,.cad-shell .cad-footer{font-size:var(--bo-ui-small);color:var(--bo-ui-muted)}
+
+/* Keep the canvas data, navigation and dark theme unmodified. */
+@media(max-width:640px){
+  :where(.bo-remote-dialog,.cad-sheet,.cad-quick,.cad-chooser,.cad-confirm-panel){max-width:calc(100vw - 24px)}
+  .cad-confirm-panel{padding:18px}
+  .bo-project-context-section-header button.primary{width:100%;justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){
+  :where(.bo-button,.bo-remote-dialog,.bo-project-context-panel,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser) button{transition:none!important}
+}
+
+/* Older product modules already use the design-system's compatibility classes.
+ * Keep their geometry intact; align type, radius and surface with the same tokens. */
+body.bo-v1130 :is(.rt144-modalbox,.rt192-dialog,.rt193-dialog,.rt195-dialog,.rt196-dialog,.rt197-dialog,.rt1101-dialog,.rt1102-dialog,.bo-dialog){
+  font-family:var(--bo-ui-font);
+  border-radius:var(--bo-ui-radius-dialog)!important;
+  background:var(--bo-ui-surface)!important;
+  color:var(--bo-ui-ink)!important;
+  border-color:var(--bo-ui-border-subtle)!important;
+  box-shadow:var(--bo-ui-shadow-dialog)!important;
+}
+body.bo-v1130 :is(.rt144-modal,.rt192-modal,.rt193-modal,.rt195-modal,.rt196-modal,.rt197-modal,.rt1101-modal,.rt1102-modal) :is(label,legend){
+  font-family:var(--bo-ui-font);
+  font-size:var(--bo-ui-label);
+  line-height:1.4;
+}
+body.bo-v1130 :is(.rt144-modal,.rt192-modal,.rt193-modal,.rt195-modal,.rt196-modal,.rt197-modal,.rt1101-modal,.rt1102-modal) :is(button,input,select,textarea){
+  font-family:var(--bo-ui-font);
+  font-size:var(--bo-ui-label);
+}
+body.bo-v1130 :is(.rt144-modal,.rt192-modal,.rt193-modal,.rt195-modal,.rt196-modal,.rt197-modal,.rt1101-modal,.rt1102-modal) :is(button,input,select,textarea):focus-visible{
+  outline:2px solid var(--bo-ui-focus)!important;
+  outline-offset:3px;
+}
+/* The canonical dialog system and legacy variants have a common footer hierarchy. */
+.bo-dialog__header h2{font-family:var(--bo-ui-font);font-size:var(--bo-font-size-xl,20px);font-weight:700;color:var(--bo-ui-strong)}
+.bo-dialog__body{font-family:var(--bo-ui-font);font-size:var(--bo-ui-copy);line-height:1.5;color:var(--bo-ui-ink)}
+.bo-dialog__footer{border-top:1px solid var(--bo-ui-border-subtle);background:var(--bo-ui-raised)}
+.bo-dialog__footer .bo-button{min-height:var(--bo-ui-control-height)}

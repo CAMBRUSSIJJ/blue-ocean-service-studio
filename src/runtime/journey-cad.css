@@ -337,6 +337,17 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 .cad-inspector .cad-inspector-advanced .cad-inspector-group{border:0;padding-top:4px}
 .cad-inspector .cad-placement-warning{background:#fff7ec;color:#7e4b15;border:1px solid #efd1a3;border-radius:8px;padding:11px;font-size:12px;line-height:1.45}
 .cad-inspector footer{gap:7px;border-top:1px solid #e6edf5}
+.cad-inspector-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:20px}
+.cad-autosave-status{font-size:11px;color:#226c57;white-space:nowrap}
+.cad-autosave-status.is-error{color:#b42331}
+#cad-component-form>.form-error:empty{display:none}
+.cad-inspector-advanced>summary small{display:block;margin:5px 0 0 16px;color:#526b8a;font-size:11px;font-weight:400;line-height:1.5;overflow-wrap:anywhere}
+.cad-sheet #cad-component-form{gap:11px}
+.cad-sheet .cad-inspector-group{border:1px solid #e1e9f4;border-radius:11px;padding:12px;background:#fff;display:grid;gap:11px;min-width:0}
+.cad-sheet .cad-inspector-group h3{font-size:13px;font-weight:700;color:#173e70;margin:0;border-bottom:1px solid #edf2f8;padding-bottom:8px}
+.cad-sheet .cad-inspector-advanced{border:1px solid #e1e9f4;border-radius:11px;min-width:0;background:#fff}
+.cad-sheet .cad-inspector-advanced>summary{cursor:pointer;color:#173e70;font-size:13px;font-weight:700;padding:12px;list-style:revert}
+.cad-sheet .cad-inspector-advanced .cad-inspector-group{border:0;padding-top:4px}
 .cad-quick .cad-quick-guidance{color:#607c9b;font-size:11px;line-height:1.4;margin-top:-5px}
 #cad-svg .cad-node-wrap .cad-node-title{letter-spacing:-.012em}
 #cad-svg .cad-node-wrap .cad-subtitle{fill:#48637f;font-weight:650}
