@@ -1,16 +1,16 @@
 # Integração experimental do BlockSuite/AFFiNE
 
-O Blue Ocean inclui um editor visual opcional associado a um Whiteboard já existente.
+O Blue Ocean usa o editor visual BlockSuite como experiência padrão dos Whiteboards. A versão clássica permanece acessível para compatibilidade e migração sem perda de dados.
 
 ## Como utilizar
 
 1. Entre no serviço e abra **Whiteboards**.
 2. Crie ou selecione um quadro existente.
-3. No quadro, escolha **Editor visual (experimental)**.
+3. Clique em **Abrir canvas** para iniciar o novo editor visual (ou crie um Whiteboard, que abre diretamente nele).
 4. Alterne entre **Canvas** e **Documento**.
 5. Use **Exportar cópia** para guardar um snapshot JSON.
 
-A experiência original de Whiteboard continua disponível. O BlockSuite é um documento Yjs separado: abrir, editar ou fechar **não altera o Service Graph** e não converte automaticamente itens, etapas, lanes ou evidências.
+O **Quadro clássico** fica no topo do editor novo e no menu do quadro. O conteúdo desenhado no BlockSuite é um documento Yjs separado. Use o painel **Objetos do serviço** para criar Personas, Necessidades, Dores, Jobs, Hipóteses e Evidências canônicas, vinculando-as ao Service Graph. O conteúdo visual livre não é automaticamente convertido e não há sincronização reversa.
 
 ## Instalação e publicação
 
@@ -29,7 +29,7 @@ cd integrations/blocksuite
 npm install
 npm run dev
 ```
-O editor isolado requer os parâmetros `serviceId` e `boardId` fornecidos pelo Blue Ocean.
+A opção **Copiar cartões para o canvas** no painel de contexto importa representações dos cartões antigos, com deduplicação por ID no Yjs; os cartões originais e o Service Graph são preservados.\n\nO editor isolado requer os parâmetros `serviceId` e `boardId` fornecidos pelo Blue Ocean.
 
 ## Restrições e dados
 

@@ -1,4 +1,6 @@
 import { AffineSchemas } from '@blocksuite/blocks';
+import { effects as blocksEffects } from '@blocksuite/blocks/effects';
+import { effects as presetsEffects } from '@blocksuite/presets/effects';
 import { EdgelessEditor, PageEditor } from '@blocksuite/presets';
 import { DocCollection, Job, Schema, Text } from '@blocksuite/store';
 import { IndexeddbPersistence } from 'y-indexeddb';
@@ -29,6 +31,8 @@ async function main() {
   }
 
   const storageKey = `blue-ocean-blocksuite-v1:${encodeURIComponent(serviceId)}:${encodeURIComponent(boardId)}`;
+  blocksEffects();
+  presetsEffects();
   const schema = new Schema().register(AffineSchemas);
   const collection = new DocCollection({ schema });
   collection.meta.initialize();
@@ -57,54 +61,26 @@ async function main() {
   const root = document.createElement('section');
   root.className = 'bo-bs-shell';
 
-  const bar = document.createElement('header');
-  bar.className = 'bo-bs-header';
-
-  const context = document.createElement('div');
-  context.className = 'bo-bs-context';
-  const overline = document.createElement('span');
-  text(overline, 'BLUE OCEAN · EDITOR VISUAL');
-  const heading = document.createElement('h1');
-  text(heading, boardName);
-  context.append(overline, heading);
-
-  const actions = document.createElement('div');
-  actions.className = 'bo-bs-actions';
-
-  const modeSwitch = document.createElement('div');
-  modeSwitch.className = 'bo-bs-mode';
-  const edgelessButton = document.createElement('button');
-  edgelessButton.type = 'button';
-  text(edgelessButton, 'Canvas');
-  const pageButton = document.createElement('button');
-  pageButton.type = 'button';
-  text(pageButton, 'Documento');
-  modeSwitch.append(edgelessButton, pageButton);
-
-  const backup = document.createElement('button');
-  backup.type = 'button';
-  backup.className = 'bo-bs-backup';
-  text(backup, 'Exportar cópia');
-
-  const status = document.createElement('span');
-  status.className = 'bo-bs-status';
-  status.setAttribute('role', 'status');
-  text(status, 'Armazenamento local');
-
-  actions.append(modeSwitch, backup, status);
-  bar.append(context, actions);
-
+  // The Blue Ocean React shell owns the toolbar, object context, and navigation.
+  // This frame only hosts the licensed BlockSuite editing engine.
   const canvas = document.createElement('div');
   canvas.className = 'bo-bs-canvas';
-  canvas.setAttribute('aria-label', 'Editor visual do Blue Ocean');
-  const notice = document.createElement('aside');
-  notice.className = 'bo-bs-notice';
-  text(notice, 'Versão experimental · as alterações ficam neste navegador e ainda não são sincronizadas com o Service Graph ou outros computadores.');
-  root.append(bar, canvas, notice);
+  canvas.setAttribute('aria-label', 'Canvas visual do Blue Ocean');
+  root.append(canvas);
   app!.append(root);
 
-  const edgeless = new EdgelessEditor();
-  const page = new PageEditor();
+  const notify = (type: string, extra: Record<string, unknown> = {}) => {
+    if (window.parent !== window) window.parent.postMessage({
+      source: 'blue-ocean-blocksuite', version: 2, boardId, serviceId, type, ...extra,
+    }, window.location.origin);
+  };
+
+  // BlockSuite 0.19.x needs custom-element registration before construction.
+  // The effects are initialized before the document is loaded.
+  if (!customElements.get('edgeless-editor')) customElements.define('edgeless-editor', EdgelessEditor);
+  if (!customElements.get('page-editor')) customElements.define('page-editor', PageEditor);
+  const edgeless = document.createElement('edgeless-editor') as EdgelessEditor;
+  const page = document.createElement('page-editor') as PageEditor;
   edgeless.doc = doc;
   page.doc = doc;
   edgeless.style.cssText = 'display:block;width:100%;height:100%';
@@ -112,15 +88,27 @@ async function main() {
 
   const setMode = (mode: 'canvas' | 'page') => {
     canvas.replaceChildren(mode === 'canvas' ? edgeless : page);
-    edgelessButton.setAttribute('aria-pressed', String(mode === 'canvas'));
-    pageButton.setAttribute('aria-pressed', String(mode === 'page'));
   };
-  edgelessButton.addEventListener('click', () => setMode('canvas'));
-  pageButton.addEventListener('click', () => setMode('page'));
   setMode('canvas');
 
-  backup.addEventListener('click', async () => {
-    backup.disabled = true;
+  const imported = doc.spaceDoc.getMap<boolean>('blue-ocean-visual-references-v2');
+  const rootPage = doc.getBlockByFlavour('affine:page')[0];
+  let placed = 0;
+  const addVisualNote = (item: { id: string; text: string; x?: number; y?: number; width?: number; height?: number }) => {
+    if (!rootPage || !item.id || imported.get(item.id) || !item.text.trim()) return false;
+    const x = Number.isFinite(item.x) ? Math.max(-100000, Math.min(100000, Number(item.x))) : 90 + placed % 4 * 320;
+    const y = Number.isFinite(item.y) ? Math.max(-100000, Math.min(100000, Number(item.y))) : 100 + Math.floor(placed / 4) * 220;
+    const width = Number.isFinite(item.width) ? Math.max(160, Math.min(1800, Number(item.width))) : 280;
+    const height = Number.isFinite(item.height) ? Math.max(100, Math.min(1200, Number(item.height))) : 160;
+    const xywh = `[${x},${y},${width},${height}]` as `[${number},${number},${number},${number}]`;
+    const noteId = doc.addBlock('affine:note', { xywh }, rootPage.id);
+    doc.addBlock('affine:paragraph', { text: new Text(item.text.slice(0, 5000)) }, noteId);
+    imported.set(item.id, true);
+    placed += 1;
+    return true;
+  };
+
+  const exportCopy = async () => {
     try {
       const snapshot = await new Job({ collection }).docToSnapshot(doc);
       const blob = new Blob([JSON.stringify({
@@ -133,16 +121,59 @@ async function main() {
       link.download = `blue-ocean-visual-${boardId.replace(/[^a-zA-Z0-9-_]/g, '_')}.json`;
       link.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 10000);
-      text(status, 'Cópia exportada');
+      notify('SAVED');
     } catch (error) {
-      text(status, 'Falha ao exportar');
+      notify('ERROR', { text: 'Não foi possível exportar o quadro visual.' });
       console.error('BlockSuite export:', error);
-    } finally {
-      backup.disabled = false;
     }
-  });
+  };
 
-  window.addEventListener('pagehide', () => { void persistence.destroy(); }, { once: true });
+  type BridgeItem = { id: string; text: string; x?: number; y?: number; width?: number; height?: number };
+  const safeItems = (value: unknown): BridgeItem[] => Array.isArray(value)
+    ? value.slice(0, 250).filter((item): item is BridgeItem =>
+      item !== null && typeof item === 'object' &&
+      typeof (item as BridgeItem).id === 'string' && typeof (item as BridgeItem).text === 'string' &&
+      (item as BridgeItem).id.length <= 250).map(item => ({
+      ...item, id: item.id.slice(0, 250), text: item.text.slice(0, 5000),
+    })) : [];
+
+  const onBridgeMessage = (event: MessageEvent) => {
+    if (event.origin !== window.location.origin || event.source !== window.parent) return;
+    const message = event.data;
+    if (!message || message.source !== 'blue-ocean' || message.version !== 2 ||
+        message.boardId !== boardId || message.serviceId !== serviceId) return;
+    if (message.type === 'MODE' && (message.mode === 'canvas' || message.mode === 'page')) {
+      setMode(message.mode);
+    } else if (message.type === 'EXPORT') {
+      void exportCopy();
+    } else if (message.type === 'INSERT_REFERENCES' || message.type === 'IMPORT_LEGACY') {
+      let count = 0;
+      for (const item of safeItems(message.items)) {
+        try { if (addVisualNote(item)) count += 1; }
+        catch (error) { console.error('Falha ao inserir nota visual', error); }
+      }
+      notify('IMPORT_DONE', { count });
+    }
+  };
+  window.addEventListener('message', onBridgeMessage);
+
+  // Provide selected text for a deliberate conversion to a canonical Blue Ocean object.
+  let lastSelected = '';
+  const notifySelection = () => {
+    const selected = (window.getSelection()?.toString() ?? '').trim().slice(0, 240);
+    if (selected !== lastSelected) { lastSelected = selected; notify('SELECTION', { text: selected }); }
+  };
+  canvas.addEventListener('mouseup', notifySelection, true);
+  canvas.addEventListener('keyup', notifySelection, true);
+  let saveTimer: number | undefined;
+  const onUpdate = () => {
+    window.clearTimeout(saveTimer);
+    saveTimer = window.setTimeout(() => notify('SAVED'), 700);
+  };
+  doc.spaceDoc.on('update', onUpdate);
+  notify('READY');
+
+  window.addEventListener('pagehide', () => { window.clearTimeout(saveTimer); window.removeEventListener('message', onBridgeMessage); doc.spaceDoc.off('update', onUpdate); void persistence.destroy(); }, { once: true });
 }
 
 main().catch(error => {
