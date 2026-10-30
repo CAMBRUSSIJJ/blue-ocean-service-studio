@@ -80,11 +80,15 @@ def main():
             page.get_by_role('button',name='Novo whiteboard',exact=True).click()
             page.get_by_label('Nome do quadro',exact=True).fill('E2E Visual')
             page.get_by_role('button',name='Começar livre',exact=True).click()
-            board=page.locator('.bo1174-board')
+            board=page.locator('[data-whiteboard-primary-editor="blocksuite"]')
             board.wait_for(state='visible',timeout=10000)
-            if page.locator('.rt144-view').bounding_box()['height']<200:
-              errors.append(f'{name}: canvas sem área útil')
+            page.frame_locator('.bo-bs-frame').locator('.bo-bs-canvas').wait_for(state='visible',timeout=30000)
+            bounds=page.locator('.bo-bs-frame').bounding_box()
+            if not bounds or bounds['height']<200:
+              errors.append(f'{name}: canvas visual sem área útil')
             page.screenshot(path=str(ART/f'whiteboard-{name}.png'),full_page=False,animations='disabled')
+            board.get_by_role('button',name='Quadro clássico',exact=True).click()
+            page.locator('.bo1174-board').wait_for(state='visible',timeout=10000)
             page.evaluate("() => window.BlueOceanRuntime.api('guidedBuilder').open()")
             page.get_by_role('dialog',name='Montar serviço',exact=True).wait_for(state='visible',timeout=10000)
             page.screenshot(path=str(ART/f'wizard-{name}.png'),full_page=False,animations='disabled')
@@ -100,6 +104,10 @@ def main():
     if args.require_baseline and len(baseline)<len(VIEWPORTS)*3: errors.append('baseline visual incompleta; execute --update-baseline e versione tests/visual-baseline')
     diffs={}
     for actual in ART.glob('*.png'):
+      # The visual canvas was intentionally redesigned: exercise layout and frame
+      # boot above, archive new screenshots and preserve old regression baselines
+      # for Home, Design System and Wizard until new screenshots are approved.
+      if actual.name.startswith('whiteboard-') and not args.require_baseline: continue
       ratio=compare_images(actual,BASE/actual.name)
       if ratio is not None:
         diffs[actual.name]=round(ratio,6)
