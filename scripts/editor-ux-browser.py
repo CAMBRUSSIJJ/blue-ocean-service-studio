@@ -51,6 +51,12 @@ def open_whiteboard(page):
     page.get_by_role('button', name='Novo whiteboard', exact=True).click()
     page.get_by_label('Nome do quadro', exact=True).fill('Ideias do atendimento')
     page.get_by_role('button', name='Começar livre', exact=True).click()
+    visual = page.locator('[data-whiteboard-primary-editor="blocksuite"]')
+    expect(visual).to_be_visible()
+    expect(page.frame_locator('.bo-bs-frame').locator('.bo-bs-canvas')).to_be_visible(timeout=30000)
+    # Legacy-compatibility suite intentionally enters the retained classic editor.
+    # The normal product entrypoint is BlockSuite, verified just above.
+    visual.get_by_role('button', name='Quadro clássico', exact=True).click()
     expect(page.locator('.bo1174-board')).to_be_visible()
 
 def note(page, text):
