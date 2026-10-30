@@ -60,9 +60,128 @@ function cadStageKey(step){return step.hostStageId||step.hostLocalId}
 function cadStageOptions(index){return S.steps.map((step,i)=>'<option value="'+esc(cadStageKey(step))+'" '+(i===index?'selected':'')+'>'+esc(step.n)+'</option>').join('')}
 function cadCatalog(kind){if(kind==='metric')return S.availableMetrics||[];if(kind==='system'||kind==='resource')return (S.operationalResources||[]).filter(item=>item.kind===kind);return S.serviceElements?.[kind]||[]}
 function cadOptions(items,value,empty='Nenhum'){return '<option value="">'+empty+'</option>'+items.map(item=>'<option value="'+esc(item.id)+'" '+(item.id===value?'selected':'')+'>'+esc(item.title||item.name||item.id)+'</option>').join('')}
-function cadFormData(form){const data=new FormData(form);return {...Object.fromEntries(data),resourceRefs:data.getAll('resourceRefs')}}
+function cadFormData(form){const data=new FormData(form);return {...Object.fromEntries(data),...(form.elements.namedItem('resourceRefs')?{resourceRefs:data.getAll('resourceRefs')}:{})}}
 function cadCurrentDraft(){if(cadState.creating)return cadState.creating;if(cadState.link)return cadState.link;return cadState.drafts.get(cadState.selected)}
 function cadField(name,label,value='',type='text',extra=''){return '<label>'+label+'<input name="'+name+'" type="'+type+'" value="'+esc(value??'')+'" '+extra+'></label>'}
+// Only supported properties of this entity are exposed. Hidden legacy values stay in the record.
+const cadInspectorSchema={
+ 'customer-action':['channelId','durationMinutes','waitMinutes','targetMinutes','metricId'],
+ activity:['owner','team','channelId','durationMinutes','waitMinutes','targetMinutes','resourceRefs','resourceNotes','rule','metricId'],
+ touchpoint:['owner','team','channelId','durationMinutes','waitMinutes','targetMinutes','resourceRefs','resourceNotes','metricId'],
+ decision:['owner','team','targetMinutes','metricId'],
+ system:['owner','team','resourceRefs','resourceNotes','metricId'],
+ resource:['owner','team','resourceNotes','metricId'],
+ metric:['owner','team'],channel:[],emotion:[],artifact:[],persona:[],need:[],pain:[],opportunity:[],thought:[],text:[]
+};
+function cadInspectorOperation(kind,draft,resourceRefs){
+ const fields=cadInspectorSchema[kind]||[];
+ return fields.map(name=>{
+  if(name==='channelId'||name==='metricId')return '<label>'+(name==='channelId'?'Canal':'Indicador vinculado')+'<select name="'+name+'">'+cadOptions(cadCatalog(name==='channelId'?'channel':'metric'),draft[name])+'</select></label>';
+  if(name==='resourceRefs')return '<fieldset><legend>Recursos vinculados</legend>'+(resourceRefs.length?resourceRefs.map(ref=>'<label class="cad-check"><input type="checkbox" name="resourceRefs" value="'+esc(ref)+'" '+(draft.resourceRefs?.includes(ref)?'checked':'')+'>'+esc(blueprintResourceName(ref))+'</label>').join(''):'<p>Cadastre um sistema ou recurso na biblioteca.</p>')+'</fieldset>';
+  if(name==='rule')return '<label>Regra ou condição<textarea name="rule" maxlength="1000">'+esc(draft.rule||'')+'</textarea></label>';
+  const timing={durationMinutes:'Execução (min)',waitMinutes:'Espera (min)',targetMinutes:'Prazo (min)'};
+  return timing[name]?cadField(name,timing[name],draft[name],'number','min="0" max="525600" step="any"'):cadField(name,{owner:'Responsável',team:'Equipe',resourceNotes:'Outros recursos'}[name],draft[name],'text','maxlength="'+(name==='resourceNotes'?400:160)+'"');
+ }).join('');
+}
+function cadLocationPreview(draft){return (S.steps.find(step=>cadStageKey(step)===draft.stageKey)?.n||'Etapa indisponível')+' → '+(rowDefs().find(row=>row.id===draft.row)?.n||draft.row)}
+const cadAutosave={timer:0,hideTimer:0,dirty:new Map(),pending:null,feedback:new Map(),confirming:false};
+function cadResetAutosave(){clearTimeout(cadAutosave.timer);clearTimeout(cadAutosave.hideTimer);cadAutosave.dirty.clear();cadAutosave.feedback.clear();cadAutosave.pending=null;cadAutosave.confirming=false}
+function cadInspectorFeedback(id,text='',error=''){
+ cadAutosave.feedback.set(id,{text,error,expires:text==='Salvo'?Date.now()+2200:0});cadSyncInspectorFeedback();
+}
+function cadSyncInspectorFeedback(){
+ const form=app.querySelector('#cad-component-form');if(!form)return;
+ const feedback=cadAutosave.feedback.get(form.dataset.noteId)||{};
+ if(feedback.expires&&feedback.expires<=Date.now())feedback.text='';
+ const status=form.querySelector('[data-cad-autosave]');if(status){status.textContent=feedback.text||'';status.classList.toggle('is-error',!!feedback.error)}
+ const error=form.querySelector('.form-error');if(error)error.textContent=feedback.error||cadState.error||'';
+}
+function cadQueueInspector(form,field){
+ const id=form.dataset.noteId,entry=blueprintNote(id);
+ if(S.readOnly||cadState.creating||!entry||!field?.name)return;
+ const values=cadFormData(form),draft=cadState.drafts.get(id)||cadDraftFor(entry);
+ Object.assign(draft,values);cadState.drafts.set(id,draft);
+ const title=form.elements.namedItem('title');title?.setCustomValidity(title.value.trim()?'':'Informe o nome do componente.');
+ const previous=cadAutosave.dirty.get(id),patch={...previous?.values,[field.name]:values[field.name]};
+ // Compare against the in-flight value too, so typing back to the saved value is not lost.
+ const baseline={...cadDraftFor(entry),...(cadAutosave.pending?.id===id?cadAutosave.pending.values:{})};
+ for(const name of Object.keys(patch))if(JSON.stringify(patch[name]??'')===JSON.stringify(baseline[name]??''))delete patch[name];
+ const invalid=[...form.elements].find(element=>element.willValidate&&!element.validity.valid);
+ const error=invalid?.validationMessage||'';
+ if(Object.keys(patch).length)cadAutosave.dirty.set(id,{values:patch,error,due:Date.now()+800});else cadAutosave.dirty.delete(id);
+ cadInspectorFeedback(id,error?'Não salvo':'',error);
+ const preview=form.querySelector('[data-cad-location]');if(preview)preview.textContent=cadLocationPreview(draft);
+ clearTimeout(cadAutosave.timer);cadAutosave.timer=setTimeout(cadFlushInspector,800);
+}
+function cadInspectorChange(id,values){
+ const entry=blueprintNote(id);if(!entry)throw Error('Este componente não está mais no mapa.');
+ const draft={...cadDraftFor(entry),...values},step=S.steps.find(item=>cadStageKey(item)===draft.stageKey);
+ if(!step)throw Error('Selecione uma etapa disponível.');
+ if(!draft.title?.trim())throw Error('Informe o nome do componente.');
+ for(const name of ['linkUrl','imageUrl'])if(values[name]&&!cadModel.canvasSafeUrl(values[name]))throw Error('Informe um endereço HTTP ou HTTPS válido.');
+ const next=structuredClone(S),note=next.c[entry.key].find(item=>item.i===id);
+ note.t=draft.title.trim();note.canvas=cadModel.normalizeCanvasMetadata(draft);
+ note.activity=window.BlueOceanJourneyContent.normalizeMatrixActivity({...draft,category:note.activity?.category});
+ const input={...draft,stageId:step.hostStageId,stageLocalId:step.hostLocalId};
+ const moved=draft.row!==entry.key.split('|')[0]||draft.stageKey!==cadStageKey(S.steps[entry.key.split('|')[1]])?cadModel.moveCanvasCard(next,id,input):next;
+ if(draft.kind==='emotion'&&Object.hasOwn(values,'emotionScore')){
+  const unknown=draft.emotionScore==='unknown';Object.assign(moved.steps[S.steps.indexOf(step)],{e:unknown?0:Math.max(-2,Math.min(2,Number(draft.emotionScore)||0)),emotionRecorded:!unknown,emotionStatus:'hypothesis',emotionSource:''});
+ }
+ window.BlueOceanJourneyContent.validateMatrixDocument(moved);
+ return {state:moved,convert:((draft.kind==='customer-action'&&draft.row!=='ac')||(draft.kind==='activity'&&draft.row==='ac'))&&draft.row!==entry.key.split('|')[0]};
+}
+function cadFlushInspector(){
+ clearTimeout(cadAutosave.timer);
+ if(cadLocked()||cadAutosave.pending||cadAutosave.confirming)return;
+ const available=[...cadAutosave.dirty].filter(([,job])=>!job.error),queued=available.find(([,job])=>job.due<=Date.now());
+ if(!queued){if(available.length)cadAutosave.timer=setTimeout(cadFlushInspector,Math.max(0,Math.min(...available.map(([,job])=>job.due))-Date.now()));return}
+ const [id,job]=queued;
+ try{
+  const change=cadInspectorChange(id,job.values);
+  const commit=()=>{
+   cadAutosave.confirming=false;cadAutosave.dirty.delete(id);cadAutosave.pending={id,values:job.values};
+   cadInspectorFeedback(id,'Salvando…');cadSend('canvas-change',{state:change.state},id,true);
+  };
+  if(change.convert){
+   cadAutosave.confirming=true;
+   cadAskConfirmation({title:'Converter componente?',message:'Mover entre Ações do cliente e Operação altera o significado deste cartão. A alteração será registrada no mapa.',acceptLabel:'Converter e mover',onAccept:commit,onCancel:()=>{
+    cadAutosave.confirming=false;delete job.values.row;delete job.values.stageKey;
+    const draft=cadState.drafts.get(id);if(draft)Object.assign(draft,cadDraftFor(blueprintNote(id)),job.values);
+    cadAutosave.dirty.delete(id);if(Object.keys(job.values).length)cadAutosave.dirty.set(id,job);
+    rerender();cadFlushInspector();
+   }});return;
+  }
+  commit();
+ }catch(error){job.error=error.message;cadInspectorFeedback(id,'Não salvo',error.message);setTimeout(cadFlushInspector,0)}
+}
+function cadInspectorSaved(data){
+ const pending=cadAutosave.pending;if(!pending)return;
+ cadAutosave.pending=null;
+ const mapTitle=app.querySelector('.cad-header>input');if(mapTitle)mapTitle.readOnly=!!S.readOnly;
+ const persona=app.querySelector('[data-cad-persona]');if(persona)persona.disabled=!!S.readOnly;
+ app.querySelectorAll('.cad-component-main[data-act="cad-add"],[data-act="cad-library"],[data-act="step"],#cad-component-form [data-act="cad-delete"]').forEach(button=>{button.disabled=!!S.readOnly;if(button.matches('.cad-component-main'))button.draggable=!S.readOnly});
+ if(!data.ok){
+  const error=data.error||'Não foi possível salvar. Edite o campo para tentar novamente.';
+  const newer=cadAutosave.dirty.get(pending.id);
+  cadAutosave.dirty.set(pending.id,{values:{...pending.values,...newer?.values},error,due:0});
+  cadInspectorFeedback(pending.id,'Não salvo',error);announceSave(false);cadFlushInspector();return;
+ }
+ const entry=blueprintNote(pending.id),newer=cadAutosave.dirty.get(pending.id);
+ if(entry)cadState.drafts.set(pending.id,{...cadState.drafts.get(pending.id),...cadDraftFor(entry),...newer?.values});
+ cadInspectorFeedback(pending.id,newer?.error?'Não salvo':newer?'':'Salvo',newer?.error||'');announceSave(true);
+ clearTimeout(cadAutosave.hideTimer);cadAutosave.hideTimer=setTimeout(()=>{if(cadAutosave.feedback.get(pending.id)?.text==='Salvo')cadInspectorFeedback(pending.id)},2200);
+ cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());cadPaint();
+ const mobile=app.querySelector('.cad-mobile-map');if(mobile)mobile.innerHTML=cadMobileMap();
+ const form=app.querySelector('#cad-component-form');if(form?.dataset.noteId===pending.id){const preview=form.querySelector('[data-cad-location]');if(preview)preview.textContent=cadLocationPreview(cadState.drafts.get(pending.id))}
+ // New text stays editable while saving; serialize its next patch against the acknowledged document.
+ cadFlushInspector();
+}
+function cadRebaseInspector(){
+ const pending=cadAutosave.pending;if(!pending)return;
+ const newer=cadAutosave.dirty.get(pending.id);
+ cadAutosave.pending=null;cadAutosave.dirty.set(pending.id,{values:{...pending.values,...newer?.values},error:newer?.error||'',due:0});
+ setTimeout(cadFlushInspector,0);
+}
 function cadInspector(){
  if(cadState.selectedRow)return cadLaneInspector();
  const entry=blueprintNote(cadState.selected),isNew=!!cadState.creating;
@@ -78,24 +197,28 @@ function cadInspector(){
  const allowed=component.rows.includes('*')?rowDefs().map(value=>value.id):component.rows.includes(row)?component.rows:[...component.rows,row];
  const legacyPlacement=!cadModel.canvasAcceptsNewRow(kind,row);
  const resourceRefs=[...new Set([...(S.operationalResources||[]).map(item=>item.ref),...(draft.resourceRefs||[])])];
- return '<form id="cad-component-form"><h2>'+(isNew?'Adicionar '+component.title:'Propriedades')+'</h2><p class="cad-kind">'+component.title+'</p>'+(legacyPlacement?'<p class="cad-placement-warning" role="status">Cartão legado: essa faixa não corresponde ao tipo do componente. Os dados foram preservados.</p>':'')+'<section class="cad-inspector-group"><h3>Conteúdo</h3>'+cadField('title','Nome do componente',draft.title,'text','required maxlength="240"')+
- '<label>Descrição<textarea name="description" maxlength="1000">'+esc(draft.description||'')+'</textarea></label></section>'+
+ const operation=cadInspectorOperation(kind,draft,resourceRefs);
+ return '<form id="cad-component-form" data-note-id="'+esc(entry?.note.i||'')+'"><h2>'+(isNew?'Adicionar '+component.title:'Propriedades')+'</h2><div class="cad-inspector-meta"><p class="cad-kind">'+component.title+'</p>'+(!isNew?'<span class="cad-autosave-status" data-cad-autosave role="status" aria-live="polite"></span>':'')+'</div>'+(legacyPlacement?'<p class="cad-placement-warning" role="status">Cartão legado: essa faixa não corresponde ao tipo do componente. Os dados foram preservados.</p>':'')+'<section class="cad-inspector-group"><h3>Conteúdo</h3>'+cadField('title','Nome do componente',draft.title,'text','required maxlength="240"')+
+ '<label>Descrição<textarea name="description" maxlength="1000">'+esc(draft.description||'')+'</textarea></label>'+
  (kind==='artifact'?'<fieldset class="cad-evidence-fields"><legend>Evidência física ou digital</legend><label>Apresentação<select name="evidenceType">'+[['physical','Evidência física'],['image','Imagem'],['document','Documento'],['link','Link']].map(([id,label])=>'<option value="'+id+'" '+((draft.evidenceType||'physical')===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+cadField('imageUrl','Endereço HTTPS da imagem',draft.imageUrl||entry?.note.url||'','url','maxlength="2000" placeholder="https://..."')+(cadModel.canvasSafeUrl(draft.imageUrl)?'<figure class="cad-evidence-preview"><img src="'+esc(cadModel.canvasSafeUrl(draft.imageUrl))+'" alt="Prévia da evidência" loading="lazy"><figcaption>Prévia da imagem vinculada</figcaption></figure>':'')+cadField('linkUrl','Link para abrir documento ou evidência',draft.linkUrl||'','url','maxlength="2000" placeholder="https://..."')+'<p class="cad-field-hint">Use links públicos HTTPS. Não envie URLs de arquivos privados.</p></fieldset>':kind==='channel'?cadField('linkUrl','Link do canal (opcional)',draft.linkUrl||'','url','maxlength="2000" placeholder="https://..."'):'')+
- '<details class="cad-inspector-advanced" open><summary>Aparência do cartão</summary><div class="cad-inspector-group"><label class="cad-icon-field">Ícone do cartão<select name="iconKey">'+Object.entries(cadModel.CANVAS_COMPONENTS).map(([id,item])=>'<option value="'+id+'" '+((draft.iconKey||kind)===id?'selected':'')+'>'+esc(item.title)+'</option>').join('')+'</select></label>'+
+ (kind==='emotion'?'<label>Como o cliente se sente?<select name="emotionScore"><option value="unknown" '+(draft.emotionScore==='unknown'?'selected':'')+'>Não informado</option>'+EM.map((label,index)=>'<option value="'+(index-2)+'" '+(Number(draft.emotionScore)===index-2&&draft.emotionScore!=='unknown'?'selected':'')+'>'+label+'</option>').join('')+'</select></label>':'')+
+ (kind==='decision'?'<label>Regra ou condição<textarea name="rule" maxlength="1000">'+esc(draft.rule||'')+'</textarea></label>':'')+'</section>'+
+ (operation?'<details class="cad-inspector-advanced" data-cad-section="operation"><summary>Vínculos e operação</summary><div class="cad-inspector-group">'+operation+'</div></details>':'')+
+ '<details class="cad-inspector-advanced" data-cad-section="location"><summary>Localização no serviço<small data-cad-location>'+esc(cadLocationPreview(draft))+'</small></summary><div class="cad-inspector-group"><label>Etapa<select name="stageKey" required>'+cadStageOptions(S.steps.findIndex(step=>cadStageKey(step)===draft.stageKey))+'</select></label><label>Faixa<select name="row">'+allowed.map(id=>'<option value="'+id+'" '+(id===draft.row?'selected':'')+'>'+esc(rowDefs().find(item=>item.id===id)?.n||id)+'</option>').join('')+'</select></label></div></details>'+
+ '<details class="cad-inspector-advanced" data-cad-section="appearance"><summary>Aparência do cartão</summary><div class="cad-inspector-group"><label class="cad-icon-field">Ícone do cartão<select name="iconKey">'+Object.entries(cadModel.CANVAS_COMPONENTS).map(([id,item])=>'<option value="'+id+'" '+((draft.iconKey||kind)===id?'selected':'')+'>'+esc(item.title)+'</option>').join('')+'</select></label>'+
  '<label class="cad-tone-field">Cor de destaque<select name="tone">'+[['default','Padrão'],['blue','Azul'],['teal','Turquesa'],['amber','Âmbar'],['violet','Violeta'],['neutral','Neutro']].map(([id,label])=>'<option value="'+id+'" '+((draft.tone||'default')===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+
- '</div></details><section class="cad-inspector-group"><h3>Localização no serviço</h3><label>Etapa<select name="stageKey" required>'+cadStageOptions(S.steps.findIndex(step=>cadStageKey(step)===draft.stageKey))+'</select></label><label>Faixa<select name="row">'+allowed.map(id=>'<option value="'+id+'" '+(id===draft.row?'selected':'')+'>'+esc(rowDefs().find(item=>item.id===id)?.n||id)+'</option>').join('')+'</select></label>'+
- '</section><section class="cad-inspector-group"><h3>Vínculos e operação</h3>'+ 
+ '</div></details>'+
  (isNew&&['system','resource','metric','channel','persona','need','pain','opportunity'].includes(kind)?'<label>Usar registro do serviço<select name="referenceId">'+cadOptions(cadCatalog(kind),draft.referenceId,'Criar novo registro')+'</select></label><p>Ao reutilizar, o nome e os dados do registro existente são mantidos.</p>':'')+
- '<div class="cad-field-grid">'+cadField('owner','Responsável',draft.owner,'text','maxlength="160"')+cadField('team','Equipe',draft.team,'text','maxlength="160"')+'</div><label>Canal<select name="channelId">'+cadOptions(cadCatalog('channel'),draft.channelId)+'</select></label><div class="cad-field-grid">'+[['durationMinutes','Execução (min)'],['waitMinutes','Espera (min)'],['targetMinutes','Prazo (min)']].map(([name,label])=>cadField(name,label,draft[name],'number','min="0" max="525600" step="any"')).join('')+'</div><fieldset><legend>Recursos vinculados</legend>'+(resourceRefs.length?resourceRefs.map(ref=>'<label class="cad-check"><input type="checkbox" name="resourceRefs" value="'+esc(ref)+'" '+(draft.resourceRefs?.includes(ref)?'checked':'')+'>'+esc(blueprintResourceName(ref))+'</label>').join(''):'<p>Cadastre um sistema ou recurso na biblioteca.</p>')+'</fieldset>'+cadField('resourceNotes','Outros recursos',draft.resourceNotes,'text','maxlength="400"')+'<label>Regra ou condição<textarea name="rule" maxlength="1000">'+esc(draft.rule||'')+'</textarea></label><label>Indicador vinculado<select name="metricId">'+cadOptions(cadCatalog('metric'),draft.metricId)+'</select></label></section><p class="form-error" role="alert">'+esc(cadState.error)+'</p><footer>'+cadButton('cad-cancel','Cancelar')+'<button type="submit" '+(cadLocked()?'disabled':'')+'>'+(isNew?'Adicionar ao Blueprint':'Salvar componente')+'</button></footer>'+(!isNew?cadButton('cad-delete','Remover do mapa',cadLocked()?'disabled':''):'')+'</form>';
+ '<p class="form-error" role="alert">'+esc(cadState.error)+'</p>'+(isNew?'<footer>'+cadButton('cad-cancel','Cancelar')+'<button type="submit" '+(cadLocked()?'disabled':'')+'>Adicionar ao Blueprint</button></footer>':cadButton('cad-delete','Remover do mapa',cadLocked()?'disabled':''))+'</form>';
 }
 function cadLinkForm(){
  const draft=cadState.link,options=value=>'<option value="">Escolha um componente</option>'+blueprintNotes().map(entry=>'<option value="'+esc(entry.note.i)+'" '+(value===entry.note.i?'selected':'')+'>'+esc(blueprintCaption(entry))+'</option>').join('');
  return '<form id="cad-link-form"><h2>'+(draft.id?'Editar conexão':'Criar conexão')+'</h2><p>Escolha origem e destino aqui ou selecione dois componentes no canvas.</p><label>Origem<select name="a" required>'+options(draft.a)+'</select></label><label>Destino<select name="b" required>'+options(draft.b)+'</select></label><label>Relação<select name="type">'+Object.entries(blueprintConnectionNames).map(([id,name])=>'<option value="'+id+'" '+(id===draft.type?'selected':'')+'>'+name+'</option>').join('')+'</select></label>'+cadField('label','Descrição da conexão',draft.label,'text','maxlength="160"')+'<fieldset data-cad-handoff><legend>Passagem entre equipes</legend>'+cadField('fromTeam','Equipe de origem',draft.fromTeam,'text','maxlength="160"')+cadField('toTeam','Equipe de destino',draft.toTeam,'text','maxlength="160"')+cadField('deliverable','O que será transferido',draft.deliverable,'text','maxlength="400"')+cadField('deadlineMinutes','Prazo da transferência (min)',draft.deadlineMinutes,'number','min="0" max="525600" step="any"')+'<label>Condição de aceite<textarea name="acceptance" maxlength="1000">'+esc(draft.acceptance||'')+'</textarea></label></fieldset><p class="form-error" role="alert">'+esc(cadState.error)+'</p><footer>'+cadButton('cad-cancel','Cancelar')+'<button type="submit" '+(cadLocked()?'disabled':'')+'>Salvar conexão</button></footer>'+(draft.id?cadButton('cad-delete-link','Remover conexão',cadLocked()?'disabled':''):'')+'</form>';
 }
 /* In-app confirmation replaces browser-native prompts, without changing the canonical map. */
-function cadAskConfirmation({title,message,acceptLabel='Confirmar',onAccept}){
+function cadAskConfirmation({title,message,acceptLabel='Confirmar',onAccept,onCancel}){
  if(cadLocked())return;
- cadState.confirmation={title,message,acceptLabel,onAccept};
+ cadState.confirmation={title,message,acceptLabel,onAccept,onCancel};
  cadState.menu=null;
  rerender();
  requestAnimationFrame(()=>app.querySelector('[data-act="cad-confirm-cancel"]')?.focus());
@@ -109,6 +232,7 @@ function cadLinkFields(){const form=app.querySelector('#cad-link-form');if(!form
 function cadCardDetails(note){const a=note.activity||{};return [a.owner||a.team||'Responsável a definir',a.durationMinutes!=null?a.durationMinutes+' min de execução':'',a.waitMinutes!=null?a.waitMinutes+' min de espera':''].filter(Boolean).join(' · ')}
 const cadBoundary=(row,index,rows)=>cadModel.canvasBoundary(row,index,rows);
 function cadSubmit(form){
+ if(form.id==='cad-component-form'&&!cadState.creating){const job=cadAutosave.dirty.get(form.dataset.noteId);if(job)job.due=0;cadFlushInspector();return}
  if(cadLocked()||!form.reportValidity())return;try{
   const data=cadFormData(form),next=structuredClone(S);
   if(form.id==='cad-link-form'){
@@ -118,16 +242,7 @@ function cadSubmit(form){
   }
   const draft=cadCurrentDraft(),step=S.steps.find(item=>cadStageKey(item)===data.stageKey);if(!step)throw Error('Selecione uma etapa disponível.');
   const input={...draft,...data,stageId:step.hostStageId,stageLocalId:step.hostLocalId};
-  if(cadState.creating){cadModel.prepareCanvasInput(S,input);cadSend('canvas-create',{input});return}
-  const entry=blueprintNote(cadState.selected);if(!entry)throw Error('Componente indisponível.');const note=next.c[entry.key].find(item=>item.i===entry.note.i),kind=cadModel.canvasKind(note,entry.key.split('|')[0]);
-  note.t=data.title.trim();if(!note.t)throw Error('Informe o nome do componente.');note.canvas=cadModel.normalizeCanvasMetadata({...input,kind});note.activity=window.BlueOceanJourneyContent.normalizeMatrixActivity({...input,category:note.activity?.category});
-  const moved=cadModel.moveCanvasCard(next,note.i,{...input,row:data.row});
-  const commit=()=>cadSend('canvas-change',{state:moved},note.i);
-  if((kind==='customer-action'&&data.row!=='ac'||kind==='activity'&&data.row==='ac')&&data.row!==entry.key.split('|')[0]){
-    cadAskConfirmation({title:'Converter componente?',message:'Mover entre Ações do cliente e Operação altera o significado deste cartão. A alteração será registrada no mapa.',acceptLabel:'Converter e mover',onAccept:commit});
-    return;
-  }
-  commit();
+  cadModel.prepareCanvasInput(S,input);cadSend('canvas-create',{input});
  }catch(error){cadState.error=error.message;form.querySelector('.form-error').textContent=error.message}
 }
 
@@ -175,7 +290,7 @@ function cadLibrary(){
  return '<div class="cad-library-head"><h2>'+ (cadState.sidebarTab==='lanes'?'Faixas':'Componentes') +'</h2>'+cadButton('cad-toggle-library-mode',cadState.libraryCompact?'»':'«','title="'+(cadState.libraryCompact?'Expandir':'Compactar')+' biblioteca" aria-label="'+(cadState.libraryCompact?'Expandir':'Compactar')+' biblioteca"')+'</div>'+cadSidebarTabs()+(cadState.sidebarTab==='lanes'?cadLanePanel():'<label class="cad-search"><span>Buscar componente</span><input type="search" data-cad-search value="'+esc(cadState.query)+'" placeholder="Nome ou função"></label><div class="cad-library-filters" role="group" aria-label="Filtrar biblioteca">'+[['all','Todos'],['compatible','Compatíveis'],['favorites','★ Favoritos']].map(([id,title])=>cadButton('cad-lib-filter',title,'data-filter="'+id+'" aria-pressed="'+(filter===id)+'"')).join('')+'</div>'+(active?'<p class="cad-library-context">Célula: <b>'+esc(rowDefs().find(r=>r.id===active.row)?.n||active.row)+'</b> · '+esc(S.steps[active.index]?.n||'')+'</p>':'')+'<div class="cad-components-list">'+(visible?sections:'<p class="cad-library-empty">Nenhum resultado. Tente Todos.</p>')+'</div><p class="cad-library-help">Arraste para o mapa ou escolha uma célula e clique no componente.</p>');
 }
 
-function cadDraftFor(entry){const [row,index]=entry.key.split('|');return {...blueprintActivity(entry.note,row),kind:cadModel.canvasKind(entry.note,row),channelId:entry.note.canonicalChannelId||'',metricId:entry.note.canonicalMetricId||'',...entry.note.canvas,title:cadTitle(entry.note),description:entry.note.canvas?.description||entry.note.canonicalDescription||'',row,stageKey:cadStageKey(S.steps[index]),editingId:entry.note.i}}
+function cadDraftFor(entry){const [row,index]=entry.key.split('|');return {...blueprintActivity(entry.note,row),kind:cadModel.canvasKind(entry.note,row),channelId:entry.note.canonicalChannelId||'',metricId:entry.note.canonicalMetricId||'',...entry.note.canvas,title:cadTitle(entry.note),description:entry.note.canvas?.description??entry.note.canonicalDescription??'',row,stageKey:cadStageKey(S.steps[index]),editingId:entry.note.i,emotionScore:cadRecordedEmotion(S.steps[index])?S.steps[index].e:'unknown'}}
 function cadStash(){if(cadState.creating&&cadState.creating.title.trim())cadState.drafts.set('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row,{...cadState.creating})}
 function cadQuickPosition(point={}){return {x:Math.max(12,Math.min(point.x??innerWidth/2-160,innerWidth-344)),y:Math.max(12,Math.min(point.y??170,innerHeight-350))}}
 function cadReveal(row){if(V.hiddenRows.includes(row)){V.hiddenRows=V.hiddenRows.filter(id=>id!==row);V.preset='custom';saveView()}}
@@ -284,6 +399,7 @@ function cadMobileMap(){
  return '<nav class="cad-stage-nav" aria-label="Navegar entre etapas">'+cadButton('cad-prev','‹','aria-label="Etapa anterior" '+(!index?'disabled':''))+'<label>Etapa '+(index+1)+' de '+S.steps.length+'<select data-cad-stage aria-label="Etapa em foco">'+S.steps.map((value,i)=>'<option value="'+i+'" '+(i===index?'selected':'')+'>'+esc(value.n)+'</option>').join('')+'</select></label>'+cadButton('cad-next','›','aria-label="Próxima etapa" '+(index===S.steps.length-1?'disabled':''))+'</nav><div class="cad-mobile-stage"><h2>'+esc(step.n)+'</h2>'+cadButton('cad-stage-after','+','data-si="'+index+'" aria-label="Adicionar etapa ao lado"')+'</div>'+cadRows().map((row,i,rows)=>'<section class="cad-mobile-lane" data-row="'+row.id+'">'+(cadModel.canvasBoundary(row,i,rows)?'<p class="cad-mobile-boundary">'+cadModel.canvasBoundary(row,i,rows)+'</p>':'')+'<h3>'+esc(row.n)+'</h3>'+(row.id==='em'?[]:cadCellNotes(row.id,index)).map(note=>'<article class="cad-mobile-card">'+cadButton(note.virtualLabel?'cad-virtual':'cad-select','<small>'+esc(note.virtualLabel||cadModel.CANVAS_COMPONENTS[cadModel.canvasKind(note,row.id)].title)+'</small><b>'+esc(cadTitle(note))+'</b>','data-id="'+esc(note.i)+'" data-row="'+row.id+'" data-si="'+index+'"')+(!note.virtualLabel?cadButton('cad-menu','···','data-id="'+esc(note.i)+'" aria-label="Ações do cartão"'):'')+'</article>').join('')+(row.id==='em'?cadButton('cad-emotion',cadRecordedEmotion(step)?EM[cadModel.canvasEmotionScore(step)+2]:'Registrar emoção','data-si="'+index+'" '+(cadLocked()?'disabled':'')):cadButton('cad-cell-add','+ Adicionar cartão','data-row="'+row.id+'" data-si="'+index+'" '+(cadLocked()?'disabled':'')))+'</section>').join('');
 }
 function cadRender(){
+ if(cadState.scene!==(S.journeyId||S.id))cadResetAutosave();
  if(!V.canvasOrderVersion){const preferred=['sd','ev','ch','ac','th','em','fl','bk','sy','im'];V.rowOrder=[...preferred,...V.rowOrder.filter(id=>!preferred.includes(id))];V.canvasOrderVersion=1;saveView()}
  const scene=S.journeyId||S.id;if(cadState.scene!==scene||cadState.canvasPerspective!==V.perspective){Object.assign(cadState,{scene,canvasPerspective:V.perspective,selected:'',selectedRow:'',creating:null,quick:null,link:null,camera:null,drafts:new Map(),inspector:false,error:'',menu:null,connectFrom:'',choosing:null,activeCell:null,libraryFilter:'all',resize:null,resizePreview:null,emotionDrag:null,laneResize:null,lanePreviewHeights:null,cardResize:null,cardResizePreview:null,lastCardClick:null})}
  document.body.classList.add('cad-mode');cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());
@@ -294,8 +410,8 @@ function cadRender(){
  (mobile?'<dialog id="cad-library-sheet" class="cad-sheet" aria-label="Biblioteca de componentes">'+cadButton('cad-close-library','Fechar componentes')+cadLibrary()+'</dialog><dialog id="cad-inspector-sheet" class="cad-sheet" aria-label="Detalhes opcionais">'+cadButton('cad-close','Fechar detalhes')+(showInspector?cadInspector():'')+'</dialog>':'')+'<dialog id="cad-link-sheet" class="cad-sheet" aria-label="Editar conexão">'+cadButton('cad-close-link','Fechar conexão')+(cadState.link?cadLinkForm():'')+'</dialog>'+customizer()+growthDialogs()+contentDialogs()+contextDialogs()+viewsDialogs()+cardToolsDialogs()+blueprintDialogs()+businessDialogs();
  if(mobile&&cadState.library)app.querySelector('#cad-library-sheet').showModal();else if(mobile&&showInspector)app.querySelector('#cad-inspector-sheet').showModal();
  if(cadState.link)app.querySelector('#cad-link-sheet').showModal();
- if(cadLocked()){app.querySelector('.cad-header>input').readOnly=true;app.querySelector('[data-cad-persona]').disabled=true;app.querySelectorAll('#cad-component-form input,#cad-component-form select,#cad-component-form textarea,#cad-link-form input,#cad-link-form select,#cad-link-form textarea,#cad-quick-form input,#cad-quick-form select,#cad-quick-form textarea').forEach(field=>field.disabled=true)}
- cadLinkFields();requestAnimationFrame(()=>{if(!cadState.camera)cadInitialCamera();else cadPaint()});
+ if(cadLocked()){app.querySelector('.cad-header>input').readOnly=true;app.querySelector('[data-cad-persona]').disabled=true;app.querySelectorAll('#cad-component-form input,#cad-component-form select,#cad-component-form textarea,#cad-link-form input,#cad-link-form select,#cad-link-form textarea,#cad-quick-form input,#cad-quick-form select,#cad-quick-form textarea').forEach(field=>field.disabled=!!S.readOnly||!cadAutosave.pending||field.form.id!=='cad-component-form')}
+ cadSyncInspectorFeedback();cadLinkFields();requestAnimationFrame(()=>{if(!cadState.camera)cadInitialCamera();else cadPaint()});
 }
 function cadUpdateStickyStages(){
  const strip=app.querySelector('.cad-sticky-stages'),viewport=app.querySelector('.cad-viewport'),cam=cadState.camera;
@@ -343,7 +459,7 @@ function cadConnectTo(target){
   const link=window.BlueOceanJourneyContent.normalizeMatrixConnection({id:uid(),a:source,b:target,type});next.links=[...(next.links||[]),link];window.BlueOceanJourneyContent.validateMatrixDocument(next);cadState.connectFrom='';cadState.pointer=null;cadSend('canvas-change',{state:next},target);
  }catch(error){cadNotice(error.message)}
 }
-function cadSend(type,payload,noteId=''){
+function cadSend(type,payload,noteId='',autosave=false){
  if(cadLocked())return;
  // Reject invalid raw canvas requests before entering the pending/render path.
  // Invalid placements must not change the Service Graph or crash the inspector.
@@ -352,15 +468,17 @@ function cadSend(type,payload,noteId=''){
   cadState.pending='';cadState.pendingDocument=null;
   rerender();return;
  }cadState.pendingDocument=type==='canvas-change'?structuredClone(payload.state):null;cadState.pending=uid();cadState.error='';announceSave('pending');
- if(HOSTED){window.parent.postMessage({boBlueprintHost:1,type,requestId:cadState.pending,...payload,noteId},location.origin);rerender();return}
+ if(HOSTED){window.parent.postMessage({boBlueprintHost:1,type,requestId:cadState.pending,...payload,noteId},location.origin);if(!autosave)rerender();return}
  try{let next=payload.state;if(type==='canvas-create'){const data=cadModel.prepareCanvasInput(S,payload.input);next=structuredClone(S);noteId=uid();(next.c[data.row+'|'+data.index]||=[]).push({i:noteId,type:'card',t:data.title,canvas:data.canvas,activity:data.activity});if(data.kind==='emotion')Object.assign(next.steps[data.index],{e:Number(payload.input.emotionScore||0),emotionRecorded:true,note:payload.input.emotionNote||'',emotionStatus:'hypothesis'})}window.BlueOceanJourneyContent.validateMatrixDocument(next);Object.assign(S,next);save();cadResult({requestId:cadState.pending,ok:true,state:S,noteId})}catch(error){cadResult({requestId:cadState.pending,ok:false,error:error.message})}
 }
 function cadResult(data){
- if(data.requestId!==cadState.pending)return;cadState.pending='';cadState.pendingDocument=null;if(!data.ok){cadState.error=data.error||'Não foi possível salvar.';announceSave(false);rerender();cadFocusQuick();return}
+ if(data.requestId!==cadState.pending)return;cadState.pending='';cadState.pendingDocument=null;if(!data.ok){if(cadAutosave.pending){cadInspectorSaved(data);return}cadState.error=data.error||'Não foi possível salvar.';announceSave(false);rerender();cadFocusQuick();return}
  S=structuredClone(data.state);S.id=HOSTED?'host':S.id;DB={cur:S.id,js:[S]};last=JSON.stringify(S);growthLastPatch=growthPatchKey();if(data.history)H=data.history;
+ if(cadAutosave.pending){cadInspectorSaved(data);return}
  if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);cadState.drafts.delete(cadState.selected);
  cadState.creating=null;cadState.quick=null;cadState.link=null;cadState.menu=null;cadState.lastCardClick=null;cadState.selected=data.noteId||'';cadState.inspector=!!cadState.selected&&!cadMobile();cadState.selectedRow='';cadState.error='';announceSave(true);rerender();
  requestAnimationFrame(()=>app.querySelector('.cad-node[data-id="'+CSS.escape(data.noteId||'')+'"]')?.focus());
+ cadFlushInspector();
 }
 function cadQuickSubmit(form){
  if(cadLocked()||!form.reportValidity())return;try{
@@ -386,7 +504,7 @@ function cadQuickSubmit(form){
  }catch(error){cadState.error=error.message;form.querySelector('.form-error').textContent=error.message}
 }
 function cadAction(action,data,button){
- if(action==='cad-confirm-cancel'){cadState.confirmation=null;rerender();return true}
+ if(action==='cad-confirm-cancel'){const callback=cadState.confirmation?.onCancel;cadState.confirmation=null;if(callback)callback();else rerender();return true}
  if(action==='cad-confirm-accept'){const callback=cadState.confirmation?.onAccept;cadState.confirmation=null;if(typeof callback==='function')callback();else rerender();return true}
  if(cadState.confirmation)return true;
  if(action==='step'&&cadEnabled()){cadStartStage(S.steps.length-1,button?{x:button.getBoundingClientRect().left,y:button.getBoundingClientRect().bottom+8}:{});return true}
@@ -464,7 +582,7 @@ function cadAction(action,data,button){
  if(action==='cad-stage-resize'||action==='cad-lane-resize'||action==='cad-node-resize')return true;
  if(action==='cad-emotion'){if(cadState.ignoreClick){cadState.ignoreClick=false;return true}cadEditEmotion(Number(data.si),point);return true}
  if(action==='cad-toggle-library'){cadState.libraryHidden=!cadState.libraryHidden;rerender();return true}
- if(action==='cad-close'){cadState.inspector=false;cadState.selectedRow='';rerender();return true}
+ if(action==='cad-close'){cadState.inspector=false;cadState.selectedRow='';cadState.lastCardClick=null;rerender();return true}
  if(action==='cad-details'){
   cadState.selectedRow='';const entry=blueprintNote(data.id||cadState.selected);if(!entry)return true;cadState.selected=entry.note.i;cadState.creating=null;cadState.drafts.set(entry.note.i,cadDraftFor(entry));cadOpenInspector();return true;
  }
@@ -521,10 +639,23 @@ function cadBind(){
   const field=event.target,form=field.form;
   if(field.matches('[data-cad-search]')){cadState.query=field.value;const temp=document.createElement('div');temp.innerHTML=cadLibrary();app.querySelector('.cad-components-list').innerHTML=temp.querySelector('.cad-components-list').innerHTML;return}
   if(form?.id==='cad-quick-form'){Object.assign(cadState.quick,Object.fromEntries(new FormData(form)));if(cadState.creating)cadPaint();return}
-  if(['cad-component-form','cad-link-form'].includes(form?.id)){const draft=cadCurrentDraft();if(draft)Object.assign(draft,cadFormData(form))}
+  if(form?.id==='cad-component-form'){if(!event.isComposing)cadQueueInspector(form,field);return}
+  if(form?.id==='cad-link-form'){const draft=cadCurrentDraft();if(draft)Object.assign(draft,cadFormData(form))}
  });
+ app.addEventListener('compositionend',event=>{if(event.target.form?.id==='cad-component-form')cadQueueInspector(event.target.form,event.target)});
+ app.addEventListener('focusout',event=>{
+  const form=event.target.form;if(form?.id!=='cad-component-form')return;
+  const job=cadAutosave.dirty.get(form.dataset.noteId);if(job)job.due=0;
+  // Let the next click/focus finish. Autosaving never replaces the form or moves focus.
+  setTimeout(cadFlushInspector,0);
+ });
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){for(const job of cadAutosave.dirty.values())job.due=0;cadFlushInspector()}});
+ window.addEventListener('pagehide',()=>{for(const job of cadAutosave.dirty.values())job.due=0;cadFlushInspector()});
  app.addEventListener('change',event=>{
   const field=event.target;
+  if(field.form?.id==='cad-component-form'&&(field.tagName==='SELECT'||field.type==='checkbox')){
+   cadQueueInspector(field.form,field);const job=cadAutosave.dirty.get(field.form.dataset.noteId);if(job)job.due=0;cadFlushInspector();return;
+  }
   if(field.form?.id==='cad-quick-form'&&field.name==='emotionScore'){
     const checkbox=field.form.elements.emotionUnknown;if(checkbox)checkbox.checked=false;if(cadState.quick)cadState.quick.emotionUnknown=false;
    }
