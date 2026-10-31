@@ -32,7 +32,7 @@ t('Discovery mede evidência', home.includes('evidenceCount'));
 t('Discovery readiness exige Persona + Problema', home.includes('serviceProjectReport.discoveryReady') && read('src/services/service-project.ts').includes('personas > 0 && hypothesisProblems + stagedProblems > 0'));
 t('criação de hipótese pré-Journey existe', home.includes("type: discoveryCreate") && home.includes("problemHypothesis"));
 t('runtime createProblem suporta problemHypothesis sem etapa', runtimeHome.includes("uid('problemHypothesis')") && runtimeHome.includes("status:'hypothesis'"));
-t('Whiteboards não carrega montagem estruturada; Service Frame pertence a Blueprints', !boards.includes('discoveryReady') && boards.includes('Ir para Blueprints'));
+t('Whiteboards não carrega montagem estruturada; Service Frame pertence a Blueprints', !boards.includes('discoveryReady') && boards.includes('openBlueprints'));
 t('Whiteboards continua permitindo quadro livre', boards.includes('Novo whiteboard') || boards.includes('Criar quadro vazio'));
 t('Whiteboards orienta desenho estruturado para Blueprints', boards.includes('Ir para Blueprints') && boards.includes("setActiveTab('canvas')"));
 t('modal gigante Preparar o serviço foi removido', !core.includes("modalShell('Preparar o serviço'"));
