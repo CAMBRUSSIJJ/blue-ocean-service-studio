@@ -24,7 +24,7 @@ export function PersonaProgressiveEditor({ draft, onChange, onAddBlock, onAdvanc
   const [channelsInput, setChannelsInput] = useState(draft.channels.join('\n'));
   const current = STEPS[step];
   const filled: Record<StepId, boolean> = {
-    identity: Boolean(draft.title.trim() && draft.description.trim()),
+    identity: Boolean(draft.title.trim()),
     goal: Boolean(draft.primaryGoal.trim()),
     situation: Boolean(draft.situation.trim()),
     channels: draft.channels.length > 0,
