@@ -205,7 +205,7 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
     {section === 'home' && <>
       <section className="bo-h740h8-section bo-h744-home-projects" data-home-projects="1">
-        <header><div><small>SEUS PROJETOS</small><h2>Projetos do serviço</h2><p>Retome um trabalho existente ou crie seu próximo projeto. Os mapas e registros ficam conectados ao serviço de cada projeto.</p></div><button type="button" onClick={() => setSection('projects')}>Ver todos <ArrowRight size={13}/></button></header>
+        <header><div><small>CONTINUE DE ONDE PAROU</small><h2>Seus projetos</h2><p>Retome um trabalho existente ou crie seu próximo projeto. Os mapas e registros ficam conectados ao serviço de cada projeto.</p></div><button type="button" onClick={() => setSection('projects')}>Ver todos <ArrowRight size={13}/></button></header>
         {current ? <div className="bo-h740h8-project-grid compact">{card(current)}</div> : <div className="bo-h740h8-empty"><FolderKanban size={24}/><strong>Seu primeiro projeto começa aqui</strong><p>Escolha o que deseja construir; não é preciso preencher todos os dados antes.</p><button type="button" className="primary" onClick={() => startTemplate('blank')}>Criar meu primeiro projeto</button></div>}
       </section>
       {favorites.filter((project) => project.id !== current?.id).length > 0 && <section className="bo-h740h8-section"><header><div><small>FAVORITOS</small><h2>Acesso rápido</h2></div></header><div className="bo-h740h8-project-grid compact">{favorites.filter((project) => project.id !== current?.id).map(card)}</div></section>}
