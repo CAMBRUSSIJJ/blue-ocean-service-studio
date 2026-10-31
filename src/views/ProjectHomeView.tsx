@@ -226,7 +226,7 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
     {section === 'templates' && <section className="bo-h740h8-section"><div className="bo-h740h8-template-grid large">{TEMPLATES.map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><Sparkles size={19}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>{projectTemplateLabel(item.id)} <ArrowRight size={12}/></em></button>)}</div></section>}
 
-    {dialog && dialog !== 'blank' && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}>
+    {dialog && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}>
       <section className="bo-h740h8-modal bo-h743-create-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h8-create-title" data-project-creation-flow="H7.43">
         <header><div><small>NOVO PROJETO</small><h2 id="bo-h740h8-create-title">{projectTemplateLabel(dialog)}</h2><p>Projeto e serviço são conceitos separados. Comece com uma estrutura editável e ajuste depois.</p></div><button type="button" onClick={() => setDialog(null)} aria-label="Fechar"><X size={18}/></button></header>
         <div className="bo-h740h8-modal-body bo-h743-create-body">
