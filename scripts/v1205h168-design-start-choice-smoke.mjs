@@ -7,6 +7,7 @@ const check=(label,ok)=>{total++; if(ok){pass++; console.log('PASS',label)}else{
 const workspace=read('src/views/BlueprintWorkspaceView.tsx');
 const journey=read('src/views/JourneyView.tsx');
 const whiteboard=read('src/views/WhiteboardsView.tsx');
+const visualEditor=read('src/views/BlockSuiteWorkspace.tsx');
 const profile=read('src/services/experience-profile.ts');
 const css=read('src/runtime/design-start-choice-h168.css');
 const style=read('src/style.css');
@@ -45,9 +46,9 @@ check('Evidência e dor podem ligar à etapa atual',journey.includes("kind === '
 check('Journey evita rótulo contexto no seletor',journey.includes('aria-label="Tipo de descoberta"'));
 check('Necessidade explica significado na etapa',journey.includes('O que a pessoa precisa nesta etapa'));
 check('Whiteboard escuta entrada do chooser',whiteboard.includes('bo-whiteboard-start-from-design'));
-check('Whiteboard evita segunda escolha ao vir do chooser',whiteboard.includes('guidedFreeStart')&&whiteboard.includes('Começar livre no Whiteboard'));
-check('Whiteboard mantém modo normal com escolha',whiteboard.includes("guidedFreeStart ? 'Começar livre no Whiteboard' : 'Como você quer começar?'"));
-check('Whiteboard continua registrando tipos específicos',whiteboard.includes('pessoas, necessidades, dores e problemas'));
+check('Whiteboard evita segunda escolha ao vir do chooser',whiteboard.includes('setGuidedFreeStart(true)') && whiteboard.includes('!guidedFreeStart && handoff.readyForWhiteboard'));
+check('Whiteboard mantém opção contextual no início normal',whiteboard.includes('bo-wb-context-choice') && whiteboard.includes('Criar com registros existentes'));
+check('Whiteboard continua registrando tipos específicos',["persona","need","pain","problemHypothesis","evidence"].every(kind => visualEditor.includes("kind: '"+kind+"'")));
 check('CSS chooser tem feedback',css.includes('.bo-h168-choice-card:hover')&&css.includes('box-shadow'));
 check('CSS chooser é responsivo',css.includes('@media(max-width:820px)'));
 check('CSS respeita reduced motion',css.includes('@media(prefers-reduced-motion:reduce)'));
