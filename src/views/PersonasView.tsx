@@ -60,22 +60,6 @@ const personaCustomSections: Array<{id:PersonaSectionId;label:string}> = [
  {id:'triggers',label:'Gatilhos'},{id:'alternatives',label:'Alternativas'},{id:'evidence',label:'Evidências'},{id:'relations',label:'Relações'},
 ];
 const layoutLabels: Array<[PersonaLayout,string]> = [['profile-left','Perfil à esquerda'],['balanced','Equilibrado'],['story-first','Narrativa primeiro']];
-const personaCheckHints: Record<string,string> = {
-  identity: 'Nome informado',
-  context: 'Contexto de utilização',
-  goal: 'Que resultado espera alcançar?',
-  situation: 'Quando e onde utiliza o serviço?',
-  channels: 'Por quais canais interage?',
-  'need-job': 'Conecte na aba Relações',
-  'pain-hypothesis': 'Relacione as dores ou hipóteses',
-  evidence: 'Associe uma fonte de pesquisa',
-  quote: 'Registre uma fala representativa',
-  behaviors: 'Documente hábitos observados',
-  expectations: 'Registre critérios de escolha',
-  constraints: 'Quais barreiras enfrenta?',
-  triggers: 'O que inicia sua busca?',
-  alternatives: 'Que soluções utiliza hoje?',
-};
 const relationLabel: Record<PersonaRelationKind, string> = {
   need: 'Necessidades', job: 'Jobs', pain: 'Dores', problemHypothesis: 'Hipóteses', evidence: 'Evidências',
 };
@@ -413,10 +397,6 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     const evidenceConnections = relationOptions.filter((item) => item.kind === 'evidence' && connectedIds.includes(item.id));
     const usage = contextEntityUsage(graph, 'persona', selected.id);
     const completenessReport = previewReport ?? report;
-    const completeness = draft.mode === 'professional' ? completenessReport.professionalScore : completenessReport.foundationScore;
-    const completenessChecks = draft.mode === 'professional'
-      ? [...completenessReport.foundationChecks, ...completenessReport.professionalChecks]
-      : completenessReport.foundationChecks;
     const savedDraft = personaProfileFromEntity(selected);
     const savedConnectedIds = report.connections.map((item) => item.id).sort();
     const isDirty = JSON.stringify(draft) !== JSON.stringify(savedDraft)
@@ -465,10 +445,18 @@ export function PersonasView({ studio }: { studio: StudioController }) {
               counts={{ related:connectedIds.length, evidence:evidenceConnections.length, usage:usage.instances }} onNavigate={setDetailTab}/>}
 
           </main>
-          <aside className="bo-h724-overview-aside">
-            <section className="bo-h724-completeness-card"><header><div><small>COMPLETUDE</small><strong>{completeness}%</strong></div><span>{draft.mode === 'professional' ? 'Avançada' : 'Simples'}</span></header><i><b style={{ width: `${completeness}%` }}/></i><div className="bo-h71-check-list bo-h724-check-list">{completenessChecks.map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span><strong>{check.label}</strong><small>{personaCheckHints[check.id] || 'Informação complementar'}</small></span></div>)}</div></section>
-            <section className="bo-h724-organization-card"><header><small>ORGANIZAÇÃO</small><strong>Responsabilidade e tags</strong></header><label><span>Responsável</span><div className="bo-h724-owner-field"><UserRound size={14}/><input list="bo-h724-owner-options" value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></div><datalist id="bo-h724-owner-options">{ownerSuggestions.map((item) => <option key={item} value={item}/>)}</datalist></label><div className="bo-h724-tags-field"><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map((tag) => <button key={tag} type="button" className="bo-h724-chip" onClick={() => removeTag(tag)}>{tag}<X size={11}/></button>)}<input value={tagEntry} onChange={(event) => setTagEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addTag(); } }} placeholder={tagValues.length ? 'Adicionar tag…' : 'Ex.: B2C'}/></div></div></section>
-            <section className="bo-h724-context-card"><small>BASE ATUAL</small><strong>{connectedIds.length} conexões</strong><p>{evidenceConnections.length} evidência(s) · {usage.instances} instância(s) visual(is)</p><button type="button" onClick={() => setDetailTab('relations')}>Ver relações</button></section>
+          <aside className="bo-h724-overview-aside bo-h748-persona-aside" aria-label="Organização e vínculos da Persona">
+            <section className="bo-h724-organization-card bo-h748-side-panel">
+              <header><small>DETALHES DA PERSONA</small><strong>Organização</strong><p>Informações para encontrar e reutilizar este perfil.</p></header>
+              <label><span>Responsável</span><div className="bo-h724-owner-field"><UserRound size={16}/><input list="bo-h724-owner-options" value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></div><datalist id="bo-h724-owner-options">{ownerSuggestions.map((item) => <option key={item} value={item}/>)}</datalist></label>
+              <div className="bo-h724-tags-field"><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map((tag) => <button key={tag} type="button" className="bo-h724-chip" onClick={() => removeTag(tag)}>{tag}<X size={12}/></button>)}<input aria-label="Adicionar tag" value={tagEntry} onChange={(event) => setTagEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addTag(); } }} placeholder={tagValues.length ? 'Adicionar tag…' : 'Ex.: B2C'}/></div></div>
+              <div className="bo-h724-context-card bo-h748-connections">
+                <div className="bo-h748-connections-head"><small>VÍNCULOS NO SERVIÇO</small><p>Registros compartilhados com os mapas e a pesquisa.</p></div>
+                <button type="button" onClick={() => setDetailTab('relations')}><span>Relações</span><strong>{connectedIds.filter(id => !graph.entities?.evidence?.[id]).length}</strong><span aria-hidden="true">→</span></button>
+                <button type="button" onClick={() => setDetailTab('evidence')}><span>Evidências</span><strong>{evidenceConnections.length}</strong><span aria-hidden="true">→</span></button>
+                <button type="button" onClick={() => setDetailTab('usage')}><span>Uso nos mapas</span><strong>{usage.instances}</strong><span aria-hidden="true">→</span></button>
+              </div>
+            </section>
           </aside>
         </div>}
 
