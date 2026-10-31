@@ -99,7 +99,7 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
   const startTemplate = (template: ProjectTemplate) => {
     const preset = TEMPLATES.find((item) => item.id === template);
-    setProjectName(''); setServiceName(preset?.service ?? ''); setDescription(''); setSelectedIntent(null); setDialog(template);
+    setProjectName(''); setServiceName(template === 'blank' ? '' : preset?.service ?? ''); setDescription(''); setSelectedIntent(template === 'blueprint' ? 'blueprint' : template === 'redesign' || template === 'omnichannel' ? 'journey' : null); setDialog(template);
   };
 
   useEffect(() => {
@@ -116,7 +116,7 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
     while (existing.has(defaultName.toLocaleLowerCase('pt-BR'))) defaultName = `Novo projeto (${sequence++})`;
     const name = projectName.trim() || defaultName;
     // Intention guides navigation, not the graph schema: the project is always a real, editable snapshot.
-    const target = dialog === 'blank' ? selectedIntent : null;
+    const target = selectedIntent;
     const ok = createWorkspaceProject({ projectName: name, serviceName: serviceName.trim() || name, description, template: dialog });
     if (!ok) return;
     setDialog(null);
@@ -160,7 +160,7 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
 
   // The creation experience is a dedicated page, not another modal layered over the project list.
-  if (dialog === 'blank') return <section className="bo-h744-create-page" data-project-creation-page="H7.44" aria-labelledby="bo-h744-create-title">
+  if (dialog) return <section className="bo-h744-create-page" data-project-creation-page="H7.44" aria-labelledby="bo-h744-create-title">
     <header className="bo-h744-create-top">
       <button type="button" className="bo-h744-back" onClick={() => setDialog(null)}><ArrowLeft size={17}/> Voltar aos projetos</button>
       <span>PROJETO NOVO <b>·</b> ESCOLHA COMO COMEÇAR</span>
@@ -168,8 +168,8 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
     <div className="bo-h744-create-frame">
       <main className="bo-h744-create-primary">
         <span className="bo-h744-create-eyebrow">BLUE OCEAN · CRIAÇÃO</span>
-        <h1 id="bo-h744-create-title">O que você quer fazer?</h1>
-        <p className="bo-h744-create-subtitle">Você não precisa conhecer as ferramentas para começar. Escolha o que pretende construir; o projeto será criado com o mesmo modelo de dados do serviço.</p>
+        <h1 id="bo-h744-create-title">{dialog === 'blank' ? 'O que você quer fazer?' : 'Como quer começar este projeto?'}</h1>
+        <p className="bo-h744-create-subtitle">{dialog === 'blank' ? 'Você não precisa conhecer as ferramentas para começar. Escolha o que pretende construir; o projeto será criado com o mesmo modelo de dados do serviço.' : `Modelo selecionado: ${projectTemplateLabel(dialog)}. Você pode definir o ponto de partida e ajustar os dados depois.`}</p>
         <fieldset className="bo-h744-options">
           <legend>Escolha por onde começar</legend>
           <div className="bo-h744-option-grid">{PROJECT_INTENTS.map((item, index) => <button type="button" key={item.id} className={selectedIntent === item.id ? 'is-selected' : ''} aria-pressed={selectedIntent === item.id} onClick={() => setSelectedIntent(item.id)}>
@@ -183,7 +183,7 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
         <span className="bo-h744-side-icon"><FolderKanban size={22}/></span>
         <h2>Seu espaço de trabalho</h2>
         <p>Personalize agora ou dê um nome depois. Nada será criado antes de confirmar.</p>
-        <label><span>Nome do projeto <small>(opcional)</small></span><input value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Melhoria do atendimento"/></label>
+        <label><span>Nome do projeto <small>(opcional)</small></span><input aria-label="Nome do projeto" value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Melhoria do atendimento"/></label>
         <details className="bo-h744-additional">
           <summary>Mais informações (opcionais)</summary>
           <label><span>Nome do serviço</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Atendimento ao cliente"/></label>
@@ -221,16 +221,6 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
     {section === 'templates' && <section className="bo-h740h8-section"><div className="bo-h740h8-template-grid large">{TEMPLATES.map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><Sparkles size={19}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>{projectTemplateLabel(item.id)} <ArrowRight size={12}/></em></button>)}</div></section>}
 
-    {dialog && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}>
-      <section className="bo-h740h8-modal bo-h743-create-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h8-create-title" data-project-creation-flow="H7.43">
-        <header><div><small>NOVO PROJETO</small><h2 id="bo-h740h8-create-title">{projectTemplateLabel(dialog)}</h2><p>Projeto e serviço são conceitos separados. Comece com uma estrutura editável e ajuste depois.</p></div><button type="button" onClick={() => setDialog(null)} aria-label="Fechar"><X size={18}/></button></header>
-        <div className="bo-h740h8-modal-body bo-h743-create-body">
-          <label className="full"><span>Nome do projeto <em>(opcional — pode nomear depois)</em></span><input autoFocus value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Redesenho do atendimento"/></label>
-          <details className="bo-h743-advanced"><summary>Nome do serviço e descrição (opcionais)</summary><div className="bo-h743-advanced-fields"><label><span>Serviço principal</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Atendimento ao cliente"/></label><label><span>Descrição</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Objetivo ou transformação deste projeto"/></label></div></details>
-        </div>
-        <footer><button type="button" onClick={() => setDialog(null)}>Cancelar</button><button type="button" className="primary" onClick={submit}>Criar e abrir <ArrowRight size={14}/></button></footer>
-      </section>
-    </div>}
 
     {deleteTarget && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteTarget(null); }}>
       <section className="bo-h740h8-modal bo-h744-delete-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h744-delete-title">
