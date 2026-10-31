@@ -664,14 +664,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
     </header>}
 
     {workspaceTab !== 'overview' && !(workspaceTab === 'journey' && journeyCreateOpen) && <>
-      {workspaceTab !== 'research' && workspaceTab !== 'journey' && <nav className="bo-h740h7-tool-phases" aria-label="Fases do serviço">
-        <button type="button" onClick={() => selectWorkspaceTab('overview')}>Resumo</button>
-        {WORKSPACE_GROUPS.filter((group) => group.id !== 'overview').map((group) => {
-          const firstVisible = group.items.find((item) => isWorkspaceCapabilityVisible(experience.level, item.id))?.id ?? group.defaultTab;
-          const label = experiencePhaseLanguage(experience.level, group.id as GuidedWorkspacePhase)?.title ?? group.label;
-          return <button key={group.id} type="button" className={activeWorkspaceGroup === group.id ? 'active' : ''} onClick={() => selectWorkspaceTab(firstVisible)}>{label}</button>;
-        })}
-      </nav>}
+      {/* Navegação por fases permanece na navegação global; não repetir seis abas sobre cada ferramenta. */}
       {workspaceTab === 'journey' ? null : workspaceTab === 'research' && experience.level === 'foundation' ? <nav className="bo-h740h3-workspace-subnav bo-h740h7-tool-subnav bo-h166-research-subnav" aria-label="Pesquisa e ferramentas">
         <button type="button" className={researchSurface === 'research' ? 'active' : ''} aria-current={researchSurface === 'research' ? 'page' : undefined} onClick={() => setResearchSurface('research')}><BlueOceanObjectIcon kind="evidence" size={16}/><span>Pesquisa</span></button>
         <button type="button" className={researchSurface === 'tools' ? 'active' : ''} aria-current={researchSurface === 'tools' ? 'page' : undefined} onClick={() => setResearchSurface('tools')}><Wrench size={16}/><span>Ferramentas</span></button>
