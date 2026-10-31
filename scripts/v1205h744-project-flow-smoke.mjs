@@ -42,7 +42,7 @@ assert(controller.includes("createBlankWorkspaceGraph()"), 'last project switche
 const deletion = controller.slice(controller.indexOf('const deleteWorkspaceProject ='), controller.indexOf('const restoreWorkspaceProject ='));
 assert(deletion.indexOf('replaceProjectGraph(') < deletion.indexOf('deleteProject(projectId)'), 'switch away before deleting project snapshot');
 assert(home.includes('data-project-creation-page="H7.44"'), 'creation uses dedicated full-page surface');
-assert(home.includes('if (dialog === \'blank\') return'), 'blank project does not show the old modal');
+assert(home.includes('if (dialog) return'), 'all project templates share the full-page flow');
 assert(home.includes('onDelete={() => setDeleteTarget(project)}'), 'active projects expose deletion');
 assert(home.includes('Excluir projeto arquivado'), 'archived projects expose deletion');
 assert(home.includes('Excluir definitivamente'), 'deletion requires a dedicated confirmation');
