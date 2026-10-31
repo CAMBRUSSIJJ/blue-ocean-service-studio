@@ -347,9 +347,13 @@ export default function App({ authUser, onSignOut }: AppProps) {
 
   useEffect(() => {
     const requestCreateService = () => {
-      setServiceName('');
-      setServiceDescription('');
-      setIsCreateServiceOpen(true);
+      // All first-service and new-project entrypoints use the dedicated creation page.
+      setIsCreateServiceOpen(false);
+      setProjectShellOpen(false);
+      setProjectHomeSection('projects');
+      setExternalNav(null);
+      window.dispatchEvent(new CustomEvent('rt-navigation', { detail: 'home' }));
+      window.setTimeout(() => window.dispatchEvent(new Event('bo-new-project')), 30);
     };
     window.addEventListener('bo-create-service', requestCreateService);
     return () => window.removeEventListener('bo-create-service', requestCreateService);
@@ -445,7 +449,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
             <div className="bo1163-service-menu__label">Projetos do serviço</div>
             {projects.slice(0, 6).map((project) => <button type="button" role="menuitem" key={project.id} className={project.id === activeProjectId ? 'active' : ''} onClick={() => { setIsServiceMenuOpen(false); if (project.id !== activeProjectId) studio.openWorkspaceProject(project.id); window.setTimeout(() => openCurrentProjectWorkspace(), 0); }}><span><strong>{project.title}</strong><small>{project.serviceName}</small></span>{project.id === activeProjectId && <CheckCircle2 size={15}/>}</button>)}
             <button type="button" role="menuitem" onClick={() => { setIsServiceMenuOpen(false); openGlobalHome('projects'); }}><span><strong>Todos os projetos</strong><small>Abrir a área Serviço</small></span></button>
-            <button type="button" role="menuitem" onClick={() => { setIsServiceMenuOpen(false); openGlobalHome('templates'); }}><span><strong>+ Novo projeto</strong><small>Comece vazio ou use um template.</small></span></button>
+            <button type="button" role="menuitem" onClick={() => { setIsServiceMenuOpen(false); requestServiceCreation(); }}><span><strong>+ Novo projeto</strong><small>Escolha como começar seu trabalho.</small></span></button>
           </div>}
           <span className="sr-only bo-h740h11-legacy-switcher"><strong>Serviço</strong><em>Projetos de serviço</em></span>
         </div>
