@@ -5,6 +5,7 @@ import {
 import { contextEntityTitle, type ContextKind } from '../services/context-library';
 import { projectContextRecords, filterProjectContext, projectRelatedRecords, projectHasLinkedEvidence } from '../services/project-context-index';
 import './project-context-workspace.css';
+import './project-creation-flow-h743.css';
 import type { StudioController } from '../state/useStudioController';
 
 export type ProjectShellSection = 'overview' | 'library';
@@ -127,6 +128,7 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
     </header>
 
     {areaTabs}
+    {area === 'overview' && serviceMaps === 0 && <section className="bo-h743-next-step" data-project-next-step="create-map"><div><small>PRÓXIMO PASSO SUGERIDO</small><h2>Crie seu primeiro mapa do serviço</h2><p>Visualize a experiência e a operação em uma estrutura única. Personas e evidências podem ser adicionadas depois.</p></div><button type="button" className="primary" onClick={onCreateMap}>Criar mapa <ArrowRight size={15}/></button></section>}
     <div id="bo-project-context-panel" role="tabpanel" aria-labelledby={`bo-pctx-tab-${area}`} className="bo-project-context-panel">
     {area === 'overview' ? <>
     <section className="bo-h31-overview" data-project-overview="compact-h31">
@@ -137,15 +139,13 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
           <h2>{serviceName}</h2>
           <p>{serviceMaps > 0 ? 'Continue o desenho do serviço e alterne entre Jornada e Blueprint.' : 'Comece pelo mapa do serviço. Pessoas, necessidades e evidências permanecem organizadas nas abas do projeto.'}</p>
         </div>
-        {serviceMaps > 0
-          ? <button type="button" className="primary" onClick={openService}>Abrir mapas <ArrowRight size={15}/></button>
-          : <button type="button" className="primary" onClick={onCreateMap}>Criar mapa <ArrowRight size={15}/></button>}
+        {serviceMaps > 0 && <button type="button" className="primary" onClick={openService}>Abrir mapas <ArrowRight size={15}/></button>}
       </div>
-      <div className="bo-h31-overview-stats" aria-label="Indicadores do projeto">
-        <div><strong>{serviceMaps}</strong><span>Mapas</span></div>
-        <div><strong>{personas}</strong><span>Personas</span></div>
-        <div><strong>{needs}</strong><span>Necessidades</span></div>
-        <div><strong>{evidence}</strong><span>Evidências</span></div>
+      <div className="bo-h31-overview-stats bo-h743-actions" aria-label="Ações e registros do projeto">
+        <button type="button" onClick={serviceMaps ? openService : onCreateMap}><strong>{serviceMaps}</strong><span>Mapas</span><small>{serviceMaps ? 'Ver mapas →' : 'Criar primeiro mapa →'}</small></button>
+        <button type="button" onClick={() => openLibraryPage('personas')}><strong>{personas}</strong><span>Personas</span><small>{personas ? 'Ver personas →' : 'Criar primeira persona →'}</small></button>
+        <button type="button" onClick={() => openLibraryPage('needs')}><strong>{needs}</strong><span>Necessidades</span><small>{needs ? 'Ver necessidades →' : 'Adicionar necessidade →'}</small></button>
+        <button type="button" onClick={() => openLibraryPage('evidence')}><strong>{evidence}</strong><span>Evidências</span><small>{evidence ? 'Ver evidências →' : 'Registrar evidência →'}</small></button>
       </div>
     </section>
     </> : (area === 'audience' || area === 'research') ? <section className="bo-project-context-collection">
