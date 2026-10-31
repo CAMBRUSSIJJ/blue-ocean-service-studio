@@ -8,6 +8,7 @@ import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
 import { PersonaVisualEditor } from './PersonaVisualEditor';
 import { PersonaProgressiveEditor } from './PersonaProgressiveEditor';
 import './persona-progressive-h746.css';
+import './persona-ux-refinements-h747.css';
 import { PersonaEvidenceTrace } from './PersonaEvidenceTrace';
 import { createDiscoveryEntity } from '../services/discovery-workspace';
 import { contextEntityTitle, contextEntityUsage, listContextEntities } from '../services/context-library';
