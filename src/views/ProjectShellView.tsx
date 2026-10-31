@@ -6,6 +6,7 @@ import { contextEntityTitle, type ContextKind } from '../services/context-librar
 import { projectContextRecords, filterProjectContext, projectRelatedRecords, projectHasLinkedEvidence } from '../services/project-context-index';
 import './project-context-workspace.css';
 import './project-creation-flow-h743.css';
+import './project-flow-cleanup-h745.css';
 import type { StudioController } from '../state/useStudioController';
 
 export type ProjectShellSection = 'overview' | 'library';
@@ -67,8 +68,8 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
       parent = parent.parentElement;
     }
   }, [projectId, section]);
-  type Area = 'overview' | 'audience' | 'research' | 'maps' | 'improvement';
-  const allowedAreas: Area[] = ['overview', 'audience', 'research', 'maps', 'improvement'];
+  type Area = 'overview' | 'audience' | 'research' | 'maps';
+  const allowedAreas: Area[] = ['overview', 'audience', 'research', 'maps'];
   const [area, setArea] = useState<Area>(() => {
     try {
       const saved = sessionStorage.getItem('bo-project-area:' + projectId);
@@ -96,8 +97,7 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   };
   const areaLabel: Array<{ id: Area; label: string }> = [
     {id:'overview',label:'Visão geral'}, {id:'audience',label:'Público e contexto'},
-    {id:'research',label:'Pesquisa e evidências'}, {id:'maps',label:'Mapas e Whiteboard'},
-    {id:'improvement',label:'Análise e melhorias'},
+    {id:'research',label:'Pesquisa e evidências'}, {id:'maps',label:'Mapas'},
   ];
   const chooseArea = (next: Area) => {
     setArea(next);
@@ -137,7 +137,7 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
 
   return <section ref={shellRef} className="bo-h740h10-shell" data-project-shell="7.40-H10" data-project-shell-section="overview">
     <header className="bo-h740h10-shell__hero bo-h31-project-header">
-      <div><small>PROJETO ATUAL</small><h1>{project?.title || serviceName}</h1><p>{project?.description || 'Organize o projeto e acesse suas informações pelas abas abaixo.'}</p></div>
+      <div><small>VISÃO GERAL DO PROJETO</small><h1>{project?.title || serviceName}</h1><p>{project?.description || 'Organize o trabalho e avance pelo que faz sentido agora. As ferramentas completas estão disponíveis no menu lateral.'}</p></div>
     </header>
 
     {areaTabs}
@@ -160,6 +160,11 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
         <button type="button" onClick={() => openLibraryPage('needs')}><strong>{needs}</strong><span>Necessidades</span><small>{needs ? 'Ver necessidades →' : 'Adicionar necessidade →'}</small></button>
         <button type="button" onClick={() => openLibraryPage('evidence')}><strong>{evidence}</strong><span>Evidências</span><small>{evidence ? 'Ver evidências →' : 'Registrar evidência →'}</small></button>
       </div>
+      {(personas === 0 || evidence === 0 || serviceMaps === 0) && <div className="bo-h745-onboarding-grid" aria-label="Primeiros passos do projeto">
+        {personas === 0 && <article><small>PÚBLICO E CONTEXTO</small><h3>Nenhuma persona ainda</h3><p>Descreva quem usa o serviço, suas necessidades, comportamentos e expectativas. Os dados poderão ser reutilizados nos mapas.</p><button type="button" onClick={() => openLibraryPage('personas')}>Criar primeira persona <ArrowRight size={14}/></button></article>}
+        {evidence === 0 && <article><small>PESQUISA E EVIDÊNCIAS</small><h3>Nenhuma evidência registrada</h3><p>Registre o que foi observado, hipóteses e materiais de pesquisa para orientar as decisões de melhoria.</p><button type="button" onClick={() => openLibraryPage('evidence')}>Adicionar evidência <ArrowRight size={14}/></button></article>}
+        {serviceMaps === 0 && <article><small>DESENHO DO SERVIÇO</small><h3>Nenhum mapa neste projeto</h3><p>O mapa conecta a experiência do cliente, a Jornada e as atividades do Blueprint em uma única estrutura.</p><button type="button" onClick={onCreateMap}>Criar primeiro mapa <ArrowRight size={14}/></button></article>}
+      </div>}
     </section>
     </> : (area === 'audience' || area === 'research') ? <section className="bo-project-context-collection">
       <header className="bo-project-context-section-header"><div><small>{area === 'audience' ? 'PÚBLICO E CONTEXTO' : 'PESQUISA DO PROJETO'}</small><h2>{area === 'audience' ? 'Pessoas, necessidades e relações' : 'Hipóteses, problemas e evidências'}</h2><p>Registros deste projeto, vinculados ao mesmo Service Graph usado nos mapas. Nenhum registro é duplicado.</p></div><button type="button" className="primary" onClick={() => openLibraryPage(area === 'audience' ? 'needs' : 'evidence')}>+ {area === 'audience' ? 'Nova necessidade' : 'Nova evidência'}</button></header>
