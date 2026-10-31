@@ -26,7 +26,7 @@ ok('Studio integra Journey e Blueprint', service.includes('syncWhiteboardJourney
 ok('Whiteboard 2.0 preserva Smart Objects canônicos', model.includes("kind: 'smart'") && service.includes('resolveSmartRecord'));
 ok('Handoff H7.8 agora usa sincronização H7.11', handoff.includes('syncWhiteboardDesignContext') && handoff.includes('WhiteboardView'));
 ok('Biblioteca marca Whiteboard 2.0', view.includes('data-whiteboard-2="1"') && view.includes('Whiteboard 2.0'));
-ok('Biblioteca possui health determinístico', view.includes('data-whiteboard-health-summary="1"') && view.includes('qualityScore'));
+ok('Biblioteca indica contexto e pendências no próprio cartão', view.includes('bo-wb-status-tag') && view.includes('danglingSmartObjects'));
 ok('Biblioteca possui busca e filtros', view.includes('Buscar whiteboard') && view.includes('Precisa atenção'));
 ok('Biblioteca permite sincronizar Contexto Journey e Blueprint', view.includes('Sincronizar contexto') && view.includes('Trazer Journey') && view.includes('Trazer Blueprint'));
 ok('Runtime expõe navegação para origem canônica', core.includes('function openSmartObjectOrigin') && core.includes("btn('Abrir origem'"));
