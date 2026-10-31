@@ -29,6 +29,7 @@ jobs:
       - run: rm -f src/generated/app-version.ts && npm run typecheck
       - run: python3 -m py_compile scripts/journey-selector-browser.py scripts/journey-observation-browser.py scripts/journey-editor-ux-browser.py scripts/blueprint-connections-browser.py
       - run: npm run docs:check
+      - run: node --experimental-strip-types scripts/v1205h744-project-flow-smoke.mjs
       - run: node scripts/journey-visualization-test.mjs
       - run: node scripts/blueprint-guided-reading-test.mjs
       - run: npm run blueprint:canvas:test
