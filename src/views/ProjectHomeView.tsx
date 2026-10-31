@@ -1,10 +1,11 @@
 // H7.40-H8 legacy Home copy preserved after H11: Seus projetos
-import { useMemo, useState } from 'react';
-import { Archive, ArrowRight, Clock3, FolderKanban, LayoutTemplate, Pencil, Plus, RotateCcw, Search, Sparkles, Star, X } from '../design-system/icons';
+import { useEffect, useMemo, useState } from 'react';
+import { Archive, ArrowLeft, ArrowRight, Clock3, FolderKanban, LayoutTemplate, Pencil, Plus, RotateCcw, Search, Sparkles, Star, Trash2, X } from '../design-system/icons';
 import type { StudioController } from '../state/useStudioController';
 import type { ProjectLibraryEntry, ProjectTemplate } from '../services/project-library';
 import { projectTemplateLabel } from '../services/project-library';
 import './project-creation-flow-h743.css';
+import './project-creation-flow-h744.css';
 
 export type ProjectHomeSection = 'home' | 'projects' | 'templates';
 
@@ -54,9 +55,10 @@ type ProjectCardProps = {
   onFavorite: () => void;
   onRename: () => void;
   onArchive: () => void;
+  onDelete: () => void;
 };
 
-function ProjectCard({ project, active, onOpen, onFavorite, onRename, onArchive }: ProjectCardProps) {
+function ProjectCard({ project, active, onOpen, onFavorite, onRename, onArchive, onDelete }: ProjectCardProps) {
   return <article className={`bo-h740h8-project-card ${active ? 'is-active' : ''}`} data-project-id={project.id}>
     <header>
       <span className="bo-h740h8-project-icon"><FolderKanban size={18}/></span>
@@ -64,6 +66,7 @@ function ProjectCard({ project, active, onOpen, onFavorite, onRename, onArchive 
         <button type="button" className={project.favorite ? 'is-favorite' : ''} onClick={onFavorite} aria-label={project.favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'} title={project.favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}><Star size={15} fill={project.favorite ? 'currentColor' : 'none'}/></button>
         <button type="button" onClick={onRename} aria-label="Renomear projeto" title="Renomear projeto"><Pencil size={14}/></button>
         <button type="button" onClick={onArchive} aria-label="Arquivar projeto" title="Arquivar projeto"><Archive size={14}/></button>
+        <button type="button" onClick={onDelete} aria-label={`Excluir projeto ${project.title}`} title="Excluir definitivamente"><Trash2 size={14}/></button>
       </div>
     </header>
     <div><small>PROJETO</small><h3>{project.title}</h3><p><b>Serviço:</b> {project.serviceName}</p></div>
@@ -73,10 +76,11 @@ function ProjectCard({ project, active, onOpen, onFavorite, onRename, onArchive 
 }
 
 export function ProjectHomeView({ studio, section, setSection, openProjectWorkspace, onCreateMap, onOpenPersonas, onOpenWhiteboards }: Props) {
-  const { projects, archivedProjects, activeProjectId, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, createWorkspaceProject } = studio;
+  const { projects, archivedProjects, activeProjectId, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, deleteWorkspaceProject, createWorkspaceProject } = studio;
   const [query, setQuery] = useState('');
   const [dialog, setDialog] = useState<ProjectTemplate | null>(null);
   const [selectedIntent, setSelectedIntent] = useState<ProjectIntent | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ProjectLibraryEntry | null>(null);
   const [renameTarget, setRenameTarget] = useState<ProjectLibraryEntry | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [projectName, setProjectName] = useState('');
@@ -100,6 +104,12 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
     const preset = TEMPLATES.find((item) => item.id === template);
     setProjectName(''); setServiceName(preset?.service ?? ''); setDescription(''); setSelectedIntent(null); setDialog(template);
   };
+
+  useEffect(() => {
+    const requestNewProject = () => startTemplate('blank');
+    window.addEventListener('bo-new-project', requestNewProject);
+    return () => window.removeEventListener('bo-new-project', requestNewProject);
+  }, []);
 
   const submit = () => {
     if (!dialog || (dialog === 'blank' && !selectedIntent)) return;
@@ -137,6 +147,11 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
     archiveWorkspaceProject(project.id);
   };
 
+  const confirmDeletion = () => {
+    if (!deleteTarget) return;
+    if (deleteWorkspaceProject(deleteTarget.id)) setDeleteTarget(null);
+  };
+
   const card = (project: ProjectLibraryEntry) => <ProjectCard
     key={project.id}
     project={project}
@@ -145,7 +160,46 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
     onFavorite={() => toggleWorkspaceProjectFavorite(project.id)}
     onRename={() => beginRename(project)}
     onArchive={() => archiveProject(project)}
+    onDelete={() => setDeleteTarget(project)}
   />;
+
+
+  // The creation experience is a dedicated page, not another modal layered over the project list.
+  if (dialog === 'blank') return <section className="bo-h744-create-page" data-project-creation-page="H7.44" aria-labelledby="bo-h744-create-title">
+    <header className="bo-h744-create-top">
+      <button type="button" className="bo-h744-back" onClick={() => setDialog(null)}><ArrowLeft size={17}/> Voltar aos projetos</button>
+      <span>PROJETO NOVO <b>·</b> ESCOLHA COMO COMEÇAR</span>
+    </header>
+    <div className="bo-h744-create-frame">
+      <main className="bo-h744-create-primary">
+        <span className="bo-h744-create-eyebrow">BLUE OCEAN · CRIAÇÃO</span>
+        <h1 id="bo-h744-create-title">O que você quer fazer?</h1>
+        <p className="bo-h744-create-subtitle">Você não precisa conhecer as ferramentas para começar. Escolha o que pretende construir; o projeto será criado com o mesmo modelo de dados do serviço.</p>
+        <fieldset className="bo-h744-options">
+          <legend>Escolha por onde começar</legend>
+          <div className="bo-h744-option-grid">{PROJECT_INTENTS.map((item, index) => <button type="button" key={item.id} className={selectedIntent === item.id ? 'is-selected' : ''} aria-pressed={selectedIntent === item.id} onClick={() => setSelectedIntent(item.id)}>
+            <span className="bo-h744-option-graphic">{index === 0 ? <LayoutTemplate size={23}/> : index === 1 ? <FolderKanban size={23}/> : index === 2 ? <LayoutTemplate size={23}/> : <Sparkles size={23}/>}</span>
+            <strong>{item.title}</strong><small>{item.detail}</small><em>{selectedIntent === item.id ? 'Selecionado ✓' : 'Selecionar →'}</em>
+          </button>)}</div>
+        </fieldset>
+        <p className="bo-h744-create-explanation">Você poderá usar todas as ferramentas depois, independentemente da escolha inicial. Projeto e serviço são conceitos separados: o projeto organiza o trabalho e o serviço é o que você desenha.</p>
+      </main>
+      <aside className="bo-h744-create-aside">
+        <span className="bo-h744-side-icon"><FolderKanban size={22}/></span>
+        <h2>Seu espaço de trabalho</h2>
+        <p>Personalize agora ou dê um nome depois. Nada será criado antes de confirmar.</p>
+        <label><span>Nome do projeto <small>(opcional)</small></span><input value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Melhoria do atendimento"/></label>
+        <details className="bo-h744-additional">
+          <summary>Mais informações (opcionais)</summary>
+          <label><span>Nome do serviço</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Atendimento ao cliente"/></label>
+          <label><span>Descrição</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Descreva o objetivo do projeto"/></label>
+        </details>
+        <div className="bo-h744-start-summary"><small>PRÓXIMO PASSO</small><strong>{selectedIntent ? PROJECT_INTENTS.find((item) => item.id === selectedIntent)?.title : 'Escolha uma intenção à esquerda'}</strong><p>{selectedIntent ? 'Vamos abrir diretamente a ferramenta escolhida.' : 'Selecione uma opção para continuar.'}</p></div>
+        <button type="button" className="primary bo-h744-create-confirm" disabled={!selectedIntent} onClick={submit}>Criar projeto e começar <ArrowRight size={16}/></button>
+        <button type="button" className="bo-h744-cancel" onClick={() => setDialog(null)}>Cancelar</button>
+      </aside>
+    </div>
+  </section>;
 
   // H7.40-H8 legacy contract: Um projeto organiza o trabalho; o serviço é o que você desenha dentro dele.
   return <section className="bo-h740h8-home bo-h740h9-home" data-project-home="7.40-H8" data-project-architecture-hardening="7.40-H9" data-service-first-navigation="7.40-H11" data-home-section={section}>
@@ -167,12 +221,12 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
     </>}
 
     {section === 'projects' && <section className="bo-h740h8-section bo-h740h8-all-projects" data-service-projects="1"><header className="bo-h740h11-service-projects-head"><div><small>SERVIÇO</small><h2>Escolha um projeto</h2><p>Abra um projeto para consultar informações, público, pesquisa, mapas e melhorias. As ferramentas continuam disponíveis no menu lateral.</p></div></header><div className="bo-h740h8-toolbar"><label><Search size={17}/><input type="search" aria-label="Buscar projetos ou serviços" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar projetos ou serviços"/></label><span>{filtered.length} projeto{filtered.length === 1 ? '' : 's'} ativo{filtered.length === 1 ? '' : 's'}</span></div>{filtered.length ? <div className="bo-h740h8-project-grid">{filtered.map(card)}</div> : <div className="bo-h740h8-empty"><Search size={24}/><strong>Nenhum projeto encontrado</strong><p>Tente outro termo ou crie um novo projeto.</p></div>}
-      {archivedProjects.length > 0 && <section className="bo-h740h9-archived"><header><div><small>ARQUIVADOS</small><h2>Projetos preservados</h2><p>Arquivar remove da lista ativa, mas mantém metadados e snapshot local.</p></div></header><div>{archivedProjects.map((project) => <article key={project.id}><span><Archive size={16}/></span><div><strong>{project.title}</strong><small>Serviço: {project.serviceName} · atualizado {dateLabel(project.updatedAt)}</small></div><button type="button" onClick={() => restoreWorkspaceProject(project.id)}><RotateCcw size={14}/> Restaurar</button></article>)}</div></section>}
+      {archivedProjects.length > 0 && <section className="bo-h740h9-archived"><header><div><small>ARQUIVADOS</small><h2>Projetos preservados</h2><p>Arquivar remove da lista ativa, mas mantém metadados e snapshot local.</p></div></header><div>{archivedProjects.map((project) => <article key={project.id}><span><Archive size={16}/></span><div><strong>{project.title}</strong><small>Serviço: {project.serviceName} · atualizado {dateLabel(project.updatedAt)}</small></div><button type="button" onClick={() => restoreWorkspaceProject(project.id)}><RotateCcw size={14}/> Restaurar</button><button type="button" onClick={() => setDeleteTarget(project)} aria-label={`Excluir projeto arquivado ${project.title}`} className="bo-h744-archive-delete"><Trash2 size={14}/> Excluir</button></article>)}</div></section>}
     </section>}
 
     {section === 'templates' && <section className="bo-h740h8-section"><div className="bo-h740h8-template-grid large">{TEMPLATES.map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><Sparkles size={19}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>{projectTemplateLabel(item.id)} <ArrowRight size={12}/></em></button>)}</div></section>}
 
-    {dialog && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}>
+    {dialog && dialog !== 'blank' && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}>
       <section className="bo-h740h8-modal bo-h743-create-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h8-create-title" data-project-creation-flow="H7.43">
         <header><div><small>NOVO PROJETO</small><h2 id="bo-h740h8-create-title">{dialog === 'blank' ? 'O que você quer fazer?' : projectTemplateLabel(dialog)}</h2><p>{dialog === 'blank' ? 'Escolha por onde começar. Projeto e serviço são conceitos separados: o projeto organiza o trabalho e o serviço é o que você desenha.' : 'Projeto e serviço são conceitos separados. Comece com uma estrutura editável e ajuste depois.'}</p></div><button type="button" onClick={() => setDialog(null)} aria-label="Fechar"><X size={18}/></button></header>
         <div className="bo-h740h8-modal-body bo-h743-create-body">
@@ -181,6 +235,13 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
           <details className="bo-h743-advanced"><summary>Nome do serviço e descrição (opcionais)</summary><div className="bo-h743-advanced-fields"><label><span>Serviço principal</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Atendimento ao cliente"/></label><label><span>Descrição</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Objetivo ou transformação deste projeto"/></label></div></details>
         </div>
         <footer><button type="button" onClick={() => setDialog(null)}>Cancelar</button><button type="button" className="primary" disabled={dialog === 'blank' && !selectedIntent} onClick={submit}>Criar e abrir <ArrowRight size={14}/></button></footer>
+      </section>
+    </div>}
+
+    {deleteTarget && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteTarget(null); }}>
+      <section className="bo-h740h8-modal bo-h744-delete-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h744-delete-title">
+        <header><div><small>EXCLUSÃO DEFINITIVA</small><h2 id="bo-h744-delete-title">Excluir “{deleteTarget.title}”?</h2><p>Isso remove o projeto e sua cópia local de Jornadas, Blueprints, Whiteboards e demais registros neste navegador. Não é possível desfazer.</p></div><button type="button" onClick={() => setDeleteTarget(null)} aria-label="Fechar"><X size={18}/></button></header>
+        <footer><button type="button" onClick={() => setDeleteTarget(null)} autoFocus>Cancelar</button><button type="button" className="bo-h744-delete-confirm" onClick={confirmDeletion}><Trash2 size={15}/> Excluir definitivamente</button></footer>
       </section>
     </div>}
 
