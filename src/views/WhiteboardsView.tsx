@@ -184,7 +184,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
         <button type="button" onClick={openBlueprints}>Ir para Blueprints <ArrowRight size={15}/></button>
         {handoff.readyForWhiteboard && <button type="button" onClick={createFromDefinition}>Com contexto <ArrowRight size={15}/></button>}
       </div></details>
-      <button type="button" className="primary bo-wb-main-create" onClick={() => setShowCreate(true)}><Plus size={17}/> Novo whiteboard</button>
+      {boards.length > 0 && <button type="button" className="primary bo-wb-main-create" onClick={() => setShowCreate(true)}><Plus size={17}/> Novo whiteboard</button>}
     </div></header>
 
     {boards.length > 0 && <div className="bo-h1711-flow-hint bo-wb-flow-hint" data-design-flow="whiteboard" role="note"><span><strong>Próximo passo</strong><span>·</span><span>Quando quiser estruturar as ideias, leve-as para a Jornada ou o Blueprint.</span></span><div><button type="button" onClick={() => openJourneys()}>Organizar em Jornadas <ArrowRight size={13}/></button><button type="button" onClick={openBlueprints}>Desenhar operação no Blueprint <ArrowRight size={13}/></button></div></div>}
@@ -224,7 +224,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
       <span className="bo-wb-empty-art" aria-hidden="true"><span/><span/><span/></span>
       <div className="bo-wb-empty-copy"><span className="bo-wb-kicker">{boards.length ? 'NENHUM RESULTADO' : 'SEU ESPAÇO PARA CRIAR'}</span><strong>{boards.length ? 'Nenhum quadro encontrado' : 'Comece com uma ideia'}</strong><p>{boards.length ? 'Experimente outro termo ou limpe os filtros para ver seus quadros.' : 'Crie um canvas livre para organizar anotações, insights e conexões. Você poderá relacionar tudo ao seu serviço depois.'}</p></div>
       {boards.length ? <div className="bo1190-empty-actions"><button type="button" className="secondary" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar filtros</button></div>
-        : <div className="bo1190-empty-actions"><button type="button" className="primary" onClick={() => setShowCreate(true)}><Plus size={16}/> Criar whiteboard</button>
+        : <div className="bo1190-empty-actions"><button type="button" className="primary" onClick={() => setShowCreate(true)}><Plus size={16}/> Novo whiteboard</button>
           {handoff.readyForWhiteboard && <button type="button" className="secondary" onClick={createFromDefinition}>Usar registros existentes <ArrowRight size={14}/></button>}
         </div>}
     </div>}
