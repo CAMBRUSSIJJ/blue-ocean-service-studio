@@ -7,6 +7,7 @@ import {
 
 type Props = {
   draft: PersonaProfileDraft;
+  initialShowLibrary?: boolean;
   onChange: (next: PersonaProfileDraft) => void;
   onChangeMode: (mode: PersonaDepth) => void;
   counts: { need: number; pain: number; evidence: number; related: number };
@@ -41,8 +42,8 @@ function ListTextEditor({label,value,placeholder,onChange}: {label:string;value:
   </label>;
 }
 
-export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNavigate}: Props) {
-  const [showLibrary,setShowLibrary]=useState(false);
+export function PersonaVisualEditor({draft,onChange,onChangeMode,counts,onNavigate,initialShowLibrary=false}: Props) {
+  const [showLibrary,setShowLibrary]=useState(initialShowLibrary);
   const [dragging,setDragging]=useState<PersonaVisualCardId|null>(null);
   const cards=normalizePersonaVisualCards(draft.visualCards,draft.mode);
   const update=(changes:Partial<PersonaProfileDraft>)=>onChange({...draft,...changes});
