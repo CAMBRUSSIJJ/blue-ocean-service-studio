@@ -352,6 +352,8 @@ export default function App({ authUser, onSignOut }: AppProps) {
       setProjectShellOpen(false);
       setProjectHomeSection('projects');
       setExternalNav(null);
+      setIsMobileNavOpen(false);
+      hideLegacyPageSurfaces();
       window.dispatchEvent(new CustomEvent('rt-navigation', { detail: 'home' }));
       window.setTimeout(() => window.dispatchEvent(new Event('bo-new-project')), 30);
     };
