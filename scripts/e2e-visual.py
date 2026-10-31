@@ -87,7 +87,9 @@ def main():
             if not bounds or bounds['height']<200:
               errors.append(f'{name}: canvas visual sem área útil')
             page.screenshot(path=str(ART/f'whiteboard-{name}.png'),full_page=False,animations='disabled')
-            board.get_by_role('button',name='Quadro clássico',exact=True).click()
+            board.get_by_role('button',name='Voltar aos Whiteboards').click()
+            page.locator('.bo1193-card-menu-trigger').first.click()
+            page.get_by_role('button',name='Abrir quadro clássico',exact=True).click()
             page.locator('.bo1174-board').wait_for(state='visible',timeout=10000)
             page.evaluate("() => window.BlueOceanRuntime.api('guidedBuilder').open()")
             page.get_by_role('dialog',name='Montar serviço',exact=True).wait_for(state='visible',timeout=10000)
