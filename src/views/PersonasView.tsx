@@ -373,7 +373,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       <header className="bo-h71-detail-head bo-h724-detail-head">
         <button type="button" className="bo-h71-back" onClick={closePersona}><ArrowLeft size={16}/> Personas</button>
         <div className="bo-h71-detail-title bo-h724-detail-title"><span className="bo-h71-avatar bo-h724-avatar"><UserRound size={20}/></span><div><small>PERSONA</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Complete o perfil para documentar quem vive essa experiência.'}</p><div className="bo-h724-persona-meta"><span className="mode">{draft.mode === 'professional' ? 'Persona avançada' : 'Persona simples'}</span>{visibleTags.map((tag) => <span key={tag}>{tag}</span>)}{tagValues.length > visibleTags.length && <span>+{tagValues.length - visibleTags.length}</span>}</div></div></div>
-        <div className="bo-h724-detail-tools"><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Alterações pendentes' : 'Tudo salvo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
+        <div className="bo-h724-detail-tools"><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Alterações pendentes' : 'Tudo salvo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" className="bo-p2-persona-customize-tab" onClick={() => { setShowDetailCustomize(true); setDetailTab('overview'); setMenuId(null); }}>Personalizar interface</button><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
       </header>
 
       <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Persona">
@@ -382,7 +382,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
               ['behavior', 'Comportamento'], ['decisions', 'Decisões'], ['barriers', 'Barreiras'],
             ] as Array<[DetailTab, string]> : []), ['relations', 'Relações'], ['evidence', 'Evidências'], ['usage', 'Uso'],
         ] as Array<[DetailTab, string]>).map(([id, label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'relations' && <b>{connectedIds.length}</b>}{id === 'evidence' && <b>{evidenceConnections.length}</b>}</button>)}
-        <button type="button" className="bo-p2-persona-customize-tab" aria-expanded={showDetailCustomize} aria-controls="bo-p2-persona-customize" onClick={()=>setShowDetailCustomize(!showDetailCustomize)}>Personalizar interface</button>
+        
       </nav>
       {showDetailCustomize&&<section id="bo-p2-persona-customize" className="bo-p2-persona-customize" aria-label="Personalizar interface da Persona">
         <div><h2>Como deseja visualizar esta Persona?</h2><p>Altere a apresentação sem apagar informações já preenchidas.</p></div>
