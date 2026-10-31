@@ -221,7 +221,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
       <div className="bo-wb-next-actions">
         <button type="button" onClick={() => openJourneys()}><GitBranch size={15}/> Jornadas</button>
         <button type="button" title="Ir para Blueprints" onClick={openBlueprints}><LayoutTemplate size={15}/> Blueprint</button>
-        {handoff.readyForWhiteboard && <button type="button" className="bo-wb-context-action" onClick={createFromDefinition}>Usar registros existentes</button>}
+        {handoff.readyForWhiteboard && <button type="button" data-whiteboard-context-handoff="1" className="bo-wb-context-action" onClick={createFromDefinition}>Criar com registros existentes</button>}
       </div>
     </section>
 
