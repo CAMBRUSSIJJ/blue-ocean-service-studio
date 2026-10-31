@@ -71,7 +71,7 @@ for (const marker of ["activeTab === 'context'",'<WorkspaceLibraryView','Dashboa
 ok(!app.includes('<ContextLibraryView'),'Context Library monolítica não é renderizada');
 const whiteboards=fs.readFileSync('src/views/WhiteboardsView.tsx','utf8');
 ok(whiteboards.includes("setActiveTab('canvas')"),'whiteboard structured work opens Blueprints');
-ok(whiteboards.includes('Ir para Blueprints'),'whiteboard copy points to Blueprints');
+ok(whiteboards.includes('openBlueprints'),'whiteboard copy points to Blueprints');
 const core=fs.readFileSync('src/runtime/whiteboard-core.js','utf8');
 for (const marker of ["Contexto:['persona','need','job','pain','problemHypothesis','problem','evidence']",'showValidatedProblemPicker','showContextConversion','Transformar em objeto…','Problema validado não é criado diretamente',"detail:'context'",'problemHypothesis']) ok(core.includes(marker),`whiteboard marker ${marker}`);
 const css=fs.readFileSync('src/runtime/workspace-library-h3.css','utf8');
