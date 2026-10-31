@@ -42,11 +42,12 @@ def audit(page, name):
 def flow(page, width):
     page.goto(URL, wait_until='networkidle')
     page.get_by_role('button', name='Abrir workspace local sem conta', exact=True).click()
+    page.get_by_role('button', name='Ver templates', exact=False).click()
     page.locator('.bo-h740h8-template-grid').first.get_by_role('button', name=re.compile('Redesenho de serviço')).click()
     page.get_by_label('Nome do projeto',exact=False).fill('Harmonia dos mapas')
     page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento')
     page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
-    expect(page.get_by_role('heading', name='Visão geral do projeto', exact=True)).to_be_visible()
+    expect(page.locator('[data-project-shell-section="overview"]')).to_be_visible()
     if width <= 760:
         page.get_by_role('button', name='Abrir navegação', exact=True).click()
     page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
