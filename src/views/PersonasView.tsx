@@ -6,6 +6,8 @@ import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
 import { PersonaVisualEditor } from './PersonaVisualEditor';
+import { PersonaProgressiveEditor } from './PersonaProgressiveEditor';
+import './persona-progressive-h746.css';
 import { PersonaEvidenceTrace } from './PersonaEvidenceTrace';
 import { createDiscoveryEntity } from '../services/discovery-workspace';
 import { contextEntityTitle, contextEntityUsage, listContextEntities } from '../services/context-library';
@@ -139,6 +141,8 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>('overview');
   const [showDetailCustomize, setShowDetailCustomize] = useState(false);
+  const [showVisualComposer, setShowVisualComposer] = useState(false);
+  const [composerStartLibrary, setComposerStartLibrary] = useState(false);
   const [draft, setDraft] = useState<PersonaProfileDraft | null>(null);
   const [owner, setOwner] = useState('');
   const [tagsText, setTagsText] = useState('');
@@ -266,8 +270,8 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     changeViewMode(view.mode==='table'?'table':'cards');setSavedViewsOpen(false);
   };
 
-  const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setMenuId(null); };
-  const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
+  const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setShowVisualComposer(false); setComposerStartLibrary(false); setMenuId(null); };
+  const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); setShowVisualComposer(false); };
 
   const chooseCreateMode = (mode: PersonaDepth) => {
     setCreateMode(mode);
@@ -286,7 +290,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     }), 'Personas 2.0: criar');
     setCreateOpen(false); setCreateTitle(''); setCreateDescription('');
     setCreateMode('simple'); setCreateSections([...SIMPLE_PERSONA_SECTIONS]);
-    setSelectedId(entity.id); setDetailTab(createMode === 'professional' ? 'behavior' : 'overview');
+    setSelectedId(entity.id); setDetailTab('overview'); setShowVisualComposer(false);
     showToast('Persona criada. Complete o perfil e salve.');
   };
 
@@ -394,10 +398,16 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       <div className="bo-h71-detail-body">
         {detailTab === 'overview' && <div className="bo-h724-overview-layout">
           <main className="bo-h724-overview-main">
-            <PersonaVisualEditor draft={draft} onChange={setDraft} onChangeMode={changeDetailMode}
-              counts={{ need:completenessReport.connectionCounts.need, pain:completenessReport.connectionCounts.pain,
-                evidence:evidenceConnections.length, related:connectedIds.length }}
-              onNavigate={setDetailTab}/>
+            {showVisualComposer ? <>
+              <div className="bo-h746-composer-back"><button type="button" onClick={() => { setShowVisualComposer(false); setComposerStartLibrary(false); }}>← Voltar ao preenchimento guiado</button></div>
+              <PersonaVisualEditor draft={draft} onChange={setDraft} onChangeMode={changeDetailMode} initialShowLibrary={composerStartLibrary}
+                counts={{ need:completenessReport.connectionCounts.need, pain:completenessReport.connectionCounts.pain,
+                  evidence:evidenceConnections.length, related:connectedIds.length }} onNavigate={setDetailTab}/>
+            </> : <PersonaProgressiveEditor key={selected.id} draft={draft} onChange={setDraft}
+              onAddBlock={() => { setComposerStartLibrary(true); setShowVisualComposer(true); }}
+              onAdvanced={() => { setComposerStartLibrary(false); setShowVisualComposer(true); }}
+              counts={{ related:connectedIds.length, evidence:evidenceConnections.length, usage:usage.instances }} onNavigate={setDetailTab}/>}
+
           </main>
           <aside className="bo-h724-overview-aside">
             <section className="bo-h724-completeness-card"><header><div><small>COMPLETUDE</small><strong>{completeness}%</strong></div><span>{draft.mode === 'professional' ? 'Avançada' : 'Simples'}</span></header><i><b style={{ width: `${completeness}%` }}/></i><div className="bo-h71-check-list bo-h724-check-list">{completenessChecks.map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span>{check.label}</span></div>)}</div></section>
