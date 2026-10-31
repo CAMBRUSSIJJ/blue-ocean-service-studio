@@ -239,7 +239,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
       <label className="bo-wb-search" aria-label="Buscar Whiteboard"><Search size={16}/><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar whiteboard..." /></label>
     </div>}
 
-    {boards.length === 0 && <div className="bo-wb-empty-inline" data-whiteboard-empty="1"><strong>Seu espaço para criar</strong><span>Crie um quadro livre, sem etapas ou Blueprint obrigatório. Acrescente contexto quando precisar.</span></div>}
+    {boards.length === 0 && <div className="bo-wb-empty-inline" data-whiteboard-empty="1"><strong>Seu espaço para criar</strong><span>Crie um quadro livre para organizar ideias, sem etapas nem Blueprint obrigatório. Acrescente contexto quando precisar.</span></div>}
     {boards.length > 0 && filteredBoards.length === 0 && <div className="bo-wb-no-results" role="status"><strong>Nenhum quadro encontrado</strong><span>Ajuste a busca ou os filtros para encontrar seus whiteboards.</span><button type="button" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar filtros</button></div>}
 
     <div className="bo1189-board-grid bo-wb-gallery">
