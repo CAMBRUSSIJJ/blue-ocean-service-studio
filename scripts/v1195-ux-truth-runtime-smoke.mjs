@@ -34,7 +34,7 @@ t('criação de hipótese pré-Journey existe', home.includes("type: discoveryCr
 t('runtime createProblem suporta problemHypothesis sem etapa', runtimeHome.includes("uid('problemHypothesis')") && runtimeHome.includes("status:'hypothesis'"));
 t('Whiteboards não carrega montagem estruturada; Service Frame pertence a Blueprints', !boards.includes('discoveryReady') && boards.includes('openBlueprints'));
 t('Whiteboards continua permitindo quadro livre', boards.includes('Novo whiteboard') || boards.includes('Criar quadro vazio'));
-t('Whiteboards orienta desenho estruturado para Blueprints', boards.includes('Ir para Blueprints') && boards.includes("setActiveTab('canvas')"));
+t('Whiteboards orienta desenho estruturado para Blueprints', boards.includes('openBlueprints') && boards.includes("setActiveTab('canvas')"));
 t('modal gigante Preparar o serviço foi removido', !core.includes("modalShell('Preparar o serviço'"));
 t('API legada showServiceRecipe redireciona para contexto', core.includes('function showServiceRecipe(){') && core.includes('openServiceContextHome()'));
 t('ação Contexto do serviço existe', core.includes('Contexto do serviço'));
