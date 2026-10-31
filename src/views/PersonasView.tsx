@@ -442,7 +442,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
             </> : <PersonaProgressiveEditor key={selected.id} draft={draft} onChange={setDraft}
               onAddBlock={() => { setComposerStartLibrary(true); setShowVisualComposer(true); }}
               onAdvanced={() => { setComposerStartLibrary(false); setShowVisualComposer(true); }}
-              counts={{ related:connectedIds.length, evidence:evidenceConnections.length, usage:usage.instances }} onNavigate={setDetailTab}/>}
+              onNavigate={setDetailTab}/>}
 
           </main>
           <aside className="bo-h724-overview-aside bo-h748-persona-aside" aria-label="Organização e vínculos da Persona">
