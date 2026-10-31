@@ -61,6 +61,7 @@ def open_whiteboard(page, *, classic=True):
         page.locator('.bo1193-card-menu-trigger').first.click()
         page.get_by_role('button', name='Abrir quadro clássico', exact=True).click()
         expect(page.locator('.bo1174-board')).to_be_visible()
+        expect(page.locator('.rt144-view')).to_be_visible(timeout=15000)
 
 def note(page, text):
     page.locator('.rt144-tool[aria-label="Post-it"]').click()
@@ -285,12 +286,15 @@ def tablet_flow(page):
           any(e.get('title') == 'Anotação no tablet' for e in current['entities']['need'].values()))
     check('Tablet visual editor links it to the Whiteboard',
           any(item.get('kind') == 'smart' and item.get('objectKind') == 'need' for item in board['items'].values()))
-    check('Tablet keeps the classic editor available', overlay.get_by_role('button', name='Quadro clássico').is_visible())
     page.screenshot(path=str(OUT / 'tablet-whiteboard.png'), full_page=False)
+    overlay.get_by_role('button', name='Voltar aos Whiteboards').click()
+    page.locator('.bo1193-card-menu-trigger').first.click()
+    check('Tablet keeps the classic editor in the library menu',
+          page.get_by_role('button', name='Abrir quadro clássico', exact=True).is_visible())
 
 def mobile_flow(page):
     # The primary Whiteboard experience is now BlockSuite on every viewport.
-    # The classic document remains reachable from the header, but is not the
+    # The classic editor remains reachable through the library menu, but is not the
     # default mobile surface or a prerequisite for a useful first experience.
     open_whiteboard(page, classic=False)
     overlay = page.locator('[data-whiteboard-primary-editor="blocksuite"]')
