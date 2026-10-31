@@ -89,7 +89,9 @@ def deletion_and_whiteboard(page):
     check(any(b.get('viewKind') == 'free' for b in graph(page)['views']['whiteboards'].values()),
           'Whiteboard creation opens BlockSuite as the primary free canvas')
     page.screenshot(path=str(OUT / 'visual-whiteboard.png'), animations='disabled')
-    page.locator('[data-whiteboard-primary-editor="blocksuite"]').get_by_role('button', name='Quadro clássico').click()
+    page.locator('[data-whiteboard-primary-editor="blocksuite"]').get_by_role('button', name='Voltar aos Whiteboards').click()
+    page.locator('.bo1193-card-menu-trigger').first.click()
+    page.get_by_role('button', name='Abrir quadro clássico', exact=True).click()
     expect(page.locator('.bo1174-board')).to_be_visible()
     check(page.locator('.bo1174-board').count() > 0, 'Classic Whiteboard remains accessible for legacy cards')
 
