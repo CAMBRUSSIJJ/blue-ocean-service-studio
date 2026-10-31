@@ -355,6 +355,7 @@ export function useStudioController() {
     try {
       if (!deleteProject(projectId)) { showToast('Não foi possível excluir o projeto.'); return false; }
       setProjectLibraryRevision((value) => value + 1);
+      window.dispatchEvent(new Event('bo-project-deleted'));
       showToast('Projeto excluído deste navegador.');
       return true;
     } catch {
