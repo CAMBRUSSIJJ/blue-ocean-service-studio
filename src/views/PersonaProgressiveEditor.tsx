@@ -9,7 +9,6 @@ type Props = {
   onAddBlock: () => void;
   onAdvanced: () => void;
   onNavigate: (tab: 'relations' | 'evidence' | 'usage') => void;
-  counts: { related: number; evidence: number; usage: number };
 };
 
 const STEPS: Array<{ id: StepId; label: string; title: string; hint: string }> = [
@@ -19,7 +18,7 @@ const STEPS: Array<{ id: StepId; label: string; title: string; hint: string }> =
   { id: 'channels', label: 'Canais', title: 'Canais de contato', hint: 'Onde ela encontra ou utiliza o serviço? Um canal por linha.' },
 ];
 
-export function PersonaProgressiveEditor({ draft, onChange, onAddBlock, onAdvanced, onNavigate, counts }: Props) {
+export function PersonaProgressiveEditor({ draft, onChange, onAddBlock, onAdvanced, onNavigate }: Props) {
   const [step, setStep] = useState(0);
   const [channelsInput, setChannelsInput] = useState(draft.channels.join('\n'));
   const current = STEPS[step];
@@ -72,10 +71,6 @@ export function PersonaProgressiveEditor({ draft, onChange, onAddBlock, onAdvanc
           : <button type="button" className="primary" onClick={() => onNavigate('relations')}>Continuar para relações <ArrowRight size={14}/></button>}
       </div>
     </div>
-    <div className="bo-h746-followups" aria-label="Conexões do projeto">
-      <button type="button" onClick={() => onNavigate('relations')}><strong>Relações</strong><span>{counts.related} vínculo(s) com necessidades, dores ou hipóteses</span><ArrowRight size={14}/></button>
-      <button type="button" onClick={() => onNavigate('evidence')}><strong>Evidências</strong><span>{counts.evidence} fonte(s) conectada(s)</span><ArrowRight size={14}/></button>
-      <button type="button" onClick={() => onNavigate('usage')}><strong>Uso nos mapas</strong><span>{counts.usage} utilização(ões) da Persona</span><ArrowRight size={14}/></button>
-    </div>
+
   </section>;
 }
