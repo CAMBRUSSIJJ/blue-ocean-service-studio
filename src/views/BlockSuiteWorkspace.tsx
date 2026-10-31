@@ -44,7 +44,14 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
   const [title, setTitle] = useState('');
   const [selectedText, setSelectedText] = useState('');
   const [search, setSearch] = useState('');
-  const [notice, setNotice] = useState('O desenho é salvo neste navegador.');
+  const [notice, setNotice] = useState('Salvando neste dispositivo');
+  const [showQuickStart, setShowQuickStart] = useState(() => {
+    try { return sessionStorage.getItem('bo-wb-quickstart-seen-v1') !== 'yes'; } catch { return true; }
+  });
+  const dismissQuickStart = () => {
+    setShowQuickStart(false);
+    try { sessionStorage.setItem('bo-wb-quickstart-seen-v1', 'yes'); } catch { /* onboarding opcional */ }
+  };
   const board = graph.views.whiteboards[boardId];
   const legacyItems = useMemo(() => legacyItemsForCanvas(graph, boardId), [graph, boardId]);
   const linked = useMemo(() => Object.values(board?.items ?? {}).filter(item => item.kind === 'smart'), [board]);
@@ -80,8 +87,8 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
       if (event.origin !== window.location.origin || event.source !== frameRef.current?.contentWindow) return;
       const message = event.data;
       if (!message || message.source !== 'blue-ocean-blocksuite' || message.version !== 2 || message.boardId !== boardId || message.serviceId !== serviceId) return;
-      if (message.type === 'READY') { setEditorReady(true); setNotice('Salvo neste navegador · mantenha um backup do quadro.'); }
-      if (message.type === 'SAVED') setNotice('Alterações salvas neste navegador.');
+      if (message.type === 'READY') { setEditorReady(true); setNotice('Salvo neste dispositivo'); }
+      if (message.type === 'SAVED') setNotice('Salvo neste dispositivo');
       if (message.type === 'ERROR') setNotice(message.text ?? 'Não foi possível executar esta ação.');
       if (message.type === 'SELECTION') setSelectedText((message.text ?? '').slice(0, 240));
       if (message.type === 'IMPORT_DONE') setNotice(message.count ? `${message.count} elemento(s) copiado(s) sem alterar o quadro anterior.` : 'Os elementos já estavam no canvas.');
@@ -124,14 +131,14 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
         <div><span>BLUE OCEAN / WHITEBOARD</span><strong id="bo-bs-window-title" title={boardName}>{boardName}</strong></div>
       </div>
       <nav className="bo-bs-modes" aria-label="Visualização do editor">
-        <button type="button" className={mode === 'canvas' ? 'active' : ''} aria-pressed={mode === 'canvas'} onClick={() => { setMode('canvas'); post('MODE', { mode: 'canvas' }); }}>Canvas</button>
-        <button type="button" className={mode === 'page' ? 'active' : ''} aria-pressed={mode === 'page'} onClick={() => { setMode('page'); post('MODE', { mode: 'page' }); }}>Documento</button>
+        <button type="button" className={mode === 'canvas' ? 'active' : ''} aria-pressed={mode === 'canvas'} title="Editar no canvas infinito" onClick={() => { setMode('canvas'); post('MODE', { mode: 'canvas' }); }}>Canvas</button>
+        <button type="button" className={mode === 'page' ? 'active' : ''} aria-pressed={mode === 'page'} title="Organizar em documento" onClick={() => { setMode('page'); post('MODE', { mode: 'page' }); }}>Documento</button>
       </nav>
       <div className="bo-bs-top-actions">
-        <span className="bo-bs-save-indicator" role="status">{notice}</span>
-        <button type="button" className={panelOpen ? 'active' : ''} aria-expanded={panelOpen} aria-controls="bo-bs-service-panel" onClick={() => setPanelOpen(!panelOpen)}>Objetos do serviço</button>
-        <button type="button" onClick={() => post('EXPORT')} disabled={!editorReady}>Exportar</button>
-        <button type="button" onClick={onOpenLegacy}>Quadro clássico</button>
+        <span className="bo-bs-save-indicator" role="status" title={notice}><span aria-hidden="true" className="bo-bs-save-dot"/> {notice}</span>
+        <button type="button" className={panelOpen ? 'active bo-bs-context-button' : 'bo-bs-context-button'} aria-expanded={panelOpen} aria-controls="bo-bs-service-panel" onClick={() => { if (!panelOpen) dismissQuickStart(); setPanelOpen(!panelOpen); }}>Objetos do serviço</button>
+        <button type="button" className="bo-bs-export-button" title="Salvar uma cópia JSON do canvas" onClick={() => post('EXPORT')} disabled={!editorReady}>Exportar</button>
+        <button type="button" className="bo-bs-legacy-button" title="Abrir a versão anterior sem alterar o documento visual" onClick={onOpenLegacy}>Quadro clássico</button>
       </div>
     </header>
     <div className="bo-bs-body">
@@ -139,6 +146,15 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
       {availability === 'missing' && <div className="bo-bs-placeholder" role="status"><h2>O canvas visual não está disponível</h2><p>Você pode continuar editando o quadro clássico sem perder os dados. Verifique a compilação do adaptador BlockSuite.</p><button type="button" onClick={onOpenLegacy}>Abrir quadro clássico</button></div>}
       {availability === 'ready' && <iframe ref={frameRef} title={`Canvas visual de ${boardName}`} className="bo-bs-frame"
         src={`/blocksuite/index.html?${params.toString()}`} sandbox="allow-scripts allow-same-origin allow-downloads" />}
+      {editorReady && showQuickStart && !panelOpen && <section className="bo-bs-quickstart" aria-label="Primeiros passos no Whiteboard">
+        <span className="bo-bs-quickstart__eyebrow">DICAS RÁPIDAS</span>
+        <h2>Comece pelo canvas</h2>
+        <p>Use as ferramentas do quadro para adicionar notas, formas e conexões. Depois, transforme suas descobertas em objetos do serviço.</p>
+        <div className="bo-bs-quickstart__actions">
+          <button type="button" onClick={() => { dismissQuickStart(); setPanelOpen(true); }}>Explorar objetos</button>
+          <button type="button" onClick={dismissQuickStart}>Entendi</button>
+        </div>
+      </section>}
       {panelOpen && <aside className="bo-bs-panel" id="bo-bs-service-panel" aria-label="Objetos do serviço">
         <div className="bo-bs-panel-intro"><div><span>CONTEXTO DO SERVIÇO</span><h2>Objetos conectados</h2></div><button type="button" aria-label="Fechar painel" onClick={() => setPanelOpen(false)}>×</button></div>
         <p>Crie ou vincule objetos reutilizáveis nas Personas, Necessidades, Dores, Jobs e Evidências do serviço.</p>
