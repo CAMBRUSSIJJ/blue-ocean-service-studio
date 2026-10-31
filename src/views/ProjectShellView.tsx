@@ -68,8 +68,8 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
       parent = parent.parentElement;
     }
   }, [projectId, section]);
-  type Area = 'overview' | 'audience' | 'research' | 'maps';
-  const allowedAreas: Area[] = ['overview', 'audience', 'research', 'maps'];
+  type Area = 'overview' | 'audience' | 'research' | 'maps' | 'improvement';
+  const allowedAreas: Area[] = ['overview', 'audience', 'research', 'maps', 'improvement'];
   const [area, setArea] = useState<Area>(() => {
     try {
       const saved = sessionStorage.getItem('bo-project-area:' + projectId);
@@ -97,7 +97,7 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   };
   const areaLabel: Array<{ id: Area; label: string }> = [
     {id:'overview',label:'Visão geral'}, {id:'audience',label:'Público e contexto'},
-    {id:'research',label:'Pesquisa e evidências'}, {id:'maps',label:'Mapas'},
+    {id:'research',label:'Pesquisa e evidências'}, {id:'maps',label:'Mapas'}, {id:'improvement',label:'Melhorias'},
   ];
   const chooseArea = (next: Area) => {
     setArea(next);
