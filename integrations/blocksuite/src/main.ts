@@ -157,6 +157,38 @@ async function main() {
   };
   window.addEventListener('message', onBridgeMessage);
 
+  // A small, content-derived note preview is cached separately from the Yjs
+  // source of truth. It never writes back into the visual document.
+  const cacheNotePreview = () => {
+    try {
+      const notes = doc.getBlockByFlavour('affine:note').slice(0, 32).map((note, index) => {
+        const model = note as unknown as { xywh?: unknown; children?: unknown[] };
+        const getText = (block: unknown, depth = 0): string => {
+          if (!block || typeof block !== 'object' || depth > 3) return '';
+          const value = block as { text?: { toString?: () => string }; children?: unknown[] };
+          const own = typeof value.text?.toString === 'function' ? value.text.toString() : '';
+          const nested = Array.isArray(value.children)
+            ? value.children.slice(0, 30).map(child => getText(child, depth + 1)).filter(Boolean).join(' ')
+            : '';
+          return (own + ' ' + nested).trim().slice(0, 140);
+        };
+        const coordinates = typeof model.xywh === 'string'
+          ? model.xywh.replace(/[\[\]]/g, '').split(',').map(Number)
+          : [];
+        const [rawX, rawY, rawW, rawH] = coordinates;
+        return {
+          x: Number.isFinite(rawX) ? Math.max(-100000, Math.min(100000, rawX)) : 80 + index % 4 * 280,
+          y: Number.isFinite(rawY) ? Math.max(-100000, Math.min(100000, rawY)) : 80 + Math.floor(index / 4) * 180,
+          width: Number.isFinite(rawW) ? Math.max(100, Math.min(1800, rawW)) : 240,
+          height: Number.isFinite(rawH) ? Math.max(70, Math.min(1200, rawH)) : 150,
+          text: getText(model),
+        };
+      }).filter(note => note.text.length > 0);
+      const cacheKey = `bo-whiteboard-thumbnail-v1:${encodeURIComponent(serviceId)}:${encodeURIComponent(boardId)}`;
+      localStorage.setItem(cacheKey, JSON.stringify({ version: 1, notes, updatedAt: Date.now() }));
+    } catch { /* Preview is optional. Yjs remains the only visual-document source. */ }
+  };
+
   // Provide selected text for a deliberate conversion to a canonical Blue Ocean object.
   let lastSelected = '';
   const notifySelection = () => {
@@ -168,9 +200,10 @@ async function main() {
   let saveTimer: number | undefined;
   const onUpdate = () => {
     window.clearTimeout(saveTimer);
-    saveTimer = window.setTimeout(() => notify('SAVED'), 700);
+    saveTimer = window.setTimeout(() => { cacheNotePreview(); notify('SAVED'); }, 700);
   };
   doc.spaceDoc.on('update', onUpdate);
+  cacheNotePreview();
   notify('READY');
 
   window.addEventListener('pagehide', () => { window.clearTimeout(saveTimer); window.removeEventListener('message', onBridgeMessage); doc.spaceDoc.off('update', onUpdate); void persistence.destroy(); }, { once: true });

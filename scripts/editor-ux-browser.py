@@ -73,7 +73,12 @@ def note(page, text):
 
 def whiteboard_flow(page):
     open_whiteboard(page)
-    check('Canvas occupies the available workspace', page.locator('.rt144-view').bounding_box()['height'] > 650)
+    page.wait_for_function("""() => {
+      const canvas = document.querySelector('.rt144-view');
+      return Boolean(canvas && canvas.getBoundingClientRect().height > 650);
+    }""", timeout=20000)
+    check('Canvas occupies the available workspace',
+          page.evaluate("() => { const canvas = document.querySelector('.rt144-view'); return Boolean(canvas && canvas.getBoundingClientRect().height > 650); }"))
     check('Editor starts at the top of the viewport', page.locator('.bo1174-board').bounding_box()['y'] == 0)
     check('Application behind the editor is inert', page.locator('#root').evaluate('e => e.inert'))
     check('No persona prerequisite in the first-use prompt', 'Persona e Problema' not in page.locator('.bo1174-board').inner_text())
