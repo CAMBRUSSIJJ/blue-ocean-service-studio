@@ -14,10 +14,8 @@ type Props = {
   graph: ServiceGraph;
   onChangeGraph: (next: ServiceGraph, tag: string) => void;
   onClose: () => void;
-  onOpenLegacy: () => void;
 };
 
-type CanvasMode = 'canvas' | 'page';
 type EditorMessage = { source: 'blue-ocean-blocksuite'; version: 2; boardId: string; serviceId: string; type: string; text?: string; count?: number };
 
 const OBJECT_TYPES: Array<{ kind: WhiteboardCanvasKind; label: string }> = [
@@ -33,13 +31,14 @@ const OBJECT_TYPES: Array<{ kind: WhiteboardCanvasKind; label: string }> = [
  * BlockSuite remains a replaceable drawing engine in an isolated, same-origin frame.
  * No automatic migration, Yjs write-back, or unverified collaboration promises.
  */
-export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onChangeGraph, onClose, onOpenLegacy }: Props) {
+export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onChangeGraph, onClose }: Props) {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [availability, setAvailability] = useState<'checking' | 'ready' | 'missing'>('checking');
   const [editorReady, setEditorReady] = useState(false);
-  const [mode, setMode] = useState<CanvasMode>('canvas');
   const [panelOpen, setPanelOpen] = useState(false);
+  const [frameIssue, setFrameIssue] = useState(false);
+  const [frameAttempt, setFrameAttempt] = useState(0);
   const [kind, setKind] = useState<WhiteboardCanvasKind>('need');
   const [title, setTitle] = useState('');
   const [selectedText, setSelectedText] = useState('');
@@ -70,7 +69,7 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
 
   useEffect(() => {
     const controller = new AbortController();
-    setEditorReady(false); setAvailability('checking');
+    setEditorReady(false); setAvailability('checking'); setFrameIssue(false);
     const check = async () => {
       try {
         const response = await fetch('/blocksuite/blue-ocean-blocksuite.json', { signal: controller.signal, cache: 'no-store' });
@@ -96,6 +95,20 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
     window.addEventListener('message', onMessage);
     return () => { controller.abort(); window.removeEventListener('message', onMessage); };
   }, [boardId, serviceId]);
+
+  // A successful manifest request does not guarantee the iframe has initialized.
+  // Offer recovery when its READY handshake never arrives (e.g. blocked asset).
+  useEffect(() => {
+    if (availability !== 'ready' || editorReady || frameIssue) return;
+    const timer = window.setTimeout(() => setFrameIssue(true), 14000);
+    return () => window.clearTimeout(timer);
+  }, [availability, editorReady, frameIssue, frameAttempt]);
+
+  const retryEditor = () => {
+    setFrameIssue(false);
+    setEditorReady(false);
+    setFrameAttempt(value => value + 1);
+  };
 
   const insertReference = (kind: WhiteboardCanvasKind, id: string, label: string) => {
     const result = linkEntityToWhiteboard(graph, boardId, kind, id);
@@ -130,22 +143,24 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
         <button type="button" className="bo-bs-back" onClick={onClose} ref={closeRef} aria-label="Voltar aos Whiteboards">←</button>
         <div><span>BLUE OCEAN / WHITEBOARD</span><strong id="bo-bs-window-title" title={boardName}>{boardName}</strong></div>
       </div>
-      <nav className="bo-bs-modes" aria-label="Visualização do editor">
-        <button type="button" className={mode === 'canvas' ? 'active' : ''} aria-pressed={mode === 'canvas'} title="Editar no canvas infinito" onClick={() => { setMode('canvas'); post('MODE', { mode: 'canvas' }); }}>Canvas</button>
-        <button type="button" className={mode === 'page' ? 'active' : ''} aria-pressed={mode === 'page'} title="Organizar em documento" onClick={() => { setMode('page'); post('MODE', { mode: 'page' }); }}>Documento</button>
-      </nav>
+      <span className="bo-bs-canvas-label" aria-label="Modo de edição">Canvas visual</span>
       <div className="bo-bs-top-actions">
         <span className="bo-bs-save-indicator" role="status" title={notice}><span aria-hidden="true" className="bo-bs-save-dot"/> {notice}</span>
         <button type="button" className={panelOpen ? 'active bo-bs-context-button' : 'bo-bs-context-button'} aria-expanded={panelOpen} aria-controls="bo-bs-service-panel" onClick={() => { if (!panelOpen) dismissQuickStart(); setPanelOpen(!panelOpen); }}>Objetos do serviço</button>
         <button type="button" className="bo-bs-export-button" title="Salvar uma cópia JSON do canvas" onClick={() => post('EXPORT')} disabled={!editorReady}>Exportar</button>
-        <button type="button" className="bo-bs-legacy-button" title="Abrir a versão anterior sem alterar o documento visual" onClick={onOpenLegacy}>Quadro clássico</button>
       </div>
     </header>
     <div className="bo-bs-body">
       {availability === 'checking' && <div className="bo-bs-placeholder" role="status">Carregando canvas visual…</div>}
-      {availability === 'missing' && <div className="bo-bs-placeholder" role="status"><h2>O canvas visual não está disponível</h2><p>Você pode continuar editando o quadro clássico sem perder os dados. Verifique a compilação do adaptador BlockSuite.</p><button type="button" onClick={onOpenLegacy}>Abrir quadro clássico</button></div>}
-      {availability === 'ready' && <iframe ref={frameRef} title={`Canvas visual de ${boardName}`} className="bo-bs-frame"
+      {availability === 'missing' && <div className="bo-bs-placeholder bo-bs-error-state" role="alert"><h2>Canvas indisponível</h2><p>Não foi possível carregar o editor visual. Os dados do quadro continuam preservados.</p><button type="button" onClick={onClose}>Voltar aos Whiteboards</button></div>}
+      {availability === 'ready' && <iframe key={frameAttempt} ref={frameRef} title={`Canvas visual de ${boardName}`} className="bo-bs-frame"
         src={`/blocksuite/index.html?${params.toString()}`} sandbox="allow-scripts allow-same-origin allow-downloads" />}
+      {availability === 'ready' && !editorReady && !frameIssue && <div className="bo-bs-loading" role="status">Abrindo o canvas visual…</div>}
+      {availability === 'ready' && frameIssue && !editorReady && <div className="bo-bs-load-error" role="alert">
+        <h2>O editor não terminou de carregar</h2>
+        <p>O canvas não confirmou a inicialização. Tente novamente ou volte aos seus quadros. Nenhum conteúdo foi apagado.</p>
+        <div><button type="button" onClick={retryEditor}>Tentar novamente</button><button type="button" onClick={onClose}>Voltar aos Whiteboards</button></div>
+      </div>}
       {editorReady && showQuickStart && !panelOpen && <section className="bo-bs-quickstart" aria-label="Primeiros passos no Whiteboard">
         <span className="bo-bs-quickstart__eyebrow">DICAS RÁPIDAS</span>
         <h2>Comece pelo canvas</h2>
