@@ -245,7 +245,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
     <div className="bo1189-board-grid bo-wb-gallery">
       {filteredBoards.map((board) => <article key={board.id} className="bo1193-board-card bo-h711-board-card bo-wb-board-card" data-whiteboard-studio-status={board.report?.status ?? 'blank'}>
         <button type="button" className="bo1189-board-preview bo-editor-board-preview bo-wb-card-preview" aria-label={'Abrir ' + board.name} onClick={() => open(board.id)}><BoardPreview board={graph.views.whiteboards[board.id]} graph={graph}/></button>
-        <div className="bo-wb-card-body">
+        <div className="bo1193-board-copy">
           <strong title={board.name}>{board.name}</strong>
           <small>{board.updatedAt && Number.isFinite(Date.parse(String(board.updatedAt))) ? 'Editado ' + new Date(board.updatedAt).toLocaleDateString('pt-BR', { day:'2-digit', month:'short' }) : 'Canvas visual'}</small>
           <span title={statusLabel(board.report?.status ?? 'blank')} className={board.contextCount ? 'bo-wb-status-tag is-linked' : 'bo-wb-status-tag is-unlinked'}>{board.contextCount ? 'Com contexto' : 'Sem contexto'}</span>
