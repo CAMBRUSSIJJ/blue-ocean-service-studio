@@ -94,6 +94,7 @@
 @import './design-system/unified-ui-h3.css';
 @import './runtime/project-ux-h31.css';
 @import './runtime/library-parity-h741.css';
+@import './runtime/whiteboard-library-mockup.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
