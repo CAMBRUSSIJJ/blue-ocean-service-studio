@@ -198,7 +198,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
     {handoff.readyForWhiteboard && <div className="bo-h78-library-hint" data-whiteboard-context-handoff="1"><strong>Pessoas, problemas e evidências já disponíveis</strong><span>{handoff.counts.persona} Persona · {handoff.counts.problem} Problema · {handoff.counts.evidence} Evidência · {handoff.supporting.length} relações de suporte.</span><button type="button" onClick={createFromDefinition}>Criar com registros existentes</button></div>}
 
     {boards.length > 0 && <div className="bo-h711-commandbar bo-wb-toolbar">
-      <label aria-label="Buscar Whiteboard"><Search size={17}/><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar quadros..." /></label>
+      <label aria-label="Buscar Whiteboard"><Search size={17}/><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar whiteboard..." /></label>
       <div aria-label="Filtros do Whiteboard"><Filter size={15}/>{([
         ['all', 'Todos'], ['context', 'Com contexto'], ['journey', 'Com Jornada'], ['attention', 'Precisa atenção'],
       ] as Array<[BoardFilter, string]>).map(([key, label]) => <button type="button" key={key} aria-pressed={filter === key} className={filter === key ? 'active' : ''} onClick={() => setFilter(key)}>{label}</button>)}</div>
