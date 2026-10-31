@@ -243,7 +243,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
     {boards.length > 0 && filteredBoards.length === 0 && <div className="bo-wb-no-results" role="status"><strong>Nenhum quadro encontrado</strong><span>Ajuste a busca ou os filtros para encontrar seus whiteboards.</span><button type="button" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar filtros</button></div>}
 
     <div className="bo1189-board-grid bo-wb-gallery">
-      {filteredBoards.map((board) => <article key={board.id} className="bo1193-board-card bo-h711-board-card bo-wb-board-card" data-whiteboard-studio-status={board.report?.status ?? 'blank'}>
+      {filteredBoards.map((board) => <article key={board.id} aria-label={'WHITEBOARD · ' + board.name} className="bo1193-board-card bo-h711-board-card bo-wb-board-card" data-whiteboard-studio-status={board.report?.status ?? 'blank'}>
         <button type="button" className="bo1189-board-preview bo-editor-board-preview bo-wb-card-preview" aria-label={'Abrir ' + board.name} onClick={() => open(board.id)}><BoardPreview board={graph.views.whiteboards[board.id]} graph={graph}/></button>
         <div className="bo1193-board-copy">
           <strong title={board.name}>{board.name}</strong>
