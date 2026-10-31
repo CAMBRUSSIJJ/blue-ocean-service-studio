@@ -51,10 +51,10 @@ def enter(page):
 
 
 def project(page):
-    page.get_by_role('button', name='Novo projeto', exact=True).click()
-    page.get_by_label('Nome do projeto', exact=True).fill('Projeto — experiência validada')
-    page.get_by_label('Serviço principal', exact=True).fill('Atendimento ao cliente')
-    page.get_by_role('button', name='Criar projeto', exact=True).click()
+    page.get_by_role('button', name='Novo projeto', exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click()
+    page.get_by_label('Nome do projeto',exact=False).fill('Projeto — experiência validada')
+    page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento ao cliente')
+    page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
     expect(page.get_by_role('heading', name='Visão geral do projeto', exact=True)).to_be_visible()
     # On narrow viewports the primary navigation is an off-canvas drawer.
     # Open it as a user would; the button is otherwise outside the viewport.
