@@ -59,6 +59,22 @@ const personaCustomSections: Array<{id:PersonaSectionId;label:string}> = [
  {id:'triggers',label:'Gatilhos'},{id:'alternatives',label:'Alternativas'},{id:'evidence',label:'Evidências'},{id:'relations',label:'Relações'},
 ];
 const layoutLabels: Array<[PersonaLayout,string]> = [['profile-left','Perfil à esquerda'],['balanced','Equilibrado'],['story-first','Narrativa primeiro']];
+const personaCheckHints: Record<string,string> = {
+  identity: 'Nome informado',
+  context: 'Contexto de utilização',
+  goal: 'Que resultado espera alcançar?',
+  situation: 'Quando e onde utiliza o serviço?',
+  channels: 'Por quais canais interage?',
+  'need-job': 'Conecte na aba Relações',
+  'pain-hypothesis': 'Relacione as dores ou hipóteses',
+  evidence: 'Associe uma fonte de pesquisa',
+  quote: 'Registre uma fala representativa',
+  behaviors: 'Documente hábitos observados',
+  expectations: 'Registre critérios de escolha',
+  constraints: 'Quais barreiras enfrenta?',
+  triggers: 'O que inicia sua busca?',
+  alternatives: 'Que soluções utiliza hoje?',
+};
 const relationLabel: Record<PersonaRelationKind, string> = {
   need: 'Necessidades', job: 'Jobs', pain: 'Dores', problemHypothesis: 'Hipóteses', evidence: 'Evidências',
 };
@@ -410,7 +426,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
 
           </main>
           <aside className="bo-h724-overview-aside">
-            <section className="bo-h724-completeness-card"><header><div><small>COMPLETUDE</small><strong>{completeness}%</strong></div><span>{draft.mode === 'professional' ? 'Avançada' : 'Simples'}</span></header><i><b style={{ width: `${completeness}%` }}/></i><div className="bo-h71-check-list bo-h724-check-list">{completenessChecks.map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span>{check.label}</span></div>)}</div></section>
+            <section className="bo-h724-completeness-card"><header><div><small>COMPLETUDE</small><strong>{completeness}%</strong></div><span>{draft.mode === 'professional' ? 'Avançada' : 'Simples'}</span></header><i><b style={{ width: `${completeness}%` }}/></i><div className="bo-h71-check-list bo-h724-check-list">{completenessChecks.map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span><strong>{check.label}</strong><small>{personaCheckHints[check.id] || 'Informação complementar'}</small></span></div>)}</div></section>
             <section className="bo-h724-organization-card"><header><small>ORGANIZAÇÃO</small><strong>Responsabilidade e tags</strong></header><label><span>Responsável</span><div className="bo-h724-owner-field"><UserRound size={14}/><input list="bo-h724-owner-options" value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></div><datalist id="bo-h724-owner-options">{ownerSuggestions.map((item) => <option key={item} value={item}/>)}</datalist></label><div className="bo-h724-tags-field"><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map((tag) => <button key={tag} type="button" className="bo-h724-chip" onClick={() => removeTag(tag)}>{tag}<X size={11}/></button>)}<input value={tagEntry} onChange={(event) => setTagEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addTag(); } }} placeholder={tagValues.length ? 'Adicionar tag…' : 'Ex.: B2C'}/></div></div></section>
             <section className="bo-h724-context-card"><small>BASE ATUAL</small><strong>{connectedIds.length} conexões</strong><p>{evidenceConnections.length} evidência(s) · {usage.instances} instância(s) visual(is)</p><button type="button" onClick={() => setDetailTab('relations')}>Ver relações</button></section>
           </aside>
