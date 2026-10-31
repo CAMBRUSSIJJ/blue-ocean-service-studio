@@ -41,6 +41,19 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   const serviceArtifacts = serviceMaps + whiteboards;
   // The current ServiceGraph is the project scope; never copy entities for a dashboard.
   const projectId = project?.id || graph.service.project?.id || graph.service.id;
+  const [initialIntent] = useState(() => {
+    try {
+      const pending = sessionStorage.getItem('bo-h744-new-project-intent') || '';
+      sessionStorage.removeItem('bo-h744-new-project-intent');
+      return pending;
+    } catch { return ''; }
+  });
+  const firstStep = initialIntent === 'personas' && personas === 0
+    ? { title: 'Crie sua primeira persona', detail: 'Descreva quem usa o serviço antes de conectar necessidades e evidências.', label: 'Criar persona', action: () => openLibraryPage('personas') }
+    : initialIntent === 'whiteboard' && whiteboards === 0
+      ? { title: 'Comece por um Whiteboard', detail: 'Use um espaço livre para reunir ideias, problemas e descobertas do projeto.', label: 'Abrir Whiteboard', action: openWhiteboards }
+      : { title: 'Crie seu primeiro mapa do serviço', detail: 'Visualize a experiência e a operação em uma estrutura única. Personas e evidências podem ser adicionadas depois.', label: 'Criar mapa', action: onCreateMap };
+
   const shellRef = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
     // Project switching must not preserve an old editor scroll offset beneath the sticky header.
@@ -128,7 +141,7 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
     </header>
 
     {areaTabs}
-    {area === 'overview' && serviceMaps === 0 && <section className="bo-h743-next-step" data-project-next-step="create-map"><div><small>PRÓXIMO PASSO SUGERIDO</small><h2>Crie seu primeiro mapa do serviço</h2><p>Visualize a experiência e a operação em uma estrutura única. Personas e evidências podem ser adicionadas depois.</p></div><button type="button" className="primary" onClick={onCreateMap}>Criar mapa <ArrowRight size={15}/></button></section>}
+    {area === 'overview' && serviceMaps === 0 && <section className="bo-h743-next-step" data-project-next-step={initialIntent || 'create-map'}><div><small>PRÓXIMO PASSO SUGERIDO</small><h2>{firstStep.title}</h2><p>{firstStep.detail}</p></div><button type="button" className="primary" onClick={firstStep.action}>{firstStep.label} <ArrowRight size={15}/></button></section>}
     <div id="bo-project-context-panel" role="tabpanel" aria-labelledby={`bo-pctx-tab-${area}`} className="bo-project-context-panel">
     {area === 'overview' ? <>
     <section className="bo-h31-overview" data-project-overview="compact-h31">
