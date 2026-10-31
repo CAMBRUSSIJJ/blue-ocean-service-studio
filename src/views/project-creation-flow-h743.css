@@ -1,0 +1,46 @@
+/* H7.43 · criação por intenção: somente superfícies locais, sem alterar o tema global. */
+.bo-h743-create-modal { width: min(680px, calc(100vw - 32px)); max-width: 680px; max-height: min(92vh, 850px); overflow-y: auto; }
+.bo-h743-create-body { display: flex; flex-direction: column; gap: 15px; }
+.bo-h743-intents { min-width: 0; width: 100%; border: 0; padding: 0; margin: 0; }
+.bo-h743-intents legend { color: var(--bo-text-secondary, #536173); font-size: 13px; font-weight: 650; margin-bottom: 11px; }
+.bo-h743-intent-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.bo-h743-intent-grid button { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; color: inherit; background: var(--bo-card-bg, #fff); border: 1px solid var(--bo-border, #d8e1ee); border-radius: 12px; padding: 17px; min-height: 106px; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
+.bo-h743-intent-grid button:hover { border-color: #5e8ed6; }
+.bo-h743-intent-grid button.is-selected { border: 2px solid #2365b1; padding: 16px; background: #edf5ff; }
+.bo-h743-intent-grid button strong { font-size: 14px; line-height: 1.4; font-weight: 650; }
+.bo-h743-intent-grid button small { font-size: 12px; line-height: 1.5; font-weight: 400; color: #4d6075; }
+.bo-h743-create-body > label.full { width: 100%; }
+.bo-h743-create-body > label.full > span { display: block; margin-bottom: 8px; }
+.bo-h743-create-body > label.full em { font-style: normal; font-weight: 400; opacity: .72; }
+.bo-h743-advanced { width: 100%; border-top: 1px solid var(--bo-border, #e2e8f0); padding-top: 12px; }
+.bo-h743-advanced summary { cursor: pointer; font-size: 13px; color: inherit; }
+.bo-h743-advanced-fields { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 14px; }
+.bo-h743-advanced-fields label { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.bo-h743-advanced-fields input, .bo-h743-advanced-fields textarea { width: 100%; }
+.bo-h743-create-modal button:focus-visible, .bo-h743-advanced summary:focus-visible { outline: 3px solid #3573c2; outline-offset: 3px; }
+.bo-h743-create-modal button:disabled { cursor: not-allowed; opacity: .5; }
+.bo-h743-next-step { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px; margin: 18px 0; padding: 16px 20px; border: 1px solid #bed4f3; background: #f1f7ff; border-radius: 12px; }
+.bo-h743-next-step small { color: #285c9c; font-size: 11px; font-weight: 700; letter-spacing: .035em; }
+.bo-h743-next-step h2 { font-size: 16px; line-height: 1.45; margin: 4px 0; }
+.bo-h743-next-step p { color: #536173; font-size: 13px; margin: 0; }
+.bo-h743-next-step button { display: inline-flex; gap: 7px; align-items: center; white-space: nowrap; }
+.bo-h31-overview-stats.bo-h743-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.bo-h31-overview-stats.bo-h743-actions button { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; min-height: 95px; padding: 14px 16px; border: 1px solid var(--bo-border, #dfe5ed); border-radius: 11px; background: var(--bo-card-bg, #fff); color: inherit; text-align: left; cursor: pointer; }
+.bo-h31-overview-stats.bo-h743-actions button:hover { border-color: #5e8ed6; }
+.bo-h31-overview-stats.bo-h743-actions button strong { font-size: 24px; font-weight: 650; }
+.bo-h31-overview-stats.bo-h743-actions button span { font-size: 13px; }
+.bo-h31-overview-stats.bo-h743-actions button small { font-size: 11px; color: #285c9c; }
+.bo-h31-overview-stats.bo-h743-actions button:focus-visible, .bo-h743-next-step button:focus-visible { outline: 3px solid #3573c2; outline-offset: 2px; }
+@media (max-width: 700px) {
+ .bo-h743-intent-grid { grid-template-columns: minmax(0,1fr); }
+ .bo-h743-create-modal { max-height: 96vh; width: calc(100vw - 20px); }
+ .bo-h31-overview-stats.bo-h743-actions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+ .bo-h743-next-step button { width: 100%; justify-content: center; }
+}
+@media (prefers-color-scheme: dark) {
+ [data-mode="dark"] .bo-h743-intent-grid button.is-selected { background: #102746; color: #eff6ff; }
+ [data-mode="dark"] .bo-h743-intent-grid button small { color: #c1ccda; }
+ [data-mode="dark"] .bo-h743-next-step { background: #102746; color: #f1f6ff; border-color: #244c80; }
+ [data-mode="dark"] .bo-h743-next-step p { color: #c1ccda; }
+ [data-mode="dark"] .bo-h743-next-step small, [data-mode="dark"] .bo-h31-overview-stats.bo-h743-actions button small { color: #99c7ff; }
+}
