@@ -14,7 +14,7 @@ const checks=[
  [app.includes('bo-h740h11-legacy-global-projects'),'Contrato legado Projetos preservado sem dominar UI'],
  [app.includes('<strong>Serviço</strong><em>Projetos de serviço</em>'),'Switcher global comunica Serviço → Projetos'],
  [home.includes('Projetos do serviço') && home.includes('Escolha um projeto'),'Área Serviço mostra projetos explicitamente'],
- [home.includes('data-service-project-hub="1"') && home.includes('Abrir Serviço'),'Home encaminha para Serviço em vez de expor grid inteiro de projetos'],
+ [home.includes('data-home-projects="1"') && home.includes("setSection('projects')"),'Home apresenta projeto recente e encaminha à biblioteca completa'],
  [home.includes('data-service-projects="1"'),'Lista de projetos pertence semanticamente a Serviço'],
  [home.includes('Abra um projeto para consultar informações, público, pesquisa, mapas e melhorias.'),'Fluxo Serviço → Projeto → Contexto e Mapas está explícito'],
  [app.includes('>Serviço</button>') || app.includes("openGlobalHome('projects')}>Serviço</button>"),'Breadcrumb global usa Serviço'],
