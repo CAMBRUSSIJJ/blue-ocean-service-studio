@@ -65,7 +65,7 @@ check('Journey preserva captura durante desenho',journey.includes('Registrar des
 check('Whiteboard oferece criação simples com nome',whiteboard.includes('Comece com um quadro') && whiteboard.includes('Nome do quadro'));
 check('Whiteboard oferece começar livre',whiteboard.includes('Começar livre'));
 check('Whiteboard oferece reutilizar pesquisa existente',whiteboard.includes('Já tem pesquisa no serviço?') && whiteboard.includes('Criar com registros existentes'));
-check('Whiteboard explicita objetos registrados após começar',whiteboard.includes('acrescentar objetos do serviço depois') && whiteboard.includes('Objetos do serviço') === false ? whiteboard.includes('acrescentar objetos do serviço depois') : whiteboard.includes('acrescentar objetos do serviço depois'));
+check('Whiteboard explicita objetos registrados após começar',whiteboard.includes('acrescentar objetos do serviço depois') && whiteboard.includes('Crie um quadro livre para organizar'));
 check('metadata preserva H16.7 no histórico',String(pkg.description||'').includes('V1.20.5-H16.7 Research Flow & Flexible Discovery'));
 check('script H16.7 registrado',pkg.scripts?.['v1205h167:research-flow-flexible-discovery-smoke']?.includes('v1205h167-research-flow-flexible-discovery-smoke.mjs'));
 check('QA preserva H16.7',String(pkg.scripts?.qa||'').includes('npm run v1205h167:research-flow-flexible-discovery-smoke'));
