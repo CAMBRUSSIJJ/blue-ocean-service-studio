@@ -251,7 +251,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
           <span title={statusLabel(board.report?.status ?? 'blank')} className={board.contextCount ? 'bo-wb-status-tag is-linked' : 'bo-wb-status-tag is-unlinked'}>{board.contextCount ? 'Com contexto' : 'Sem contexto'}</span>
           {board.report && board.report.danglingSmartObjects > 0 && <span className="bo-wb-status-tag is-attention" title={'Qualidade: ' + board.report.qualityScore + '%'}><AlertTriangle size={12}/> Revisar referências</span>}
           <div className="bo-wb-card-actions">
-            <button type="button" className="bo-wb-open-canvas" onClick={() => open(board.id)}>Abrir canvas</button>
+            <button type="button" className="bo-wb-open-canvas" onClick={() => open(board.id)}>Abrir canvas <ArrowRight size={14}/></button>
             <button type="button" className="bo1193-card-menu-trigger" aria-label={'Ações de ' + board.name} aria-expanded={menuBoardId === board.id} title="Mais opções" onClick={() => setMenuBoardId(menuBoardId === board.id ? null : board.id)}>⋯</button>
           </div>
         </div>
