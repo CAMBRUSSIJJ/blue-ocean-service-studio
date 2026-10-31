@@ -75,6 +75,7 @@ def flow(page, width):
     expect(pane).to_be_visible()
     page.get_by_role('button', name='Criar mapa', exact=True).click()
     page.get_by_role('button', name=re.compile('^Em branco')).click()
+    page.get_by_role('button', name='Criar e abrir mapa', exact=True).click()
     wait_saved(f)
     f.get_by_role('button', name='Adicionar etapa', exact=True).click()
     f.locator('#cad-quick-form [name=title]').fill('Primeira etapa')
