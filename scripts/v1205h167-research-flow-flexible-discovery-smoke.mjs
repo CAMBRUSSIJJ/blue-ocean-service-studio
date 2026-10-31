@@ -62,10 +62,10 @@ check('Journey importa criação canônica de contexto',journey.includes("create
 check('Journey permite capturar Persona/Need/Pain',journey.includes("'persona' | 'need' | 'pain'")&&journey.includes('captureContextDuringJourney'));
 check('Journey auto-vincula necessidade à etapa',journey.includes("kind === 'need'")&&journey.includes('needIds')&&journey.includes('selectedStage'));
 check('Journey preserva captura durante desenho',journey.includes('Registrar descoberta')||journey.includes('Registrar enquanto desenha'));
-check('Whiteboard pergunta como começar',whiteboard.includes('Como você quer começar?'));
+check('Whiteboard oferece criação simples com nome',whiteboard.includes('Comece com um quadro') && whiteboard.includes('Nome do quadro'));
 check('Whiteboard oferece começar livre',whiteboard.includes('Começar livre'));
-check('Whiteboard oferece usar pesquisa existente',whiteboard.includes('Usar o que já foi pesquisado'));
-check('Whiteboard explicita registros durante desenho',whiteboard.includes('registre pessoas, necessidades, dores e problemas conforme eles aparecerem'));
+check('Whiteboard oferece reutilizar pesquisa existente',whiteboard.includes('Já tem pesquisa no serviço?') && whiteboard.includes('Criar com registros existentes'));
+check('Whiteboard explicita objetos registrados após começar',whiteboard.includes('acrescentar objetos do serviço depois') && whiteboard.includes('Crie um quadro livre para organizar'));
 check('metadata preserva H16.7 no histórico',String(pkg.description||'').includes('V1.20.5-H16.7 Research Flow & Flexible Discovery'));
 check('script H16.7 registrado',pkg.scripts?.['v1205h167:research-flow-flexible-discovery-smoke']?.includes('v1205h167-research-flow-flexible-discovery-smoke.mjs'));
 check('QA preserva H16.7',String(pkg.scripts?.qa||'').includes('npm run v1205h167:research-flow-flexible-discovery-smoke'));

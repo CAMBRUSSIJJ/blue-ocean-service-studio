@@ -287,12 +287,25 @@ def tablet_flow(page):
     page.screenshot(path=str(OUT / 'tablet-whiteboard.png'), full_page=False)
 
 def mobile_flow(page):
-    open_whiteboard(page)
-    check('Mobile declares its reading mode', 'Modo leitura' in page.locator('.bo1174-board-header').inner_text())
-    check('Mobile canvas has available height', page.locator('.rt144-view').bounding_box()['height'] > 500)
-    check('Mobile hides editing tools', page.locator('.rt144-tool[aria-label="Post-it"]').count() == 0)
-    check('Mobile viewport fits the screen', page.locator('.bo1174-board').bounding_box()['width'] <= 391)
-    check('Mobile keeps comments available', page.get_by_role('button', name='Comentar', exact=True).is_visible())
+    # The primary Whiteboard experience is now BlockSuite on every viewport.
+    # The classic document remains reachable from the header, but is not the
+    # default mobile surface or a prerequisite for a useful first experience.
+    open_whiteboard(page, classic=False)
+    overlay = page.locator('[data-whiteboard-primary-editor="blocksuite"]')
+    expect(overlay).to_be_visible()
+    frame = page.locator('.bo-bs-frame')
+    expect(page.frame_locator('.bo-bs-frame').locator('.bo-bs-canvas')).to_be_visible(timeout=30000)
+    dimensions = frame.bounding_box()
+    check('Mobile visual canvas has usable height', bool(dimensions and dimensions['height'] > 500))
+    check('Mobile visual canvas stays inside viewport',
+          bool(dimensions and dimensions['width'] <= 391 and dimensions['x'] >= -1))
+    check('Mobile can choose Canvas and Documento',
+          overlay.get_by_role('button', name='Canvas', exact=True).is_visible() and
+          overlay.get_by_role('button', name='Documento', exact=True).is_visible())
+    check('Mobile keeps service objects accessible',
+          overlay.get_by_role('button', name='Objetos do serviço').count() == 1)
+    check('Mobile retains access to classic Whiteboard',
+          overlay.get_by_role('button', name='Quadro clássico').count() == 1)
     page.screenshot(path=str(OUT / 'mobile-whiteboard.png'), full_page=False)
 
 class QuietHandler(SimpleHTTPRequestHandler):

@@ -73,6 +73,13 @@ def deletion_and_whiteboard(page):
     expect(page.locator('[data-whiteboard-library="1"]')).to_be_visible()
     check(page.get_by_role('button', name='Novo whiteboard').is_visible(),
           'Whiteboard library is accessible by primary sidebar')
+    if not graph(page)['views']['whiteboards']:
+        check(page.locator('[data-whiteboard-empty="1"]').is_visible(),
+              'Whiteboard empty screen offers a clear first action')
+        check(page.get_by_role('button', name='Novo whiteboard').count() == 1,
+              'Whiteboard empty screen has only one primary create CTA')
+        check(page.locator('.bo-h711-commandbar').count() == 0,
+              'Empty Whiteboard does not display premature search filters')
     page.get_by_role('button', name='Novo whiteboard').click()
     page.get_by_label('Nome do quadro', exact=True).fill('QA Quadro livre')
     page.get_by_role('button', name='Começar livre', exact=True).click()
