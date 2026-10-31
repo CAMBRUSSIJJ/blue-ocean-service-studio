@@ -6,7 +6,7 @@
   gap:clamp(18px,2.1vw,30px);
   width:100%;
   max-width:1230px;
-  margin:0 auto;
+  margin:0;
   padding:0 4px 28px;
   box-sizing:border-box;
 }
