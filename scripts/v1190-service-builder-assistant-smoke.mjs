@@ -42,10 +42,10 @@ ok('assistant API registered',core.includes("runtime.register('serviceBuilderAss
 ok('assistant start requires free board',core.includes("board().viewKind!=='free'"));
 ok('blank board remains empty',core.includes("createBoard(clean,{viewKind:'free',layoutMode:'free',items:{},edges:{}})"));
 ok('empty Whiteboard starts with a note and keeps the assistant optional',core.includes("btn('Adicionar post-it'")&&core.includes("if(board()?.viewKind==='free'&&!serviceBuilderAssistantState().active)return"));
-ok('empty state preserves free exploration and points structured design to Blueprints',whiteboards.includes('Ir para Blueprints')&&whiteboards.includes('livre'));
+ok('empty state preserves free exploration and points structured design to Blueprints',whiteboards.includes('openBlueprints')&&whiteboards.includes('livre'));
 ok('home guided creates blank board first',home.includes("core?.createBlank") && home.includes("serviceBuilderAssistant"));
 ok('home guided uses service named board',home.includes("`${graph.service.name || 'Serviço'} · construção`"));
-ok('whiteboard library no longer exposes structured guided build',!whiteboards.includes('✦ Montar com assistente')&&!whiteboards.includes('✦ Montar serviço')&&whiteboards.includes('Ir para Blueprints'));
+ok('whiteboard library no longer exposes structured guided build',!whiteboards.includes('✦ Montar com assistente')&&!whiteboards.includes('✦ Montar serviço')&&whiteboards.includes('openBlueprints'));
 ok('whiteboard library creates only free blank boards',whiteboards.includes('createBlank')&&!whiteboards.includes('createGuided'));
 ok('guidance objective mapping',guidance.includes("objective:'service'"));
 ok('guidance evidence mapping',guidance.includes("evidence:'evidence'"));
