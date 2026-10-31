@@ -44,8 +44,6 @@ type WhiteboardCoreApi = {
 
 type BoardFilter = 'all' | 'context' | 'journey' | 'attention';
 
-const statusLabel = (status: string) => ({ blank: 'Em branco', contextual: 'Contextual', composing: 'Em composição', connected: 'Conectado' }[status] ?? status);
-
 export function WhiteboardsView({ studio }: { studio: StudioController }) {
   const { graph, hasService, setActiveTab, setGraph, showToast } = studio;
   const [showCreate, setShowCreate] = useState(false);
