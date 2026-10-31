@@ -79,3 +79,33 @@
 .bo-bs-panel .bo-bs-panel-section button.primary:hover{background:#0e5398}
 @media(max-width:1020px){.bo-bs-topbar{gap:8px;padding:8px 12px}.bo-bs-topbar__title{max-width:26%}.bo-bs-top-actions button{padding:8px 10px}.bo-bs-save-indicator{display:none}}
 @media(max-width:680px){.bo-bs-topbar__title{max-width:100%;flex:1}.bo-bs-modes{order:3;width:100%;max-width:100%;justify-content:center}.bo-bs-top-actions{max-width:100%;min-width:0;overflow-x:auto;scrollbar-width:none}.bo-bs-top-actions button{font-size:11px;min-height:36px;white-space:nowrap}.bo-bs-quickstart{top:12px;left:12px;width:calc(100% - 24px);padding:15px}}
+
+/* H7.41 — canvas-only toolbar, accessible loading and retry states. */
+.bo-bs-topbar{justify-content:space-between}
+.bo-bs-canvas-label{
+  display:inline-flex;align-items:center;min-height:34px;
+  padding:7px 12px;border:1px solid #dfe7f0;border-radius:9px;
+  background:#f5f8fc;color:#315f88;font-size:12px;font-weight:690;
+  white-space:nowrap;margin-left:auto;
+}
+.bo-bs-load-error{
+  position:absolute;z-index:5;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(430px,calc(100% - 30px));padding:22px;
+  border:1px solid #dbe6f2;border-radius:14px;background:#fff;
+  box-shadow:0 18px 38px rgba(15,49,83,.14);text-align:left;
+}
+.bo-bs-load-error h2{font-size:17px;line-height:1.35;color:#193b5d;margin:0 0 8px}
+.bo-bs-load-error p{font-size:13px;line-height:1.6;color:#647d95;margin:0 0 18px}
+.bo-bs-load-error>div{display:flex;gap:8px;flex-wrap:wrap}
+.bo-bs-load-error button,.bo-bs-error-state button{
+  border:1px solid #bfd3e9;background:#fff;color:#185e9a;
+  border-radius:9px;padding:10px 13px;font-size:12px;font-weight:700;
+  cursor:pointer;min-height:40px;
+}
+.bo-bs-load-error button:first-child{border-color:#1766b0;background:#1766b0;color:#fff}
+.bo-bs-loading{
+  position:absolute;z-index:2;left:50%;top:44%;transform:translate(-50%,-50%);
+  pointer-events:none;font-size:13px;color:#6c8297;padding:12px 15px;
+  border-radius:9px;background:rgba(255,255,255,.94);
+}
+@media(max-width:680px){.bo-bs-canvas-label{display:none}.bo-bs-top-actions{margin-left:auto}}
