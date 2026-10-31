@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { DragEvent } from 'react';
 import type { Id, ActiveTab, ServiceGraph, Stage, Touchpoint, Problem, Opportunity, Task, StageDraft, BlueprintDraft, StageBundle, Emotion, TaskStatus, JourneyRow, Journey } from '../domain/model';
-import { makeId, normalizeName, parseList, nowIso, snapshotStage, pasteStageBundles, deleteStageFromGraph, createServiceGraph, createDemoGraph, isWorkspaceEmpty } from '../domain/graph-operations';
+import { makeId, normalizeName, parseList, nowIso, snapshotStage, pasteStageBundles, deleteStageFromGraph, createServiceGraph, createDemoGraph, createBlankWorkspaceGraph, isWorkspaceEmpty } from '../domain/graph-operations';
 import { BrowserLocalGraphRepository } from '../repositories/local-graph-repository';
 import { commitHistory, initialHistory, redoHistory, undoHistory } from './history';
 import { describeImportError } from '../domain/migrations';
@@ -9,7 +9,7 @@ import { dataBridge, runtimeApi } from '../runtime/client';
 import { setJourneyStageContextLink, updateJourneyStageExperience } from '../services/journey-map-studio';
 import type { JourneyContextKind } from '../services/journey-map-studio';
 import { assignTouchpointChannel, assignTouchpointChannelByName } from '../services/channel-continuity';
-import { activeProjectId as resolveActiveProjectId, listArchivedProjects, listProjects, loadProjectSnapshot, markProjectOpened, renameProject, saveProjectSnapshot, setProjectArchived, toggleProjectFavorite } from '../services/project-library';
+import { activeProjectId as resolveActiveProjectId, deleteProject, listArchivedProjects, listProjects, loadProjectSnapshot, markProjectOpened, renameProject, saveProjectSnapshot, setProjectArchived, toggleProjectFavorite } from '../services/project-library';
 import type { ProjectTemplate } from '../services/project-library';
 
 const repository = new BrowserLocalGraphRepository();
@@ -335,6 +335,33 @@ export function useStudioController() {
     if (projectId === activeProjectId && fallback) openWorkspaceProject(fallback.id);
     showToast('Projeto arquivado.');
     return true;
+  };
+
+  const deleteWorkspaceProject = (projectId: Id) => {
+    const target = [...projects, ...archivedProjects].find((item) => item.id === projectId);
+    if (!target) { showToast('Projeto não encontrado.'); return false; }
+    if (projectId === activeProjectId) {
+      // Switch the canonical graph before removing the snapshot. This prevents
+      // replaceProjectGraph's flush and the autosave bridge from resurrecting it.
+      const fallback = projects.find((item) => item.id !== projectId);
+      const nextGraph = fallback ? loadProjectSnapshot(fallback.id) : createBlankWorkspaceGraph();
+      if (!nextGraph || !replaceProjectGraph(nextGraph, 'Excluir projeto: mudar contexto')) {
+        showToast('Não foi possível fechar o projeto antes da exclusão.');
+        return false;
+      }
+      // Keep the user on the project library after deletion, even when a fallback exists.
+      setActiveTab('home');
+    }
+    try {
+      if (!deleteProject(projectId)) { showToast('Não foi possível excluir o projeto.'); return false; }
+      setProjectLibraryRevision((value) => value + 1);
+      window.dispatchEvent(new Event('bo-project-deleted'));
+      showToast('Projeto excluído deste navegador.');
+      return true;
+    } catch {
+      showToast('Falha ao excluir o projeto do armazenamento local.');
+      return false;
+    }
   };
 
   const restoreWorkspaceProject = (projectId: Id) => {
@@ -872,7 +899,7 @@ export function useStudioController() {
   const canRedo = bridgeHistory?.canRedo ?? history.future.length > 0;
   return {
     activeTab, setActiveTab, toast, setToast, loaded, history, setHistory, canUndo, canRedo,
-    saveStatus, setSaveStatus, graph, setGraph, hasService, projects, archivedProjects, activeProjectId, createWorkspaceProject, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, createService, loadDemoService, undo, redo, selectedStageIds,
+    saveStatus, setSaveStatus, graph, setGraph, hasService, projects, archivedProjects, activeProjectId, createWorkspaceProject, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, deleteWorkspaceProject, createService, loadDemoService, undo, redo, selectedStageIds,
     setSelectedStageIds, selectedStageId, setSelectedStageId, selectionAnchorId, setSelectionAnchorId, clipboard, setClipboard,
     focusedStageId, setFocusedStageId, zoom, setZoom, stageWidth, setStageWidth, collapsedRows,
     setCollapsedRows, showRowControls, setShowRowControls, detailMode, setDetailMode, showShortcuts, setShowShortcuts,

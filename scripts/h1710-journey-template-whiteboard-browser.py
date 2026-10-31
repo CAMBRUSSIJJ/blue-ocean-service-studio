@@ -36,9 +36,9 @@ def enter(page):
 def create_from_project_template(page, template, project):
     enter(page)
     page.locator('.bo-h740h8-template-grid').first.get_by_role('button', name=__import__('re').compile(template)).click()
-    page.get_by_label('Nome do projeto', exact=True).fill(project)
-    page.get_by_label('Serviço principal', exact=True).fill(project + ' serviço')
-    page.get_by_role('button', name='Criar projeto', exact=True).click()
+    page.get_by_label('Nome do projeto',exact=False).fill(project)
+    page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill(project + ' serviço')
+    page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
     expect(page.get_by_role('heading', name='Visão geral do projeto', exact=True)).to_be_visible()
     page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
     expect(page.locator('[data-service-map-library]')).to_be_visible()
@@ -97,10 +97,10 @@ def deletion_and_whiteboard(page):
 
 def library_templates(page):
     enter(page)
-    page.get_by_role('button', name='Novo projeto', exact=True).click()
-    page.get_by_label('Nome do projeto', exact=True).fill('QA Templates')
-    page.get_by_label('Serviço principal', exact=True).fill('QA Modelos')
-    page.get_by_role('button', name='Criar projeto', exact=True).click()
+    page.get_by_role('button', name='Novo projeto', exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click()
+    page.get_by_label('Nome do projeto',exact=False).fill('QA Templates')
+    page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('QA Modelos')
+    page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
     expect(page.get_by_role('heading', name='Visão geral do projeto', exact=True)).to_be_visible()
     page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
     expect(page.locator('[data-service-map-library]')).to_be_visible()

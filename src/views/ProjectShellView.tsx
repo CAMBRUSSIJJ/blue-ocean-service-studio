@@ -5,6 +5,8 @@ import {
 import { contextEntityTitle, type ContextKind } from '../services/context-library';
 import { projectContextRecords, filterProjectContext, projectRelatedRecords, projectHasLinkedEvidence } from '../services/project-context-index';
 import './project-context-workspace.css';
+import './project-creation-flow-h743.css';
+import './project-flow-cleanup-h745.css';
 import type { StudioController } from '../state/useStudioController';
 
 export type ProjectShellSection = 'overview' | 'library';
@@ -40,6 +42,19 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   const serviceArtifacts = serviceMaps + whiteboards;
   // The current ServiceGraph is the project scope; never copy entities for a dashboard.
   const projectId = project?.id || graph.service.project?.id || graph.service.id;
+  const [initialIntent] = useState(() => {
+    try {
+      const pending = sessionStorage.getItem('bo-h744-new-project-intent') || '';
+      sessionStorage.removeItem('bo-h744-new-project-intent');
+      return pending;
+    } catch { return ''; }
+  });
+  const firstStep = initialIntent === 'personas' && personas === 0
+    ? { title: 'Crie sua primeira persona', detail: 'Descreva quem usa o serviço antes de conectar necessidades e evidências.', label: 'Criar persona', action: () => openLibraryPage('personas') }
+    : initialIntent === 'whiteboard' && whiteboards === 0
+      ? { title: 'Comece por um Whiteboard', detail: 'Use um espaço livre para reunir ideias, problemas e descobertas do projeto.', label: 'Abrir Whiteboard', action: openWhiteboards }
+      : { title: 'Crie seu primeiro mapa do serviço', detail: 'Visualize a experiência e a operação em uma estrutura única. Personas e evidências podem ser adicionadas depois.', label: 'Criar mapa', action: onCreateMap };
+
   const shellRef = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
     // Project switching must not preserve an old editor scroll offset beneath the sticky header.
@@ -82,8 +97,7 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
   };
   const areaLabel: Array<{ id: Area; label: string }> = [
     {id:'overview',label:'Visão geral'}, {id:'audience',label:'Público e contexto'},
-    {id:'research',label:'Pesquisa e evidências'}, {id:'maps',label:'Mapas e Whiteboard'},
-    {id:'improvement',label:'Análise e melhorias'},
+    {id:'research',label:'Pesquisa e evidências'}, {id:'maps',label:'Mapas'}, {id:'improvement',label:'Melhorias'},
   ];
   const chooseArea = (next: Area) => {
     setArea(next);
@@ -123,10 +137,11 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
 
   return <section ref={shellRef} className="bo-h740h10-shell" data-project-shell="7.40-H10" data-project-shell-section="overview">
     <header className="bo-h740h10-shell__hero bo-h31-project-header">
-      <div><small>PROJETO ATUAL</small><h1>{project?.title || serviceName}</h1><p>{project?.description || 'Organize o projeto e acesse suas informações pelas abas abaixo.'}</p></div>
+      <div><small>VISÃO GERAL DO PROJETO</small><h1>{project?.title || serviceName}</h1><p>{project?.description || 'Organize o trabalho e avance pelo que faz sentido agora. As ferramentas completas estão disponíveis no menu lateral.'}</p></div>
     </header>
 
     {areaTabs}
+    {area === 'overview' && serviceMaps === 0 && <section className="bo-h743-next-step" data-project-next-step={initialIntent || 'create-map'}><div><small>PRÓXIMO PASSO SUGERIDO</small><h2>{firstStep.title}</h2><p>{firstStep.detail}</p></div><button type="button" className="primary" onClick={firstStep.action}>{firstStep.label} <ArrowRight size={15}/></button></section>}
     <div id="bo-project-context-panel" role="tabpanel" aria-labelledby={`bo-pctx-tab-${area}`} className="bo-project-context-panel">
     {area === 'overview' ? <>
     <section className="bo-h31-overview" data-project-overview="compact-h31">
@@ -137,16 +152,19 @@ export function ProjectShellView({ studio, section, openService, onCreateMap, op
           <h2>{serviceName}</h2>
           <p>{serviceMaps > 0 ? 'Continue o desenho do serviço e alterne entre Jornada e Blueprint.' : 'Comece pelo mapa do serviço. Pessoas, necessidades e evidências permanecem organizadas nas abas do projeto.'}</p>
         </div>
-        {serviceMaps > 0
-          ? <button type="button" className="primary" onClick={openService}>Abrir mapas <ArrowRight size={15}/></button>
-          : <button type="button" className="primary" onClick={onCreateMap}>Criar mapa <ArrowRight size={15}/></button>}
+        {serviceMaps > 0 && <button type="button" className="primary" onClick={openService}>Abrir mapas <ArrowRight size={15}/></button>}
       </div>
-      <div className="bo-h31-overview-stats" aria-label="Indicadores do projeto">
-        <div><strong>{serviceMaps}</strong><span>Mapas</span></div>
-        <div><strong>{personas}</strong><span>Personas</span></div>
-        <div><strong>{needs}</strong><span>Necessidades</span></div>
-        <div><strong>{evidence}</strong><span>Evidências</span></div>
+      <div className="bo-h31-overview-stats bo-h743-actions" aria-label="Ações e registros do projeto">
+        <button type="button" onClick={serviceMaps ? openService : onCreateMap}><strong>{serviceMaps}</strong><span>Mapas</span><small>{serviceMaps ? 'Ver mapas →' : 'Criar primeiro mapa →'}</small></button>
+        <button type="button" onClick={() => openLibraryPage('personas')}><strong>{personas}</strong><span>Personas</span><small>{personas ? 'Ver personas →' : 'Criar primeira persona →'}</small></button>
+        <button type="button" onClick={() => openLibraryPage('needs')}><strong>{needs}</strong><span>Necessidades</span><small>{needs ? 'Ver necessidades →' : 'Adicionar necessidade →'}</small></button>
+        <button type="button" onClick={() => openLibraryPage('evidence')}><strong>{evidence}</strong><span>Evidências</span><small>{evidence ? 'Ver evidências →' : 'Registrar evidência →'}</small></button>
       </div>
+      {(personas === 0 || evidence === 0 || serviceMaps === 0) && <div className="bo-h745-onboarding-grid" aria-label="Primeiros passos do projeto">
+        {personas === 0 && <article><small>PÚBLICO E CONTEXTO</small><h3>Nenhuma persona ainda</h3><p>Descreva quem usa o serviço, suas necessidades, comportamentos e expectativas. Os dados poderão ser reutilizados nos mapas.</p><button type="button" onClick={() => openLibraryPage('personas')}>Criar primeira persona <ArrowRight size={14}/></button></article>}
+        {evidence === 0 && <article><small>PESQUISA E EVIDÊNCIAS</small><h3>Nenhuma evidência registrada</h3><p>Registre o que foi observado, hipóteses e materiais de pesquisa para orientar as decisões de melhoria.</p><button type="button" onClick={() => openLibraryPage('evidence')}>Adicionar evidência <ArrowRight size={14}/></button></article>}
+        {serviceMaps === 0 && <article><small>DESENHO DO SERVIÇO</small><h3>Nenhum mapa neste projeto</h3><p>O mapa conecta a experiência do cliente, a Jornada e as atividades do Blueprint em uma única estrutura.</p><button type="button" onClick={onCreateMap}>Criar primeiro mapa <ArrowRight size={14}/></button></article>}
+      </div>}
     </section>
     </> : (area === 'audience' || area === 'research') ? <section className="bo-project-context-collection">
       <header className="bo-project-context-section-header"><div><small>{area === 'audience' ? 'PÚBLICO E CONTEXTO' : 'PESQUISA DO PROJETO'}</small><h2>{area === 'audience' ? 'Pessoas, necessidades e relações' : 'Hipóteses, problemas e evidências'}</h2><p>Registros deste projeto, vinculados ao mesmo Service Graph usado nos mapas. Nenhum registro é duplicado.</p></div><button type="button" className="primary" onClick={() => openLibraryPage(area === 'audience' ? 'needs' : 'evidence')}>+ {area === 'audience' ? 'Nova necessidade' : 'Nova evidência'}</button></header>

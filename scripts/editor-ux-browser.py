@@ -36,10 +36,10 @@ def graph(page):
 def project(page):
     page.goto(URL, wait_until='domcontentloaded')
     page.get_by_role('button', name='Abrir workspace local sem conta').click()
-    page.get_by_role('button', name='Novo projeto', exact=True).click()
-    page.get_by_label('Nome do projeto', exact=True).fill('Editor UX QA')
-    page.get_by_label('Serviço principal', exact=True).fill('Atendimento ao cliente')
-    page.get_by_role('button', name='Criar projeto', exact=True).click()
+    page.get_by_role('button', name='Novo projeto', exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click()
+    page.get_by_label('Nome do projeto',exact=False).fill('Editor UX QA')
+    page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento ao cliente')
+    page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
 
 def open_whiteboard(page, *, classic=True):
     project(page)

@@ -70,7 +70,7 @@ try:
         page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
         page.add_locator_handler(page.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click())
         page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click()
-        page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Negócio QA');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click()
+        page.get_by_role('button',name='Novo projeto',exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click();page.get_by_label('Nome do projeto',exact=False).fill('Negócio QA');page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
         page.get_by_role('button',name='Criar mapa',exact=True).click()
         page.get_by_role('button',name='Reduzir atrasos e retrabalho',exact=False).click()
         expect(page.locator('.bo-business-goals')).to_contain_text('Objetivo: Reduzir atrasos e retrabalho')
