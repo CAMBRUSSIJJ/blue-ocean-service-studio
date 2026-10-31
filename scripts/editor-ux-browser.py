@@ -57,7 +57,9 @@ def open_whiteboard(page, *, classic=True):
     # Legacy-compatibility suite intentionally enters the retained classic editor.
     # The normal product entrypoint is BlockSuite, verified just above.
     if classic:
-        visual.get_by_role('button', name='Quadro clássico', exact=True).click()
+        visual.get_by_role('button', name='Voltar aos Whiteboards').click()
+        page.locator('.bo1193-card-menu-trigger').first.click()
+        page.get_by_role('button', name='Abrir quadro clássico', exact=True).click()
         expect(page.locator('.bo1174-board')).to_be_visible()
 
 def note(page, text):
@@ -299,13 +301,13 @@ def mobile_flow(page):
     check('Mobile visual canvas has usable height', bool(dimensions and dimensions['height'] > 500))
     check('Mobile visual canvas stays inside viewport',
           bool(dimensions and dimensions['width'] <= 391 and dimensions['x'] >= -1))
-    check('Mobile can choose Canvas and Documento',
-          overlay.get_by_role('button', name='Canvas', exact=True).is_visible() and
-          overlay.get_by_role('button', name='Documento', exact=True).is_visible())
+    check('Mobile uses the canvas without obsolete mode buttons',
+          overlay.get_by_role('button', name='Documento', exact=True).count() == 0 and
+          overlay.get_by_role('button', name='Quadro clássico', exact=True).count() == 0)
     check('Mobile keeps service objects accessible',
           overlay.get_by_role('button', name='Objetos do serviço').count() == 1)
-    check('Mobile retains access to classic Whiteboard',
-          overlay.get_by_role('button', name='Quadro clássico').count() == 1)
+    check('Mobile can return to the board library',
+          overlay.get_by_role('button', name='Voltar aos Whiteboards').count() == 1)
     page.screenshot(path=str(OUT / 'mobile-whiteboard.png'), full_page=False)
 
 class QuietHandler(SimpleHTTPRequestHandler):
