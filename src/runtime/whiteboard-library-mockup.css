@@ -1,0 +1,45 @@
+/* Whiteboard library — mockup-based, without a phase-navigation bar. */
+.bo-wb-home{gap:14px!important}
+.bo-wb-home .bo-wb-home-header{min-height:0;padding:20px 0 6px;margin:0;display:block}
+.bo-wb-home .bo-wb-home-intro>span{display:none}
+.bo-wb-home .bo-wb-home-intro h1{font-size:25px;margin:0 0 5px;line-height:1.18}
+.bo-wb-home .bo-wb-home-intro p{font-size:13px;max-width:570px}
+.bo-wb-storage-warning{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border:1px solid #e9a41e;border-radius:10px;background:#fff0ca;color:#825209;font-size:12px;line-height:1.5}
+.bo-wb-storage-warning svg{flex:none;margin-top:1px;color:#ac7412}
+.bo-wb-storage-warning strong{font-weight:750}
+.bo-wb-next-step{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 17px;border:1px solid #8db6f6;border-radius:11px;background:#dceaff;color:#25486f}
+.bo-wb-next-step>div:first-child{min-width:0}
+.bo-wb-next-step>div:first-child>span{display:block;font-size:10px;font-weight:800;letter-spacing:.06em;color:#3264a2;margin-bottom:5px}
+.bo-wb-next-step p{font-size:12px;line-height:1.5;margin:0;max-width:480px}
+.bo-wb-next-actions{display:flex;align-items:center;gap:8px;flex:none}
+.bo-wb-next-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#fff;border:1px solid #acc6e8;border-radius:9px;min-height:37px;padding:8px 12px;font-size:12px;font-weight:680;color:#204f83;cursor:pointer}
+.bo-wb-next-actions button:hover{background:#eff6ff;border-color:#6e9bdb}
+.bo-wb-home .bo-wb-toolbar{display:flex;flex-direction:row;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:10px 0;border:0;background:transparent;box-shadow:none;min-height:56px}
+.bo-wb-home .bo-wb-toolbar>div{display:flex;flex:1 1 380px;align-items:center;gap:7px;flex-wrap:wrap}
+.bo-wb-home .bo-wb-toolbar>div>svg{display:none}
+.bo-wb-home .bo-wb-toolbar>div button{border:1px solid #dae3ed;background:#fff;border-radius:999px;padding:7px 12px;min-height:36px;height:auto;color:#46617b;font-size:12px}
+.bo-wb-home .bo-wb-toolbar>div button.active{background:#e9f2ff;border-color:#75a8ed;color:#1c58a6}
+.bo-wb-home .bo-wb-toolbar>label{min-width:min(100%,180px);width:215px;max-width:280px;flex:0 1 215px;border:1px solid #d9e2ec;border-radius:9px;background:#fff;min-height:38px;height:38px}
+.bo-wb-home .bo-wb-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;align-items:stretch}
+.bo-wb-home .bo-wb-gallery .bo-h711-board-card{display:flex;flex-direction:column;min-width:0;min-height:290px;overflow:visible;border:1px solid #dce4ec;border-radius:12px;background:#fff;position:relative;box-shadow:0 1px 5px rgba(18,53,91,.04)}
+.bo-wb-home .bo-wb-gallery .bo1189-board-preview{height:130px;min-height:130px;max-height:130px;background:#f7f9fc;border-bottom:1px solid #e5eaf0;border-radius:12px 12px 0 0;padding:0;overflow:hidden}
+.bo-wb-home .bo-wb-gallery .bo1189-board-preview svg{display:block;width:100%;height:100%;object-fit:contain}
+.bo-wb-home .bo-wb-gallery .bo1193-board-copy{padding:13px 13px 6px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;flex:1}
+.bo-wb-home .bo-wb-gallery .bo1193-board-copy>strong{font-size:13px;font-weight:720;line-height:1.35;color:#192e48;overflow-wrap:anywhere}
+.bo-wb-home .bo-wb-gallery .bo1193-board-copy>small{font-size:11px;color:#708195;line-height:1.4}
+.bo-wb-status-tag{display:inline-flex!important;align-items:center!important;width:auto;max-width:100%;font-size:10px!important;font-weight:650!important;line-height:1.3!important;border:1px solid #f2d599;background:#fff4d9;color:#925c06;padding:4px 7px;border-radius:999px;margin:4px 0 0}
+.bo-wb-status-tag.is-connected{border-color:#b9dfd0;background:#eaf8f2;color:#277456}
+.bo-wb-home .bo-wb-gallery .bo-wb-open-canvas{margin:7px 13px 13px;align-self:flex-start;min-height:35px;padding:7px 12px;border:1px solid #cdd9e7;border-radius:9px;background:#fff;font-size:12px;color:#275989;gap:7px}
+.bo-wb-home .bo-wb-gallery .bo1193-card-menu-trigger{z-index:4;position:absolute;right:10px;top:138px}
+.bo-wb-home .bo-wb-gallery .bo1193-card-menu{z-index:20}
+.bo-wb-review-note{display:flex;align-items:center;gap:6px;margin:0 13px 4px;font-size:10px;color:#97620e}
+.bo-wb-home .bo-wb-gallery .bo-h1711-link{margin:0 13px 10px;font-size:10px}
+.bo-wb-add-tile{display:flex;flex-direction:column;text-align:left;padding:0;min-width:0;min-height:290px;background:#fff;border:1px dashed #8cb8f5;border-radius:12px;overflow:hidden;cursor:pointer;color:#205ca8}
+.bo-wb-add-tile:hover{border-color:#377ce0;box-shadow:0 4px 16px rgba(38,98,188,.1)}
+.bo-wb-add-tile-visual{height:130px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;background:#d9eaff;border-bottom:1px dashed #8cb8f5}
+.bo-wb-add-tile-visual strong{font-size:12px;font-weight:700}
+.bo-wb-add-tile-caption{padding:13px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;flex:1}
+.bo-wb-add-tile-caption>strong{font-size:13px;color:#315170;font-weight:710}
+.bo-wb-add-tile-caption small{font-size:11px;color:#7b8a9d;line-height:1.4}
+.bo-wb-add-tile-caption em{display:inline-flex;align-items:center;gap:8px;font-style:normal;border:1px solid #b4d0f6;border-radius:8px;color:#2262b5;padding:8px 12px;margin-top:auto;font-size:12px;font-weight:650}
+@media(max-width:700px){.bo-wb-next-step{align-items:stretch;flex-direction:column}.bo-wb-next-actions{flex-wrap:wrap}.bo-wb-home .bo-wb-toolbar>label{flex:1 1 100%;max-width:none;width:100%}.bo-wb-home .bo-wb-gallery{grid-template-columns:repeat(auto-fit,minmax(175px,1fr))}}
