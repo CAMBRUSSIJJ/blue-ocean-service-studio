@@ -349,7 +349,8 @@ export function useStudioController() {
         showToast('Não foi possível fechar o projeto antes da exclusão.');
         return false;
       }
-      if (!fallback) setActiveTab('home');
+      // Keep the user on the project library after deletion, even when a fallback exists.
+      setActiveTab('home');
     }
     try {
       if (!deleteProject(projectId)) { showToast('Não foi possível excluir o projeto.'); return false; }
