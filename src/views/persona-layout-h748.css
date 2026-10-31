@@ -1,0 +1,207 @@
+/* H7.48 — Persona detail, no completion score. A focused editor + utility rail. */
+.bo-h71-persona-detail .bo-h724-overview-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(260px,290px);
+  align-items:start;
+  gap:clamp(18px,2.1vw,30px);
+  width:100%;
+  max-width:1230px;
+  margin:0 auto;
+  padding:0 4px 28px;
+  box-sizing:border-box;
+}
+.bo-h71-persona-detail .bo-h724-overview-main{
+  min-width:0;
+  width:100%;
+  max-width:none;
+}
+.bo-h71-persona-detail .bo-h746-guided{
+  min-width:0;
+  width:100%;
+  max-width:none;
+}
+.bo-h71-persona-detail .bo-h746-block-top,
+.bo-h71-persona-detail .bo-h746-inputs{max-width:750px}
+.bo-h71-persona-detail .bo-h724-overview-aside.bo-h748-persona-aside{
+  display:block;
+  min-width:0;
+  position:sticky;
+  top:18px;
+}
+.bo-h748-side-panel.bo-h724-organization-card{
+  display:block;
+  padding:20px;
+  border:1px solid #dde6f0;
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 3px 14px rgba(19,47,84,.035);
+}
+.bo-h748-side-panel > header{
+  display:grid;
+  gap:6px;
+  margin:0 0 18px;
+}
+.bo-h748-side-panel > header small{font-size:10px;letter-spacing:.08em;font-weight:760;color:#45759f}
+.bo-h748-side-panel > header strong{font-size:16px;line-height:1.25;font-weight:700;color:#253a56}
+.bo-h748-side-panel > header p{
+  margin:0;
+  font-size:12px;
+  line-height:1.5;
+  font-weight:450;
+  color:#5b6d80;
+}
+.bo-h748-side-panel label > span,
+.bo-h748-side-panel .bo-h724-tags-field > span{
+  display:block;
+  font-size:12px;
+  font-weight:660;
+  color:#405670;
+}
+.bo-h748-side-panel .bo-h724-owner-field{
+  width:100%;
+  height:42px;
+  padding:0 10px;
+  box-sizing:border-box;
+  border-radius:8px;
+}
+.bo-h748-side-panel .bo-h724-owner-field input{
+  font-size:13px;
+  width:100%;
+  min-width:0;
+}
+.bo-h748-side-panel .bo-h724-chip-editor{
+  min-height:42px;
+  box-sizing:border-box;
+  border-radius:8px;
+  padding:5px 8px;
+}
+.bo-h748-side-panel .bo-h724-chip-editor input{
+  font-size:13px;
+  min-width:75px;
+}
+.bo-h748-side-panel .bo-h724-chip{font-size:11px}
+.bo-h748-side-panel .bo-h724-tags-field{margin-top:15px}
+.bo-h748-side-panel .bo-h748-connections.bo-h724-context-card{
+  margin-top:20px;
+  padding:18px 0 0;
+  border:0;
+  border-top:1px solid #e6ecf2;
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
+}
+.bo-h748-connections-head small{
+  font-size:10px;
+  letter-spacing:.07em;
+  font-weight:760;
+  color:#45759f;
+}
+.bo-h748-connections-head p{
+  margin:7px 0 13px;
+  font-size:12px;
+  line-height:1.5;
+  color:#5b6d80;
+}
+.bo-h748-side-panel .bo-h748-connections > button{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:9px;
+  width:100%;
+  height:auto;
+  min-height:42px;
+  margin:0;
+  padding:10px 2px;
+  border:0;
+  border-top:1px solid #eff2f6;
+  border-radius:0;
+  background:transparent;
+  text-align:left;
+  color:#294869;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+}
+.bo-h748-side-panel .bo-h748-connections > button:hover{
+  color:#155da7;
+  background:#f8fbff;
+}
+.bo-h748-connections > button > strong{
+  display:inline-grid;
+  place-items:center;
+  min-width:23px;
+  height:23px;
+  padding:0 4px;
+  box-sizing:border-box;
+  border-radius:7px;
+  background:#edf3fa;
+  color:#23598b;
+  font-size:11px;
+}
+.bo-h748-connections > button > span:last-child{
+  color:#6e8296;
+  font-size:16px;
+}
+.bo-h71-persona-detail .bo-h746-guided-head h2{font-size:21px}
+.bo-h71-persona-detail .bo-h746-guided-head p{
+  max-width:70ch;
+  font-size:13px;
+  line-height:1.55;
+}
+.bo-h71-persona-detail .bo-h746-steps{
+  gap:8px;
+  padding:6px;
+}
+.bo-h71-persona-detail .bo-h746-steps button{
+  min-height:40px;
+  font-size:13px;
+}
+.bo-h71-persona-detail .bo-h746-block{
+  min-height:0;
+  padding:28px clamp(20px,3vw,34px);
+}
+.bo-h71-persona-detail .bo-h746-block-top h3{font-size:21px}
+.bo-h71-persona-detail .bo-h746-inputs span{
+  font-size:12px;
+}
+.bo-h71-persona-detail .bo-h746-block-actions{
+  margin-top:2px;
+  padding-bottom:8px;
+}
+@media(max-width:1030px){
+  .bo-h71-persona-detail .bo-h724-overview-layout{
+    grid-template-columns:minmax(0,1fr);
+    max-width:900px;
+    gap:24px;
+  }
+  .bo-h71-persona-detail .bo-h724-overview-aside.bo-h748-persona-aside{
+    position:static;
+  }
+  .bo-h748-side-panel.bo-h724-organization-card{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    column-gap:28px;
+  }
+  .bo-h748-side-panel > header{grid-column:1/-1}
+  .bo-h748-side-panel .bo-h748-connections.bo-h724-context-card{
+    grid-column:2;
+    grid-row:2/4;
+    margin-top:0;
+    padding:0 0 0 22px;
+    border-top:0;
+    border-left:1px solid #e6ecf2;
+  }
+}
+@media(max-width:650px){
+  .bo-h71-persona-detail .bo-h724-overview-layout{padding:0 0 18px;gap:15px}
+  .bo-h748-side-panel.bo-h724-organization-card{display:block;padding:18px}
+  .bo-h748-side-panel .bo-h748-connections.bo-h724-context-card{
+    margin-top:20px;
+    padding:18px 0 0;
+    border-left:0;
+    border-top:1px solid #e6ecf2;
+  }
+  .bo-h71-persona-detail .bo-h746-block{padding:20px 16px}
+  .bo-h71-persona-detail .bo-h746-steps button{font-size:11px}
+  .bo-h71-persona-detail .bo-h746-guided-head h2{font-size:19px}
+}
