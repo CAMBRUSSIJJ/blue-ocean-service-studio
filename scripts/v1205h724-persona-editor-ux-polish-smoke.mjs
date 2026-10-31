@@ -9,7 +9,12 @@ const style = fs.readFileSync('src/style.css', 'utf8');
 
 ok('cartões possuem edição inline no quadro', visual.includes('function PersonaVisualEditor') && visual.includes('bo-p5-field') && visual.includes('onChange'));
 ok('overview usa layout principal + lateral', personas.includes('bo-h724-overview-layout') && personas.includes('bo-h724-overview-aside'));
-ok('completude migrou para painel lateral', personas.includes('bo-h724-completeness-card'));
+const layout = fs.readFileSync('src/views/persona-layout-h748.css', 'utf8');
+const guided = fs.readFileSync('src/views/PersonaProgressiveEditor.tsx', 'utf8');
+ok('completude percentual não aparece no detalhe da Persona', !personas.includes('bo-h724-completeness-card') && !personas.includes('completenessChecks.map'));
+ok('lateral reúne apenas organização e links contextuais', personas.includes('bo-h748-side-panel') && personas.includes('bo-h748-connections') && ['Relações','Evidências','Uso nos mapas'].every(label => personas.includes(label)));
+ok('editor principal utiliza largura central legível e coluna lateral', layout.includes('max-width:1230px') && layout.includes('grid-template-columns:minmax(0,1fr) minmax(260px,290px)'));
+ok('atalhos de vínculos não se repetem abaixo do formulário', !guided.includes('bo-h746-followups'));
 ok('canais usam cartão editável', visual.includes("listField('channels'") && visual.includes('ListTextEditor'));
 ok('tags usam editor por chips', personas.includes('addTag') && personas.includes('removeTag'));
 ok('responsável possui sugestões', personas.includes('bo-h724-owner-options') && personas.includes('<datalist'));
