@@ -34,3 +34,14 @@
 .bo-h746-composer-back button{border:1px solid var(--bo-color-border,#d7e1eb);border-radius:8px;padding:9px 11px;background:var(--bo-color-surface,#fff);font-weight:630;cursor:pointer}
 @media(max-width:1080px){.bo-h746-followups{grid-template-columns:1fr}.bo-h746-guided-head{flex-wrap:wrap}}
 @media(max-width:640px){.bo-h746-guided{gap:13px}.bo-h746-block{padding:17px}.bo-h746-steps{gap:2px}.bo-h746-steps button{flex-direction:column;padding:7px 2px;font-size:10px}.bo-h746-block-actions{align-items:stretch;flex-wrap:wrap}.bo-h746-block-actions>div{margin-left:auto}}
+
+/* Creation is intentionally one decision; advanced depth stays collapsed. */
+.bo-p2-create-grid{grid-template-columns:minmax(0,1fr) minmax(220px,265px);gap:22px}
+.bo-p2-create-main{max-width:720px}
+.bo-h746-create-advanced{border:1px solid var(--bo-color-border,#dbe5ef);border-radius:10px;padding:15px 18px;background:var(--bo-color-surface,#fff)}
+.bo-h746-create-advanced>summary{cursor:pointer;font-size:13px;font-weight:660;color:var(--bo-color-primary-700,#285fa9);list-style:disclosure-closed}
+.bo-h746-create-advanced[open]>summary{margin-bottom:15px;list-style:disclosure-open}
+.bo-h746-create-advanced .bo-p2-step{margin-top:6px}
+.bo-h746-depth-note{font-size:12px;line-height:1.5;color:var(--bo-color-text-muted,#637287)}
+.bo-p2-create-aside .bo-p2-help-card{box-shadow:none}
+@media(max-width:900px){.bo-p2-create-grid{grid-template-columns:1fr}.bo-p2-create-main{max-width:none}.bo-p2-create-aside{display:none}}
