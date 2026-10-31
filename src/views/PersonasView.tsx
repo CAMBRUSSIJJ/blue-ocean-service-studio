@@ -471,36 +471,29 @@ export function PersonasView({ studio }: { studio: StudioController }) {
           <section className="bo-p2-section">
             <span className="bo-p2-step">01 · IDENTIFICAÇÃO</span>
             <h2>Como vamos reconhecer esta pessoa?</h2>
-            <label htmlFor="bo-p2-name">Nome da Persona <strong>Obrigatório</strong></label>
+            <label htmlFor="bo-p2-name">Nome da Persona <small>(para começar)</small></label>
             <input id="bo-p2-name" autoFocus required maxLength={140} value={createTitle} onChange={(event) => setCreateTitle(event.target.value)}
               placeholder="Ex.: Profissional que mora sozinho"/>
             <label htmlFor="bo-p2-description">Resumo <small>Opcional</small></label>
             <textarea id="bo-p2-description" rows={4} maxLength={2000} value={createDescription}
               onChange={(event) => setCreateDescription(event.target.value)} placeholder="Quem é essa pessoa, em que contexto utiliza o serviço e por que é relevante?"/>
           </section>
-          <section className="bo-p2-section">
+          <details className="bo-p2-section bo-h746-create-advanced">
+            <summary>Pesquisa avançada (opcional)</summary>
             <span className="bo-p2-step">02 · PROFUNDIDADE</span><h2>Como deseja começar?</h2>
             <div className="bo-p2-modes" role="group" aria-label="Profundidade da Persona">
               <button type="button" className={createMode === 'simple' ? 'is-selected' : ''} aria-pressed={createMode === 'simple'} onClick={() => chooseCreateMode('simple')}><strong>Simples</strong><span>Identidade, objetivo, situação, canais e necessidades. Ideal para começar.</span></button>
               <button type="button" className={createMode === 'professional' ? 'is-selected' : ''} aria-pressed={createMode === 'professional'} onClick={() => chooseCreateMode('professional')}><strong>Avançada</strong><span>Adiciona comportamento, expectativas, restrições, alternativas e mais conexões.</span></button>
             </div>
-            <div className="bo-p4-create-explainer" aria-live="polite">
-              {createMode === 'professional' ? <>
-                <strong>Persona Avançada selecionada</strong>
-                <p>Após criar, você entrará na área de Comportamento. Também poderá pesquisar Decisões e Barreiras, além de conectar Evidências.</p>
-                <span>Comportamentos · Expectativas · Gatilhos · Alternativas · Restrições</span>
-              </> : <>
-                <strong>Persona Simples selecionada</strong><p>Comece com identidade, situação e objetivo. Você poderá ativar a pesquisa avançada depois sem perder informações.</p>
-              </>}
-            </div>
-          </section>
+            <p className="bo-h746-depth-note">Você pode mudar de Simples para Avançada a qualquer momento, sem perder os dados existentes.</p>
+          </details>
+          
           <footer className="bo-p2-actions"><button type="button" onClick={cancelCreate}>Cancelar</button>
             <button className="primary" type="submit" disabled={!createTitle.trim()}>Criar Persona e continuar <span aria-hidden="true">→</span></button>
           </footer>
         </main>
         <aside className="bo-p2-create-aside">
-          <div className="bo-p2-help-card"><strong>Construa progressivamente</strong><p>Você só precisa de um nome para começar. Depois de criar, poderá completar objetivos, relações e evidências sem perder o contexto.</p>
-            <div><span>✓</span> Informações essenciais</div><div><span>✓</span> Salvar e editar no próprio perfil</div><div><span>✓</span> Personalizar layout e blocos depois</div></div>
+          <div className="bo-p2-help-card"><strong>Comece com uma identidade</strong><p>Depois de criar, preencha Objetivo, Situação e Canais na mesma página. As Relações e Evidências ficam em abas próprias.</p></div>
           <div className="bo-p2-help-note"><strong>Sobre a validação</strong><p>Uma Persona com todos os campos preenchidos não está automaticamente validada. As evidências serão vinculadas durante a pesquisa.</p></div>
         </aside>
       </div>
