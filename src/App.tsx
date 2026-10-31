@@ -306,6 +306,13 @@ export default function App({ authUser, onSignOut }: AppProps) {
     window.dispatchEvent(new CustomEvent('rt-navigation', { detail: 'home' }));
   };
 
+  // Deleting the current project must return to the global library, including when no projects remain.
+  useEffect(() => {
+    const openListAfterDeletion = () => openGlobalHome('projects');
+    window.addEventListener('bo-project-deleted', openListAfterDeletion);
+    return () => window.removeEventListener('bo-project-deleted', openListAfterDeletion);
+  }, []);
+
   const selectCore = (tab: typeof activeTab) => {
     setProjectShellOpen(true);
     setExternalNav(null);
