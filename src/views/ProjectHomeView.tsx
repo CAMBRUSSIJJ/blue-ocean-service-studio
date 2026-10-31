@@ -228,13 +228,12 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
     {dialog && dialog !== 'blank' && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}>
       <section className="bo-h740h8-modal bo-h743-create-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h8-create-title" data-project-creation-flow="H7.43">
-        <header><div><small>NOVO PROJETO</small><h2 id="bo-h740h8-create-title">{dialog === 'blank' ? 'O que você quer fazer?' : projectTemplateLabel(dialog)}</h2><p>{dialog === 'blank' ? 'Escolha por onde começar. Projeto e serviço são conceitos separados: o projeto organiza o trabalho e o serviço é o que você desenha.' : 'Projeto e serviço são conceitos separados. Comece com uma estrutura editável e ajuste depois.'}</p></div><button type="button" onClick={() => setDialog(null)} aria-label="Fechar"><X size={18}/></button></header>
+        <header><div><small>NOVO PROJETO</small><h2 id="bo-h740h8-create-title">{projectTemplateLabel(dialog)}</h2><p>Projeto e serviço são conceitos separados. Comece com uma estrutura editável e ajuste depois.</p></div><button type="button" onClick={() => setDialog(null)} aria-label="Fechar"><X size={18}/></button></header>
         <div className="bo-h740h8-modal-body bo-h743-create-body">
-          {dialog === 'blank' && <fieldset className="bo-h743-intents"><legend>Escolha uma intenção</legend><div className="bo-h743-intent-grid">{PROJECT_INTENTS.map((item) => <button type="button" key={item.id} className={selectedIntent === item.id ? 'is-selected' : ''} aria-pressed={selectedIntent === item.id} onClick={() => setSelectedIntent(item.id)}><strong>{item.title}</strong><small>{item.detail}</small></button>)}</div></fieldset>}
-          <label className="full"><span>Nome do projeto <em>(opcional — pode nomear depois)</em></span><input autoFocus={dialog !== 'blank'} value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Redesenho do atendimento"/></label>
+          <label className="full"><span>Nome do projeto <em>(opcional — pode nomear depois)</em></span><input autoFocus value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Redesenho do atendimento"/></label>
           <details className="bo-h743-advanced"><summary>Nome do serviço e descrição (opcionais)</summary><div className="bo-h743-advanced-fields"><label><span>Serviço principal</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Atendimento ao cliente"/></label><label><span>Descrição</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Objetivo ou transformação deste projeto"/></label></div></details>
         </div>
-        <footer><button type="button" onClick={() => setDialog(null)}>Cancelar</button><button type="button" className="primary" disabled={dialog === 'blank' && !selectedIntent} onClick={submit}>Criar e abrir <ArrowRight size={14}/></button></footer>
+        <footer><button type="button" onClick={() => setDialog(null)}>Cancelar</button><button type="button" className="primary" onClick={submit}>Criar e abrir <ArrowRight size={14}/></button></footer>
       </section>
     </div>}
 
