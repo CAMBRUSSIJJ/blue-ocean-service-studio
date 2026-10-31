@@ -1,7 +1,7 @@
 // H7.40-H4 legacy surface label: WHITEBOARD 2.0
 // H7.40-H3 legacy title: Whiteboard 2.0
 import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ArrowRight, Filter, GitBranch, LayoutTemplate, Plus, RefreshCw, Search, ShieldCheck, X } from '../design-system/icons';
+import { AlertTriangle, ArrowRight, Filter, GitBranch, LayoutTemplate, Plus, RefreshCw, Search, X } from '../design-system/icons';
 import type { StudioController } from '../state/useStudioController';
 import { buildDesignHandoffReport, prepareWhiteboardFromDefinition } from '../services/design-handoff';
 import { buildWhiteboardStudioReport, syncWhiteboardBlueprint, syncWhiteboardDesignContext, syncWhiteboardJourney } from '../services/whiteboard-studio';
@@ -208,7 +208,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
     <aside className="bo-wb-storage-warning" role="note" aria-label="Armazenamento dos whiteboards">
       <AlertTriangle size={18} aria-hidden="true"/>
       <p><strong>Salvo somente neste navegador.</strong> Exporte uma cópia para não perder o trabalho se os dados locais forem apagados.
-        {boards.length > 0 && <> <button type="button" onClick={() => { open(boards[0].id); showToast('No editor visual, clique em Exportar para guardar uma cópia do canvas.'); }}>Abrir canvas para exportar</button></>}
+        {boards.length > 0 && <> <button type="button" onClick={() => { const first = boards[0]; if (first) { open(first.id); showToast('No editor visual, clique em Exportar para guardar uma cópia do canvas.'); } }}>Abrir canvas para exportar</button></>}
       </p>
     </aside>
 
@@ -248,7 +248,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
         <div className="bo-wb-card-body">
           <strong title={board.name}>{board.name}</strong>
           <small>{board.updatedAt && Number.isFinite(Date.parse(String(board.updatedAt))) ? 'Editado ' + new Date(board.updatedAt).toLocaleDateString('pt-BR', { day:'2-digit', month:'short' }) : 'Canvas visual'}</small>
-          <span className={board.contextCount ? 'bo-wb-status-tag is-linked' : 'bo-wb-status-tag is-unlinked'}>{board.contextCount ? 'Com contexto' : 'Sem contexto'}</span>
+          <span title={statusLabel(board.report?.status ?? 'blank')} className={board.contextCount ? 'bo-wb-status-tag is-linked' : 'bo-wb-status-tag is-unlinked'}>{board.contextCount ? 'Com contexto' : 'Sem contexto'}</span>
           {board.report && board.report.danglingSmartObjects > 0 && <span className="bo-wb-status-tag is-attention" title={'Qualidade: ' + board.report.qualityScore + '%'}><AlertTriangle size={12}/> Revisar referências</span>}
           <div className="bo-wb-card-actions">
             <button type="button" className="bo-wb-open-canvas" onClick={() => open(board.id)}>Abrir canvas</button>
