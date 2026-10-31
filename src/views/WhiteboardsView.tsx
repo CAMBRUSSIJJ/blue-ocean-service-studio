@@ -8,25 +8,49 @@ import { buildWhiteboardStudioReport, syncWhiteboardBlueprint, syncWhiteboardDes
 import type { ServiceGraph, WhiteboardView } from '../domain/model';
 import { BlockSuiteWorkspace } from './BlockSuiteWorkspace';
 
+type VisualPreviewNote = { x: number; y: number; width: number; height: number; text: string };
+function readVisualPreview(serviceId: string, boardId: string): VisualPreviewNote[] {
+  try {
+    const key = 'bo-whiteboard-thumbnail-v1:' + encodeURIComponent(serviceId) + ':' + encodeURIComponent(boardId);
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    const data: unknown = JSON.parse(raw);
+    if (!data || typeof data !== 'object' || !('version' in data) || data.version !== 1 ||
+      !('notes' in data) || !Array.isArray(data.notes)) return [];
+    return data.notes.slice(0, 32).filter((note): note is VisualPreviewNote => Boolean(
+      note && typeof note === 'object' && typeof note.text === 'string' &&
+      ['x', 'y', 'width', 'height'].every(key => Number.isFinite(note[key]))
+    )).map(note => ({ ...note, text: note.text.slice(0, 140) }));
+  } catch { return []; }
+}
+
 function BoardPreview({ board, graph }: { board: WhiteboardView; graph: ServiceGraph }) {
-  const items = Object.values(board.items ?? {}).slice(0, 60);
-  if (!items.length) return <span className="bo-editor-preview-empty bo-wb-preview-empty"><LayoutTemplate size={28} strokeWidth={1.4}/><span>Canvas visual</span></span>;
+  // The BlockSuite thumbnail is derived from the real visual notes saved on this
+  // device; legacy cards remain a fallback, never fabricated placeholders.
+  const liveNotes = readVisualPreview(graph.service.id, board.id);
+  const legacy = Object.values(board.items ?? {}).slice(0, 60);
+  if (!liveNotes.length && !legacy.length) return <span className="bo-wb-preview-empty"><LayoutTemplate size={25} strokeWidth={1.4}/><span>Canvas em branco</span></span>;
+  const items = liveNotes.length
+    ? liveNotes.map((note, index) => ({ id: 'visual-' + index, ...note, tone: 'blue' }))
+    : legacy.map(item => ({
+      id: item.id, x: item.x, y: item.y, width: item.width, height: item.height,
+      tone: item.tone ?? 'slate',
+      text: item.kind === 'free' ? item.text : String(graph.entities?.[item.objectKind]?.[item.objectId]?.title ?? 'Objeto vinculado'),
+    }));
   const left = Math.min(...items.map(item => item.x)) - 40;
   const top = Math.min(...items.map(item => item.y)) - 40;
   const width = Math.max(320, Math.max(...items.map(item => item.x + item.width)) - left + 40);
   const height = Math.max(180, Math.max(...items.map(item => item.y + item.height)) - top + 40);
-  const colors: Record<string, string> = { yellow: '#fff3b5', blue: '#dbeafe', emerald: '#dcfce7', amber: '#ffedd5', violet: '#ede9fe', rose: '#ffe4e6', slate: '#f1f5f9' };
-  return <svg viewBox={`${left} ${top} ${width} ${height}`} aria-hidden="true">
-    {Object.values(board.edges ?? {}).slice(0, 80).map(edge => {
+  const colors: Record<string,string> = { yellow: '#fff3b5', blue: '#dbeafe', emerald: '#dcfce7', amber: '#ffedd5', violet: '#ede9fe', rose: '#ffe4e6', slate: '#f1f5f9' };
+  return <svg viewBox={left + ' ' + top + ' ' + width + ' ' + height} aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+    {!liveNotes.length && Object.values(board.edges ?? {}).slice(0, 80).map(edge => {
       const from = board.items[edge.fromId], to = board.items[edge.toId];
-      return from && to ? <line key={edge.id} x1={from.x + from.width / 2} y1={from.y + from.height / 2} x2={to.x + to.width / 2} y2={to.y + to.height / 2} stroke="#94a3b8" strokeWidth={3} /> : null;
+      return from && to ? <line key={edge.id} x1={from.x + from.width / 2} y1={from.y + from.height / 2} x2={to.x + to.width / 2} y2={to.y + to.height / 2} stroke="#94a3b8" strokeWidth={3}/> : null;
     })}
-    {items.map(item => {
-      const entity = item.kind === 'smart' ? graph.entities?.[item.objectKind]?.[item.objectId] : undefined;
-      const label = item.kind === 'free' ? item.text : String(entity?.title ?? entity?.name ?? 'Objeto vinculado');
-      const frame = item.kind === 'free' && item.shape === 'frame';
-      return <g key={item.id}><rect x={item.x} y={item.y} width={item.width} height={item.height} rx={8} fill={frame ? '#f8fafc' : colors[item.tone ?? 'slate']} stroke="#cbd5e1" strokeWidth={2} /><text x={item.x + 12} y={item.y + 25} fontSize={14} fill="#334155">{label.slice(0, 38)}</text></g>;
-    })}
+    {items.map(item => <g key={item.id}>
+      <rect x={item.x} y={item.y} width={item.width} height={item.height} rx={8} fill={colors[item.tone] || colors.slate} stroke="#cbd5e1" strokeWidth={2}/>
+      <text x={item.x + 12} y={item.y + 27} fontSize={15} fill="#334155">{item.text.slice(0, 42)}</text>
+    </g>)}
   </svg>;
 }
 
@@ -70,6 +94,7 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
         edgeCount: Object.keys(board.edges ?? {}).length,
         contextCount: board.designContext ? board.designContext.personaIds.length + board.designContext.needIds.length + board.designContext.jobIds.length + board.designContext.painIds.length + board.designContext.problemIds.length + board.designContext.evidenceIds.length : 0,
         journeyId: board.journeyId,
+        updatedAt: board.updatedAt,
         report,
       };
     }), [graph]);
@@ -83,12 +108,6 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
       return true;
     });
   }, [boards, filter, query]);
-  const summary = useMemo(() => ({
-    total: boards.length,
-    smart: boards.reduce((sum, board) => sum + (board.report?.smartItems ?? 0), 0),
-    connections: boards.reduce((sum, board) => sum + board.edgeCount, 0),
-    contextual: boards.filter((board) => board.contextCount > 0).length,
-  }), [boards]);
 
   useEffect(() => {
     const startFromDesign = () => {
