@@ -4,6 +4,7 @@ import { Archive, ArrowRight, Clock3, FolderKanban, LayoutTemplate, Pencil, Plus
 import type { StudioController } from '../state/useStudioController';
 import type { ProjectLibraryEntry, ProjectTemplate } from '../services/project-library';
 import { projectTemplateLabel } from '../services/project-library';
+import './project-creation-flow-h743.css';
 
 export type ProjectHomeSection = 'home' | 'projects' | 'templates';
 
@@ -12,7 +13,18 @@ type Props = {
   section: ProjectHomeSection;
   setSection: (section: ProjectHomeSection) => void;
   openProjectWorkspace: () => void;
+  onCreateMap: () => void;
+  onOpenPersonas: () => void;
+  onOpenWhiteboards: () => void;
 };
+
+type ProjectIntent = 'journey' | 'personas' | 'blueprint' | 'whiteboard';
+const PROJECT_INTENTS: Array<{ id: ProjectIntent; title: string; detail: string }> = [
+  { id: 'journey', title: 'Mapear a jornada', detail: 'Visualize o caminho do cliente do primeiro contato até a entrega.' },
+  { id: 'personas', title: 'Criar personas', detail: 'Entenda quem utiliza o serviço e suas expectativas.' },
+  { id: 'blueprint', title: 'Desenhar um blueprint', detail: 'Conecte experiência e atividades dos bastidores no mesmo mapa.' },
+  { id: 'whiteboard', title: 'Explorar livremente', detail: 'Abra um canvas para reunir ideias, evidências e descobertas.' },
+];
 
 const PHASE_LABELS: Record<string, string> = {
   discovery: 'Entender', definition: 'Definir', design: 'Projetar', validation: 'Validar', improvement: 'Melhorar',
@@ -60,10 +72,11 @@ function ProjectCard({ project, active, onOpen, onFavorite, onRename, onArchive 
   </article>;
 }
 
-export function ProjectHomeView({ studio, section, setSection, openProjectWorkspace }: Props) {
+export function ProjectHomeView({ studio, section, setSection, openProjectWorkspace, onCreateMap, onOpenPersonas, onOpenWhiteboards }: Props) {
   const { projects, archivedProjects, activeProjectId, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, createWorkspaceProject } = studio;
   const [query, setQuery] = useState('');
   const [dialog, setDialog] = useState<ProjectTemplate | null>(null);
+  const [selectedIntent, setSelectedIntent] = useState<ProjectIntent | null>(null);
   const [renameTarget, setRenameTarget] = useState<ProjectLibraryEntry | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [projectName, setProjectName] = useState('');
@@ -85,15 +98,28 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
   const startTemplate = (template: ProjectTemplate) => {
     const preset = TEMPLATES.find((item) => item.id === template);
-    setProjectName(''); setServiceName(preset?.service ?? ''); setDescription(''); setDialog(template);
+    setProjectName(''); setServiceName(preset?.service ?? ''); setDescription(''); setSelectedIntent(null); setDialog(template);
   };
 
   const submit = () => {
-    if (!dialog || !projectName.trim()) return;
-    const ok = createWorkspaceProject({ projectName, serviceName: serviceName.trim() || projectName, description, template: dialog });
+    if (!dialog || (dialog === 'blank' && !selectedIntent)) return;
+    const existing = new Set([...projects, ...archivedProjects].map((project) => project.title.toLocaleLowerCase('pt-BR')));
+    let defaultName = 'Novo projeto';
+    let sequence = 2;
+    while (existing.has(defaultName.toLocaleLowerCase('pt-BR'))) defaultName = `Novo projeto (${sequence++})`;
+    const name = projectName.trim() || defaultName;
+    // Intention guides navigation, not the graph schema: the project is always a real, editable snapshot.
+    const target = dialog === 'blank' ? selectedIntent : null;
+    const ok = createWorkspaceProject({ projectName: name, serviceName: serviceName.trim() || name, description, template: dialog });
     if (!ok) return;
     setDialog(null);
-    window.setTimeout(openProjectWorkspace, 0);
+    setSelectedIntent(null);
+    window.setTimeout(() => {
+      if (target === 'personas') onOpenPersonas();
+      else if (target === 'whiteboard') onOpenWhiteboards();
+      else if (target === 'journey' || target === 'blueprint') onCreateMap();
+      else openProjectWorkspace();
+    }, 0);
   };
 
   const beginRename = (project: ProjectLibraryEntry) => {
@@ -146,7 +172,17 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
     {section === 'templates' && <section className="bo-h740h8-section"><div className="bo-h740h8-template-grid large">{TEMPLATES.map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><Sparkles size={19}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>{projectTemplateLabel(item.id)} <ArrowRight size={12}/></em></button>)}</div></section>}
 
-    {dialog && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}><section className="bo-h740h8-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h8-create-title"><header><div><small>NOVO PROJETO · {projectTemplateLabel(dialog).toUpperCase()}</small><h2 id="bo-h740h8-create-title">Crie o espaço de trabalho</h2><p>Projeto e serviço são conceitos separados. O projeto organiza o trabalho; o serviço é o objeto que será desenhado.</p></div><button type="button" onClick={() => setDialog(null)} aria-label="Fechar"><X size={18}/></button></header><div className="bo-h740h8-modal-body"><label><span>Nome do projeto</span><input autoFocus value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Redesenho da experiência da lavanderia"/></label><label><span>Serviço principal</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Lavanderia com entrega e coleta"/></label><label className="full"><span>Descrição <em>opcional</em></span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Qual objetivo ou transformação este projeto pretende conduzir?"/></label></div><footer><button type="button" onClick={() => setDialog(null)}>Cancelar</button><button type="button" className="primary" disabled={!projectName.trim()} onClick={submit}>Criar projeto</button></footer></section></div>}
+    {dialog && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}>
+      <section className="bo-h740h8-modal bo-h743-create-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h8-create-title" data-project-creation-flow="H7.43">
+        <header><div><small>NOVO PROJETO</small><h2 id="bo-h740h8-create-title">{dialog === 'blank' ? 'O que você quer fazer?' : projectTemplateLabel(dialog)}</h2><p>{dialog === 'blank' ? 'Escolha por onde começar. O projeto será criado automaticamente com os dados conectados.' : 'Comece com a estrutura editável escolhida. Você pode alterá-la depois.'}</p></div><button type="button" onClick={() => setDialog(null)} aria-label="Fechar"><X size={18}/></button></header>
+        <div className="bo-h740h8-modal-body bo-h743-create-body">
+          {dialog === 'blank' && <fieldset className="bo-h743-intents"><legend>Escolha uma intenção</legend><div className="bo-h743-intent-grid">{PROJECT_INTENTS.map((item) => <button type="button" key={item.id} className={selectedIntent === item.id ? 'is-selected' : ''} aria-pressed={selectedIntent === item.id} onClick={() => setSelectedIntent(item.id)}><strong>{item.title}</strong><small>{item.detail}</small></button>)}</div></fieldset>}
+          <label className="full"><span>Nome do projeto <em>(opcional — pode nomear depois)</em></span><input autoFocus={dialog !== 'blank'} value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Redesenho do atendimento"/></label>
+          <details className="bo-h743-advanced"><summary>Nome do serviço e descrição (opcionais)</summary><div className="bo-h743-advanced-fields"><label><span>Serviço principal</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Atendimento ao cliente"/></label><label><span>Descrição</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Objetivo ou transformação deste projeto"/></label></div></details>
+        </div>
+        <footer><button type="button" onClick={() => setDialog(null)}>Cancelar</button><button type="button" className="primary" disabled={dialog === 'blank' && !selectedIntent} onClick={submit}>Criar e abrir <ArrowRight size={14}/></button></footer>
+      </section>
+    </div>}
 
     {renameTarget && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setRenameTarget(null); }}><section className="bo-h740h8-modal bo-h740h9-rename-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h9-rename-title"><header><div><small>PROJETO</small><h2 id="bo-h740h9-rename-title">Renomear projeto</h2><p>O nome do serviço permanece independente e não será alterado.</p></div><button type="button" onClick={() => setRenameTarget(null)} aria-label="Fechar"><X size={18}/></button></header><div className="bo-h740h8-modal-body"><label className="full"><span>Nome do projeto</span><input autoFocus value={renameValue} onChange={(event) => setRenameValue(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && renameValue.trim()) submitRename(); }}/></label></div><footer><button type="button" onClick={() => setRenameTarget(null)}>Cancelar</button><button type="button" className="primary" disabled={!renameValue.trim()} onClick={submitRename}>Salvar nome</button></footer></section></div>}
   </section>;
