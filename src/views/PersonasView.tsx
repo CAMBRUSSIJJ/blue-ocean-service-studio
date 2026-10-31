@@ -170,6 +170,8 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [createMode, setCreateMode] = useState<PersonaDepth>('simple');
   const [createSections, setCreateSections] = useState<PersonaSectionId[]>([...SIMPLE_PERSONA_SECTIONS]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [quickCreateKind, setQuickCreateKind] = useState<Exclude<PersonaRelationKind, 'evidence'> | null>(null);
+  const [quickCreateTitle, setQuickCreateTitle] = useState('');
 
   const selected = selectedId ? graph.entities?.persona?.[selectedId] : undefined;
   const report = useMemo(() => selectedId ? buildPersonaStudioReport(graph, selectedId) : null, [graph, selectedId]);
@@ -287,7 +289,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   };
 
   const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setShowVisualComposer(false); setComposerStartLibrary(false); setMenuId(null); };
-  const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); setShowVisualComposer(false); };
+  const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); setShowVisualComposer(false); setQuickCreateKind(null); setQuickCreateTitle(''); };
 
   const chooseCreateMode = (mode: PersonaDepth) => {
     setCreateMode(mode);
@@ -358,6 +360,34 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   };
 
   const toggleRelation = (id: string) => setConnectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  const createLinkedRecord = (kind: Exclude<PersonaRelationKind, 'evidence'>) => {
+    if (!selectedId || !quickCreateTitle.trim()) return;
+    const source = graph.entities?.persona?.[selectedId];
+    if (!source) return;
+    // The new record belongs to the same Service Graph, not a Persona-local shadow copy.
+    // Its inbound relationship is immediately visible. Saving the Persona synchronizes both sides.
+    const record = createDiscoveryEntity({
+      graph, kind, title: quickCreateTitle.trim(), relatedIds: [selectedId],
+    });
+    setGraph((current) => {
+      if (!current.entities?.persona?.[selectedId]) return current;
+      return {
+        ...current,
+        entities: {
+          ...current.entities,
+          [kind]: {
+            ...(current.entities?.[kind] ?? {}),
+            [record.id]: { ...record, serviceId: current.service.id, personaIds: [selectedId] },
+          },
+        },
+        service: { ...current.service, updatedAt: String(record.updatedAt) },
+      };
+    }, 'Personas: criar e vincular registro do serviço');
+    setConnectedIds((current) => [...new Set([...current, record.id])]);
+    setQuickCreateKind(null);
+    setQuickCreateTitle('');
+    showToast('Registro criado e vinculado à Persona. Salve as alterações para sincronizar as relações.');
+  };
   const updateList = (field: 'behaviors' | 'expectations' | 'constraints' | 'triggers' | 'alternatives' | 'channels', value: string) => setDraft((current) => current ? { ...current, [field]: stringList(value) } : current);
   const tagValues = stringList(tagsText);
   const addTag = (raw = tagEntry) => {
@@ -461,9 +491,36 @@ export function PersonasView({ studio }: { studio: StudioController }) {
           </section>
         </div>}
 
-        {detailTab === 'relations' && <div className="bo-h71-relations"><div className="bo-h71-section-intro"><div><small>SERVICE GRAPH</small><h2>Contexto conectado à Persona</h2><p>As relações abaixo são canônicas: a mesma necessidade, Job, dor ou hipótese pode aparecer em Journey, Blueprint e Whiteboard sem ser duplicada.</p></div><strong>{connectedIds.length} conexões</strong></div><div className="bo-h71-relation-grid">{(['need', 'job', 'pain', 'problemHypothesis'] as PersonaRelationKind[]).map((kind) => { const options = relationOptions.filter((item) => item.kind === kind); return <section key={kind}><header><strong>{relationLabel[kind]}</strong><span>{options.filter((item) => connectedIds.includes(item.id)).length}/{options.length}</span></header>{options.length ? <div>{options.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <p>Nenhum item criado ainda.</p>}</section>; })}</div></div>}
+        {detailTab === 'relations' && <div className="bo-h71-relations"><div className="bo-h71-section-intro"><div><small>SERVICE GRAPH</small><h2>Contexto conectado à Persona</h2><p>Conecte registros compartilhados. Uma necessidade, Job, dor ou hipótese pode ser reutilizada na Jornada, no Blueprint e no Whiteboard sem duplicação.</p></div><strong>{connectedIds.length} conexões</strong></div>
+          <div className="bo-h71-relation-grid">{(['need', 'job', 'pain', 'problemHypothesis'] as const).map((kind) => {
+            const options = relationOptions.filter((item) => item.kind === kind);
+            const count = options.filter((item) => connectedIds.includes(item.id)).length;
+            return <section key={kind} data-persona-relation-kind={kind}>
+              <header><strong>{relationLabel[kind]}</strong><span>{count}/{options.length}</span></header>
+              {options.length ? <div>{options.map((item) => <button key={item.id} type="button" aria-pressed={connectedIds.includes(item.id)} className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div>
+                : <div className="bo-h747-empty"><strong>Nenhum registro ainda</strong><p>Crie um registro deste tipo e vincule-o a esta Persona, ou reutilize os existentes quando aparecerem.</p></div>}
+              {quickCreateKind === kind ? <form className="bo-h747-inline-create" onSubmit={(event) => { event.preventDefault(); createLinkedRecord(kind); }}>
+                <label htmlFor={`bo-h747-create-${kind}`}>Nome de {relationLabel[kind].toLowerCase()}</label>
+                <input id={`bo-h747-create-${kind}`} autoFocus value={quickCreateTitle} onChange={(event) => setQuickCreateTitle(event.target.value)} maxLength={140} placeholder="Descreva o que foi identificado" />
+                <div><button type="button" onClick={() => { setQuickCreateKind(null); setQuickCreateTitle(''); }}>Cancelar</button><button type="submit" className="primary" disabled={!quickCreateTitle.trim()}>Criar e vincular</button></div>
+              </form> : <button type="button" className="bo-h747-action" onClick={() => { setQuickCreateKind(kind); setQuickCreateTitle(''); }}><Plus size={14}/> {options.length ? `Criar mais: ${relationLabel[kind].toLowerCase()}` : `Criar primeira: ${relationLabel[kind].toLowerCase()}`}</button>}
+            </section>;
+          })}</div>
+        </div>}
 
-        {detailTab === 'evidence' && <div className="bo-h71-evidence"><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que sustenta essa persona?</h2><p>Conecte somente evidências que realmente ajudam a explicar contexto, comportamento ou necessidades.</p></div><strong>{evidenceConnections.length} conectada(s)</strong></div>{relationOptions.filter((item) => item.kind === 'evidence').length ? <div className="bo-h71-evidence-list">{relationOptions.filter((item) => item.kind === 'evidence').map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma evidência criada</strong><p>Crie evidências na aba Evidências e depois conecte-as aqui.</p></div>}<PersonaEvidenceTrace draft={draft} evidence={relationOptions.filter(item=>item.kind === 'evidence')} onChange={setDraft}/></div>}
+        {detailTab === 'evidence' && <div className="bo-h71-evidence"><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que sustenta essa persona?</h2><p>Conecte fontes de pesquisa que sustentam afirmações específicas. Preencher o perfil não significa validá-lo empiricamente.</p></div><strong>{evidenceConnections.length} conectada(s)</strong></div>
+          {relationOptions.some((item) => item.kind === 'evidence')
+            ? <div className="bo-h71-evidence-list">{relationOptions.filter((item) => item.kind === 'evidence').map((item) => <button key={item.id} type="button" aria-pressed={connectedIds.includes(item.id)} className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>)}</div>
+            : <div className="bo-h747-empty bo-h747-evidence-empty"><strong>Nenhuma evidência registrada</strong><p>Crie uma evidência na área de pesquisa, com fonte e contexto. Depois volte para vincular a afirmação correspondente.</p>
+              <button type="button" className="bo-h747-action" onClick={() => {
+                if (isDirty && !window.confirm('Salvar alterações da Persona antes de registrar uma evidência?')) return;
+                if (isDirty) savePersona();
+                try { sessionStorage.setItem('bo-workspace-create-page', 'evidence'); } catch { /* optional navigation hint */ }
+                window.dispatchEvent(new CustomEvent('bo-open-context-page', { detail: 'evidence' }));
+              }}><Plus size={14}/> Registrar primeira evidência</button>
+            </div>}
+          <PersonaEvidenceTrace draft={draft} evidence={relationOptions.filter(item => item.kind === 'evidence')} onChange={setDraft}/>
+        </div>}
 
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="persona" id={selected.id} title="Uso e relações" />}
       </div>
