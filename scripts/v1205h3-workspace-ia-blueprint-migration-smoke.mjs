@@ -36,7 +36,7 @@ check('Dashboard tem favoritos',dashboard.includes('Favoritos'));
 check('Dashboard tem aprender',dashboard.includes('Aprender'));
 
 check('Whiteboard volta a ser livre',(whiteboards.includes('raciocinar livremente')||whiteboards.includes('Começar livre')||whiteboards.includes('quadro livre'))&&(whiteboards.includes('Novo whiteboard')||whiteboards.includes('NOVO WHITEBOARD')));
-check('Whiteboard aponta estrutura para Blueprints',whiteboards.includes('Ir para Blueprints')&&whiteboards.includes("setActiveTab('canvas')"));
+check('Whiteboard aponta estrutura para Blueprints',whiteboards.includes('openBlueprints')&&whiteboards.includes("setActiveTab('canvas')"));
 check('Whiteboard não oferece Novo Service Frame',!whiteboards.includes('Novo Service Frame')&&!whiteboards.includes('Criar Service Frame'));
 check('runtime bloqueia criação legada de frame no Whiteboard',core.includes("function createServiceFrameWhiteboard(){toast('O Service Frame agora pertence a Blueprints.');return null}"));
 check('runtime cria Blueprint estruturado',core.includes('function createServiceBlueprint')&&core.includes("viewKind:'blueprint'")&&core.includes("layoutMode:'service'"));
