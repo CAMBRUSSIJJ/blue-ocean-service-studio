@@ -55,6 +55,21 @@ export function EvidenceView({ studio }: { studio: StudioController }) {
   const [createSourceType, setCreateSourceType] = useState<EvidenceSourceType>('observation');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  // Coming from an empty Persona evidence tab must open the actual evidence creator.
+  useEffect(() => {
+    let requested = false;
+    try {
+      requested = sessionStorage.getItem('bo-workspace-create-page') === 'evidence';
+      if (requested) sessionStorage.removeItem('bo-workspace-create-page');
+    } catch { /* navigation still works without persisted intent */ }
+    if (!requested) return;
+    setSelectedId(null);
+    setCreateTitle('');
+    setCreateDescription('');
+    setCreateSourceType('observation');
+    setCreateOpen(true);
+  }, []);
+
   const selected = selectedId ? graph.entities?.evidence?.[selectedId] : undefined;
   const report = useMemo(() => selectedId ? buildEvidenceStudioReport(graph, selectedId) : null, [graph, selectedId]);
   const relationOptions = useMemo(() => evidenceRelationOptions(graph), [graph]);
