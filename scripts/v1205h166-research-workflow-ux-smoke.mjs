@@ -19,7 +19,8 @@ check('H16.6 marcado no workspace',workspace.includes('data-research-workflow-ux
 check('body class H16.6 registrada',main.includes("'bo-h166'"));
 check('CSS H16.6 existe e está importado',style.includes("@import './runtime/research-workflow-ux-h166.css';"));
 check('CSS H16.6 vem depois de H16.5',style.indexOf('research-proposal-h165.css')<style.indexOf('research-workflow-ux-h166.css'));
-check('Pesquisa não renderiza stepper global de fases',(workspace.includes("workspaceTab !== 'research' && <nav className=\"bo-h740h7-tool-phases\"") || workspace.includes("workspaceTab !== 'research' && workspaceTab !== 'journey' && <nav className=\"bo-h740h7-tool-phases\"")));
+check('Pesquisa não renderiza stepper global de fases',!workspace.includes('<nav className="bo-h740h7-tool-phases"'));
+
 check('subnav contextual Pesquisa e Ferramentas existe',workspace.includes('aria-label="Pesquisa e ferramentas"')&&workspace.includes('<span>Pesquisa</span>')&&workspace.includes('<span>Ferramentas</span>'));
 check('Ferramentas não navega para Proposição',workspace.includes("setResearchSurface('tools')")&&workspace.includes("foundationSurface={researchSurface}"));
 check('estado da superfície de pesquisa existe',workspace.includes("useState<'research' | 'tools'>('research')"));
