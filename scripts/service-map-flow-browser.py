@@ -36,7 +36,7 @@ try:
   context=browser.new_context(viewport={'width':1600,'height':1000},accept_downloads=True);page=context.new_page();page.on('pageerror',lambda error:errors.append(str(error)))
   page.add_locator_handler(page.locator('.rt155-recovery-notice.show'),lambda notice:notice.locator('i').click())
   page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click()
-  page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Mapa unificado QA');page.get_by_label('Serviço principal',exact=True).fill('Clínica');page.get_by_role('button',name='Criar projeto',exact=True).click()
+  page.get_by_role('button',name='Novo projeto',exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click();page.get_by_label('Nome do projeto',exact=False).fill('Mapa unificado QA');page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Clínica');page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
   # Project creation now lands on its overview by design. Maps are a separate
   # primary navigation destination, not an automatic redirect.
   expect(page.get_by_role('heading',name='Visão geral do projeto',exact=True)).to_be_visible()
