@@ -1,0 +1,145 @@
+/* H7.47 — Persona reading width, direct manipulation, contextual empty states. */
+.bo-h71-persona-detail .bo-h724-overview-main{
+  min-width:0;
+  width:100%;
+  max-width:900px;
+  justify-self:start;
+}
+.bo-h71-persona-detail .bo-h746-guided{
+  max-width:900px;
+}
+.bo-h71-persona-detail .bo-h746-block-top,
+.bo-h71-persona-detail .bo-h746-inputs{
+  max-width:780px;
+}
+.bo-h71-persona-detail .bo-h746-inputs input,
+.bo-h71-persona-detail .bo-h746-inputs textarea{
+  border-color:transparent;
+  background:var(--bo-color-surface-muted,#f6f8fb);
+  box-shadow:inset 0 -1px 0 var(--bo-color-border,#d2dce9);
+  transition:border-color 120ms ease,background 120ms ease,box-shadow 120ms ease;
+}
+.bo-h71-persona-detail .bo-h746-inputs input:hover,
+.bo-h71-persona-detail .bo-h746-inputs textarea:hover{
+  border-color:var(--bo-color-border,#d2dce9);
+  background:var(--bo-color-surface,#fff);
+}
+.bo-h71-persona-detail .bo-h746-inputs input:focus-visible,
+.bo-h71-persona-detail .bo-h746-inputs textarea:focus-visible{
+  border-color:var(--bo-color-primary-500,#3372bc);
+  background:var(--bo-color-surface,#fff);
+  box-shadow:0 0 0 3px rgba(40,110,185,.13);
+}
+.bo-h71-persona-detail .bo-h746-guided-head p,
+.bo-h71-persona-detail .bo-h746-block-top p,
+.bo-h71-persona-detail .bo-h71-section-intro p{
+  color:var(--bo-color-text-secondary,#4c6178);
+  font-weight:500;
+}
+.bo-h71-persona-detail .bo-h746-inputs input::placeholder,
+.bo-h71-persona-detail .bo-h746-inputs textarea::placeholder{
+  color:var(--bo-color-text-muted,#77899b);
+  font-weight:400;
+  opacity:1;
+}
+.bo-h747-empty{
+  display:grid;
+  gap:8px;
+  align-content:center;
+  padding:15px;
+  border:1px dashed var(--bo-color-border,#d3e0ed);
+  background:var(--bo-color-surface-muted,#f8fafc);
+  border-radius:10px;
+  min-width:0;
+}
+.bo-h747-empty>strong{
+  color:var(--bo-color-text,#21364c);
+  font-size:13px;
+  font-weight:660;
+}
+.bo-h747-empty p{
+  margin:0;
+  max-width:48ch;
+  color:var(--bo-color-text-secondary,#4e6176);
+  line-height:1.55;
+  font-size:12px;
+}
+.bo-h747-action{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  justify-content:flex-start;
+  width:fit-content;
+  min-height:33px;
+  margin-top:9px;
+  padding:7px 10px;
+  background:transparent;
+  border:1px solid var(--bo-color-border,#d0ddeb);
+  border-radius:7px;
+  color:var(--bo-color-primary-700,#1c5ab4);
+  font-size:12px;
+  font-weight:660;
+  cursor:pointer;
+}
+.bo-h747-action:hover{
+  background:var(--bo-color-primary-100,#eaf1fd);
+  border-color:var(--bo-color-primary-500,#4f7fb9);
+}
+.bo-h747-inline-create{
+  display:grid;
+  gap:9px;
+  margin-top:12px;
+  padding:14px;
+  background:var(--bo-color-surface-muted,#f8fafc);
+  border:1px solid var(--bo-color-border,#d1dce8);
+  border-radius:10px;
+}
+.bo-h747-inline-create label{
+  font-size:12px;
+  font-weight:650;
+  color:var(--bo-color-text,#263e56);
+}
+.bo-h747-inline-create input{
+  width:100%;
+  box-sizing:border-box;
+  min-height:39px;
+  padding:9px 11px;
+  border:1px solid var(--bo-color-border,#ccd9e7);
+  border-radius:8px;
+  background:var(--bo-color-surface,#fff);
+  color:var(--bo-color-text,#1a3148);
+  font:inherit;
+  font-size:13px;
+}
+.bo-h747-inline-create>div{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+.bo-h747-inline-create button{
+  padding:8px 12px;
+  border-radius:7px;
+  border:1px solid var(--bo-color-border,#ced9e7);
+  background:var(--bo-color-surface,#fff);
+  color:var(--bo-color-text,#273d55);
+  font-size:12px;
+  cursor:pointer;
+}
+.bo-h747-inline-create .primary{
+  border-color:var(--bo-color-primary-700,#205eac);
+  background:var(--bo-color-primary-700,#205eac);
+  color:white;
+}
+.bo-h747-inline-create button:disabled{opacity:.55;cursor:not-allowed}
+.bo-h747-evidence-empty{padding:20px}
+.bo-h747-inline-create button:focus-visible,
+.bo-h747-inline-create input:focus-visible,
+.bo-h747-action:focus-visible{outline:3px solid var(--bo-color-primary-500,#3372bc);outline-offset:2px}
+@media(max-width:1050px){
+ .bo-h71-persona-detail .bo-h724-overview-main,
+ .bo-h71-persona-detail .bo-h746-guided{max-width:none}
+}
+@media(max-width:680px){
+ .bo-h747-empty{padding:12px}
+ .bo-h747-evidence-empty{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){
+ .bo-h71-persona-detail .bo-h746-inputs input,
+ .bo-h71-persona-detail .bo-h746-inputs textarea{transition:none}
+}
