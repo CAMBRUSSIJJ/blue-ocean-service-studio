@@ -14,9 +14,6 @@ type Props = {
   section: ProjectHomeSection;
   setSection: (section: ProjectHomeSection) => void;
   openProjectWorkspace: () => void;
-  onCreateMap: () => void;
-  onOpenPersonas: () => void;
-  onOpenWhiteboards: () => void;
 };
 
 type ProjectIntent = 'journey' | 'personas' | 'blueprint' | 'whiteboard';
@@ -75,7 +72,7 @@ function ProjectCard({ project, active, onOpen, onFavorite, onRename, onArchive,
   </article>;
 }
 
-export function ProjectHomeView({ studio, section, setSection, openProjectWorkspace, onCreateMap, onOpenPersonas, onOpenWhiteboards }: Props) {
+export function ProjectHomeView({ studio, section, setSection, openProjectWorkspace }: Props) {
   const { projects, archivedProjects, activeProjectId, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, deleteWorkspaceProject, createWorkspaceProject } = studio;
   const [query, setQuery] = useState('');
   const [dialog, setDialog] = useState<ProjectTemplate | null>(null);
@@ -124,12 +121,10 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
     if (!ok) return;
     setDialog(null);
     setSelectedIntent(null);
-    window.setTimeout(() => {
-      if (target === 'personas') onOpenPersonas();
-      else if (target === 'whiteboard') onOpenWhiteboards();
-      else if (target === 'journey' || target === 'blueprint') onCreateMap();
-      else openProjectWorkspace();
-    }, 0);
+    // The prototype's next screen is the project overview; its contextual CTA
+    // remembers the selected intention instead of unexpectedly opening an editor.
+    if (target) { try { sessionStorage.setItem('bo-h744-new-project-intent', target); } catch { /* optional navigation hint */ } }
+    window.setTimeout(openProjectWorkspace, 0);
   };
 
   const beginRename = (project: ProjectLibraryEntry) => {
