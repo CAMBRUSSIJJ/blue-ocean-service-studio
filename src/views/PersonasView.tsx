@@ -362,17 +362,18 @@ export function PersonasView({ studio }: { studio: StudioController }) {
 
   const toggleRelation = (id: string) => setConnectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   const createLinkedRecord = (kind: Exclude<PersonaRelationKind, 'evidence'>) => {
-    if (!selectedId || !quickCreateTitle.trim()) return;
-    const source = graph.entities?.persona?.[selectedId];
-    if (!source) return;
-    // The new record belongs to the same Service Graph, not a Persona-local shadow copy.
-    // Its inbound relationship is immediately visible. Saving the Persona synchronizes both sides.
+    if (!selectedId || !draft || !draft.title.trim() || !quickCreateTitle.trim()) return;
+    if (!graph.entities?.persona?.[selectedId]) return;
+    // One transaction: the new canonical object, the Persona draft and both relation directions.
+    // This prevents unsaved edits from being reset when the Persona's updatedAt changes.
     const record = createDiscoveryEntity({
       graph, kind, title: quickCreateTitle.trim(), relatedIds: [selectedId],
     });
+    const nextConnectedIds = [...new Set([...connectedIds, record.id])];
+    const nextTags = stringList([tagsText, tagEntry].filter(Boolean).join(','));
     setGraph((current) => {
       if (!current.entities?.persona?.[selectedId]) return current;
-      return {
+      const withRecord = {
         ...current,
         entities: {
           ...current.entities,
@@ -383,11 +384,19 @@ export function PersonasView({ studio }: { studio: StudioController }) {
         },
         service: { ...current.service, updatedAt: String(record.updatedAt) },
       };
-    }, 'Personas: criar e vincular registro do serviço');
-    setConnectedIds((current) => [...new Set([...current, record.id])]);
+      return patchPersonaMeta(
+        updatePersonaProfile({ graph: withRecord, personaId: selectedId, draft, connectedIds: nextConnectedIds }),
+        selectedId,
+        owner,
+        nextTags,
+      );
+    }, 'Personas: criar e vincular registro canônico');
+    setConnectedIds(nextConnectedIds);
+    setTagsText(nextTags.join(', '));
+    setTagEntry('');
     setQuickCreateKind(null);
     setQuickCreateTitle('');
-    showToast('Registro criado e vinculado à Persona. Salve as alterações para sincronizar as relações.');
+    showToast('Registro criado e vinculado. Alterações da Persona salvas no projeto.');
   };
   const updateList = (field: 'behaviors' | 'expectations' | 'constraints' | 'triggers' | 'alternatives' | 'channels', value: string) => setDraft((current) => current ? { ...current, [field]: stringList(value) } : current);
   const tagValues = stringList(tagsText);
