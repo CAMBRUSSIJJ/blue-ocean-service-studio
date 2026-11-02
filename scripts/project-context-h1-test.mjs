@@ -48,7 +48,7 @@ for (const area of ['overview','audience','research','maps','improvement']) {
   assert(view.includes("id:'"+area+"'"),area+' is reachable as a project tab');
 }
 assert(view.includes("sessionStorage.setItem('bo-service-object-focus'"),'linked records open their existing detail views');
-assert(view.includes('onClick={onCreateMap}>Criar mapa'),'project overview has a real quick-create action');
+assert(view.includes('action: onCreateMap') && view.includes('onClick={firstStep.action}'),'project overview has a real contextual quick-create action');
 assert(app.includes('createMapIntent={createMapIntent}'),'the quick-create intent reaches the map editor');
 assert(maps.includes('if (!createMapIntent) return;') && maps.includes('setJourneyCreateOpen(true);'),'the existing creation dialog consumes the intent');
 console.log('H1 project context: scope, relations, filters, navigation and quick-create assertions passed.');

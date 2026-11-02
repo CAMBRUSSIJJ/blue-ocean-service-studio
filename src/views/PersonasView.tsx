@@ -6,12 +6,24 @@ import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
 import { PersonaVisualEditor } from './PersonaVisualEditor';
+import { PersonaProgressiveEditor } from './PersonaProgressiveEditor';
+import { PersonaSplitBuilder, type PersonaBuilderNode } from './PersonaSplitBuilder';
+import { PersonaFocusEditor } from './PersonaFocusEditor';
+import { PersonaReadProfile } from './PersonaReadProfile';
+import './persona-read-profile-h751.css';
+import './persona-proportions-h752.css';
+import './persona-focus-h750.css';
+import './persona-progressive-h746.css';
+import './persona-ux-refinements-h747.css';
+import './persona-layout-h748.css';
+import { PersonaEcosystem } from './PersonaEcosystem';
+import { changePersonaEcosystem, type PersonaEcosystemChange } from '../services/persona-ecosystem';
+import { openServiceObject } from '../services/service-object-navigation';
+import { runtimeApi } from '../runtime/client';
 import { PersonaEvidenceTrace } from './PersonaEvidenceTrace';
 import { createDiscoveryEntity } from '../services/discovery-workspace';
 import { contextEntityTitle, contextEntityUsage, listContextEntities } from '../services/context-library';
 import {
-  ADVANCED_PERSONA_SECTIONS,
-  SIMPLE_PERSONA_SECTIONS,
   switchPersonaDepth,
   visiblePersonaSections,
   buildPersonaStudioReport,
@@ -27,7 +39,7 @@ import {
 } from '../services/persona-studio';
 
 
-type DetailTab = 'overview' | 'behavior' | 'decisions' | 'barriers' | 'relations' | 'evidence' | 'usage';
+type DetailTab = 'ecosystem' | 'overview' | 'behavior' | 'decisions' | 'barriers' | 'relations' | 'evidence' | 'usage';
 type FilterMode = 'all' | 'unused' | 'used' | 'evidence' | 'without-evidence' | 'incomplete';
 type LibraryViewMode = 'cards' | 'table';
 type PersonaFilterField = 'title' | 'owner' | 'mode' | 'tags' | 'evidence' | 'usage' | 'completeness';
@@ -139,17 +151,22 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>('overview');
   const [showDetailCustomize, setShowDetailCustomize] = useState(false);
+  const [showVisualComposer, setShowVisualComposer] = useState(false);
+  const [focusOpen, setFocusOpen] = useState(false);
+  const [focusInitialStep, setFocusInitialStep] = useState(0);
+  const [profileReadOnly, setProfileReadOnly] = useState(true);
+  const [splitOpen, setSplitOpen] = useState(false);
+  const [newGuided, setNewGuided] = useState(false);
+  const [newFocusDraft, setNewFocusDraft] = useState<PersonaProfileDraft | null>(null);
+  const [composerStartLibrary, setComposerStartLibrary] = useState(false);
   const [draft, setDraft] = useState<PersonaProfileDraft | null>(null);
   const [owner, setOwner] = useState('');
   const [tagsText, setTagsText] = useState('');
   const [tagEntry, setTagEntry] = useState('');
   const [connectedIds, setConnectedIds] = useState<string[]>([]);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [createTitle, setCreateTitle] = useState('');
-  const [createDescription, setCreateDescription] = useState('');
-  const [createMode, setCreateMode] = useState<PersonaDepth>('simple');
-  const [createSections, setCreateSections] = useState<PersonaSectionId[]>([...SIMPLE_PERSONA_SECTIONS]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [quickCreateKind, setQuickCreateKind] = useState<Exclude<PersonaRelationKind, 'evidence'> | null>(null);
+  const [quickCreateTitle, setQuickCreateTitle] = useState('');
 
   const selected = selectedId ? graph.entities?.persona?.[selectedId] : undefined;
   const report = useMemo(() => selectedId ? buildPersonaStudioReport(graph, selectedId) : null, [graph, selectedId]);
@@ -176,7 +193,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     const requested = sessionStorage.getItem('bo-workspace-create-page');
     if (requested !== 'personas') return;
     sessionStorage.removeItem('bo-workspace-create-page');
-    setCreateOpen(true);
+    setNewFocusDraft(personaProfileFromEntity(createDiscoveryEntity({ graph, kind:'persona', title:'' })));
   }, []);
 
 
@@ -266,36 +283,42 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     changeViewMode(view.mode==='table'?'table':'cards');setSavedViewsOpen(false);
   };
 
-  const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setMenuId(null); };
-  const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
+  const openPersona = (id: string) => { setSplitOpen(false); setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setShowVisualComposer(false); setFocusOpen(false); setFocusInitialStep(0); setProfileReadOnly(true); setComposerStartLibrary(false); setMenuId(null); };
+  const closePersona = () => { setSplitOpen(false); setSelectedId(null); setDraft(null); setDetailTab('overview'); setShowVisualComposer(false); setFocusOpen(false); setProfileReadOnly(true); setQuickCreateKind(null); setQuickCreateTitle(''); };
 
-  const chooseCreateMode = (mode: PersonaDepth) => {
-    setCreateMode(mode);
-    setCreateSections(mode === 'professional' ? [...ADVANCED_PERSONA_SECTIONS] : [...SIMPLE_PERSONA_SECTIONS]);
+  const startNewPersona = () => {
+    const blank = createDiscoveryEntity({graph, kind:'persona', title:''});
+    setNewFocusDraft(personaProfileFromEntity(blank));
+    setMenuId(null);
   };
-
-  const createPersona = () => {
-    if (!createTitle.trim()) return;
+  const cancelNewPersona = (hasConnections = false) => {
+    if (!newFocusDraft) return;
+    const filled = hasConnections || [newFocusDraft.title,newFocusDraft.description,newFocusDraft.primaryGoal,newFocusDraft.situation,newFocusDraft.context,...newFocusDraft.channels].some(value => value.trim());
+    if (filled && !window.confirm('Descartar a Persona ainda não criada?')) return;
+    setNewFocusDraft(null); setNewGuided(false);
+  };
+  const finishNewPersona = (nodes: PersonaBuilderNode[] = []) => {
+    if (!newFocusDraft?.title.trim()) return;
+    const values = newFocusDraft;
     const now = new Date().toISOString();
-    const baseEntity = createDiscoveryEntity({ graph, kind: 'persona', title: createTitle, description: createDescription, now });
-    const entity = { ...baseEntity, personaMode: createMode, personaLayout: 'profile-left' as PersonaLayout, personaSections: [...new Set(createSections)] };
-    setGraph((current) => ({
-      ...current,
-      service: { ...current.service, updatedAt: now },
-      entities: { ...current.entities, persona: { ...(current.entities?.persona ?? {}), [entity.id]: entity } },
-    }), 'Personas 2.0: criar');
-    setCreateOpen(false); setCreateTitle(''); setCreateDescription('');
-    setCreateMode('simple'); setCreateSections([...SIMPLE_PERSONA_SECTIONS]);
-    setSelectedId(entity.id); setDetailTab(createMode === 'professional' ? 'behavior' : 'overview');
-    showToast('Persona criada. Complete o perfil e salve.');
-  };
-
-  const cancelCreate = () => {
-    if ((createTitle.trim() || createDescription.trim()) && !window.confirm('Descartar as informações ainda não salvas?')) return;
-    setCreateOpen(false);
-    setCreateTitle('');
-    setCreateDescription('');
-    chooseCreateMode('simple');
+    const base = createDiscoveryEntity({graph,kind:'persona',title:values.title,description:values.description,now});
+    setGraph((current) => {
+      const withPersona = {
+        ...current,
+        entities:{...current.entities,persona:{...(current.entities?.persona ?? {}),[base.id]:{...base,serviceId:current.service.id}}},
+        service: { ...current.service, updatedAt: now },
+      };
+      let next = updatePersonaProfile({graph:withPersona,personaId:base.id,draft:values,connectedIds:[],now});
+      for (const node of nodes) next = changePersonaEcosystem(next, base.id, values, buildPersonaStudioReport(next, base.id)?.connections.map(item => item.id) || [], { type: 'create', kind: node.kind, title: node.title, id: `${node.kind}-${node.id}` }, now);
+      return next;
+    }, 'Personas H7.51: criar após concluir o Modo Foco');
+    setNewFocusDraft(null); setNewGuided(false);
+    setSelectedId(base.id);
+    setDetailTab('overview');
+    setProfileReadOnly(true);
+    setShowVisualComposer(false);
+    setFocusOpen(false);
+    showToast('Persona salva. Agora você pode consultar o perfil e conectar registros.');
   };
 
   const savePersona = () => {
@@ -338,6 +361,43 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   };
 
   const toggleRelation = (id: string) => setConnectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  const createLinkedRecord = (kind: Exclude<PersonaRelationKind, 'evidence'>) => {
+    if (!selectedId || !draft || !draft.title.trim() || !quickCreateTitle.trim()) return;
+    if (!graph.entities?.persona?.[selectedId]) return;
+    // One transaction: the new canonical object, the Persona draft and both relation directions.
+    // This prevents unsaved edits from being reset when the Persona's updatedAt changes.
+    const record = createDiscoveryEntity({
+      graph, kind, title: quickCreateTitle.trim(), relatedIds: [selectedId],
+    });
+    const nextConnectedIds = [...new Set([...connectedIds, record.id])];
+    const nextTags = stringList([tagsText, tagEntry].filter(Boolean).join(','));
+    setGraph((current) => {
+      if (!current.entities?.persona?.[selectedId]) return current;
+      const withRecord = {
+        ...current,
+        entities: {
+          ...current.entities,
+          [kind]: {
+            ...(current.entities?.[kind] ?? {}),
+            [record.id]: { ...record, serviceId: current.service.id, personaIds: [selectedId] },
+          },
+        },
+        service: { ...current.service, updatedAt: String(record.updatedAt) },
+      };
+      return patchPersonaMeta(
+        updatePersonaProfile({ graph: withRecord, personaId: selectedId, draft, connectedIds: nextConnectedIds }),
+        selectedId,
+        owner,
+        nextTags,
+      );
+    }, 'Personas: criar e vincular registro canônico');
+    setConnectedIds(nextConnectedIds);
+    setTagsText(nextTags.join(', '));
+    setTagEntry('');
+    setQuickCreateKind(null);
+    setQuickCreateTitle('');
+    showToast('Registro criado e vinculado. Alterações da Persona salvas no projeto.');
+  };
   const updateList = (field: 'behaviors' | 'expectations' | 'constraints' | 'triggers' | 'alternatives' | 'channels', value: string) => setDraft((current) => current ? { ...current, [field]: stringList(value) } : current);
   const tagValues = stringList(tagsText);
   const addTag = (raw = tagEntry) => {
@@ -353,10 +413,6 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     const evidenceConnections = relationOptions.filter((item) => item.kind === 'evidence' && connectedIds.includes(item.id));
     const usage = contextEntityUsage(graph, 'persona', selected.id);
     const completenessReport = previewReport ?? report;
-    const completeness = draft.mode === 'professional' ? completenessReport.professionalScore : completenessReport.foundationScore;
-    const completenessChecks = draft.mode === 'professional'
-      ? [...completenessReport.foundationChecks, ...completenessReport.professionalChecks]
-      : completenessReport.foundationChecks;
     const savedDraft = personaProfileFromEntity(selected);
     const savedConnectedIds = report.connections.map((item) => item.id).sort();
     const isDirty = JSON.stringify(draft) !== JSON.stringify(savedDraft)
@@ -365,20 +421,42 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       || Boolean(tagEntry.trim())
       || JSON.stringify([...connectedIds].sort()) !== JSON.stringify(savedConnectedIds);
     const visibleTags = tagValues.slice(0, 3);
-    return <section className={`bo-h71-persona-detail bo-h713-layout-${draft.layout}`} data-personas-h71="detail">
+    const editInFocus = (step = 0) => { setFocusInitialStep(step); setFocusOpen(true); };
+    if (detailTab === 'ecosystem' || splitOpen) {
+      const canEdit = runtimeApi<{ can?(action: string): boolean }>('collaboration')?.can?.('edit') !== false;
+      const change = (mutation: PersonaEcosystemChange) => {
+        if (!canEdit) throw new Error('Este perfil está em modo somente leitura.');
+        const operation = mutation.type === 'create' ? { ...mutation, id: `${mutation.kind}-${crypto.randomUUID()}` } : mutation;
+        // Validate before the controller handles the transaction; no partial record is stored.
+        changePersonaEcosystem(graph, selected.id, draft, connectedIds, operation);
+        const tags = stringList([tagsText, tagEntry].filter(Boolean).join(','));
+        setGraph(current => patchPersonaMeta(changePersonaEcosystem(current, selected.id, draft, connectedIds, operation), selected.id, owner, tags), 'Persona: atualizar ecossistema');
+      };
+      if (splitOpen) return <PersonaSplitBuilder draft={draft} onChange={setDraft} existing readOnly={!canEdit}
+        connections={relationOptions.filter(item => connectedIds.includes(item.id) && (item.kind === 'pain' || item.kind === 'need')).map(item => ({id:item.id,kind:item.kind as 'pain' | 'need',title:item.title}))}
+        onAdd={(kind,title)=>change({type:'create',kind,title})} onRemove={id=>change({type:'unlink',id})}
+        onSave={()=>{savePersona();setSplitOpen(false);}} onExit={()=>setSplitOpen(false)}/>;
+      return <PersonaEcosystem key={selected.id} graph={graph} persona={selected} draft={draft} options={relationOptions}
+        connectedIds={connectedIds} dirty={isDirty} readOnly={!canEdit} saveStatus={studio.saveStatus}
+        onChange={change} onSave={savePersona} onBack={closePersona}
+        onNavigate={area => { if (area === 'creation') { setSplitOpen(true); }
+          else { if (area === 'overview') setProfileReadOnly(true); setDetailTab(area); } }}
+        onOpenMap={(kind, id) => { if (isDirty) savePersona(); openServiceObject(kind, id); }}/>
+    }
+    return <section className={`bo-h71-persona-detail bo-h713-layout-${draft.layout} ${profileReadOnly ? 'bo-h751-persona-read' : ''}`} data-personas-h71="detail">
       <header className="bo-h71-detail-head bo-h724-detail-head">
         <button type="button" className="bo-h71-back" onClick={closePersona}><ArrowLeft size={16}/> Personas</button>
         <div className="bo-h71-detail-title bo-h724-detail-title"><span className="bo-h71-avatar bo-h724-avatar"><UserRound size={20}/></span><div><small>PERSONA</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Complete o perfil para documentar quem vive essa experiência.'}</p><div className="bo-h724-persona-meta"><span className="mode">{draft.mode === 'professional' ? 'Persona avançada' : 'Persona simples'}</span>{visibleTags.map((tag) => <span key={tag}>{tag}</span>)}{tagValues.length > visibleTags.length && <span>+{tagValues.length - visibleTags.length}</span>}</div></div></div>
-        <div className="bo-h724-detail-tools"><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Alterações pendentes' : 'Tudo salvo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
+        <div className="bo-h724-detail-tools"><div className="bo-h751-read-actions"><button type="button" className="bo-h750-enter" onClick={() => editInFocus(0)}>Modo foco</button>{profileReadOnly && <button type="button" className="primary" onClick={() => setSplitOpen(true)}>Editar perfil <span aria-hidden="true">→</span></button>}</div><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Alterações pendentes' : 'Tudo salvo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" onClick={() => { setProfileReadOnly(false); setDetailTab('overview'); setMenuId(null); }}>Editor completo</button><button type="button" className="bo-p2-persona-customize-tab" onClick={() => { setProfileReadOnly(false); setShowDetailCustomize(true); setDetailTab('overview'); setMenuId(null); }}>Personalizar interface</button><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
       </header>
 
       <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Persona">
         {([
           ['overview', 'Visão geral'], ...(draft.mode === 'professional' ? [
               ['behavior', 'Comportamento'], ['decisions', 'Decisões'], ['barriers', 'Barreiras'],
-            ] as Array<[DetailTab, string]> : []), ['relations', 'Relações'], ['evidence', 'Evidências'], ['usage', 'Uso'],
+            ] as Array<[DetailTab, string]> : []), ['ecosystem', 'Ecossistema'], ['relations', 'Relações'], ['evidence', 'Evidências'], ['usage', 'Uso'],
         ] as Array<[DetailTab, string]>).map(([id, label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'relations' && <b>{connectedIds.length}</b>}{id === 'evidence' && <b>{evidenceConnections.length}</b>}</button>)}
-        <button type="button" className="bo-p2-persona-customize-tab" aria-expanded={showDetailCustomize} aria-controls="bo-p2-persona-customize" onClick={()=>setShowDetailCustomize(!showDetailCustomize)}>Personalizar interface</button>
+        
       </nav>
       {showDetailCustomize&&<section id="bo-p2-persona-customize" className="bo-p2-persona-customize" aria-label="Personalizar interface da Persona">
         <div><h2>Como deseja visualizar esta Persona?</h2><p>Altere a apresentação sem apagar informações já preenchidas.</p></div>
@@ -394,15 +472,29 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       <div className="bo-h71-detail-body">
         {detailTab === 'overview' && <div className="bo-h724-overview-layout">
           <main className="bo-h724-overview-main">
-            <PersonaVisualEditor draft={draft} onChange={setDraft} onChangeMode={changeDetailMode}
-              counts={{ need:completenessReport.connectionCounts.need, pain:completenessReport.connectionCounts.pain,
-                evidence:evidenceConnections.length, related:connectedIds.length }}
-              onNavigate={setDetailTab}/>
+            {profileReadOnly ? <PersonaReadProfile draft={draft} onEditStep={editInFocus}/> : showVisualComposer ? <>
+              <div className="bo-h746-composer-back"><button type="button" onClick={() => { setShowVisualComposer(false); setComposerStartLibrary(false); }}>← Voltar ao preenchimento guiado</button></div>
+              <PersonaVisualEditor draft={draft} onChange={setDraft} onChangeMode={changeDetailMode} initialShowLibrary={composerStartLibrary}
+                counts={{ need:completenessReport.connectionCounts.need, pain:completenessReport.connectionCounts.pain,
+                  evidence:evidenceConnections.length, related:connectedIds.length }} onNavigate={setDetailTab}/>
+            </> : <PersonaProgressiveEditor key={selected.id} draft={draft} onChange={setDraft}
+              onAddBlock={() => { setComposerStartLibrary(true); setShowVisualComposer(true); }}
+              onAdvanced={() => { setComposerStartLibrary(false); setShowVisualComposer(true); }}
+              onNavigate={setDetailTab}/>}
+
           </main>
-          <aside className="bo-h724-overview-aside">
-            <section className="bo-h724-completeness-card"><header><div><small>COMPLETUDE</small><strong>{completeness}%</strong></div><span>{draft.mode === 'professional' ? 'Avançada' : 'Simples'}</span></header><i><b style={{ width: `${completeness}%` }}/></i><div className="bo-h71-check-list bo-h724-check-list">{completenessChecks.map((check) => <div key={check.id} className={check.complete ? 'is-done' : ''}><b>{check.complete ? <Check size={12}/> : '—'}</b><span>{check.label}</span></div>)}</div></section>
-            <section className="bo-h724-organization-card"><header><small>ORGANIZAÇÃO</small><strong>Responsabilidade e tags</strong></header><label><span>Responsável</span><div className="bo-h724-owner-field"><UserRound size={14}/><input list="bo-h724-owner-options" value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></div><datalist id="bo-h724-owner-options">{ownerSuggestions.map((item) => <option key={item} value={item}/>)}</datalist></label><div className="bo-h724-tags-field"><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map((tag) => <button key={tag} type="button" className="bo-h724-chip" onClick={() => removeTag(tag)}>{tag}<X size={11}/></button>)}<input value={tagEntry} onChange={(event) => setTagEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addTag(); } }} placeholder={tagValues.length ? 'Adicionar tag…' : 'Ex.: B2C'}/></div></div></section>
-            <section className="bo-h724-context-card"><small>BASE ATUAL</small><strong>{connectedIds.length} conexões</strong><p>{evidenceConnections.length} evidência(s) · {usage.instances} instância(s) visual(is)</p><button type="button" onClick={() => setDetailTab('relations')}>Ver relações</button></section>
+          <aside className="bo-h724-overview-aside bo-h748-persona-aside" aria-label="Organização e vínculos da Persona">
+            <section className="bo-h724-organization-card bo-h748-side-panel">
+              <header><small>DETALHES DA PERSONA</small><strong>Organização</strong><p>Informações para encontrar e reutilizar este perfil.</p></header>
+              <label><span>Responsável</span><div className="bo-h724-owner-field"><UserRound size={16}/><input list="bo-h724-owner-options" value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></div><datalist id="bo-h724-owner-options">{ownerSuggestions.map((item) => <option key={item} value={item}/>)}</datalist></label>
+              <div className="bo-h724-tags-field"><span>Tags</span><div className="bo-h724-chip-editor">{tagValues.map((tag) => <button key={tag} type="button" className="bo-h724-chip" onClick={() => removeTag(tag)}>{tag}<X size={12}/></button>)}<input aria-label="Adicionar tag" value={tagEntry} onChange={(event) => setTagEntry(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); addTag(); } }} placeholder={tagValues.length ? 'Adicionar tag…' : 'Ex.: B2C'}/></div></div>
+              <div className="bo-h724-context-card bo-h748-connections">
+                <div className="bo-h748-connections-head"><small>VÍNCULOS NO SERVIÇO</small><p>Registros compartilhados com os mapas e a pesquisa.</p></div>
+                <button type="button" onClick={() => setDetailTab('relations')}><span>Relações</span><strong>{connectedIds.filter(id => !graph.entities?.evidence?.[id]).length}</strong><span aria-hidden="true">→</span></button>
+                <button type="button" onClick={() => setDetailTab('evidence')}><span>Evidências</span><strong>{evidenceConnections.length}</strong><span aria-hidden="true">→</span></button>
+                <button type="button" onClick={() => setDetailTab('usage')}><span>Uso nos mapas</span><strong>{usage.instances}</strong><span aria-hidden="true">→</span></button>
+              </div>
+            </section>
           </aside>
         </div>}
 
@@ -435,67 +527,46 @@ export function PersonasView({ studio }: { studio: StudioController }) {
           </section>
         </div>}
 
-        {detailTab === 'relations' && <div className="bo-h71-relations"><div className="bo-h71-section-intro"><div><small>SERVICE GRAPH</small><h2>Contexto conectado à Persona</h2><p>As relações abaixo são canônicas: a mesma necessidade, Job, dor ou hipótese pode aparecer em Journey, Blueprint e Whiteboard sem ser duplicada.</p></div><strong>{connectedIds.length} conexões</strong></div><div className="bo-h71-relation-grid">{(['need', 'job', 'pain', 'problemHypothesis'] as PersonaRelationKind[]).map((kind) => { const options = relationOptions.filter((item) => item.kind === kind); return <section key={kind}><header><strong>{relationLabel[kind]}</strong><span>{options.filter((item) => connectedIds.includes(item.id)).length}/{options.length}</span></header>{options.length ? <div>{options.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <p>Nenhum item criado ainda.</p>}</section>; })}</div></div>}
+        {detailTab === 'relations' && <div className="bo-h71-relations"><div className="bo-h71-section-intro"><div><small>SERVICE GRAPH</small><h2>Contexto conectado à Persona</h2><p>Conecte registros compartilhados. Uma necessidade, Job, dor ou hipótese pode ser reutilizada na Jornada, no Blueprint e no Whiteboard sem duplicação.</p></div><strong>{connectedIds.length} conexões</strong></div>
+          <div className="bo-h71-relation-grid">{(['need', 'job', 'pain', 'problemHypothesis'] as const).map((kind) => {
+            const options = relationOptions.filter((item) => item.kind === kind);
+            const count = options.filter((item) => connectedIds.includes(item.id)).length;
+            return <section key={kind} data-persona-relation-kind={kind}>
+              <header><strong>{relationLabel[kind]}</strong><span>{count}/{options.length}</span></header>
+              {options.length ? <div>{options.map((item) => <button key={item.id} type="button" aria-pressed={connectedIds.includes(item.id)} className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div>
+                : <div className="bo-h747-empty"><strong>Nenhum registro ainda</strong><p>Crie um registro deste tipo e vincule-o a esta Persona, ou reutilize os existentes quando aparecerem.</p></div>}
+              {quickCreateKind === kind ? <form className="bo-h747-inline-create" onSubmit={(event) => { event.preventDefault(); createLinkedRecord(kind); }}>
+                <label htmlFor={`bo-h747-create-${kind}`}>Nome de {relationLabel[kind].toLowerCase()}</label>
+                <input id={`bo-h747-create-${kind}`} autoFocus value={quickCreateTitle} onChange={(event) => setQuickCreateTitle(event.target.value)} maxLength={140} placeholder="Descreva o que foi identificado" />
+                <div><button type="button" onClick={() => { setQuickCreateKind(null); setQuickCreateTitle(''); }}>Cancelar</button><button type="submit" className="primary" disabled={!quickCreateTitle.trim()}>Criar e vincular</button></div>
+              </form> : <button type="button" className="bo-h747-action" onClick={() => { setQuickCreateKind(kind); setQuickCreateTitle(''); }}><Plus size={14}/> {options.length ? `Criar mais: ${relationLabel[kind].toLowerCase()}` : `Criar primeira: ${relationLabel[kind].toLowerCase()}`}</button>}
+            </section>;
+          })}</div>
+        </div>}
 
-        {detailTab === 'evidence' && <div className="bo-h71-evidence"><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que sustenta essa persona?</h2><p>Conecte somente evidências que realmente ajudam a explicar contexto, comportamento ou necessidades.</p></div><strong>{evidenceConnections.length} conectada(s)</strong></div>{relationOptions.filter((item) => item.kind === 'evidence').length ? <div className="bo-h71-evidence-list">{relationOptions.filter((item) => item.kind === 'evidence').map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma evidência criada</strong><p>Crie evidências na aba Evidências e depois conecte-as aqui.</p></div>}<PersonaEvidenceTrace draft={draft} evidence={relationOptions.filter(item=>item.kind === 'evidence')} onChange={setDraft}/></div>}
+        {detailTab === 'evidence' && <div className="bo-h71-evidence"><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que sustenta essa persona?</h2><p>Conecte fontes de pesquisa que sustentam afirmações específicas. Preencher o perfil não significa validá-lo empiricamente.</p></div><strong>{evidenceConnections.length} conectada(s)</strong></div>
+          {relationOptions.some((item) => item.kind === 'evidence')
+            ? <div className="bo-h71-evidence-list">{relationOptions.filter((item) => item.kind === 'evidence').map((item) => <button key={item.id} type="button" aria-pressed={connectedIds.includes(item.id)} className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>)}</div>
+            : <div className="bo-h747-empty bo-h747-evidence-empty"><strong>Nenhuma evidência registrada</strong><p>Crie uma evidência na área de pesquisa, com fonte e contexto. Depois volte para vincular a afirmação correspondente.</p>
+              <button type="button" className="bo-h747-action" onClick={() => {
+                if (isDirty && !window.confirm('Salvar alterações da Persona antes de registrar uma evidência?')) return;
+                if (isDirty) savePersona();
+                try { sessionStorage.setItem('bo-workspace-create-page', 'evidence'); } catch { /* optional navigation hint */ }
+                window.dispatchEvent(new CustomEvent('bo-open-context-page', { detail: 'evidence' }));
+              }}><Plus size={14}/> Registrar primeira evidência</button>
+            </div>}
+          <PersonaEvidenceTrace draft={draft} evidence={relationOptions.filter(item => item.kind === 'evidence')} onChange={setDraft}/>
+        </div>}
 
         {detailTab === 'usage' && <ServiceUsageRelations graph={graph} kind="persona" id={selected.id} title="Uso e relações" />}
       </div>
 
       <footer className="bo-h71-detail-actions bo-h724-detail-actions"><div className="bo-h724-save-state"><b className={isDirty ? 'is-dirty' : 'is-saved'}/><span>{isDirty ? 'Alterações ainda não salvas' : 'Todas as alterações estão salvas'}</span></div><span/><button type="button" disabled={!isDirty} onClick={discardPersona}>Descartar</button><button type="button" className="primary" disabled={!draft.title.trim() || !isDirty} onClick={savePersona}>Salvar alterações</button></footer>
 
+      {focusOpen && <PersonaFocusEditor key={`${selected.id}-${focusInitialStep}`} initialStep={focusInitialStep} draft={draft} onChange={setDraft} onExit={() => setFocusOpen(false)} onSaveAndExit={() => { savePersona(); setFocusOpen(false); setProfileReadOnly(true); setDetailTab('overview'); }}/>} 
       {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER PERSONA</small><h2>Remover “{contextEntityTitle(graph.entities?.persona?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações com Necessidades, Jobs, Dores, Hipóteses e Evidências serão desvinculadas. Esta ação pode ser desfeita pelo histórico da aplicação.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removePersona(deleteId)}>Remover Persona</button></footer></div></div>}
     </section>;
   }
-
-  if (createOpen) return <section className="bo-p2-create-page" data-personas-h71="create">
-    <header className="bo-p2-header">
-      <button type="button" className="bo-p2-back" onClick={cancelCreate}><ArrowLeft size={16}/> Voltar para Personas</button>
-      <span>PUBLICO-ALVO / PERSONAS / CRIAR</span>
-    </header>
-    <form className="bo-p2-create-form" onSubmit={(event) => { event.preventDefault(); createPersona(); }}>
-      <div className="bo-p2-title"><small>CRIAÇÃO DE PERSONA</small><h1>Criar Persona</h1>
-        <p>Comece com as informações essenciais. Você poderá aprofundar a pesquisa e personalizar os blocos depois.</p></div>
-      <div className="bo-p2-create-grid">
-        <main className="bo-p2-create-main">
-          <section className="bo-p2-section">
-            <span className="bo-p2-step">01 · IDENTIFICAÇÃO</span>
-            <h2>Como vamos reconhecer esta pessoa?</h2>
-            <label htmlFor="bo-p2-name">Nome da Persona <strong>Obrigatório</strong></label>
-            <input id="bo-p2-name" autoFocus required maxLength={140} value={createTitle} onChange={(event) => setCreateTitle(event.target.value)}
-              placeholder="Ex.: Profissional que mora sozinho"/>
-            <label htmlFor="bo-p2-description">Resumo <small>Opcional</small></label>
-            <textarea id="bo-p2-description" rows={4} maxLength={2000} value={createDescription}
-              onChange={(event) => setCreateDescription(event.target.value)} placeholder="Quem é essa pessoa, em que contexto utiliza o serviço e por que é relevante?"/>
-          </section>
-          <section className="bo-p2-section">
-            <span className="bo-p2-step">02 · PROFUNDIDADE</span><h2>Como deseja começar?</h2>
-            <div className="bo-p2-modes" role="group" aria-label="Profundidade da Persona">
-              <button type="button" className={createMode === 'simple' ? 'is-selected' : ''} aria-pressed={createMode === 'simple'} onClick={() => chooseCreateMode('simple')}><strong>Simples</strong><span>Identidade, objetivo, situação, canais e necessidades. Ideal para começar.</span></button>
-              <button type="button" className={createMode === 'professional' ? 'is-selected' : ''} aria-pressed={createMode === 'professional'} onClick={() => chooseCreateMode('professional')}><strong>Avançada</strong><span>Adiciona comportamento, expectativas, restrições, alternativas e mais conexões.</span></button>
-            </div>
-            <div className="bo-p4-create-explainer" aria-live="polite">
-              {createMode === 'professional' ? <>
-                <strong>Persona Avançada selecionada</strong>
-                <p>Após criar, você entrará na área de Comportamento. Também poderá pesquisar Decisões e Barreiras, além de conectar Evidências.</p>
-                <span>Comportamentos · Expectativas · Gatilhos · Alternativas · Restrições</span>
-              </> : <>
-                <strong>Persona Simples selecionada</strong><p>Comece com identidade, situação e objetivo. Você poderá ativar a pesquisa avançada depois sem perder informações.</p>
-              </>}
-            </div>
-          </section>
-          <footer className="bo-p2-actions"><button type="button" onClick={cancelCreate}>Cancelar</button>
-            <button className="primary" type="submit" disabled={!createTitle.trim()}>Criar Persona e continuar <span aria-hidden="true">→</span></button>
-          </footer>
-        </main>
-        <aside className="bo-p2-create-aside">
-          <div className="bo-p2-help-card"><strong>Construa progressivamente</strong><p>Você só precisa de um nome para começar. Depois de criar, poderá completar objetivos, relações e evidências sem perder o contexto.</p>
-            <div><span>✓</span> Informações essenciais</div><div><span>✓</span> Salvar e editar no próprio perfil</div><div><span>✓</span> Personalizar layout e blocos depois</div></div>
-          <div className="bo-p2-help-note"><strong>Sobre a validação</strong><p>Uma Persona com todos os campos preenchidos não está automaticamente validada. As evidências serão vinculadas durante a pesquisa.</p></div>
-        </aside>
-      </div>
-    </form>
-  </section>;
 
   const hasSearchOrFilter = Boolean(query.trim()) || filter !== 'all' || filterRules.length>0;
   const filters: Array<[FilterMode, string]> = [
@@ -538,7 +609,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
           <button type="button" className={viewMode === 'cards' ? 'is-active' : ''} aria-pressed={viewMode === 'cards'} onClick={() => changeViewMode('cards')}><UsersRound size={16}/><span>Cartões</span></button>
           <button type="button" className={viewMode === 'table' ? 'is-active' : ''} aria-pressed={viewMode === 'table'} onClick={() => changeViewMode('table')}><Table2 size={16}/><span>Tabela</span></button>
         </div>
-        <button type="button" className="primary bo-p1-create" onClick={() => setCreateOpen(true)}><Plus size={16}/> Nova Persona</button>
+        <button type="button" className="primary bo-p1-create" onClick={startNewPersona}><Plus size={16}/> Nova Persona</button>
       </div>
     </div>
     {showFilters && <div className="bo-p3-overlay" onMouseDown={(e)=>{if(e.target===e.currentTarget)setShowFilters(false)}}>
@@ -601,9 +672,10 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       </tr>)}</tbody></table>
     </div>}
     {!filtered.length && <div className="bo-h71-empty bo-p1-empty"><UsersRound size={28}/><strong>{hasSearchOrFilter ? 'Nenhuma Persona corresponde à busca' : 'Comece conhecendo seu público-alvo'}</strong><p>{hasSearchOrFilter ? 'Experimente buscar outro termo ou remover os filtros aplicados.' : 'Crie uma Persona para documentar objetivos, necessidades e evidências ligadas ao serviço.'}</p>
-      {hasSearchOrFilter ? <button type="button" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar busca e filtros</button> : <button type="button" onClick={() => setCreateOpen(true)}><Plus size={14}/> Criar persona</button>}
+      {hasSearchOrFilter ? <button type="button" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar busca e filtros</button> : <button type="button" onClick={startNewPersona}><Plus size={14}/> Criar persona</button>}
     </div>}
 
+    {newFocusDraft && (newGuided ? <PersonaFocusEditor key="new-persona" draft={newFocusDraft} onChange={setNewFocusDraft} onExit={() => setNewGuided(false)} onSaveAndExit={() => finishNewPersona()}/> : <PersonaSplitBuilder draft={newFocusDraft} onChange={setNewFocusDraft} onExit={cancelNewPersona} onSave={finishNewPersona} onGuided={() => setNewGuided(true)}/>)}
     {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER PERSONA</small><h2>Remover “{contextEntityTitle(graph.entities?.persona?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações existentes serão desvinculadas do Service Graph.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removePersona(deleteId)}>Remover Persona</button></footer></div></div>}
   </section>;
 }

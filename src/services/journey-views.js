@@ -32,7 +32,7 @@ export function switchMatrixPerspective(input, perspective, definitions) {
   const current = normalizeSavedMatrixView(input);
   if (!['journey','blueprint'].includes(perspective) || perspective === current.perspective) return current;
   const memory = {...current.perspectiveViews,[current.perspective]:normalizeMatrixViewSnapshot(current)};
-  const visible = perspective === 'blueprint' ? ['ev','ch','ac','em','fl','bk','sy'] : ['sd','ch','ac','th','em','im'];
+  const visible = perspective === 'blueprint' ? ['ev','ch','ac','bk'] : ['sd','ch','ac','th','em','im'];
   const defaults = {...current,perspective,preset:perspective === 'blueprint' ? 'operational' : 'essential',
     rowOrder:definitions.map(row=>row.id),hiddenRows:definitions.filter(row=>!visible.includes(row.id)&&!row.custom).map(row=>row.id),
     collapsedRows:[],cardFilters:{},canvasOrderVersion:0,connectionMode:perspective==='blueprint'?'all':current.connectionMode};

@@ -44,7 +44,7 @@ check('Outcomes vira Medir resultados',service.includes("outcomes: { label: 'Med
 check('Overview filtra capacidades pelo perfil',workspace.includes(".filter((row) => isWorkspaceCapabilityVisible(experience.level, row.target))"));
 check('Overview projeta linguagem pelo perfil',workspace.includes('projectExperienceCapability(experience.level'));
 check('Troca de modo expulsa ferramenta oculta',workspace.includes("selectWorkspaceTab('overview')")&&workspace.includes('[experience.level, workspaceTab]'));
-check('Navegação de ferramentas escolhe primeiro item visível',workspace.includes('const firstVisible = group.items.find'));
+check('Navegação contextual mostra somente ferramentas disponíveis',workspace.includes('const activeWorkspaceItems = baseWorkspaceItems.filter') && workspace.includes('isWorkspaceCapabilityVisible'));
 check('Guidance em Fundamentos usa projeção simples',workspace.includes('guidanceProjection')&&workspace.includes("experience.level === 'foundation' ? guidanceProjection.label"));
 check('Apoio avançado some das conexões de Fundamentos',workspace.includes("experience.level !== 'foundation' && phaseConnections[overviewPhase].support"));
 check('Stepper usa rows projetadas',workspace.includes('const rowsForPhase = phaseRowsFor(phase)')&&workspace.includes('const projected = rowsForExperience(phase)'));

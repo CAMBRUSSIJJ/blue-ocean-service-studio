@@ -70,16 +70,14 @@ def main():
             page.wait_for_function("() => window.BlueOceanRuntime?.api?.('whiteboardCore')",timeout=10000)
             page.get_by_role('button',name='Abrir workspace local sem conta').click()
             page.get_by_role('button',name='Novo projeto',exact=True).click()
+            # H7.49: a Whiteboard intention goes straight to its creation form.
+            page.get_by_role('button',name='Começar com um espaço em branco').click()
             page.get_by_label('Nome do projeto',exact=True).fill('Visual QA')
-            page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
-            page.get_by_role('button',name='Criar projeto',exact=True).click()
-            if w <= 700:
-              page.get_by_role('navigation',name='Navegação rápida').get_by_role('button',name='Abrir Whiteboard pelo atalho móvel').click()
-            else:
-              page.locator('[data-blue-ocean-whiteboard-nav="standard"]').click()
-            page.get_by_role('button',name='Novo whiteboard',exact=True).click()
+            page.locator('details.bo-h744-additional summary').click()
+            page.get_by_label('Nome do serviço',exact=True).fill('Atendimento')
+            page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
             page.get_by_label('Nome do quadro',exact=True).fill('E2E Visual')
-            page.get_by_role('button',name='Começar livre',exact=True).click()
+            page.get_by_role('button',name='Criar e começar',exact=True).click()
             board=page.locator('[data-whiteboard-primary-editor="blocksuite"]')
             board.wait_for(state='visible',timeout=10000)
             page.frame_locator('.bo-bs-frame').locator('.bo-bs-canvas').wait_for(state='visible',timeout=30000)

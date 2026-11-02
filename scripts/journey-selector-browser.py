@@ -45,8 +45,8 @@ try:
   browser=pw.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
   page=browser.new_page(viewport={'width':1440,'height':1000},accept_downloads=True);errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   page.add_locator_handler(page.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click())
-  page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click();page.get_by_role('button',name='Novo projeto',exact=True).click()
-  page.get_by_label('Nome do projeto',exact=True).fill('QA Seletor Universal');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click()
+  page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click();page.get_by_role('button',name='Novo projeto',exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click()
+  page.get_by_label('Nome do projeto',exact=False).fill('QA Seletor Universal');page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
   page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name='Em branco').first.click()
   f=page.frame_locator('.bo-blueprint-reference-frame');saved(f)
   for name in ['Descobrir','Usar']:

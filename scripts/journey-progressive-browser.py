@@ -34,10 +34,10 @@ def graph(page):
 def enter(page):
     page.goto(URL, wait_until='networkidle')
     page.get_by_role('button', name='Abrir workspace local sem conta').click()
-    page.get_by_role('button', name='Novo projeto', exact=True).click()
-    page.get_by_label('Nome do projeto', exact=True).fill('Jornada progressiva QA')
-    page.get_by_label('Serviço principal', exact=True).fill('Atendimento')
-    page.get_by_role('button', name='Criar projeto', exact=True).click()
+    page.get_by_role('button', name='Novo projeto', exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click()
+    page.get_by_label('Nome do projeto',exact=False).fill('Jornada progressiva QA')
+    page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento')
+    page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
 
 def new_journey(page):
     page.get_by_role('button', name='Criar mapa', exact=True).click()

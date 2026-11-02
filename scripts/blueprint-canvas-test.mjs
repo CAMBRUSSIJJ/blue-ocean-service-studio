@@ -174,4 +174,20 @@ check('Resize controls remain hidden until hover or keyboard focus',()=>{
  assert.match(editor,/ArrowRight','ArrowLeft','ArrowUp','ArrowDown','Home'/);
  assert.doesNotThrow(()=>new Function(editor));
 });
+check('Reference geometry keeps dense cards inside their stage and lane after resizing',()=>{
+ const source=doc();
+ source.c['ac|0']=Array.from({length:8},(_,i)=>({i:'reference-'+i,t:'Ação '+i,canvas:{kind:'customer-action',...(i===0?{width:580,height:200}:{})}}));
+ const definitions=[{id:'ev'},{id:'ch'},{id:'ac'},{id:'bk'}];
+ const grid={label:192,stage:320,header:80,cardWidth:288,cardHeight:132,padding:12,gap:16,rowGap:8,minimumRow:120,reference:true};
+ const layout=buildCanvasLayout(source,definitions,null,[210,600],null,grid);
+ for(const node of layout.nodes){
+  const stage=layout.stages.find(s=>s.index===node.stageIndex),row=layout.rows.find(r=>r.id===node.row);
+  assert.ok(node.x>=stage.x&&node.x+node.width<=stage.x+stage.width);
+  assert.ok(node.y>=row.y&&node.y+node.height<=row.y+row.height);
+  const next=layout.nodes.find(n=>n.key===node.key&&n.position===node.position+1);
+  if(next)assert.ok(next.y>=node.y+node.height);
+ }
+ const customer=layout.rows.find(r=>r.id==='ac'),backstage=layout.rows.find(r=>r.id==='bk');
+ assert.ok(backstage.y-customer.y-customer.height>=32,'visibility separator has space when frontstage is not displayed');
+});
 console.log(`Blueprint canvas: ${count}/${count} PASS`);

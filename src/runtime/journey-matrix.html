@@ -139,7 +139,7 @@ const PRESET_NAMES={essential:'Jornada essencial',detailed:'Jornada detalhada',o
 const rowDefs=()=>contentRowDefs();
 function viewState(input){
   const preset=Object.hasOwn(PRESETS,input?.preset)?input.preset:input?.preset==='custom'?'custom':'operational';
-  let hiddenRows=Array.isArray(input?.hiddenRows)?input.hiddenRows.filter(x=>typeof x==='string'):BASE_ROWS.filter(r=>!PRESETS[preset]?.includes(r.id)).map(r=>r.id);
+  let hiddenRows=Array.isArray(input?.hiddenRows)?input.hiddenRows.filter(x=>typeof x==='string'):BASE_ROWS.filter(r=>!(preset==='operational'?['ev','ch','ac','bk']:PRESETS[preset])?.includes(r.id)).map(r=>r.id);
   if(input&&!input.rowOrder?.includes('go')&&!['complete','acquisition'].includes(preset))hiddenRows=[...new Set([...hiddenRows,...ACQUISITION_LANES.map(r=>r.id)])];
   return {version:1,preset,blueprintRenderer:input?.blueprintRenderer==='matrix'?'matrix':'canvas',canvasOrderVersion:input?.canvasOrderVersion===1?1:0,perspective:input?.perspective==='blueprint'||!input?.perspective&&preset==='operational'?'blueprint':'journey',hiddenRows,rowOrder:Array.isArray(input?.rowOrder)?[...new Set(input.rowOrder.filter(x=>typeof x==='string'))]:BASE_ROWS.map(r=>r.id),insightsOpen:input?.insightsOpen===true,insightsTab:['guidance','analysis','quality'].includes(input?.insightsTab)?input.insightsTab:'guidance',emotionsExpanded:input?.emotionsExpanded===true,fitToScreen:input?.fitToScreen===true,
  zoom:Number.isFinite(+input?.zoom)?Math.max(75,Math.min(150,Math.round(+input.zoom))):100,
@@ -181,7 +181,7 @@ function saveView(){
 function choosePreset(preset,keepCustom=false){const renderer=V.blueprintRenderer,target=preset==='operational'?'blueprint':['essential','detailed','acquisition'].includes(preset)?'journey':V.perspective;if(target!==V.perspective)V=window.BlueOceanJourneyViews.switchMatrixPerspective(V,target,rowDefs());V.blueprintRenderer=renderer;V.preset=preset;if(preset==='operational')V.perspective='blueprint';else if(['essential','detailed','acquisition'].includes(preset))V.perspective='journey';V.hiddenRows=rowDefs().filter(r=>!(PRESETS[preset].includes(r.id)||r.custom&&(keepCustom||preset!=='essential'))).map(r=>r.id);saveView()}
 function announceSave(ok){
   saveLabel=ok==='pending'?'Salvando…':ok?'Salvo neste navegador':'Erro ao salvar';
-  const el=app.querySelector('[data-save-status]');if(el)el.textContent=saveLabel;
+  const el=app.querySelector('[data-save-status]');if(el){el.textContent=saveLabel;el.dataset.savePhase=ok==='pending'?'pending':ok===true?'saved':'error'}
   // Some host acknowledgements arrive after a disabled render. Keep the
   // enabled/draggable state of library controls aligned to the canonical lock,
   // without remounting dialogs or overwriting edits already in progress.

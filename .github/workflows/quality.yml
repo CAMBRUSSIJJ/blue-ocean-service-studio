@@ -29,6 +29,7 @@ jobs:
       - run: rm -f src/generated/app-version.ts && npm run typecheck
       - run: python3 -m py_compile scripts/journey-selector-browser.py scripts/journey-observation-browser.py scripts/journey-editor-ux-browser.py scripts/blueprint-connections-browser.py
       - run: npm run docs:check
+      - run: node --experimental-strip-types scripts/v1205h744-project-flow-smoke.mjs
       - run: node scripts/journey-visualization-test.mjs
       - run: node scripts/blueprint-guided-reading-test.mjs
       - run: npm run blueprint:canvas:test
@@ -70,12 +71,16 @@ jobs:
       - run: python -m pip install playwright pillow
       - run: python -m playwright install --with-deps chromium
       - run: npm run e2e:visual
+      - run: npm run persona:split:browser
+      - run: npm run persona:ecosystem:browser
       - name: Armazenar evidências visuais
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: blue-ocean-visual-${{ github.sha }}
-          path: artifacts/e2e-v1162
+          path: |
+            artifacts/e2e-v1162
+            artifacts/persona-ecosystem
           retention-days: 14
 
   editor-ux:

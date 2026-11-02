@@ -38,9 +38,9 @@ def entry(page):
  check('Signup remains reachable and within the viewport',page.locator('.bo-auth-card').bounding_box()['x']>=0 and page.get_by_placeholder('Seu nome',exact=True).is_visible())
  page.get_by_role('button',name='Voltar',exact=True).click()
  page.get_by_role('button',name='Abrir workspace local sem conta',exact=True).click()
- page.get_by_role('button',name='Novo projeto',exact=True).click()
- page.get_by_label('Nome do projeto',exact=True).fill('Experiência inicial QA');page.get_by_label('Serviço principal',exact=True).fill('Atendimento')
- page.get_by_role('button',name='Criar projeto',exact=True).click()
+ page.get_by_role('button',name='Novo projeto',exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click()
+ page.get_by_label('Nome do projeto',exact=False).fill('Experiência inicial QA');page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento')
+ page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
  # New project navigation starts at its overview; maps live in the primary sidebar.
  expect(page.get_by_role('heading',name='Visão geral do projeto',exact=True)).to_be_visible()
  check('Project opens on its overview before the map library',True)
@@ -74,7 +74,7 @@ def entry(page):
 def custom(page):
  # This flow uses the visible blank-map controls and then adopts the starter.
  page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta',exact=True).click()
- page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Mapa próprio');page.get_by_label('Serviço principal',exact=True).fill('Suporte');page.get_by_role('button',name='Criar projeto',exact=True).click();
+ page.get_by_role('button',name='Novo projeto',exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click();page.get_by_label('Nome do projeto',exact=False).fill('Mapa próprio');page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Suporte');page.get_by_role('button',name='Criar projeto e começar',exact=True).click();
  page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
  page.get_by_role('button',name='Nova etapa',exact=True).click();page.get_by_placeholder('Nome da etapa',exact=True).fill('Conversa');page.get_by_role('button',name='Criar etapa',exact=True).click()
  page.locator('.bo-h1705-menubar').get_by_role('button',name='Adicionar faixa',exact=True).click();page.locator('.bo-refined-picker').get_by_role('button',name='Texto',exact=True).click()
@@ -95,7 +95,7 @@ def small(page):
  page.emulate_media(reduced_motion='reduce');check('Reduced motion stops the ocean animation',page.locator('.bo-auth-wave__track').evaluate("e=>getComputedStyle(e).animationName==='none'"))
  if width==390:
   page.get_by_role('button',name='Abrir workspace local sem conta',exact=True).click()
-  page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Jornada no celular');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click();
+  page.get_by_role('button',name='Novo projeto',exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click();page.get_by_label('Nome do projeto',exact=False).fill('Jornada no celular');page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto e começar',exact=True).click();
   page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name=re.compile(r'^Em branco')).click()
   welcome=page.get_by_role('region',name='Começar a mapear');expect(welcome).to_be_visible()
   check('The Journey introduction fits a phone',welcome.bounding_box()['x']>=0 and welcome.bounding_box()['x']+welcome.bounding_box()['width']<=391)
@@ -109,10 +109,10 @@ def starting_map(page):
  page.emulate_media(reduced_motion='reduce')
  page.goto(URL,wait_until='networkidle')
  page.get_by_role('button',name='Abrir workspace local sem conta',exact=True).click()
- page.get_by_role('button',name='Novo projeto',exact=True).click()
- page.get_by_label('Nome do projeto',exact=True).fill('Novo início da Jornada')
- page.get_by_label('Serviço principal',exact=True).fill('Atendimento ao cliente')
- page.get_by_role('button',name='Criar projeto',exact=True).click()
+ page.get_by_role('button',name='Novo projeto',exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click()
+ page.get_by_label('Nome do projeto',exact=False).fill('Novo início da Jornada')
+ page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento ao cliente')
+ page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
  page.get_by_role('button',name='Criar mapa',exact=True).click()
  page.get_by_role('button',name=re.compile(r'^Em branco')).click()
  width=page.viewport_size['width']

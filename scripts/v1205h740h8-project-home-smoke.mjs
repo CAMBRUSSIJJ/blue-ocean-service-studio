@@ -49,7 +49,7 @@ const checks=[
  [home.includes('CONTINUE DE ONDE PAROU'),'Home prioriza continuidade'],
  [home.includes('Seus projetos'),'Home mostra biblioteca de projetos'],
  [home.includes('Começar com um template'),'Home oferece templates'],
- [home.includes('Nome do projeto') && home.includes('Serviço principal'),'Criação separa Projeto × Serviço'],
+ [home.includes('Nome do projeto') && (home.includes('Nome do serviço') || home.includes('Serviço principal')),'Criação separa Projeto × Serviço'],
  [home.includes('Um projeto organiza o trabalho; o serviço é o que você desenha dentro dele.'),'UI explica Project × Service'],
  [home.includes('toggleWorkspaceProjectFavorite'),'Projetos suportam favoritos'],
  [css.includes('grid-template-columns:repeat(3,minmax(0,1fr))'),'Projetos usam grid desktop de 3 colunas'],

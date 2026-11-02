@@ -39,7 +39,7 @@ const checks=[
  [workspace.includes("stateLabel: 'Estruturado'") || workspace.includes("stateLabel: 'Leitura derivada'"),'Estados semânticos definidos'],
  [workspace.includes("state: 'derived'"),'Cockpit/Prontidão não contam como capacidade estrutural'],
  [workspace.includes('bo-h740h7-compact-head'),'Ferramentas usam header compacto'],
- [workspace.includes('bo-h740h7-tool-phases'),'Ferramentas mantêm navegação por fase compacta'],
+ [!workspace.includes('<nav className="bo-h740h7-tool-phases"') && workspace.includes('bo-h740h7-tool-subnav'),'Ferramentas usam subnav contextual sem duplicar navegação por fases'],
  [workspace.includes('executeGuidedTarget'),'CTAs de guidance navegam para alvo real'],
  [workspace.includes("target === 'journey' && journeys.length === 0"),'CTA da Journey abre criação quando necessário'],
  [css.includes('grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr)'),'Hero desktop tem duas colunas'],

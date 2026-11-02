@@ -12,7 +12,7 @@ const cases = [
   ['project overview is compact and informational',project.includes('data-project-overview="compact-h31"')&&project.includes('bo-h31-overview-stats')],
   ['redundant navigation cards removed',!project.includes('bo-h740h10-area-grid')&& !project.includes('data-project-elements="H17.0.7"')],
   ['outdated maps button removed',!project.includes('Ver mapas existentes')],
-  ['new projects can create a map',project.includes('onClick={onCreateMap}>Criar mapa')],
+  ['new projects can create a map',project.includes('action: onCreateMap')&&project.includes('onClick={firstStep.action}')],
   ['existing project maps have one open action',project.includes('onClick={openService}>Abrir mapas')],
   ['service counts remain derived from canonical graph',project.includes('const serviceMaps = journeys + detachedMaps')],
   ['project scroll reset under sticky header',project.includes('parent.scrollTop = 0')],

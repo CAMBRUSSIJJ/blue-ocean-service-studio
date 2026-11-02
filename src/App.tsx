@@ -24,7 +24,7 @@ import { JourneyView } from './views/JourneyView';
 import { EditorSurface } from './views/EditorSurface';
 import { BlueprintWorkspaceView } from './views/BlueprintWorkspaceView';
 import { ActionPlanView } from './views/ActionPlanView';
-import { ProjectHomeView, type ProjectHomeSection } from './views/ProjectHomeView';
+import { ProjectHomeView, type ProjectHomeSection, type ProjectIntent } from './views/ProjectHomeView';
 import { ProjectShellView, type ProjectShellSection } from './views/ProjectShellView';
 import { WhiteboardsView } from './views/WhiteboardsView';
 import { WorkspaceLibraryView, type WorkspaceLibraryPage } from './views/WorkspaceLibraryView';
@@ -92,6 +92,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const [serviceWorkspaceTab, setServiceWorkspaceTab] = useState(() => { try { const stored = sessionStorage.getItem('bo-service-workspace-tab'); return stored === 'research' ? 'overview' : stored === 'blueprint' ? 'journey' : stored || 'overview'; } catch { return 'overview'; } });
   const [libraryPage, setLibraryPage] = useState<WorkspaceLibraryPage>('personas');
   const [projectHomeSection, setProjectHomeSection] = useState<ProjectHomeSection>('home');
+  const [isProjectCreationOpen, setIsProjectCreationOpen] = useState(false);
   const [projectShellOpen, setProjectShellOpen] = useState(false);
   const [createMapIntent, setCreateMapIntent] = useState(false);
   const [projectShellSection] = useState<ProjectShellSection>('overview');
@@ -298,6 +299,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
   };
 
   const openGlobalHome = (section: ProjectHomeSection = 'home') => {
+    if (isProjectCreationOpen) window.dispatchEvent(new Event('bo-h749-cancel-project-creation'));
     setProjectShellOpen(false);
     setProjectHomeSection(section);
     setExternalNav(null);
@@ -305,6 +307,13 @@ export default function App({ authUser, onSignOut }: AppProps) {
     hideLegacyPageSurfaces();
     window.dispatchEvent(new CustomEvent('rt-navigation', { detail: 'home' }));
   };
+
+  // Deleting the current project must return to the global library, including when no projects remain.
+  useEffect(() => {
+    const openListAfterDeletion = () => openGlobalHome('projects');
+    window.addEventListener('bo-project-deleted', openListAfterDeletion);
+    return () => window.removeEventListener('bo-project-deleted', openListAfterDeletion);
+  }, []);
 
   const selectCore = (tab: typeof activeTab) => {
     setProjectShellOpen(true);
@@ -347,9 +356,15 @@ export default function App({ authUser, onSignOut }: AppProps) {
 
   useEffect(() => {
     const requestCreateService = () => {
-      setServiceName('');
-      setServiceDescription('');
-      setIsCreateServiceOpen(true);
+      // All first-service and new-project entrypoints use the dedicated creation page.
+      setIsCreateServiceOpen(false);
+      setProjectShellOpen(false);
+      setProjectHomeSection('projects');
+      setExternalNav(null);
+      setIsMobileNavOpen(false);
+      hideLegacyPageSurfaces();
+      window.dispatchEvent(new CustomEvent('rt-navigation', { detail: 'home' }));
+      window.setTimeout(() => window.dispatchEvent(new Event('bo-new-project')), 30);
     };
     window.addEventListener('bo-create-service', requestCreateService);
     return () => window.removeEventListener('bo-create-service', requestCreateService);
@@ -387,6 +402,23 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const openCurrentProjectWorkspace = () => openCurrentProjectHome();
   const createMapFromProject = () => { setCreateMapIntent(true); openServiceWorkspaceTab('journey'); };
 
+  const openCreatedProjectIntent = (intent: ProjectIntent) => {
+    setIsProjectCreationOpen(false);
+    // Intent selects the starting tool. All four paths keep one canonical Service Graph.
+    if (intent === 'personas') {
+      try { sessionStorage.setItem('bo-workspace-create-page', 'personas'); } catch { /* optional creation hint */ }
+      openLibraryPage('personas');
+      return;
+    }
+    if (intent === 'whiteboard') {
+      try { sessionStorage.setItem('bo-whiteboard-start-from-design', 'free'); } catch { /* optional creation hint */ }
+      openServiceWorkspaceTab('whiteboard');
+      return;
+    }
+    try { sessionStorage.setItem('bo-h749-direct-map-intent', intent); } catch { /* fallback opens map creator */ }
+    createMapFromProject();
+  };
+
   useEffect(() => {
     const changed = (event: Event) => { const target = String((event as CustomEvent<string>).detail || 'overview'); setServiceWorkspaceTab(target === 'research' ? 'overview' : target === 'blueprint' ? 'journey' : target); };
     window.addEventListener('bo-service-workspace-tab-changed', changed);
@@ -415,7 +447,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
   };
 
   return (
-    <div data-blue-ocean-identity="7.13" data-adaptive-home="7.14" data-ocean-home="7.15" data-object-language="7.16" data-ocean-surface="7.17" data-animated-ocean-branding="7.18" data-journey-cover-system="7.18-H1" data-motion-identity="7.19" data-visual-recovery="7.19-H1" data-dashboard-composition="7.20" data-dashboard-recovery="7.20-H1" data-journey-workspace="7.21" data-unified-service-workspace="7.22" data-journey-editor-ux="7.23" data-journey-library-sidebar="7.24" data-research-studio="7.26" data-project-shell="7.40-H10" data-service-first-navigation="7.40-H11" data-primary-sidebar-project-switch="7.40-H12" data-persistent-global-sidebar="7.40-H13" data-interaction-accessibility-polish="7.40-H14" data-usage-relations="7.40-H15.2" data-design-service-ux="7.40-H15.3" data-design-service-visual="7.40-H15.4" data-discovery-ux="7.40-H15.5" data-research-ux="7.40-H15.6" data-adaptive-experience="H16" data-foundation-deep-adaptation="H16.1" data-research-driven-context="H16.2" data-phase-status-consistency="H16.3" data-design-service-proposal="H16.4" data-research-proposal="H16.5" data-research-proposal-hotfix="H16.5.1" data-research-workflow-ux="H16.6" data-research-flow-polish="H16.7" data-flexible-discovery="H16.7" data-design-start-choice="H16.8" data-single-experience="H17" data-experience-level={experience.level} data-experience-density={experience.meta.density} className="bo1187-app-shell min-h-screen h-screen bg-slate-50 font-sans flex overflow-hidden">
+    <div data-blue-ocean-identity="7.13" data-adaptive-home="7.14" data-ocean-home="7.15" data-object-language="7.16" data-ocean-surface="7.17" data-animated-ocean-branding="7.18" data-journey-cover-system="7.18-H1" data-motion-identity="7.19" data-visual-recovery="7.19-H1" data-dashboard-composition="7.20" data-dashboard-recovery="7.20-H1" data-journey-workspace="7.21" data-unified-service-workspace="7.22" data-journey-editor-ux="7.23" data-journey-library-sidebar="7.24" data-research-studio="7.26" data-project-shell="7.40-H10" data-service-first-navigation="7.40-H11" data-primary-sidebar-project-switch="7.40-H12" data-persistent-global-sidebar="7.40-H13" data-interaction-accessibility-polish="7.40-H14" data-usage-relations="7.40-H15.2" data-design-service-ux="7.40-H15.3" data-design-service-visual="7.40-H15.4" data-discovery-ux="7.40-H15.5" data-research-ux="7.40-H15.6" data-adaptive-experience="H16" data-foundation-deep-adaptation="H16.1" data-research-driven-context="H16.2" data-phase-status-consistency="H16.3" data-design-service-proposal="H16.4" data-research-proposal="H16.5" data-research-proposal-hotfix="H16.5.1" data-research-workflow-ux="H16.6" data-research-flow-polish="H16.7" data-flexible-discovery="H16.7" data-design-start-choice="H16.8" data-single-experience="H17" data-experience-level={experience.level} data-experience-density={experience.meta.density} className={`bo1187-app-shell min-h-screen h-screen bg-slate-50 font-sans flex overflow-hidden ${isProjectCreationOpen ? 'bo-h749-creation-focus' : ''}`}>
       <a className="bo1175-skip-link" href="#bo-main-content">Pular para o conteúdo</a>
       <button type="button" className="bo1175-mobile-scrim" aria-label="Fechar navegação" tabIndex={isMobileNavOpen ? 0 : -1} onClick={() => setIsMobileNavOpen(false)} />
       <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" aria-label="Selecionar backup completo" onChange={(event) => { const file = event.target.files?.[0]; if (file) void handleImport(file); event.target.value = ''; }} />
@@ -445,7 +477,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
             <div className="bo1163-service-menu__label">Projetos do serviço</div>
             {projects.slice(0, 6).map((project) => <button type="button" role="menuitem" key={project.id} className={project.id === activeProjectId ? 'active' : ''} onClick={() => { setIsServiceMenuOpen(false); if (project.id !== activeProjectId) studio.openWorkspaceProject(project.id); window.setTimeout(() => openCurrentProjectWorkspace(), 0); }}><span><strong>{project.title}</strong><small>{project.serviceName}</small></span>{project.id === activeProjectId && <CheckCircle2 size={15}/>}</button>)}
             <button type="button" role="menuitem" onClick={() => { setIsServiceMenuOpen(false); openGlobalHome('projects'); }}><span><strong>Todos os projetos</strong><small>Abrir a área Serviço</small></span></button>
-            <button type="button" role="menuitem" onClick={() => { setIsServiceMenuOpen(false); openGlobalHome('templates'); }}><span><strong>+ Novo projeto</strong><small>Comece vazio ou use um template.</small></span></button>
+            <button type="button" role="menuitem" onClick={() => { setIsServiceMenuOpen(false); requestServiceCreation(); }}><span><strong>+ Novo projeto</strong><small>Escolha como começar seu trabalho.</small></span></button>
           </div>}
           <span className="sr-only bo-h740h11-legacy-switcher"><strong>Serviço</strong><em>Projetos de serviço</em></span>
         </div>
@@ -547,7 +579,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
           {isGlobalScope ? <>
             <div className="flex items-center min-w-0">
               <button type="button" className="bo1175-mobile-menu" onClick={() => setIsMobileNavOpen(true)} aria-label="Abrir navegação" aria-expanded={isMobileNavOpen}><Menu size={20} /></button>
-              <h2 className="bo1187-dashboard-header__title">{activeTab === 'context' && !externalNav ? libraryTitles[libraryPage] : isPrimaryResearch ? 'Pesquisa' : projectHomeSection === 'home' ? 'Home' : projectHomeSection === 'projects' ? 'Serviço' : 'Templates'}</h2>
+              <h2 className="bo1187-dashboard-header__title">{activeTab === 'context' && !externalNav ? libraryTitles[libraryPage] : isPrimaryResearch ? 'Pesquisa' : isProjectCreationOpen ? 'Novo projeto' : projectHomeSection === 'home' ? 'Home' : projectHomeSection === 'projects' ? 'Serviço' : 'Templates'}</h2>
             </div>
             <div className="bo1187-dashboard-header__actions">
               <span data-bo-global-search-native="1" className="sr-only" aria-hidden="true" />
@@ -599,7 +631,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
         {/* A sidebar owns global navigation; the project workspace supplies contextual views. */}
 
         <main id="bo-main-content" data-bo-precision-workspace-native="1" data-bo-active-view={externalNav ?? activeTab} className={`flex-1 flex flex-col min-w-0 ${activeTab === 'canvas' && !externalNav ? 'overflow-hidden p-0' : activeTab === 'home' && !externalNav ? 'overflow-y-auto p-0' : 'px-4 md:px-6 overflow-y-auto'}`}>
-          {isGlobalHome && <ProjectHomeView studio={studio} section={projectHomeSection} setSection={setProjectHomeSection} openProjectWorkspace={openCurrentProjectWorkspace} />}
+          {isGlobalHome && <ProjectHomeView studio={studio} section={projectHomeSection} setSection={setProjectHomeSection} openProjectWorkspace={openCurrentProjectWorkspace} onCreatingChange={setIsProjectCreationOpen} onCreatedIntent={openCreatedProjectIntent} />}
           {isProjectHome && hasService && <ProjectShellView key={activeProjectId || graph.service.id} studio={studio} section="overview" openService={() => openServiceWorkspaceTab('journey')} onCreateMap={createMapFromProject} openWhiteboards={() => openServiceWorkspaceTab('whiteboard')} openLibraryPage={openLibraryPage} />}
           {!hasService && activeTab !== 'home' && !externalNav && <section className="bo-h740h2-service-gate" data-requested-view={activeTab}><div className="bo-h740h2-service-gate__icon"><BlueOceanObjectIcon kind="service" size={34}/></div><small>COMECE PELO SERVIÇO</small><h2>{activeViewTitle} está pronta para você</h2><p>Você pode navegar por toda a plataforma. Para criar, editar ou conectar objetos nesta área, crie primeiro o serviço que será desenhado.</p><div><button type="button" className="primary" onClick={requestServiceCreation}>Criar meu primeiro serviço</button><button type="button" onClick={() => { loadDemoService(); setExternalNav(null); }}>Explorar serviço de exemplo</button></div></section>}
           {hasService && activeTab === 'context' && !externalNav && <WorkspaceLibraryView studio={studio} page={libraryPage} />}

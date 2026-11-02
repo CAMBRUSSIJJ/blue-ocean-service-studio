@@ -171,6 +171,19 @@ export function setProjectArchived(id: Id, archived: boolean, store = storage())
   return true;
 }
 
+/** Remove an indexed project and its local snapshot, including archived projects. */
+export function deleteProject(id: Id, store = storage()) {
+  if (!store) return false;
+  const index = parseIndex(store);
+  if (!index.projects.some((item) => item.id === id)) return false;
+  const projects = index.projects.filter((item) => item.id !== id);
+  // Update the index first so an orphaned snapshot cannot appear as a listed project.
+  writeIndex({ version: 1, projects }, store);
+  store.removeItem(snapshotKey(id));
+  if (store.getItem(ACTIVE_KEY) === id) store.removeItem(ACTIVE_KEY);
+  return true;
+}
+
 export function projectTemplateLabel(template: ProjectTemplate) {
   return ({
     blank: 'Novo serviço', redesign: 'Redesenho de serviço', blueprint: 'Service Blueprint', research: 'Pesquisa de serviço', omnichannel: 'Experiência omnichannel', demo: 'Projeto de exemplo',

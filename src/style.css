@@ -95,6 +95,9 @@
 @import './runtime/project-ux-h31.css';
 @import './runtime/library-parity-h741.css';
 @import './runtime/whiteboard-library-h742.css';
+@import './runtime/discovery-detail-unified-h754.css';
+@import './views/persona-read-profile-h751.css';
+@import './runtime/discovery-read-profile-h755.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

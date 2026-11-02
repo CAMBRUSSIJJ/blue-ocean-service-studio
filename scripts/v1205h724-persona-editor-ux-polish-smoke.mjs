@@ -9,7 +9,25 @@ const style = fs.readFileSync('src/style.css', 'utf8');
 
 ok('cartões possuem edição inline no quadro', visual.includes('function PersonaVisualEditor') && visual.includes('bo-p5-field') && visual.includes('onChange'));
 ok('overview usa layout principal + lateral', personas.includes('bo-h724-overview-layout') && personas.includes('bo-h724-overview-aside'));
-ok('completude migrou para painel lateral', personas.includes('bo-h724-completeness-card'));
+const layout = fs.readFileSync('src/views/persona-layout-h748.css', 'utf8');
+const guided = fs.readFileSync('src/views/PersonaProgressiveEditor.tsx', 'utf8');
+ok('completude percentual não aparece no detalhe da Persona', !personas.includes('bo-h724-completeness-card') && !personas.includes('completenessChecks.map'));
+const focus = fs.readFileSync('src/views/PersonaFocusEditor.tsx','utf8');
+const focusCss = fs.readFileSync('src/views/persona-focus-h750.css','utf8');
+ok('criar Persona abre modo foco sem página intermediária', personas.includes('setNewFocusDraft(') && personas.includes('finishNewPersona') && personas.includes('<PersonaFocusEditor') && !personas.includes('bo-p2-create-page'));
+ok('perfis existentes podem abrir modo foco sem perder editor completo', personas.includes('Modo foco') && personas.includes('bo-h750-enter') && personas.includes('PersonaProgressiveEditor'));
+ok('modo foco preserva campos canônicos e salvamento', ['draft.situation','draft.context','draft.channels','onSaveAndExit','onChange'].every(term => focus.includes(term)));
+ok('modo foco mostra somente etapa navegacional, sem percentual de completude',focus.includes('Passo ${step + 1} de 4') && !focus.includes('75%') && !focus.includes('foundationScore'));
+ok('modo foco usa largura do protótipo H7.51 e layout móvel',fs.readFileSync('src/views/persona-read-profile-h751.css','utf8').includes('width:min(100%,740px)') && focusCss.includes('@media(max-width:660px)'));
+ok('modo foco protege acesso por teclado e restaura a página',focus.includes('aria-modal="true"') && focus.includes("appRoot?.setAttribute('inert'") && focus.includes("appRoot?.removeAttribute('inert'"));
+
+ok('lateral reúne apenas organização e links contextuais', personas.includes('bo-h748-side-panel') && personas.includes('bo-h748-connections') && ['Relações','Evidências','Uso nos mapas'].every(label => personas.includes(label)));
+const proportionCss = fs.readFileSync('src/views/persona-proportions-h752.css','utf8');
+ok('H7.52 elimina limite fixo que deixava vazio o lado direito da tela', proportionCss.includes('.bo-h71-persona-detail .bo-h71-detail-body') && proportionCss.includes('max-width:none;') && proportionCss.includes('width:100%;') && proportionCss.includes('.bo-h71-persona-detail .bo-h724-overview-layout'));
+ok('H7.52 mantém duas colunas proporcionais em desktop', proportionCss.includes('grid-template-columns:minmax(0,1fr) clamp(286px,23vw,340px)') && proportionCss.includes('gap:clamp(18px,1.8vw,32px)'));
+ok('H7.52 organiza o painel abaixo do perfil em telas médias e pequenas', proportionCss.includes('@media(max-width:1150px)') && proportionCss.includes('@media(max-width:680px)') && proportionCss.includes('grid-template-columns:1fr;'));
+ok('H7.52 está ativado na tela de Personas', personas.includes("import './persona-proportions-h752.css';"));
+ok('atalhos de vínculos não se repetem abaixo do formulário', !guided.includes('bo-h746-followups'));
 ok('canais usam cartão editável', visual.includes("listField('channels'") && visual.includes('ListTextEditor'));
 ok('tags usam editor por chips', personas.includes('addTag') && personas.includes('removeTag'));
 ok('responsável possui sugestões', personas.includes('bo-h724-owner-options') && personas.includes('<datalist'));

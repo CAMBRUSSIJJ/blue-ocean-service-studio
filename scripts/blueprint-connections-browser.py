@@ -70,7 +70,7 @@ try:
         page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
         page.add_locator_handler(page.locator('.rt155-recovery-notice.show'),lambda n:n.locator('i').click())
         page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click()
-        page.get_by_role('button',name='Novo projeto',exact=True).click();page.get_by_label('Nome do projeto',exact=True).fill('Blueprint conectado QA');page.get_by_label('Serviço principal',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto',exact=True).click()
+        page.get_by_role('button',name='Novo projeto',exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click();page.get_by_label('Nome do projeto',exact=False).fill('Blueprint conectado QA');page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento');page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
         page.evaluate("""()=>window.BlueOceanRuntime.api('dataBridge').transact(g=>{g.entities.system||={};g.entities.system['qa-crm']={id:'qa-crm',type:'system',serviceId:g.service.id,title:'CRM de atendimento',createdAt:new Date().toISOString()};return g},'Recurso fictício')""")
         page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name='Em branco',exact=False).first.click()
         f=page.frame_locator('.bo-blueprint-reference-frame');saved(f)

@@ -19,7 +19,7 @@ const checks=[
  ['Público-alvo permanece acessível pela navegação do projeto',app.includes('openPrimaryLibraryPage') && app.includes('personas') && !shell.includes('Ferramentas e configurações')],
  ['Jornada em branco ou guiada',ws.includes('journeyStartTemplate') && ws.includes('Em branco') && (ws.includes('Com orientação') || ws.includes('starterTemplates.map'))],
  ['Jornada nova abre editor',ws.includes('setJourneyEditorOpen(true)')],
- ['Persona nova abre construtor',persona.includes("bo-workspace-create-page") && persona.includes('setCreateOpen(true)')],
+ ['Persona nova abre Modo Foco sem formulário intermediário',persona.includes("bo-workspace-create-page") && persona.includes('setNewFocusDraft(') && persona.includes('finishNewPersona') && !persona.includes('setCreateOpen(true)')],
  ['Jornada permite registrar descobertas',journey.includes('Registrar descoberta') && journey.includes('captureContextDuringJourney')],
  ['Pesquisa histórica preservada como código',fs.existsSync('src/services/research-studio.ts') && fs.existsSync('src/views/ResearchStudioView.tsx')],
  ['modelos antigos de pesquisa retirados do menu',!read('src/views/ProjectHomeView.tsx').includes("{ id: 'research', title: 'Pesquisa de serviço'")],
