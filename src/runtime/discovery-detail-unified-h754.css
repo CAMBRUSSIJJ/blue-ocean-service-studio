@@ -41,7 +41,12 @@
 .bo-h754-rail>.bo-h754-criteria .bo-h71-check-list>div:last-child{border-bottom:0}
 .bo-h754-rail>.bo-h754-criteria .bo-h71-check-list span{font-size:12px;line-height:1.5;color:#4e6176}
 .bo-h754-rail .bo-h754-summary{min-width:0}
-.bo-h754-rail .bo-h754-summary>:first-child{margin:0;width:100%;max-width:none;box-sizing:border-box}
+.bo-h754-rail .bo-h754-summary{width:100%;box-sizing:border-box;min-width:0;border:1px solid #dfe8f2;border-radius:10px;background:#fff;overflow:hidden}
+.bo-h754-rail .bo-h754-summary>summary{display:list-item;padding:13px 17px;font-size:12px;font-weight:650;color:#365a80;cursor:pointer}
+.bo-h754-rail .bo-h754-summary>summary:hover{background:#f5f9fd}
+.bo-h754-rail .bo-h754-summary>div{border-top:1px solid #e8edf5;min-width:0}
+.bo-h754-rail .bo-h754-summary>div> :first-child{margin:0;width:100%;max-width:none;box-sizing:border-box;border:0;box-shadow:none}
+.bo-h754-rail .bo-h754-summary>div>aside>div:has(>span:first-child),.bo-h754-rail .bo-h754-summary>div>aside>em{display:none}
 .bo-h754-rail .bo-h754-summary :is(p,span,small){overflow-wrap:anywhere}
 @media(max-width:1150px){
  :is(.bo-h73-job-detail,.bo-h74-pain-detail,.bo-h75-hypothesis-detail,.bo-h76-problems,.bo-h77-evidence) .bo-h754-overview-grid{grid-template-columns:minmax(0,1fr)}
