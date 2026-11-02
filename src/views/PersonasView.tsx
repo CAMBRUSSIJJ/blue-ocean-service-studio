@@ -298,7 +298,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       const withPersona = {
         ...current,
         entities:{...current.entities,persona:{...(current.entities?.persona ?? {}),[base.id]:{...base,serviceId:current.service.id}}},
-        service:{...current.service,updatedAt:now},
+        service: { ...current.service, updatedAt: now },
       };
       return updatePersonaProfile({graph:withPersona,personaId:base.id,draft:values,connectedIds:[],now});
     }, 'Personas H7.51: criar após concluir o Modo Foco');
