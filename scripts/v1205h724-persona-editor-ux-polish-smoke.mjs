@@ -14,11 +14,11 @@ const guided = fs.readFileSync('src/views/PersonaProgressiveEditor.tsx', 'utf8')
 ok('completude percentual não aparece no detalhe da Persona', !personas.includes('bo-h724-completeness-card') && !personas.includes('completenessChecks.map'));
 const focus = fs.readFileSync('src/views/PersonaFocusEditor.tsx','utf8');
 const focusCss = fs.readFileSync('src/views/persona-focus-h750.css','utf8');
-ok('criar Persona abre o modo foco por padrão', personas.includes('setFocusOpen(true)') && personas.includes('<PersonaFocusEditor'));
+ok('criar Persona abre modo foco sem página intermediária', personas.includes('setNewFocusDraft(') && personas.includes('finishNewPersona') && personas.includes('<PersonaFocusEditor') && !personas.includes('bo-p2-create-page'));
 ok('perfis existentes podem abrir modo foco sem perder editor completo', personas.includes('Modo foco') && personas.includes('bo-h750-enter') && personas.includes('PersonaProgressiveEditor'));
 ok('modo foco preserva campos canônicos e salvamento', ['draft.situation','draft.context','draft.channels','onSaveAndExit','onChange'].every(term => focus.includes(term)));
 ok('modo foco mostra somente etapa navegacional, sem percentual de completude',focus.includes('Passo ${step + 1} de 4') && !focus.includes('75%') && !focus.includes('foundationScore'));
-ok('modo foco usa cartão central de 650px responsivo',focusCss.includes('width:min(100%,650px)') && focusCss.includes('@media(max-width:660px)'));
+ok('modo foco usa largura do protótipo H7.51 e layout móvel',fs.readFileSync('src/views/persona-read-profile-h751.css','utf8').includes('width:min(100%,740px)') && focusCss.includes('@media(max-width:660px)'));
 ok('modo foco protege acesso por teclado e restaura a página',focus.includes('aria-modal="true"') && focus.includes("appRoot?.setAttribute('inert'") && focus.includes("appRoot?.removeAttribute('inert'"));
 
 ok('lateral reúne apenas organização e links contextuais', personas.includes('bo-h748-side-panel') && personas.includes('bo-h748-connections') && ['Relações','Evidências','Uso nos mapas'].every(label => personas.includes(label)));
