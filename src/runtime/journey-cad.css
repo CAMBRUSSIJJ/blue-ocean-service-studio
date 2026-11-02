@@ -387,3 +387,443 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 @media(max-width:760px){
   .cad-quick{max-height:calc(100dvh - 190px)}
 }
+
+
+/* H7.56 — Real Blueprint editor adapted from service_blueprint_editor.html.
+ * Visual adaptation only. All events remain connected to the existing CAD
+ * component actions, Service Graph, patch history and host persistence.
+ * The narrow palette is a real 64px dock: expansion overlays the canvas instead
+ * of clipping text, resizing the map, or creating a second sidebar. */
+.cad-shell.bo-h756-blueprint {
+ --cad-border:#e2e8f0;
+ --cad-muted:#64748b;
+ font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+ background:#f8fafc;
+ color:#17263d;
+}
+.bo-h756-blueprint .cad-header{
+ min-height:56px;
+ padding:8px clamp(14px,1.5vw,24px);
+ gap:9px;
+ flex-wrap:nowrap;
+ border-bottom:1px solid #e2e8f0;
+ background:#fff;
+}
+.bo-h756-blueprint .cad-header>[data-act="back"]{
+ flex:none;min-height:34px;
+ padding:5px 9px;
+ border:0;background:transparent;
+ border-radius:7px;color:#64748b;
+ font-size:12px;font-weight:650;
+}
+.bo-h756-blueprint .cad-header>[data-act="back"]:hover{
+ background:#f1f5f9;color:#1e3a5d;
+}
+.bo-h756-blueprint .bo-h756-crumb{
+ flex:none;
+ font-size:12px;
+ font-weight:550;
+ color:#64748b;
+ white-space:nowrap;
+}
+.bo-h756-blueprint .cad-header>input[data-f="title"]{
+ flex:0 1 320px;
+ width:auto;
+ min-width:110px;
+ max-width:320px;
+ min-height:34px;
+ margin:0;
+ padding:5px 8px;
+ border:1px solid transparent;
+ border-radius:7px;
+ font-size:14px;
+ font-weight:700;
+ color:#1e293b;
+ background:#fff;
+ box-shadow:none;
+ text-overflow:ellipsis;
+}
+.bo-h756-blueprint .cad-header>input[data-f="title"]:hover{border-color:#e2e8f0}
+.bo-h756-blueprint .cad-header>input[data-f="title"]:focus-visible{
+ border-color:#3b82f6;
+ outline:3px solid #bfdbfe;
+ outline-offset:1px;
+}
+.bo-h756-blueprint .bo-h756-save-badge{
+ flex:none;
+ display:inline-flex;
+ align-items:center;
+ gap:7px;
+ margin:0;
+ padding:5px 9px;
+ border-radius:999px;
+ border:1px solid #d1fae5;
+ background:#ecfdf5;
+ font-size:11px;
+ font-weight:650;
+ color:#047857;
+ white-space:nowrap;
+}
+.bo-h756-blueprint .bo-h756-save-badge::before{
+ content:"✓";
+ font-size:12px;
+}
+.bo-h756-blueprint .bo-h756-save-badge[data-save-phase="pending"]{
+ background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;
+}
+.bo-h756-blueprint .bo-h756-save-badge[data-save-phase="pending"]::before{content:"↻"}
+.bo-h756-blueprint .bo-h756-save-badge[data-save-phase="error"]{
+ background:#fef2f2;border-color:#fecaca;color:#b91c1c;
+}
+.bo-h756-blueprint .bo-h756-save-badge[data-save-phase="error"]::before{content:"!"}
+.bo-h756-blueprint .cad-view-label{
+ flex:none;
+ margin-left:auto;
+ display:flex;
+ align-items:center;
+ gap:7px;
+ color:#64748b;
+ font-size:12px;
+}
+.bo-h756-blueprint .cad-view-label select{
+ width:118px;
+ min-height:34px;
+ padding:6px 8px;
+ border-radius:7px;
+ font-size:12px;
+ background:#f8fafc;
+ border:1px solid #e2e8f0;
+ color:#334155;
+}
+.bo-h756-blueprint .cad-toolbar{
+ flex:none;
+ min-height:46px;
+ gap:7px;
+ padding:7px clamp(14px,1.4vw,22px);
+ border-bottom:1px solid #e2e8f0;
+ background:#fff;
+}
+.bo-h756-blueprint .cad-toolbar>button,
+.bo-h756-blueprint .cad-toolbar>details>summary{
+ font-size:12px;
+ min-height:32px;
+ padding:6px 10px;
+ border-radius:7px;
+}
+.bo-h756-blueprint .cad-toolbar [data-act="cad-library"]{
+ background:#2563eb;
+ color:#fff;
+ border-color:#2563eb;
+}
+.bo-h756-blueprint .cad-workspace:not(.is-library-hidden),
+.bo-h756-blueprint .cad-workspace.has-inspector:not(.is-library-hidden),
+.bo-h756-blueprint .cad-workspace.is-library-compact:not(.is-library-hidden),
+.bo-h756-blueprint .cad-workspace.is-library-compact.has-inspector:not(.is-library-hidden){
+ position:relative;
+ grid-template-columns:64px minmax(0,1fr);
+ gap:0;
+ overflow:hidden;
+ background:#fff;
+}
+.bo-h756-blueprint .cad-workspace.is-library-hidden,
+.bo-h756-blueprint .cad-workspace.is-library-hidden.has-inspector{
+ position:relative;
+ grid-template-columns:minmax(0,1fr);
+ background:#fff;
+}
+.bo-h756-blueprint .cad-library{
+ position:relative;
+ z-index:30;
+ justify-self:start;
+ width:64px;
+ height:100%;
+ min-height:0;
+ box-sizing:border-box;
+ padding:11px 7px;
+ overflow-x:hidden;
+ overflow-y:auto;
+ background:#fff;
+ border-right:1px solid #e2e8f0;
+ box-shadow:3px 0 12px rgba(15,23,42,.025);
+ transition:width .17s ease,box-shadow .17s ease;
+ scrollbar-width:none;
+}
+.bo-h756-blueprint .cad-library::-webkit-scrollbar{display:none}
+.bo-h756-blueprint .cad-library:hover,
+.bo-h756-blueprint .cad-library:focus-within{
+ width:min(266px,calc(100vw - 72px));
+ padding:11px 12px;
+ box-shadow:8px 0 25px rgba(15,23,42,.11);
+ scrollbar-width:thin;
+}
+.bo-h756-blueprint .bo-h756-palette-action{margin:0 0 13px;min-width:0}
+.bo-h756-blueprint .bo-h756-palette-action [data-act="cad-library"]{
+ display:block;
+ width:100%;
+ height:39px;
+ min-height:39px;
+ border:0;
+ border-radius:8px;
+ padding:7px 8px;
+ background:#2563eb;
+ color:#fff;
+ overflow:hidden;
+ white-space:nowrap;
+ text-overflow:clip;
+ text-align:left;
+ font-size:0;
+ font-weight:600;
+}
+.bo-h756-blueprint .bo-h756-palette-action [data-act="cad-library"]::before{
+ content:"+";
+ display:inline-grid;
+ place-items:center;
+ width:24px;
+ margin-right:8px;
+ font-size:22px;
+ line-height:1;
+ vertical-align:middle;
+}
+.bo-h756-blueprint .cad-library:hover .bo-h756-palette-action [data-act="cad-library"],
+.bo-h756-blueprint .cad-library:focus-within .bo-h756-palette-action [data-act="cad-library"]{
+ font-size:12px;
+}
+.bo-h756-blueprint .cad-library:hover .bo-h756-palette-action [data-act="cad-library"]::before,
+.bo-h756-blueprint .cad-library:focus-within .bo-h756-palette-action [data-act="cad-library"]::before{
+ content:"";
+ width:0;margin:0;
+}
+.bo-h756-blueprint .cad-library-head h2,
+.bo-h756-blueprint .cad-library-head [data-act="cad-toggle-library-mode"],
+.bo-h756-blueprint .cad-library .cad-search,
+.bo-h756-blueprint .cad-library .cad-library-filters,
+.bo-h756-blueprint .cad-library .cad-library-context,
+.bo-h756-blueprint .cad-library .cad-library-help,
+.bo-h756-blueprint .cad-library .cad-group-toggle,
+.bo-h756-blueprint .cad-library .cad-library-tabs button,
+.bo-h756-blueprint .cad-library .cad-lanes-panel{display:none!important}
+.bo-h756-blueprint .cad-library-group{
+ border:0;
+ margin:0;
+ padding:2px 0;
+}
+.bo-h756-blueprint .cad-components{
+ display:flex;
+ flex-direction:column;
+ gap:4px;
+}
+.bo-h756-blueprint .cad-library .cad-component-item{
+ margin:0;
+ min-height:41px;
+ width:100%;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+}
+.bo-h756-blueprint .cad-library .cad-component-item>.cad-favorite{display:none}
+.bo-h756-blueprint .cad-library .cad-components .cad-component-item>.cad-component-main{
+ display:flex;
+ align-items:center;
+ justify-content:flex-start;
+ width:100%;
+ min-width:0;
+ max-width:none;
+ min-height:41px;
+ padding:5px 7px;
+ border:1px solid transparent;
+ border-radius:8px;
+ background:#fff;
+ overflow:hidden;
+ white-space:nowrap;
+ cursor:grab;
+}
+.bo-h756-blueprint .cad-library .cad-component-main span{
+ flex:0 0 28px;
+ width:28px;height:28px;
+ display:grid;place-items:center;
+ margin:0;
+ border-radius:7px;
+ background:#eff6ff;
+ color:#2563eb;
+ font-size:17px;
+}
+.bo-h756-blueprint .cad-library .cad-component-main b,
+.bo-h756-blueprint .cad-library .cad-component-main small{display:none!important}
+.bo-h756-blueprint .cad-library:hover .cad-library-head h2,
+.bo-h756-blueprint .cad-library:focus-within .cad-library-head h2,
+.bo-h756-blueprint .cad-library:hover .cad-search,
+.bo-h756-blueprint .cad-library:focus-within .cad-search,
+.bo-h756-blueprint .cad-library:hover .cad-library-filters,
+.bo-h756-blueprint .cad-library:focus-within .cad-library-filters,
+.bo-h756-blueprint .cad-library:hover .cad-group-toggle,
+.bo-h756-blueprint .cad-library:focus-within .cad-group-toggle,
+.bo-h756-blueprint .cad-library:hover .cad-library-tabs button,
+.bo-h756-blueprint .cad-library:focus-within .cad-library-tabs button,
+.bo-h756-blueprint .cad-library:hover .cad-lanes-panel,
+.bo-h756-blueprint .cad-library:focus-within .cad-lanes-panel{display:revert!important}
+.bo-h756-blueprint .cad-library:hover .cad-library-tabs,
+.bo-h756-blueprint .cad-library:focus-within .cad-library-tabs{display:flex;flex-direction:row}
+.bo-h756-blueprint .cad-library:hover .cad-library-tabs button,
+.bo-h756-blueprint .cad-library:focus-within .cad-library-tabs button{font-size:12px}
+.bo-h756-blueprint .cad-library:hover .cad-group-toggle,
+.bo-h756-blueprint .cad-library:focus-within .cad-group-toggle{display:flex!important}
+.bo-h756-blueprint .cad-library:hover .cad-components .cad-component-item>.cad-component-main,
+.bo-h756-blueprint .cad-library:focus-within .cad-components .cad-component-item>.cad-component-main{
+ display:grid;
+ grid-template-columns:30px minmax(0,1fr);
+ grid-template-rows:auto auto;
+ justify-content:initial;
+ min-height:60px;
+ padding:9px 7px;
+ column-gap:9px;
+ border-color:transparent;
+ white-space:normal;
+}
+.bo-h756-blueprint .cad-library:hover .cad-component-main span,
+.bo-h756-blueprint .cad-library:focus-within .cad-component-main span{grid-row:1/span 2}
+.bo-h756-blueprint .cad-library:hover .cad-component-main b,
+.bo-h756-blueprint .cad-library:focus-within .cad-component-main b{
+ display:block!important;
+ min-width:0;
+ font-size:12px;
+ color:#334155;
+}
+.bo-h756-blueprint .cad-library:hover .cad-component-main small,
+.bo-h756-blueprint .cad-library:focus-within .cad-component-main small{
+ display:block!important;
+ min-width:0;
+ font-size:10px;
+ color:#8492a6;
+ white-space:normal;
+}
+.bo-h756-blueprint .cad-library .cad-component-main:hover{
+ border-color:#e2e8f0;
+ background:#f8fafc;
+}
+.bo-h756-blueprint .cad-main{position:relative;min-width:0;background:#f8fafc}
+.bo-h756-blueprint .cad-viewport{
+ background:#f8fafc;
+ background-image:none;
+}
+.bo-h756-blueprint #cad-svg .cad-stage-bg{fill:#fff;stroke:#e2e8f0;stroke-width:1.2}
+.bo-h756-blueprint #cad-svg .cad-stage-name{fill:#1e293b;font-weight:650}
+.bo-h756-blueprint #cad-svg .cad-subtitle{fill:#94a3b8;font-weight:700;letter-spacing:.07em}
+.bo-h756-blueprint #cad-svg .cad-lane-bg{fill:#fff;stroke:#e8edf4}
+.bo-h756-blueprint #cad-svg .cad-lane-name{fill:#334155;font-weight:650}
+.bo-h756-blueprint #cad-svg .cad-cell{stroke:#e2e8f0;stroke-width:1}
+.bo-h756-blueprint #cad-svg .cad-cell-add{opacity:.67}
+.bo-h756-blueprint #cad-svg .cad-cell-add rect{
+ fill:#fbfdff;stroke:#cbd5e1;stroke-width:1.5;stroke-dasharray:5 4;
+}
+.bo-h756-blueprint #cad-svg .cad-cell-add:hover rect,
+.bo-h756-blueprint #cad-svg .cad-cell-add:focus-visible rect{fill:#eff6ff;stroke:#60a5fa}
+.bo-h756-blueprint #cad-svg .cad-node-bg{
+ fill:#fff;stroke:#e2e8f0;stroke-width:1.25;
+ filter:drop-shadow(0 2px 3px rgba(15,23,42,.055));
+}
+.bo-h756-blueprint #cad-svg .cad-node-wrap.is-selected .cad-node-bg{stroke:#60a5fa;stroke-width:2;fill:#fff}
+.bo-h756-blueprint #cad-svg .cad-boundary{stroke:#94a3b8;stroke-width:1.5;stroke-dasharray:4 6}
+.bo-h756-blueprint #cad-svg .cad-boundary-name{fill:#64748b;stroke:#f8fafc}
+.bo-h756-blueprint .cad-workspace.has-inspector:not(.is-library-hidden),
+.bo-h756-blueprint .cad-workspace.is-library-hidden.has-inspector,
+.bo-h756-blueprint .cad-workspace.is-library-compact.has-inspector:not(.is-library-hidden){
+ grid-template-columns:64px minmax(0,1fr);
+}
+.bo-h756-blueprint .cad-workspace.is-library-hidden.has-inspector{grid-template-columns:minmax(0,1fr)}
+.bo-h756-blueprint .cad-inspector{
+ display:block;
+ position:absolute;
+ z-index:45;
+ top:0;right:0;bottom:0;
+ width:min(340px,calc(100vw - 80px));
+ padding:0 20px 20px;
+ overflow-y:auto;
+ border-left:1px solid #e2e8f0;
+ background:#fff;
+ box-shadow:-10px 0 30px rgba(15,23,42,.07);
+ animation:bo-h756-slide .16s ease-out;
+}
+@keyframes bo-h756-slide{from{transform:translateX(18px);opacity:.75}to{transform:translateX(0);opacity:1}}
+.bo-h756-blueprint .bo-h756-properties-head{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:12px;
+ position:sticky;
+ top:0;
+ z-index:2;
+ min-height:64px;
+ padding:13px 0;
+ margin-bottom:14px;
+ border-bottom:1px solid #eef2f7;
+ background:#fff;
+}
+.bo-h756-blueprint .bo-h756-properties-head strong{font-size:14px;color:#1e293b}
+.bo-h756-blueprint .bo-h756-properties-head [data-act="cad-close"]{
+ margin:0;
+ min-width:32px;
+ width:32px;height:32px;
+ padding:0;
+ border:0;
+ background:#f8fafc;
+ color:#64748b;
+ font-size:0;
+}
+.bo-h756-blueprint .bo-h756-properties-head [data-act="cad-close"]::before{
+ content:"×";font-size:20px;line-height:1;
+}
+.bo-h756-blueprint .cad-inspector #cad-component-form>h2{
+ font-size:15px;
+ color:#334155;
+}
+.bo-h756-blueprint .cad-inspector .cad-inspector-group{
+ border:0;
+ border-top:1px solid #eef2f7;
+ border-radius:0;
+ padding:16px 0 6px;
+ background:transparent;
+}
+.bo-h756-blueprint .cad-inspector .cad-inspector-group h3{
+ font-size:11px;
+ color:#64748b;
+ letter-spacing:.07em;
+ text-transform:uppercase;
+}
+.bo-h756-blueprint .cad-inspector input,
+.bo-h756-blueprint .cad-inspector textarea,
+.bo-h756-blueprint .cad-inspector select{
+ border-color:#cbd5e1;
+ border-radius:8px;
+ font-size:13px;
+}
+.bo-h756-blueprint .cad-inspector .cad-inspector-advanced{border-color:#e2e8f0}
+.bo-h756-blueprint .cad-inspector footer{
+ bottom:-20px;
+ padding:13px 0;
+ background:#fff;
+}
+.bo-h756-blueprint .cad-footer{
+ flex:none;
+ padding:8px 16px;
+ min-height:34px;
+ border-top:1px solid #e2e8f0;
+ background:#fff;
+ color:#64748b;
+}
+@media(max-width:760px){
+ .bo-h756-blueprint .cad-header{flex-wrap:wrap;padding:10px;gap:7px}
+ .bo-h756-blueprint .cad-header>input[data-f="title"]{flex:1 1 150px;max-width:none}
+ .bo-h756-blueprint .bo-h756-crumb{display:none}
+ .bo-h756-blueprint .cad-view-label{margin-left:0}
+ .bo-h756-blueprint .cad-workspace,
+ .bo-h756-blueprint .cad-workspace.has-inspector,
+ .bo-h756-blueprint .cad-workspace.is-library-hidden,
+ .bo-h756-blueprint .cad-workspace.is-library-hidden.has-inspector{display:block;overflow:visible}
+ .bo-h756-blueprint .cad-library,.bo-h756-blueprint .cad-inspector{display:none}
+ .bo-h756-blueprint .cad-main{min-height:0}
+ .bo-h756-blueprint .cad-toolbar{min-height:0;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+ .bo-h756-blueprint .cad-library{transition:none}
+ .bo-h756-blueprint .cad-inspector{animation:none}
+}
