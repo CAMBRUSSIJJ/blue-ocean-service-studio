@@ -63,5 +63,6 @@ assert(app.includes("sessionStorage.setItem('bo-h749-direct-map-intent', intent)
 assert(mapWorkspace.includes("const existingId = graph.service.journeyIds.find") && mapWorkspace.includes("createJourney('blank'"), 'existing template maps are reused without duplicating canonical Journeys');
 assert(home.includes('onCreatingChange?.(Boolean(dialog))') && app.includes('bo-h749-creation-focus'), 'creation focuses the navigation without permanently changing preferences');
 assert(layout.includes('grid-template-columns:minmax(0,1fr) minmax(282px,320px)') && layout.includes('@media(max-width:600px)'), 'creation spacing is wide and responsive');
+assert(layout.includes('.bo-h749-creation-focus > aside.bo-h724-sidebar{') && layout.includes('display:none!important;'), 'focused creation hides the complete sidebar instead of clipping its contents');
 assert(persona.includes("sessionStorage.getItem('bo-workspace-create-page')"), 'Persona create intent is consumed by the dedicated page');
 console.log('H7.44 project creation and deletion: PASS');
