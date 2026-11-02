@@ -53,6 +53,15 @@ try:
         expect(detail).to_be_visible()
         read=detail.locator('[data-persona-read-profile="1"]')
         expect(read).to_be_visible()
+        proportions=page.evaluate("""() => {
+          const body=document.querySelector('.bo-h71-detail-body');
+          const grid=document.querySelector('.bo-h724-overview-layout');
+          const main=document.querySelector('.bo-h724-overview-main');
+          const rail=document.querySelector('.bo-h748-persona-aside');
+          return { body:body.getBoundingClientRect().width, grid:grid.getBoundingClientRect().width,
+            main:main.getBoundingClientRect().width, rail:rail.getBoundingClientRect().width }
+        }""")
+        check('H7.52 fills desktop content width and keeps a usable sidebar',proportions['grid']>=proportions['body']*.9 and proportions['main']>700 and proportions['rail']>=285)
         check('After saving, Persona is a read-only profile rather than another form',read.get_by_text('Resolver a necessidade com previsibilidade').count()==1 and detail.locator('[data-persona-progressive-editor]').count()==0)
         check('Canonical fields persist',page.evaluate("() => Object.values(window.BlueOceanRuntime.api('dataBridge').get().entities.persona || {}).some(p => p.context === 'Na rotina de trabalho, pelo celular' && p.channels?.includes('WhatsApp'))"))
         read.get_by_role('button',name='Editar',exact=False).first.click()
