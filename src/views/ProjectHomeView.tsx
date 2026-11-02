@@ -170,7 +170,7 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
 
   // The creation experience is a dedicated page, not another modal layered over the project list.
-  if (dialog) return <section className="bo-h744-create-page" data-project-creation-page="H7.44" aria-labelledby="bo-h744-create-title">
+  if (dialog) return <section className="bo-h744-create-page bo-h749-create-page" data-project-creation-page="H7.44" aria-labelledby="bo-h744-create-title">
     <header className="bo-h744-create-top">
       <button type="button" className="bo-h744-back" onClick={() => setDialog(null)}><ArrowLeft size={17}/> Voltar aos projetos</button>
       <span>Projetos <b>›</b> Novo projeto</span>
