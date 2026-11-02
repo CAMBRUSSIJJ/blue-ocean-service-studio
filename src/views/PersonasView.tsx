@@ -18,8 +18,6 @@ import { PersonaEvidenceTrace } from './PersonaEvidenceTrace';
 import { createDiscoveryEntity } from '../services/discovery-workspace';
 import { contextEntityTitle, contextEntityUsage, listContextEntities } from '../services/context-library';
 import {
-  ADVANCED_PERSONA_SECTIONS,
-  SIMPLE_PERSONA_SECTIONS,
   switchPersonaDepth,
   visiblePersonaSections,
   buildPersonaStudioReport,
