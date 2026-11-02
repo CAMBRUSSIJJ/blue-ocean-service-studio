@@ -134,37 +134,16 @@
   outline:3px solid #3c7dc5;
   outline-offset:3px;
 }
-/* Creation mode keeps the project nav out of the user's decision. */
+/* The creation page is an intentional full-screen flow.
+   H7.49's 68px partial sidebar exposed clipped text and logo on Linux/Firefox.
+   Hide the *whole* nav while creating; navigation and cancel remain in the page. */
 .bo-h749-creation-focus > aside.bo-h724-sidebar{
-  width:68px!important;
-  min-width:68px!important;
-  max-width:68px!important;
-}
-.bo-h749-creation-focus .bo1163-service-context,
-.bo-h749-creation-focus .bo-h701-nav-section,
-.bo-h749-creation-focus .bo1205h3-sidebar-bottom,
-.bo-h749-creation-focus .rt182-host-footer,
-.bo-h749-creation-focus .bo-h701-sidebar-wave{
   display:none!important;
 }
-.bo-h749-creation-focus .bo-h701-sidebar-nav{
-  padding:14px 10px!important;
-  flex:1;
-}
-.bo-h749-creation-focus .bo-h701-dashboard-link{
-  display:flex!important;
-  justify-content:center;
+.bo-h749-creation-focus > .flex-1{
+  flex:1 1 auto;
   width:100%;
-}
-.bo-h749-creation-focus .bo-h701-dashboard-link .hidden{
-  display:none!important;
-}
-.bo-h749-creation-focus .rt182-host-brand{
-  min-height:64px;
-  padding:12px!important;
-}
-.bo-h749-creation-focus .rt182-host-brand > div:nth-child(2){
-  display:none!important;
+  min-width:0;
 }
 .bo-h749-creation-focus .bo1187-dashboard-header__actions{
   visibility:hidden;
@@ -192,7 +171,6 @@
   .bo-h749-create-page .bo-h744-option-grid{grid-template-columns:1fr}
   .bo-h749-create-page .bo-h744-option-grid button{min-height:118px}
   .bo-h749-create-page .bo-h744-create-aside{padding:19px}
-  .bo-h749-creation-focus > aside.bo-h724-sidebar{display:none!important}
 }
 @media(prefers-reduced-motion:reduce){
   .bo-h749-create-page .bo-h744-option-grid button{transition:none}
