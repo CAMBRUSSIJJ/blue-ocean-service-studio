@@ -441,8 +441,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       <div className="bo-h71-detail-body">
         {detailTab === 'overview' && <div className="bo-h724-overview-layout">
           <main className="bo-h724-overview-main">
-            {profileReadOnly ? <PersonaReadProfile draft={draft} onEditStep={editInFocus} onNavigate={setDetailTab}
-              counts={{relations:connectedIds.filter(id => !graph.entities?.evidence?.[id]).length,evidence:evidenceConnections.length,usage:usage.instances}}/> : showVisualComposer ? <>
+            {profileReadOnly ? <PersonaReadProfile draft={draft} onEditStep={editInFocus}/> : showVisualComposer ? <>
               <div className="bo-h746-composer-back"><button type="button" onClick={() => { setShowVisualComposer(false); setComposerStartLibrary(false); }}>← Voltar ao preenchimento guiado</button></div>
               <PersonaVisualEditor draft={draft} onChange={setDraft} onChangeMode={changeDetailMode} initialShowLibrary={composerStartLibrary}
                 counts={{ need:completenessReport.connectionCounts.need, pain:completenessReport.connectionCounts.pain,
