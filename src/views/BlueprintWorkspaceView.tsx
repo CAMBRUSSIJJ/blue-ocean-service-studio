@@ -1,5 +1,5 @@
 import { ServiceMapsLibrary } from './ServiceMapsLibrary';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, LayoutTemplate, Plus, Table2, Wrench, X } from '../design-system/icons';
 import { BlueOceanObjectIcon, type BlueOceanObjectKind } from '../design-system/blue-ocean-objects';
 import type { StudioController } from '../state/useStudioController';
