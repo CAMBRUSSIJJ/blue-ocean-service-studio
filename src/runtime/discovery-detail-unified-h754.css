@@ -1,0 +1,60 @@
+/* Blue Ocean H7.54 — shared detail composition based on Necessidades.
+   Limit to Discovery overviews; do not interfere with maps, canvases or their editors. */
+:is(.bo-h72-need-detail,.bo-h73-job-detail,.bo-h74-pain-detail,.bo-h75-hypothesis-detail,.bo-h76-problems,.bo-h77-evidence)
+ .bo-h71-detail-body{width:100%;max-width:none;min-width:0;padding:24px clamp(20px,2vw,34px) 96px;box-sizing:border-box}
+:is(.bo-h73-job-detail,.bo-h74-pain-detail,.bo-h75-hypothesis-detail,.bo-h76-problems,.bo-h77-evidence)
+ .bo-h754-overview-grid{display:grid;grid-template-columns:minmax(0,2.55fr) minmax(300px,1fr);gap:clamp(18px,2vw,28px);align-items:start;width:100%;max-width:none;min-width:0;margin:0;padding:0}
+.bo-h754-overview-grid>.bo-h71-editor-card{min-width:0;width:100%;margin:0;box-sizing:border-box}
+.bo-h754-overview-grid>.bo-h71-editor-card .bo-h71-form,
+.bo-h754-overview-grid>.bo-h71-editor-card .bo-h71-fields{min-width:0;width:100%;box-sizing:border-box}
+.bo-h754-overview-grid .bo-h71-form.two-col,
+.bo-h754-overview-grid .bo-h71-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 18px}
+.bo-h754-overview-grid .bo-h71-form.two-col>.wide,
+.bo-h754-overview-grid .bo-h71-fields>.full{grid-column:1/-1}
+.bo-h754-overview-grid :is(input,select,textarea){box-sizing:border-box;max-width:100%;min-width:0;width:100%}
+.bo-h754-overview-grid .bo-h71-editor-card>header{min-height:57px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bo-h754-overview-grid .bo-h71-editor-card>header small{font-size:10px;font-weight:750;letter-spacing:.06em;color:#677d98}
+.bo-h754-overview-grid .bo-h71-editor-card>header strong,
+.bo-h754-overview-grid .bo-h71-editor-card>header h2{font-size:14px;font-weight:700;line-height:1.4}
+.bo-h754-overview-grid .bo-h71-editor-card>.bo-h71-form,
+.bo-h754-overview-grid .bo-h71-editor-card>.bo-h71-fields{padding:clamp(18px,2vw,26px)}
+.bo-h754-overview-grid .bo-h71-form label,
+.bo-h754-overview-grid .bo-h71-fields label{min-width:0}
+.bo-h754-overview-grid .bo-h71-form label>span,
+.bo-h754-overview-grid .bo-h71-fields label>span{font-size:12px;font-weight:650;color:#36506f}
+.bo-h754-overview-grid .bo-h71-form input,
+.bo-h754-overview-grid .bo-h71-form select,
+.bo-h754-overview-grid .bo-h71-form textarea,
+.bo-h754-overview-grid .bo-h71-fields input,
+.bo-h754-overview-grid .bo-h71-fields select,
+.bo-h754-overview-grid .bo-h71-fields textarea{font-size:13px;line-height:1.55;border-radius:8px;border:1px solid #d4e0ee;background:#fff;padding:11px 12px}
+.bo-h754-overview-grid .bo-h71-form textarea,
+.bo-h754-overview-grid .bo-h71-fields textarea{min-height:92px;resize:vertical}
+.bo-h754-overview-grid :is(input,select,textarea):focus-visible{outline:3px solid #b9d7f4;outline-offset:1px;border-color:#4486c2}
+.bo-h754-rail{display:flex;flex-direction:column;min-width:0;gap:22px}
+.bo-h754-rail>.bo-h71-editor-card{min-width:0;width:100%;margin:0;box-sizing:border-box;border:1px solid #e0e8f2;background:#fff;border-radius:11px;overflow:hidden}
+.bo-h754-rail>.bo-h754-organize>.bo-h71-form{display:flex;flex-direction:column;gap:15px;padding:20px}
+.bo-h754-rail>.bo-h754-organize>.bo-h71-form label{display:flex;flex-direction:column;gap:7px}
+.bo-h754-rail>.bo-h754-organize>.bo-h71-form label>span{font-size:12px;font-weight:650}
+.bo-h754-rail>.bo-h754-criteria>.bo-h71-check-list{padding:10px 14px 12px}
+.bo-h754-rail>.bo-h754-criteria .bo-h71-check-list>div{padding:9px 2px;border-bottom:1px solid #edf1f5;display:flex;align-items:flex-start;gap:8px;min-width:0}
+.bo-h754-rail>.bo-h754-criteria .bo-h71-check-list>div:last-child{border-bottom:0}
+.bo-h754-rail>.bo-h754-criteria .bo-h71-check-list span{font-size:12px;line-height:1.5;color:#4e6176}
+.bo-h754-rail .bo-h754-summary{min-width:0}
+.bo-h754-rail .bo-h754-summary>:first-child{margin:0;width:100%;max-width:none;box-sizing:border-box}
+.bo-h754-rail .bo-h754-summary :is(p,span,small){overflow-wrap:anywhere}
+@media(max-width:1150px){
+ :is(.bo-h73-job-detail,.bo-h74-pain-detail,.bo-h75-hypothesis-detail,.bo-h76-problems,.bo-h77-evidence) .bo-h754-overview-grid{grid-template-columns:minmax(0,1fr)}
+ .bo-h754-rail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:16px}
+ .bo-h754-rail>.bo-h754-summary{grid-column:1/-1}
+}
+@media(max-width:700px){
+ .bo-h754-rail{display:flex;flex-direction:column}
+ .bo-h754-overview-grid .bo-h71-form.two-col,
+ .bo-h754-overview-grid .bo-h71-fields{grid-template-columns:minmax(0,1fr)}
+ .bo-h754-overview-grid .bo-h71-form.two-col>.wide,
+ .bo-h754-overview-grid .bo-h71-fields>.full{grid-column:auto}
+ :is(.bo-h72-need-detail,.bo-h73-job-detail,.bo-h74-pain-detail,.bo-h75-hypothesis-detail,.bo-h76-problems,.bo-h77-evidence) .bo-h71-detail-body{padding:17px 14px 90px}
+ .bo-h754-overview-grid .bo-h71-editor-card>.bo-h71-form,
+ .bo-h754-overview-grid .bo-h71-editor-card>.bo-h71-fields{padding:17px}
+}
