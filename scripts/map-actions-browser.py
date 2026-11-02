@@ -47,10 +47,10 @@ def flow(page, width):
     page.get_by_label('Nome do projeto',exact=False).fill('Harmonia dos mapas')
     page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Atendimento')
     page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
-    expect(page.locator('[data-project-shell-section="overview"]')).to_be_visible()
-    if width <= 760:
-        page.get_by_role('button', name='Abrir navegação', exact=True).click()
-    page.get_by_role('button', name='Abrir Mapas do serviço', exact=True).click()
+    # H7.49 opens the template Journey directly; navigate back to its map library.
+    f = page.frame_locator('.bo-blueprint-reference-frame')
+    expect(f.get_by_role('button', name='Voltar para mapas do serviço', exact=True)).to_be_visible(timeout=25000)
+    f.get_by_role('button', name='Voltar para mapas do serviço', exact=True).click()
     pane = page.locator('[data-service-map-library]')
     expect(pane).to_be_visible()
     cards = pane.locator('.bo-h724-journey-card')
