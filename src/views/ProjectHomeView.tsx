@@ -187,7 +187,7 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
             <strong>{item.title}</strong><small>{item.detail}</small><em>{selectedIntent === item.id ? 'Selecionado ✓' : 'Selecionar →'}</em>
           </button>)}</div>
         </fieldset>
-        <p className="bo-h744-create-explanation">Seu ponto de partida não limita o projeto. Personas, mapas, evidências e Whiteboards compartilham os mesmos dados do serviço.</p>
+        <p className="bo-h744-create-explanation">Seu ponto de partida não limita o projeto. Projeto e serviço são conceitos separados: o projeto organiza o trabalho; o serviço conecta Personas, mapas e evidências.</p>
       </main>
       <aside className="bo-h744-create-aside">
         <h2>Defina seu projeto</h2>
