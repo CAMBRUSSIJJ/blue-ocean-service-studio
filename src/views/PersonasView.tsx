@@ -7,6 +7,7 @@ import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
 import { PersonaVisualEditor } from './PersonaVisualEditor';
 import { PersonaProgressiveEditor } from './PersonaProgressiveEditor';
+import { PersonaSplitBuilder, type PersonaBuilderNode } from './PersonaSplitBuilder';
 import { PersonaFocusEditor } from './PersonaFocusEditor';
 import { PersonaReadProfile } from './PersonaReadProfile';
 import './persona-read-profile-h751.css';
@@ -154,6 +155,8 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [focusOpen, setFocusOpen] = useState(false);
   const [focusInitialStep, setFocusInitialStep] = useState(0);
   const [profileReadOnly, setProfileReadOnly] = useState(true);
+  const [splitOpen, setSplitOpen] = useState(false);
+  const [newGuided, setNewGuided] = useState(false);
   const [newFocusDraft, setNewFocusDraft] = useState<PersonaProfileDraft | null>(null);
   const [composerStartLibrary, setComposerStartLibrary] = useState(false);
   const [draft, setDraft] = useState<PersonaProfileDraft | null>(null);
@@ -280,21 +283,21 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     changeViewMode(view.mode==='table'?'table':'cards');setSavedViewsOpen(false);
   };
 
-  const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setShowVisualComposer(false); setFocusOpen(false); setFocusInitialStep(0); setProfileReadOnly(true); setComposerStartLibrary(false); setMenuId(null); };
-  const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); setShowVisualComposer(false); setFocusOpen(false); setProfileReadOnly(true); setQuickCreateKind(null); setQuickCreateTitle(''); };
+  const openPersona = (id: string) => { setSplitOpen(false); setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setShowVisualComposer(false); setFocusOpen(false); setFocusInitialStep(0); setProfileReadOnly(true); setComposerStartLibrary(false); setMenuId(null); };
+  const closePersona = () => { setSplitOpen(false); setSelectedId(null); setDraft(null); setDetailTab('overview'); setShowVisualComposer(false); setFocusOpen(false); setProfileReadOnly(true); setQuickCreateKind(null); setQuickCreateTitle(''); };
 
   const startNewPersona = () => {
     const blank = createDiscoveryEntity({graph, kind:'persona', title:''});
     setNewFocusDraft(personaProfileFromEntity(blank));
     setMenuId(null);
   };
-  const cancelNewPersona = () => {
+  const cancelNewPersona = (hasConnections = false) => {
     if (!newFocusDraft) return;
-    const filled = [newFocusDraft.title,newFocusDraft.description,newFocusDraft.primaryGoal,newFocusDraft.situation,newFocusDraft.context,...newFocusDraft.channels].some(value => value.trim());
+    const filled = hasConnections || [newFocusDraft.title,newFocusDraft.description,newFocusDraft.primaryGoal,newFocusDraft.situation,newFocusDraft.context,...newFocusDraft.channels].some(value => value.trim());
     if (filled && !window.confirm('Descartar a Persona ainda não criada?')) return;
-    setNewFocusDraft(null);
+    setNewFocusDraft(null); setNewGuided(false);
   };
-  const finishNewPersona = () => {
+  const finishNewPersona = (nodes: PersonaBuilderNode[] = []) => {
     if (!newFocusDraft?.title.trim()) return;
     const values = newFocusDraft;
     const now = new Date().toISOString();
@@ -305,9 +308,11 @@ export function PersonasView({ studio }: { studio: StudioController }) {
         entities:{...current.entities,persona:{...(current.entities?.persona ?? {}),[base.id]:{...base,serviceId:current.service.id}}},
         service: { ...current.service, updatedAt: now },
       };
-      return updatePersonaProfile({graph:withPersona,personaId:base.id,draft:values,connectedIds:[],now});
+      let next = updatePersonaProfile({graph:withPersona,personaId:base.id,draft:values,connectedIds:[],now});
+      for (const node of nodes) next = changePersonaEcosystem(next, base.id, values, buildPersonaStudioReport(next, base.id)?.connections.map(item => item.id) || [], { type: 'create', kind: node.kind, title: node.title, id: `${node.kind}-${node.id}` }, now);
+      return next;
     }, 'Personas H7.51: criar após concluir o Modo Foco');
-    setNewFocusDraft(null);
+    setNewFocusDraft(null); setNewGuided(false);
     setSelectedId(base.id);
     setDetailTab('overview');
     setProfileReadOnly(true);
@@ -417,7 +422,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       || JSON.stringify([...connectedIds].sort()) !== JSON.stringify(savedConnectedIds);
     const visibleTags = tagValues.slice(0, 3);
     const editInFocus = (step = 0) => { setFocusInitialStep(step); setFocusOpen(true); };
-    if (detailTab === 'ecosystem') {
+    if (detailTab === 'ecosystem' || splitOpen) {
       const canEdit = runtimeApi<{ can?(action: string): boolean }>('collaboration')?.can?.('edit') !== false;
       const change = (mutation: PersonaEcosystemChange) => {
         if (!canEdit) throw new Error('Este perfil está em modo somente leitura.');
@@ -427,10 +432,14 @@ export function PersonasView({ studio }: { studio: StudioController }) {
         const tags = stringList([tagsText, tagEntry].filter(Boolean).join(','));
         setGraph(current => patchPersonaMeta(changePersonaEcosystem(current, selected.id, draft, connectedIds, operation), selected.id, owner, tags), 'Persona: atualizar ecossistema');
       };
+      if (splitOpen) return <PersonaSplitBuilder draft={draft} onChange={setDraft} existing readOnly={!canEdit}
+        connections={relationOptions.filter(item => connectedIds.includes(item.id) && (item.kind === 'pain' || item.kind === 'need')).map(item => ({id:item.id,kind:item.kind as 'pain' | 'need',title:item.title}))}
+        onAdd={(kind,title)=>change({type:'create',kind,title})} onRemove={id=>change({type:'unlink',id})}
+        onSave={()=>{savePersona();setSplitOpen(false);}} onExit={()=>setSplitOpen(false)}/>;
       return <PersonaEcosystem key={selected.id} graph={graph} persona={selected} draft={draft} options={relationOptions}
         connectedIds={connectedIds} dirty={isDirty} readOnly={!canEdit} saveStatus={studio.saveStatus}
         onChange={change} onSave={savePersona} onBack={closePersona}
-        onNavigate={area => { if (area === 'creation') { setProfileReadOnly(false); setDetailTab('overview'); }
+        onNavigate={area => { if (area === 'creation') { setSplitOpen(true); }
           else { if (area === 'overview') setProfileReadOnly(true); setDetailTab(area); } }}
         onOpenMap={(kind, id) => { if (isDirty) savePersona(); openServiceObject(kind, id); }}/>
     }
@@ -438,7 +447,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       <header className="bo-h71-detail-head bo-h724-detail-head">
         <button type="button" className="bo-h71-back" onClick={closePersona}><ArrowLeft size={16}/> Personas</button>
         <div className="bo-h71-detail-title bo-h724-detail-title"><span className="bo-h71-avatar bo-h724-avatar"><UserRound size={20}/></span><div><small>PERSONA</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Complete o perfil para documentar quem vive essa experiência.'}</p><div className="bo-h724-persona-meta"><span className="mode">{draft.mode === 'professional' ? 'Persona avançada' : 'Persona simples'}</span>{visibleTags.map((tag) => <span key={tag}>{tag}</span>)}{tagValues.length > visibleTags.length && <span>+{tagValues.length - visibleTags.length}</span>}</div></div></div>
-        <div className="bo-h724-detail-tools"><div className="bo-h751-read-actions"><button type="button" className="bo-h750-enter" onClick={() => editInFocus(0)}>Modo foco</button>{profileReadOnly && <button type="button" className="primary" onClick={() => editInFocus(0)}>Editar perfil <span aria-hidden="true">→</span></button>}</div><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Alterações pendentes' : 'Tudo salvo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" onClick={() => { setProfileReadOnly(false); setDetailTab('overview'); setMenuId(null); }}>Editor completo</button><button type="button" className="bo-p2-persona-customize-tab" onClick={() => { setProfileReadOnly(false); setShowDetailCustomize(true); setDetailTab('overview'); setMenuId(null); }}>Personalizar interface</button><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
+        <div className="bo-h724-detail-tools"><div className="bo-h751-read-actions"><button type="button" className="bo-h750-enter" onClick={() => editInFocus(0)}>Modo foco</button>{profileReadOnly && <button type="button" className="primary" onClick={() => setSplitOpen(true)}>Editar perfil <span aria-hidden="true">→</span></button>}</div><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Alterações pendentes' : 'Tudo salvo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" onClick={() => { setProfileReadOnly(false); setDetailTab('overview'); setMenuId(null); }}>Editor completo</button><button type="button" className="bo-p2-persona-customize-tab" onClick={() => { setProfileReadOnly(false); setShowDetailCustomize(true); setDetailTab('overview'); setMenuId(null); }}>Personalizar interface</button><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
       </header>
 
       <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Persona">
@@ -666,7 +675,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       {hasSearchOrFilter ? <button type="button" onClick={() => { setQuery(''); setFilter('all'); }}>Limpar busca e filtros</button> : <button type="button" onClick={startNewPersona}><Plus size={14}/> Criar persona</button>}
     </div>}
 
-    {newFocusDraft && <PersonaFocusEditor key="new-persona" draft={newFocusDraft} onChange={setNewFocusDraft} onExit={cancelNewPersona} onSaveAndExit={finishNewPersona}/>}
+    {newFocusDraft && (newGuided ? <PersonaFocusEditor key="new-persona" draft={newFocusDraft} onChange={setNewFocusDraft} onExit={() => setNewGuided(false)} onSaveAndExit={() => finishNewPersona()}/> : <PersonaSplitBuilder draft={newFocusDraft} onChange={setNewFocusDraft} onExit={cancelNewPersona} onSave={finishNewPersona} onGuided={() => setNewGuided(true)}/>)}
     {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER PERSONA</small><h2>Remover “{contextEntityTitle(graph.entities?.persona?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações existentes serão desvinculadas do Service Graph.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removePersona(deleteId)}>Remover Persona</button></footer></div></div>}
   </section>;
 }

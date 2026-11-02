@@ -239,7 +239,8 @@
     "maps:flow:browser": "python3 scripts/service-map-flow-browser.py",
     "blocksuite:build": "npm --prefix integrations/blocksuite install --no-audit --no-fund --package-lock=false && npm --prefix integrations/blocksuite run build",
     "persona:ecosystem:test": "node --experimental-strip-types scripts/persona-ecosystem-test.mjs",
-    "persona:ecosystem:browser": "python3 scripts/persona-ecosystem-browser.py"
+    "persona:ecosystem:browser": "python3 scripts/persona-ecosystem-browser.py",
+    "persona:split:browser": "python3 scripts/persona-split-browser.py"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",

@@ -71,6 +71,7 @@ jobs:
       - run: python -m pip install playwright pillow
       - run: python -m playwright install --with-deps chromium
       - run: npm run e2e:visual
+      - run: npm run persona:split:browser
       - run: npm run persona:ecosystem:browser
       - name: Armazenar evidências visuais
         if: always()

@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""Reference Persona ecosystem against the real UI, canonical graph and persistence."""
+import functools, json, os, shutil, threading
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from playwright.sync_api import sync_playwright, expect
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT/'artifacts/persona-ecosystem'
+OUT.mkdir(parents=True, exist_ok=True)
+class Quiet(SimpleHTTPRequestHandler):
+    def log_message(self, *_): pass
+    def copyfile(self, source, output):
+        try: super().copyfile(source, output)
+        except (BrokenPipeError, ConnectionResetError): pass
+server=ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT/'dist')))
+threading.Thread(target=server.serve_forever,daemon=True).start()
+checks=[]
+def check(label, value=True):
+    assert value,label
+    checks.append(label); print('PASS '+label,flush=True)
+def graph(page): return page.evaluate("()=>window.BlueOceanRuntime.api('dataBridge').get()")
+def audit(page,label):
+    page.add_script_tag(content=(ROOT/'node_modules/axe-core/axe.min.js').read_text())
+    violations=page.evaluate("async()=>{const r=await axe.run('[data-persona-ecosystem]',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});return r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))}")
+    (OUT/f'{label}-axe.json').write_text(json.dumps(violations,indent=2))
+    check('Accessible ecosystem on '+label,not violations)
+try:
+    with sync_playwright() as pw:
+        browser=pw.chromium.launch(headless=True,executable_path=os.environ.get('CHROMIUM_PATH') or shutil.which('chromium'),args=['--no-sandbox','--disable-dev-shm-usage'])
+        page=browser.new_page(viewport={'width':1536,'height':1100})
+        errors=[];page.on('pageerror',lambda error:errors.append(str(error)))
+        page.goto(f'http://127.0.0.1:{server.server_port}',wait_until='networkidle')
+        page.get_by_role('button',name='Abrir workspace local sem conta').click()
+        page.get_by_role('button',name='Novo projeto',exact=True).click()
+        page.locator('[data-project-creation-page] .bo-h744-option-grid button').nth(1).click()
+        page.get_by_label('Nome do projeto',exact=False).fill('Ecossistema QA')
+        page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
+        split=page.locator('[data-persona-split-builder="1"]')
+        expect(split).to_be_visible()
+        check('New Persona starts in the real split builder',not graph(page)['entities'].get('persona'))
+        split.get_by_label('Adicionar dor',exact=True).fill('Rascunho descartável');split.get_by_label('Adicionar dor',exact=True).press('Enter')
+        page.once('dialog',lambda dialog:dialog.accept())
+        split.get_by_role('button',name='Voltar do editor de Persona',exact=True).click()
+        check('Cancel discards staged connections without orphan records',not graph(page)['entities'].get('pain') and not graph(page)['entities'].get('persona'))
+        page.get_by_role('button',name='Criar persona',exact=True).first.click()
+        split.get_by_label('Nome da Persona',exact=True).fill('Joana Silva')
+        split.get_by_label('Situação / Contexto',exact=True).fill('Compra pelo celular com pouco tempo.')
+        expect(split.locator('.bo-split-center strong')).to_have_text('Joana Silva')
+        for label,text in [('Adicionar dor','Não sabe o prazo'),('Adicionar necessidade','Receber atualizações')]:
+            field=split.get_by_label(label,exact=True);field.fill(text);field.press('Enter')
+        expect(split.locator('[data-split-node]')).to_have_count(2)
+        expect(split.locator('.bo-split-world>svg line')).to_have_count(2)
+        check('Graph and counts update without storing orphan records',not graph(page)['entities'].get('persona') and not graph(page)['entities'].get('pain'))
+        split.get_by_label('Nome da Persona',exact=True).fill('Joana Ferreira')
+        expect(split.locator('.bo-split-center strong')).to_have_text('Joana Ferreira')
+        split.get_by_role('button',name='Ampliar grafo',exact=True).click()
+        expect(split.locator('.bo-split-status')).to_contain_text('115%')
+        split.get_by_role('button',name='Reorganizar nós',exact=True).click()
+        expect(split.locator('.bo-split-status')).to_contain_text('100%')
+        audit_script=(ROOT/'node_modules/axe-core/axe.min.js').read_text()
+        page.add_script_tag(content=audit_script)
+        violations=page.evaluate("async()=>{const r=await axe.run('[data-persona-split-builder]',{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}});return r.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)}))}")
+        check('Split editor passes desktop accessibility',not violations)
+        page.screenshot(path=str(OUT/'split-desktop.png'),animations='disabled')
+        split.get_by_role('button',name='Salvar',exact=True).click()
+        expect(split).to_have_count(0)
+        g=graph(page);person=next(iter(g['entities']['persona'].values()))
+        check('Save commits the Persona and its connections together',person['title']=='Joana Ferreira' and person['context']=='Compra pelo celular com pouco tempo.' and len(person['relatedIds'])==2)
+        page.get_by_role('button',name='Ecossistema',exact=True).click()
+        page.get_by_role('button',name='Perfil de criação',exact=True).click()
+        expect(split.locator('[data-split-node]')).to_have_count(2)
+        split.get_by_role('button',name='Desvincular Não sabe o prazo',exact=True).click()
+        expect(split.locator('[data-split-node]')).to_have_count(1)
+        check('Existing builder unlinks without deleting the shared pain',len(graph(page)['entities']['pain'])==1)
+        split.get_by_label('Nome da Persona',exact=True).fill('Joana atualizada')
+        split.get_by_role('button',name='Salvar',exact=True).click()
+        check('Existing builder saves canonical identity',graph(page)['entities']['persona'][person['id']]['title']=='Joana atualizada')
+        page.get_by_role('button',name='Perfil de criação',exact=True).click()
+        page.set_viewport_size({'width':390,'height':844})
+        check('Split editor fits phone without horizontal overflow',split.evaluate('(el)=>el.scrollWidth<=el.clientWidth+1'))
+        check('Phone centers the graph and covers the underlying navigation',split.evaluate("el=>{const c=el.querySelector('.bo-split-canvas').getBoundingClientRect(),n=el.querySelector('.bo-split-center').getBoundingClientRect();return n.top>=c.top&&n.bottom<=c.bottom&&el.contains(document.elementFromPoint(100,innerHeight-10))&&Number(getComputedStyle(el).zIndex)>Number(getComputedStyle(document.querySelector('.bo1175-mobile-nav')||el).zIndex||0)}"))
+        page.screenshot(path=str(OUT/'split-phone.png'),animations='disabled')
+        split.get_by_role('button',name='Voltar do editor de Persona',exact=True).click()
+        page.set_viewport_size({'width':1536,'height':1100})
+        page.reload(wait_until='networkidle');page.get_by_role('button',name='Personas',exact=True).click()
+        page.locator(f'[data-persona-card="{person["id"]}"]').get_by_role('button',name='Abrir Persona',exact=True).click()
+        page.get_by_role('button',name='Ecossistema',exact=True).click();page.get_by_role('button',name='Perfil de criação',exact=True).click()
+        expect(split.locator('[data-split-node]')).to_have_count(1)
+        expect(split.get_by_label('Nome da Persona',exact=True)).to_have_value('Joana atualizada')
+        check('Saved split data survives reload')
+        check('No JavaScript errors',not errors)
+        browser.close()
+    print(f'Persona split browser: {len(checks)} PASS')
+finally:
+    server.shutdown();server.server_close()

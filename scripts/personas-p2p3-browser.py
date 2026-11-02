@@ -31,6 +31,7 @@ try:
         page.locator('details.bo-h744-additional summary').click()
         page.get_by_label('Nome do serviço',exact=True).fill('Atendimento')
         page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
+        page.get_by_role('button',name='Preenchimento guiado',exact=True).click()
         focus=page.locator('[data-persona-focus="1"]')
         expect(focus).to_be_visible()
         library=page.locator('[data-personas-h71="library"]')
