@@ -156,14 +156,14 @@
   justify-content:center;
   width:100%;
 }
-.bo-h749-creation-focus .bo-h701-dashboard-link .hidden.md\\:inline{
+.bo-h749-creation-focus .bo-h701-dashboard-link .hidden{
   display:none!important;
 }
 .bo-h749-creation-focus .rt182-host-brand{
   min-height:64px;
   padding:12px!important;
 }
-.bo-h749-creation-focus .rt182-host-brand .rt182-host-brand__copy{
+.bo-h749-creation-focus .rt182-host-brand > div:nth-child(2){
   display:none!important;
 }
 .bo-h749-creation-focus .bo1187-dashboard-header__actions{
