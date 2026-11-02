@@ -1,12 +1,10 @@
-import { ArrowRight, Plus } from '../design-system/icons';
+import { Plus } from '../design-system/icons';
 import type { ReactNode } from 'react';
 import type { PersonaProfileDraft } from '../services/persona-studio';
 
 type Props = {
   draft: PersonaProfileDraft;
   onEditStep: (step: number) => void;
-  onNavigate: (tab: 'relations' | 'evidence' | 'usage') => void;
-  counts: { relations: number; evidence: number; usage: number };
 };
 
 function ReadSection({ title, step, children, onEditStep }: {
@@ -18,7 +16,7 @@ function ReadSection({ title, step, children, onEditStep }: {
   </section>;
 }
 
-export function PersonaReadProfile({ draft, onEditStep, onNavigate, counts }: Props) {
+export function PersonaReadProfile({ draft, onEditStep }: Props) {
   return <article className="bo-h751-reader" data-persona-read-profile="1" aria-label="Perfil da Persona para consulta">
     <ReadSection title="Quem é esta pessoa?" step={0} onEditStep={onEditStep}>
       {draft.description.trim() ? <p className="bo-h751-reader-copy">{draft.description}</p> : <button className="bo-h751-add-detail" type="button" onClick={() => onEditStep(0)}><Plus size={15}/> Adicionar descrição</button>}
@@ -35,12 +33,5 @@ export function PersonaReadProfile({ draft, onEditStep, onNavigate, counts }: Pr
     <ReadSection title="Canais de contato" step={3} onEditStep={onEditStep}>
       {draft.channels.length ? <div className="bo-h751-channel-list">{draft.channels.map((channel, index) => <span key={channel + index}>{channel}</span>)}</div> : <button className="bo-h751-add-detail" type="button" onClick={() => onEditStep(3)}><Plus size={15}/> Adicionar canais</button>}
     </ReadSection>
-    <div className="bo-h751-reader-next"><div><strong>Conecte esta Persona ao serviço</strong><p>O perfil é o ponto de partida. Relacione necessidades e evidências para usá-lo na Jornada e no Blueprint.</p></div>
-      <div className="bo-h751-reader-links">
-        <button type="button" onClick={() => onNavigate('relations')}>Relações <b>{counts.relations}</b><ArrowRight size={14}/></button>
-        <button type="button" onClick={() => onNavigate('evidence')}>Evidências <b>{counts.evidence}</b><ArrowRight size={14}/></button>
-        <button type="button" onClick={() => onNavigate('usage')}>Uso nos mapas <b>{counts.usage}</b><ArrowRight size={14}/></button>
-      </div>
-    </div>
   </article>;
 }
