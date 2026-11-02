@@ -7,6 +7,8 @@ import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
 import { PersonaVisualEditor } from './PersonaVisualEditor';
 import { PersonaProgressiveEditor } from './PersonaProgressiveEditor';
+import { PersonaFocusEditor } from './PersonaFocusEditor';
+import './persona-focus-h750.css';
 import './persona-progressive-h746.css';
 import './persona-ux-refinements-h747.css';
 import './persona-layout-h748.css';
@@ -144,6 +146,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
   const [detailTab, setDetailTab] = useState<DetailTab>('overview');
   const [showDetailCustomize, setShowDetailCustomize] = useState(false);
   const [showVisualComposer, setShowVisualComposer] = useState(false);
+  const [focusOpen, setFocusOpen] = useState(false);
   const [composerStartLibrary, setComposerStartLibrary] = useState(false);
   const [draft, setDraft] = useState<PersonaProfileDraft | null>(null);
   const [owner, setOwner] = useState('');
@@ -274,8 +277,8 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     changeViewMode(view.mode==='table'?'table':'cards');setSavedViewsOpen(false);
   };
 
-  const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setShowVisualComposer(false); setComposerStartLibrary(false); setMenuId(null); };
-  const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); setShowVisualComposer(false); setQuickCreateKind(null); setQuickCreateTitle(''); };
+  const openPersona = (id: string) => { setSelectedId(id); setDetailTab('overview'); setShowDetailCustomize(false); setShowVisualComposer(false); setFocusOpen(false); setComposerStartLibrary(false); setMenuId(null); };
+  const closePersona = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); setShowVisualComposer(false); setFocusOpen(false); setQuickCreateKind(null); setQuickCreateTitle(''); };
 
   const chooseCreateMode = (mode: PersonaDepth) => {
     setCreateMode(mode);
@@ -294,7 +297,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     }), 'Personas 2.0: criar');
     setCreateOpen(false); setCreateTitle(''); setCreateDescription('');
     setCreateMode('simple'); setCreateSections([...SIMPLE_PERSONA_SECTIONS]);
-    setSelectedId(entity.id); setDetailTab('overview'); setShowVisualComposer(false);
+    setSelectedId(entity.id); setDetailTab('overview'); setShowVisualComposer(false); setFocusOpen(true);
     showToast('Persona criada. Complete o perfil e salve.');
   };
 
@@ -410,7 +413,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       <header className="bo-h71-detail-head bo-h724-detail-head">
         <button type="button" className="bo-h71-back" onClick={closePersona}><ArrowLeft size={16}/> Personas</button>
         <div className="bo-h71-detail-title bo-h724-detail-title"><span className="bo-h71-avatar bo-h724-avatar"><UserRound size={20}/></span><div><small>PERSONA</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Complete o perfil para documentar quem vive essa experiência.'}</p><div className="bo-h724-persona-meta"><span className="mode">{draft.mode === 'professional' ? 'Persona avançada' : 'Persona simples'}</span>{visibleTags.map((tag) => <span key={tag}>{tag}</span>)}{tagValues.length > visibleTags.length && <span>+{tagValues.length - visibleTags.length}</span>}</div></div></div>
-        <div className="bo-h724-detail-tools"><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Alterações pendentes' : 'Tudo salvo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" className="bo-p2-persona-customize-tab" onClick={() => { setShowDetailCustomize(true); setDetailTab('overview'); setMenuId(null); }}>Personalizar interface</button><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
+        <div className="bo-h724-detail-tools"><button type="button" className="bo-h750-enter" onClick={() => { setDetailTab('overview'); setShowVisualComposer(false); setFocusOpen(true); }}>Modo foco <span aria-hidden="true">↗</span></button><span className={isDirty ? 'bo-h724-save-badge is-dirty' : 'bo-h724-save-badge is-saved'}>{isDirty ? 'Alterações pendentes' : 'Tudo salvo'}</span><div className="bo-h724-detail-menu"><button type="button" aria-label="Mais ações" onClick={() => setMenuId(menuId === selected.id ? null : selected.id)}><MoreVertical size={17}/></button>{menuId === selected.id && <div><button type="button" className="bo-p2-persona-customize-tab" onClick={() => { setShowDetailCustomize(true); setDetailTab('overview'); setMenuId(null); }}>Personalizar interface</button><button type="button" className="danger" onClick={() => { setMenuId(null); setDeleteId(selected.id); }}><Trash2 size={13}/> Remover persona</button></div>}</div></div>
       </header>
 
       <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Persona">
@@ -526,6 +529,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
 
       <footer className="bo-h71-detail-actions bo-h724-detail-actions"><div className="bo-h724-save-state"><b className={isDirty ? 'is-dirty' : 'is-saved'}/><span>{isDirty ? 'Alterações ainda não salvas' : 'Todas as alterações estão salvas'}</span></div><span/><button type="button" disabled={!isDirty} onClick={discardPersona}>Descartar</button><button type="button" className="primary" disabled={!draft.title.trim() || !isDirty} onClick={savePersona}>Salvar alterações</button></footer>
 
+      {focusOpen && <PersonaFocusEditor draft={draft} onChange={setDraft} onExit={() => setFocusOpen(false)} onSaveAndExit={() => { savePersona(); setFocusOpen(false); }}/>} 
       {deleteId && <div className="bo-h71-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteId(null); }}><div className="bo-h71-confirm"><header><div><small>REMOVER PERSONA</small><h2>Remover “{contextEntityTitle(graph.entities?.persona?.[deleteId])}”?</h2></div><button type="button" onClick={() => setDeleteId(null)}><X size={16}/></button></header><p>As relações com Necessidades, Jobs, Dores, Hipóteses e Evidências serão desvinculadas. Esta ação pode ser desfeita pelo histórico da aplicação.</p><footer><button type="button" onClick={() => setDeleteId(null)}>Cancelar</button><button type="button" className="danger" onClick={() => removePersona(deleteId)}>Remover Persona</button></footer></div></div>}
     </section>;
   }
