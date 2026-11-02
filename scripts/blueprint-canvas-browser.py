@@ -66,8 +66,10 @@ try:
   page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click()
   page.get_by_role('button',name='Novo projeto',exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click();page.get_by_label('Nome do projeto',exact=False).fill('Canvas QA');page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Clínica');page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
   page.evaluate("""()=>window.BlueOceanRuntime.api('dataBridge').transact(g=>{g.entities.channel||={};g.entities.channel['qa-whatsapp']={id:'qa-whatsapp',type:'channel',serviceId:g.service.id,title:'WhatsApp QA',createdAt:new Date().toISOString()};return g},'Canal fictício')""")
-  page.get_by_role('button',name='Criar mapa',exact=True).click();page.get_by_role('button',name='Em branco',exact=False).first.click()
+  # H7.49 opens the canonical map directly when the Journey intention is chosen.
+  # Do not trigger a redundant "Criar mapa" modal behind the already open editor.
   f=page.frame_locator('.bo-blueprint-reference-frame');saved(f)
+  check('New project begins with one canonical Journey',len(graph(page)['journeys'])==1)
   for name in ['Agendar','Atender','Acompanhar']:stage(f,name)
   f.locator('[data-cad-view]').select_option('blueprint');saved(f);expect(f.locator('#cad-svg')).to_be_visible();check('Blueprint opens canvas over the existing Journey')
   f.locator('[data-act="cad-stage-edit"][data-si="0"]').click();f.get_by_role('textbox',name='Nome da etapa',exact=True).fill('Agendar consulta');f.get_by_role('textbox',name='Nome da etapa',exact=True).press('Enter');saved(f);check('Canvas stage properties update the canonical stage',any(stage['title']=='Agendar consulta' for stage in graph(page)['stages'].values()))
