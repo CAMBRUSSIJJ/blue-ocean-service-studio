@@ -77,7 +77,7 @@ export function PersonaFocusEditor({ draft, onChange, onExit, onSaveAndExit }: P
           </div>
           {step === 0 && <div className="bo-h750-focus-fields">
             <label htmlFor="bo-h750-name">Nome da Persona</label>
-            <input ref={firstFieldRef as React.RefObject<HTMLInputElement>} id="bo-h750-name" type="text" maxLength={140} value={draft.title}
+            <input ref={(element) => { firstFieldRef.current = element; }} id="bo-h750-name" type="text" maxLength={140} value={draft.title}
               onChange={event => changeText('title', event.target.value)} placeholder="Ex.: Maria — cliente recorrente"/>
             <label htmlFor="bo-h750-description">Quem é esta pessoa? <em>(opcional)</em></label>
             <textarea id="bo-h750-description" rows={4} value={draft.description}
@@ -85,12 +85,12 @@ export function PersonaFocusEditor({ draft, onChange, onExit, onSaveAndExit }: P
           </div>}
           {step === 1 && <div className="bo-h750-focus-fields">
             <label htmlFor="bo-h750-goal">Resultado esperado</label>
-            <textarea ref={firstFieldRef as React.RefObject<HTMLTextAreaElement>} id="bo-h750-goal" rows={6} value={draft.primaryGoal}
+            <textarea ref={(element) => { firstFieldRef.current = element; }} id="bo-h750-goal" rows={6} value={draft.primaryGoal}
               onChange={event => changeText('primaryGoal', event.target.value)} placeholder="Que resultado essa pessoa quer alcançar usando o serviço?"/>
           </div>}
           {step === 2 && <div className="bo-h750-focus-fields">
             <label htmlFor="bo-h750-situation">Momento de uso</label>
-            <textarea ref={firstFieldRef as React.RefObject<HTMLTextAreaElement>} id="bo-h750-situation" rows={4} value={draft.situation}
+            <textarea ref={(element) => { firstFieldRef.current = element; }} id="bo-h750-situation" rows={4} value={draft.situation}
               onChange={event => changeText('situation', event.target.value)} placeholder="Ex.: Procura atendimento quando surge uma necessidade inesperada."/>
             <label htmlFor="bo-h750-context">Contexto e ambiente</label>
             <textarea id="bo-h750-context" rows={4} value={draft.context}
@@ -98,7 +98,7 @@ export function PersonaFocusEditor({ draft, onChange, onExit, onSaveAndExit }: P
           </div>}
           {step === 3 && <div className="bo-h750-focus-fields">
             <label htmlFor="bo-h750-channels">Canais de contato <em>(um por linha)</em></label>
-            <textarea ref={firstFieldRef as React.RefObject<HTMLTextAreaElement>} id="bo-h750-channels" rows={7} value={channelText}
+            <textarea ref={(element) => { firstFieldRef.current = element; }} id="bo-h750-channels" rows={7} value={channelText}
               onChange={event => updateChannels(event.target.value)} placeholder={'WhatsApp\nAtendimento presencial\nSite'}/>
             <p className="bo-h750-focus-note">Estes canais são registrados no perfil. Os vínculos com elementos do serviço são feitos na aba Relações.</p>
           </div>}
