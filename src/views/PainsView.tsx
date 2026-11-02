@@ -4,6 +4,7 @@ import type { ServiceGraph } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
 import { ServiceUsageRelations } from '../components/ServiceUsageRelations';
 import { DiscoveryDetailRail } from '../components/DiscoveryDetailRail';
+import { DiscoveryReadProfile } from '../components/DiscoveryReadProfile';
 import { createDiscoveryEntity } from '../services/discovery-workspace';
 import { contextEntityTitle, contextEntityUsage, listContextEntities, removeContextEntity } from '../services/context-library';
 import {
@@ -50,6 +51,7 @@ export function PainsView({ studio }: { studio: StudioController }) {
   const [menuId, setMenuId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>('overview');
+  const [profileEditing, setProfileEditing] = useState(false);
   const [draft, setDraft] = useState<PainProfileDraft | null>(null);
   const [owner, setOwner] = useState('');
   const [tagsText, setTagsText] = useState('');
@@ -129,7 +131,7 @@ export function PainsView({ studio }: { studio: StudioController }) {
     return true;
   }), [rows, query, filter]);
 
-  const openPain = (id: string) => { setSelectedId(id); setDetailTab('overview'); setMenuId(null); };
+  const openPain = (id: string) => { setSelectedId(id); setDetailTab('overview'); setProfileEditing(false); setMenuId(null); };
   const closePain = () => { setSelectedId(null); setDraft(null); setDetailTab('overview'); };
   const createPain = () => {
     if (!createTitle.trim()) return;
@@ -171,18 +173,18 @@ export function PainsView({ studio }: { studio: StudioController }) {
     const personaOptions = relationOptions.filter((item) => item.kind === 'persona');
     const score = previewReport?.foundationScore ?? report.foundationScore;
     const checks = previewReport?.foundationChecks ?? report.foundationChecks;
-    return <section className="bo-h74-pain-detail" data-pains-h74="detail">
+    return <section className={`bo-h74-pain-detail ${profileEditing ? "" : "bo-h755-read-screen"}`} data-pains-h74="detail">
       <header className="bo-h71-detail-head bo-h74-detail-head">
         <button type="button" className="bo-h71-back" onClick={closePain}><ArrowLeft size={16}/> Dores</button>
         <div className="bo-h71-detail-title"><span className="bo-h71-avatar bo-h74-avatar"><HeartCrack size={19}/></span><div><small>FRICÇÃO OBSERVADA</small><h1>{draft.title || 'Sem título'}</h1><p>{draft.description || 'Descreva a fricção observada sem transformá-la prematuramente em solução ou problema validado.'}</p></div></div>
         <div className="bo-h71-detail-score"><span>COMPLETUDE</span><strong>{score}%</strong><i><b style={{ width: `${score}%` }}/></i></div>
-      </header>
+      <div className="bo-h755-detail-tools"><button type="button" onClick={() => { if (profileEditing) { savePain(); setProfileEditing(false); } else { setProfileEditing(true); setDetailTab('overview'); } }}>{profileEditing ? 'Concluir edição' : 'Editar perfil'}</button></div></header>
       <nav className="bo-h71-detail-tabs" aria-label="Detalhes da Dor">
         {([['overview','Visão geral'],['people','Pessoas'],['relations','Relações'],['evidence','Evidências'],['usage','Uso']] as Array<[DetailTab,string]>).map(([id,label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'people' && <b>{previewReport?.connectionCounts.persona ?? report.connectionCounts.persona}</b>}{id === 'relations' && <b>{connectedIds.length}</b>}{id === 'evidence' && <b>{evidenceConnections.length}</b>}</button>)}
       </nav>
       <div className="bo-h71-detail-body">
         {detailTab === 'overview' && <div className="bo-h74-overview-grid bo-h754-overview-grid">
-          <section className="bo-h71-editor-card bo-h74-pain-card"><header><div><small>FRICÇÃO</small><strong>O que está tornando a experiência difícil?</strong></div><span className={`bo-h74-severity is-${draft.severity}`}>{severityLabel[draft.severity]}</span></header>
+  {profileEditing ? <section className="bo-h71-editor-card bo-h74-pain-card"><header><div><small>FRICÇÃO</small><strong>O que está tornando a experiência difícil?</strong></div><span className={`bo-h74-severity is-${draft.severity}`}>{severityLabel[draft.severity]}</span></header>
             <div className="bo-h71-form two-col">
               <label className="wide"><span>Nome da Dor</span><input value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="Ex.: Perder tempo esperando disponibilidade para lavar roupas"/></label>
               <label className="wide"><span>Descrição <small>o que acontece, sem prescrever solução</small></span><textarea rows={3} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Descreva a fricção de forma observável."/></label>
@@ -196,9 +198,13 @@ export function PainsView({ studio }: { studio: StudioController }) {
               
               
             </div>
-          </section>
-          <DiscoveryDetailRail title="Impacto e responsabilidade" checks={checks} score={score} summary={<aside className="bo-h74-pain-summary"><small>LEITURA DA DOR</small><strong>Fricção em uma frase</strong><p>{draft.context ? <><b>Quando</b> {draft.context}, </> : null}{draft.description ? <><b>a pessoa enfrenta</b> {draft.description}. </> : null}{draft.impact ? <><b>Isso provoca</b> {draft.impact}.</> : null}{!draft.context && !draft.description && !draft.impact ? 'Preencha contexto, descrição e impacto para formar uma leitura clara da dor.' : null}</p><div><span>Base mínima</span><strong>{score}%</strong><i><b style={{ width: `${score}%` }}/></i></div>{checks.map((item) => <em key={item.id} className={item.complete ? 'is-done' : ''}><b>{item.complete ? <Check size={11}/> : '·'}</b>{item.label}</em>)}</aside>}><label><span>Severidade</span><select value={draft.severity} onChange={(event) => setDraft({ ...draft, severity: event.target.value as PainSeverity })}>{Object.entries(severityLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label><span>Frequência</span><select value={draft.frequency} onChange={(event) => setDraft({ ...draft, frequency: event.target.value as PainFrequency })}>{Object.entries(frequencyLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label><span>Responsável <small>opcional</small></span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></label><label><span>Tags <small>separadas por vírgula</small></span><input value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="Ex.: operação, tempo, confiança"/></label></DiscoveryDetailRail>
-        </div>}
+          </section> : <DiscoveryReadProfile entityLabel="Dor" onEdit={() => setProfileEditing(true)} sections={[
+{ title: "Fricção observada", fields: [{ label: "Descrição", value: draft.description }, { label: "Contexto", value: draft.context }, { label: "Impacto", value: draft.impact }] },
+{ title: "Sinais e consequências", fields: [{ label: "Sinal observável", value: draft.observableSignal }, { label: "Consequência", value: draft.consequence }] },
+{ title: "Alternativa atual", fields: [{ label: "Como a pessoa contorna a dor", value: draft.currentWorkaround }] }
+]}/>}
+<DiscoveryDetailRail title="Impacto e responsabilidade" checks={checks} score={score} summary={<aside className="bo-h74-pain-summary"><small>LEITURA DA DOR</small><strong>Fricção em uma frase</strong><p>{draft.context ? <><b>Quando</b> {draft.context}, </> : null}{draft.description ? <><b>a pessoa enfrenta</b> {draft.description}. </> : null}{draft.impact ? <><b>Isso provoca</b> {draft.impact}.</> : null}{!draft.context && !draft.description && !draft.impact ? 'Preencha contexto, descrição e impacto para formar uma leitura clara da dor.' : null}</p><div><span>Base mínima</span><strong>{score}%</strong><i><b style={{ width: `${score}%` }}/></i></div>{checks.map((item) => <em key={item.id} className={item.complete ? 'is-done' : ''}><b>{item.complete ? <Check size={11}/> : '·'}</b>{item.label}</em>)}</aside>}><label><span>Severidade</span><select value={draft.severity} onChange={(event) => setDraft({ ...draft, severity: event.target.value as PainSeverity })}>{Object.entries(severityLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label><span>Frequência</span><select value={draft.frequency} onChange={(event) => setDraft({ ...draft, frequency: event.target.value as PainFrequency })}>{Object.entries(frequencyLabel).map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label><label><span>Responsável <small>opcional</small></span><input value={owner} onChange={(event) => setOwner(event.target.value)} placeholder="Nome ou papel"/></label><label><span>Tags <small>separadas por vírgula</small></span><input value={tagsText} onChange={(event) => setTagsText(event.target.value)} placeholder="Ex.: operação, tempo, confiança"/></label></DiscoveryDetailRail>
+</div>}
         {detailTab === 'people' && <div><div className="bo-h71-section-intro"><div><small>PESSOAS</small><h2>Quem sente esta dor?</h2><p>Conecte Personas que realmente experimentam esta fricção.</p></div><strong>{connectedIds.filter((id) => personaOptions.some((item) => item.id === id)).length} conectada(s)</strong></div>{personaOptions.length ? <div className="bo-h71-evidence-list">{personaOptions.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma Persona criada</strong><p>Crie Personas primeiro e depois conecte-as à Dor.</p></div>}</div>}
         {detailTab === 'relations' && <div><div className="bo-h71-section-intro"><div><small>SERVICE GRAPH</small><h2>Que contexto explica esta Dor?</h2><p>Necessidades e Jobs mostram onde a fricção aparece; hipóteses e problemas mostram como ela pode evoluir para investigação ou validação.</p></div><strong>{connectedIds.filter((id) => !personaOptions.some((item) => item.id === id) && !evidence.some((item) => item.id === id)).length} conexões</strong></div><div className="bo-h71-relation-grid">{(['need','job','problemHypothesis','problem'] as PainRelationKind[]).map((kind) => { const options = relationOptions.filter((item) => item.kind === kind); return <section key={kind}><header><strong>{relationLabel[kind]}</strong><span>{options.filter((item) => connectedIds.includes(item.id)).length}/{options.length}</span></header>{options.length ? <div>{options.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={12}/> : <Plus size={12}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span></button>)}</div> : <p>Nenhum item criado ainda.</p>}</section>; })}</div></div>}
         {detailTab === 'evidence' && <div><div className="bo-h71-section-intro"><div><small>EVIDÊNCIAS</small><h2>O que demonstra esta Dor?</h2><p>Conecte entrevistas, observações, reclamações e dados que sustentem que a fricção existe e importa.</p></div><strong>{evidenceConnections.length} conectada(s)</strong></div>{evidence.length ? <div className="bo-h71-evidence-list">{evidence.map((item) => <button key={item.id} type="button" className={connectedIds.includes(item.id) ? 'is-linked' : ''} onClick={() => toggleRelation(item.id)}><b>{connectedIds.includes(item.id) ? <Check size={13}/> : <Plus size={13}/>}</b><span><strong>{item.title}</strong><small>{item.description || 'Sem descrição'}</small></span><em>{item.confidence === 'high' ? 'Alta confiança' : item.confidence === 'low' ? 'Baixa confiança' : 'Média confiança'}</em></button>)}</div> : <div className="bo-h71-empty-inline"><strong>Nenhuma evidência criada</strong><p>Crie evidências na aba Evidências e depois conecte-as aqui.</p></div>}</div>}
