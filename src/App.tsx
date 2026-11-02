@@ -299,6 +299,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
   };
 
   const openGlobalHome = (section: ProjectHomeSection = 'home') => {
+    if (isProjectCreationOpen) window.dispatchEvent(new Event('bo-h749-cancel-project-creation'));
     setProjectShellOpen(false);
     setProjectHomeSection(section);
     setExternalNav(null);
