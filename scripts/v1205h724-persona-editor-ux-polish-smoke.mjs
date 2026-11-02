@@ -12,6 +12,15 @@ ok('overview usa layout principal + lateral', personas.includes('bo-h724-overvie
 const layout = fs.readFileSync('src/views/persona-layout-h748.css', 'utf8');
 const guided = fs.readFileSync('src/views/PersonaProgressiveEditor.tsx', 'utf8');
 ok('completude percentual não aparece no detalhe da Persona', !personas.includes('bo-h724-completeness-card') && !personas.includes('completenessChecks.map'));
+const focus = fs.readFileSync('src/views/PersonaFocusEditor.tsx','utf8');
+const focusCss = fs.readFileSync('src/views/persona-focus-h750.css','utf8');
+ok('criar Persona abre o modo foco por padrão', personas.includes('setFocusOpen(true)') && personas.includes('<PersonaFocusEditor'));
+ok('perfis existentes podem abrir modo foco sem perder editor completo', personas.includes('Modo foco') && personas.includes('bo-h750-enter') && personas.includes('PersonaProgressiveEditor'));
+ok('modo foco preserva campos canônicos e salvamento', ['draft.situation','draft.context','draft.channels','onSaveAndExit','onChange'].every(term => focus.includes(term)));
+ok('modo foco mostra somente etapa navegacional, sem percentual de completude',focus.includes('Passo ${step + 1} de 4') && !focus.includes('75%') && !focus.includes('foundationScore'));
+ok('modo foco usa cartão central de 650px responsivo',focusCss.includes('width:min(100%,650px)') && focusCss.includes('@media(max-width:660px)'));
+ok('modo foco protege acesso por teclado e restaura a página',focus.includes('aria-modal="true"') && focus.includes("appRoot?.setAttribute('inert'") && focus.includes("appRoot?.removeAttribute('inert'"));
+
 ok('lateral reúne apenas organização e links contextuais', personas.includes('bo-h748-side-panel') && personas.includes('bo-h748-connections') && ['Relações','Evidências','Uso nos mapas'].every(label => personas.includes(label)));
 ok('editor principal utiliza largura central legível e coluna lateral', layout.includes('max-width:1230px') && layout.includes('grid-template-columns:minmax(0,1fr) minmax(260px,290px)'));
 ok('atalhos de vínculos não se repetem abaixo do formulário', !guided.includes('bo-h746-followups'));
