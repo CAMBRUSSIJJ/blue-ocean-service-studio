@@ -15,6 +15,10 @@ import './persona-focus-h750.css';
 import './persona-progressive-h746.css';
 import './persona-ux-refinements-h747.css';
 import './persona-layout-h748.css';
+import { PersonaEcosystem } from './PersonaEcosystem';
+import { changePersonaEcosystem, type PersonaEcosystemChange } from '../services/persona-ecosystem';
+import { openServiceObject } from '../services/service-object-navigation';
+import { runtimeApi } from '../runtime/client';
 import { PersonaEvidenceTrace } from './PersonaEvidenceTrace';
 import { createDiscoveryEntity } from '../services/discovery-workspace';
 import { contextEntityTitle, contextEntityUsage, listContextEntities } from '../services/context-library';
@@ -34,7 +38,7 @@ import {
 } from '../services/persona-studio';
 
 
-type DetailTab = 'overview' | 'behavior' | 'decisions' | 'barriers' | 'relations' | 'evidence' | 'usage';
+type DetailTab = 'ecosystem' | 'overview' | 'behavior' | 'decisions' | 'barriers' | 'relations' | 'evidence' | 'usage';
 type FilterMode = 'all' | 'unused' | 'used' | 'evidence' | 'without-evidence' | 'incomplete';
 type LibraryViewMode = 'cards' | 'table';
 type PersonaFilterField = 'title' | 'owner' | 'mode' | 'tags' | 'evidence' | 'usage' | 'completeness';
@@ -413,6 +417,23 @@ export function PersonasView({ studio }: { studio: StudioController }) {
       || JSON.stringify([...connectedIds].sort()) !== JSON.stringify(savedConnectedIds);
     const visibleTags = tagValues.slice(0, 3);
     const editInFocus = (step = 0) => { setFocusInitialStep(step); setFocusOpen(true); };
+    if (detailTab === 'ecosystem') {
+      const canEdit = runtimeApi<{ can?(action: string): boolean }>('collaboration')?.can?.('edit') !== false;
+      const change = (mutation: PersonaEcosystemChange) => {
+        if (!canEdit) throw new Error('Este perfil está em modo somente leitura.');
+        const operation = mutation.type === 'create' ? { ...mutation, id: `${mutation.kind}-${crypto.randomUUID()}` } : mutation;
+        // Validate before the controller handles the transaction; no partial record is stored.
+        changePersonaEcosystem(graph, selected.id, draft, connectedIds, operation);
+        const tags = stringList([tagsText, tagEntry].filter(Boolean).join(','));
+        setGraph(current => patchPersonaMeta(changePersonaEcosystem(current, selected.id, draft, connectedIds, operation), selected.id, owner, tags), 'Persona: atualizar ecossistema');
+      };
+      return <PersonaEcosystem key={selected.id} graph={graph} persona={selected} draft={draft} options={relationOptions}
+        connectedIds={connectedIds} dirty={isDirty} readOnly={!canEdit} saveStatus={studio.saveStatus}
+        onChange={change} onSave={savePersona} onBack={closePersona}
+        onNavigate={area => { if (area === 'creation') { setProfileReadOnly(false); setDetailTab('overview'); }
+          else { if (area === 'overview') setProfileReadOnly(true); setDetailTab(area); } }}
+        onOpenMap={(kind, id) => { if (isDirty) savePersona(); openServiceObject(kind, id); }}/>
+    }
     return <section className={`bo-h71-persona-detail bo-h713-layout-${draft.layout} ${profileReadOnly ? 'bo-h751-persona-read' : ''}`} data-personas-h71="detail">
       <header className="bo-h71-detail-head bo-h724-detail-head">
         <button type="button" className="bo-h71-back" onClick={closePersona}><ArrowLeft size={16}/> Personas</button>
@@ -424,7 +445,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
         {([
           ['overview', 'Visão geral'], ...(draft.mode === 'professional' ? [
               ['behavior', 'Comportamento'], ['decisions', 'Decisões'], ['barriers', 'Barreiras'],
-            ] as Array<[DetailTab, string]> : []), ['relations', 'Relações'], ['evidence', 'Evidências'], ['usage', 'Uso'],
+            ] as Array<[DetailTab, string]> : []), ['ecosystem', 'Ecossistema'], ['relations', 'Relações'], ['evidence', 'Evidências'], ['usage', 'Uso'],
         ] as Array<[DetailTab, string]>).map(([id, label]) => <button key={id} type="button" className={detailTab === id ? 'is-active' : ''} onClick={() => setDetailTab(id)}>{label}{id === 'relations' && <b>{connectedIds.length}</b>}{id === 'evidence' && <b>{evidenceConnections.length}</b>}</button>)}
         
       </nav>

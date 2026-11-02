@@ -107,8 +107,11 @@ try:
         expect(scale).to_be_visible()
         scale.get_by_role('slider',name='Posição da escala de preferência').fill('71')
         goal=visual.locator('[data-persona-visual-card="goal"]')
+        # Card actions appear on hover; reveal them before pointer interaction.
+        goal.hover()
         goal.get_by_role('button',name='Alternar largura de Objetivo principal').click()
         check('Goal card can become full width',goal.get_attribute('data-width')=='full')
+        visual.locator('[data-persona-visual-card="quote"]').hover()
         visual.locator('[data-persona-visual-card="quote"]').get_by_role('button',name='Ocultar bloco Citação').click()
         check('Hidden card is removed from composition, not domain',visual.locator('[data-persona-visual-card="quote"]').count()==0)
         detail.get_by_role('button',name='Salvar alterações').click()

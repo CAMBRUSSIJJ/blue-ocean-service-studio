@@ -71,12 +71,15 @@ jobs:
       - run: python -m pip install playwright pillow
       - run: python -m playwright install --with-deps chromium
       - run: npm run e2e:visual
+      - run: npm run persona:ecosystem:browser
       - name: Armazenar evidências visuais
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: blue-ocean-visual-${{ github.sha }}
-          path: artifacts/e2e-v1162
+          path: |
+            artifacts/e2e-v1162
+            artifacts/persona-ecosystem
           retention-days: 14
 
   editor-ux:
