@@ -1,0 +1,37 @@
+/* H7.51 — Readable Persona profile, faithfully adapted from the H7.51 HTML reference. */
+.bo-h751-reader{display:flex;flex-direction:column;width:100%;min-width:0;border:1px solid #dce5ef;border-radius:12px;background:#fff;overflow:hidden}
+.bo-h751-reader-section{padding:28px clamp(22px,3vw,34px);border-bottom:1px solid #e8eef5;min-width:0}
+.bo-h751-reader-section>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.bo-h751-reader-section h2{margin:0;color:#253e5c;font-size:15px;font-weight:720;line-height:1.45}
+.bo-h751-reader-section>header button{background:transparent;color:#2566aa;border:0;border-radius:6px;padding:7px 9px;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.bo-h751-reader-section>header button:hover{background:#eff6ff}
+.bo-h751-reader-copy,.bo-h751-situation-grid p{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font-size:14px;color:#38516b;line-height:1.75}
+.bo-h751-add-detail{display:inline-flex;align-items:center;gap:7px;color:#356fae;border:1px dashed #c8d8e8;background:#f9fbff;padding:8px 11px;border-radius:8px;font-size:12px;font-weight:630;cursor:pointer}
+.bo-h751-add-detail:hover{background:#edf5ff;border-color:#88afd7}
+.bo-h751-situation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.bo-h751-situation-grid small{display:block;color:#7088a0;font-size:11px;font-weight:770;letter-spacing:.045em;margin:0 0 9px}
+.bo-h751-channel-list{display:flex;gap:8px;flex-wrap:wrap}
+.bo-h751-channel-list span{background:#f4f9ff;border:1px solid #d5e5f8;border-radius:999px;color:#30649b;font-size:12px;line-height:1.35;padding:7px 11px;max-width:100%;overflow-wrap:anywhere}
+.bo-h751-reader-next{display:flex;flex-direction:column;gap:13px;padding:22px clamp(22px,3vw,34px);background:#f9fbfe}
+.bo-h751-reader-next strong{font-size:13px;font-weight:720;color:#284360}
+.bo-h751-reader-next p{font-size:12px;line-height:1.6;margin:6px 0 0;color:#667e95;max-width:62ch}
+.bo-h751-reader-links{display:flex;flex-wrap:wrap;gap:8px}
+.bo-h751-reader-links button{display:inline-flex;align-items:center;gap:9px;min-height:37px;padding:8px 11px;border:1px solid #d7e4f2;border-radius:8px;background:white;color:#2d6298;font-size:12px;font-weight:630;cursor:pointer}
+.bo-h751-reader-links button:hover{background:#ecf4ff}
+.bo-h751-reader-links b{font-size:11px;border-radius:5px;padding:2px 6px;background:#edf4fc}
+.bo-h751-persona-read .bo-h724-overview-layout{align-items:start}
+.bo-h751-persona-read .bo-h724-overview-aside{position:sticky;top:18px}
+.bo-h751-persona-read .bo-h71-detail-head{padding-bottom:17px}
+.bo-h751-persona-read .bo-h71-detail-tabs{margin-bottom:2px}
+.bo-h751-persona-read .bo-h724-detail-title h1{font-size:clamp(22px,2.25vw,29px)}
+.bo-h751-read-actions{display:inline-flex;align-items:center;gap:9px}
+.bo-h751-read-actions button{display:inline-flex;align-items:center;gap:6px;border:1px solid #d2e0ef;background:white;border-radius:8px;padding:9px 12px;color:#345d89;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.bo-h751-read-actions button.primary{background:#2669ad;color:white;border-color:#2669ad}
+.bo-h751-read-actions button:hover{background:#eff6ff}
+.bo-h751-read-actions button.primary:hover{background:#1f5c99}
+.bo-h751-read-actions button:focus-visible,.bo-h751-reader button:focus-visible{outline:3px solid #87b6ea;outline-offset:2px}
+@media(max-width:800px){.bo-h751-reader-section{padding:23px 19px}.bo-h751-situation-grid{gap:18px}.bo-h751-read-actions{flex-wrap:wrap;justify-content:flex-end}}
+@media(max-width:600px){.bo-h751-situation-grid{grid-template-columns:1fr}.bo-h751-read-actions button{padding:8px 9px;font-size:11px}.bo-h751-reader-links{flex-direction:column}.bo-h751-reader-links button{justify-content:space-between}}
+/* Focus screen matches the 740px reference on desktop, preserving full-screen mobile. */
+.bo-h750-focus-card{width:min(100%,740px)}
+.bo-h750-focus-progress-track i:not(.is-active){background:#e7edf4}
