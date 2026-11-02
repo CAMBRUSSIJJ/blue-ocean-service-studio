@@ -8,6 +8,7 @@ type Props = {
   onChange: (draft: PersonaProfileDraft) => void;
   onExit: () => void;
   onSaveAndExit: () => void;
+  initialStep?: number;
 };
 
 const stages = [
@@ -17,8 +18,8 @@ const stages = [
   { label: 'Canais', title: 'Canais de contato', help: 'Por onde ela encontra, procura ou utiliza o serviço?' },
 ] as const;
 
-export function PersonaFocusEditor({ draft, onChange, onExit, onSaveAndExit }: Props) {
-  const [step, setStep] = useState(0);
+export function PersonaFocusEditor({ draft, onChange, onExit, onSaveAndExit, initialStep = 0 }: Props) {
+  const [step, setStep] = useState(() => Math.max(0, Math.min(3, Math.floor(initialStep))));
   const [channelText, setChannelText] = useState(() => draft.channels.join('\n'));
   const cardRef = useRef<HTMLElement>(null);
   const firstFieldRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
