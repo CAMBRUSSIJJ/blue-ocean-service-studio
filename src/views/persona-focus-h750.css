@@ -1,0 +1,210 @@
+/* H7.50 — Persona focus mode, adapted from the supplied 650px HTML prototype.
+   A step count is navigation, not a percentage of persona completion. */
+.bo-h750-focus-backdrop{
+  position:fixed;
+  z-index:99999;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+  background:#f3f4f6;
+  padding:clamp(16px,3vh,32px) 20px;
+  overflow-y:auto;
+}
+.bo-h750-focus-card{
+  display:flex;
+  flex-direction:column;
+  width:min(100%,650px);
+  max-height:calc(100vh - 40px);
+  max-height:calc(100dvh - 40px);
+  min-height:0;
+  box-sizing:border-box;
+  border:1px solid #e5e9ef;
+  border-radius:12px;
+  background:#fff;
+  color:#18263a;
+  box-shadow:0 8px 30px rgba(16,30,54,.055);
+  overflow:hidden;
+}
+.bo-h750-focus-header{
+  flex:0 0 auto;
+  padding:28px 32px 20px;
+  border-bottom:1px solid #eef0f3;
+}
+.bo-h750-focus-titlebar{
+  display:grid;
+  grid-template-columns:30px minmax(0,1fr) 30px;
+  align-items:center;
+  gap:12px;
+  margin-bottom:25px;
+}
+.bo-h750-focus-titlebar h1{
+  min-width:0;
+  margin:0;
+  font-size:18px;
+  font-weight:600;
+  line-height:1.35;
+  letter-spacing:-.012em;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.bo-h750-focus-titlebar button{
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:32px;
+  border:0;
+  border-radius:7px;
+  background:transparent;
+  color:#718096;
+  cursor:pointer;
+}
+.bo-h750-focus-titlebar button:hover{background:#f2f5f8;color:#26384f}
+.bo-h750-focus-progress>span{
+  display:block;
+  color:#2367b5;
+  font-size:13px;
+  font-weight:650;
+  margin-bottom:9px;
+}
+.bo-h750-focus-progress-track{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:3px;
+  width:100%;
+  height:5px;
+  background:transparent;
+}
+.bo-h750-focus-progress-track i{
+  border-radius:100px;
+  background:#edf0f4;
+}
+.bo-h750-focus-progress-track i.is-active{background:#2367c2}
+.bo-h750-focus-body{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  padding:29px 32px 32px;
+}
+.bo-h750-focus-intro{margin:0 0 27px}
+.bo-h750-focus-intro h2{
+  margin:0 0 5px;
+  font-size:21px;
+  line-height:1.35;
+  font-weight:650;
+}
+.bo-h750-focus-intro p{
+  margin:0;
+  color:#637187;
+  font-size:13px;
+  line-height:1.6;
+}
+.bo-h750-focus-fields{display:flex;flex-direction:column;align-items:stretch;gap:0}
+.bo-h750-focus-fields label{
+  display:block;
+  font-size:13px;
+  font-weight:640;
+  color:#394b63;
+  margin:0 0 9px;
+}
+.bo-h750-focus-fields label:not(:first-child){margin-top:26px}
+.bo-h750-focus-fields label em{
+  font-weight:400;
+  font-style:normal;
+  color:#8492a4;
+}
+.bo-h750-focus-fields input,
+.bo-h750-focus-fields textarea{
+  display:block;
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  padding:12px 14px;
+  border:1px solid #dce2e9;
+  border-radius:9px;
+  background:#fff;
+  color:#1b293f;
+  font:inherit;
+  font-size:14px;
+  line-height:1.58;
+  outline:none;
+  resize:vertical;
+  min-height:46px;
+}
+.bo-h750-focus-fields textarea{min-height:110px}
+.bo-h750-focus-fields input::placeholder,
+.bo-h750-focus-fields textarea::placeholder{color:#93a0af;opacity:1}
+.bo-h750-focus-fields input:hover,
+.bo-h750-focus-fields textarea:hover{border-color:#b8c9d9}
+.bo-h750-focus-fields input:focus-visible,
+.bo-h750-focus-fields textarea:focus-visible{
+  border-color:#3478c7;
+  box-shadow:0 0 0 4px rgba(45,114,197,.10);
+}
+.bo-h750-focus-note{
+  color:#637187;
+  font-size:12px;
+  line-height:1.55;
+  margin:11px 0 0;
+}
+.bo-h750-focus-footer{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:18px 32px;
+  border-top:1px solid #eff1f4;
+  background:#fafbfd;
+}
+.bo-h750-focus-footer button{
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:10px 20px;
+  border:1px solid transparent;
+  border-radius:8px;
+  background:transparent;
+  color:#526277;
+  font-size:13px;
+  font-weight:650;
+  cursor:pointer;
+}
+.bo-h750-focus-footer button:hover{background:#edf1f5;color:#24394d}
+.bo-h750-focus-footer button.primary{
+  background:#2268ad;
+  border-color:#2268ad;
+  color:white;
+  box-shadow:0 2px 6px rgba(17,70,126,.11);
+}
+.bo-h750-focus-footer button.primary:hover{background:#1b579b}
+.bo-h750-focus-footer button:disabled,
+.bo-h750-focus-titlebar button:disabled{opacity:.5;cursor:not-allowed}
+.bo-h750-focus-footer button:focus-visible,
+.bo-h750-focus-titlebar button:focus-visible{
+  outline:3px solid #568acb;
+  outline-offset:3px;
+}
+@media(max-width:660px){
+  .bo-h750-focus-backdrop{padding:0}
+  .bo-h750-focus-card{
+    width:100%;
+    height:100vh;
+    height:100dvh;
+    max-height:none;
+    border-radius:0;
+    border:0;
+  }
+  .bo-h750-focus-header{padding:20px 20px 17px}
+  .bo-h750-focus-body{padding:24px 20px 26px}
+  .bo-h750-focus-footer{padding:16px 20px}
+  .bo-h750-focus-titlebar{margin-bottom:20px}
+  .bo-h750-focus-intro h2{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){
+  .bo-h750-focus-card *{scroll-behavior:auto}
+}
