@@ -1,0 +1,41 @@
+/* H7.55: Persona's read-first architecture for every Discovery entity.
+   Edit screens continue using the existing forms; reading never duplicates them. */
+:is(.bo-h72-need-detail,.bo-h73-job-detail,.bo-h74-pain-detail,.bo-h75-hypothesis-detail,.bo-h76-problems,.bo-h77-evidence).bo-h755-read-screen
+ .bo-h71-detail-body{padding:24px clamp(22px,2.3vw,36px) 96px;max-width:none;width:100%;box-sizing:border-box}
+.bo-h755-read-screen .bo-h754-overview-grid{
+ display:grid;grid-template-columns:minmax(0,2.55fr) minmax(288px,1fr);
+ gap:clamp(18px,2vw,28px);width:100%;min-width:0;max-width:none;align-items:start;
+}
+.bo-h755-read-screen .bo-h755-discovery-profile{width:100%;max-width:none;min-width:0}
+.bo-h755-discovery-profile .bo-h751-reader-section{padding:26px clamp(20px,2.2vw,34px)}
+.bo-h755-discovery-profile .bo-h751-reader-section>header{margin-bottom:16px}
+.bo-h755-discovery-profile .bo-h751-reader-section h2{font-size:16px}
+.bo-h755-read-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:clamp(20px,2.5vw,38px);row-gap:24px}
+.bo-h755-read-field{min-width:0;overflow-wrap:anywhere}
+.bo-h755-read-field>small{font-size:11px;display:block;font-weight:730;color:#6e88a3;letter-spacing:.03em;margin:0 0 9px;text-transform:uppercase}
+.bo-h755-read-field>.bo-h751-reader-copy{max-width:78ch;font-size:14px;line-height:1.7}
+.bo-h755-read-screen .bo-h754-rail{position:sticky;top:18px;min-width:0}
+.bo-h755-read-screen .bo-h754-rail>.bo-h754-organize{border-radius:12px}
+.bo-h755-read-screen .bo-h754-rail .bo-h71-form label input,
+.bo-h755-read-screen .bo-h754-rail .bo-h71-form label select{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.bo-h755-detail-tools{display:flex;gap:9px;align-items:center;margin-left:auto}
+.bo-h755-detail-tools button{display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#2367ab;color:#fff;border:1px solid #2367ab;border-radius:8px;padding:9px 13px;min-height:37px;font-size:12px;font-weight:700;cursor:pointer}
+.bo-h755-detail-tools button.secondary{background:#fff;color:#2d6094;border-color:#d3e0ee}
+.bo-h755-detail-tools button:focus-visible,.bo-h755-discovery-profile button:focus-visible{outline:3px solid #9fc8ee;outline-offset:2px}
+.bo-h755-detail-tools button:hover{filter:brightness(.94)}
+/* Domain relevance remains in existing tabs; no circular completeness dashboard on read views. */
+.bo-h755-read-screen .bo-h71-detail-score,
+.bo-h755-read-screen .bo-h76-score,
+.bo-h755-read-screen .bo-h77-score{display:none}
+.bo-h755-read-screen .bo-h75-header-status .bo-h71-detail-score{display:none}
+@media(max-width:1150px){
+ .bo-h755-read-screen .bo-h754-overview-grid{grid-template-columns:minmax(0,1fr)}
+ .bo-h755-read-screen .bo-h754-rail{position:static}
+}
+@media(max-width:680px){
+ .bo-h755-read-fields{grid-template-columns:minmax(0,1fr);row-gap:20px}
+ .bo-h755-read-screen .bo-h754-overview-grid{gap:16px}
+ .bo-h755-discovery-profile .bo-h751-reader-section{padding:21px 18px}
+ .bo-h755-detail-tools button{padding:8px;font-size:11px}
+ :is(.bo-h72-need-detail,.bo-h73-job-detail,.bo-h74-pain-detail,.bo-h75-hypothesis-detail,.bo-h76-problems,.bo-h77-evidence).bo-h755-read-screen .bo-h71-detail-body{padding:16px 14px 90px}
+}
