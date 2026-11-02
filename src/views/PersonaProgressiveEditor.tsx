@@ -55,9 +55,14 @@ export function PersonaProgressiveEditor({ draft, onChange, onAddBlock, onAdvanc
       {current.id === 'goal' && <label className="bo-h746-inputs"><span>Resultado esperado</span><textarea aria-label="Objetivo principal" rows={5}
         value={draft.primaryGoal} onChange={(event) => update('primaryGoal', event.target.value)}
         placeholder="Que resultado essa pessoa quer alcançar usando o serviço?"/></label>}
-      {current.id === 'situation' && <label className="bo-h746-inputs"><span>Momento de uso</span><textarea aria-label="Situação de uso" rows={5}
-        value={draft.situation} onChange={(event) => update('situation', event.target.value)}
-        placeholder="Quando e onde essa necessidade aparece?"/></label>}
+      {current.id === 'situation' && <div className="bo-h746-inputs">
+        <label><span>Momento de uso</span><textarea aria-label="Situação de uso" rows={4}
+          value={draft.situation} onChange={(event) => update('situation', event.target.value)}
+          placeholder="Em que momento essa pessoa precisa do serviço?"/></label>
+        <label><span>Contexto e ambiente</span><textarea aria-label="Contexto e ambiente" rows={4}
+          value={draft.context} onChange={(event) => update('context', event.target.value)}
+          placeholder="Onde está, o que faz e quais condições influenciam sua experiência?"/></label>
+      </div>}
       {current.id === 'channels' && <label className="bo-h746-inputs"><span>Pontos de interação</span><textarea aria-label="Canais de contato" rows={5}
         value={channelsInput} onChange={(event) => changeChannels(event.target.value)}
         placeholder={'WhatsApp\nPresencial\nSite'}/></label>}
