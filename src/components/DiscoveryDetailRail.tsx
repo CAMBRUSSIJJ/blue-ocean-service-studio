@@ -28,6 +28,6 @@ export function DiscoveryDetailRail({
         <b>{check.complete ? <Check size={12}/> : '—'}</b><span>{check.label}</span>
       </div>)}</div>
     </section>}
-    {summary && <section className="bo-h754-summary">{summary}</section>}
+    {summary && <details className="bo-h754-summary"><summary>Leitura complementar</summary><div>{summary}</div></details>}
   </aside>;
 }
