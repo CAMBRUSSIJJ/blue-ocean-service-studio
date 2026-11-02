@@ -181,7 +181,7 @@ function saveView(){
 function choosePreset(preset,keepCustom=false){const renderer=V.blueprintRenderer,target=preset==='operational'?'blueprint':['essential','detailed','acquisition'].includes(preset)?'journey':V.perspective;if(target!==V.perspective)V=window.BlueOceanJourneyViews.switchMatrixPerspective(V,target,rowDefs());V.blueprintRenderer=renderer;V.preset=preset;if(preset==='operational')V.perspective='blueprint';else if(['essential','detailed','acquisition'].includes(preset))V.perspective='journey';V.hiddenRows=rowDefs().filter(r=>!(PRESETS[preset].includes(r.id)||r.custom&&(keepCustom||preset!=='essential'))).map(r=>r.id);saveView()}
 function announceSave(ok){
   saveLabel=ok==='pending'?'Salvando…':ok?'Salvo neste navegador':'Erro ao salvar';
-  const el=app.querySelector('[data-save-status]');if(el)el.textContent=saveLabel;
+  const el=app.querySelector('[data-save-status]');if(el){el.textContent=saveLabel;el.dataset.savePhase=ok==='pending'?'pending':ok===true?'saved':'error'}
   // Some host acknowledgements arrive after a disabled render. Keep the
   // enabled/draggable state of library controls aligned to the canonical lock,
   // without remounting dialogs or overwriting edits already in progress.
