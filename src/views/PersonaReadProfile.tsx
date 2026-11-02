@@ -1,4 +1,5 @@
 import { ArrowRight, Plus } from '../design-system/icons';
+import type { ReactNode } from 'react';
 import type { PersonaProfileDraft } from '../services/persona-studio';
 
 type Props = {
@@ -9,7 +10,7 @@ type Props = {
 };
 
 function ReadSection({ title, step, children, onEditStep }: {
-  title: string; step: number; children: React.ReactNode; onEditStep: (step: number) => void;
+  title: string; step: number; children: ReactNode; onEditStep: (step: number) => void;
 }) {
   return <section className="bo-h751-reader-section">
     <header><h2>{title}</h2><button type="button" onClick={() => onEditStep(step)}>Editar <span aria-hidden="true">↗</span></button></header>
