@@ -39,3 +39,45 @@
  .bo-h755-detail-tools button{padding:8px;font-size:11px}
  :is(.bo-h72-need-detail,.bo-h73-job-detail,.bo-h74-pain-detail,.bo-h75-hypothesis-detail,.bo-h76-problems,.bo-h77-evidence).bo-h755-read-screen .bo-h71-detail-body{padding:16px 14px 90px}
 }
+
+/* The existing right-rail remains available, but the read screen mirrors
+   Personas: organization and connections, without a checklist dashboard. */
+.bo-h755-read-screen .bo-h754-rail>.bo-h754-criteria,
+.bo-h755-read-screen .bo-h754-rail>.bo-h754-summary,
+.bo-h755-read-screen .bo-h754-rail>.bo-h71-editor-card:nth-child(2){display:none}
+.bo-h755-read-screen .bo-h754-rail>.bo-h71-editor-card:first-child{
+ border:1px solid #dfe6ef;
+ border-radius:12px;
+ min-width:0;
+ width:100%;
+ box-sizing:border-box;
+}
+.bo-h755-read-screen.bo-h72-need-detail .bo-h71-editor-grid.bo-h754-overview-grid{
+ grid-template-columns:minmax(0,2.55fr) minmax(288px,1fr);
+ gap:clamp(18px,2vw,28px);
+ width:100%;
+ max-width:none;
+ min-width:0;
+ align-items:start;
+}
+.bo-h755-read-screen.bo-h72-need-detail .bo-h754-rail{display:flex;flex-direction:column;position:sticky;top:18px}
+.bo-h755-read-screen.bo-h72-need-detail .bo-h754-rail>.bo-h71-editor-card{
+ grid-column:auto;
+ grid-row:auto;
+ width:100%;
+ margin:0;
+}
+.bo-h755-read-screen .bo-h754-rail>.bo-h71-editor-card>.bo-h71-form{
+ display:flex;flex-direction:column;gap:15px;padding:20px;
+}
+.bo-h755-read-screen .bo-h754-rail>.bo-h71-editor-card>.bo-h71-form label{
+ width:100%;min-width:0;
+}
+.bo-h755-read-screen .bo-h754-rail>.bo-h71-editor-card>.bo-h71-form input,
+.bo-h755-read-screen .bo-h754-rail>.bo-h71-editor-card>.bo-h71-form select{box-sizing:border-box;width:100%;min-width:0}
+@media(max-width:1150px){
+ .bo-h755-read-screen.bo-h72-need-detail .bo-h71-editor-grid.bo-h754-overview-grid{
+  grid-template-columns:minmax(0,1fr);
+ }
+ .bo-h755-read-screen.bo-h72-need-detail .bo-h754-rail{position:static}
+}
