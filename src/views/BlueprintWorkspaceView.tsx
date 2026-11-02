@@ -138,13 +138,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
   const [journeyViewMode, setJourneyViewMode] = useState<LibraryViewMode>('cards');
   const [journeyEditorOpen, setJourneyEditorOpen] = useState(false);
   const [journeyCreateOpen, setJourneyCreateOpen] = useState(false);
-  useEffect(() => {
-    if (!createMapIntent) return;
-    setWorkspaceTab('journey');
-    setJourneyEditorOpen(false);
-    setJourneyCreateOpen(true);
-    onCreateMapIntentConsumed?.();
-  }, [createMapIntent, onCreateMapIntentConsumed]);
+
   const [journeyToDelete, setJourneyToDelete] = useState<{ id: string; name: string } | null>(null);
   const [blueprintToDelete, setBlueprintToDelete] = useState<{ id: string; name: string } | null>(null);
   const [designStartOpen, setDesignStartOpen] = useState(false);
@@ -282,9 +276,9 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
     }, prepared.created ? 180 : 30);
   };
 
-  const createJourney = async (requestedTemplate?: string) => {
-    let name = journeyDraftName.trim() || 'Novo mapa';
-    if (!journeyDraftName.trim()) {
+  const createJourney = async (requestedTemplate?: string, requestedName?: string) => {
+    let name = requestedName || journeyDraftName.trim() || 'Novo mapa';
+    if (!journeyDraftName.trim() && !requestedName) {
       const names = new Set(Object.values(graph.journeys).map(item => item.name.toLocaleLowerCase('pt-BR')));
       let number = 2;
       while (names.has(name.toLocaleLowerCase('pt-BR'))) name = `Novo mapa (${number++})`;
@@ -300,6 +294,49 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
     showToast((requestedTemplate ?? journeyStartTemplate) === 'blank' ? 'Mapa pronto para adicionar etapas e cartões.' : 'Mapa criado com um modelo editável. Ajuste as etapas para a realidade do serviço.');
     await openJourney(created.id);
   };
+
+  const projectMapStartRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!createMapIntent) return;
+    setWorkspaceTab('journey');
+    setJourneyEditorOpen(false);
+    let direct: 'journey' | 'blueprint' | null = null;
+    try {
+      const pending = sessionStorage.getItem('bo-h749-direct-map-intent');
+      if (pending === 'journey' || pending === 'blueprint') direct = pending;
+    } catch { /* regular creation remains available */ }
+    if (!direct) {
+      setJourneyCreateOpen(true);
+      onCreateMapIntentConsumed?.();
+      return;
+    }
+    // Directly enter the shared map workspace. A reusable template project may
+    // already contain a Journey; never create a duplicate just to enter its editor.
+    let cancelled = false;
+    let timer: number | undefined;
+    let retries = 0;
+    const begin = () => {
+      if (cancelled || projectMapStartRef.current === graph.service.id) return;
+      if (!journeyApi()?.create || !blueprintApi()?.open) {
+        if (retries++ < 15) { timer = window.setTimeout(begin, 180); return; }
+        // Runtime is not ready: leave the working map creation page available.
+        try { sessionStorage.removeItem('bo-h749-direct-map-intent'); } catch { /* optional */ }
+        setJourneyCreateOpen(true);
+        showToast('Editor de mapas ainda não disponível. Continue pela criação do mapa.');
+        onCreateMapIntentConsumed?.();
+        return;
+      }
+      projectMapStartRef.current = graph.service.id;
+      try { sessionStorage.removeItem('bo-h749-direct-map-intent'); } catch { /* optional */ }
+      setJourneyCreateOpen(false);
+      const existingId = graph.service.journeyIds.find((id) => Boolean(graph.journeys[id]));
+      if (existingId) void openJourney(existingId);
+      else void createJourney('blank', direct === 'blueprint' ? 'Blueprint do serviço' : 'Jornada do cliente');
+      onCreateMapIntentConsumed?.();
+    };
+    timer = window.setTimeout(begin, 0);
+    return () => { cancelled = true; if (timer !== undefined) window.clearTimeout(timer); };
+  }, [createMapIntent, graph.service.id]);
 
   const deleteJourney = () => {
     if (!journeyToDelete) return;
