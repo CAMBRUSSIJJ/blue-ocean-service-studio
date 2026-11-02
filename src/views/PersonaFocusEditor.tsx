@@ -29,9 +29,16 @@ export function PersonaFocusEditor({ draft, onChange, onExit, onSaveAndExit }: P
   useEffect(() => {
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const originalOverflow = document.body.style.overflow;
+    const appRoot = document.getElementById('root');
+    const wasInert = appRoot?.hasAttribute('inert') ?? false;
+    appRoot?.setAttribute('inert', '');
     document.body.style.overflow = 'hidden';
     firstFieldRef.current?.focus();
-    return () => { document.body.style.overflow = originalOverflow; previous?.focus(); };
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      if (!wasInert) appRoot?.removeAttribute('inert');
+      previous?.focus();
+    };
   }, []);
 
   useEffect(() => { firstFieldRef.current?.focus(); }, [step]);
