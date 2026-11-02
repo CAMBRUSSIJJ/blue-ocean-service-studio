@@ -6,6 +6,7 @@ import type { ProjectLibraryEntry, ProjectTemplate } from '../services/project-l
 import { projectTemplateLabel } from '../services/project-library';
 import './project-creation-flow-h743.css';
 import './project-creation-flow-h744.css';
+import './project-creation-flow-h749.css';
 
 export type ProjectHomeSection = 'home' | 'projects' | 'templates';
 
@@ -14,14 +15,16 @@ type Props = {
   section: ProjectHomeSection;
   setSection: (section: ProjectHomeSection) => void;
   openProjectWorkspace: () => void;
+  onCreatingChange?: (creating: boolean) => void;
+  onCreatedIntent?: (intent: ProjectIntent) => void;
 };
 
-type ProjectIntent = 'journey' | 'personas' | 'blueprint' | 'whiteboard';
+export type ProjectIntent = 'journey' | 'personas' | 'blueprint' | 'whiteboard';
 const PROJECT_INTENTS: Array<{ id: ProjectIntent; title: string; detail: string }> = [
   { id: 'journey', title: 'Mapear a jornada', detail: 'Visualize o caminho do cliente do primeiro contato até a entrega.' },
   { id: 'personas', title: 'Criar personas', detail: 'Entenda quem utiliza o serviço e suas expectativas.' },
   { id: 'blueprint', title: 'Desenhar um blueprint', detail: 'Conecte experiência e atividades dos bastidores no mesmo mapa.' },
-  { id: 'whiteboard', title: 'Explorar livremente', detail: 'Abra um canvas para reunir ideias, evidências e descobertas.' },
+  { id: 'whiteboard', title: 'Começar com um espaço em branco', detail: 'Organize ideias e explore possibilidades em um Whiteboard livre.' },
 ];
 
 const PHASE_LABELS: Record<string, string> = {
@@ -72,7 +75,7 @@ function ProjectCard({ project, active, onOpen, onFavorite, onRename, onArchive,
   </article>;
 }
 
-export function ProjectHomeView({ studio, section, setSection, openProjectWorkspace }: Props) {
+export function ProjectHomeView({ studio, section, setSection, openProjectWorkspace, onCreatingChange, onCreatedIntent }: Props) {
   const { projects, archivedProjects, activeProjectId, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, deleteWorkspaceProject, createWorkspaceProject } = studio;
   const [query, setQuery] = useState('');
   const [dialog, setDialog] = useState<ProjectTemplate | null>(null);
@@ -83,6 +86,11 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
   const [projectName, setProjectName] = useState('');
   const [serviceName, setServiceName] = useState('');
   const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    onCreatingChange?.(Boolean(dialog));
+    return () => onCreatingChange?.(false);
+  }, [dialog, onCreatingChange]);
 
   const current = projects.find((item) => item.id === activeProjectId) ?? projects[0] ?? null;
   const favorites = projects.filter((item) => item.favorite).slice(0, 4);
@@ -121,10 +129,12 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
     if (!ok) return;
     setDialog(null);
     setSelectedIntent(null);
-    // The prototype's next screen is the project overview; its contextual CTA
-    // remembers the selected intention instead of unexpectedly opening an editor.
-    if (target) { try { sessionStorage.setItem('bo-h744-new-project-intent', target); } catch { /* optional navigation hint */ } }
-    window.setTimeout(openProjectWorkspace, 0);
+    // The chosen intent is a route to the first working surface, never a different project schema.
+    // Legacy callers without a route handler still return to the canonical project overview.
+    window.setTimeout(() => {
+      if (target && onCreatedIntent) onCreatedIntent(target);
+      else openProjectWorkspace();
+    }, 0);
   };
 
   const beginRename = (project: ProjectLibraryEntry) => {
@@ -163,33 +173,32 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
   if (dialog) return <section className="bo-h744-create-page" data-project-creation-page="H7.44" aria-labelledby="bo-h744-create-title">
     <header className="bo-h744-create-top">
       <button type="button" className="bo-h744-back" onClick={() => setDialog(null)}><ArrowLeft size={17}/> Voltar aos projetos</button>
-      <span>PROJETO NOVO <b>·</b> ESCOLHA COMO COMEÇAR</span>
+      <span>Projetos <b>›</b> Novo projeto</span>
     </header>
     <div className="bo-h744-create-frame">
       <main className="bo-h744-create-primary">
         <span className="bo-h744-create-eyebrow">BLUE OCEAN · CRIAÇÃO</span>
-        <h1 id="bo-h744-create-title">{dialog === 'blank' ? 'O que você quer fazer?' : 'Como quer começar este projeto?'}</h1>
-        <p className="bo-h744-create-subtitle">{dialog === 'blank' ? 'Você não precisa conhecer as ferramentas para começar. Escolha o que pretende construir; o projeto será criado com o mesmo modelo de dados do serviço.' : `Modelo selecionado: ${projectTemplateLabel(dialog)}. Você pode definir o ponto de partida e ajustar os dados depois.`}</p>
+        <h1 id="bo-h744-create-title">Como você deseja começar?</h1>
+        <p className="bo-h744-create-subtitle">{dialog === 'blank' ? 'Escolha um ponto de partida. Todas as ferramentas continuarão disponíveis no mesmo projeto.' : `Comece pelo modelo ${projectTemplateLabel(dialog)}. Você poderá adaptar o serviço depois.`}</p>
         <fieldset className="bo-h744-options">
-          <legend>Escolha por onde começar</legend>
+          <legend>O que você quer fazer primeiro?</legend>
           <div className="bo-h744-option-grid">{PROJECT_INTENTS.map((item, index) => <button type="button" key={item.id} className={selectedIntent === item.id ? 'is-selected' : ''} aria-pressed={selectedIntent === item.id} onClick={() => setSelectedIntent(item.id)}>
             <span className="bo-h744-option-graphic">{index === 0 ? <LayoutTemplate size={23}/> : index === 1 ? <FolderKanban size={23}/> : index === 2 ? <LayoutTemplate size={23}/> : <Sparkles size={23}/>}</span>
             <strong>{item.title}</strong><small>{item.detail}</small><em>{selectedIntent === item.id ? 'Selecionado ✓' : 'Selecionar →'}</em>
           </button>)}</div>
         </fieldset>
-        <p className="bo-h744-create-explanation">Você poderá usar todas as ferramentas depois, independentemente da escolha inicial. Projeto e serviço são conceitos separados: o projeto organiza o trabalho e o serviço é o que você desenha.</p>
+        <p className="bo-h744-create-explanation">Seu ponto de partida não limita o projeto. Personas, mapas, evidências e Whiteboards compartilham os mesmos dados do serviço.</p>
       </main>
       <aside className="bo-h744-create-aside">
-        <span className="bo-h744-side-icon"><FolderKanban size={22}/></span>
-        <h2>Seu espaço de trabalho</h2>
-        <p>Personalize agora ou dê um nome depois. Nada será criado antes de confirmar.</p>
+        <h2>Defina seu projeto</h2>
+        <p>Dê um nome agora ou comece e personalize depois.</p>
         <label><span>Nome do projeto <small>(opcional)</small></span><input aria-label="Nome do projeto" value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Melhoria do atendimento"/></label>
         <details className="bo-h744-additional">
           <summary>Mais informações (opcionais)</summary>
           <label><span>Nome do serviço</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Atendimento ao cliente"/></label>
           <label><span>Descrição</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Descreva o objetivo do projeto"/></label>
         </details>
-        <div className="bo-h744-start-summary"><small>PRÓXIMO PASSO</small><strong>{selectedIntent ? PROJECT_INTENTS.find((item) => item.id === selectedIntent)?.title : 'Escolha uma intenção à esquerda'}</strong><p>{selectedIntent ? 'Vamos abrir diretamente a ferramenta escolhida.' : 'Selecione uma opção para continuar.'}</p></div>
+        <p className="bo-h749-next-inline" role="status" aria-live="polite">{selectedIntent ? 'O projeto abrirá diretamente na ferramenta escolhida.' : 'Selecione um ponto de partida para continuar.'}</p>
         <button type="button" className="primary bo-h744-create-confirm" disabled={!selectedIntent} onClick={submit}>Criar projeto e começar <ArrowRight size={16}/></button>
         <button type="button" className="bo-h744-cancel" onClick={() => setDialog(null)}>Cancelar</button>
       </aside>
