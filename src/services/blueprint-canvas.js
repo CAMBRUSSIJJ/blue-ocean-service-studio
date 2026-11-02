@@ -46,14 +46,14 @@ export function canvasCardHeight(note={},row='') {
   if(kind==='text')return 98;
   return CANVAS_GRID.cardHeight;
 }
-export function canvasRowHeight(doc,definition,indices,minimum=0) {
+export function canvasRowHeight(doc,definition,indices,minimum=0,grid=CANVAS_GRID) {
   if(definition.id==='em')return Math.max(132,Number(minimum)||0);
-  const g=CANVAS_GRID;
+  const g=grid;
   const total=indices.map(index=>{
     const notes=doc.c[definition.id+'|'+index]||[];
-    return notes.length?g.padding*2+notes.reduce((sum,note)=>sum+canvasCardHeight(note,definition.id),0)+Math.max(0,notes.length-1)*g.gap:0;
+    return notes.length?g.padding*2+notes.reduce((sum,note)=>sum+(g.rowGap===undefined||note.canvas?.height!=null?canvasCardHeight(note,definition.id):Math.max(g.cardHeight,canvasCardHeight(note,definition.id))),0)+Math.max(0,notes.length-1)*g.gap:0;
   });
-  return Math.max(90,...total,Math.min(540,Math.max(0,Number(minimum)||0)));
+  return Math.max(g.minimumRow||90,...total,Math.min(540,Math.max(0,Number(minimum)||0)));
 }
 export function normalizeCanvasMetadata(input={}) {
   if (!Object.hasOwn(CANVAS_COMPONENTS,input.kind)) throw Error('Tipo de componente indisponível.');
@@ -139,29 +139,31 @@ export function canvasEmotionScore(step={}) {
 export function canvasEmotionPoint(stage,row) {
   return {x:stage.x+stage.width/2,y:row.y+24+(2-canvasEmotionScore(stage.step))*16};
 }
-export function canvasBoundary(row,index,rows) {
+export function canvasBoundary(row,index,rows,reference=false) {
+  if(reference&&row.id==='bk'&&!rows.some(value=>value.id==='fl')&&rows.slice(0,index).some(value=>value.id==='ac'))return 'Linha de visibilidade';
   const previous={fl:'ac',bk:'fl',sy:'bk'}[row.id],before=rows.findIndex(value=>value.id===previous);
   if(!previous||before<0||before>=index||rows.slice(before+1,index).some(value=>['fl','bk','sy'].includes(value.id)))return '';
   return {fl:'Linha de interação',bk:'Linha de visibilidade · início dos bastidores',sy:'Linha de interação interna · apoio'}[row.id];
 }
-export function buildCanvasLayout(doc,definitions,stageIndices=null,stageWidths=null,rowHeights=null) {
-  const g=CANVAS_GRID,indices=stageIndices||doc.steps.map((_,index)=>index),nodes=[],rows=[];
+export function buildCanvasLayout(doc,definitions,stageIndices=null,stageWidths=null,rowHeights=null,grid=null) {
+  const g={...CANVAS_GRID,...grid},indices=stageIndices||doc.steps.map((_,index)=>index),nodes=[],rows=[];
   let cursor=g.label;
-  const stages=indices.map(index=>{const width=canvasStageWidth(stageWidths?.[index]);const stage={index,step:doc.steps[index],x:cursor,width};cursor+=width;return stage;});
+  const stages=indices.map(index=>{const width=canvasStageWidth(stageWidths?.[index],g.stage);const stage={index,step:doc.steps[index],x:cursor,width};cursor+=width;return stage;});
   let y=g.header;
   for(const definition of definitions) {
-    const height=canvasRowHeight(doc,definition,indices,rowHeights?.[definition.id]);
+    const height=canvasRowHeight(doc,definition,indices,rowHeights?.[definition.id],g);
+    if(g.rowGap!==undefined&&canvasBoundary(definition,rows.length,definitions,g.reference))y+=32;
     rows.push({...definition,y,height});
     if(definition.id==='em')for(const stage of stages)(doc.c['em|'+stage.index]||[]).forEach(note=>{if(note.virtualLabel)return;const point=canvasEmotionPoint(stage,{y});nodes.push({id:note.i,note,row:'em',stageIndex:stage.index,position:0,key:'em|'+stage.index,x:point.x-1,y:point.y-1,width:2,height:2});});
     if(definition.id!=='em')for(const stage of stages){
       let offset=0;
       for(const [position,note] of (doc.c[definition.id+'|'+stage.index]||[]).entries()){
-        const width=canvasCardWidth(note,stage.width),cardHeight=canvasCardHeight(note,definition.id);
+        const width=grid?Math.min(stage.width-32,canvasDimension(note.canvas?.width,150,600)??g.cardWidth):canvasCardWidth(note,stage.width),cardHeight=grid?(g.rowGap===undefined||note.canvas?.height!=null?canvasCardHeight(note,definition.id):Math.max(g.cardHeight,canvasCardHeight(note,definition.id))):canvasCardHeight(note,definition.id);
         nodes.push({id:note.i,note,row:definition.id,stageIndex:stage.index,position,key:definition.id+'|'+stage.index,x:stage.x+(stage.width-width)/2,y:y+g.padding+offset,width,height:cardHeight});
         offset+=cardHeight+g.gap;
       }
     }
-    y+=height+28;
+    y+=height+(g.rowGap??28);
   }
   return {stages,rows,nodes,width:cursor+20,height:y+20};
 }

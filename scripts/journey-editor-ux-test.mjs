@@ -8,8 +8,8 @@ const view=()=>normalizeSavedMatrixView({perspective:'journey',preset:'custom',r
 check('Perspective switching restores independent order, visibility, filters and geometry after JSON reload',()=>{
   const original=view(),before=structuredClone(original);
   let next=switchMatrixPerspective(original,'blueprint',definitions);
-  assert.equal(next.preset,'operational');assert.ok(!next.hiddenRows.includes('fl'));assert.ok(!next.hiddenRows.includes('xnotes'));assert.equal(next.cardFilters.query,'');
-  next.hiddenRows.push('fl');next.rowOrder.reverse();next.cardFilters.query='equipe';next.zoom=90;
+  assert.equal(next.preset,'operational');assert.ok(next.hiddenRows.includes('fl'));assert.ok(!next.hiddenRows.includes('bk'));assert.ok(!next.hiddenRows.includes('xnotes'));assert.equal(next.cardFilters.query,'');
+  next.hiddenRows=next.hiddenRows.filter(id=>id!=='fl');next.rowOrder.reverse();next.cardFilters.query='equipe';next.zoom=90;
   const operation=structuredClone(next);
   next=switchMatrixPerspective(JSON.parse(JSON.stringify(next)),'journey',definitions);
   for(const key of ['hiddenRows','rowOrder','cardFilters','stageWidths','rowHeights','collapsedRows','zoom'])assert.deepEqual(next[key],original[key]);

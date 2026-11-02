@@ -10,7 +10,7 @@ export function journeyPreviewSrc(journey: Journey, graph: ServiceGraph): string
   const stages = journey.stageIds.map(id => graph.stages[id]).filter(Boolean).slice(0, 4);
   const labels: Record<string, string> = { sd: 'Contexto', ev: 'Evidências', ch: 'Canais', ac: 'Ações do cliente', th: 'Pensamentos', em: 'Emoções', fl: 'Linha de frente', bk: 'Bastidores', sy: 'Sistemas e apoio', im: 'Dores e ideias' };
   const view = journey.matrixView;
-  const defaultRows = view?.perspective === 'journey' ? ['sd', 'ac', 'em'] : ['ev', 'ch', 'ac', 'em', 'fl', 'bk', 'sy'];
+  const defaultRows = view?.perspective === 'journey' ? ['sd', 'ac', 'em'] : ['ev', 'ch', 'ac', 'bk'];
   const rowIds = (view?.rowOrder?.length ? view.rowOrder : defaultRows).filter(id => !(view?.hiddenRows ?? []).includes(id));
   const lanes = journey.matrixContent || view || !journey.mapLayout?.lanes?.length
     ? rowIds.slice(0, 3).map(id => ({ id, label: journey.matrixContent?.rows[id]?.n || labels[id] || id, type: 'text' as const, cards: {}, tone: 'neutral' as const, binding: undefined }))

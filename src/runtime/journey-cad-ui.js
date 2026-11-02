@@ -3,6 +3,8 @@ const cadModel=window.BlueOceanBlueprintCanvas;
 const cadState={scene:'',selected:'',creating:null,link:null,drafts:new Map(),camera:null,layout:null,pending:'',error:'',library:false,inspector:false,detail:'auto',drag:null,ignoreClick:false,quick:null,choosing:null,menu:null,connectFrom:'',connectType:'sequence',pointer:null,query:'',libraryHidden:false,libraryKind:'',pendingDocument:null,canvasPerspective:'',libraryFilter:'all',activeCell:null,sidebarTab:'components',libraryCompact:false,groupOpen:{},favorites:[],resize:null,resizePreview:null,emotionDrag:null,selectedRow:'',laneResize:null,lanePreviewHeights:null,cardResize:null,cardResizePreview:null,laneDragId:'',confirmation:null};
 try{const p=JSON.parse(localStorage.getItem('bo-cad-library-prefs-v2')||'{}');cadState.libraryCompact=!!p.compact;cadState.favorites=Array.isArray(p.favorites)?p.favorites.filter(k=>k in cadModel.CANVAS_COMPONENTS):[];cadState.groupOpen=p.groups||{};cadState.sidebarTab=p.sidebarTab==='lanes'?'lanes':'components'}catch{}
 function cadSaveLibraryPreferences(){try{localStorage.setItem('bo-cad-library-prefs-v2',JSON.stringify({compact:cadState.libraryCompact,favorites:cadState.favorites,groups:cadState.groupOpen,sidebarTab:cadState.sidebarTab}))}catch{}}
+function cadReference(){return V.perspective==='blueprint'}
+function cadLayout(widths=cadStageWidths()){return cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,widths,cadRowHeights(),cadReference()?{label:192,stage:320,header:80,cardWidth:288,cardHeight:132,padding:12,gap:16,rowGap:8,minimumRow:120,reference:true}:null)}
 function cadStageWidths(){return cadState.resizePreview||V.stageWidths||[]}
 function cadRowHeights(){return cadState.lanePreviewHeights||V.rowHeights||{}}
 function cadChangeRowHeight(id,height){
@@ -78,12 +80,12 @@ function cadInspector(){
  const allowed=component.rows.includes('*')?rowDefs().map(value=>value.id):component.rows.includes(row)?component.rows:[...component.rows,row];
  const legacyPlacement=!cadModel.canvasAcceptsNewRow(kind,row);
  const resourceRefs=[...new Set([...(S.operationalResources||[]).map(item=>item.ref),...(draft.resourceRefs||[])])];
- return '<form id="cad-component-form"><h2>'+(isNew?'Adicionar '+component.title:'Propriedades')+'</h2><p class="cad-kind">'+component.title+'</p>'+(legacyPlacement?'<p class="cad-placement-warning" role="status">Cartão legado: essa faixa não corresponde ao tipo do componente. Os dados foram preservados.</p>':'')+'<section class="cad-inspector-group"><h3>Conteúdo</h3>'+cadField('title','Nome do componente',draft.title,'text','required maxlength="240"')+
+ return '<form id="cad-component-form"><h2>'+(isNew?'Adicionar '+component.title:'Propriedades')+'</h2><p class="cad-kind">'+component.title+'</p>'+(legacyPlacement?'<p class="cad-placement-warning" role="status">Cartão legado: essa faixa não corresponde ao tipo do componente. Os dados foram preservados.</p>':'')+'<section class="cad-inspector-group"><h3>Conteúdo</h3>'+cadField('title',cadReference()?'Título do componente':'Nome do componente',draft.title,'text','required maxlength="240"')+
  '<label>Descrição<textarea name="description" maxlength="1000">'+esc(draft.description||'')+'</textarea></label></section>'+
  (kind==='artifact'?'<fieldset class="cad-evidence-fields"><legend>Evidência física ou digital</legend><label>Apresentação<select name="evidenceType">'+[['physical','Evidência física'],['image','Imagem'],['document','Documento'],['link','Link']].map(([id,label])=>'<option value="'+id+'" '+((draft.evidenceType||'physical')===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+cadField('imageUrl','Endereço HTTPS da imagem',draft.imageUrl||entry?.note.url||'','url','maxlength="2000" placeholder="https://..."')+(cadModel.canvasSafeUrl(draft.imageUrl)?'<figure class="cad-evidence-preview"><img src="'+esc(cadModel.canvasSafeUrl(draft.imageUrl))+'" alt="Prévia da evidência" loading="lazy"><figcaption>Prévia da imagem vinculada</figcaption></figure>':'')+cadField('linkUrl','Link para abrir documento ou evidência',draft.linkUrl||'','url','maxlength="2000" placeholder="https://..."')+'<p class="cad-field-hint">Use links públicos HTTPS. Não envie URLs de arquivos privados.</p></fieldset>':kind==='channel'?cadField('linkUrl','Link do canal (opcional)',draft.linkUrl||'','url','maxlength="2000" placeholder="https://..."'):'')+
  '<details class="cad-inspector-advanced" open><summary>Aparência do cartão</summary><div class="cad-inspector-group"><label class="cad-icon-field">Ícone do cartão<select name="iconKey">'+Object.entries(cadModel.CANVAS_COMPONENTS).map(([id,item])=>'<option value="'+id+'" '+((draft.iconKey||kind)===id?'selected':'')+'>'+esc(item.title)+'</option>').join('')+'</select></label>'+
  '<label class="cad-tone-field">Cor de destaque<select name="tone">'+[['default','Padrão'],['blue','Azul'],['teal','Turquesa'],['amber','Âmbar'],['violet','Violeta'],['neutral','Neutro']].map(([id,label])=>'<option value="'+id+'" '+((draft.tone||'default')===id?'selected':'')+'>'+label+'</option>').join('')+'</select></label>'+
- '</div></details><section class="cad-inspector-group"><h3>Localização no serviço</h3><label>Etapa<select name="stageKey" required>'+cadStageOptions(S.steps.findIndex(step=>cadStageKey(step)===draft.stageKey))+'</select></label><label>Faixa<select name="row">'+allowed.map(id=>'<option value="'+id+'" '+(id===draft.row?'selected':'')+'>'+esc(rowDefs().find(item=>item.id===id)?.n||id)+'</option>').join('')+'</select></label>'+
+ (cadReference()?'<div class="cad-reference-tones" role="group" aria-label="Cor de destaque">'+[['blue','Azul','#3b82f6'],['violet','Violeta','#8b5cf6'],['teal','Turquesa','#10b981'],['amber','Âmbar','#f59e0b'],['neutral','Neutro','#94a3b8'],['default','Padrão','#fff']].map(([tone,label,color])=>cadButton('cad-tone','<span class="sr-only">'+label+'</span>','data-tone="'+tone+'" aria-label="'+label+'" aria-pressed="'+((draft.tone||'default')===tone)+'" style="--tone:'+color+'"')).join('')+'</div>':'')+'</div></details><section class="cad-inspector-group"><h3>Localização no serviço</h3><label>Etapa<select name="stageKey" required>'+cadStageOptions(S.steps.findIndex(step=>cadStageKey(step)===draft.stageKey))+'</select></label><label>Faixa<select name="row">'+allowed.map(id=>'<option value="'+id+'" '+(id===draft.row?'selected':'')+'>'+esc(rowDefs().find(item=>item.id===id)?.n||id)+'</option>').join('')+'</select></label>'+
  '</section><section class="cad-inspector-group"><h3>Vínculos e operação</h3>'+ 
  (isNew&&['system','resource','metric','channel','persona','need','pain','opportunity'].includes(kind)?'<label>Usar registro do serviço<select name="referenceId">'+cadOptions(cadCatalog(kind),draft.referenceId,'Criar novo registro')+'</select></label><p>Ao reutilizar, o nome e os dados do registro existente são mantidos.</p>':'')+
  '<div class="cad-field-grid">'+cadField('owner','Responsável',draft.owner,'text','maxlength="160"')+cadField('team','Equipe',draft.team,'text','maxlength="160"')+'</div><label>Canal<select name="channelId">'+cadOptions(cadCatalog('channel'),draft.channelId)+'</select></label><div class="cad-field-grid">'+[['durationMinutes','Execução (min)'],['waitMinutes','Espera (min)'],['targetMinutes','Prazo (min)']].map(([name,label])=>cadField(name,label,draft[name],'number','min="0" max="525600" step="any"')).join('')+'</div><fieldset><legend>Recursos vinculados</legend>'+(resourceRefs.length?resourceRefs.map(ref=>'<label class="cad-check"><input type="checkbox" name="resourceRefs" value="'+esc(ref)+'" '+(draft.resourceRefs?.includes(ref)?'checked':'')+'>'+esc(blueprintResourceName(ref))+'</label>').join(''):'<p>Cadastre um sistema ou recurso na biblioteca.</p>')+'</fieldset>'+cadField('resourceNotes','Outros recursos',draft.resourceNotes,'text','maxlength="400"')+'<label>Regra ou condição<textarea name="rule" maxlength="1000">'+esc(draft.rule||'')+'</textarea></label><label>Indicador vinculado<select name="metricId">'+cadOptions(cadCatalog('metric'),draft.metricId)+'</select></label></section><p class="form-error" role="alert">'+esc(cadState.error)+'</p><footer>'+cadButton('cad-cancel','Cancelar')+'<button type="submit" '+(cadLocked()?'disabled':'')+'>'+(isNew?'Adicionar ao Blueprint':'Salvar componente')+'</button></footer>'+(!isNew?cadButton('cad-delete','Remover do mapa',cadLocked()?'disabled':''):'')+'</form>';
@@ -107,7 +109,7 @@ function cadConfirmationView(){
 }
 function cadLinkFields(){const form=app.querySelector('#cad-link-form');if(!form)return;const handoff=form.elements.type.value==='handoff',field=form.querySelector('[data-cad-handoff]');field.hidden=!handoff;field.disabled=!handoff;for(const name of ['fromTeam','toTeam','deliverable'])form.elements[name].required=handoff}
 function cadCardDetails(note){const a=note.activity||{};return [a.owner||a.team||'Responsável a definir',a.durationMinutes!=null?a.durationMinutes+' min de execução':'',a.waitMinutes!=null?a.waitMinutes+' min de espera':''].filter(Boolean).join(' · ')}
-const cadBoundary=(row,index,rows)=>cadModel.canvasBoundary(row,index,rows);
+const cadBoundary=(row,index,rows,reference=false)=>cadModel.canvasBoundary(row,index,rows,reference);
 function cadSubmit(form){
  if(cadLocked()||!form.reportValidity())return;try{
   const data=cadFormData(form),next=structuredClone(S);
@@ -168,6 +170,7 @@ function cadLanePanel(){
 }
 
 function cadLibrary(){
+ if(cadReference())return cadReferenceLibrary();
  const q=cadState.query.trim().toLocaleLowerCase('pt-BR'),active=cadState.activeCell,filter=cadState.libraryFilter;
  const groups={experience:['Experiência do cliente',['customer-action','touchpoint','thought','persona','need']],channels:['Canais',['channel']],emotions:['Emoções',['emotion']],operation:['Operação do serviço',['activity','decision','system','resource']],analysis:['Análise e oportunidades',['pain','opportunity','metric']],content:['Conteúdo e evidências',['artifact','text']]};
  const tile=kind=>{const item=cadModel.CANVAS_COMPONENTS[kind],fav=cadState.favorites.includes(kind);return '<div class="cad-component-item"><button type="button" class="cad-component-main" data-act="cad-add" data-kind="'+kind+'" draggable="'+!cadLocked()+'" title="'+esc(item.title+' · '+item.hint)+'" aria-label="Adicionar '+esc(item.title)+'" '+(cadLocked()?'disabled':'')+'><span aria-hidden="true">'+cadIcon(kind)+'</span><b>'+esc(item.title)+'</b><small>'+esc(kind==='emotion'?'Editar a curva emocional':item.hint)+'</small></button><button type="button" class="cad-favorite'+(fav?' is-favorite':'')+'" data-act="cad-favorite" data-kind="'+kind+'" title="'+(fav?'Remover dos favoritos':'Favoritar')+'" aria-label="'+(fav?'Desfavoritar ':'Favoritar ')+esc(item.title)+'" aria-pressed="'+fav+'">'+(fav?'★':'☆')+'</button></div>'};
@@ -224,7 +227,58 @@ function cadEmotionSvg(row,layout){
  });
  return svg+'</g>';
 }
+/* Layout from service_blueprint_editor.html. All actions still use this document's
+   controllers, history and host acknowledgements. No sample records are embedded. */
+function cadReferenceLibrary(){
+ const tile=(kind,title,hint,row='')=>'<div class="cad-component-item"><button type="button" class="cad-component-main" data-act="cad-add" data-kind="'+kind+'" data-row="'+row+'" draggable="'+!cadLocked()+'" aria-label="Adicionar '+esc(title)+'" title="'+esc(title)+'" '+(cadLocked()?'disabled':'')+'><span data-kind="'+kind+'">'+cadIcon(kind)+'</span><b>'+esc(title)+'</b><small>'+esc(hint)+'</small></button></div>';
+ return '<div class="bo-h756-palette-action">'+cadButton('cad-library','+ Novo componente','aria-label="Novo componente" '+(cadLocked()?'disabled':''))+'</div><div class="cad-reference-palette"><section><h3>Experiência</h3>'+tile('customer-action','Ação do cliente','O que a pessoa faz')+tile('touchpoint','Ponto de contato','Interação com a marca')+tile('emotion','Emoção','Curva de sentimento')+'</section><section><h3>Operação</h3>'+tile('activity','Linha de frente','Atendimento direto','fl')+tile('activity','Bastidores','Suporte interno','bk')+'</section><details class="cad-reference-more"><summary>Mais componentes</summary><div>'+tile('channel','Canal','Onde acontece o contato')+tile('artifact','Evidência física/digital','O que o cliente vê ou recebe')+Object.entries(cadModel.CANVAS_COMPONENTS).filter(([kind])=>!['customer-action','touchpoint','emotion','activity','channel','artifact'].includes(kind)).map(([kind,item])=>tile(kind,item.title,item.hint)).join('')+'</div></details></div><div class="cad-reference-structure">'+cadSidebarTabs()+(cadState.sidebarTab==='lanes'?cadLanePanel():'')+'</div>';
+}
+function cadReferenceSvg(){
+ const layout=cadState.layout,cam=cadState.camera||{x:32,y:32,zoom:1};
+ const labels={ev:['Evidências','Físicas e digitais'],ch:['Canais',''],ac:['Ações do cliente','O que a pessoa faz'],fl:['Linha de frente','Atendimento direto'],bk:['Bastidores','Operações internas'],sy:['Sistemas e apoio','Recursos da operação']};
+ const addLabels={ev:'Adicionar evidência',ch:'Adicionar canal',ac:'Adicionar ação',fl:'Adicionar atendimento',bk:'Adicionar bastidor',sy:'Adicionar apoio'};
+ const nodes=new Map(layout.nodes.map(node=>[node.id,node])),offsets=cadModel.canvasConnectionOffsets(S.links||[]),start=layout.stages[0]?.x||192,end=layout.width-20;
+ let html='<defs>'+Object.entries(cadLinkColors).map(([type,color])=>'<marker id="cad-arrow-'+type+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="'+color+'"/></marker>').join('')+'</defs><g id="cad-world" transform="translate('+cam.x+' '+cam.y+') scale('+cam.zoom+')">';
+ if(!layout.stages.length)return html+'</g>';
+ html+='<path class="cad-reference-header-line" d="M'+start+' 56 H'+end+'"/>';
+ for(const stage of layout.stages){
+  html+='<g role="button" tabindex="0" data-act="cad-stage-edit" data-si="'+stage.index+'" class="cad-stage" aria-label="Editar etapa '+esc(stage.step.n)+'"><rect class="cad-reference-stage-hit" x="'+stage.x+'" y="0" width="'+stage.width+'" height="56"/><text x="'+(stage.x+16)+'" y="14" class="cad-reference-step">ETAPA '+(stage.index+1)+'</text><text x="'+(stage.x+16)+'" y="40" class="cad-reference-stage-name">'+esc(cadModel.canvasTitleLines(stage.step.n,Math.floor((stage.width-32)/10),1)[0])+'</text><title>'+esc(stage.step.n)+'</title></g>';
+  if(!cadLocked())html+='<g class="cad-stage-insert" role="button" tabindex="0" data-act="cad-stage-after" data-si="'+stage.index+'" aria-label="Adicionar etapa depois de '+esc(stage.step.n)+'"><circle cx="'+(stage.x+stage.width-4)+'" cy="28" r="12"/><path d="M '+(stage.x+stage.width-9)+' 28 h10 M '+(stage.x+stage.width-4)+' 23 v10"/></g><g class="cad-stage-resize" role="separator" tabindex="0" data-act="cad-stage-resize" data-si="'+stage.index+'" aria-orientation="vertical" aria-label="Ajustar largura da etapa '+esc(stage.step.n)+'" aria-valuemin="210" aria-valuemax="600" aria-valuenow="'+stage.width+'"><rect x="'+(stage.x+stage.width-12)+'" y="0" width="12" height="16"/></g>';
+ }
+ layout.rows.forEach((row,index)=>{
+  const [title,hint]=labels[row.id]||[row.n,row.h||''],boundary=cadBoundary(row,index,layout.rows,true);
+  if(boundary){const label=row.id==='bk'?'Linha de visibilidade':row.id==='fl'?'Linha de interação':'Linha de interação interna';html+='<path d="M'+start+' '+(row.y-16)+' H'+end+'" class="cad-boundary"/><text x="'+((start+end)/2)+'" y="'+(row.y-12)+'" text-anchor="middle" class="cad-boundary-name">'+esc(label.toUpperCase())+'</text>'}
+  html+='<g class="cad-reference-lane" data-lane="'+row.id+'"><rect x="'+start+'" y="'+row.y+'" width="'+(end-start)+'" height="'+row.height+'" rx="12" class="cad-lane-bg"/><path d="M'+start+' '+row.y+' V'+(row.y+row.height)+'" class="cad-reference-label-line"/><path d="M'+start+' '+(row.y+row.height)+' H'+end+'" class="cad-reference-row-line"/><text x="0" y="'+(row.y+29)+'" class="cad-lane-name">'+esc(title)+'</text>'+(hint?'<text x="0" y="'+(row.y+49)+'" class="cad-reference-lane-hint">'+esc(hint)+'</text>':'')+'<g class="cad-lane-select'+(cadState.selectedRow===row.id?' is-selected':'')+'" role="button" tabindex="0" data-act="cad-lane-select" data-id="'+esc(row.id)+'" aria-label="Propriedades da faixa '+esc(title)+'"><rect x="0" y="'+row.y+'" width="192" height="'+row.height+'" fill="transparent"/></g>';
+  for(const stage of layout.stages){
+   const empty=!layout.nodes.some(node=>node.row===row.id&&node.stageIndex===stage.index),width=Math.min(288,stage.width-32);
+   html+='<rect x="'+stage.x+'" y="'+row.y+'" width="'+stage.width+'" height="'+row.height+'" class="cad-cell" data-row="'+row.id+'" data-si="'+stage.index+'"/>';
+   if(!cadLocked()&&empty&&row.id!=='em')html+='<g role="button" tabindex="0" class="cad-cell-add" data-act="cad-cell-add" data-row="'+row.id+'" data-si="'+stage.index+'" aria-label="Adicionar cartão em '+esc(stage.step.n)+' — '+esc(title)+'"><rect x="'+(stage.x+(stage.width-width)/2)+'" y="'+(row.y+12)+'" width="'+width+'" height="96" rx="12"/><text x="'+(stage.x+stage.width/2)+'" y="'+(row.y+65)+'" text-anchor="middle">+ '+esc(addLabels[row.id]||'Adicionar cartão')+'</text></g>';
+  }
+  if(row.id==='em')html+=cadEmotionSvg(row,layout);
+  if(!cadLocked())html+='<g class="cad-lane-resize" role="separator" tabindex="0" data-act="cad-lane-resize" data-id="'+esc(row.id)+'" aria-label="Redimensionar faixa '+esc(title)+'" aria-orientation="horizontal" aria-valuemin="90" aria-valuemax="540" aria-valuenow="'+row.height+'"><rect x="0" y="'+(row.y+row.height-6)+'" width="'+layout.width+'" height="12"/><path d="M0 '+(row.y+row.height)+' H'+end+'"/></g></g>';
+ });
+ for(const link of S.links||[]){
+  const a=nodes.get(link.a),b=nodes.get(link.b);if(!a||!b||V.connectionMode==='off'||V.connectionMode==='selected'&&![link.a,link.b].includes(cadState.selected))continue;
+  const geometry=cadModel.canvasEdgeGeometry(a,b,offsets.get(link.id)||0),label=blueprintConnectionNames[link.type]+(link.label?' · '+link.label:'');
+  html+='<g class="cad-edge" role="button" tabindex="0" data-act="cad-edge" data-id="'+esc(link.id)+'" aria-label="Editar '+esc(label)+'"><path d="'+geometry.d+'" stroke="'+cadLinkColors[link.type]+'" stroke-width="2" fill="none" marker-end="url(#cad-arrow-'+link.type+')"/><path d="'+geometry.d+'" stroke="transparent" stroke-width="16" fill="none"/><text x="'+geometry.x+'" y="'+(geometry.y-6)+'" text-anchor="middle" class="cad-edge-label">'+esc(label)+'</text></g>';
+ }
+ for(const node of layout.nodes){
+  if(node.row==='em')continue;
+  const kind=cadModel.canvasKind(node.note,node.row),title=cadTitle(node.note),description=node.note.canvas?.description||node.note.canonicalDescription||'',tone=node.note.canvas?.tone||'default',media=kind==='artifact'?cadModel.canvasSafeUrl(node.note.canvas?.imageUrl||node.note.url):'',url=cadModel.canvasSafeUrl(node.note.canvas?.linkUrl);
+  const action=node.note.draft?'cad-quick-focus':node.note.virtualLabel?'cad-virtual':'cad-select';
+  html+='<g class="cad-node-wrap'+(node.id===cadState.selected?' is-selected':'')+(cadState.connectFrom&&node.id!==cadState.connectFrom?' is-connect-target':'')+'" data-group-id="'+esc(node.id)+'" data-tone="'+esc(tone)+'" data-row="'+node.row+'" transform="translate('+node.x+' '+node.y+')"><g class="cad-node'+(node.note.draft?' is-draft':'')+'" data-act="'+action+'" data-id="'+esc(node.id)+'" data-row="'+node.row+'" data-si="'+node.stageIndex+'" role="button" tabindex="0" aria-label="'+esc(title)+'"><title>'+esc(title+(description?' · '+description:''))+'</title><rect width="'+node.width+'" height="'+node.height+'" rx="12" class="cad-node-bg"/><foreignObject width="'+node.width+'" height="'+node.height+'" pointer-events="none"><div xmlns="http://www.w3.org/1999/xhtml" class="cad-reference-card"><span class="cad-reference-card-icon">'+cadIcon(node.note.canvas?.iconKey||kind)+'</span>'+(media?'<img src="'+esc(media)+'" alt=""/>':'')+'<h4>'+esc(title)+'</h4>'+(description?'<p>'+esc(description)+'</p>':'')+'</div></foreignObject></g>';
+  if(node.row==='ac')html+='<circle class="cad-reference-inlet" cx="0" cy="'+(node.height/2)+'" r="7"/>';
+  if(!cadLocked()&&!node.note.virtualLabel&&!node.note.draft){
+   html+='<g class="cad-port" role="button" tabindex="0" data-act="cad-connect" data-id="'+esc(node.id)+'" aria-label="Conectar '+esc(title)+'"><circle cx="'+node.width+'" cy="'+(node.height/2)+'" r="7"/><title>Conectar cartão</title></g><g class="cad-node-menu" role="button" tabindex="0" data-act="cad-menu" data-id="'+esc(node.id)+'" aria-label="Ações de '+esc(title)+'"><rect x="'+(node.width-40)+'" y="12" width="28" height="28" rx="5"/><text x="'+(node.width-26)+'" y="32" text-anchor="middle">···</text></g><g class="cad-node-resize" role="separator" tabindex="0" data-act="cad-node-resize" data-id="'+esc(node.id)+'" aria-label="Redimensionar '+esc(title)+'" aria-orientation="vertical" aria-valuemin="80" aria-valuemax="480" aria-valuenow="'+node.height+'"><rect class="cad-node-resize-hit" x="'+(node.width-26)+'" y="'+(node.height-26)+'" width="26" height="26"/><path d="M'+(node.width-16)+' '+(node.height-6)+' L'+(node.width-6)+' '+(node.height-16)+'"/></g>';
+  }
+  if(url)html+='<g role="button" tabindex="0" data-act="cad-open-link" data-id="'+esc(node.id)+'" aria-label="Abrir link vinculado a '+esc(title)+'"><rect x="'+(node.width-72)+'" y="12" width="26" height="26" rx="4" fill="#eff6ff"/><text x="'+(node.width-59)+'" y="30" text-anchor="middle">↗</text></g>';
+  html+='</g>';
+ }
+ if(cadState.connectFrom&&cadState.pointer){const node=nodes.get(cadState.connectFrom);if(node)html+='<path class="cad-connect-preview" d="M'+(node.x+node.width)+' '+(node.y+node.height/2)+' L'+cadState.pointer.x+' '+cadState.pointer.y+'"/>'}
+ return html+'</g>';
+}
 function cadSvg(){
+ if(cadReference())return cadReferenceSvg();
  const layout=cadState.layout,cam=cadState.camera||{x:16,y:16,zoom:1},small=cadState.detail==='overview'||cadState.detail==='auto'&&cam.zoom<.8;
  const font=Math.max(18,15/cam.zoom),labelFont=Math.max(15,13/cam.zoom),badgeFont=Math.max(12,11/cam.zoom),nodes=new Map(layout.nodes.map(node=>[node.id,node])),offsets=cadModel.canvasConnectionOffsets(S.links||[]);
  let html='<defs>'+Object.entries(cadLinkColors).map(([type,color])=>'<marker id="cad-arrow-'+type+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="'+color+'"/></marker>').join('')+'</defs><g id="cad-world" transform="translate('+cam.x+' '+cam.y+') scale('+cam.zoom+')"><text x="14" y="36" class="cad-map-label" style="font-size:'+labelFont+'px">MAPA DO</text><text x="14" y="'+(36+labelFont+4)+'" class="cad-map-label" style="font-size:'+labelFont+'px">SERVIÇO</text>';
@@ -284,9 +338,9 @@ function cadMobileMap(){
  return '<nav class="cad-stage-nav" aria-label="Navegar entre etapas">'+cadButton('cad-prev','‹','aria-label="Etapa anterior" '+(!index?'disabled':''))+'<label>Etapa '+(index+1)+' de '+S.steps.length+'<select data-cad-stage aria-label="Etapa em foco">'+S.steps.map((value,i)=>'<option value="'+i+'" '+(i===index?'selected':'')+'>'+esc(value.n)+'</option>').join('')+'</select></label>'+cadButton('cad-next','›','aria-label="Próxima etapa" '+(index===S.steps.length-1?'disabled':''))+'</nav><div class="cad-mobile-stage"><h2>'+esc(step.n)+'</h2>'+cadButton('cad-stage-after','+','data-si="'+index+'" aria-label="Adicionar etapa ao lado"')+'</div>'+cadRows().map((row,i,rows)=>'<section class="cad-mobile-lane" data-row="'+row.id+'">'+(cadModel.canvasBoundary(row,i,rows)?'<p class="cad-mobile-boundary">'+cadModel.canvasBoundary(row,i,rows)+'</p>':'')+'<h3>'+esc(row.n)+'</h3>'+(row.id==='em'?[]:cadCellNotes(row.id,index)).map(note=>'<article class="cad-mobile-card">'+cadButton(note.virtualLabel?'cad-virtual':'cad-select','<small>'+esc(note.virtualLabel||cadModel.CANVAS_COMPONENTS[cadModel.canvasKind(note,row.id)].title)+'</small><b>'+esc(cadTitle(note))+'</b>','data-id="'+esc(note.i)+'" data-row="'+row.id+'" data-si="'+index+'"')+(!note.virtualLabel?cadButton('cad-menu','···','data-id="'+esc(note.i)+'" aria-label="Ações do cartão"'):'')+'</article>').join('')+(row.id==='em'?cadButton('cad-emotion',cadRecordedEmotion(step)?EM[cadModel.canvasEmotionScore(step)+2]:'Registrar emoção','data-si="'+index+'" '+(cadLocked()?'disabled':'')):cadButton('cad-cell-add','+ Adicionar cartão','data-row="'+row.id+'" data-si="'+index+'" '+(cadLocked()?'disabled':'')))+'</section>').join('');
 }
 function cadRender(){
- if(!V.canvasOrderVersion){const preferred=['sd','ev','ch','ac','th','em','fl','bk','sy','im'];V.rowOrder=[...preferred,...V.rowOrder.filter(id=>!preferred.includes(id))];V.canvasOrderVersion=1;saveView()}
+ if(!V.canvasOrderVersion){if(cadReference()&&V.preset==='operational')V.hiddenRows=V.hiddenRows.filter(id=>!Object.entries(S.c).some(([key,notes])=>key.split('|')[0]===id&&notes.length));const preferred=['sd','ev','ch','ac','th','em','fl','bk','sy','im'];V.rowOrder=[...preferred,...V.rowOrder.filter(id=>!preferred.includes(id))];V.canvasOrderVersion=1;saveView()}
  const scene=S.journeyId||S.id;if(cadState.scene!==scene||cadState.canvasPerspective!==V.perspective){Object.assign(cadState,{scene,canvasPerspective:V.perspective,selected:'',selectedRow:'',creating:null,quick:null,link:null,camera:null,drafts:new Map(),inspector:false,error:'',menu:null,connectFrom:'',choosing:null,activeCell:null,libraryFilter:'all',resize:null,resizePreview:null,emotionDrag:null,laneResize:null,lanePreviewHeights:null,cardResize:null,cardResizePreview:null,lastCardClick:null})}
- document.body.classList.add('cad-mode');cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());
+ document.body.classList.add('cad-mode');cadState.layout=cadLayout();
  if(cadState.selected&&!blueprintNote(cadState.selected)){cadState.selected='';cadState.inspector=false}
  const mobile=cadMobile(),showInspector=cadState.inspector&&(!!cadState.selected||!!cadState.selectedRow),view=V.perspective==='journey'?'journey':'blueprint';
  const status=cadState.error||(cadState.pending?'Concluindo alteração…':S.readOnly?'Somente leitura':cadState.connectFrom?'Escolha o cartão de destino · Esc cancela':cadState.quick?'Rascunho — confirme para adicionar ao mapa':'Arraste um componente ou use + em uma célula');
@@ -294,6 +348,7 @@ function cadRender(){
  (mobile?'<dialog id="cad-library-sheet" class="cad-sheet" aria-label="Biblioteca de componentes">'+cadButton('cad-close-library','Fechar componentes')+cadLibrary()+'</dialog><dialog id="cad-inspector-sheet" class="cad-sheet" aria-label="Detalhes opcionais">'+cadButton('cad-close','Fechar detalhes')+(showInspector?cadInspector():'')+'</dialog>':'')+'<dialog id="cad-link-sheet" class="cad-sheet" aria-label="Editar conexão">'+cadButton('cad-close-link','Fechar conexão')+(cadState.link?cadLinkForm():'')+'</dialog>'+customizer()+growthDialogs()+contentDialogs()+contextDialogs()+viewsDialogs()+cardToolsDialogs()+blueprintDialogs()+businessDialogs();
  if(mobile&&cadState.library)app.querySelector('#cad-library-sheet').showModal();else if(mobile&&showInspector)app.querySelector('#cad-inspector-sheet').showModal();
  if(cadState.link)app.querySelector('#cad-link-sheet').showModal();
+ if(cadReference()){const toolbar=app.querySelector('.cad-toolbar'),settings=toolbar.querySelector('.cad-options');settings.classList.add('cad-reference-settings');settings.querySelector('summary').setAttribute('aria-label','Configurações do mapa');settings.querySelector('summary').innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m9 3-1 3-3 1-2 3 2 2-1 3 3 2 3-1 2 2 3-1 1-3 3-1 1-3-2-2 1-3-3-2-3 1-2-2z"/><circle cx="12" cy="12" r="3"/></svg>'; app.querySelector('.cad-header').append(settings);const persona=toolbar.querySelector('.cad-persona-label');settings.querySelector('.cad-options-panel').append(toolbar.querySelector('[data-act="business-review"]'),persona);}
  if(cadLocked()){app.querySelector('.cad-header>input').readOnly=true;app.querySelector('[data-cad-persona]').disabled=true;app.querySelectorAll('#cad-component-form input,#cad-component-form select,#cad-component-form textarea,#cad-link-form input,#cad-link-form select,#cad-link-form textarea,#cad-quick-form input,#cad-quick-form select,#cad-quick-form textarea').forEach(field=>field.disabled=true)}
  cadLinkFields();requestAnimationFrame(()=>{if(!cadState.camera)cadInitialCamera();else cadPaint()});
 }
@@ -316,6 +371,7 @@ function cadInitialCamera(){
  if(!viewport)return;
  /* Start at the first stage at 100%, rather than shrinking the full board into the viewport. */
  cadState.camera={x:16,y:16,zoom:1};
+ if(cadReference()){cadState.camera.x=32;cadState.camera.y=32;}
  cadPaint();
 }
 function cadFit(){const viewport=app.querySelector('.cad-viewport');if(!viewport)return;const layout=cadState.layout,zoom=Math.max(.2,Math.min(1,(viewport.clientWidth-40)/layout.width,(viewport.clientHeight-45)/layout.height));cadState.camera={x:Math.max(16,(viewport.clientWidth-layout.width*zoom)/2),y:16,zoom};cadPaint()}
@@ -386,6 +442,7 @@ function cadQuickSubmit(form){
  }catch(error){cadState.error=error.message;form.querySelector('.form-error').textContent=error.message}
 }
 function cadAction(action,data,button){
+ if(action==='cad-tone'){const form=button.closest('form');if(form&&!cadLocked()){form.elements.tone.value=data.tone;form.elements.tone.dispatchEvent(new Event('input',{bubbles:true}));form.querySelectorAll('[data-act="cad-tone"]').forEach(el=>el.setAttribute('aria-pressed',String(el===button)))}return true}
  if(action==='cad-confirm-cancel'){cadState.confirmation=null;rerender();return true}
  if(action==='cad-confirm-accept'){const callback=cadState.confirmation?.onAccept;cadState.confirmation=null;if(typeof callback==='function')callback();else rerender();return true}
  if(cadState.confirmation)return true;
@@ -457,8 +514,8 @@ function cadAction(action,data,button){
  if(action==='cad-favorite'){const kind=data.kind;cadState.favorites=cadState.favorites.includes(kind)?cadState.favorites.filter(x=>x!==kind):[...cadState.favorites,kind];cadSaveLibraryPreferences();rerender();return true}
  if(action==='cad-lib-filter'){cadState.libraryFilter=data.filter;rerender();return true}
  if(['cad-stage-narrow','cad-stage-wide','cad-stage-equal','cad-stage-reset'].includes(action)){
-  if(cadLocked())return true;const widths=cadStageWidths(),average=Math.round(S.steps.reduce((sum,_,i)=>sum+cadModel.canvasStageWidth(widths[i]),0)/Math.max(1,S.steps.length));
-  V.stageWidths=S.steps.map((_,i)=>action==='cad-stage-reset'?392:action==='cad-stage-equal'?average:cadModel.canvasStageWidth(cadModel.canvasStageWidth(widths[i])+(action==='cad-stage-wide'?48:-48)));
+  if(cadLocked())return true;const widths=cadStageWidths(),average=Math.round(S.steps.reduce((sum,_,i)=>sum+cadModel.canvasStageWidth(widths[i],cadReference()?320:392),0)/Math.max(1,S.steps.length));
+  V.stageWidths=S.steps.map((_,i)=>action==='cad-stage-reset'?(cadReference()?320:392):action==='cad-stage-equal'?average:cadModel.canvasStageWidth(cadModel.canvasStageWidth(widths[i],cadReference()?320:392)+(action==='cad-stage-wide'?48:-48)));
   V.fitToScreen=false;saveView();rerender();return true;
  }
  if(action==='cad-stage-resize'||action==='cad-lane-resize'||action==='cad-node-resize')return true;
@@ -586,8 +643,8 @@ function cadBind(){
    }
    const grip=event.target.closest?.('.cad-stage-resize');
    if(grip&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){
-    event.preventDefault();const i=Number(grip.dataset.si),current=cadModel.canvasStageWidth(cadStageWidths()[i]);
-    cadStageResizeTo(i,event.key==='Home'?392:event.key==='End'?600:current+(event.key==='ArrowRight'?24:-24));return;
+    event.preventDefault();const i=Number(grip.dataset.si),current=cadModel.canvasStageWidth(cadStageWidths()[i],cadReference()?320:392);
+    cadStageResizeTo(i,event.key==='Home'?(cadReference()?320:392):event.key==='End'?600:current+(event.key==='ArrowRight'?24:-24));return;
    }
    const emotion=event.target.closest?.('.cad-emotion-control');
    if(emotion&&['ArrowUp','ArrowDown','Home','End'].includes(event.key)&&!cadLocked()){
@@ -604,7 +661,7 @@ function cadBind(){
       }else button.dispatchEvent(new MouseEvent('click',{bubbles:true}));
       return;
     }
-  if(event.key==='Escape'&&cadEnabled()&&!event.target.closest('dialog')){event.preventDefault();cadState.drag=null;if(cadState.choosing){cadState.choosing=null;rerender()}else if(cadState.menu){cadState.menu=null;rerender()}else if(cadState.quick||cadState.connectFrom)cadAction('cad-cancel',{});return}
+  if(event.key==='Escape'&&cadEnabled()&&!event.target.closest('dialog')){event.preventDefault();cadState.drag=null;if(cadState.choosing){cadState.choosing=null;rerender()}else if(cadState.menu){cadState.menu=null;rerender()}else if(cadState.quick||cadState.connectFrom)cadAction('cad-cancel',{});else if(cadState.inspector)cadAction('cad-close',{});return}
   if(event.target.matches('.cad-viewport')&&['+','-','0','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();if(event.key==='0')cadFit();else if(event.key==='+'||event.key==='-')cadZoom(event.key==='+'?1.2:1/1.2);else{const cam=cadState.camera;cam.x+=event.key==='ArrowLeft'?40:event.key==='ArrowRight'?-40:0;cam.y+=event.key==='ArrowUp'?40:event.key==='ArrowDown'?-40:0;cadPaint()}}
  });
  app.addEventListener('wheel',event=>{
@@ -630,7 +687,7 @@ function cadBind(){
    const grip=event.target.closest?.('.cad-stage-resize'),emotion=event.target.closest?.('.cad-emotion-control');
    if(event.button===0&&grip&&!cadLocked()){
     const i=Number(grip.dataset.si),viewport=app.querySelector('.cad-viewport');
-    cadState.resize={pointer:event.pointerId,index:i,startX:event.clientX,width:cadModel.canvasStageWidth(cadStageWidths()[i]),zoom:cadState.camera.zoom};
+    cadState.resize={pointer:event.pointerId,index:i,startX:event.clientX,width:cadModel.canvasStageWidth(cadStageWidths()[i],cadReference()?320:392),zoom:cadState.camera.zoom};
     viewport?.setPointerCapture(event.pointerId);event.preventDefault();return;
    }
    if(event.button===0&&emotion&&!cadLocked()){
@@ -650,7 +707,7 @@ function cadBind(){
      const width=cadModel.canvasDimension(cardResize.width+(event.clientX-cardResize.startX)/cardResize.zoom,150,Math.min(600,stage?.width-28||600));
      const height=cadModel.canvasDimension(cardResize.height+(event.clientY-cardResize.startY)/cardResize.zoom,80,480);
      cadState.cardResizePreview={id:cardResize.id,width,height};
-     cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());
+     cadState.layout=cadLayout();
      cadPaint();return;
    }
    const laneResize=cadState.laneResize;
@@ -658,12 +715,12 @@ function cadBind(){
     const min=cadModel.canvasRowHeight(cadProjection(false),cadRows().find(r=>r.id===laneResize.id),S.steps.map((_,i)=>i));
     const height=Math.max(min,Math.min(540,Math.round(laneResize.height+(event.clientY-laneResize.startY)/laneResize.zoom)));
     cadState.lanePreviewHeights={...cadRowHeights(),[laneResize.id]:height};
-    cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());
+    cadState.layout=cadLayout();
     cadPaint();return;
    }
    const resize=cadState.resize;if(resize&&resize.pointer===event.pointerId){
     const widths=[...cadStageWidths()];widths[resize.index]=cadModel.canvasStageWidth(resize.width+(event.clientX-resize.startX)/resize.zoom);
-    cadState.resizePreview=widths;cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,widths,cadRowHeights());cadPaint();return;
+    cadState.resizePreview=widths;cadState.layout=cadLayout(widths);cadPaint();return;
    }
    const emotionDrag=cadState.emotionDrag;if(emotionDrag&&emotionDrag.pointer===event.pointerId){
     const row=cadState.layout.rows.find(value=>value.id==='em');if(!row)return;
@@ -682,7 +739,7 @@ function cadBind(){
      const preview=cadState.cardResizePreview;
      cadState.cardResize=null;cadState.cardResizePreview=null;
      if(cancel||!preview||preview.width===cardResize.width&&preview.height===cardResize.height){
-       cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());cadPaint();return;
+       cadState.layout=cadLayout();cadPaint();return;
      }
      const entry=blueprintNote(cardResize.id);
      if(!entry){cadPaint();return}
@@ -695,13 +752,13 @@ function cadBind(){
    const laneResize=cadState.laneResize;
    if(laneResize&&laneResize.pointer===event.pointerId){
     cadState.laneResize=null;const height=cadState.lanePreviewHeights?.[laneResize.id]??laneResize.height;cadState.lanePreviewHeights=null;
-    if(cancel){cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());cadPaint()}
+    if(cancel){cadState.layout=cadLayout();cadPaint()}
     else cadChangeRowHeight(laneResize.id,height);
     return;
    }
    const resize=cadState.resize;if(resize&&resize.pointer===event.pointerId){
     cadState.resize=null;const width=cadState.resizePreview?.[resize.index]??resize.width;cadState.resizePreview=null;
-    if(cancel){cadState.layout=cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,cadStageWidths(),cadRowHeights());cadPaint()}
+    if(cancel){cadState.layout=cadLayout();cadPaint()}
     else cadStageResizeTo(resize.index,width);return;
    }
    const emotionDrag=cadState.emotionDrag;if(emotionDrag&&emotionDrag.pointer===event.pointerId){
