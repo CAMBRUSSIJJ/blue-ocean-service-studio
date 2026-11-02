@@ -208,3 +208,26 @@
 @media(prefers-reduced-motion:reduce){
   .bo-h750-focus-card *{scroll-behavior:auto}
 }
+
+/* Entry point belongs to the detail toolbar, not the Persona content form. */
+.bo-h71-persona-detail .bo-h750-enter{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:34px;
+  padding:7px 12px;
+  border:1px solid #cbd9e9;
+  border-radius:8px;
+  background:#f6faff;
+  color:#245f9e;
+  font-size:12px;
+  font-weight:670;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.bo-h71-persona-detail .bo-h750-enter:hover{background:#eaf3ff;border-color:#8caed4}
+.bo-h71-persona-detail .bo-h750-enter:focus-visible{outline:3px solid #568acb;outline-offset:3px}
+@media(max-width:650px){
+  .bo-h71-persona-detail .bo-h750-enter{padding:7px 9px;font-size:11px}
+}
