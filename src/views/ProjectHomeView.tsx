@@ -112,8 +112,13 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
   useEffect(() => {
     const requestNewProject = () => startTemplate('blank');
+    const dismissNewProject = () => setDialog(null);
     window.addEventListener('bo-new-project', requestNewProject);
-    return () => window.removeEventListener('bo-new-project', requestNewProject);
+    window.addEventListener('bo-h749-cancel-project-creation', dismissNewProject);
+    return () => {
+      window.removeEventListener('bo-new-project', requestNewProject);
+      window.removeEventListener('bo-h749-cancel-project-creation', dismissNewProject);
+    };
   }, []);
 
   const submit = () => {
