@@ -10,6 +10,7 @@ import { PersonaProgressiveEditor } from './PersonaProgressiveEditor';
 import { PersonaFocusEditor } from './PersonaFocusEditor';
 import { PersonaReadProfile } from './PersonaReadProfile';
 import './persona-read-profile-h751.css';
+import './persona-proportions-h752.css';
 import './persona-focus-h750.css';
 import './persona-progressive-h746.css';
 import './persona-ux-refinements-h747.css';
