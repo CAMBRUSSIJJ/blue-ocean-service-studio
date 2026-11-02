@@ -37,13 +37,13 @@ try:
   page.add_locator_handler(page.locator('.rt155-recovery-notice.show'),lambda notice:notice.locator('i').click())
   page.goto(URL,wait_until='networkidle');page.get_by_role('button',name='Abrir workspace local sem conta').click()
   page.get_by_role('button',name='Novo projeto',exact=True).click();page.locator('[data-project-creation-page] .bo-h744-option-grid button').first.click();page.get_by_label('Nome do projeto',exact=False).fill('Mapa unificado QA');page.locator('details.bo-h744-additional summary').click();page.get_by_label('Nome do serviço',exact=True).fill('Clínica');page.get_by_role('button',name='Criar projeto e começar',exact=True).click()
-  # Project creation now lands on its overview by design. Maps are a separate
-  # primary navigation destination, not an automatic redirect.
-  expect(page.get_by_role('heading',name='Visão geral do projeto',exact=True)).to_be_visible()
-  page.get_by_role('button',name='Abrir Mapas do serviço',exact=True).click()
-  expect(page.locator('[data-service-map-library]')).to_be_visible();check('One map library replaces separate Journey and Blueprint libraries',page.locator('[data-blueprint-library]').count()==0)
-  page.get_by_role('button',name='Começar mapa',exact=True).click();page.get_by_role('button',name='Em branco',exact=False).first.click()
-  f=page.frame_locator('.bo-blueprint-reference-frame');saved(f);expect(f.locator('#cad-svg')).to_be_visible()
+  # H7.49: "Mapear a jornada" starts in the canonical editor immediately.
+  # No intermediate project overview or a second map selection is required.
+  f=page.frame_locator('.bo-blueprint-reference-frame')
+  saved(f)
+  expect(f.locator('#cad-svg')).to_be_visible()
+  check('Project creation opens one canonical map directly',len(graph(page)['journeys'])==1)
+  check('One shared editor replaces separate Journey and Blueprint screens',page.locator('[data-blueprint-library]').count()==0)
   check('Unified editor uses the light Journey layout',frame(page).evaluate("()=>getComputedStyle(document.body).backgroundColor==='rgb(255, 255, 255)'"))
   if f.locator('[data-cad-view]').input_value()!='blueprint':f.locator('[data-cad-view]').select_option('blueprint');saved(f)
   for name in ['Agendar','Atender']:stage(f,name)
