@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   BookOpen, Briefcase, ChartLine, Check, ChevronDown, ChevronLeft,
-  ChevronRight, CircleHelp, FolderOpen, Layers3, LayoutTemplate, Lightbulb,
+  ChevronRight, CircleHelp, FolderOpen, House, Layers3, LayoutTemplate, Lightbulb,
   Map, MessageSquare, Network, Plus, Search, Settings, StickyNote, Target, Users,
 } from '../design-system/icons';
 
@@ -178,7 +178,7 @@ export function NativeAnimatedSidebarH764({
       <button type="button" className="bo-h764-home-link" onClick={() => navigate('home')}
         data-sidebar-item="home" aria-current={activeKey === 'home' ? 'page' : undefined}
         title={collapsed ? 'Home' : undefined} aria-label="Home">
-        <span className="bo-h764-home-dot" aria-hidden="true"/>
+        <House size={19} strokeWidth={1.8} aria-hidden="true"/>
         <span className="bo-h764-item-label">Home</span>
       </button>
 
