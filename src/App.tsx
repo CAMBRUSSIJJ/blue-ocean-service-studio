@@ -17,7 +17,7 @@
 // V1.17 legacy shell copy: Próximo passo, saúde, continuidade e atenção do serviço
 // H7.40-H3 legacy sidebar labels: Blueprints · Portfólio · Métricas
 import React, { useEffect, useRef, useState } from 'react';
-import { Save, Upload, Download, KanbanSquare, X, Plus, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, ChevronLeft, ChevronRight, FolderKanban, ChevronsUpDown } from './design-system/icons';
+import { Save, Upload, Download, KanbanSquare, X, Plus, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal } from './design-system/icons';
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
 import { useStudioController } from './state/useStudioController';
 import { JourneyView } from './views/JourneyView';
@@ -30,7 +30,6 @@ import { NativeAnimatedSidebarH764, type SidebarNavKeyH764 } from './components/
 import { WhiteboardsView } from './views/WhiteboardsView';
 import { WorkspaceLibraryView, type WorkspaceLibraryPage } from './views/WorkspaceLibraryView';
 import { Toast } from './components/Toast';
-import { APP_VERSION } from './generated/app-version';
 import { DesignSystemView } from './views/DesignSystemView';
 import type { AuthUser } from './auth/auth';
 import { useExperienceProfile } from './services/experience-profile';
@@ -422,10 +421,10 @@ export default function App({ authUser, onSignOut }: AppProps) {
     : activeTab === 'context' && !externalNav
       ? ({ personas:'personas', needs:'needs', jobs:'jobs', pains:'pains', problems:'problems',
           evidence:'evidence', hypotheses:'hypotheses', hierarchies:'hierarchies',
-          portfolio:'portfolio', metrics:'metrics', templates:'templates', archive:'archive' } as const)[libraryPage]
+          portfolio:'portfolio', metrics:'metrics', templates:'templates', archive:'archive' } as Record<WorkspaceLibraryPage,SidebarNavKeyH764>)[libraryPage]
     : activeTab === 'canvas' && !externalNav
       ? ({ journey:'maps', blueprint:'maps', whiteboard:'whiteboard', prototypes:'prototypes',
-          portfolio:'improvements', outcomes:'outcomes' } as const)[serviceWorkspaceTab] ?? 'servico'
+          portfolio:'improvements', outcomes:'outcomes' } as Record<string,SidebarNavKeyH764>)[serviceWorkspaceTab] ?? 'servico'
     : activeTab === 'whiteboards' ? 'whiteboard'
     : 'home';
 
