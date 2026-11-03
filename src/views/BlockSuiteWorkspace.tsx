@@ -81,7 +81,7 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
         // The Vite development server returns its HTML fallback for unknown paths.
         // Check both resources so a successful manifest request cannot mask a missing iframe entry.
         const editor = await fetch('/blocksuite/index.html', { signal: controller.signal, cache: 'no-store' });
-        if (!editor.ok || !(await editor.text()).includes('<html')) throw new Error('A página do canvas visual não está disponível.');
+        if (!editor.ok || !(await editor.text()).includes('id="app"')) throw new Error('A página do canvas visual não está disponível.');
         if (!controller.signal.aborted) setAvailability('ready');
       } catch (error) {
         if (!controller.signal.aborted) {
