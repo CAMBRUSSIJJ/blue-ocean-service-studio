@@ -104,7 +104,6 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const isGlobalScope = !projectShellOpen;
   const isGlobalHome = isGlobalScope && activeTab === 'home' && !externalNav;
   const isProjectHome = activeTab === 'home' && !externalNav && projectShellOpen;
-  const isPrimaryLibrary = activeTab === 'context' && !externalNav;
   const isPrimaryResearch = activeTab === 'canvas' && !externalNav && serviceWorkspaceTab === 'research';
 
   const libraryTitles: Record<WorkspaceLibraryPage, string> = {
