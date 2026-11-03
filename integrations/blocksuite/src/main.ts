@@ -108,6 +108,134 @@ async function main() {
     return true;
   };
 
+  // H7.62: drive the *native* BlockSuite 0.19.5 gfx tools.
+  // No parallel canvas: notes, frames, shapes, connectors and groups all remain
+  // in the existing Yjs document persisted under the original storageKey.
+  type NativeElement = { id: string; xywh?: string; type?: string; flavour?: string };
+  type NativeRootService = {
+    gfx: {
+      tool: { setTool(name: string, options?: Record<string, unknown>): void; currentToolName$: { value: string } };
+      selection: { selectedElements: NativeElement[] };
+    };
+    viewport: { center: [number, number] };
+    frame: { createFrameOnSelected(): unknown };
+    updateElement(id: string, props: Record<string, unknown>): void;
+    createGroupFromSelected(): unknown;
+    setZoomByAction(action: 'in' | 'out' | 'fit' | 'reset'): void;
+  };
+  const nativeRoot = () => edgeless.std.getService('affine:page') as unknown as NativeRootService;
+  const toolNames: Record<string, string> = {
+    select: 'default', hand: 'pan', note: 'affine:note', text: 'text',
+    rect: 'shape', ellipse: 'shape', diamond: 'shape',
+    connector: 'connector', brush: 'brush', eraser: 'eraser', frame: 'frame',
+  };
+  const activateTool = (tool: string) => {
+    const name = toolNames[tool];
+    if (!name) throw new Error('Ferramenta desconhecida.');
+    const options: Record<string, unknown> = tool === 'note'
+      ? { childFlavour: 'affine:paragraph', childType: 'text', tip: 'Clique para adicionar uma nota' }
+      : name === 'shape' ? { shapeName: tool === 'ellipse' ? 'ellipse' : tool === 'diamond' ? 'diamond' : 'rect' }
+      : name === 'connector' ? { mode: 1 /* ConnectorMode.Orthogonal, BlockSuite 0.19.5 */ }
+      : name === 'pan' ? { panning: false } : {};
+    nativeRoot().gfx.tool.setTool(name, options);
+    notify('TOOL_CHANGED', { tool });
+  };
+  const selectedBounds = () => nativeRoot().gfx.selection.selectedElements
+    .filter(element => element.type !== 'connector' && element.type !== 'group' && typeof element.xywh === 'string')
+    .map(element => {
+      let coords: unknown;
+      try { coords = JSON.parse(element.xywh || ''); } catch { coords = null; }
+      if (!Array.isArray(coords) || coords.length !== 4 || !coords.every(value => typeof value === 'number' && Number.isFinite(value))) return null;
+      const [x, y, w, h] = coords as number[];
+      if (w <= 0 || h <= 0) return null;
+      return { element, x, y, w, h };
+    }).filter((item): item is { element: NativeElement; x: number; y: number; w: number; h: number } => Boolean(item));
+  const organize = (action: string): string => {
+    const service = nativeRoot();
+    const items = selectedBounds();
+    if (items.length < (action === 'frame-selection' ? 1 : 2)) throw new Error(action === 'frame-selection'
+      ? 'Selecione um ou mais objetos antes de criar um Frame.'
+      : 'Selecione pelo menos dois objetos com Shift antes de organizar.');
+    if (action === 'group') {
+      doc.captureSync();
+      const grouped = service.createGroupFromSelected();
+      if (!grouped) throw new Error('Estes objetos não podem ser agrupados. Selecione cartões ou formas do mesmo nível.');
+      return 'Grupo criado sem alterar o conteúdo.';
+    }
+    if (action === 'frame-selection') {
+      const framed = service.frame.createFrameOnSelected();
+      if (!framed) throw new Error('Não foi possível criar um Frame com esta seleção.');
+      return 'Frame criado ao redor da seleção.';
+    }
+    if (action === 'distribute' && items.length < 3) throw new Error('Selecione ao menos três objetos para distribuir.');
+    // Do not touch frames/notes outside the user selection or overwrite their content.
+    doc.captureSync();
+    const positions = new Map<string, [number, number]>();
+    if (action === 'align-left') {
+      const x = Math.min(...items.map(item => item.x));
+      items.forEach(item => positions.set(item.element.id, [x, item.y]));
+    } else if (action === 'distribute') {
+      const sorted = [...items].sort((a, b) => a.x - b.x);
+      const first = sorted[0].x, last = sorted[sorted.length - 1].x;
+      sorted.forEach((item, i) => positions.set(item.element.id, [first + (last - first) * i / (sorted.length - 1), item.y]));
+    } else if (action === 'organize-grid') {
+      const sorted = [...items].sort((a, b) => a.y - b.y || a.x - b.x);
+      const columns = Math.ceil(Math.sqrt(sorted.length));
+      const startX = Math.min(...sorted.map(item => item.x));
+      const startY = Math.min(...sorted.map(item => item.y));
+      let rowY = startY;
+      for (let index = 0; index < sorted.length; index += columns) {
+        const row = sorted.slice(index, index + columns);
+        let x = startX;
+        for (const item of row) { positions.set(item.element.id, [x, rowY]); x += item.w + 36; }
+        rowY += Math.max(...row.map(item => item.h)) + 36;
+      }
+    } else throw new Error('Ação de organização desconhecida.');
+    for (const item of items) {
+      const p = positions.get(item.element.id);
+      if (p) service.updateElement(item.element.id, { xywh: JSON.stringify([p[0], p[1], item.w, item.h]) });
+    }
+    return items.length + ' objetos organizados. Ctrl+Z desfaz a operação.';
+  };
+  const addStarterTemplate = (action: 'template-brainstorm' | 'template-affinity') => {
+    // Layout seeds are native note blocks (not fabricated Service Graph records).
+    // Existing visual content is never cleared or replaced.
+    if (doc.getBlockByFlavour('affine:note').length > 900) throw new Error('Quadro muito grande. Organize o conteúdo existente antes de inserir um modelo.');
+    const center = nativeRoot().viewport.center;
+    const cx = Array.isArray(center) && Number.isFinite(center[0]) ? center[0] : 600;
+    const cy = Array.isArray(center) && Number.isFinite(center[1]) ? center[1] : 400;
+    const titles = action === 'template-brainstorm'
+      ? ['Pergunta central — o que queremos resolver?', 'Ideia 1', 'Ideia 2', 'Ideia 3', 'Ideia 4', 'Próximos passos']
+      : ['Tema A — agrupar descobertas', 'Tema B — agrupar descobertas', 'Tema C — agrupar descobertas', 'Pontos em comum', 'Questões abertas', 'Oportunidades'];
+    const x = cx - 450, y = cy - 275;
+    const templateId = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : String(Date.now());
+    doc.captureSync();
+    let created = 0;
+    titles.forEach((label, i) => {
+      if (addVisualNote({ id: 'h762:' + templateId + ':' + i, text: label, x: x + i % 3 * 320, y: y + Math.floor(i / 3) * 220, width: 280, height: 160 })) created++;
+    });
+    return created + ' notas inseridas. Edite-as diretamente no canvas.';
+  };
+  const runAction = (action: string) => {
+    if (['align-left', 'distribute', 'organize-grid', 'group', 'frame-selection'].includes(action)) return organize(action);
+    if (action === 'template-brainstorm' || action === 'template-affinity') return addStarterTemplate(action);
+    if (action === 'zoom-in' || action === 'zoom-out' || action === 'zoom-fit') {
+      nativeRoot().setZoomByAction(action === 'zoom-in' ? 'in' : action === 'zoom-out' ? 'out' : 'fit');
+      return 'Visualização ajustada.';
+    }
+    const history = doc as unknown as { undo?: () => void; redo?: () => void };
+    if (action === 'undo' && history.undo) { history.undo(); return 'Última ação desfeita.'; }
+    if (action === 'redo' && history.redo) { history.redo(); return 'Ação refeita.'; }
+    throw new Error('Esta ação não está disponível no editor atual.');
+  };
+  // Native tools may revert to selection after placing a shape/connection.
+  canvas.addEventListener('pointerup', () => {
+    window.setTimeout(() => {
+      const current = nativeRoot().gfx.tool.currentToolName$?.value;
+      if (current === 'default') notify('TOOL_CHANGED', { tool: 'select' });
+    }, 0);
+  }, true);
+
   const exportCopy = async () => {
     try {
       const snapshot = await new Job({ collection }).docToSnapshot(doc);
@@ -142,7 +270,13 @@ async function main() {
     const message = event.data;
     if (!message || message.source !== 'blue-ocean' || message.version !== 2 ||
         message.boardId !== boardId || message.serviceId !== serviceId) return;
-    if (message.type === 'MODE' && (message.mode === 'canvas' || message.mode === 'page')) {
+    if (message.type === 'TOOL' && typeof message.tool === 'string') {
+      try { activateTool(message.tool); }
+      catch (error) { notify('ERROR', { text: error instanceof Error ? error.message : 'Falha ao ativar ferramenta.' }); }
+    } else if (message.type === 'ACTION' && typeof message.action === 'string') {
+      try { notify('COMMAND_RESULT', { text: runAction(message.action) }); }
+      catch (error) { notify('ERROR', { text: error instanceof Error ? error.message : 'Ação não disponível.' }); }
+    } else if (message.type === 'MODE' && (message.mode === 'canvas' || message.mode === 'page')) {
       setMode(message.mode);
     } else if (message.type === 'EXPORT') {
       void exportCopy();

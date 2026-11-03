@@ -86,6 +86,56 @@ def deletion_and_whiteboard(page):
     expect(page.locator('[data-whiteboard-primary-editor="blocksuite"]')).to_be_visible()
     editor = page.frame_locator('.bo-bs-frame')
     expect(editor.locator('.bo-bs-canvas')).to_be_visible(timeout=30000)
+    palette = page.locator('[data-whiteboard-tools="H7.62"]')
+    expect(palette).to_be_visible(timeout=20000)
+    editor_root = editor.locator('edgeless-editor')
+    def current_tool():
+        return editor_root.evaluate("(el) => el.std.getService('affine:page').gfx.tool.currentToolName$.value")
+    palette.get_by_role('button', name='Retângulo', exact=True).click()
+    page.wait_for_timeout(150)
+    check(current_tool() == 'shape', 'Toolbar H7.62 activates native Shape tool in BlockSuite')
+    palette.get_by_role('button', name='Conectar', exact=True).click()
+    page.wait_for_timeout(150)
+    check(current_tool() == 'connector', 'Toolbar H7.62 activates native Connector tool')
+    palette.get_by_role('button', name='Post-it', exact=True).click()
+    page.wait_for_timeout(150)
+    check(current_tool() == 'affine:note', 'Toolbar H7.62 activates native Note tool')
+    palette.get_by_role('button', name='Selecionar', exact=True).click()
+    check(current_tool() == 'default', 'Toolbar H7.62 returns to native selection')
+    before = editor_root.evaluate("(el) => el.doc.getBlockByFlavour('affine:note').length")
+    palette.get_by_role('button', name='Modelos', exact=True).click()
+    palette.get_by_role('button', name='Brainstorm — notas de ideias', exact=True).click()
+    page.wait_for_function("""() => {
+      const frame = document.querySelector('.bo-bs-frame');
+      const edgeless = frame?.contentDocument?.querySelector('edgeless-editor');
+      return edgeless?.doc?.getBlockByFlavour('affine:note').length >= 7;
+    }""", timeout=20000)
+    after = editor_root.evaluate("(el) => el.doc.getBlockByFlavour('affine:note').length")
+    check(after == before + 6, 'Brainstorm creates six native editable notes without deleting prior content')
+    pre_align = editor_root.evaluate("""(el) => {
+      const notes = el.doc.getBlockByFlavour('affine:note');
+      const lastTwo = notes.slice(-2);
+      const unchanged = notes[0];
+      el.std.getService('affine:page').gfx.selection.set({elements: lastTwo.map(note => note.id)});
+      return { lastIds: lastTwo.map(note => note.id), original: unchanged.xywh, untouched: unchanged.id };
+    }""")
+    palette.get_by_role('button', name='Organizar', exact=True).click()
+    palette.get_by_role('button', name='Alinhar à esquerda', exact=True).click()
+    page.wait_for_timeout(150)
+    post_align = editor_root.evaluate("""(el, args) => {
+      const last = args.lastIds.map(id => el.doc.getBlockById(id));
+      const first = el.doc.getBlockById(args.untouched);
+      return { x: last.map(note => JSON.parse(note.xywh)[0]), original: first.xywh };
+    }""", pre_align)
+    check(abs(post_align['x'][0] - post_align['x'][1]) < 1e-6 and post_align['original'] == pre_align['original'],
+          'Align-left only changes selected native notes and preserves other content')
+
+    palette.get_by_role('button', name='Recolher ferramentas').click()
+    check(palette.get_by_role('button', name='Expandir ferramentas').is_visible(),
+          'Tool palette collapses inside Whiteboard without closing canvas')
+    palette.get_by_role('button', name='Expandir ferramentas').click()
+    check(palette.get_by_role('button', name='Objetos do serviço').is_visible(),
+          'Service Graph object access remains on the same visual canvas')
     check(any(b.get('viewKind') == 'free' for b in graph(page)['views']['whiteboards'].values()),
           'Whiteboard creation opens BlockSuite as the primary free canvas')
     page.screenshot(path=str(OUT / 'visual-whiteboard.png'), animations='disabled')
