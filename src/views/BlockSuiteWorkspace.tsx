@@ -39,6 +39,8 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
   const [panelOpen, setPanelOpen] = useState(false);
   const [frameIssue, setFrameIssue] = useState(false);
   const [frameAttempt, setFrameAttempt] = useState(0);
+  const [availabilityAttempt, setAvailabilityAttempt] = useState(0);
+  const [loadError, setLoadError] = useState('');
   const [kind, setKind] = useState<WhiteboardCanvasKind>('need');
   const [title, setTitle] = useState('');
   const [selectedText, setSelectedText] = useState('');
@@ -69,16 +71,23 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
 
   useEffect(() => {
     const controller = new AbortController();
-    setEditorReady(false); setAvailability('checking'); setFrameIssue(false);
+    setEditorReady(false); setAvailability('checking'); setFrameIssue(false); setLoadError('');
     const check = async () => {
       try {
         const response = await fetch('/blocksuite/blue-ocean-blocksuite.json', { signal: controller.signal, cache: 'no-store' });
-        if (!response.ok) throw new Error('Editor indisponível');
+        if (!response.ok) throw new Error('Os arquivos do editor visual não foram encontrados no servidor.');
         const manifest: unknown = await response.json();
-        if (!manifest || typeof manifest !== 'object' || !('integration' in manifest) || manifest.integration !== 'blue-ocean-blocksuite') throw new Error('Manifesto inválido');
+        if (!manifest || typeof manifest !== 'object' || !('integration' in manifest) || manifest.integration !== 'blue-ocean-blocksuite') throw new Error('Manifesto do editor visual inválido.');
+        // The Vite development server returns its HTML fallback for unknown paths.
+        // Check both resources so a successful manifest request cannot mask a missing iframe entry.
+        const editor = await fetch('/blocksuite/index.html', { signal: controller.signal, cache: 'no-store' });
+        if (!editor.ok || !(await editor.text()).includes('id="app"')) throw new Error('A página do canvas visual não está disponível.');
         if (!controller.signal.aborted) setAvailability('ready');
-      } catch {
-        if (!controller.signal.aborted) setAvailability('missing');
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setLoadError(error instanceof Error ? error.message : 'Não foi possível carregar os arquivos do Whiteboard.');
+          setAvailability('missing');
+        }
       }
     };
     void check();
@@ -89,12 +98,16 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
       if (message.type === 'READY') { setEditorReady(true); setNotice('Salvo neste dispositivo'); }
       if (message.type === 'SAVED') setNotice('Salvo neste dispositivo');
       if (message.type === 'ERROR') setNotice(message.text ?? 'Não foi possível executar esta ação.');
+      if (message.type === 'INIT_ERROR') {
+        setLoadError(message.text || 'O editor visual encontrou um erro de inicialização.');
+        setFrameIssue(true);
+      }
       if (message.type === 'SELECTION') setSelectedText((message.text ?? '').slice(0, 240));
       if (message.type === 'IMPORT_DONE') setNotice(message.count ? `${message.count} elemento(s) copiado(s) sem alterar o quadro anterior.` : 'Os elementos já estavam no canvas.');
     };
     window.addEventListener('message', onMessage);
     return () => { controller.abort(); window.removeEventListener('message', onMessage); };
-  }, [boardId, serviceId]);
+  }, [boardId, serviceId, availabilityAttempt]);
 
   // A successful manifest request does not guarantee the iframe has initialized.
   // Offer recovery when its READY handshake never arrives (e.g. blocked asset).
@@ -105,9 +118,15 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
   }, [availability, editorReady, frameIssue, frameAttempt]);
 
   const retryEditor = () => {
+    setLoadError('');
     setFrameIssue(false);
     setEditorReady(false);
     setFrameAttempt(value => value + 1);
+  };
+  const retryAssets = () => {
+    setLoadError('');
+    setAvailability('checking');
+    setAvailabilityAttempt(value => value + 1);
   };
 
   const insertReference = (kind: WhiteboardCanvasKind, id: string, label: string) => {
@@ -152,13 +171,18 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
     </header>
     <div className="bo-bs-body">
       {availability === 'checking' && <div className="bo-bs-placeholder" role="status">Carregando canvas visual…</div>}
-      {availability === 'missing' && <div className="bo-bs-placeholder bo-bs-error-state" role="alert"><h2>Canvas indisponível</h2><p>Não foi possível carregar o editor visual. Os dados do quadro continuam preservados.</p><button type="button" onClick={onClose}>Voltar aos Whiteboards</button></div>}
+      {availability === 'missing' && <div className="bo-bs-placeholder bo-bs-error-state" role="alert">
+        <h2>Canvas indisponível</h2>
+        <p>{loadError || 'Os arquivos do editor visual não estão disponíveis.'} Os dados do quadro continuam preservados.</p>
+        <p className="bo-bs-recovery-hint">No Linux, reinicie o Blue Ocean com <code>npm run dev</code> para preparar automaticamente o editor.</p>
+        <div className="bo-bs-recovery-actions"><button type="button" onClick={retryAssets}>Tentar novamente</button><button type="button" onClick={onClose}>Voltar aos Whiteboards</button></div>
+      </div>}
       {availability === 'ready' && <iframe key={frameAttempt} ref={frameRef} title={`Canvas visual de ${boardName}`} className="bo-bs-frame"
         src={`/blocksuite/index.html?${params.toString()}`} sandbox="allow-scripts allow-same-origin allow-downloads" />}
       {availability === 'ready' && !editorReady && !frameIssue && <div className="bo-bs-loading" role="status">Abrindo o canvas visual…</div>}
       {availability === 'ready' && frameIssue && !editorReady && <div className="bo-bs-load-error" role="alert">
         <h2>O editor não terminou de carregar</h2>
-        <p>O canvas não confirmou a inicialização. Tente novamente ou volte aos seus quadros. Nenhum conteúdo foi apagado.</p>
+        <p>{loadError || 'O canvas não confirmou a inicialização.'} Tente novamente ou volte aos seus quadros. Nenhum conteúdo foi apagado.</p>
         <div><button type="button" onClick={retryEditor}>Tentar novamente</button><button type="button" onClick={onClose}>Voltar aos Whiteboards</button></div>
       </div>}
       {editorReady && showQuickStart && !panelOpen && <section className="bo-bs-quickstart" aria-label="Primeiros passos no Whiteboard">

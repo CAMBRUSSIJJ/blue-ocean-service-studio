@@ -135,11 +135,22 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
   const create = async () => {
     const title = name.trim() || 'Novo Whiteboard';
     const runtime = api<WhiteboardCoreApi>('whiteboardCore');
-    if (!runtime?.createBlank) return;
-    setShowCreate(false); setGuidedFreeStart(false); setName('');
-    const board = await (runtime.createBlankSilent ? runtime.createBlankSilent(title) : runtime.createBlank(title));
-    if (board?.id) setVisualBoard({ id: board.id, name: board.name || title });
-    else showToast('O quadro foi criado, mas não foi possível abrir o editor visual.');
+    if (!runtime?.createBlank) {
+      showToast('O Whiteboard ainda não inicializou. Recarregue a página e tente novamente.');
+      return;
+    }
+    try {
+      const board = await (runtime.createBlankSilent ? runtime.createBlankSilent(title) : runtime.createBlank(title));
+      if (!board?.id) {
+        showToast('Não foi possível criar o quadro. Confira se um projeto de serviço está aberto.');
+        return;
+      }
+      setShowCreate(false); setGuidedFreeStart(false); setName('');
+      setVisualBoard({ id: board.id, name: board.name || title });
+    } catch (error) {
+      console.error('Falha ao criar Whiteboard:', error);
+      showToast('Falha ao criar o Whiteboard. Seus quadros anteriores foram preservados.');
+    }
   };
 
   const syncContext = (id: string) => {
@@ -204,13 +215,6 @@ export function WhiteboardsView({ studio }: { studio: StudioController }) {
       </div>
       {boards.length > 0 && <button type="button" className="primary bo-wb-main-create" onClick={() => setShowCreate(true)}><Plus size={17}/> Novo whiteboard</button>}
     </header>
-
-    <aside className="bo-wb-storage-warning" role="note" aria-label="Armazenamento dos whiteboards">
-      <AlertTriangle size={18} aria-hidden="true"/>
-      <p><strong>Salvo somente neste navegador.</strong> Exporte uma cópia para não perder o trabalho se os dados locais forem apagados.
-        {boards.length > 0 && <> <button type="button" onClick={() => { const first = boards[0]; if (first) { open(first.id); showToast('No editor visual, clique em Exportar para guardar uma cópia do canvas.'); } }}>Abrir canvas para exportar</button></>}
-      </p>
-    </aside>
 
     <section className="bo-wb-next-step" aria-label="Próximo passo">
       <div className="bo-wb-next-copy"><span className="bo-wb-next-kicker">PRÓXIMO PASSO</span>

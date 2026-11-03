@@ -210,6 +210,12 @@ async function main() {
 }
 
 main().catch(error => {
+  const reason = (error instanceof Error ? error.message : 'Falha inesperada.').slice(0, 400);
+  // A child frame might fail before its READY handshake. Report the failure to
+  // the React shell instead of leaving the user stuck at a loading spinner.
+  if (window.parent !== window) window.parent.postMessage({
+    source: 'blue-ocean-blocksuite', version: 2, boardId, serviceId, type: 'INIT_ERROR', text: reason,
+  }, window.location.origin);
   if (!app) return;
   const fallback = document.createElement('div');
   fallback.className = 'bo-bs-error';
