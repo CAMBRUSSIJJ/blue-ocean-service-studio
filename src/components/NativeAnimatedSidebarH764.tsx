@@ -24,6 +24,7 @@ type Props = {
   projectScope: 'global' | 'project';
   projectTitle: string;
   serviceName: string;
+  version: string;
   activeProjectId: string | null;
   projects: Project[];
   activeKey: SidebarNavKeyH764;
@@ -70,7 +71,7 @@ const extraItems = [
 const extraIds: ReadonlySet<string> = new Set(extraItems.map(item => item.id));
 
 export function NativeAnimatedSidebarH764({
-  collapsed, projectScope, projectTitle, serviceName, activeProjectId,
+  collapsed, projectScope, projectTitle, serviceName, version, activeProjectId,
   projects, activeKey, collapsedSections, onToggleSection, onToggleCollapse,
   onNavigate, onSwitchProject, onCreateProject,
 }: Props) {
@@ -212,6 +213,7 @@ export function NativeAnimatedSidebarH764({
 
     <div className="bo-h764-sidebar-footer">
       {itemButton({ id:'settings', label:'Configurações', icon:Settings })}
+      <small className="bo-h764-version">V{version}</small>
     </div>
   </aside>;
 }
