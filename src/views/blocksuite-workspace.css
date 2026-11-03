@@ -102,7 +102,11 @@
   border-radius:9px;padding:10px 13px;font-size:12px;font-weight:700;
   cursor:pointer;min-height:40px;
 }
-.bo-bs-load-error button:first-child{border-color:#1766b0;background:#1766b0;color:#fff}
+.bo-bs-load-error button:first-child,.bo-bs-recovery-actions button:first-child{border-color:#1766b0!important;background:#1766b0!important;color:#fff!important}
+.bo-bs-recovery-hint{color:#526e87;font-size:12px;line-height:1.55}
+.bo-bs-recovery-hint code{padding:2px 4px;border-radius:4px;background:#edf4fa;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.bo-bs-recovery-actions{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:18px}
+
 .bo-bs-loading{
   position:absolute;z-index:2;left:50%;top:44%;transform:translate(-50%,-50%);
   pointer-events:none;font-size:13px;color:#6c8297;padding:12px 15px;
