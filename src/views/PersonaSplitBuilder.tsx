@@ -137,7 +137,7 @@ export function PersonaSplitBuilder({ draft, onChange, onSave, onExit, onGuided,
               </form>
             </section>;
           })}
-          {onGuided && !readOnly && <button type="button" className="bo-split-guided" onClick={onGuided}>Preenchimento guiado</button>}
+          {onGuided && !localNodes.length && !readOnly && <button type="button" className="bo-split-guided" onClick={onGuided}>Preenchimento guiado</button>}
         </section>
       </div>
     </div>
