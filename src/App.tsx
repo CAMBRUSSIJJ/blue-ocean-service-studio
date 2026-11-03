@@ -193,7 +193,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
     try { localStorage.setItem('bo-sidebar-collapsed', isSidebarCollapsed ? '1' : '0'); } catch { /* local preference only */ }
     document.body.classList.toggle('bo-h724-sidebar-collapsed', isSidebarCollapsed);
     const resize = () => {
-      const width = window.innerWidth <= 767 ? 0 : isSidebarCollapsed ? 72 : 256;
+      const width = window.innerWidth <= 767 ? 0 : isSidebarCollapsed ? 76 : 260;
       for (const name of ['--bo-sidebar-w', '--rt-sidebar']) document.documentElement.style.setProperty(name, `${width}px`);
     };
     resize(); window.addEventListener('resize', resize);
