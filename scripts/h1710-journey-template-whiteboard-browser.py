@@ -112,6 +112,24 @@ def deletion_and_whiteboard(page):
     }""", timeout=20000)
     after = editor_root.evaluate("(el) => el.doc.getBlockByFlavour('affine:note').length")
     check(after == before + 6, 'Brainstorm creates six native editable notes without deleting prior content')
+    pre_align = editor_root.evaluate("""(el) => {
+      const notes = el.doc.getBlockByFlavour('affine:note');
+      const lastTwo = notes.slice(-2);
+      const unchanged = notes[0];
+      el.std.getService('affine:page').gfx.selection.set({elements: lastTwo.map(note => note.id)});
+      return { lastIds: lastTwo.map(note => note.id), original: unchanged.xywh, untouched: unchanged.id };
+    }""")
+    palette.get_by_role('button', name='Organizar', exact=True).click()
+    palette.get_by_role('button', name='Alinhar à esquerda', exact=True).click()
+    page.wait_for_timeout(150)
+    post_align = editor_root.evaluate("""(el, args) => {
+      const last = args.lastIds.map(id => el.doc.getBlockById(id));
+      const first = el.doc.getBlockById(args.untouched);
+      return { x: last.map(note => JSON.parse(note.xywh)[0]), original: first.xywh };
+    }""", pre_align)
+    check(abs(post_align['x'][0] - post_align['x'][1]) < 1e-6 and post_align['original'] == pre_align['original'],
+          'Align-left only changes selected native notes and preserves other content')
+
     palette.get_by_role('button', name='Recolher ferramentas').click()
     check(palette.get_by_role('button', name='Expandir ferramentas').is_visible(),
           'Tool palette collapses inside Whiteboard without closing canvas')
