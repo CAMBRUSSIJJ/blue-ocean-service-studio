@@ -19,7 +19,7 @@ test('rota home tipada', /ActiveTab = 'home' \| (?:'context' \| )?(?:'whiteboard
 test('workspace é entrada padrão', /useState<ActiveTab>\('home'\)/.test(controller));
 test('Home React consome Service Graph real', /graph\.service\.id/.test(home) && /Object\.values\(graph\.journeys\)/.test(home) && /buildServiceHealthReport\(graph\)/.test(home) && /buildAttentionReport\(graph\)/.test(home));
 test('Home React possui continuidade e histórico de trabalho', /buildContinueReport\(workspaceTargets, workspacePreferences, 50\)/.test(home) && /recordRecentContext/.test(home) && /Ver todos os recentes/.test(home));
-test('App expõe Workspace IA com criação por módulo', /data-sidebar-section="design"/.test(app) && /data-sidebar-section="context"/.test(app) && /data-sidebar-section="management"/.test(app) && /WorkspaceLibraryView/.test(app) && !/bo114-global-create/.test(app));
+test('App expõe Workspace IA com criação por módulo', ['design','context','management'].every(section=>read('src/components/NativeAnimatedSidebarH764.tsx').includes(`id: '${section}'`)) && /WorkspaceLibraryView/.test(app) && !/bo114-global-create/.test(app));
 test('8 tipos de criação disponíveis', ['journey','blueprint','whiteboard','research','problem','opportunity','action','metric'].every(k => runtimeHome.includes(`kind==='${k}'`)));
 test('runtime Workspace Home registrado', /runtime\.register\('workspaceHome'/.test(runtimeHome));
 test('Whiteboard livre possui API de criação', /createBlankWhiteboard/.test(whiteboard) && /createBlank:createBlankWhiteboard/.test(whiteboard));
