@@ -33,7 +33,7 @@ check(view.includes("if (id === 'journey') setJourneyEditorOpen(false)"),'clicar
 check(view.includes("workspaceTab === 'journey' && !journeyEditorOpen") && view.includes("workspaceTab === 'journey' && journeyEditorOpen"),'library e editor têm estados separados');
 
 check(app.includes("useState(() =>") && app.includes("bo-sidebar-collapsed"),'sidebar recolhível persiste preferência');
-check(app.includes('PanelLeftClose') && app.includes('PanelLeftOpen'),'sidebar possui affordance visual de recolher/expandir');
+check((app.includes('PanelLeftClose') && app.includes('PanelLeftOpen')) || (app.includes('<ChevronLeft size={18}/>') && app.includes('<ChevronRight size={18}/>') && app.includes('bo-h763-collapse-toggle')), 'sidebar possui affordance visual de recolher/expandir');
 check(app.includes('data-sidebar-collapsed={isSidebarCollapsed ? "1" : "0"}'),'sidebar expõe estado recolhido');
 check(app.includes('bo-h724-sidebar-toggle'),'controle de recolhimento existe');
 check(css.includes('.bo-h724-sidebar.is-collapsed{width:72px!important}'),'sidebar recolhida usa largura compacta');

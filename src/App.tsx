@@ -17,7 +17,7 @@
 // V1.17 legacy shell copy: Próximo passo, saúde, continuidade e atenção do serviço
 // H7.40-H3 legacy sidebar labels: Blueprints · Portfólio · Métricas
 import React, { useEffect, useRef, useState } from 'react';
-import { Save, Upload, Download, KanbanSquare, X, Plus, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, PanelLeftClose, PanelLeftOpen, ChevronsUpDown } from './design-system/icons';
+import { Save, Upload, Download, KanbanSquare, X, Plus, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, ChevronLeft, ChevronRight, FolderKanban, ChevronsUpDown } from './design-system/icons';
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
 import { useStudioController } from './state/useStudioController';
 import { JourneyView } from './views/JourneyView';
@@ -195,7 +195,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
     try { localStorage.setItem('bo-sidebar-collapsed', isSidebarCollapsed ? '1' : '0'); } catch { /* local preference only */ }
     document.body.classList.toggle('bo-h724-sidebar-collapsed', isSidebarCollapsed);
     const resize = () => {
-      const width = window.innerWidth <= 700 ? 0 : isSidebarCollapsed ? 64 : 216;
+      const width = window.innerWidth <= 767 ? 0 : isSidebarCollapsed ? 72 : 256;
       for (const name of ['--bo-sidebar-w', '--rt-sidebar']) document.documentElement.style.setProperty(name, `${width}px`);
     };
     resize(); window.addEventListener('resize', resize);
@@ -447,23 +447,20 @@ export default function App({ authUser, onSignOut }: AppProps) {
   };
 
   return (
-    <div data-blue-ocean-identity="7.13" data-adaptive-home="7.14" data-ocean-home="7.15" data-object-language="7.16" data-ocean-surface="7.17" data-animated-ocean-branding="7.18" data-journey-cover-system="7.18-H1" data-motion-identity="7.19" data-visual-recovery="7.19-H1" data-dashboard-composition="7.20" data-dashboard-recovery="7.20-H1" data-journey-workspace="7.21" data-unified-service-workspace="7.22" data-journey-editor-ux="7.23" data-journey-library-sidebar="7.24" data-research-studio="7.26" data-project-shell="7.40-H10" data-service-first-navigation="7.40-H11" data-primary-sidebar-project-switch="7.40-H12" data-persistent-global-sidebar="7.40-H13" data-interaction-accessibility-polish="7.40-H14" data-usage-relations="7.40-H15.2" data-design-service-ux="7.40-H15.3" data-design-service-visual="7.40-H15.4" data-discovery-ux="7.40-H15.5" data-research-ux="7.40-H15.6" data-adaptive-experience="H16" data-foundation-deep-adaptation="H16.1" data-research-driven-context="H16.2" data-phase-status-consistency="H16.3" data-design-service-proposal="H16.4" data-research-proposal="H16.5" data-research-proposal-hotfix="H16.5.1" data-research-workflow-ux="H16.6" data-research-flow-polish="H16.7" data-flexible-discovery="H16.7" data-design-start-choice="H16.8" data-single-experience="H17" data-experience-level={experience.level} data-experience-density={experience.meta.density} className={`bo1187-app-shell min-h-screen h-screen bg-slate-50 font-sans flex overflow-hidden ${isProjectCreationOpen ? 'bo-h749-creation-focus' : ''} ${isGlobalHome && projectHomeSection === 'home' ? 'bo-h757-home-shell' : ''}`}>
+    <div data-blue-ocean-identity="7.13" data-adaptive-home="7.14" data-ocean-home="7.15" data-object-language="7.16" data-ocean-surface="7.17" data-animated-ocean-branding="7.18" data-journey-cover-system="7.18-H1" data-motion-identity="7.19" data-visual-recovery="7.19-H1" data-dashboard-composition="7.20" data-dashboard-recovery="7.20-H1" data-journey-workspace="7.21" data-unified-service-workspace="7.22" data-journey-editor-ux="7.23" data-journey-library-sidebar="7.24" data-research-studio="7.26" data-project-shell="7.40-H10" data-service-first-navigation="7.40-H11" data-primary-sidebar-project-switch="7.40-H12" data-persistent-global-sidebar="7.40-H13" data-interaction-accessibility-polish="7.40-H14" data-usage-relations="7.40-H15.2" data-design-service-ux="7.40-H15.3" data-design-service-visual="7.40-H15.4" data-discovery-ux="7.40-H15.5" data-research-ux="7.40-H15.6" data-adaptive-experience="H16" data-foundation-deep-adaptation="H16.1" data-research-driven-context="H16.2" data-phase-status-consistency="H16.3" data-design-service-proposal="H16.4" data-research-proposal="H16.5" data-research-proposal-hotfix="H16.5.1" data-research-workflow-ux="H16.6" data-research-flow-polish="H16.7" data-flexible-discovery="H16.7" data-design-start-choice="H16.8" data-single-experience="H17" data-animated-sidebar-reference="H7.63" data-experience-level={experience.level} data-experience-density={experience.meta.density} className={`bo1187-app-shell min-h-screen h-screen bg-slate-50 font-sans flex overflow-hidden ${isProjectCreationOpen ? 'bo-h749-creation-focus' : ''} ${isGlobalHome && projectHomeSection === 'home' ? 'bo-h757-home-shell' : ''}`}>
       <a className="bo1175-skip-link" href="#bo-main-content">Pular para o conteúdo</a>
       <button type="button" className="bo1175-mobile-scrim" aria-label="Fechar navegação" tabIndex={isMobileNavOpen ? 0 : -1} onClick={() => setIsMobileNavOpen(false)} />
       <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" aria-label="Selecionar backup completo" onChange={(event) => { const file = event.target.files?.[0]; if (file) void handleImport(file); event.target.value = ''; }} />
-      <aside data-bo-precision-sidebar-native="1" data-project-scope={isGlobalScope ? "global" : "project"} data-sidebar-collapsed={isSidebarCollapsed ? "1" : "0"} className={`bo1175-sidebar rt182-host-sidebar bo1205h3-sidebar bo-h724-sidebar w-20 shrink-0 bg-white border-r border-slate-200 flex flex-col z-30 ${isSidebarCollapsed ? 'is-collapsed' : ''}`}>
-        <div className="rt182-host-brand bo-h724-sidebar-brand h-[73px] px-4 md:px-5 border-b border-slate-200 flex items-center gap-3 shrink-0">
-          <div className="bg-blue-600 p-2 rounded-lg text-white shrink-0">
-            <img src="/blue-ocean-mark.svg" alt="" className="h-[22px] w-[22px]" aria-hidden="true" />
+      <aside data-bo-precision-sidebar-native="1" data-animated-sidebar="H7.63" aria-label="Navegação principal do Blue Ocean" data-project-scope={isGlobalScope ? "global" : "project"} data-sidebar-collapsed={isSidebarCollapsed ? "1" : "0"} className={`bo1175-sidebar rt182-host-sidebar bo1205h3-sidebar bo-h724-sidebar w-20 shrink-0 bg-white border-r border-slate-200 flex flex-col z-30 ${isSidebarCollapsed ? 'is-collapsed' : ''}`}>
+        <div className="rt182-host-brand bo-h724-sidebar-brand bo-h763-brand h-[73px] px-4 md:px-5 border-b border-slate-200 flex items-center gap-3 shrink-0">
+          <div className="bg-blue-600 p-2 rounded-lg text-white shrink-0" aria-hidden="true">
+            <img src="/blue-ocean-mark.svg" alt="" className="h-[22px] w-[22px]" />
           </div>
-          <div className="hidden md:block min-w-0">
-            <h1 className="font-bold text-slate-800 tracking-tight leading-tight truncate">
-              BLUE OCEAN
-            </h1>
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider truncate">
-              Service Studio
-            </p>
+          <div className="bo-h763-brand-label min-w-0">
+            <h1 className="font-bold text-slate-800 tracking-tight leading-tight truncate">BLUE OCEAN</h1>
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider truncate">Service Studio</p>
           </div>
+          <button type="button" className="bo-h724-sidebar-toggle bo-h763-collapse-toggle" onClick={() => { setIsSidebarCollapsed(value => !value); setIsServiceMenuOpen(false); }} aria-label={isSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'} aria-expanded={!isSidebarCollapsed} aria-controls="bo-primary-navigation" title={isSidebarCollapsed ? 'Expandir navegação · Ctrl+\\' : 'Recolher navegação · Ctrl+\\'}>{isSidebarCollapsed ? <ChevronRight size={18}/> : <ChevronLeft size={18}/>}</button>
         </div>
 
         <div className="bo1163-service-context relative px-2.5 pt-2.5" data-project-context="7.40-H10" data-persistent-switcher="7.40-H13">
@@ -472,7 +469,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
             <span className="bo1163-service-switcher__copy"><small>{projectShellOpen ? 'Projeto atual' : 'Serviço'}</small><strong>{currentProject?.serviceName || graph.service.name || 'Serviço'}</strong><em>{projectShellOpen ? projectTitle : 'Abrir projetos'}</em></span>
             <ChevronsUpDown size={14} />
           </button>
-          <button type="button" className="bo-h724-sidebar-toggle" onClick={() => setIsSidebarCollapsed(value => !value)} aria-label={isSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'} aria-expanded={!isSidebarCollapsed} aria-controls="bo-primary-navigation" title={isSidebarCollapsed ? 'Expandir navegação · Ctrl+\\' : 'Recolher navegação · Ctrl+\\'}>{isSidebarCollapsed ? <PanelLeftOpen size={18}/> : <PanelLeftClose size={18}/>}</button>
+
           {isServiceMenuOpen && <div className="bo1163-service-menu bo-h740h13-project-menu" role="menu">
             <div className="bo1163-service-menu__label">Projetos do serviço</div>
             {projects.slice(0, 6).map((project) => <button type="button" role="menuitem" key={project.id} className={project.id === activeProjectId ? 'active' : ''} onClick={() => { setIsServiceMenuOpen(false); if (project.id !== activeProjectId) studio.openWorkspaceProject(project.id); window.setTimeout(() => openCurrentProjectWorkspace(), 0); }}><span><strong>{project.title}</strong><small>{project.serviceName}</small></span>{project.id === activeProjectId && <CheckCircle2 size={15}/>}</button>)}
@@ -536,6 +533,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
             <div className={`bo-h701-nav-section bo-h740h12-primary-management ${collapsedSidebarSections.management ? 'is-section-collapsed' : ''}`} data-sidebar-section="management">
               <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.management} onClick={() => toggleSidebarSection('management')}><span>Gestão</span><span aria-hidden="true">{collapsedSidebarSections.management ? '+' : '−'}</span></button>
               <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.management}>
+               <button type="button" data-sidebar-projects-nav="H7.63" title="Projetos" aria-label="Projetos" aria-current={isGlobalHome && projectHomeSection === 'projects' ? 'page' : undefined} className={`bo1205h3-nav-child ${isGlobalHome && projectHomeSection === 'projects' ? 'is-active' : ''}`} onClick={() => openGlobalHome('projects')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><FolderKanban size={17}/></span><span className="hidden md:inline">Projetos</span></button>
               <button type="button" title="Oportunidades" aria-label="Oportunidades" aria-current={isPrimaryLibrary && libraryPage === 'portfolio' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'portfolio' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('portfolio')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="portfolio" size={16}/></span><span className="hidden md:inline">Oportunidades</span></button>
               <button type="button" data-experience-nav="expanded" title="Catálogo de métricas" aria-label="Catálogo de métricas" aria-current={isPrimaryLibrary && libraryPage === 'metrics' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'metrics' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('metrics')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="metric" size={16}/></span><span className="hidden md:inline">Catálogo de métricas</span></button>
               {/* Pesquisa histórica preservada no grafo, mas retirada da navegação principal. */}
