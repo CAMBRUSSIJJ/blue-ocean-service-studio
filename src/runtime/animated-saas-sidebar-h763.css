@@ -195,10 +195,14 @@ aside[data-animated-sidebar="H7.63"] .bo1205h3-sidebar-bottom button.is-active s
   color:#2563eb!important;
 }
 aside[data-animated-sidebar="H7.63"] .bo-h701-sidebar-bottom{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:6!important;
   margin-top:12px!important;
   padding:12px 2px 4px!important;
-  background:transparent!important;
+  background:#f8fafc!important;
   border-top:1px solid #e2e8f0!important;
+  box-shadow:0 -7px 12px rgba(248,250,252,.95);
 }
 aside[data-animated-sidebar="H7.63"] .rt182-host-footer{
   flex:none;
