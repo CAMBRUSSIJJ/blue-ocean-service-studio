@@ -16,7 +16,7 @@ const checks = [
   ['Texto e formas do BlockSuite são acionados', ['rect','ellipse','diamond','text'].every(id => tools.includes("id: '" + id + "'")) && editor.includes("shapeName")],
   ['Conexão usa a ferramenta nativa BlockSuite', tools.includes("id: 'connector'") && editor.includes("mode: 1 /* ConnectorMode.Orthogonal")],
   ['Caneta, borracha e frames usam ferramentas nativas', ['brush','eraser','frame'].every(id => tools.includes("id: '" + id + "'") && editor.includes(id))],
-  ['Undo/Redo e zoom preservam a árvore original', tools.includes("id: 'zoom-in'") && tools.includes("id: 'zoom-out'") && editor.includes("action === 'undo'") && editor.includes("setZoomByAction(")],
+  ['Undo/Redo e zoom preservam a árvore original', tools.includes("onAction('zoom-in')") && tools.includes("onAction('zoom-out')") && editor.includes("action === 'undo'") && editor.includes("setZoomByAction(")],
   ['Alinhamento, distribuição e grade alteram somente a seleção', editor.includes("const selectedBounds = () => nativeRoot().gfx.selection.selectedElements") && editor.includes("if (items.length < 2)") && editor.includes("positions.get(item.element.id)")],
   ['Frame da seleção e agrupamento são recursos nativos', editor.includes('service.frame.createFrameOnSelected()') && editor.includes('service.createGroupFromSelected()')],
   ['Modelos criam notas novas sem descartar anteriores', tools.includes("'template-brainstorm'") && tools.includes("'template-affinity'") && editor.includes("addVisualNote({ id: 'h762:'")],
