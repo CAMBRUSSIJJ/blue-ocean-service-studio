@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  Archive, BookOpen, Briefcase, ChartLine, Check, ChevronDown, ChevronLeft,
+  BookOpen, Briefcase, ChartLine, Check, ChevronDown, ChevronLeft,
   ChevronRight, CircleHelp, FolderOpen, Layers3, LayoutTemplate, Lightbulb,
   Map, MessageSquare, Network, Plus, Search, Settings, StickyNote, Target, Users,
 } from '../design-system/icons';
-import './native-animated-sidebar-h764.css';
 
 /**
  * H7.64 – the one and only sidebar for Blue Ocean.
@@ -118,7 +117,6 @@ export function NativeAnimatedSidebarH764({
       data-bo1173-settings-nav={item.id === 'settings' ? '1' : undefined}
       aria-current={active ? 'page' : undefined}
       aria-label={item.label}
-      aria-expanded={undefined}
       title={collapsed ? item.label : undefined}
       className={`bo-h764-item ${active ? 'is-active' : ''} ${extra ? 'is-extra' : ''}`}
       onClick={() => navigate(item.id)}
@@ -149,7 +147,7 @@ export function NativeAnimatedSidebarH764({
         </span>
         <span className="bo-h764-context-text">
           <strong>{projectScope === 'project' ? projectTitle : 'Novo serviço'}</strong>
-          <small>{projectScope === 'project' ? serviceName : 'Abrir projetos'}</small>
+          <small>{projectScope === 'project' ? serviceName : projectTitle || 'Abrir projetos'}</small>
         </span>
         {!collapsed && <ChevronDown size={15} className="bo-h764-context-arrow" aria-hidden="true"/>}
       </button>
