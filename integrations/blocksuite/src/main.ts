@@ -153,7 +153,9 @@ async function main() {
   const organize = (action: string): string => {
     const service = nativeRoot();
     const items = selectedBounds();
-    if (items.length < 2) throw new Error('Selecione pelo menos dois objetos com Shift antes de organizar.');
+    if (items.length < (action === 'frame-selection' ? 1 : 2)) throw new Error(action === 'frame-selection'
+      ? 'Selecione um ou mais objetos antes de criar um Frame.'
+      : 'Selecione pelo menos dois objetos com Shift antes de organizar.');
     if (action === 'group') {
       doc.captureSync();
       const grouped = service.createGroupFromSelected();
@@ -161,7 +163,8 @@ async function main() {
       return 'Grupo criado sem alterar o conteúdo.';
     }
     if (action === 'frame-selection') {
-      service.frame.createFrameOnSelected();
+      const framed = service.frame.createFrameOnSelected();
+      if (!framed) throw new Error('Não foi possível criar um Frame com esta seleção.');
       return 'Frame criado ao redor da seleção.';
     }
     if (action === 'distribute' && items.length < 3) throw new Error('Selecione ao menos três objetos para distribuir.');
