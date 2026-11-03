@@ -19,7 +19,7 @@ check('collapse persistente e atalho',js.includes('blue-ocean:precision-studio:s
 check('Inspector Universal disponível',js.includes('openInspector')&&css.includes('.bo1152-inspector'));
 check('toolbar contextual disponível',js.includes('showToolbar')&&css.includes('.bo1152-floating-toolbar'));
 check('API registrada',js.includes("register?.('precisionStudio'"));
-check('hooks nativos no App',app.includes('data-bo-precision-sidebar-native')&&app.includes('data-bo-precision-header-native')&&app.includes('data-bo-precision-workspace-native'));
+check('hooks nativos no App',read('src/components/NativeAnimatedSidebarH764.tsx').includes('data-bo-precision-sidebar-native')&&app.includes('data-bo-precision-header-native')&&app.includes('data-bo-precision-workspace-native'));
 check('assets no pipeline',prep.includes('v1153-precision-studio.js')&&prep.includes('v1153-precision-studio.css'));
 check('assets no bootstrap',index.includes('v1153-precision-studio.css')&&index.includes('v1153-precision-studio.js'));
 check('CSS responsivo',css.includes('@media(max-width:1120px)')&&css.includes('@media(max-width:720px)'));
