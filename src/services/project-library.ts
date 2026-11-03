@@ -1,4 +1,5 @@
 import type { Id, ServiceGraph } from '../domain/model.ts';
+import { createServiceProjectState } from './service-project.ts';
 
 const INDEX_KEY = 'blue-ocean-project-library-v1';
 const ACTIVE_KEY = 'blue-ocean-project-library-active-v1';
@@ -182,6 +183,67 @@ export function deleteProject(id: Id, store = storage()) {
   store.removeItem(snapshotKey(id));
   if (store.getItem(ACTIVE_KEY) === id) store.removeItem(ACTIVE_KEY);
   return true;
+}
+
+/** Duplicate a project into an independent local snapshot, without changing the active project.
+ *  All original entity IDs remain stable *inside* the copy; the service/project namespaces change.
+ *  This preserves internal Service Graph references while preventing cross-project service ownership.
+ */
+export function duplicateProjectSnapshot(id: Id, store = storage()): ProjectLibraryEntry | null {
+  if (!store) return null;
+  const indexed = parseIndex(store);
+  const source = indexed.projects.find((item) => item.id === id);
+  if (!source) return null;
+  const original = loadProjectSnapshot(id, store);
+  if (!original?.service?.id || isWorkspaceEmpty(original)) return null;
+
+  const priorServiceId = original.service.id;
+  const priorProjectId = projectIdOf(original);
+  const suffix = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+  const newServiceId = `service-${suffix}`;
+  const newProjectId = `project-${suffix}`;
+  const remap = (value: unknown): unknown => {
+    if (typeof value === 'string') return value === priorServiceId ? newServiceId : value === priorProjectId ? newProjectId : value;
+    if (Array.isArray(value)) return value.map(remap);
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, remap(child)]));
+    }
+    return value;
+  };
+  const copy = remap(original) as ServiceGraph;
+  const now = nowIso();
+  copy.service.id = newServiceId;
+  copy.service.createdAt = now;
+  copy.service.updatedAt = now;
+  copy.service.project = {
+    ...(copy.service.project ?? createServiceProjectState(newServiceId, now)),
+    id: newProjectId,
+    serviceId: newServiceId,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const titles = new Set(indexed.projects.map((item) => item.title.trim().toLocaleLowerCase('pt-BR')));
+  let title = `${source.title} (cópia)`;
+  let number = 2;
+  while (titles.has(title.toLocaleLowerCase('pt-BR'))) title = `${source.title} (cópia ${number++})`;
+  const created = summarizeProjectGraph(copy, {
+    title, template: source.template, favorite: false, archived: false,
+    description: source.description, createdAt: now, updatedAt: now, lastOpenedAt: now,
+  });
+
+  // Persist the copy first, then publish it to the index. Active project is untouched.
+  const key = snapshotKey(newProjectId);
+  try {
+    store.setItem(key, JSON.stringify(copy));
+    writeIndex({ version: 1, projects: [created, ...indexed.projects] }, store);
+    return created;
+  } catch {
+    try { store.removeItem(key); } catch { /* storage quota or access rejected */ }
+    return null;
+  }
 }
 
 export function projectTemplateLabel(template: ProjectTemplate) {
