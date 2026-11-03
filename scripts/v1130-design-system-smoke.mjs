@@ -18,7 +18,7 @@ check('biblioteca React',ui.includes('export const Button')&&ui.includes('export
 check('bridge legado isolado',compat.includes('Legacy compatibility bridge')&&compat.includes('.rt196-benefits-home'));
 check('asset único gerado',prep.includes('v1130-design-system.css'));
 check('design system carregado por último',index.indexOf('v1130-design-system.css')>index.indexOf('v1120-stability.css'));
-check('badge da aplicação usa versão gerada',app.includes("from './generated/app-version'")&&app.includes('V${APP_VERSION}'));
+check('badge da aplicação usa versão gerada',app.includes("from './generated/app-version'") && (app.includes('V${APP_VERSION}') || (app.includes('version={APP_VERSION}') && require('fs').readFileSync('src/components/NativeAnimatedSidebarH764.tsx','utf8').includes('V{version}'))));
 check('sem nova dependência visual',!pkg.dependencies?.['@mui/material']&&!pkg.dependencies?.['antd']);
 check('tokens fonte existem',existsSync('src/design-system/tokens.ts'));
 console.log(`V1.13+ design-system smoke: ${checks.filter(([,ok])=>ok).length}/${checks.length}`);
