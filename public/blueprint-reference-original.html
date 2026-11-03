@@ -82,19 +82,29 @@ button,select,input{font:inherit;color:var(--ink)}button{cursor:pointer}
 .ck em{margin-left:auto;font-style:normal;font-size:12px}
 </style>
 <link rel="stylesheet" href="/journey-matrix.css">
+<link rel="stylesheet" href="/journey-cad.css">
+<!-- Shared H3 controls and dialog rules inside the isolated Blueprint iframe. -->
+<link rel="stylesheet" href="/blue-ocean-ui-h3.css">
 </head>
 <body>
 <div id="app"></div>
 <script src="/v1102-journey-content-shared.js"></script>
+<script src="/v1102-journey-views-shared.js"></script>
 <script src="/v1102-journey-content-ui.js"></script>
 <script src="/v1102-journey-picker-ui.js"></script>
+<script src="/v1102-journey-elements-ui.js"></script>
 <script src="/v1102-journey-growth-ui.js"></script>
 <script src="/v1102-journey-context-ui.js"></script>
 <script src="/v1102-journey-views-ui.js"></script>
+<script src="/v1102-journey-card-tools-ui.js"></script>
+<script src="/v1102-journey-blueprint-ui.js"></script>
+<script src="/v1102-journey-business-ui.js"></script>
+<script src="/v1102-blueprint-canvas-shared.js"></script>
+<script src="/v1102-journey-cad-ui.js"></script>
 <script>
-const HOSTED=new URLSearchParams(location.search).get('service-graph')==='1';let applyingHost=false;
+const HOSTED=new URLSearchParams(location.search).get('service-graph')==='1';let applyingHost=false,hostHydrated=!HOSTED;
 const KEY='bo-blueprint-v1',DIMS=['Tangíveis','Confiabilidade','Presteza','Segurança','Empatia'],EM=['Frustrada','Ansiosa','Neutra','Animada','Satisfeita'];
-const LANES=[{id:'ev',n:'Evidência física',h:'O que o cliente vê ou toca'},{id:'ac',n:'Ações do cliente',h:'O que a pessoa faz'},{id:'em',n:'Emoções',h:'Como ela se sente',emo:1},{id:'fl',n:'Linha de frente',h:'Ações visíveis da equipe',d:'Linha de interação'},{id:'bk',n:'Bastidores',h:'Ações que o cliente não vê',d:'Linha de visibilidade',o:1},{id:'sy',n:'Sistemas e apoio',h:'Ferramentas e processos',d:'Linha de interação interna',o:1}];
+const LANES=[{id:'ev',n:'Evidências físicas e digitais',h:'O que o cliente vê ou recebe'},{id:'ac',n:'Ações do cliente',h:'O que a pessoa faz'},{id:'em',n:'Emoções',h:'Como ela se sente',emo:1},{id:'fl',n:'Linha de frente',h:'Ações visíveis da equipe',d:'Linha de interação'},{id:'bk',n:'Bastidores',h:'Ações que o cliente não vê',d:'Linha de visibilidade',o:1},{id:'sy',n:'Sistemas e apoio',h:'Recursos e processos de suporte',d:'Linha de interação interna',o:1}];
 const seed=()=>({title:'Pedido de café para retirar',persona:'Marina, trabalha em home office · pede pelo app e retira no balcão',steps:[{n:'Descobrir',e:1,d:'Marina vê o café nas redes sociais e decide pedir.'},{n:'Pedir',e:-1,d:'Ela monta o pedido no app e paga com Pix.'},{n:'Retirar',e:-2,d:'Ela vai ao balcão e espera o pedido ficar pronto.'},{n:'Avaliar',e:2,d:'Depois, responde à pesquisa e recebe um cupom.'}],
 c:{'ev|0':['Cardápio no Instagram'],'ev|1':['Tela do app de pedidos'],'ev|2':['Copo com o nome da cliente'],'ev|3':['Cupom por e-mail'],'ac|0':['Vê o cardápio e escolhe a bebida'],'ac|1':['Faz o pedido e paga com Pix'],'ac|2':['Chega ao balcão e retira'],'ac|3':['Responde à pesquisa'],'fl|0':['Responde dúvidas no direct'],'fl|1':['Confirma o pedido no tablet'],'fl|2':['Chama a cliente pelo nome'],'fl|3':['Envia a pesquisa por e-mail'],'bk|0':['Atualiza o cardápio do dia'],'bk|1':['Barista recebe o ticket impresso'],'bk|2':['Prepara e confere o pedido'],'bk|3':['Analisa as avaliações da semana'],'sy|0':['Instagram e planilha de estoque'],'sy|1':['App de pedidos e Pix'],'sy|2':['Impressora de tickets'],'sy|3':['CRM de clientes']},
 iss:[{s:1,t:'d',x:'Pix às vezes falha sem aviso',v:2,d:1},{s:2,t:'d',x:'Espera sem estimativa',v:3,d:2},{s:2,t:'i',x:'Avisar quando o pedido ficar pronto',v:0,d:2},{s:3,t:'i',x:'Cupom na segunda compra',v:0,d:4}]});
@@ -121,40 +131,90 @@ return '<h2>Passo a passo</h2>'+progress.map((r,i)=>'<div class="ck'+(r===next?'
 const KEY2='bo-blueprint-v2',uid=()=>Math.random().toString(36).slice(2,9);
 let lk=false,pick=null,DB,S,cv=false,armed=false,lib=false,dr='',msg='',U=[],R=[],last='',lt=0;
 let V=null,H={canUndo:false,canRedo:false},emotionEdit=null,expandedNotes=new Set(),saveLabel=HOSTED?'Carregando…':'Salvo neste navegador';
-const STANDARD_ROWS=[{id:'sd',n:'Contexto da etapa',h:'Situação vivida pelo cliente'},...LANES,{id:'im',n:'Dores e ideias',h:'Problemas e oportunidades'}];
+const STANDARD_ROWS=[{id:'sd',n:'Contexto da etapa',h:'Situação vivida pelo cliente'},{id:'th',n:'Pensamentos',h:'O que a pessoa pensa'},...LANES,{id:'im',n:'Dores e ideias',h:'Problemas e oportunidades'}];
 const ACQUISITION_LANES=[{id:'go',n:'Objetivo da etapa',h:'Resultado que buscamos'},{id:'ch',n:'Canais de aquisição',h:'Como o cliente chega'},{id:'pr',n:'Promessa e mensagem',h:'O que comunicamos'},{id:'br',n:'Barreiras à contratação',h:'Dúvidas e objeções'},{id:'rr',n:'Retorno e indicação',h:'Relacionamento e retenção'},{id:'ki',n:'Indicador da etapa',h:'Como avaliar esta experiência'}];
 const BASE_ROWS=[...STANDARD_ROWS,...ACQUISITION_LANES];
-const PRESETS={essential:['sd','ac','em'],detailed:['sd','ev','ac','em','im'],operational:STANDARD_ROWS.map(r=>r.id),acquisition:['sd','ac','go','ch','pr','br','rr','ki','im'],complete:BASE_ROWS.map(r=>r.id)};
+const PRESETS={essential:['sd','ac','em'],detailed:['sd','ev','ac','em','im'],operational:['ev','ch','ac','em','fl','bk','sy'],acquisition:['sd','ac','go','ch','pr','br','rr','ki','im'],complete:BASE_ROWS.map(r=>r.id)};
 const PRESET_NAMES={essential:'Jornada essencial',detailed:'Jornada detalhada',operational:'Visão operacional',acquisition:'Aquisição e relacionamento',complete:'Matriz completa',custom:'Visualização personalizada'};
 const rowDefs=()=>contentRowDefs();
 function viewState(input){
-  const preset=Object.hasOwn(PRESETS,input?.preset)?input.preset:input?.preset==='custom'?'custom':S.editorKind==='blueprint'?'operational':'essential';
+  const preset=Object.hasOwn(PRESETS,input?.preset)?input.preset:input?.preset==='custom'?'custom':'operational';
   let hiddenRows=Array.isArray(input?.hiddenRows)?input.hiddenRows.filter(x=>typeof x==='string'):BASE_ROWS.filter(r=>!PRESETS[preset]?.includes(r.id)).map(r=>r.id);
   if(input&&!input.rowOrder?.includes('go')&&!['complete','acquisition'].includes(preset))hiddenRows=[...new Set([...hiddenRows,...ACQUISITION_LANES.map(r=>r.id)])];
-  return {version:1,preset,hiddenRows,rowOrder:Array.isArray(input?.rowOrder)?[...new Set(input.rowOrder.filter(x=>typeof x==='string'))]:BASE_ROWS.map(r=>r.id),insightsOpen:input?.insightsOpen===true,insightsTab:['guidance','analysis','quality'].includes(input?.insightsTab)?input.insightsTab:'guidance',emotionsExpanded:input?.emotionsExpanded===true,fitToScreen:input?.fitToScreen===true};
+  return {version:1,preset,blueprintRenderer:input?.blueprintRenderer==='matrix'?'matrix':'canvas',canvasOrderVersion:input?.canvasOrderVersion===1?1:0,perspective:input?.perspective==='blueprint'||!input?.perspective&&preset==='operational'?'blueprint':'journey',hiddenRows,rowOrder:Array.isArray(input?.rowOrder)?[...new Set(input.rowOrder.filter(x=>typeof x==='string'))]:BASE_ROWS.map(r=>r.id),insightsOpen:input?.insightsOpen===true,insightsTab:['guidance','analysis','quality'].includes(input?.insightsTab)?input.insightsTab:'guidance',emotionsExpanded:input?.emotionsExpanded===true,fitToScreen:input?.fitToScreen===true,
+ zoom:Number.isFinite(+input?.zoom)?Math.max(75,Math.min(150,Math.round(+input.zoom))):100,
+ stageWidths:Array.isArray(input?.stageWidths)?input.stageWidths.slice(0,100).map(w=>Number.isFinite(+w)?Math.max(210,Math.min(600,Math.round(+w))):290):[],
+ rowHeights:input?.rowHeights&&typeof input.rowHeights==='object'&&!Array.isArray(input.rowHeights)?Object.fromEntries(Object.entries(input.rowHeights).filter(([id])=>/^[a-z][a-z0-9]{0,24}$/.test(id)).map(([id,v])=>[id,Math.max(76,Math.min(540,Math.round(Number(v)||110)))])): {},
+ collapsedRows:Array.isArray(input?.collapsedRows)?input.collapsedRows.filter(id=>typeof id==='string'):[],
+ cardFilters:window.BlueOceanJourneyContent.normalizeMatrixCardFilters(input?.cardFilters),
+ connectionMode:['selected','all','off'].includes(input?.connectionMode)?input.connectionMode:preset==='operational'?'all':'selected',
+ perspectiveViews:window.BlueOceanJourneyViews.normalizeSavedMatrixView(input||{}).perspectiveViews};
+}
+
+const stageWidth=i=>V.stageWidths?.[i]||290;
+function mapGridStyle(count,preview=null){
+ const max=count<=2?440:320,widths=V.stageWidths||[],hasCustom=widths.some((n,i)=>i<count&&Number.isFinite(n));
+ const style='--stage-count:'+Math.max(1,count)+';--stage-max:'+max+'px;--map-zoom:'+(V.zoom||100)/100+';';
+ if(!preview&&(V.fitToScreen||!hasCustom))return style;
+ const px=Array.from({length:count},(_,i)=>preview?.i===i?preview.width:(preview?.widths?.[i]||stageWidth(i)));
+ const total=320+px.reduce((a,b)=>a+b,0);
+ return style+'--cols:180px '+px.map(w=>Math.max(210,Math.min(600,w))+'px').join(' ')+' 140px;min-width:'+total+'px;width:'+total+'px;';
+}
+function resizeMatrixPreview(preview){
+ const matrix=app.querySelector('.matrix');if(!matrix)return;
+ const copy=document.createElement('div');copy.style.cssText=mapGridStyle(S.steps.length,preview);
+ for(const key of ['--cols','--stage-count','--stage-max','--map-zoom'])matrix.style.setProperty(key,copy.style.getPropertyValue(key));
+ matrix.style.minWidth=copy.style.minWidth;matrix.style.width=copy.style.width;requestAnimationFrame(drawLinks);
+}
+function moveLane(id,delta,focus=true){
+ const ids=orderedRows().map(row=>row.id),i=ids.indexOf(id),j=i+delta;if(i<0||j<0||j>=ids.length)return;
+ [ids[i],ids[j]]=[ids[j],ids[i]];V.rowOrder=ids;V.preset='custom';saveView();rerender();
+ if(focus)focusNew('[data-lane-handle="'+id+'"]');
 }
 function orderedRows(){const rows=rowDefs();return [...V.rowOrder.map(id=>rows.find(r=>r.id===id)).filter(Boolean),...rows.filter(r=>!V.rowOrder.includes(r.id))]}
 function saveView(){
+  if(HOSTED&&!hostHydrated)return;
+  if(HOSTED&&S.readOnly)return;
   if(HOSTED){saveLabel='Salvando…';window.parent.postMessage({boBlueprintHost:1,type:'preferences',view:V},location.origin)}
   else{S.view=V;save()}
 }
-function choosePreset(preset){V.preset=preset;V.hiddenRows=rowDefs().filter(r=>!(PRESETS[preset].includes(r.id)||r.custom&&preset!=='essential')).map(r=>r.id);saveView()}
-function announceSave(ok){saveLabel=ok==='pending'?'Salvando…':ok?'Salvo neste navegador':'Erro ao salvar';const el=app.querySelector('[data-save-status]');if(el)el.textContent=saveLabel}
+function choosePreset(preset,keepCustom=false){const renderer=V.blueprintRenderer,target=preset==='operational'?'blueprint':['essential','detailed','acquisition'].includes(preset)?'journey':V.perspective;if(target!==V.perspective)V=window.BlueOceanJourneyViews.switchMatrixPerspective(V,target,rowDefs());V.blueprintRenderer=renderer;V.preset=preset;if(preset==='operational')V.perspective='blueprint';else if(['essential','detailed','acquisition'].includes(preset))V.perspective='journey';V.hiddenRows=rowDefs().filter(r=>!(PRESETS[preset].includes(r.id)||r.custom&&(keepCustom||preset!=='essential'))).map(r=>r.id);saveView()}
+function announceSave(ok){
+  saveLabel=ok==='pending'?'Salvando…':ok?'Salvo neste navegador':'Erro ao salvar';
+  const el=app.querySelector('[data-save-status]');if(el)el.textContent=saveLabel;
+  // Some host acknowledgements arrive after a disabled render. Keep the
+  // enabled/draggable state of library controls aligned to the canonical lock,
+  // without remounting dialogs or overwriting edits already in progress.
+  if(ok===true){
+    requestAnimationFrame(()=>{
+      if(!cadEnabled())return;
+      const unlocked=!cadLocked();
+      app.querySelectorAll('.cad-component-main[data-act="cad-add"]').forEach(button=>{
+        button.disabled=!unlocked;
+        button.draggable=unlocked;
+      });
+      app.querySelectorAll('[data-act="cad-library"],[data-act="step"]').forEach(button=>{
+        button.disabled=!unlocked;
+      });
+    });
+  }
+}
 function rerender(){const bd=app.querySelector('.bd'),left=bd?.scrollLeft||0,top=window.scrollY;render();if(bd&&app.querySelector('.bd'))app.querySelector('.bd').scrollLeft=left;window.scrollTo(0,top)}
 function changeView(update,focus){Object.assign(V,update);saveView();rerender();if(focus)focusNew(focus)}
-function openCustomizer(){const dialog=document.getElementById('customize');dialog.showModal();dialog.querySelector('[data-act="close-customize"]').focus()}
+let customizeQuery='';
+function openCustomizer(){customizeQuery='';const dialog=document.getElementById('customize');dialog.showModal();dialog.querySelector('[data-customize-search]')?.focus()}
 function closeCustomizer(){document.getElementById('customize')?.close();focusNew('[data-act="customize"]')}
 function redrawCustomizer(focus){const top=document.getElementById('customize').scrollTop;rerender();document.getElementById('customize').showModal();focusNew(focus);document.getElementById('customize').scrollTop=top}
 try{DB=JSON.parse(localStorage.getItem(KEY2))}catch(e){}
 if(!DB||!Array.isArray(DB.js)||!DB.js.length){let o;try{o=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!o||!o.steps)o=seed();o.id=uid();DB={cur:o.id,js:[o]}}
-function mig(j){const ok=/^[a-z0-9]{3,12}$/,seen=new Set();for(const k in j.c)j.c[k]=j.c[k].map(n=>{const o=typeof n=='object'&&n,t=o?String(n.t==null?'':n.t):String(n),i=o&&ok.test(n.i)&&!seen.has(n.i)?n.i:uid();seen.add(i);return{...(o?n:{}),i,t,type:window.BlueOceanJourneyContent.MATRIX_CONTENT_TYPES.includes(n?.type)?n.type:'card'}});j.links=(Array.isArray(j.links)?j.links:[]).filter(l=>l&&seen.has(l.a)&&seen.has(l.b)&&l.a!=l.b).map(l=>({a:l.a,b:l.b}))}
+function mig(j){const ok=/^[a-z0-9]{3,12}$/,seen=new Set();for(const k in j.c)j.c[k]=j.c[k].map(n=>{const o=typeof n=='object'&&n,t=o?String(n.t==null?'':n.t):String(n),i=o&&ok.test(n.i)&&!seen.has(n.i)?n.i:uid();seen.add(i);return{...(o?n:{}),i,t,type:window.BlueOceanJourneyContent.MATRIX_CONTENT_TYPES.includes(n?.type)?n.type:'card'}});j.links=(Array.isArray(j.links)?j.links:[]).filter(l=>l&&seen.has(l.a)&&seen.has(l.b)&&l.a!=l.b).map(l=>({...l,a:l.a,b:l.b,id:l.id||uid(),type:l.type||'sequence'}))}
 if(HOSTED){const o=blank();o.start=0;o.id='host';DB={cur:o.id,js:[o]}}
 DB.js.forEach(mig);S=DB.js.find(j=>j.id==DB.cur)||DB.js[0];last=JSON.stringify(S);
 function commit(){const j=JSON.stringify(S);if(j===last)return;if(Date.now()-lt>700||!U.length){U.push(last);if(U.length>60)U.shift()}lt=Date.now();last=j;R=[]}
 const save=()=>{if(S.links){const q=new Set();for(const k in S.c)S.c[k].forEach(n=>q.add(n.i));S.links=S.links.filter(l=>q.has(l.a)&&q.has(l.b))}if(!HOSTED)commit();DB.cur=S.id;if(HOSTED){S.steps.forEach(st=>{st.hostLocalId ||= uid()});S.iss.forEach(it=>{it.hostLocalId ||= uid()});if(!applyingHost){const key=growthPatchKey();if(key===growthLastPatch)return;growthLastPatch=key;announceSave('pending');window.parent.postMessage({boBlueprintHost:1,type:'patch',state:JSON.parse(JSON.stringify(S))},location.origin)}return;}try{localStorage.setItem(KEY2,JSON.stringify(DB))}catch(e){}};
 function setS(o){o.id=S.id;Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,o)}
 function sw(j){S=j;V=viewState(S.view);DB.cur=j.id;lib=false;U=[];R=[];last=JSON.stringify(S);lt=0;save()}
-function undo(d){if(HOSTED){window.parent.postMessage({boBlueprintHost:1,type:'history',direction:d?'redo':'undo'},location.origin);return}const A=d?R:U,B=d?U:R;if(!A.length)return;B.push(JSON.stringify(S));const p=JSON.parse(A.pop());Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,p);last=JSON.stringify(S);lt=0;save()}
+function undo(d){if(HOSTED){announceSave('pending');window.parent.postMessage({boBlueprintHost:1,type:'history',direction:d?'redo':'undo'},location.origin);return}const A=d?R:U,B=d?U:R;if(!A.length)return;B.push(JSON.stringify(S));const p=JSON.parse(A.pop());Object.keys(S).forEach(k=>delete S[k]);Object.assign(S,p);last=JSON.stringify(S);lt=0;save()}
 function libView(){return '<div class="hd"><div class="bk">Blue Ocean · '+(HOSTED?'Jornada':'Blueprint de serviço')+'</div><h1 class="h1">Minhas jornadas</h1></div><div class="st" style="max-width:860px"><div class="row"><button class="tb p" data-act="new">+ Nova jornada</button><button class="tb" data-act="dl">Baixar backup (.json)</button><button class="tb" data-act="imp">Importar backup</button><input type="file" id="fi" accept=".json,application/json" hidden aria-label="Arquivo de backup"><button class="tb" data-act="back">Voltar</button></div>'+(msg?'<div class="ins" role="status">'+esc(msg)+'</div>':'')+DB.js.map(j=>{const n=Object.values(j.c||{}).reduce((a,x)=>a+x.length,0);return '<section><div class="row" style="align-items:center"><div style="flex:1 1 240px"><b>'+esc(j.title||'(sem nome)')+'</b>'+(j.id==S.id?' <span class="sv">· aberta agora</span>':'')+'<div class="sv">'+(j.steps||[]).length+' etapas · '+n+' notas · '+(j.iss||[]).length+' dores e ideias'+(j.start?' · em criação':'')+'</div>'+(j.persona?'<div class="sv">'+esc(j.persona)+'</div>':'')+'</div><button class="tb" data-act="open" data-id="'+j.id+'">Abrir</button><button class="tb" data-act="dup" data-id="'+j.id+'">Duplicar</button><button class="tb" data-act="rm" data-id="'+j.id+'">'+(dr==j.id?'Confirmar exclusão':'Excluir')+'</button></div></section>'}).join('')+'<p class="hint" style="margin:0">As jornadas ficam salvas só neste navegador e neste dispositivo. Baixe um backup de vez em quando e use “Importar backup” para trazer jornadas de outro aparelho.</p></div>'}
 function impF(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result),a=Array.isArray(o.js)?o.js:o.steps?[o]:[];const ok=a.filter(j=>j&&Array.isArray(j.steps)&&j.steps.every(s=>s&&typeof s.n=='string'&&s.e>=-2&&s.e<=2)&&j.c&&typeof j.c=='object'&&Object.values(j.c).every(Array.isArray)&&Array.isArray(j.iss)&&j.iss.every(x=>x&&x.s>=0&&x.s<j.steps.length&&(x.t=='d'||x.t=='i')));ok.forEach(j=>{j.id=uid();j.steps=j.steps.map(s=>({n:s.n,e:Math.round(+s.e),d:typeof s.d=='string'?s.d:''}));j.iss=j.iss.map(x=>({s:+x.s,t:x.t,x:String(x.x),v:Math.min(3,Math.max(0,+x.v||0)),d:Math.min(4,Math.max(0,+x.d||0))}));j.lanes=(Array.isArray(j.lanes)?j.lanes:[]).filter(L=>L&&/^x[a-z0-9]{1,12}$/.test(L.id)&&typeof L.n=='string');mig(j);DB.js.push(j)});msg=ok.length?ok.length+' jornada(s) importada(s).':'O arquivo não tem jornadas válidas.';if(ok.length)save()}catch(e){msg='Não consegui ler esse arquivo.'}render()};r.readAsText(f)}
 async function dl(){try{const d=await claude.use('downloads');if(!d){msg='Download indisponível nesta tela. Abra o link no navegador ou no app do Claude.';render();return}await d.save({filename:'blueprints-blue-ocean.json',data:JSON.stringify({v:1,js:DB.js},null,1)});msg='Backup salvo.'}catch(e){msg=e&&e.code=='declined'?'Download cancelado.':'Não foi possível baixar o backup.'}render()}
@@ -183,40 +243,113 @@ return h+'<h2>Leitura automática</h2>'+ins.map(t=>'<div class="ins">'+t+'</div>
 function cell(l,i){return growthCell(l,i)}
 function item(x,ii){return '<div class="it '+x.t+'"><b>'+(x.t=='d'?'Dor':'Ideia')+'</b><div class="tx" contenteditable="true" role="textbox" aria-label="Texto" data-ed="ix" data-ii="'+ii+'">'+esc(x.x)+'</div><div class="mt">'+(x.t=='d'?'<button data-act="sev" data-ii="'+ii+'">Gravidade '+x.v+'/3</button>':'')+'<select data-act="dim" data-ii="'+ii+'" aria-label="Dimensão de qualidade">'+DIMS.map((m,k)=>'<option value="'+k+'"'+(k==x.d?' selected':'')+'>'+m+'</option>').join('')+'</select><button class="x" data-act="deli" data-ii="'+ii+'" aria-label="Remover item">×</button></div>'+growthIssueActions(x,ii)+'</div>'}
 function customizer(){
-return '<dialog class="customize" id="customize" aria-labelledby="customize-title"><div class="panel-head"><h2 id="customize-title">Personalizar visualização</h2><button class="x" data-act="close-customize" aria-label="Fechar personalização">×</button></div><p>Mostre apenas o que precisa agora. O conteúdo das faixas ocultas permanece salvo nesta Jornada.</p><div class="customize-row"><label><input type="checkbox" checked disabled>Etapas <small>(sempre visível)</small></label></div>'+orderedRows().map((r,i,a)=>'<div class="customize-row"><label><input type="checkbox" data-view-row="'+esc(r.id)+'" '+(!V.hiddenRows.includes(r.id)?'checked':'')+'>'+esc(r.n)+'</label><button class="x" data-act="row-move" data-id="'+esc(r.id)+'" data-d="-1" aria-label="Mover '+esc(r.n)+' para cima" '+(!i?'disabled':'')+'>↑</button><button class="x" data-act="row-move" data-id="'+esc(r.id)+'" data-d="1" aria-label="Mover '+esc(r.n)+' para baixo" '+(i===a.length-1?'disabled':'')+'>↓</button></div>').join('')+'<div class="footer"><button class="tb" data-act="show-all">Mostrar todas as faixas</button><button class="tb p" data-act="close-customize">Concluir</button></div></dialog>';
+ const rows=orderedRows(),visible=rows.filter(row=>!V.hiddenRows.includes(row.id)).length;
+ return '<dialog class="customize" id="customize" aria-labelledby="customize-title" aria-describedby="customize-description">'+
+ '<div class="panel-head"><div class="customize-heading"><span class="customize-eyebrow">ORGANIZAÇÃO DO MAPA</span><h2 id="customize-title">Personalizar visualização</h2></div><button class="x" data-act="close-customize" aria-label="Fechar personalização">×</button></div>'+
+ '<p id="customize-description">Escolha o que aparece na matriz. Ocultar uma faixa não exclui seu conteúdo.</p>'+
+ '<div class="customize-summary"><strong>'+visible+' de '+rows.length+' faixas visíveis</strong><span>Arraste no mapa ou use as setas para mudar a ordem.</span></div>'+
+ '<label class="customize-search-label" for="customize-search">Buscar faixa</label>'+
+ '<input id="customize-search" data-customize-search type="search" autocomplete="off" value="'+esc(customizeQuery)+'" placeholder="Ex.: emoções, canais, ações" aria-controls="customize-row-list">'+
+ '<div class="customize-row-list" id="customize-row-list"><div class="customize-row is-locked"><label><input type="checkbox" checked disabled>Etapas <small>· Sempre visível</small></label></div>'+
+ rows.map((row,i,all)=>{const found=(row.n+' '+(row.h||'')).toLocaleLowerCase('pt-BR').includes(customizeQuery.toLocaleLowerCase('pt-BR'));return '<div class="customize-row" data-customize-item data-search="'+esc((row.n+' '+(row.h||'')).toLocaleLowerCase('pt-BR'))+'" '+(found?'':'hidden')+'><label><input type="checkbox" data-view-row="'+esc(row.id)+'" '+(!V.hiddenRows.includes(row.id)?'checked':'')+'>'+esc(row.n)+'</label><div class="customize-move" role="group" aria-label="Ordenar '+esc(row.n)+'"><button class="x" data-act="row-move" data-id="'+esc(row.id)+'" data-d="-1" title="Mover para cima" aria-label="Mover '+esc(row.n)+' para cima" '+(!i?'disabled':'')+'>↑</button><button class="x" data-act="row-move" data-id="'+esc(row.id)+'" data-d="1" title="Mover para baixo" aria-label="Mover '+esc(row.n)+' para baixo" '+(i===all.length-1?'disabled':'')+'>↓</button></div></div>'}).join('')+
+ '</div><p class="customize-empty" data-customize-empty '+(rows.some(row=>(row.n+' '+(row.h||'')).toLocaleLowerCase('pt-BR').includes(customizeQuery.toLocaleLowerCase('pt-BR')))?'hidden':'')+'>Nenhuma faixa encontrada. Experimente outro termo.</p>'+
+ '<div class="footer"><div class="customize-footer-tools"><button class="tb" data-act="reset-rows">Restaurar padrão</button><button class="tb" data-act="show-all">Mostrar todas as faixas</button></div><button class="tb p" data-act="close-customize">Concluir</button></div></dialog>';
 }
 function editorHeader(){
-const kind=S.editorKind==='blueprint'?'Blueprint':'Jornada',opportunities=S.iss.filter(x=>x.t==='i').length;
-return '<header class="editor-head"><div class="hd"><button class="tb back" data-act="back" aria-label="'+(kind==='Jornada'?'Voltar para Jornadas':'Voltar para Blueprints')+'">← '+(kind==='Jornada'?'Jornadas':'Blueprints')+'</button><input class="ti" data-f="title" aria-label="Nome da jornada" value="'+esc(S.title||kind)+'"><span class="sv" role="status" data-save-status title="As alterações são armazenadas neste navegador. Baixe um backup para guardar outra cópia.">'+saveLabel+'</span></div><nav class="toolbar" aria-label="Ferramentas da '+kind+'"><details class="menu"><summary>'+kind+' ▾</summary><div class="menu-body">'+Object.entries(PRESETS).map(([id])=>'<button class="tb" data-act="preset" data-preset="'+id+'" aria-pressed="'+(V.preset===id)+'">'+PRESET_NAMES[id]+'<small>'+({essential:'Quatro faixas para começar',detailed:'Evidências, dores e ideias',operational:'Linha de frente, bastidores e apoio',acquisition:'Canais, promessa, contratação e retorno',complete:'Todas as faixas, inclusive personalizadas'}[id])+'</small></button>').join('')+'</div></details><button class="tb" data-act="customize">Personalizar visualização</button><button class="tb" data-act="views-open">Visualizações</button><span class="spacer"></span><button class="tb icon" data-act="undo" aria-label="Desfazer" title="Desfazer" '+(!(HOSTED?H.canUndo:U.length)?'disabled':'')+'>↶</button><button class="tb icon" data-act="redo" aria-label="Refazer" title="Refazer" '+(!(HOSTED?H.canRedo:R.length)?'disabled':'')+'>↷</button><button class="tb" data-act="present">Apresentar</button><button class="tb" data-act="insights" aria-expanded="'+V.insightsOpen+'" aria-controls="insights-panel">Insights'+(opportunities?'<span class="insight-count"> · '+opportunities+' oportunidade'+(opportunities===1?'':'s')+'</span>':'')+'</button><details class="menu tools-menu"><summary>Ferramentas ▾</summary><div class="menu-body"><button class="tb" data-act="fit" aria-pressed="'+V.fitToScreen+'">Ajustar etapas à tela</button><button class="tb" data-act="lk" aria-pressed="'+lk+'">↗ Ligar notas</button><button class="tb" data-act="cv" aria-pressed="'+cv+'">Visão do cliente</button><button class="tb" data-act="alane">Adicionar faixa</button><label>Cenário da jornada<input data-f="persona" maxlength="400" value="'+esc(S.persona||'')+'" aria-label="Cenário da jornada" placeholder="Quem vive esta experiência?"></label><label>Objetivo da Jornada<input data-f="objective" maxlength="1000" value="'+esc(S.objective||'')+'" placeholder="Que experiência queremos melhorar?"></label>'+(HOSTED?'<button class="tb" data-act="backup">Baixar backup do projeto</button><button class="tb" data-act="tools">Recursos avançados<small>Revisão, qualidade, exportação e guias</small></button>':'<button class="tb" data-act="lib">Minhas jornadas</button>')+'</div></details><button class="tb p" data-act="step" aria-label="Adicionar etapa">+ Etapa</button></nav>'+contextHeader()+'</header>';
+const perspective=V.perspective,kind=perspective==='blueprint'?'Blueprint':'Jornada',opportunities=S.iss.filter(x=>x.t==='i').length;
+return '<header class="editor-head"><div class="hd"><button class="tb back" data-act="back" aria-label="Voltar para mapas do serviço">← Jornadas e Blueprints</button><input class="ti" data-f="title" aria-label="Nome do mapa" placeholder="Nome do mapa" value="'+esc(S.title||'')+'"><span class="map-perspective-label">'+kind+'</span><span class="sv" role="status" data-save-status title="As alterações são armazenadas neste navegador. Baixe um backup para guardar outra cópia.">'+saveLabel+'</span></div><nav class="toolbar" aria-label="Ferramentas da '+kind+'"><label class="map-perspectives">Visualização<select data-cad-view aria-label="Visualização do mapa"><option value="blueprint">Blueprint</option><option value="journey">Jornada</option><option value="matrix" selected>Matriz</option></select></label><button class="tb" data-act="cad-open">Canvas</button><button class="tb" data-act="views-open" title="Salvar e aplicar visualizações deste mapa">Visualizações</button><details class="menu"><summary aria-label="Faixas: escolher modelo de visualização">Faixas <span class="toolbar-chevron" aria-hidden="true">⌄</span></summary><div class="menu-body"><span class="menu-heading">MODELOS DE FAIXAS</span>'+Object.entries(PRESETS).map(([id])=>'<button class="tb" data-act="preset" data-preset="'+id+'" aria-pressed="'+(V.preset===id)+'">'+PRESET_NAMES[id]+'<small>'+({essential:'Contexto, ações e emoções',detailed:'Evidências, dores e ideias',operational:'Linha de frente, bastidores e apoio',acquisition:'Canais, promessa, contratação e retorno',complete:'Todas as faixas, inclusive personalizadas'}[id])+'</small></button>').join('')+'</div></details><div class="map-navigation" role="group" aria-label="Navegação do mapa"><button class="tb icon" data-act="map-prev" aria-label="Rolar mapa à esquerda">‹</button><button class="tb icon" data-act="map-next" aria-label="Rolar mapa à direita">›</button><button class="tb icon" data-act="zoom-out" aria-label="Reduzir zoom">−</button><button class="tb map-zoom-indicator" data-act="zoom-reset" aria-label="Restaurar zoom a 100 por cento" title="Restaurar zoom">'+V.zoom+'%</button><button class="tb icon" data-act="zoom-in" aria-label="Ampliar zoom">+</button><button class="tb map-fit" data-act="fit" aria-pressed="'+V.fitToScreen+'" title="Ajustar etapas à tela">Ajustar à tela</button><button class="tb map-fit" data-act="bp-distribute" title="Distribuir larguras sem alterar o conteúdo">Distribuir larguras</button></div><span class="spacer"></span><div class="map-toolset map-toolset--views" role="group" aria-label="Personalizar e salvar visualizações"><button class="tb map-customize" data-act="customize" title="Mostrar, ocultar e ordenar faixas" aria-label="Personalizar visualização">Personalizar</button></div><button class="tb icon" data-act="undo" aria-label="Desfazer" title="Desfazer" '+(!(HOSTED?H.canUndo:U.length)?'disabled':'')+'>↶</button><button class="tb icon" data-act="redo" aria-label="Refazer" title="Refazer" '+(!(HOSTED?H.canRedo:R.length)?'disabled':'')+'>↷</button><button class="tb map-secondary" data-act="present" aria-label="Apresentar" title="Apresentar mapa">◧</button><button class="tb map-secondary" data-act="insights" aria-label="Insights" title="Abrir ou fechar painel de análise" aria-expanded="'+V.insightsOpen+'" aria-controls="insights-panel" data-active="'+V.insightsOpen+'">Insights'+(opportunities?'<span class="insight-count" aria-hidden="true">'+opportunities+'</span>':'')+'</button><details class="menu tools-menu"><summary aria-label="Mais ferramentas">Mais <span class="toolbar-chevron" aria-hidden="true">⌄</span></summary><div class="menu-body"><span class="menu-heading">MAPA</span><button class="tb" data-act="lk" aria-pressed="'+lk+'">↗ Ligar notas</button><button class="tb" data-act="cv" aria-pressed="'+cv+'">Visão do cliente</button><button class="tb" data-act="alane">Adicionar faixa</button><span class="menu-heading">CONTEXTO DO SERVIÇO</span><label>Cenário da jornada<input data-f="persona" maxlength="400" value="'+esc(S.persona||'')+'" aria-label="Cenário da jornada" placeholder="Quem vive esta experiência?"></label><label>Objetivo da Jornada<input data-f="objective" maxlength="1000" value="'+esc(S.objective||'')+'" placeholder="Que experiência queremos melhorar?"></label><span class="menu-heading">ARQUIVOS E RECURSOS</span>'+(HOSTED?'<button class="tb" data-act="backup">Baixar backup do projeto</button><button class="tb" data-act="tools">Recursos avançados<small>Revisão, qualidade, exportação e guias</small></button>':'<button class="tb" data-act="lib">Minhas jornadas</button>')+'</div></details><button class="tb p" data-act="step" aria-label="Adicionar etapa">+ Etapa</button></nav>'+contextHeader()+'</header>';
 }
 function render(){
 if(growthPresent){growthShowPresentation();return}if(lib){app.innerHTML=libView();return}if(S.start){app.innerHTML=startScreen();chk();return}
 if(!V)V=viewState(S.view);
+document.title='Blue Ocean · '+(V.perspective==='blueprint'?'Blueprint':'Jornada')+' · '+(S.title||'Mapa sem nome');
+if(cadEnabled()){cadRender();return}
+document.body.classList.remove('cad-mode');
 const N=S.steps.length,rows=orderedRows().filter(r=>!V.hiddenRows.includes(r.id));
-let h=editorHeader()+(lk?'<div class="ins" role="status" style="margin:12px 24px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois na de destino. Clique numa seta para removê-la.')+'</div>':'');
-h+='<main class="wrap'+(V.insightsOpen?' has-insights':'')+'"><div class="bd" tabindex="0" role="region" aria-label="Matriz da Jornada"><div class="matrix'+(V.fitToScreen?' fit-screen':'')+'" style="--stage-count:'+Math.max(1,N)+'"><div class="r" data-row="st"><div class="lb">Etapas<small>Um momento da experiência</small></div>'+S.steps.map((s,i)=>'<div class="sh"><i>'+(i+1)+'</i><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da etapa" data-ed="sn" data-si="'+i+'">'+esc(s.n)+'</span><div class="sa"><button class="x" data-act="mv" data-si="'+i+'" data-d="-1" aria-label="Mover etapa para a esquerda" '+(!i?'disabled':'')+'>‹</button><button class="x" data-act="mv" data-si="'+i+'" data-d="1" aria-label="Mover etapa para a direita" '+(i===N-1?'disabled':'')+'>›</button><button class="x" data-act="ds" data-si="'+i+'" aria-label="Duplicar etapa">⧉</button><button class="x" data-act="del" data-si="'+i+'" aria-label="Remover etapa">×</button></div></div>').join('')+growthStageColumn()+'</div>';
-if(!N)h+='<div class="empty-map" data-empty-journey="1">Adicione uma etapa para começar o mapa.</div>';
+let h=editorHeader()+cardToolsHeader()+blueprintConnectionBar()+businessHeader()+(lk?'<div class="ins" role="status" style="margin:12px 24px">'+(pick?'Agora clique em ● na nota de destino.':'Clique em ● na nota de origem e depois na de destino. Clique numa seta para removê-la.')+'</div>':'');
+if(businessFocusMode()){h+=businessFocus(rows)}else{
+h+='<main class="wrap'+(V.insightsOpen?' has-insights':'')+'"><div class="bd" tabindex="0" role="region" aria-label="Matriz da Jornada"><div class="map-canvas'+(N<=2?' is-compact is-'+N:'')+'"><div class="matrix'+(V.fitToScreen?' fit-screen':'')+'" style="'+mapGridStyle(N)+'"><div class="r" data-row="st"><div class="lb">Etapas<small>Um momento da experiência</small></div>'+S.steps.map((s,i)=>'<div class="sh"><i>'+(i+1)+'</i><span class="sn" contenteditable="true" role="textbox" aria-label="Nome da etapa" data-ed="sn" data-si="'+i+'">'+esc(s.n)+'</span><div class="sa"><button class="x" data-act="mv" data-si="'+i+'" data-d="-1" aria-label="Mover etapa para a esquerda" '+(!i?'disabled':'')+'>‹</button><button class="x" data-act="mv" data-si="'+i+'" data-d="1" aria-label="Mover etapa para a direita" '+(i===N-1?'disabled':'')+'>›</button><button class="x" data-act="ds" data-si="'+i+'" aria-label="Duplicar etapa">⧉</button><button class="x" data-act="del" data-si="'+i+'" aria-label="Remover etapa">×</button></div><span class="stage-resize" role="separator" tabindex="0" aria-orientation="vertical" aria-label="Ajustar largura da etapa '+esc(s.n)+'" aria-valuemin="210" aria-valuemax="600" aria-valuenow="'+stageWidth(i)+'" data-stage-resize="'+i+'" title="Arraste ou use as setas do teclado para ajustar largura"></span></div>').join('')+growthStageColumn()+'</div>';
+if(!N)h+='<div class="empty-map" data-empty-journey="1"><h2>Comece pelo primeiro momento da experiência</h2><p>Adicione uma etapa e registre o que a pessoa faz, pensa e sente.</p><button class="tb p" data-act="step">Adicionar a primeira etapa</button></div>';
+if(N&&V.perspective==='blueprint'){const missing=['ac','fl','bk','sy'].filter(id=>!rows.some(row=>row.id===id));if(missing.length)h+='<div class="blueprint-notice" role="note">Camadas essenciais ocultas: '+missing.map(id=>esc(rowDefs().find(row=>row.id===id).n)).join(', ')+'. Os separadores dependem dessas camadas.<button class="tb" data-act="customize">Revisar faixas</button></div>'}
 rows.forEach(L=>{
-if(L.d)h+='<div class="dv">'+L.d+'</div>';
-h+='<div class="r" data-row="'+esc(L.id)+'" data-category="'+(['fl','bk','sy'].includes(L.id)?'operation':L.id==='ev'?'evidence':'experience')+'"><div class="lb">'+contentRowLabel(L)+'<small>'+esc(L.h||'Faixa personalizada')+'</small>'+(L.id==='em'?'<button class="emotion-toggle" data-act="emotion-expand" aria-expanded="'+V.emotionsExpanded+'">'+(V.emotionsExpanded?'Recolher detalhes':'Expandir detalhes')+'</button>':'')+'</div>';
-if(L.id==='sd')h+=S.steps.map((s,i)=>'<div class="c"><div class="n" contenteditable="true" role="textbox" data-placeholder="Em que situação o cliente está?" aria-label="Contexto em '+esc(s.n)+'" data-ed="sd" data-si="'+i+'">'+esc(s.d||'')+'</div>'+contentCell('sd',i,true)+'</div>').join('');
-else if(L.id==='em'&&N)h+='<div class="c" style="grid-column:2/'+(N+2)+'"><div class="cvb" id="curve">'+curve()+'</div><div class="emotion-cells" style="grid-template-columns:repeat('+N+',minmax(0,1fr))">'+S.steps.map((_,i)=>'<div class="emotion-stage" style="grid-column:'+(i+1)+'">'+(V.emotionsExpanded||emotionEdit===i?emotionFields(i):'')+contentCell('em',i,true)+'</div>').join('')+'</div></div>';
+if(L.d&&V.perspective==='blueprint'){const boundary=window.BlueOceanJourneyViews.matrixBlueprintBoundary(L.id,rows.map(row=>row.id)),previous=rowDefs().find(row=>row.id===boundary.previous);h+=boundary.valid?'<div class="dv" data-boundary="'+L.id+'"><span>'+esc(L.d)+'</span></div>':'<div class="blueprint-gap" role="note">'+esc(L.d)+' suspensa · '+(boundary.hidden?'Mostre':'Posicione')+' “'+esc(previous.n)+'” antes de “'+esc(L.n)+'”.</div>'}
+h+='<div class="r" data-row="'+esc(L.id)+'" data-collapsed="'+V.collapsedRows.includes(L.id)+'" style="--lane-height:'+(V.rowHeights[L.id]||78)+'px" data-tone="'+esc(L.tone||'neutral')+'" data-category="'+(['fl','bk','sy'].includes(L.id)?'operation':L.id==='ev'?'evidence':'experience')+'"><div class="lb">'+contentRowLabel(L)+(V.perspective==='blueprint'&&['fl','bk'].includes(L.id)?'<span class="blueprint-lane-role" data-role="'+L.id+'">'+(L.id==='fl'?'Frontstage':'Backstage')+'</span>':'')+'<small>'+esc(L.h||'Faixa personalizada')+'</small><div class="lane-direct-actions"><span role="button" class="lane-grip" tabindex="0" draggable="true" data-lane-handle="'+esc(L.id)+'" aria-label="Arrastar faixa '+esc(L.n)+'" title="Arraste; Alt+↑/↓ também reordena">⠿</span><button class="x lane-collapse" data-act="lane-collapse" data-id="'+esc(L.id)+'" aria-label="'+(V.collapsedRows.includes(L.id)?'Expandir':'Recolher')+' faixa '+esc(L.n)+'" aria-expanded="'+!V.collapsedRows.includes(L.id)+'">'+(V.collapsedRows.includes(L.id)?'▾':'▴')+'</button></div><span class="lane-height-grip" role="separator" tabindex="0" aria-orientation="horizontal" aria-label="Ajustar altura da faixa '+esc(L.n)+'" aria-valuemin="76" aria-valuemax="540" aria-valuenow="'+(V.rowHeights[L.id]||78)+'" data-lane-resize="'+esc(L.id)+'" title="Arraste ou use ↑/↓ no teclado"></span>'+(L.id==='em'?'<small class="emotion-tip">Arraste os pontos da curva para ajustar a emoção.</small><button class="emotion-toggle" data-act="emotion-expand" aria-expanded="'+V.emotionsExpanded+'">'+(V.emotionsExpanded?'Recolher detalhes':'Expandir detalhes')+'</button>':'')+'</div>';
+if(V.collapsedRows.includes(L.id))h+='<div class="lane-collapsed-content" style="grid-column:2/'+(N+2)+'">Faixa recolhida · conteúdo preservado</div>';
+else if(L.id==='sd')h+=S.steps.map((s,i)=>'<div class="c"><div class="n" contenteditable="true" role="textbox" data-placeholder="Em que situação o cliente está?" aria-label="Contexto em '+esc(s.n)+'" data-ed="sd" data-si="'+i+'">'+esc(s.d||'')+'</div>'+contentCell('sd',i,true)+'</div>').join('');
+else if(L.id==='em'&&N)h+='<div class="c" style="grid-column:2/'+(N+2)+'"><div class="cvb" id="curve">'+curve()+'</div><div class="emotion-cells" style="grid-template-columns:'+S.steps.map((_,i)=>stageWidth(i)+'px').join(' ')+'">'+S.steps.map((_,i)=>'<div class="emotion-stage" style="grid-column:'+(i+1)+'">'+(V.emotionsExpanded||emotionEdit===i?emotionFields(i):'')+contentCell('em',i,true)+'</div>').join('')+'</div></div>';
 else if(L.id==='im')for(let i=0;i<N;i++)h+='<div class="c">'+S.iss.map((x,ii)=>x.s===i?item(x,ii):'').join('')+'<div class="bt"><button data-act="addi" data-si="'+i+'" data-t="d">+ Dor</button><button data-act="addi" data-si="'+i+'" data-t="i">+ Ideia</button></div>'+contentCell('im',i,true)+'</div>';
 else for(let i=0;i<N;i++)h+=cell(L.id,i);
 h+='</div>';
 });
-h+='<div class="row-tools"><button class="ad" data-act="alane">+ Adicionar faixa</button><button class="ad" data-act="customize">Mostrar outras faixas</button></div><svg class="lk" id="lk" aria-hidden="true"></svg></div></div>';
+h+='<div class="row-tools"><button class="ad" data-act="alane">+ Adicionar faixa</button><button class="ad" data-act="customize">Mostrar outras faixas</button></div><svg class="lk" id="lk" aria-hidden="true"></svg></div>'+(N>0&&N<=2&&!V.insightsOpen?'<aside class="map-guidance" aria-label="Orientação para construir o mapa"><small>PRÓXIMOS PASSOS</small><h2>'+esc(V.perspective==='blueprint'?'Conecte experiência e operação':'Dê forma à experiência')+'</h2><ol><li>Descreva a situação vivida em cada etapa.</li><li>Use <b>+ Adicionar cartão</b> para registrar ações e observações.</li><li>'+esc(V.perspective==='blueprint'?'Relacione linha de frente, bastidores e apoio.':'Registre emoções e acrescente as faixas que precisar.')+'</li></ol><p>Seus cartões acompanham a troca entre Jornada e Blueprint.</p><button class="tb" data-act="step">Adicionar próxima etapa</button></aside>':'')+'</div></div>';
 if(V.insightsOpen)h+='<aside class="pnl" id="insights-panel" aria-label="Insights"><div class="panel-head"><h2>Insights</h2><button class="x" data-act="insights" aria-label="Fechar Insights">×</button></div><div class="panel-tabs" role="tablist" aria-label="Tipos de insights">'+[['guidance','Orientações'],['analysis','Análise'],['quality','Qualidade']].map(([id,label])=>'<button id="tab-'+id+'" role="tab" data-act="insight-tab" data-tab="'+id+'" aria-controls="dx" aria-selected="'+(V.insightsTab===id)+'" tabindex="'+(V.insightsTab===id?0:-1)+'">'+label+'</button>').join('')+'</div><div id="dx" role="tabpanel" aria-labelledby="tab-'+V.insightsTab+'">'+dx()+'</div></aside>';
-app.innerHTML=h+'</main>'+customizer()+growthDialogs()+contentDialogs()+contextDialogs()+viewsDialogs();requestAnimationFrame(drawLinks);
+}
+app.innerHTML=h+'</main>'+cardToolsBulkBar()+customizer()+growthDialogs()+contentDialogs()+contextDialogs()+viewsDialogs()+cardToolsDialogs()+blueprintDialogs()+businessDialogs();businessAfterRender();requestAnimationFrame(drawLinks);
 }
 function live(){requestAnimationFrame(drawLinks);const c=document.getElementById('curve');if(c)c.innerHTML=curve();const dxEl=document.getElementById('dx');if(dxEl)dxEl.innerHTML=dx();app.querySelectorAll('[data-emotion-label]').forEach(el=>el.textContent=EM[S.steps[+el.dataset.emotionLabel].e+2]);const count=app.querySelector('.insight-count');if(count)count.textContent=' · '+S.iss.filter(x=>x.t==='i').length+' oportunidades'}
 function focusNew(sel){const e=app.querySelector(sel);if(e)e.focus()}
-app.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
-if(viewsAction(a,d,b)||contentAction(a,d,b)||growthAction(a,d))return;
+// H1/H2: direct manipulation changes view preferences, never canonical map content.
+let geometryDrag=null;
+function geometryPointerDown(event){
+ const stage=event.target.closest?.('[data-stage-resize]'),lane=event.target.closest?.('[data-lane-resize]');
+ if(!event.isPrimary||event.button!==0||(!stage&&!lane))return;
+ const el=stage||lane,kind=stage?'stage':'lane',i=stage?Number(stage.dataset.stageResize):lane.dataset.laneResize;
+ const zoom=(V.zoom||100)/100,rendered=kind==='stage'?el.closest('.sh')?.getBoundingClientRect().width:el.closest('.r')?.getBoundingClientRect().height;
+ const initial=Math.round((rendered||290)/zoom);
+ geometryDrag={kind,i,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,initial,value:initial,moved:false,widths:kind==='stage'?[...app.querySelectorAll('.r[data-row="st"]>.sh')].map(sh=>Math.max(210,Math.min(600,Math.round(sh.getBoundingClientRect().width/zoom)))):null};
+ el.setPointerCapture?.(event.pointerId);event.preventDefault();
+}
+function geometryPointerMove(event){
+ const d=geometryDrag;if(!d||event.pointerId!==d.pointerId)return;
+ const zoom=(V.zoom||100)/100,change=(d.kind==='stage'?event.clientX-d.startX:event.clientY-d.startY)/zoom;
+ d.moved=Math.abs(change)>3;
+ d.value=Math.max(d.kind==='stage'?210:76,Math.min(d.kind==='stage'?600:540,Math.round(d.initial+change)));
+ if(d.kind==='stage')resizeMatrixPreview({i:d.i,width:d.value,widths:d.widths});
+ else{const row=app.querySelector('.r[data-row="'+d.i+'"]');if(row)row.style.setProperty('--lane-height',d.value+'px');requestAnimationFrame(drawLinks)}
+ event.preventDefault();
+}
+function geometryPointerEnd(event,cancel=false){
+ const d=geometryDrag;if(!d||d.pointerId!==event.pointerId)return;
+ geometryDrag=null;
+ if(!cancel&&d.moved){
+  if(d.kind==='stage'){V.fitToScreen=false;V.stageWidths=d.widths||[];V.stageWidths[d.i]=d.value}
+  else{V.rowHeights ||= {};V.rowHeights[d.i]=d.value}
+  saveView();
+ }
+ rerender();
+}
+let laneDrag=null;
+function applyLaneDrop(target){
+ if(!laneDrag||!target||target===laneDrag)return false;
+ const ids=orderedRows().map(row=>row.id),old=ids.indexOf(laneDrag),at=ids.indexOf(target);
+ if(old<0||at<0)return false;
+ ids.splice(old,1);ids.splice(ids.indexOf(target),0,laneDrag);
+ V.rowOrder=ids;V.preset='custom';saveView();rerender();return true;
+}
+app.addEventListener('pointerdown',geometryPointerDown);
+app.addEventListener('pointermove',geometryPointerMove);
+app.addEventListener('pointerup',event=>geometryPointerEnd(event));
+app.addEventListener('pointercancel',event=>geometryPointerEnd(event,true));
+app.addEventListener('wheel',event=>{
+ if(!(event.ctrlKey||event.metaKey)||!event.target.closest?.('.bd'))return;
+ event.preventDefault();const next=Math.max(75,Math.min(150,(V.zoom||100)+(event.deltaY<0?5:-5)));
+ if(V.zoom!==next){V.zoom=next;saveView();rerender()}
+},{passive:false});
+app.addEventListener('pointerdown',growthEmotionPointerDown);
+app.addEventListener('pointermove',growthEmotionPointerMove);
+app.addEventListener('pointerup',event=>growthEmotionPointerEnd(event));
+app.addEventListener('pointercancel',event=>growthEmotionPointerEnd(event,true));
+app.addEventListener('click',e=>{if(growthEmotionIgnoreClick(e))return;const b=e.target.closest('[data-act]');if(!b||b.tagName=='SELECT'||b.tagName=='INPUT')return;const a=b.dataset.act,d=b.dataset;armed=false;if(a!='rm')dr='';if(a!='dup'&&a!='dl'&&a!='imp')msg='';
+if(cadAction(a,d,b)||businessAction(a,d,b)||blueprintAction(a,d,b)||viewsAction(a,d,b)||contentAction(a,d,b)||growthAction(a,d))return;
+if(a==='map-prev'||a==='map-next'){const bd=app.querySelector('.bd');if(bd)bd.scrollBy({left:bd.clientWidth*(a==='map-prev'?-0.75:0.75),behavior:'smooth'});return}
+if(a==='zoom-in'||a==='zoom-out'||a==='zoom-reset'){V.zoom=a==='zoom-reset'?100:Math.max(75,Math.min(150,(V.zoom||100)+(a==='zoom-in'?10:-10)));saveView();rerender();return}
+if(a==='lane-collapse'){V.collapsedRows=V.collapsedRows.includes(d.id)?V.collapsedRows.filter(id=>id!==d.id):[...V.collapsedRows,d.id];saveView();rerender();focusNew('[data-act="lane-collapse"][data-id="'+d.id+'"]');return}
 if(a==='customize'){openCustomizer();return}
 if(a==='close-customize'){closeCustomizer();return}
+if(a==='map-perspective'){cv=false;V=window.BlueOceanJourneyViews.switchMatrixPerspective(V,d.preset==='operational'?'blueprint':'journey',rowDefs());saveView();rerender();focusNew('[data-act="map-perspective"][data-preset="'+d.preset+'"]');return}
 if(a==='preset'){cv=false;choosePreset(d.preset);rerender();focusNew('.toolbar .menu summary');return}
 if(a==='show-all'){cv=false;choosePreset('complete');redrawCustomizer('[data-act="show-all"]');return}
+if(a==='reset-rows'){cv=false;choosePreset(V.perspective==='blueprint'?'operational':'essential');redrawCustomizer('[data-act="reset-rows"]');return}
 if(a==='row-move'){
   const ids=orderedRows().map(r=>r.id),i=ids.indexOf(d.id),j=i+Number(d.d);if(i>=0&&j>=0&&j<ids.length)[ids[i],ids[j]]=[ids[j],ids[i]];
   V.rowOrder=ids;V.preset='custom';saveView();redrawCustomizer('[data-act="row-move"][data-id="'+d.id+'"][data-d="'+d.d+'"]');return;
@@ -263,15 +396,37 @@ else if(a=='deli'){S.iss.splice(+d.ii,1);save()}
 rerender();if(a==='undo'||a==='redo')focusNew('[data-act="'+a+'"]');});
 app.addEventListener('focusout',e=>{const el=e.target,t=el.dataset&&el.dataset.ed,f=el.dataset&&el.dataset.f;
 if(f){if(!f.startsWith('st:')){S[f]=el.value;save()}return}if(!t||!el.isConnected)return;const v=el.innerText.replace(/\s+$/,'').trim();
-if(t=='c'){const a=S.c[el.dataset.k],j=+el.dataset.j;if(a[j]===undefined)return;if(pickerReferenceTypes.includes(a[j].type)){if(a[j].t!==v){a[j].t=v;save()}return}if(v)a[j].t=v;else if(['image','link','emoji'].includes(a[j].type)){el.textContent=a[j].t;return}else a.splice(j,1);save();if(!v)render()}
+if(t=='c'){const a=S.c[el.dataset.k],j=+el.dataset.j;if(a[j]===undefined)return;if(pickerReferenceTypes.includes(a[j].type)){if(a[j].t!==v){a[j].t=v;save()}return}if(v)a[j].t=v;else if(['image','link','emoji'].includes(a[j].type)){el.textContent=a[j].t;return}else a.splice(j,1);save();cardToolsUpdateSummary();if(!v)render()}
 else if(t=='sd'){S.steps[+el.dataset.si].d=v;save()}
 else if(t=='ln'){const l=(S.lanes||[]).find(x=>x.id==el.dataset.id);if(l){l.n=v||'Faixa';if(S.rowSettings?.[l.id])S.rowSettings[l.id].n=l.n;save()}}
 else if(t=='sn'){const step=S.steps[+el.dataset.si],name=v||'Etapa';if(step.n!==name){step.n=name;save();live()}}
 else if(t=='ix'){const ii=+el.dataset.ii;if(!S.iss[ii])return;if(v){S.iss[ii].x=v;save();live();const item=el.closest('.it');if(item){item.querySelector('.issue-next')?.remove();item.insertAdjacentHTML('beforeend',growthIssueActions(S.iss[ii],ii))}}else{S.iss.splice(ii,1);save();render()}}});
-app.addEventListener('input',e=>{const el=e.target;if(growthEmotionInput(el))return;if(el.id==='growth-stage-name'){growthStageTitle=el.value;return}if(el.dataset.emotionNote!==undefined){S.steps[+el.dataset.emotionNote].note=el.value;save();return}if(el.isContentEditable)drawLinks();if(el.dataset.f){const f=el.dataset.f;if(f.startsWith('st:')){ST[f.slice(3)]=el.value;chk()}else{S[f]=el.value;save()}}else if(el.dataset.act=='emo'){S.steps[+el.dataset.si].e=+el.value;S.steps[+el.dataset.si].emotionRecorded=true;save();live()}});
+app.addEventListener('input',e=>{const el=e.target;if(el.matches?.('[data-customize-search]')){customizeQuery=el.value;const query=customizeQuery.trim().toLocaleLowerCase('pt-BR');let count=0;app.querySelectorAll('[data-customize-item]').forEach(row=>{const show=row.dataset.search.includes(query);row.hidden=!show;if(show)count++});const empty=app.querySelector('[data-customize-empty]');if(empty)empty.hidden=count>0;return}if(growthEmotionInput(el))return;if(el.id==='growth-stage-name'){growthStageTitle=el.value;return}if(el.dataset.emotionNote!==undefined){S.steps[+el.dataset.emotionNote].note=el.value;save();return}if(el.isContentEditable)drawLinks();if(el.dataset.f){const f=el.dataset.f;if(f.startsWith('st:')){ST[f.slice(3)]=el.value;chk()}else{S[f]=el.value;save()}}else if(el.dataset.act=='emo'){S.steps[+el.dataset.si].e=+el.value;S.steps[+el.dataset.si].emotionRecorded=true;save();live()}});
 app.addEventListener('change',e=>{const el=e.target;if(growthEmotionInput(el))return;if(el.name==='metricId'&&el.closest('#growth-plan-dialog')){growthMetricToggle(el);return}if(el.dataset.viewRow){const id=el.dataset.viewRow;V.hiddenRows=el.checked?V.hiddenRows.filter(x=>x!==id):[...new Set([...V.hiddenRows,id])];V.preset='custom';saveView();redrawCustomizer('[data-view-row="'+id+'"]');return}if(el.id=='fi'){impF(el.files[0]);return}if(el.dataset.act=='dim'){S.iss[+el.dataset.ii].d=+el.value;save();live()}});
 app.addEventListener('submit',event=>{const form=event.target;if(form.id==='growth-stage-form'){event.preventDefault();growthCreateStage();return}if(form.id==='growth-plan-form'){event.preventDefault();growthSubmitPlan(form);return}if(form.matches('.growth-measure-form')){event.preventDefault();growthSubmitMeasurement(form)}});
 app.addEventListener('keydown',e=>{
+ const point=e.target.closest?.('#curve .dt[data-act="emotion-edit"]');
+ if(point&&['ArrowUp','ArrowDown','Home','End'].includes(e.key)){
+  e.preventDefault();
+  const i=Number(point.dataset.si),stage=S.steps[i];
+  if(!stage)return;
+  const old=growthEmotionScore(stage),next=e.key==='Home'?-2:e.key==='End'?2:Math.max(-2,Math.min(2,old+(e.key==='ArrowUp'?1:-1)));
+  if(next!==old||!growthEmotionKnown(stage)){
+   stage.e=next;stage.emotionRecorded=true;stage.emotionStatus='hypothesis';stage.emotionSource='';
+   growthEmotionDrafts.delete(growthEmotionKey(i));save();growthEmotionRefreshPoint(i);
+  }
+  return;
+ }
+ const stage=e.target.closest?.('[data-stage-resize]'),height=e.target.closest?.('[data-lane-resize]'),handle=e.target.closest?.('[data-lane-handle]');
+ if(handle&&e.altKey&&(e.key==='ArrowUp'||e.key==='ArrowDown')){e.preventDefault();moveLane(handle.dataset.laneHandle,e.key==='ArrowUp'?-1:1);return}
+ if((stage||height)&&['ArrowRight','ArrowLeft','ArrowUp','ArrowDown'].includes(e.key)){
+  if(stage&&!['ArrowRight','ArrowLeft'].includes(e.key)||height&&!['ArrowUp','ArrowDown'].includes(e.key))return;
+  e.preventDefault();const delta=(e.key==='ArrowRight'||e.key==='ArrowDown'?20:-20);
+  if(stage){const i=+stage.dataset.stageResize;V.fitToScreen=false;V.stageWidths=[...app.querySelectorAll('.r[data-row="st"]>.sh')].map(sh=>Math.max(210,Math.min(600,Math.round(sh.getBoundingClientRect().width/((V.zoom||100)/100)))));V.stageWidths[i]=Math.max(210,Math.min(600,V.stageWidths[i]+delta))}
+  else{const id=height.dataset.laneResize;V.rowHeights ||= {};V.rowHeights[id]=Math.max(76,Math.min(540,(V.rowHeights[id]||78)+delta))}
+  saveView();rerender();focusNew(stage?'[data-stage-resize="'+stage.dataset.stageResize+'"]':'[data-lane-resize="'+height.dataset.laneResize+'"]');return;
+ }
+
 if(e.target.id==='growth-stage-name'){if(e.key==='Enter'){e.preventDefault();growthCreateStage(true);return}if(e.key==='Escape'){e.preventDefault();growthAction('cancel-stage',{});return}}
 
 if(e.key==='Escape'){
@@ -287,38 +442,69 @@ if((e.ctrlKey||e.metaKey)&&['z','y'].includes(e.key.toLowerCase())&&!e.target.cl
 if(e.key=='Enter'&&e.target.dataset.f=='st:new'){e.preventDefault();document.querySelector('[data-act=addst]').click()}if(e.key=='Enter'&&e.target.isContentEditable){e.preventDefault();e.target.blur()}});
 function remap(f){const c={};for(const k in S.c){const p=k.split('|'),n=f(+p[1]);if(n!=null)c[p[0]+'|'+n]=S.c[k]}S.c=c;S.iss=S.iss.map(x=>({...x,s:f(x.s)})).filter(x=>x.s!=null)}
 let dg=null;
-app.addEventListener('dragstart',e=>{const h=e.target.closest&&e.target.closest('.gh');if(!h)return;dg={k:h.dataset.k,j:+h.dataset.j};e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain','n')}catch(x){}});
-app.addEventListener('dragover',e=>{const c=e.target.closest('[data-cell]');if(!dg||!c||c.dataset.cell.split('|')[0]!=dg.k.split('|')[0])return;e.preventDefault();app.querySelectorAll('.ov').forEach(x=>x.classList.remove('ov'));c.classList.add('ov')});
-app.addEventListener('drop',e=>{const c=e.target.closest('[data-cell]');if(!dg||!c)return;e.preventDefault();const k2=c.dataset.cell;if(k2.split('|')[0]!=dg.k.split('|')[0]){dg=null;return}const w=e.target.closest('.nw'),dst=S.c[k2]=S.c[k2]||[];let j2=w?+w.dataset.j:dst.length;const t=S.c[dg.k].splice(dg.j,1)[0];if(k2==dg.k&&dg.j<j2)j2--;dst.splice(j2,0,t);dg=null;save();render()});
-app.addEventListener('dragend',()=>{dg=null;app.querySelectorAll('.ov').forEach(x=>x.classList.remove('ov'))});
-function drawLinks(){const sv=document.getElementById('lk');if(!sv)return;const o=sv.getBoundingClientRect(),P=el=>{const r=el.getBoundingClientRect();return{l:r.left-o.left,r:r.right-o.left,t:r.top-o.top,b:r.bottom-o.top}};
-let h='<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--ac)"/></marker></defs>';
-(S.links||[]).forEach((l,n)=>{const A=app.querySelector('.nw[data-nid="'+l.a+'"]'),B=app.querySelector('.nw[data-nid="'+l.b+'"]');if(!A||!B)return;const a=P(A),b=P(B),dx=(b.l+b.r)/2-(a.l+a.r)/2,dy=(b.t+b.b)/2-(a.t+a.b)/2;let x1,y1,x2,y2,c1,c2;
-if(Math.abs(dy)>Math.abs(dx)*.3){const dn=dy>0;x1=(a.l+a.r)/2;x2=(b.l+b.r)/2;y1=dn?a.b:a.t;y2=dn?b.t:b.b;const k=Math.max(30,Math.abs(y2-y1)/2)*(dn?1:-1);c1=[x1,y1+k];c2=[x2,y2-k]}
-else{const rt=dx>0;y1=(a.t+a.b)/2;y2=(b.t+b.b)/2;x1=rt?a.r:a.l;x2=rt?b.l:b.r;const k=Math.max(30,Math.abs(x2-x1)/2)*(rt?1:-1);c1=[x1+k,y1];c2=[x2-k,y2]}
-const d='M'+x1+' '+y1+' C'+c1.join(' ')+' '+c2.join(' ')+' '+x2+' '+y2;
-h+='<path d="'+d+'" fill="none" style="stroke:var(--ac)" stroke-width="1.75" marker-end="url(#ar)"/><path d="'+d+'" fill="none" stroke="transparent" stroke-width="14" style="pointer-events:stroke;cursor:pointer" data-act="ul" data-n="'+n+'"><title>Remover ligação</title></path>'});
-sv.innerHTML=h}
+app.addEventListener('dragstart',e=>{const lane=e.target.closest?.('[data-lane-handle]');if(lane){laneDrag=lane.dataset.laneHandle;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',laneDrag);return}const h=e.target.closest&&e.target.closest('.gh');if(!h)return;dg={k:h.dataset.k,j:+h.dataset.j};e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain','n')}catch(x){}});
+app.addEventListener('dragover',e=>{if(laneDrag){const row=e.target.closest?.('.r[data-row]:not([data-row="st"])');if(row){e.preventDefault();app.querySelectorAll('.lane-drop-target').forEach(node=>node.classList.remove('lane-drop-target'));row.classList.add('lane-drop-target')}return}const c=e.target.closest('[data-cell]');if(!dg||!c||c.dataset.cell.split('|')[0]!=dg.k.split('|')[0])return;e.preventDefault();app.querySelectorAll('.ov').forEach(x=>x.classList.remove('ov'));c.classList.add('ov')});
+app.addEventListener('drop',e=>{if(laneDrag){e.preventDefault();const id=e.target.closest?.('.r[data-row]')?.dataset.row;applyLaneDrop(id);laneDrag=null;app.querySelectorAll('.lane-drop-target').forEach(node=>node.classList.remove('lane-drop-target'));return}const c=e.target.closest('[data-cell]');if(!dg||!c)return;e.preventDefault();const k2=c.dataset.cell;if(k2.split('|')[0]!=dg.k.split('|')[0]){dg=null;return}const w=e.target.closest('.nw'),dst=S.c[k2]=S.c[k2]||[];let j2=w?+w.dataset.j:dst.length;const t=S.c[dg.k].splice(dg.j,1)[0];if(k2==dg.k&&dg.j<j2)j2--;dst.splice(j2,0,t);dg=null;save();render()});
+app.addEventListener('dragend',()=>{laneDrag=null;app.querySelectorAll('.lane-drop-target').forEach(node=>node.classList.remove('lane-drop-target'));dg=null;app.querySelectorAll('.ov').forEach(x=>x.classList.remove('ov'))});
+function drawLinks(){
+ blueprintSyncGeometry();
+ const sv=document.getElementById('lk');if(!sv)return;
+ const zoom=(V.zoom||100)/100,o=sv.getBoundingClientRect(),P=el=>{const r=el.getBoundingClientRect();return{l:(r.left-o.left)/zoom,r:(r.right-o.left)/zoom,t:(r.top-o.top)/zoom,b:(r.bottom-o.top)/zoom}};
+ let h='<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="context-stroke"/></marker></defs>';
+ blueprintVisibleLinks().forEach(({link:l,index:n})=>{
+  const A=app.querySelector('.nw[data-nid="'+CSS.escape(l.a)+'"]'),B=app.querySelector('.nw[data-nid="'+CSS.escape(l.b)+'"]');if(!A||!B)return;
+  const a=P(A),b=P(B),dx=(b.l+b.r-a.l-a.r)/2,dy=(b.t+b.b-a.t-a.b)/2;
+  const rows=[...app.querySelectorAll('.matrix>.r[data-row]')],rowA=A.closest('.r'),rowB=B.closest('.r');
+  let d,mx,my;
+  if(Math.abs(dx)<4&&Math.abs(rows.indexOf(rowA)-rows.indexOf(rowB))===1){
+   const x=(a.l+a.r)/2,y1=dy>0?a.b:a.t,y2=dy>0?b.t:b.b;d='M'+x+' '+y1+' V'+y2;mx=x;my=(y1+y2)/2;
+  }else{
+   const right=dx>=0,x1=right?a.r:a.l,x2=right?b.l:b.r,y1=(a.t+a.b)/2,y2=(b.t+b.b)/2;
+   const gutter1=x1+(right?8:-8),gutter2=x2+(right?-8:8),track=P(rowB).t-6;
+   d='M'+x1+' '+y1+' H'+gutter1+' V'+track+' H'+gutter2+' V'+y2+' H'+x2;mx=(gutter1+gutter2)/2;my=track;
+  }
+  const type=l.type||'sequence',label=(blueprintConnectionNames[type]||'Sequência')+(l.label?' · '+l.label:'');
+  h+='<path class="blueprint-edge edge-'+type+'" data-connection-id="'+esc(l.id||'')+'" d="'+d+'" fill="none" stroke-width="1.75" marker-end="url(#ar)"/><path d="'+d+'" fill="none" stroke="transparent" stroke-width="14" style="pointer-events:stroke;cursor:pointer" data-act="bp-edit-link" data-n="'+n+'"><title>'+esc(label)+' · Editar conexão</title></path>';
+  if(type==='handoff')h+='<circle class="blueprint-handoff-dot" cx="'+mx+'" cy="'+my+'" r="5"><title>'+esc(l.handoff.fromTeam+' → '+l.handoff.toTeam+' · '+l.handoff.deliverable)+'</title></circle>';
+ });
+ sv.innerHTML=h;
+}
 document.addEventListener('click',event=>{app.querySelectorAll('details.menu[open],details.note-menu[open]').forEach(menu=>{if(!menu.contains(event.target))menu.open=false})});
 app.addEventListener('toggle',event=>{if(event.target.matches('details.menu')&&event.target.open)app.querySelectorAll('details.menu[open],details.note-menu[open]').forEach(menu=>{if(menu!==event.target)menu.open=false})},true);
 window.addEventListener('resize',drawLinks);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawLinks);
-contentBind();
+contentBind();blueprintBind();cadBind();
 render();
 if(HOSTED){
   window.addEventListener('message',event=>{
     if(event.source!==window.parent||event.origin!==location.origin||event.data?.boBlueprintHost!==1)return;
     if(event.data.history){H=event.data.history;const u=app.querySelector('[data-act="undo"]'),r=app.querySelector('[data-act="redo"]');if(u)u.disabled=!H.canUndo;if(r)r.disabled=!H.canRedo}
     if(event.data.type==='saved-view-result'){viewsResult(event.data);return}
-    if(event.data.type==='context-result'){contextResult(event.data);return}
+    if(event.data.type==='canvas-result'){cadResult(event.data);return}
+    if(event.data.type==='element-result'){elementsResult(event.data);return}
+    if(event.data.type==='context-result'){contextResult(event.data);if(!event.data.ok&&cadEnabled()){announceSave(false);cadNotice(event.data.error||'Não foi possível alterar o contexto.');const field=app.querySelector('[data-cad-persona]');if(field){field.disabled=!!S.readOnly;field.value=S.personaId||''}}return}
     if(event.data.type==='plan-result'){growthPlanResult(event.data);return}
-    if(event.data.type==='saved'){if(!event.data.ok)growthLastPatch='';if(event.data.plans)S.plans=event.data.plans;if(event.data.painContexts)S.painContexts=event.data.painContexts;if(event.data.serviceElements){S.serviceElements=event.data.serviceElements;pickerRefreshReferences()}announceSave(event.data.ok);return}
+    if(event.data.type==='saved'){if(Array.isArray(event.data.stageIdentities)){const ids=new Map(event.data.stageIdentities.filter(x=>x.hostLocalId&&x.hostStageId).map(x=>[x.hostLocalId,x.hostStageId]));for(const step of S.steps){const id=ids.get(step.hostLocalId);if(id)step.hostStageId=id}}if(event.data.operationalResources)S.operationalResources=event.data.operationalResources;if(!event.data.ok)growthLastPatch='';if(event.data.plans)S.plans=event.data.plans;if(event.data.painContexts)S.painContexts=event.data.painContexts;if(event.data.serviceElements){S.serviceElements=event.data.serviceElements;pickerRefreshReferences();elementsRefresh()}announceSave(event.data.ok);return}
     if(event.data.type==='hydrate'){
       applyingHost=true;
       try{
         const state=event.data.state;
         if(!state||!Array.isArray(state.steps)||typeof state.c!=='object')throw Error('Invalid host state');
-        S=JSON.parse(JSON.stringify(state));S.id='host';DB={cur:'host',js:[S]};
-        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;V=viewState(S.view);H=S.history||H;growthEmotionDrafts.clear();growthLastPatch=growthPatchKey();saveLabel='Salvo neste navegador';document.title='Blue Ocean · '+(S.editorKind==='blueprint'?'Blueprint':'Jornada');render();app.inert=false;app.setAttribute('aria-busy','false');
+        // A host hydration is the authoritative saved snapshot. Clear any stale
+        // canvas request that has been superseded by the incoming revision.
+        // Otherwise the header says "Salvo" while cadLocked() disables the library.
+        const hadPendingCanvas=!!cadState.pending;
+        S=JSON.parse(JSON.stringify(state));S.id='host';DB={cur:'host',js:[S]};hostHydrated=true;
+        if(hadPendingCanvas){
+          cadState.pending='';
+          cadState.pendingDocument=null;
+          cadRebaseInspector();
+          cadState.creating=null;
+          cadState.quick=null;
+          cadState.link=null;
+          cadState.menu=null;
+          cadState.error='';
+        }
+        last=JSON.stringify(S);U=[];R=[];lib=false;dr='';cv=false;V=viewState(S.view);H=S.history||H;growthEmotionDrafts.clear();growthLastPatch=growthPatchKey();saveLabel='Salvo neste navegador';document.title='Blue Ocean · '+(S.editorKind==='blueprint'?'Blueprint':'Jornada');render();announceSave(true);app.inert=false;app.setAttribute('aria-busy','false');
       }catch(e){console.error('Blueprint: cannot hydrate service graph',e)}
       finally{applyingHost=false}
     }

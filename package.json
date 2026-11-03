@@ -230,6 +230,8 @@
     "remote:stop": "docker stop bo-cloud-qa-rest bo-cloud-qa-auth bo-cloud-qa-db && docker network rm bo-cloud-qa-network",
     "blueprint:canvas:test": "node scripts/blueprint-canvas-test.mjs",
     "blueprint:canvas:browser": "python3 scripts/blueprint-canvas-browser.py",
+    "blueprint:inspector:browser": "python3 scripts/blueprint-inspector-browser.py",
+    "blueprint:inspector:test": "node scripts/blueprint-inspector-test.mjs",
     "maps:flow:test": "node scripts/service-map-flow-test.mjs",
     "project:context:test": "node --experimental-strip-types scripts/project-context-h1-test.mjs",
     "blueprint:h2:test": "node scripts/blueprint-h2-test.mjs",

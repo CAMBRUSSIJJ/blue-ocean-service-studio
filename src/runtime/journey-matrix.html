@@ -497,6 +497,7 @@ if(HOSTED){
         if(hadPendingCanvas){
           cadState.pending='';
           cadState.pendingDocument=null;
+          cadRebaseInspector();
           cadState.creating=null;
           cadState.quick=null;
           cadState.link=null;
