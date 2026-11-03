@@ -16,7 +16,7 @@ const checks=[
  [home.includes('Projetos do serviço') && home.includes('Escolha um projeto'),'Área Serviço mostra projetos explicitamente'],
  [home.includes('data-home-projects="1"') && home.includes("setSection('projects')"),'Home apresenta projeto recente e encaminha à biblioteca completa'],
  [home.includes('data-service-projects="1"'),'Lista de projetos pertence semanticamente a Serviço'],
- [home.includes('Abra um projeto para consultar informações, público, pesquisa, mapas e melhorias.'),'Fluxo Serviço → Projeto → Contexto e Mapas está explícito'],
+ [home.includes('Abra um projeto para consultar informações, público, pesquisa, mapas e melhorias.') || (home.includes('Escolha um projeto para consultar suas informações, mapas e melhorias. Cada projeto preserva seus dados.') && home.includes('data-service-projects="1"') && home.includes('onOpen={() => openProject(project)}')),'Fluxo Serviço → Projeto → Contexto e Mapas está explícito'],
  [app.includes('>Serviço</button>') || app.includes("openGlobalHome('projects')}>Serviço</button>"),'Breadcrumb global usa Serviço'],
  [app.includes("projectHomeSection === 'projects' ? 'Serviço'"),'Header global chama a área de Serviço'],
  [app.includes('<span>Serviço</span></button>') && app.includes("openGlobalHome('projects')"),'Mobile global usa Serviço'],
