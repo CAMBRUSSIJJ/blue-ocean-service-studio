@@ -20,7 +20,7 @@
 }
 .bo-h762-toolbar-head span{
   flex:1;min-width:0;padding-left:7px;
-  font-size:10px;font-weight:780;letter-spacing:.105em;
+  font-size:11px;font-weight:780;letter-spacing:.105em;
   color:#59718a;
 }
 .bo-h762-toolbar-head button{
@@ -49,7 +49,7 @@
   border:1px solid transparent;border-radius:9px;
   background:transparent;color:#4f6982;
   cursor:pointer;
-  font-size:10px;font-weight:670;
+  font-size:11px;font-weight:670;
   transition:background-color .14s,border-color .14s;
 }
 .bo-h762-toolbar-group button span{
@@ -116,7 +116,7 @@
 .bo-h762-toolbar-popover>button:hover{background:#eff6fd;color:#155e9e}
 .bo-h762-toolbar-popover>p{
   margin:6px 5px 2px;
-  font-size:10px;line-height:1.6;color:#6e8396;
+  font-size:11px;line-height:1.6;color:#6e8396;
 }
 .bo-h762-show-tools{
   position:absolute;z-index:8;left:14px;top:14px;
@@ -133,7 +133,7 @@
 }
 @media(max-width:900px){
   .bo-bs-body .bo-h762-toolbar{top:9px;left:9px;width:185px}
-  .bo-h762-toolbar-group button{min-height:47px;font-size:9px}
+  .bo-h762-toolbar-group button{min-height:47px;font-size:11px}
   .bo-bs-body .bo-h762-toolbar-popover{width:235px;max-width:calc(100vw - 210px);top:115px}
 }
 @media(max-width:530px){
