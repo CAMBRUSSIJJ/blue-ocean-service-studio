@@ -177,7 +177,7 @@ export function NeedsView({ studio }: { studio: StudioController }) {
           {dirty && <span className="bo-h760-unsaved" role="status">Alterações pendentes</span>}
           {profileEditing ? <>
             <button type="button" className="bo-h760-discard" onClick={() => { discardNeed(); setProfileEditing(false); }}><X size={15}/> Descartar</button>
-            <button type="button" className="bo-h760-save" disabled={!draft.title.trim()} onClick={() => { saveNeed(); setProfileEditing(false); }}><Save size={15}/> Salvar Necessidade</button>
+            <button type="button" className="bo-h760-save" title="Concluir edição e salvar alterações" disabled={!draft.title.trim()} onClick={() => { saveNeed(); setProfileEditing(false); }}><Save size={15}/> Salvar Necessidade</button>
           </> : <>
             <button type="button" className="bo-h760-edit" onClick={() => { setProfileEditing(true); setDetailTab('overview'); }}>Editar perfil</button>
             {dirty && <button type="button" className="bo-h760-save" disabled={!draft.title.trim()} onClick={saveNeed}><Save size={15}/> Salvar alterações</button>}
