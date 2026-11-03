@@ -32,7 +32,7 @@ function editorBuilt() {
     if (descriptor?.integration !== 'blue-ocean-blocksuite') return false;
     const html = readFileSync(index, 'utf8');
     // Require the generated JS and CSS, not just an old Vite HTML shell.
-    const assets = [...html.matchAll(/(?:src|href)=["']\\/blocksuite\\/([^"'?#]+)(?:[?#][^"']*)?["']/g)]
+    const assets = [...html.matchAll(/(?:src|href)=["']\/blocksuite\/([^"'?#]+)(?:[?#][^"']*)?["']/g)]
       .map(match => match[1]);
     if (!assets.some(asset => asset.endsWith('.js')) || !assets.every(asset => existsSync(join(target, asset)))) return false;
     const builtAt = statSync(index).mtimeMs;
