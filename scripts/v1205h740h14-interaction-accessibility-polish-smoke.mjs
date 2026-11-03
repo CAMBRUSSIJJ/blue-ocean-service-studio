@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 const read=(p)=>fs.readFileSync(p,'utf8');
 const app=read('src/App.tsx');
+const sidebar=read('src/components/NativeAnimatedSidebarH764.tsx');
+const sidebarCss=read('src/components/native-animated-sidebar-h764.css');
 const bp=read('src/views/BlueprintWorkspaceView.tsx');
 const css=read('src/runtime/interaction-accessibility-polish-h740h14.css');
 const style=read('src/style.css');
@@ -14,11 +16,11 @@ const checks=[
  [style.includes("interaction-accessibility-polish-h740h14.css"),'CSS H14 importado'],
  [app.includes("bo-sidebar-sections"),'Estado recolhível da sidebar é persistido'],
  [app.includes("toggleSidebarSection"),'Sidebar possui toggle de seções'],
- [app.includes("aria-expanded={!collapsedSidebarSections.design}"),'Desenho do serviço expõe estado acessível'],
- [app.includes("aria-expanded={!collapsedSidebarSections.context}"),'Contexto expõe estado acessível'],
- [app.includes("aria-expanded={!collapsedSidebarSections.management}"),'Gestão expõe estado acessível'],
- [app.includes("bo-h740h14-section-items"),'Itens das seções usam disclosure explícito'],
- [app.includes('>Serviço</span>') && app.includes('>Mapas do serviço</span>'),'Projeto distingue seleção de serviço da biblioteca de Jornadas e Blueprints'],
+ [sidebar.includes("id: 'design'") && sidebar.includes('aria-expanded={!sectionHidden}'),'Desenho do serviço expõe estado acessível'],
+ [sidebar.includes("id: 'context'") && sidebar.includes('aria-expanded={!sectionHidden}'),'Contexto expõe estado acessível'],
+ [sidebar.includes("id: 'management'") && sidebar.includes('aria-expanded={!sectionHidden}'),'Gestão expõe estado acessível'],
+ [sidebar.includes('bo-h764-section-items'),'Itens das seções usam disclosure explícito'],
+ [sidebar.includes("label: 'Serviço'") && sidebar.includes("label: 'Mapas do serviço'"),'Projeto distingue seleção de serviço da biblioteca de Jornadas e Blueprints'],
  [app.includes("? 'Design do serviço'"),'Título ativo usa Design do serviço'],
  [bp.includes('>Design do serviço</button>'),'Header compacto usa Design do serviço'],
  [app.includes('data-header-mode={activeTab === \'canvas\' && !externalNav ? \'compact-tool\' : \'standard\'}'),'Header do app possui modo compacto'],
@@ -27,9 +29,9 @@ const checks=[
  [app.includes("'Salvo neste dispositivo'"),'Status salvo explica persistência local'],
  [app.includes("'Não foi possível salvar'"),'Status de erro é explícito'],
  [app.includes('aria-live="polite"'),'Salvamento anuncia mudanças sem interromper'],
- [app.includes('aria-current={isPrimaryLibrary && libraryPage === \'personas\' ? \'page\' : undefined}'),'Personas publica aria-current'],
- [app.includes("libraryPage === 'personas' ? 'page' : undefined") && !app.includes('title="Pesquisa"'),'Público-alvo publica aria-current e Pesquisa não ocupa a sidebar'],
- [app.includes("serviceWorkspaceTab === 'journey' ? 'page' : undefined") || app.includes("serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'page' : undefined"),'Jornadas e Whiteboard publicam estado ativo na navegação'],
+ [sidebar.includes("aria-current={active ? 'page' : undefined}") && app.includes("personas:'personas'"),'Personas publica aria-current'],
+ [app.includes("personas:'personas'") && !app.includes('title="Pesquisa"'),'Público-alvo publica aria-current e Pesquisa não ocupa a sidebar'],
+ [app.includes("journey:'maps'") || app.includes("whiteboard:'whiteboard'"),'Jornadas e Whiteboard publicam estado ativo na navegação'],
  [css.includes('min-height:40px!important'),'Targets desktop foram ampliados'],
  [css.includes('@media(pointer:coarse)'),'Touch targets recebem regra coarse pointer'],
  [css.includes('.bo-h740h14-section-items[hidden]{display:block!important}'),'Sidebar recolhida no desktop não bloqueia navegação mobile'],
