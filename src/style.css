@@ -98,8 +98,8 @@
 @import './runtime/discovery-detail-unified-h754.css';
 @import './views/persona-read-profile-h751.css';
 @import './runtime/discovery-read-profile-h755.css';
-/* H7.63: final scoped native sidebar layer, after legacy sidebar rules. */
-@import './runtime/animated-saas-sidebar-h763.css';
+/* H7.64: one replacement sidebar, after all historical navigation layers. */
+@import './components/native-animated-sidebar-h764.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
