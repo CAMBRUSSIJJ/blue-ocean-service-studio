@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {
-  activeProjectId, listProjects, loadProjectSnapshot, markProjectOpened, saveProjectSnapshot, toggleProjectFavorite,
+  activeProjectId, duplicateProjectSnapshot, listProjects, loadProjectSnapshot, markProjectOpened, saveProjectSnapshot, toggleProjectFavorite,
 } from '../src/services/project-library.ts';
 
 const read=(p)=>fs.readFileSync(p,'utf8');
@@ -9,6 +9,7 @@ const home=read('src/views/ProjectHomeView.tsx');
 const service=read('src/services/project-library.ts');
 const controller=read('src/state/useStudioController.ts');
 const css=read('src/runtime/project-home-h740h8.css');
+const projectDashboardCSS=read('src/views/project-dashboard-h758.css');
 const style=read('src/style.css');
 const main=read('src/main.tsx');
 const pkg=JSON.parse(read('package.json'));
@@ -59,5 +60,20 @@ const checks=[
  [pkg.scripts['v1205h740h8:project-home-smoke']?.includes('v1205h740h8-project-home-smoke.mjs'),'Script H8 registrado'],
  [pkg.scripts.qa?.includes('v1205h740h8:project-home-smoke'),'QA acumulado inclui H8'],
 ];
+// H7.58: duplication is independent and must preserve the original + active selection.
+const firstCopy = duplicateProjectSnapshot('project-a', store);
+const secondCopy = duplicateProjectSnapshot('project-a', store);
+const duplicateSnapshot = firstCopy ? loadProjectSnapshot(firstCopy.id, store) : null;
+checks.push(
+ [Boolean(firstCopy && firstCopy.id !== 'project-a' && firstCopy.title === 'Redesenho da lavanderia (cópia)'), 'Duplicação cria projeto com identidade própria'],
+ [Boolean(secondCopy && secondCopy.title === 'Redesenho da lavanderia (cópia 2)'), 'Duplicação evita colisões de nome'],
+ [Boolean(duplicateSnapshot?.service.id !== 'service-a' && duplicateSnapshot?.service.project?.id === firstCopy?.id && duplicateSnapshot?.service.project?.serviceId === duplicateSnapshot?.service.id), 'Duplicação altera namespace de projeto e serviço'],
+ [Boolean(duplicateSnapshot?.journeys.j0?.serviceId === duplicateSnapshot?.service.id && duplicateSnapshot?.journeys.j1?.serviceId === duplicateSnapshot?.service.id), 'Duplicação atualiza relações internas de Journey'],
+ [Boolean(loadProjectSnapshot('project-a', store)?.service.id === 'service-a' && activeProjectId(undefined, store) === 'project-a'), 'Projeto original e ativo não mudam após duplicar'],
+ [Boolean(home.includes('data-project-dashboard="H7.58"') && home.includes('filtered.map(card)') && home.includes('Buscar projetos ou serviços')), 'Tela usa a biblioteca real e busca funcional'],
+ [Boolean(home.includes('onDuplicate={() => { duplicateWorkspaceProject(project.id); }}') && controller.includes('duplicateWorkspaceProject')), 'Botão duplicar chama o controlador real'],
+ [Boolean(home.includes('bo-h758-project-card') && projectDashboardCSS.includes('bo-h758-card-actions') && projectDashboardCSS.includes('@media(max-width:560px)')), 'Cartões seguem layout acessível e responsivo'],
+ [Boolean(home.includes("import './project-dashboard-h758.css'")), 'CSS do painel é isolado na view'],
+);
 let ok=0,fail=0;for(const [pass,label] of checks){console.log(`${pass?'OK':'FAIL'} ${label}`);pass?ok++:fail++;}
 console.log(`\nH7.40-H8 Project Home & Workspace Architecture: ${ok}/${ok+fail} PASS`);process.exit(fail?1:0);

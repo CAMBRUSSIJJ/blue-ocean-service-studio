@@ -9,7 +9,7 @@ import { dataBridge, runtimeApi } from '../runtime/client';
 import { setJourneyStageContextLink, updateJourneyStageExperience } from '../services/journey-map-studio';
 import type { JourneyContextKind } from '../services/journey-map-studio';
 import { assignTouchpointChannel, assignTouchpointChannelByName } from '../services/channel-continuity';
-import { activeProjectId as resolveActiveProjectId, deleteProject, listArchivedProjects, listProjects, loadProjectSnapshot, markProjectOpened, renameProject, saveProjectSnapshot, setProjectArchived, toggleProjectFavorite } from '../services/project-library';
+import { activeProjectId as resolveActiveProjectId, deleteProject, duplicateProjectSnapshot, listArchivedProjects, listProjects, loadProjectSnapshot, markProjectOpened, renameProject, saveProjectSnapshot, setProjectArchived, toggleProjectFavorite } from '../services/project-library';
 import type { ProjectTemplate } from '../services/project-library';
 
 const repository = new BrowserLocalGraphRepository();
@@ -303,6 +303,16 @@ export function useStudioController() {
     const opened = replaceProjectGraph(nextGraph, 'Criar projeto');
     if (opened) showToast('Projeto criado. Agora estruture o serviço dentro dele.');
     return opened;
+  };
+
+  const duplicateWorkspaceProject = (projectId: Id) => {
+    // Persist unsaved changes before taking the copy, without replacing the active graph.
+    if (projectId === activeProjectId) saveProjectSnapshot(graphRef.current);
+    const copy = duplicateProjectSnapshot(projectId);
+    if (!copy) { showToast('Não foi possível duplicar o projeto. Verifique o espaço de armazenamento local.'); return null; }
+    setProjectLibraryRevision((value) => value + 1);
+    showToast('Cópia criada. O projeto original foi preservado.');
+    return copy;
   };
 
   const toggleWorkspaceProjectFavorite = (projectId: Id) => {
@@ -899,7 +909,7 @@ export function useStudioController() {
   const canRedo = bridgeHistory?.canRedo ?? history.future.length > 0;
   return {
     activeTab, setActiveTab, toast, setToast, loaded, history, setHistory, canUndo, canRedo,
-    saveStatus, setSaveStatus, graph, setGraph, hasService, projects, archivedProjects, activeProjectId, createWorkspaceProject, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, deleteWorkspaceProject, createService, loadDemoService, undo, redo, selectedStageIds,
+    saveStatus, setSaveStatus, graph, setGraph, hasService, projects, archivedProjects, activeProjectId, createWorkspaceProject, openWorkspaceProject, duplicateWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, deleteWorkspaceProject, createService, loadDemoService, undo, redo, selectedStageIds,
     setSelectedStageIds, selectedStageId, setSelectedStageId, selectionAnchorId, setSelectionAnchorId, clipboard, setClipboard,
     focusedStageId, setFocusedStageId, zoom, setZoom, stageWidth, setStageWidth, collapsedRows,
     setCollapsedRows, showRowControls, setShowRowControls, detailMode, setDetailMode, showShortcuts, setShowShortcuts,
