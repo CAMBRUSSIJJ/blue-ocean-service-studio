@@ -36,7 +36,8 @@ export function PersonaSplitBuilder({ draft, onChange, onSave, onExit, onGuided,
   const name = draft.title.trim() || 'Persona sem nome';
   const words = name.split(/\s+/).filter(word => /[\p{L}\p{N}]/u.test(word));
   const initials = (words.length > 1 ? words.slice(0, 2).map(word => word.match(/[\p{L}\p{N}]/u)?.[0]).join('') : Array.from(words[0] || 'PS').slice(0, 2).join('')).toLocaleUpperCase('pt-BR');
-  const portrait = Boolean(draft.imageUrl?.trim() && !imageFailed);
+  const portraitUrl = draft.imageUrl?.trim() && /^https:\/\//i.test(draft.imageUrl.trim()) ? draft.imageUrl.trim() : '';
+  const portrait = Boolean(portraitUrl && !imageFailed);
 
   useEffect(() => {
     if (typeof matchMedia !== 'function') return;
@@ -154,7 +155,7 @@ export function PersonaSplitBuilder({ draft, onChange, onSave, onExit, onGuided,
         })}</svg>
         <div className="bo-split-center">
           <span className="bo-h759-persona-avatar" aria-hidden="true">
-            {portrait ? <img src={draft.imageUrl} alt="" referrerPolicy="no-referrer" onError={() => setImageFailed(true)}/> : <span className="bo-h759-avatar-initials">{initials}</span>}
+            {portrait ? <img src={portraitUrl} alt="" referrerPolicy="no-referrer" onError={() => setImageFailed(true)}/> : <span className="bo-h759-avatar-initials">{initials}</span>}
           </span>
           <strong className="bo-h759-persona-name">{name}</strong>
         </div>
