@@ -5,9 +5,9 @@ const app=read('src/App.tsx'), runtime=read('src/runtime/shell-consistency.js'),
 let ok=0,total=0;function check(n,p){total++;if(!p){console.error('FAIL '+n);process.exitCode=1}else{ok++;console.log('OK   '+n)}}
 check('baseline V1.16.3 preservada em versão >= 1.16.3',/^1\.(?:16\.(?:[3-9]|[1-9]\d)|1[7-9]\.|[2-9]\d\.)/.test(pkg.version));
 check('header nativo possui breadcrumbs canônicos',app.includes('bo1163-breadcrumbs')&&app.includes('activeViewGroup'));
-check('seletor de serviço no topo da sidebar',app.includes('bo1163-service-switcher')&&app.includes('Serviço atual'));
+check('seletor de serviço no topo da sidebar',app.includes('serviceName={currentProject?.serviceName || graph.service.name')&&sidebar.includes('data-project-switcher-trigger'));
 check('status de salvamento único no header',app.includes('bo1163-save-status')&&app.includes('Falha ao salvar'));
-check('sidebar nativa usa Workspace IA e não EXECUTAR',app.includes('data-sidebar-section="design"')&&app.includes('data-sidebar-section="context"')&&app.includes('Journey maps')&&app.includes('Personas')&&!app.includes('rt182-nav-group-label">EXECUTAR'));
+check('sidebar nativa usa Workspace IA e não EXECUTAR',sidebar.includes("id: 'design'")&&sidebar.includes("id: 'context'")&&sidebar.includes("label: 'Mapas do serviço'")&&sidebar.includes("label: 'Personas'")&&!sidebar.includes('rt182-nav-group-label">EXECUTAR'));
 check('runtime normaliza páginas legadas',runtime.includes('normalizePageHeaders')&&runtime.includes('bo1163-page-header'));
 check('runtime mantém um item ativo',runtime.includes('normalizeActiveNav')&&runtime.includes("aria-current','page"));
 check('runtime oculta badge local redundante',runtime.includes('bo1163-hide-local-badge'));

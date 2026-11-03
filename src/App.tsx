@@ -17,7 +17,7 @@
 // V1.17 legacy shell copy: Próximo passo, saúde, continuidade e atenção do serviço
 // H7.40-H3 legacy sidebar labels: Blueprints · Portfólio · Métricas
 import React, { useEffect, useRef, useState } from 'react';
-import { Save, Upload, Download, KanbanSquare, X, Plus, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, ChevronLeft, ChevronRight, FolderKanban, ChevronsUpDown } from './design-system/icons';
+import { Save, Upload, Download, KanbanSquare, X, Plus, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal } from './design-system/icons';
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
 import { useStudioController } from './state/useStudioController';
 import { JourneyView } from './views/JourneyView';
@@ -26,10 +26,11 @@ import { BlueprintWorkspaceView } from './views/BlueprintWorkspaceView';
 import { ActionPlanView } from './views/ActionPlanView';
 import { ProjectHomeView, type ProjectHomeSection, type ProjectIntent } from './views/ProjectHomeView';
 import { ProjectShellView, type ProjectShellSection } from './views/ProjectShellView';
+import { NativeAnimatedSidebarH764, type SidebarNavKeyH764 } from './components/NativeAnimatedSidebarH764';
+import { APP_VERSION } from './generated/app-version';
 import { WhiteboardsView } from './views/WhiteboardsView';
 import { WorkspaceLibraryView, type WorkspaceLibraryPage } from './views/WorkspaceLibraryView';
 import { Toast } from './components/Toast';
-import { APP_VERSION } from './generated/app-version';
 import { DesignSystemView } from './views/DesignSystemView';
 import type { AuthUser } from './auth/auth';
 import { useExperienceProfile } from './services/experience-profile';
@@ -71,8 +72,6 @@ function hideLegacyPageSurfaces() {
 export default function App({ authUser, onSignOut }: AppProps) {
   const studio = useStudioController();
   const importInputRef = useRef<HTMLInputElement>(null);
-  const sidebarWaveTimerRef = useRef<number | null>(null);
-  const [isServiceMenuOpen, setIsServiceMenuOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem('bo-sidebar-collapsed') === '1'; } catch { return false; }
@@ -106,7 +105,6 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const isGlobalScope = !projectShellOpen;
   const isGlobalHome = isGlobalScope && activeTab === 'home' && !externalNav;
   const isProjectHome = activeTab === 'home' && !externalNav && projectShellOpen;
-  const isPrimaryLibrary = activeTab === 'context' && !externalNav;
   const isPrimaryResearch = activeTab === 'canvas' && !externalNav && serviceWorkspaceTab === 'research';
 
   const libraryTitles: Record<WorkspaceLibraryPage, string> = {
@@ -195,7 +193,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
     try { localStorage.setItem('bo-sidebar-collapsed', isSidebarCollapsed ? '1' : '0'); } catch { /* local preference only */ }
     document.body.classList.toggle('bo-h724-sidebar-collapsed', isSidebarCollapsed);
     const resize = () => {
-      const width = window.innerWidth <= 767 ? 0 : isSidebarCollapsed ? 72 : 256;
+      const width = window.innerWidth <= 767 ? 0 : isSidebarCollapsed ? 76 : 260;
       for (const name of ['--bo-sidebar-w', '--rt-sidebar']) document.documentElement.style.setProperty(name, `${width}px`);
     };
     resize(); window.addEventListener('resize', resize);
@@ -270,33 +268,6 @@ export default function App({ authUser, onSignOut }: AppProps) {
           ? 'Desenhe, valide e opere o serviço com o caminho guiado e suas capacidades conectadas.'
           : 'Transforme oportunidades mapeadas em tarefas de execução.'
   );
-
-  const handleSidebarWaveInteraction = (event: React.MouseEvent<HTMLElement>) => {
-    const target = event.target as HTMLElement;
-    const button = target.closest('button');
-    if (!(button instanceof HTMLButtonElement) || button.disabled || !event.currentTarget.contains(button)) return;
-    const sidebar = event.currentTarget.closest('aside');
-    if (!(sidebar instanceof HTMLElement)) return;
-
-    const sidebarRect = sidebar.getBoundingClientRect();
-    const buttonRect = button.getBoundingClientRect();
-    const rawOrigin = buttonRect.top - sidebarRect.top + buttonRect.height / 2;
-    const originY = Math.max(42, Math.min(sidebarRect.height - 44, rawOrigin));
-    sidebar.style.setProperty('--bo-wave-origin-y', `${originY}px`);
-
-    sidebar.classList.remove('is-wave-reacting');
-    button.classList.remove('is-wave-source');
-    void sidebar.offsetWidth;
-    sidebar.classList.add('is-wave-reacting');
-    button.classList.add('is-wave-source');
-
-    if (sidebarWaveTimerRef.current !== null) window.clearTimeout(sidebarWaveTimerRef.current);
-    sidebarWaveTimerRef.current = window.setTimeout(() => {
-      sidebar.classList.remove('is-wave-reacting');
-      button.classList.remove('is-wave-source');
-      sidebarWaveTimerRef.current = null;
-    }, 780);
-  };
 
   const openGlobalHome = (section: ProjectHomeSection = 'home') => {
     if (isProjectCreationOpen) window.dispatchEvent(new Event('bo-h749-cancel-project-creation'));
@@ -427,7 +398,6 @@ export default function App({ authUser, onSignOut }: AppProps) {
 
   const openExternal = (key: string, apiName: string, arg?: string) => {
     setExternalNav(key);
-    setIsServiceMenuOpen(false);
     setIsMobileNavOpen(false);
     const open = () => {
       const api = window.BlueOceanRuntime?.api<{ show(value?: string): void }>(apiName);
@@ -441,136 +411,72 @@ export default function App({ authUser, onSignOut }: AppProps) {
 
 
 
+  // H7.64: one canonical map from new sidebar items to existing route handlers.
+  // No fabricated page, demo data or duplicate application shell.
+  const sidebarActiveKey: SidebarNavKeyH764 =
+    externalNav === 'settings' ? 'settings'
+    : externalNav === 'collaboration' ? 'collaboration'
+    : isGlobalHome ? (projectHomeSection === 'projects' ? 'projects' : 'home')
+    : isProjectHome ? 'servico'
+    : activeTab === 'context' && !externalNav
+      ? ({ personas:'personas', needs:'needs', jobs:'jobs', pains:'pains', problems:'problems',
+          evidence:'evidence', hypotheses:'hypotheses', hierarchies:'hierarchies',
+          portfolio:'portfolio', metrics:'metrics', templates:'templates', archive:'archive' } as Record<WorkspaceLibraryPage,SidebarNavKeyH764>)[libraryPage]
+    : activeTab === 'canvas' && !externalNav
+      ? ({ journey:'maps', blueprint:'maps', whiteboard:'whiteboard', prototypes:'prototypes',
+          portfolio:'improvements', outcomes:'outcomes' } as Record<string,SidebarNavKeyH764>)[serviceWorkspaceTab] ?? 'servico'
+    : activeTab === 'whiteboards' ? 'whiteboard'
+    : 'home';
+
+  const navigateSidebar = (key: SidebarNavKeyH764) => {
+    switch (key) {
+      case 'home': openGlobalHome('home'); break;
+      case 'projects': openGlobalHome('projects'); break;
+      case 'servico': hasService ? openCurrentProjectHome() : openGlobalHome('projects'); break;
+      case 'maps': openServiceWorkspaceTab('journey'); break;
+      case 'whiteboard': openServiceWorkspaceTab('whiteboard'); break;
+      case 'prototypes': openServiceWorkspaceTab('prototypes'); break;
+      case 'improvements': openServiceWorkspaceTab('portfolio'); break;
+      case 'outcomes': openServiceWorkspaceTab('outcomes'); break;
+      case 'collaboration': openExternal('collaboration', 'collaboration', 'workspace'); break;
+      case 'settings': openExternal('settings', 'unifiedWorkspaces'); break;
+      default: openPrimaryLibraryPage(({
+        personas:'personas', pains:'pains', needs:'needs', jobs:'jobs', problems:'problems',
+        evidence:'evidence', hypotheses:'hypotheses', hierarchies:'hierarchies',
+        portfolio:'portfolio', metrics:'metrics', templates:'templates', archive:'archive',
+      } as Record<string,WorkspaceLibraryPage>)[key]);
+    }
+  };
+
   const openGuidance = () => {
     const api = window.BlueOceanRuntime?.api<{ help(): void; open(): void }>('guidedBuilder');
     if (api?.help) api.help(); else api?.open?.();
   };
 
   return (
-    <div data-blue-ocean-identity="7.13" data-adaptive-home="7.14" data-ocean-home="7.15" data-object-language="7.16" data-ocean-surface="7.17" data-animated-ocean-branding="7.18" data-journey-cover-system="7.18-H1" data-motion-identity="7.19" data-visual-recovery="7.19-H1" data-dashboard-composition="7.20" data-dashboard-recovery="7.20-H1" data-journey-workspace="7.21" data-unified-service-workspace="7.22" data-journey-editor-ux="7.23" data-journey-library-sidebar="7.24" data-research-studio="7.26" data-project-shell="7.40-H10" data-service-first-navigation="7.40-H11" data-primary-sidebar-project-switch="7.40-H12" data-persistent-global-sidebar="7.40-H13" data-interaction-accessibility-polish="7.40-H14" data-usage-relations="7.40-H15.2" data-design-service-ux="7.40-H15.3" data-design-service-visual="7.40-H15.4" data-discovery-ux="7.40-H15.5" data-research-ux="7.40-H15.6" data-adaptive-experience="H16" data-foundation-deep-adaptation="H16.1" data-research-driven-context="H16.2" data-phase-status-consistency="H16.3" data-design-service-proposal="H16.4" data-research-proposal="H16.5" data-research-proposal-hotfix="H16.5.1" data-research-workflow-ux="H16.6" data-research-flow-polish="H16.7" data-flexible-discovery="H16.7" data-design-start-choice="H16.8" data-single-experience="H17" data-animated-sidebar-reference="H7.63" data-experience-level={experience.level} data-experience-density={experience.meta.density} className={`bo1187-app-shell min-h-screen h-screen bg-slate-50 font-sans flex overflow-hidden ${isProjectCreationOpen ? 'bo-h749-creation-focus' : ''} ${isGlobalHome && projectHomeSection === 'home' ? 'bo-h757-home-shell' : ''}`}>
+    <div data-blue-ocean-identity="7.13" data-adaptive-home="7.14" data-ocean-home="7.15" data-object-language="7.16" data-ocean-surface="7.17" data-animated-ocean-branding="7.18" data-journey-cover-system="7.18-H1" data-motion-identity="7.19" data-visual-recovery="7.19-H1" data-dashboard-composition="7.20" data-dashboard-recovery="7.20-H1" data-journey-workspace="7.21" data-unified-service-workspace="7.22" data-journey-editor-ux="7.23" data-journey-library-sidebar="7.24" data-research-studio="7.26" data-project-shell="7.40-H10" data-service-first-navigation="7.40-H11" data-primary-sidebar-project-switch="7.40-H12" data-persistent-global-sidebar="7.40-H13" data-interaction-accessibility-polish="7.40-H14" data-usage-relations="7.40-H15.2" data-design-service-ux="7.40-H15.3" data-design-service-visual="7.40-H15.4" data-discovery-ux="7.40-H15.5" data-research-ux="7.40-H15.6" data-adaptive-experience="H16" data-foundation-deep-adaptation="H16.1" data-research-driven-context="H16.2" data-phase-status-consistency="H16.3" data-design-service-proposal="H16.4" data-research-proposal="H16.5" data-research-proposal-hotfix="H16.5.1" data-research-workflow-ux="H16.6" data-research-flow-polish="H16.7" data-flexible-discovery="H16.7" data-design-start-choice="H16.8" data-single-experience="H17" data-sidebar-fully-replaced="H7.64" data-experience-level={experience.level} data-experience-density={experience.meta.density} className={`bo1187-app-shell min-h-screen h-screen bg-slate-50 font-sans flex overflow-hidden ${isProjectCreationOpen ? 'bo-h749-creation-focus' : ''} ${isGlobalHome && projectHomeSection === 'home' ? 'bo-h757-home-shell' : ''}`}>
       <a className="bo1175-skip-link" href="#bo-main-content">Pular para o conteúdo</a>
       <button type="button" className="bo1175-mobile-scrim" aria-label="Fechar navegação" tabIndex={isMobileNavOpen ? 0 : -1} onClick={() => setIsMobileNavOpen(false)} />
       <input ref={importInputRef} type="file" accept=".json,application/json" className="hidden" aria-label="Selecionar backup completo" onChange={(event) => { const file = event.target.files?.[0]; if (file) void handleImport(file); event.target.value = ''; }} />
-      <aside data-bo-precision-sidebar-native="1" data-animated-sidebar="H7.63" aria-label="Navegação principal do Blue Ocean" data-project-scope={isGlobalScope ? "global" : "project"} data-sidebar-collapsed={isSidebarCollapsed ? "1" : "0"} className={`bo1175-sidebar rt182-host-sidebar bo1205h3-sidebar bo-h724-sidebar w-20 shrink-0 bg-white border-r border-slate-200 flex flex-col z-30 ${isSidebarCollapsed ? 'is-collapsed' : ''}`}>
-        <div className="rt182-host-brand bo-h724-sidebar-brand bo-h763-brand h-[73px] px-4 md:px-5 border-b border-slate-200 flex items-center gap-3 shrink-0">
-          <div className="bg-blue-600 p-2 rounded-lg text-white shrink-0" aria-hidden="true">
-            <img src="/blue-ocean-mark.svg" alt="" className="h-[22px] w-[22px]" />
-          </div>
-          <div className="bo-h763-brand-label min-w-0">
-            <h1 className="font-bold text-slate-800 tracking-tight leading-tight truncate">BLUE OCEAN</h1>
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider truncate">Service Studio</p>
-          </div>
-          <button type="button" className="bo-h724-sidebar-toggle bo-h763-collapse-toggle" onClick={() => { setIsSidebarCollapsed(value => !value); setIsServiceMenuOpen(false); }} aria-label={isSidebarCollapsed ? 'Expandir sidebar' : 'Recolher sidebar'} aria-expanded={!isSidebarCollapsed} aria-controls="bo-primary-navigation" title={isSidebarCollapsed ? 'Expandir navegação · Ctrl+\\' : 'Recolher navegação · Ctrl+\\'}>{isSidebarCollapsed ? <ChevronRight size={18}/> : <ChevronLeft size={18}/>}</button>
-        </div>
-
-        <div className="bo1163-service-context relative px-2.5 pt-2.5" data-project-context="7.40-H10" data-persistent-switcher="7.40-H13">
-          <button type="button" className="bo1163-service-switcher bo-h740h13-persistent-switcher" onClick={() => setIsServiceMenuOpen((value) => !value)} aria-haspopup="menu" aria-expanded={isServiceMenuOpen} title="Serviço e projetos">
-            <span className="bo1163-service-switcher__mark"><span /></span>
-            <span className="bo1163-service-switcher__copy"><small>{projectShellOpen ? 'Projeto atual' : 'Serviço'}</small><strong>{currentProject?.serviceName || graph.service.name || 'Serviço'}</strong><em>{projectShellOpen ? projectTitle : 'Abrir projetos'}</em></span>
-            <ChevronsUpDown size={14} />
-          </button>
-
-          {isServiceMenuOpen && <div className="bo1163-service-menu bo-h740h13-project-menu" role="menu">
-            <div className="bo1163-service-menu__label">Projetos do serviço</div>
-            {projects.slice(0, 6).map((project) => <button type="button" role="menuitem" key={project.id} className={project.id === activeProjectId ? 'active' : ''} onClick={() => { setIsServiceMenuOpen(false); if (project.id !== activeProjectId) studio.openWorkspaceProject(project.id); window.setTimeout(() => openCurrentProjectWorkspace(), 0); }}><span><strong>{project.title}</strong><small>{project.serviceName}</small></span>{project.id === activeProjectId && <CheckCircle2 size={15}/>}</button>)}
-            <button type="button" role="menuitem" onClick={() => { setIsServiceMenuOpen(false); openGlobalHome('projects'); }}><span><strong>Todos os projetos</strong><small>Abrir a área Serviço</small></span></button>
-            <button type="button" role="menuitem" onClick={() => { setIsServiceMenuOpen(false); requestServiceCreation(); }}><span><strong>+ Novo projeto</strong><small>Escolha como começar seu trabalho.</small></span></button>
-          </div>}
-          <span className="sr-only bo-h740h11-legacy-switcher"><strong>Serviço</strong><em>Projetos de serviço</em></span>
-        </div>
-        <nav id="bo-primary-navigation" className="bo-h701-sidebar-nav flex-1 overflow-y-auto" aria-label="Navegação principal" onClickCapture={handleSidebarWaveInteraction}>
-          <button type="button" aria-label="Home" title="Home" className={`bo1205h3-nav-root bo-h701-dashboard-link ${isGlobalHome && projectHomeSection === 'home' ? 'is-active' : ''}`} onClick={() => openGlobalHome('home')} aria-current={isGlobalHome && projectHomeSection === 'home' ? 'page' : undefined}>
-            <span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="dashboard"><BlueOceanUtilityIcon kind="dashboard" size={16}/></span><span className="hidden md:inline">Home</span>
-          </button>
-
-          <span className="sr-only bo-h740h11-legacy-global-projects" aria-hidden="true">Projetos · Todos os projetos</span>
-          {/* H7.40-H13: a sidebar principal é persistente em Home, Serviço e dentro dos projetos. */}
-          <div data-persistent-global-nav="7.40-H13">
-            {experience.level === 'foundation' && <div className="bo-h161-foundation-nav" data-foundation-navigation="H16.1" data-research-driven-context-nav="H16.2">
-              <section><strong>ENTENDER</strong>
-                <button type="button" onClick={() => openPrimaryLibraryPage('personas')}><BlueOceanObjectIcon kind="persona" size={16}/><span>Público-alvo</span></button>
-              </section>
-              <section><strong>DESENHAR</strong>
-                <button type="button" className={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' ? 'is-active' : ''} onClick={() => openServiceWorkspaceTab('journey')}><BlueOceanObjectIcon kind="journey" size={16}/><span>Mapas do serviço</span></button>
-                <button type="button" data-blue-ocean-whiteboard-nav="foundation" aria-label="Abrir Whiteboard pelo menu de desenho" className={activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' ? 'is-active' : ''} onClick={() => openServiceWorkspaceTab('whiteboard')}><BlueOceanObjectIcon kind="whiteboard" size={16}/><span>Whiteboard</span></button>
-              </section>
-              <section><strong>TESTAR</strong>
-                <button type="button" className={activeTab === 'canvas' && serviceWorkspaceTab === 'prototypes' ? 'is-active' : ''} onClick={() => openServiceWorkspaceTab('prototypes')}><BlueOceanObjectIcon kind="experiment" size={16}/><span>Protótipos</span></button>
-              </section>
-              <section><strong>MELHORAR</strong>
-                <button type="button" className={activeTab === 'canvas' && serviceWorkspaceTab === 'portfolio' ? 'is-active' : ''} onClick={() => openServiceWorkspaceTab('portfolio')}><BlueOceanObjectIcon kind="task" size={16}/><span>Melhorias</span></button>
-              </section>
-              <section><strong>ACOMPANHAR</strong>
-                <button type="button" className={activeTab === 'canvas' && serviceWorkspaceTab === 'outcomes' ? 'is-active' : ''} onClick={() => openServiceWorkspaceTab('outcomes')}><BlueOceanObjectIcon kind="metric" size={16}/><span>Resultados</span></button>
-              </section>
-            </div>}
-            <div className={experience.level === 'foundation' ? 'bo-h161-standard-nav is-hidden' : 'bo-h161-standard-nav'}>
-            <div className={`bo-h701-nav-section bo-h740h12-primary-design ${collapsedSidebarSections.design ? 'is-section-collapsed' : ''}`} data-sidebar-section="design">
-              <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.design} onClick={() => toggleSidebarSection('design')}><span>Desenho do serviço</span><span aria-hidden="true">{collapsedSidebarSections.design ? '+' : '−'}</span></button>
-              <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.design}>
-              <button type="button" data-service-projects-nav="1" data-unified-service-workspace-nav="1" title="Serviço" aria-label="Serviço" aria-current={isGlobalHome && projectHomeSection === 'projects' ? 'page' : undefined} className={`bo1205h3-nav-child ${isGlobalHome && projectHomeSection === 'projects' ? 'is-active' : ''}`} onClick={() => openGlobalHome('projects')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="service" size={16}/></span><span className="hidden md:inline">Serviço</span></button>
-              {hasService && <button type="button" data-project-context-nav="h1" title="Visão geral do projeto" aria-label="Visão geral do projeto" aria-current={isProjectHome ? "page" : undefined} className={`bo1205h3-nav-child ${isProjectHome ? "is-active" : ""}`} onClick={() => openCurrentProjectHome()}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="service" size={16}/></span><span className="hidden md:inline">Projeto atual</span></button>}
-              <button type="button" data-service-journey-nav="1" data-service-blueprint-nav="1" title="Mapas do serviço" aria-label="Abrir Mapas do serviço" aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'journey' && !externalNav ? 'page' : undefined} className={`bo1205h3-nav-child ${activeTab === 'canvas' && serviceWorkspaceTab === 'journey' && !externalNav ? 'is-active' : ''}`} onClick={() => openServiceWorkspaceTab('journey')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="journey" size={16}/></span><span className="hidden md:inline">Mapas do serviço</span></button>
-              <button type="button" data-blue-ocean-whiteboard-nav="standard" title="Whiteboard" aria-label="Abrir Whiteboard pelo menu principal" aria-current={activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'page' : undefined} className={`bo1205h3-nav-child ${activeTab === 'canvas' && serviceWorkspaceTab === 'whiteboard' && !externalNav ? 'is-active' : ''}`} onClick={() => openServiceWorkspaceTab('whiteboard')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="whiteboard" size={16}/></span><span className="hidden md:inline">Whiteboard</span></button>
-              <span className="sr-only" data-unified-service-workspace-legacy="1"><span>Journey maps</span><span>Whiteboards</span><span>Blueprints</span></span>
-              <button type="button" data-experience-nav="expanded" title="Hierarquias" aria-label="Hierarquias" aria-current={isPrimaryLibrary && libraryPage === 'hierarchies' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'hierarchies' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('hierarchies')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="hierarchy" size={16}/></span><span className="hidden md:inline">Hierarquias</span></button>
-              </div>
-            </div>
-
-            <div className={`bo-h701-nav-section bo-h740h12-primary-context ${collapsedSidebarSections.context ? 'is-section-collapsed' : ''}`} data-sidebar-section="context">
-              <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.context} onClick={() => toggleSidebarSection('context')}><span>Público-alvo</span><span aria-hidden="true">{collapsedSidebarSections.context ? '+' : '−'}</span></button>
-              <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.context}>
-              <button type="button" title="Personas" aria-label="Personas" aria-current={isPrimaryLibrary && libraryPage === 'personas' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'personas' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('personas')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="persona" size={16}/></span><span className="hidden md:inline">Personas</span></button>
-              <button type="button" title="Necessidades" aria-label="Necessidades" aria-current={isPrimaryLibrary && libraryPage === 'needs' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'needs' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('needs')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="need" size={16}/></span><span className="hidden md:inline">Necessidades</span></button>
-              <button type="button" data-experience-nav="expanded" title="Jobs" aria-label="Jobs" aria-current={isPrimaryLibrary && libraryPage === 'jobs' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'jobs' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('jobs')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="job" size={16}/></span><span className="hidden md:inline">Jobs</span></button>
-              <button type="button" title="Dores" aria-label="Dores" aria-current={isPrimaryLibrary && libraryPage === 'pains' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'pains' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('pains')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="pain" size={16}/></span><span className="hidden md:inline">Dores</span></button>
-              <button type="button" data-experience-nav="expanded" title="Hipóteses" aria-label="Hipóteses" aria-current={isPrimaryLibrary && libraryPage === 'hypotheses' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'hypotheses' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('hypotheses')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="problemHypothesis" size={16}/></span><span className="hidden md:inline">Hipóteses</span></button>
-              <button type="button" title="Problemas" aria-label="Problemas" aria-current={isPrimaryLibrary && libraryPage === 'problems' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'problems' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('problems')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="problem" size={16}/></span><span className="hidden md:inline">Problemas</span></button>
-              <button type="button" title="Evidências" aria-label="Evidências" aria-current={isPrimaryLibrary && libraryPage === 'evidence' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'evidence' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('evidence')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="evidence" size={16}/></span><span className="hidden md:inline">Evidências</span></button>
-              </div>
-            </div>
-
-            <div className={`bo-h701-nav-section bo-h740h12-primary-management ${collapsedSidebarSections.management ? 'is-section-collapsed' : ''}`} data-sidebar-section="management">
-              <button type="button" className="bo-h701-nav-section__label bo-h740h14-section-toggle hidden md:flex" aria-expanded={!collapsedSidebarSections.management} onClick={() => toggleSidebarSection('management')}><span>Gestão</span><span aria-hidden="true">{collapsedSidebarSections.management ? '+' : '−'}</span></button>
-              <div className="bo-h740h14-section-items" hidden={!isSidebarCollapsed && collapsedSidebarSections.management}>
-               <button type="button" data-sidebar-projects-nav="H7.63" title="Projetos" aria-label="Projetos" aria-current={isGlobalHome && projectHomeSection === 'projects' ? 'page' : undefined} className={`bo1205h3-nav-child ${isGlobalHome && projectHomeSection === 'projects' ? 'is-active' : ''}`} onClick={() => openGlobalHome('projects')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><FolderKanban size={17}/></span><span className="hidden md:inline">Projetos</span></button>
-              <button type="button" title="Oportunidades" aria-label="Oportunidades" aria-current={isPrimaryLibrary && libraryPage === 'portfolio' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'portfolio' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('portfolio')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="portfolio" size={16}/></span><span className="hidden md:inline">Oportunidades</span></button>
-              <button type="button" data-experience-nav="expanded" title="Catálogo de métricas" aria-label="Catálogo de métricas" aria-current={isPrimaryLibrary && libraryPage === 'metrics' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'metrics' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('metrics')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanObjectIcon kind="metric" size={16}/></span><span className="hidden md:inline">Catálogo de métricas</span></button>
-              {/* Pesquisa histórica preservada no grafo, mas retirada da navegação principal. */}
-              <button type="button" data-experience-nav="expanded" title="Templates" aria-label="Templates" aria-current={isPrimaryLibrary && libraryPage === 'templates' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'templates' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('templates')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="template" size={16}/></span><span className="hidden md:inline">Templates</span></button>
-              <button type="button" data-experience-nav="expanded" title="Arquivo" aria-label="Arquivo" aria-current={isPrimaryLibrary && libraryPage === 'archive' ? 'page' : undefined} className={`bo1205h3-nav-child ${isPrimaryLibrary && libraryPage === 'archive' ? 'is-active' : ''}`} onClick={() => openPrimaryLibraryPage('archive')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon"><BlueOceanUtilityIcon kind="archive" size={16}/></span><span className="hidden md:inline">Arquivo</span></button>
-              </div>
-            </div>
-            </div>
-          </div>
-          <span className="sr-only bo-h740h10-legacy-project-nav" data-h740h10-legacy="1">Desenho do serviço Hierarquias Contexto Personas Necessidades Jobs Dores Hipóteses Problemas Evidências Gestão Oportunidades Catálogo de métricas Aplicar template Equipe do projeto Configurações do projeto Journey maps Whiteboards Blueprints</span>
-          {/* H7.40-H12 compatibility markers only: {!isProjectContext && <> · {isProjectContext && <> · bo-h740h10-project-nav */}
-
-          <div className="bo1205h3-sidebar-bottom bo-h701-sidebar-bottom">
-            <button type="button" data-rt-collab-nav="1" aria-label="Colaboração" className={externalNav === 'collaboration' ? 'is-active' : ''} onClick={() => openExternal('collaboration', 'collaboration', 'workspace')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="collaboration"><BlueOceanUtilityIcon kind="collaboration" size={16}/></span><span className="hidden md:inline">Colaboração</span></button>
-            <button type="button" data-bo1173-settings-nav="1" aria-label="Configurações" className={externalNav === 'settings' ? 'is-active' : ''} onClick={() => openExternal('settings', 'unifiedWorkspaces')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="settings"><BlueOceanUtilityIcon kind="settings" size={16}/></span><span className="hidden md:inline">Configurações</span></button>
-          </div>
-        </nav>
-
-        <div className="bo-h701-sidebar-wave" aria-hidden="true">
-          <svg viewBox="0 0 320 86" preserveAspectRatio="none" role="presentation">
-            <path className="bo-h701-wave-back" d="M-80 48 C-20 18 36 76 96 46 S212 18 272 46 S388 74 448 44 V86 H-80 Z" />
-            <path className="bo-h701-wave-front" d="M-96 58 C-28 34 32 78 98 56 S224 32 288 56 S412 78 480 54 V86 H-96 Z" />
-          </svg>
-        </div>
-
-        <div className="rt182-host-footer p-3 md:p-4 border-t border-slate-200">
-          <div className="hidden md:block rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
-            <p className="text-xs font-semibold text-slate-700 truncate">{isGlobalScope ? 'Blue Ocean' : projectTitle}</p>
-            <p className="text-[11px] text-slate-500 mt-0.5 truncate">{isGlobalScope ? `${projects.length} projeto${projects.length === 1 ? '' : 's'}` : graph.service.name}</p>
-          </div>
-          <div className="bo1187-sidebar-footer">
-            <button type="button" onClick={() => openExternal('settings', 'unifiedWorkspaces')}>Configurações</button>
-            <button type="button" onClick={() => openExternal('collaboration', 'collaboration', 'workspace')}>Equipe</button>
-            <small>{`V${APP_VERSION}`}</small>
-          </div>
-        </div>
-      </aside>
+      <NativeAnimatedSidebarH764
+        collapsed={isSidebarCollapsed}
+        projectScope={isGlobalScope ? 'global' : 'project'}
+        projectTitle={projectTitle}
+        serviceName={currentProject?.serviceName || graph.service.name || 'Serviço'}
+        version={APP_VERSION}
+        projects={projects}
+        activeProjectId={activeProjectId}
+        activeKey={sidebarActiveKey}
+        collapsedSections={collapsedSidebarSections}
+        onToggleSection={toggleSidebarSection}
+        onToggleCollapse={() => setIsSidebarCollapsed(value => !value)}
+        onNavigate={navigateSidebar}
+        onSwitchProject={(id) => {
+          if (id !== activeProjectId) studio.openWorkspaceProject(id);
+          window.setTimeout(() => openCurrentProjectWorkspace(), 0);
+        }}
+        onCreateProject={requestServiceCreation}
+      />
 
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         <header data-bo-precision-header-native="1" data-header-mode={activeTab === 'canvas' && !externalNav ? 'compact-tool' : 'standard'} className={`bo1175-header rt182-host-header h-[73px] bg-white border-b border-slate-200 shrink-0 px-5 md:px-7 flex items-center justify-between gap-4 z-20 ${isGlobalScope ? 'bo1187-dashboard-header' : ''} ${activeTab === 'canvas' && !externalNav ? 'bo-h740h14-compact-app-header' : ''}`}>
