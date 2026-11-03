@@ -27,6 +27,7 @@ import { ActionPlanView } from './views/ActionPlanView';
 import { ProjectHomeView, type ProjectHomeSection, type ProjectIntent } from './views/ProjectHomeView';
 import { ProjectShellView, type ProjectShellSection } from './views/ProjectShellView';
 import { NativeAnimatedSidebarH764, type SidebarNavKeyH764 } from './components/NativeAnimatedSidebarH764';
+import { APP_VERSION } from './generated/app-version';
 import { WhiteboardsView } from './views/WhiteboardsView';
 import { WorkspaceLibraryView, type WorkspaceLibraryPage } from './views/WorkspaceLibraryView';
 import { Toast } from './components/Toast';
@@ -462,6 +463,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
         projectScope={isGlobalScope ? 'global' : 'project'}
         projectTitle={projectTitle}
         serviceName={currentProject?.serviceName || graph.service.name || 'Serviço'}
+        version={APP_VERSION}
         projects={projects}
         activeProjectId={activeProjectId}
         activeKey={sidebarActiveKey}
