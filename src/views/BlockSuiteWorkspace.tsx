@@ -5,7 +5,9 @@ import {
   type WhiteboardCanvasKind,
 } from '../services/whiteboard-blocksuite-bridge';
 import { contextEntityTitle } from '../services/context-library';
+import { WhiteboardToolsH762, type WhiteboardToolH762, type WhiteboardActionH762 } from './WhiteboardToolsH762';
 import './blocksuite-workspace.css';
+import './whiteboard-tools-h762.css';
 
 type Props = {
   boardId: string;
@@ -16,7 +18,7 @@ type Props = {
   onClose: () => void;
 };
 
-type EditorMessage = { source: 'blue-ocean-blocksuite'; version: 2; boardId: string; serviceId: string; type: string; text?: string; count?: number };
+type EditorMessage = { source: 'blue-ocean-blocksuite'; version: 2; boardId: string; serviceId: string; type: string; text?: string; count?: number; tool?: WhiteboardToolH762 };
 
 const OBJECT_TYPES: Array<{ kind: WhiteboardCanvasKind; label: string }> = [
   { kind: 'persona', label: 'Persona' },
@@ -46,6 +48,9 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
   const [selectedText, setSelectedText] = useState('');
   const [search, setSearch] = useState('');
   const [notice, setNotice] = useState('Salvando neste dispositivo');
+  const [showToolPalette, setShowToolPalette] = useState(true);
+  const [activeTool, setActiveTool] = useState<WhiteboardToolH762>('select');
+
   const [showQuickStart, setShowQuickStart] = useState(() => {
     try { return sessionStorage.getItem('bo-wb-quickstart-seen-v1') !== 'yes'; } catch { return true; }
   });
@@ -104,6 +109,9 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
       }
       if (message.type === 'SELECTION') setSelectedText((message.text ?? '').slice(0, 240));
       if (message.type === 'IMPORT_DONE') setNotice(message.count ? `${message.count} elemento(s) copiado(s) sem alterar o quadro anterior.` : 'Os elementos já estavam no canvas.');
+      if (message.type === 'TOOL_CHANGED' && message.tool) setActiveTool(message.tool);
+      if (message.type === 'COMMAND_RESULT') setNotice(message.text || 'Ação concluída.');
+
     };
     window.addEventListener('message', onMessage);
     return () => { controller.abort(); window.removeEventListener('message', onMessage); };
@@ -129,6 +137,16 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
     setAvailabilityAttempt(value => value + 1);
   };
 
+  const useNativeTool = (tool: WhiteboardToolH762) => {
+    if (!post('TOOL', { tool })) { setNotice('O editor ainda está iniciando.'); return; }
+    dismissQuickStart();
+    setActiveTool(tool);
+    setPanelOpen(false);
+  };
+  const useCanvasAction = (action: WhiteboardActionH762) => {
+    if (!post('ACTION', { action })) setNotice('Abra o canvas antes de utilizar as ferramentas.');
+    else dismissQuickStart();
+  };
   const insertReference = (kind: WhiteboardCanvasKind, id: string, label: string) => {
     const result = linkEntityToWhiteboard(graph, boardId, kind, id);
     if (result.linked) onChangeGraph(result.graph, 'Whiteboard: vincular objeto ao canvas visual');
@@ -179,13 +197,23 @@ export function BlockSuiteWorkspace({ boardId, boardName, serviceId, graph, onCh
       </div>}
       {availability === 'ready' && <iframe key={frameAttempt} ref={frameRef} title={`Canvas visual de ${boardName}`} className="bo-bs-frame"
         src={`/blocksuite/index.html?${params.toString()}`} sandbox="allow-scripts allow-same-origin allow-downloads" />}
+      {editorReady && showToolPalette && <WhiteboardToolsH762
+        ready={editorReady}
+        activeTool={activeTool}
+        onTool={useNativeTool}
+        onAction={useCanvasAction}
+        onObjects={() => { dismissQuickStart(); setPanelOpen(true); }}
+        onClose={() => setShowToolPalette(false)}
+      />}
+      {editorReady && !showToolPalette && <button type="button" className="bo-h762-show-tools" onClick={() => setShowToolPalette(true)} aria-label="Mostrar ferramentas do Whiteboard">Ferramentas +</button>}
+
       {availability === 'ready' && !editorReady && !frameIssue && <div className="bo-bs-loading" role="status">Abrindo o canvas visual…</div>}
       {availability === 'ready' && frameIssue && !editorReady && <div className="bo-bs-load-error" role="alert">
         <h2>O editor não terminou de carregar</h2>
         <p>{loadError || 'O canvas não confirmou a inicialização.'} Tente novamente ou volte aos seus quadros. Nenhum conteúdo foi apagado.</p>
         <div><button type="button" onClick={retryEditor}>Tentar novamente</button><button type="button" onClick={onClose}>Voltar aos Whiteboards</button></div>
       </div>}
-      {editorReady && showQuickStart && !panelOpen && <section className="bo-bs-quickstart" aria-label="Primeiros passos no Whiteboard">
+      {editorReady && showQuickStart && !panelOpen && !showToolPalette && <section className="bo-bs-quickstart" aria-label="Primeiros passos no Whiteboard">
         <span className="bo-bs-quickstart__eyebrow">DICAS RÁPIDAS</span>
         <h2>Comece pelo canvas</h2>
         <p>Use as ferramentas do quadro para adicionar notas, formas e conexões. Depois, transforme suas descobertas em objetos do serviço.</p>
