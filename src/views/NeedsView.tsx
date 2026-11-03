@@ -147,7 +147,6 @@ export function NeedsView({ studio }: { studio: StudioController }) {
     const evidence = relationOptions.filter((item) => item.kind === 'evidence');
     const evidenceConnections = evidence.filter((item) => connectedIds.includes(item.id));
     const personaOptions = relationOptions.filter((item) => item.kind === 'persona');
-    const score = previewReport?.foundationScore ?? report.foundationScore;
     const linkedPersonas = personaOptions.filter((item) => connectedIds.includes(item.id));
     const savedDraft = needProfileFromEntity(selected);
     const savedIds = report.connections.map((item) => item.id).sort();
