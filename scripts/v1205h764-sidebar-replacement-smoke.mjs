@@ -24,7 +24,7 @@ const checks = [
  ['A seleção é calculada pelas rotas reais', replacement.includes('aria-current={active ?') && app.includes('const sidebarActiveKey: SidebarNavKeyH764')],
  ['A visualização mudou de fato (não apenas CSS)', !replacement.includes('bo-h701-sidebar-wave') && !replacement.includes('bo1163-service-context') && !replacement.includes('bo-h701-nav-section')],
  ['Imagem de serviço fictício não foi introduzida', !replacement.includes('Lavanderia') && !replacement.includes('Nenhum dado encontrado')],
- ['Larguras do layout e JS concordam', app.includes('isSidebarCollapsed ? 76 : 260') && css.includes('flex:0 0 260px') && css.includes('flex-basis:76px')],
+ ['Larguras do layout e JS concordam', ((app.includes('isSidebarCollapsed ? 76 : 260') && css.includes('flex:0 0 260px') && css.includes('flex-basis:76px')) || (app.includes('isSidebarCollapsed ? 72 : 256') && read('src/components/sidebar-collapse-h765.css').includes('flex:0 0 256px!important') && read('src/components/sidebar-collapse-h765.css').includes('flex:0 0 72px!important')))],
  ['Responsividade e redução de animações', css.includes('@media(max-width:767px)') && css.includes('body.bo1175-mobile-nav-open') && css.includes('@media(prefers-reduced-motion:reduce)')],
  ['CSS não depende de classes antigas', !css.includes('bo-h701-sidebar-nav') && !css.includes('bo1205h3-sidebar') && css.includes('.bo-h764-sidebar')],
  ['O teste de substituição faz parte do QA', pkg.scripts.qa.includes('sidebar:replacement:smoke')],
