@@ -135,7 +135,7 @@ export function NativeAnimatedSidebarH764({
     data-layout-corrigido="H7.65"
     data-project-scope={projectScope}
     data-sidebar-collapsed={collapsed ? '1' : '0'}
-    className={`bo-h764-sidebar bo-h765-sidebar w-64 shrink-0 ${collapsed ? 'is-collapsed' : ''}`}
+    className={`bo-h764-sidebar bo-h765-sidebar ${collapsed ? 'is-collapsed' : ''}`}
     aria-label="Navegação do Blue Ocean"
   >
     <div className="bo-h764-sidebar-header" ref={switcherRef}>
