@@ -1,0 +1,45 @@
+name: Sidebar H7.65 — visual
+
+on:
+  pull_request:
+    paths:
+      - 'src/App.tsx'
+      - 'src/components/NativeAnimatedSidebarH764.tsx'
+      - 'src/components/native-animated-sidebar-h764.css'
+      - 'src/components/sidebar-collapse-h765.css'
+      - 'src/style.css'
+      - 'scripts/v1205h765-sidebar-collapse-browser.py'
+      - '.github/workflows/sidebar-h765.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sidebar-collapse:
+    name: Abre, recolhe e expande sidebar
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Compilar o Blue Ocean
+        run: npm run build
+      - run: python -m pip install playwright
+      - run: python -m playwright install --with-deps chromium
+      - name: Verificar largura e rótulos do menu recolhido
+        run: python3 scripts/v1205h765-sidebar-collapse-browser.py
+      - name: Guardar capturas para revisão
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sidebar-h765-visual-${{ github.sha }}
+          retention-days: 7
+          path: artifacts/sidebar-collapse-h765/
