@@ -1,0 +1,181 @@
+/* H7.65 · Sidebar recolhível corrigida.
+   Corrige a estrutura, não apenas a aparência: 256px aberta,
+   72px fechada com SOMENTE ícones, sem títulos ou textos cortados.
+   Não modifica os conteúdos nem os objetos do Service Graph. */
+
+[data-layout-corrigido="H7.65"]{
+  display:flex;
+  min-width:0;
+}
+[data-layout-corrigido="H7.65"] > .bo-h765-sidebar{
+  position:relative;
+  box-sizing:border-box;
+  flex:0 0 256px!important;
+  width:256px!important;
+  min-width:256px!important;
+  max-width:256px!important;
+  flex-shrink:0!important;
+  overflow:visible;
+  background:#f9fafb;
+  transition:width .26s ease,flex-basis .26s ease,min-width .26s ease,max-width .26s ease;
+}
+[data-layout-corrigido="H7.65"] > .bo-h765-main-column{
+  flex:1 1 0%!important;
+  width:auto;
+  min-width:0!important;
+  overflow:hidden;
+}
+
+/* Os estilos antigos podiam reduzir a coluna, mas deixavam os rótulos visíveis.
+   No desktop fechado, apenas elementos gráficos permanecem montados visualmente. */
+@media(min-width:768px){
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"]{
+    flex:0 0 72px!important;
+    width:72px!important;
+    min-width:72px!important;
+    max-width:72px!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-context-text,
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-context-arrow,
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-item-label,
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-extra-chevron,
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-section-heading > span,
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-version{
+    display:none!important;
+    visibility:hidden!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-sidebar-header{
+    display:flex!important;
+    align-items:center!important;
+    gap:3px!important;
+    padding:0 7px!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-project-trigger{
+    flex:0 0 29px!important;
+    width:29px!important;
+    min-width:29px!important;
+    padding:0!important;
+    overflow:visible;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-brand-symbol{
+    width:29px!important;
+    height:29px!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-collapse-button{
+    display:grid!important;
+    place-items:center!important;
+    width:26px!important;
+    height:28px!important;
+    flex:0 0 26px!important;
+    padding:3px!important;
+    margin:0!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-navigation{
+    padding:10px 9px!important;
+    overflow-x:hidden!important;
+    scrollbar-width:none;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-navigation::-webkit-scrollbar{
+    display:none;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-section-heading{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    height:12px!important;
+    min-height:12px!important;
+    max-height:12px!important;
+    padding:0!important;
+    margin:8px 0!important;
+    border:0!important;
+    font-size:0!important;
+    line-height:0!important;
+    overflow:hidden!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-section-heading::after{
+    content:""!important;
+    display:block!important;
+    width:25px!important;
+    height:1px!important;
+    flex:0 0 25px!important;
+    background:#dbe3ed!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-home-link,
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-item,
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-extra-trigger{
+    display:flex!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:44px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:0!important;
+    padding:9px 0!important;
+    margin:2px 0!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-item > svg,
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-extra-trigger > svg,
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-home-link > svg{
+    display:block!important;
+    width:19px!important;
+    height:19px!important;
+    flex:0 0 19px!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-sidebar-footer{
+    padding:9px!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"] .bo-h764-selected-marker{
+    left:0!important;
+  }
+}
+
+/* Expandida: títulos em uma só linha, sem quebrar a navegação. */
+@media(min-width:768px){
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="0"] .bo-h764-section-heading{
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis;
+    font-size:11px;
+    letter-spacing:.09em;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="0"] .bo-h764-section-heading > span:first-child{
+    min-width:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="0"] .bo-h764-item-label{
+    display:block!important;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}
+
+/* Em telas móveis, o menu é uma gaveta de largura integral. O estado
+   desktop recolhido não deve fazer a gaveta aparecer sem rótulos. */
+@media(max-width:767px){
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar,
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"]{
+    position:fixed!important;
+    inset:0 auto 0 0!important;
+    z-index:92!important;
+    flex:0 0 256px!important;
+    width:256px!important;
+    min-width:0!important;
+    max-width:calc(100vw - 44px)!important;
+    height:100dvh!important;
+  }
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar .bo-h764-item-label{
+    display:block!important;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  [data-layout-corrigido="H7.65"] > .bo-h765-sidebar{transition:none!important}
+}
