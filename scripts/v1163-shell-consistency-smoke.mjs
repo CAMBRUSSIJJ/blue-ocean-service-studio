@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const pkg=JSON.parse(read('package.json'));
+const sidebar=read('src/components/NativeAnimatedSidebarH764.tsx');
 const app=read('src/App.tsx'), runtime=read('src/runtime/shell-consistency.js'), css=read('src/runtime/shell-consistency.css'), index=read('index.html'), prep=read('scripts/prepare-assets.mjs'), main=read('src/main.tsx');
 let ok=0,total=0;function check(n,p){total++;if(!p){console.error('FAIL '+n);process.exitCode=1}else{ok++;console.log('OK   '+n)}}
 check('baseline V1.16.3 preservada em versão >= 1.16.3',/^1\.(?:16\.(?:[3-9]|[1-9]\d)|1[7-9]\.|[2-9]\d\.)/.test(pkg.version));

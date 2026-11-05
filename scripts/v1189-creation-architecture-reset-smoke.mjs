@@ -6,6 +6,7 @@ const repo = read('src/repositories/local-graph-repository.ts');
 const controller = read('src/state/useStudioController.ts');
 const model = read('src/domain/model.ts');
 const app = read('src/App.tsx');
+const sidebar = read('src/components/NativeAnimatedSidebarH764.tsx');
 const home = read('src/views/WorkspaceHome.tsx');
 const boardsView = read('src/views/WhiteboardsView.tsx');
 const blueprintView = read('src/views/BlueprintView.tsx');
@@ -66,7 +67,7 @@ check('controller mantém demo como ação explícita',controller.includes('load
 check('Whiteboards é rota de primeira classe',/ActiveTab = 'home' \| (?:'context' \| )?'whiteboards'/.test(model));
 check('App renderiza WhiteboardsView',app.includes('<WhiteboardsView'));
 check('sidebar possui entrada Whiteboards',app.includes('Whiteboards'));
-check('criação por módulo substitui criação global no Workspace IA',app.includes('data-sidebar-section="design"')&&app.includes('data-sidebar-section="context"')&&app.includes('data-sidebar-section="management"')&&app.includes('WorkspaceDashboardView')&&!app.includes('bo114-global-create'));
+check('criação por módulo substitui criação global no Workspace IA',['design','context','management'].every(section=>sidebar.includes("id: '"+section+"'"))&&app.includes('WorkspaceDashboardView')&&!app.includes('bo114-global-create'));
 check('módulos estruturais ficam indisponíveis sem Serviço',app.includes('disabled={!hasService}'));
 
 check('Home possui estado real de workspace vazio',home.includes('data-workspace-empty="1"')&&home.includes('Crie seu primeiro serviço'));

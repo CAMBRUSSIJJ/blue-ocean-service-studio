@@ -25,7 +25,7 @@ const checks=[
  ['Native module nav styling exists',/bo1182-native-module-nav/.test(css)],
  ['Home responsive layout exists',/@media\(max-width:820px\)/.test(css)&&/@media\(max-width:560px\)/.test(css)],
  ['Global Create remains native in header',/data-bo-global-create-native="1"/.test(app)],
- ['React owns active sidebar modules without Pesquisa',app.includes('Pesquisa histórica preservada')&&/data-bo1173-settings-nav="1"/.test(app)],
+ ['React owns active sidebar modules without Pesquisa',app.includes('isPrimaryResearch') && /data-bo1173-settings-nav=/.test(read('src/components/NativeAnimatedSidebarH764.tsx'))],
  ['No Home typography below 11px',!Array.from(css.matchAll(/font-size:\s*([0-9.]+)px/g)).some(m=>Number(m[1])<11)],
 ];
 let bad=0;for(const [name,ok] of checks){console.log(`${ok?'OK  ':'FAIL'} ${name}`);if(!ok)bad++}

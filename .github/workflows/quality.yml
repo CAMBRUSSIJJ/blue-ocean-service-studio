@@ -70,6 +70,8 @@ jobs:
           path: dist
       - run: python -m pip install playwright pillow
       - run: python -m playwright install --with-deps chromium
+      - name: Sidebar recolhida — teste visual de 72px sem textos
+        run: python3 scripts/v1205h765-sidebar-collapse-browser.py
       - run: npm run e2e:visual
       - run: npm run persona:split:browser
       - run: npm run persona:ecosystem:browser
@@ -81,6 +83,7 @@ jobs:
           path: |
             artifacts/e2e-v1162
             artifacts/persona-ecosystem
+            artifacts/sidebar-collapse-h765
           retention-days: 14
 
   editor-ux:
