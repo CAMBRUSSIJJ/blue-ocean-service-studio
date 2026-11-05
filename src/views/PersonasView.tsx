@@ -574,7 +574,7 @@ export function PersonasView({ studio }: { studio: StudioController }) {
     ['evidence', 'Com evidência'], ['without-evidence', 'Sem evidências'], ['incomplete', 'Base incompleta'],
   ];
 
-  return <section className="bo-h71-personas bo-p1-personas" data-personas-h71="library" data-persona-view={viewMode}>
+  return <section className="bo-h71-personas bo-p1-personas bo-h765-personas" data-personas-h71="library" data-persona-view={viewMode}>
     <div className="bo-h71-page-head bo-p1-page-head">
       <div><span>Público-alvo /</span><h1>Personas</h1></div>
       <p>Perfis das pessoas que vivem a experiência do serviço.</p>
