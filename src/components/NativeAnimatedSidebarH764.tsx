@@ -132,9 +132,10 @@ export function NativeAnimatedSidebarH764({
     data-bo-precision-sidebar-native="1"
     data-animated-sidebar="H7.64"
     data-native-sidebar-replacement="true"
+    data-layout-corrigido="H7.65"
     data-project-scope={projectScope}
     data-sidebar-collapsed={collapsed ? '1' : '0'}
-    className={`bo1175-sidebar bo-h764-sidebar ${collapsed ? 'is-collapsed' : ''}`}
+    className={`bo-h764-sidebar bo-h765-sidebar w-64 shrink-0 ${collapsed ? 'is-collapsed' : ''}`}
     aria-label="Navegação do Blue Ocean"
   >
     <div className="bo-h764-sidebar-header" ref={switcherRef}>
@@ -187,8 +188,7 @@ export function NativeAnimatedSidebarH764({
         const sectionHidden = collapsedSections[section.id] && !collapsed;
         return <section key={section.id} className="bo-h764-section" data-sidebar-section={section.id}>
           <button type="button" className="bo-h764-section-heading"
-            aria-label={section.title} aria-expanded={!sectionHidden}
-            title={collapsed ? section.title : undefined}
+            aria-label={section.title} title={collapsed ? section.title : section.title.toUpperCase()} aria-expanded={!sectionHidden}
             onClick={() => onToggleSection(section.id)}>
             <span>{section.title}</span>
             {!collapsed && <span aria-hidden="true" className="bo-h764-section-sign">{sectionHidden ? '+' : '−'}</span>}
