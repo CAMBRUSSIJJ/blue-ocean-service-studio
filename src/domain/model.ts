@@ -115,6 +115,8 @@ export type Service = {
   governance?: ServiceGovernanceState;
   /** H7.38 Service Operations Bridge. Maps design artifacts to operational references and execution telemetry without coupling the graph to one provider. */
   operationsBridge?: ServiceOperationsBridgeState;
+  /** Spatial layouts reference canonical activities by stable map/block IDs. */
+  spatialDesign?: import('./spatial-design-schema').SpatialDesignState;
 };
 
 export type JourneyLaneType = 'text' | 'image' | 'stage' | 'icons' | 'grid' | 'divider' | 'emotion' | 'metric' | 'embed';

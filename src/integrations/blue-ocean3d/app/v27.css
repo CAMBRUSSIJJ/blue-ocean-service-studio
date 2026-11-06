@@ -1,0 +1,187 @@
+/* v2.4 — Híbrido inspirado no fluxo de trabalho enviado pelo usuário.
+   Layout somente: mantém editor Three.js, dados, eventos e motor de simulação existentes. */
+body.sb-hybrid-active{background:var(--bg);color:var(--text)}
+body.sb-hybrid-active #app.shell{background:var(--bg);color:var(--text)}
+body.sb-hybrid-active #app>.rail{display:none}
+body.sb-hybrid-active #app>.workspace{width:100%;min-width:0;min-height:0}
+body.sb-hybrid-active .topbar{height:58px;min-height:58px;background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;gap:14px;flex-wrap:nowrap;color:var(--text)}
+body.sb-hybrid-active .topbar .identity{min-width:0;flex:1 1 250px;max-width:440px}
+body.sb-hybrid-active .topbar .app-overline{display:none}
+body.sb-hybrid-active .topbar .brandline{display:flex;align-items:center;overflow:hidden;gap:0}
+body.sb-hybrid-active .topbar .brandline strong{font-size:15px;color:var(--text);white-space:nowrap}
+body.sb-hybrid-active .topbar .brandline .brand-subtitle,body.sb-hybrid-active .topbar .brandline .brand-separator{display:none}
+body.sb-hybrid-active .topbar .top-actions{flex:1 1 260px;display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0}
+body.sb-hybrid-active .topbar .project-field{display:none}
+body.sb-hybrid-active .topbar #save-status.save-state{color:var(--green);white-space:nowrap;font-size:11px;flex:0 1 auto;width:auto;order:0;min-height:30px;max-width:280px;background:transparent}
+body.sb-hybrid-active .topbar #save-status.is-error{background:var(--red-light);color:var(--red);white-space:normal}
+body.sb-hybrid-active .topbar .menu-wrap #btn-export{background:var(--surface2);color:var(--text);border:1px solid var(--border);min-height:37px}
+body.sb-hybrid-active .topbar .dropdown{background:var(--surface2);color:var(--text);border:1px solid var(--border);box-shadow:var(--shadow)}
+body.sb-hybrid-active .topbar .dropdown button{color:var(--text)}
+body.sb-hybrid-active .topbar .dropdown button:hover{background:var(--blue-light)}
+.hybrid-top-modes{display:flex;align-items:center;gap:3px;border:1px solid var(--border);border-radius:11px;background:var(--surface2);padding:3px;flex:0 0 auto}
+.hybrid-top-modes button{border:0;border-radius:8px;background:transparent;color:var(--text2);padding:9px 20px;min-height:36px;min-width:94px;font-size:12px;font-weight:800;cursor:pointer}
+.hybrid-top-modes button.active{background:var(--blue-light);color:var(--blue)}
+body.sb-hybrid-active #rooms-view.rooms-view{display:flex;flex-direction:column;gap:0;padding:0;height:calc(100dvh - 58px);min-height:500px;overflow:hidden;background:var(--bg);color:var(--text);border:0}
+body.sb-hybrid-active #rooms-view[hidden]{display:none}
+body.sb-hybrid-active #rooms-view .rooms-hero,body.sb-hybrid-active #rooms-view .room-stats,body.sb-hybrid-active #rooms-view .room-check,body.sb-hybrid-active #rooms-view .room-main-toolbar,body.sb-hybrid-active #rooms-view .room-connections{display:none}
+body.sb-hybrid-active #rooms-view .rooms-shell{display:grid;grid-template-columns:205px minmax(0,1fr) 249px;flex:1 1 auto;min-height:260px;min-width:0;position:relative;gap:0;background:var(--bg)}
+body.sb-hybrid-active #rooms-view .hybrid-left-dock,body.sb-hybrid-active #rooms-view .hybrid-right-dock{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--surface);color:var(--text);border-right:1px solid var(--border);overflow:hidden}
+body.sb-hybrid-active #rooms-view .hybrid-right-dock{border-right:0;border-left:1px solid var(--border)}
+#rooms-view .hybrid-dock-tabs{display:flex;align-items:center;gap:3px;border-radius:9px;background:var(--surface2);margin:12px 10px 8px;padding:3px;flex:0 0 auto}
+#rooms-view .hybrid-dock-tabs button{color:var(--text2);border:0;border-radius:7px;background:transparent;padding:10px 6px;min-width:0;min-height:39px;flex:1;font-size:12px;font-weight:750;cursor:pointer}
+#rooms-view .hybrid-dock-tabs button[aria-selected="true"]{background:var(--blue-light);color:var(--blue)}
+#rooms-view .hybrid-side-caption{padding:2px 16px 9px;margin:0;color:var(--text2);font-size:10px;font-weight:700;letter-spacing:.04em}
+body.sb-hybrid-active #rooms-view .room-tab-nav{display:flex;flex-direction:column;align-items:stretch;overflow:auto;flex:1 1 auto;min-height:0;max-height:none;margin:0;padding:0 10px 10px;gap:6px;border:0}
+body.sb-hybrid-active #rooms-view .room-tab{position:relative;flex:0 0 auto;width:100%;min-height:61px;max-width:100%;display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:2px 7px;text-align:left;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--text);padding:9px;font-size:12px;box-shadow:none;white-space:normal}
+body.sb-hybrid-active #rooms-view .room-tab.active{background:var(--blue-light);border-color:var(--blue-mid)}
+body.sb-hybrid-active #rooms-view .room-tab:hover{background:var(--blue-light);border-color:var(--blue-mid)}
+body.sb-hybrid-active #rooms-view .room-tab .room-tab-icon{width:27px;height:27px;display:grid;place-items:center;align-self:center;grid-row:span 2;background:color-mix(in srgb,var(--tab-color,var(--blue)),var(--surface) 70%);color:var(--text);border-radius:7px;font-size:13px}
+body.sb-hybrid-active #rooms-view .room-tab small{font-size:10px;color:var(--text2);flex:0 0 100%;padding-left:34px;margin-top:-8px}
+body.sb-hybrid-active #rooms-view #room-tab-add{margin-top:auto;flex:0 0 auto;min-height:43px;border:1px dashed var(--border);border-radius:10px;background:transparent;color:var(--text);font-size:12px}
+body.sb-hybrid-active #rooms-view .rooms-shell .rooms-catalog{display:none}
+/* Docked, non-overlapping component library. */
+body.sb-hybrid-active #rooms-view .hybrid-left-dock .floor-palette{display:none;position:relative;inset:auto;left:auto;right:auto;top:auto;bottom:auto;width:100%;max-width:100%;height:auto;max-height:none;min-height:0;flex:1;overflow:auto;border:0;border-radius:0;background:var(--surface);box-shadow:none;padding:7px 10px;color:var(--text)}
+body.sb-hybrid-active #rooms-view .rooms-shell.hybrid-furniture-active .hybrid-left-dock .floor-palette{display:block}
+body.sb-hybrid-active #rooms-view .rooms-shell.hybrid-furniture-active .hybrid-left-dock .room-tab-nav{display:none}
+body.sb-hybrid-active #rooms-view .hybrid-left-dock .floating-panel-head h4{color:var(--text)}
+body.sb-hybrid-active #rooms-view .hybrid-left-dock .floating-panel-head p,body.sb-hybrid-active #rooms-view .floor-palette small{color:var(--text2)}
+body.sb-hybrid-active #rooms-view .floor-library-controls input,body.sb-hybrid-active #rooms-view .floor-library-controls select{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:12px}
+body.sb-hybrid-active #rooms-view .hybrid-left-dock .floor-palette-item{border:1px solid var(--border);background:var(--surface2);border-radius:9px;color:var(--text)}
+body.sb-hybrid-active #rooms-view .hybrid-left-dock .floor-palette-item.active,body.sb-hybrid-active #rooms-view .hybrid-left-dock .floor-palette-item:hover{border-color:var(--blue-mid);background:var(--blue-light)}
+body.sb-hybrid-active #rooms-view .hybrid-left-dock .floor-palette-label{color:var(--text)}
+body.sb-hybrid-active #rooms-view .floor-structure-tools{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+body.sb-hybrid-active #rooms-view .floor-structure-tools button{color:var(--text);background:var(--surface2);border:1px solid var(--border)}
+/* Wide work area in center */
+body.sb-hybrid-active #rooms-view .rooms-main{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg)}
+body.sb-hybrid-active #rooms-view .room-mode-switch{display:flex;flex:0 0 42px;min-height:42px;max-height:42px;width:auto;border:0;border-bottom:1px solid var(--border);border-radius:0;margin:0;padding:3px 12px;gap:6px;align-items:center;justify-content:flex-start;background:var(--surface)}
+body.sb-hybrid-active #rooms-view .room-mode-switch button{min-height:33px;padding:7px 12px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--text2);font-size:11px;flex:0 0 auto}
+body.sb-hybrid-active #rooms-view .room-mode-switch button.active{background:var(--blue-light);color:var(--blue);border-color:var(--border)}
+body.sb-hybrid-active #rooms-view .floor-editor{flex:1 1 auto;min-height:0;margin:0;border:0;border-radius:0;box-shadow:none;background:var(--bg);overflow:hidden}
+body.sb-hybrid-active #rooms-view .floor-editor-toolbar{display:flex;position:relative;flex:0 0 49px;min-height:49px;height:49px;padding:5px 14px;background:var(--surface);border-bottom:1px solid var(--border);align-items:center;gap:8px}
+body.sb-hybrid-active #rooms-view .floor-editor-toolbar h3{font-size:13px;color:var(--text)}
+body.sb-hybrid-active #rooms-view .floor-editor-toolbar>div:last-child{margin-left:auto;display:flex;gap:4px;flex-wrap:nowrap}
+body.sb-hybrid-active #rooms-view .floor-editor-toolbar .button{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;font-size:11px;min-height:34px;min-width:34px;padding:6px 8px}
+body.sb-hybrid-active #rooms-view .hybrid-breadcrumb{background:transparent;border:0;color:var(--text2);padding:6px 8px;font-size:11px;white-space:nowrap;cursor:pointer}
+body.sb-hybrid-active #rooms-view .hybrid-breadcrumb span{padding:0 5px;color:var(--blue)}
+body.sb-hybrid-active #rooms-view .hybrid-breadcrumb strong{color:var(--text)}
+body.sb-hybrid-active #rooms-view .room-studio-center{background:var(--bg)}
+body.sb-hybrid-active #rooms-view .room3d-stage{background:var(--bg)}
+body.sb-hybrid-active #rooms-view .floor-editor-map{background:var(--bg)}
+body.sb-hybrid-active #rooms-view .floor-editor-map .floor-editor-room{background:var(--surface2);color:var(--text2)}
+body.sb-hybrid-active #rooms-view .room3d-dim{position:absolute;top:12px;left:79px;z-index:12;max-width:calc(100% - 370px);border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:7px 10px;font-size:11px}
+body.sb-hybrid-active #rooms-view .room3d-wall-control{top:12px;right:12px;z-index:12;max-width:200px;color:var(--text2);background:var(--surface2);border:1px solid var(--border);border-radius:8px}
+body.sb-hybrid-active #rooms-view .room3d-wall-control input{background:var(--surface2);color:var(--text);border:1px solid var(--border);min-height:33px}
+body.sb-hybrid-active #rooms-view .room3d-structure-bar{position:absolute;display:flex;flex-direction:column;align-items:stretch;gap:2px;top:78px;left:11px;right:auto;bottom:auto;transform:none;max-width:64px;width:64px;padding:5px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;z-index:15}
+body.sb-hybrid-active #rooms-view .room3d-structure-bar>span{display:none}
+body.sb-hybrid-active #rooms-view .room3d-structure-bar button{display:block;min-width:0;width:100%;min-height:44px;border:0;border-radius:6px;padding:6px 2px;line-height:1.15;font-size:10px;white-space:normal;background:transparent;color:var(--text2)}
+body.sb-hybrid-active #rooms-view .room3d-structure-bar button.active,body.sb-hybrid-active #rooms-view .room3d-structure-bar button[aria-pressed="true"]{background:var(--blue-light);color:var(--blue)}
+body.sb-hybrid-active #rooms-view .room3d-structure-bar .hybrid-move{font-weight:850}
+body.sb-hybrid-active #rooms-view .room3d-buttons{position:absolute;left:50%;right:auto;bottom:15px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 22px);display:flex;justify-content:center;flex-wrap:nowrap;gap:3px;padding:5px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);box-shadow:var(--shadow);z-index:15}
+body.sb-hybrid-active #rooms-view .room3d-buttons button{min-width:35px;min-height:38px;padding:6px;font-size:11px;white-space:nowrap;border:0;border-radius:7px;background:var(--surface2);color:var(--text)}
+body.sb-hybrid-active #rooms-view .room3d-buttons button:hover{background:var(--blue-light)}
+body.sb-hybrid-active #rooms-view .room3d-buttons button[data-room3d-control="rotate-selected"],body.sb-hybrid-active #rooms-view .room3d-buttons button[data-room3d-control="duplicate-selected"]{display:none}
+body.sb-hybrid-active #rooms-view .room3d-help{display:none}
+body.sb-hybrid-active #rooms-view .floor-editor-notice{background:var(--surface2);color:var(--text2);border-top:1px solid var(--border);font-size:11px;padding:6px 12px;flex:0 0 27px}
+/* Right inspector dock */
+body.sb-hybrid-active #rooms-view .hybrid-right-dock .floor-editor-inspector{display:block;position:relative;top:auto;bottom:auto;left:auto;right:auto;flex:1 1 auto;height:auto;width:100%;max-width:100%;min-height:0;max-height:none;background:var(--surface);color:var(--text);border:0;border-radius:0;box-shadow:none;padding:11px 12px;overflow:auto}
+body.sb-hybrid-active #rooms-view .hybrid-right-dock .room-detail{display:none;position:relative;top:auto;bottom:auto;left:auto;right:auto;width:100%;max-width:100%;height:auto;min-height:0;max-height:none;flex:1 1 auto;border:0;border-radius:0;box-shadow:none;background:var(--surface);color:var(--text);padding:12px;overflow:auto}
+body.sb-hybrid-active #rooms-view .rooms-shell.show-details .hybrid-right-dock .room-detail{display:block}
+body.sb-hybrid-active #rooms-view .rooms-shell.show-details .hybrid-right-dock .floor-editor-inspector{display:none}
+body.sb-hybrid-active #rooms-view .floor-inspector-top h3,body.sb-hybrid-active #rooms-view .floor-inspector-top b,body.sb-hybrid-active #rooms-view .room-detail h2,body.sb-hybrid-active #rooms-view .room-detail h3{color:var(--text)}
+body.sb-hybrid-active #rooms-view .floor-inspector-top small,body.sb-hybrid-active #rooms-view .floor-inspector-hint,body.sb-hybrid-active #rooms-view .floor-inspector-hint b,body.sb-hybrid-active #rooms-view .room-detail p{color:var(--text2)}
+body.sb-hybrid-active #rooms-view .floor-link-label,body.sb-hybrid-active #rooms-view .hybrid-right-dock label,body.sb-hybrid-active #rooms-view .hybrid-right-dock legend{color:var(--text2);font-size:11px}
+body.sb-hybrid-active #rooms-view .hybrid-right-dock input,body.sb-hybrid-active #rooms-view .hybrid-right-dock select,body.sb-hybrid-active #rooms-view .hybrid-right-dock textarea{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:7px;max-width:100%}
+body.sb-hybrid-active #rooms-view .hybrid-right-dock fieldset{border:1px solid var(--border);color:var(--text2);border-radius:9px}
+body.sb-hybrid-active #rooms-view .hybrid-right-dock button:not(.hybrid-dock-tabs button){background:var(--surface2);color:var(--text);border:1px solid var(--border);min-height:35px;border-radius:7px}
+body.sb-hybrid-active #rooms-view .hybrid-right-dock #floor-remove,body.sb-hybrid-active #rooms-view .hybrid-right-dock #room-delete{color:var(--red);border-color:var(--border)}
+body.sb-hybrid-active #rooms-view .hybrid-right-dock button.hybrid-sim-action:not(:disabled){flex:0 0 auto;margin:10px 12px 12px;min-height:43px;background:var(--blue);color:#ffffff;border:0;font-weight:850;font-size:12px}
+body.sb-hybrid-active #rooms-view .room-side-placeholder{color:var(--text2);font-size:12px}
+/* Lower customer journey strip */
+body.sb-hybrid-active #rooms-view .hybrid-journey{display:flex;flex-direction:column;flex:0 0 151px;min-height:0;border-top:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 14px 8px;overflow:hidden}
+body.sb-hybrid-active #rooms-view .hybrid-journey-title{display:flex;align-items:center;gap:10px;margin:0 0 7px;flex:0 0 auto;min-height:27px}
+body.sb-hybrid-active #rooms-view .hybrid-journey-title strong{color:var(--text);font-size:12px}
+body.sb-hybrid-active #rooms-view .hybrid-journey-title span{font-size:11px;color:var(--text2);flex:1}
+body.sb-hybrid-active #rooms-view #hybrid-preview{border:0;border-radius:7px;background:var(--blue);color:#ffffff;padding:7px 12px;font-size:11px;font-weight:800;cursor:pointer;min-height:32px}
+body.sb-hybrid-active #rooms-view .hybrid-journey-list{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;flex:1;min-height:0}
+body.sb-hybrid-active #rooms-view .hybrid-journey-group{display:flex;flex:1 0 230px;flex-direction:column;gap:5px;min-width:215px;max-width:420px}
+body.sb-hybrid-active #rooms-view .hybrid-journey-room{align-self:flex-start;padding:2px 3px;border:0;background:transparent;color:var(--journey-color);font-weight:800;font-size:11px;text-align:left;cursor:pointer}
+body.sb-hybrid-active #rooms-view .hybrid-journey-tasks{display:flex;gap:4px;overflow-x:auto;min-width:0;scrollbar-width:thin}
+body.sb-hybrid-active #rooms-view .hybrid-journey-tasks button{flex:1 0 86px;min-width:86px;max-width:130px;min-height:65px;padding:7px;text-align:left;display:flex;flex-direction:column;gap:3px;border:1px solid color-mix(in srgb,var(--journey-color),transparent 36%);border-top:3px solid var(--journey-color);background:var(--surface2);color:var(--text);border-radius:7px;cursor:pointer}
+body.sb-hybrid-active #rooms-view .hybrid-journey-tasks button strong{font-size:10px;line-height:1.3;overflow-wrap:anywhere}
+body.sb-hybrid-active #rooms-view .hybrid-journey-tasks button small{margin-top:auto;font-size:10px;color:var(--text2)}
+body.sb-hybrid-active #rooms-view .hybrid-journey-tasks button:hover{background:var(--blue-light)}
+body.sb-hybrid-active #rooms-view .hybrid-journey-empty{padding:12px;color:var(--text2);font-size:11px}
+body.sb-hybrid-active #rooms-view :is(.hybrid-dock-tabs button,.hybrid-journey button,.hybrid-move,.hybrid-breadcrumb):focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+/* Responsive: keep the canvas central, side panels turn into overlays only on smaller screens. */
+@media(max-width:1199px){
+ body.sb-hybrid-active #rooms-view .rooms-shell{grid-template-columns:166px minmax(0,1fr) 216px}
+ body.sb-hybrid-active #rooms-view .floor-editor-toolbar #floor-auto{display:none}
+ body.sb-hybrid-active #rooms-view .hybrid-breadcrumb{max-width:130px;overflow:hidden;text-overflow:ellipsis}
+ body.sb-hybrid-active #rooms-view .room3d-dim{left:79px;top:64px;max-width:calc(100% - 95px)}
+ body.sb-hybrid-active #rooms-view .room3d-wall-control{top:12px}
+}
+@media(max-width:900px){
+ body.sb-hybrid-active #rooms-view .rooms-shell{grid-template-columns:147px minmax(0,1fr)}
+ body.sb-hybrid-active #rooms-view .hybrid-right-dock{position:absolute;right:8px;top:46px;bottom:8px;z-index:21;width:min(250px,75vw);box-shadow:var(--shadow);border:1px solid var(--border);border-radius:11px}
+ body.sb-hybrid-active #rooms-view .room3d-buttons{gap:1px}
+ body.sb-hybrid-active #rooms-view .room3d-buttons button{min-width:31px;font-size:10px}
+ body.sb-hybrid-active .topbar .identity{max-width:210px}
+ body.sb-hybrid-active .hybrid-top-modes button{min-width:68px;padding:8px}
+}
+@media(max-width:650px){
+ body.sb-hybrid-active .topbar{height:59px;min-height:59px;flex-direction:row;align-items:center;flex-wrap:nowrap;padding:0 8px;gap:6px}
+ body.sb-hybrid-active .topbar .identity{display:none}
+ body.sb-hybrid-active .topbar .top-actions{width:auto;flex:1 1 auto;flex-wrap:nowrap;justify-content:flex-end}
+ body.sb-hybrid-active .topbar #save-status.save-state{font-size:10px;order:0;flex:0 1 auto;max-width:110px;overflow:hidden}
+ body.sb-hybrid-active #rooms-view.rooms-view{height:calc(100dvh - 59px);min-height:340px}
+ body.sb-hybrid-active #rooms-view .rooms-shell{grid-template-columns:minmax(0,1fr)}
+ body.sb-hybrid-active #rooms-view .hybrid-left-dock{position:absolute;z-index:24;top:46px;left:6px;bottom:6px;width:min(230px,78vw);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow)}
+ body.sb-hybrid-active #rooms-view .hybrid-right-dock{top:46px}
+ body.sb-hybrid-active #rooms-view .room-mode-switch{padding-left:3px;padding-right:3px;overflow-x:auto}
+ body.sb-hybrid-active #rooms-view .room-mode-switch button{font-size:10px;padding:7px 8px}
+ body.sb-hybrid-active #rooms-view .floor-editor-toolbar{padding:4px 6px}
+ body.sb-hybrid-active #rooms-view .hybrid-breadcrumb{display:none}
+ body.sb-hybrid-active #rooms-view .floor-editor-toolbar h3{font-size:11px}
+ body.sb-hybrid-active #rooms-view .floor-editor-toolbar #floor-add-task{display:none}
+ body.sb-hybrid-active #rooms-view .room3d-dim{left:76px;top:62px;font-size:10px;max-width:calc(100% - 88px)}
+ body.sb-hybrid-active #rooms-view .room3d-structure-bar{top:10px;left:6px;max-width:62px}
+ body.sb-hybrid-active #rooms-view .room3d-wall-control{display:none}
+ body.sb-hybrid-active #rooms-view .room3d-buttons{bottom:6px;max-width:calc(100% - 10px)}
+ body.sb-hybrid-active #rooms-view .room3d-buttons button[data-room3d-control="left"],body.sb-hybrid-active #rooms-view .room3d-buttons button[data-room3d-control="right"]{display:none}
+ body.sb-hybrid-active #rooms-view .hybrid-journey{flex-basis:116px;padding:5px 7px}
+ body.sb-hybrid-active #rooms-view .hybrid-journey-title span{display:none}
+ body.sb-hybrid-active #rooms-view .hybrid-journey-group{min-width:174px;flex-basis:174px}
+ body.sb-hybrid-active #rooms-view .hybrid-journey-tasks button{min-height:55px}
+}
+/* Small screens: docks become mutually exclusive, opt-in drawers; preserve usable scene. */
+#rooms-view .hybrid-mobile-panels{display:none}
+@media(max-width:900px){
+ body.sb-hybrid-active #rooms-view .hybrid-mobile-panels{flex:0 0 43px;display:flex;align-items:center;justify-content:space-between;gap:5px;min-height:43px;padding:3px 7px;background:var(--surface);border-bottom:1px solid var(--border)}
+ body.sb-hybrid-active #rooms-view .hybrid-mobile-panels button{flex:1;min-height:35px;padding:5px 8px;border-radius:7px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);font-size:11px;font-weight:700}
+ body.sb-hybrid-active #rooms-view .hybrid-left-dock,body.sb-hybrid-active #rooms-view .hybrid-right-dock{display:none}
+ body.sb-hybrid-active #rooms-view .rooms-shell.hybrid-mobile-left-open .hybrid-left-dock,body.sb-hybrid-active #rooms-view .rooms-shell.hybrid-mobile-right-open .hybrid-right-dock{display:flex}
+ body.sb-hybrid-active #rooms-view .floor-editor{flex:1 1 auto}
+}
+@media(max-width:650px){
+ body.sb-hybrid-active #rooms-view .rooms-shell{display:flex;flex-direction:row}
+ body.sb-hybrid-active #rooms-view .rooms-main{flex:1 1 auto}
+ body.sb-hybrid-active #rooms-view .floor-editor-toolbar{flex-basis:43px;min-height:43px;height:43px}
+}
+@media(min-width:651px) and (max-width:900px){
+ body.sb-hybrid-active #rooms-view .rooms-shell{grid-template-columns:minmax(0,1fr)}
+ body.sb-hybrid-active #rooms-view .rooms-main{grid-column:1/-1;min-width:0}
+ body.sb-hybrid-active #rooms-view .hybrid-left-dock{position:absolute;left:7px;top:46px;bottom:8px;z-index:24;width:min(240px,75vw);box-shadow:var(--shadow);border:1px solid var(--border);border-radius:10px}
+}
+@media(max-width:650px){
+ body.sb-hybrid-active #rooms-view .floor-editor-toolbar>div:last-child{width:auto;min-width:0;flex:0 0 auto;margin-left:auto}
+ body.sb-hybrid-active #rooms-view .floor-editor-toolbar #floor-undo,body.sb-hybrid-active #rooms-view .floor-editor-toolbar #floor-redo{flex:0 0 36px;width:36px;min-width:36px;max-width:36px;min-height:34px;padding:5px}
+}
+
+/* Project name remains editable from the header on larger screens. */
+@media(min-width:1060px){
+ body.sb-hybrid-active .topbar .project-field{display:flex;flex:0 1 210px;min-width:120px;max-width:210px;align-items:center}
+ body.sb-hybrid-active .topbar .project-field>span{display:none}
+ body.sb-hybrid-active .topbar .project-field input{display:block;width:100%;min-height:36px;padding:7px 9px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:7px;font-size:11px;text-overflow:ellipsis}
+}
+/* Top navigation remains accurate when switching from rooms to simulation. */
+.hybrid-top-modes button[aria-current="page"]{background:var(--blue-light);color:var(--blue)}

@@ -1,0 +1,38 @@
+/* Host chrome belongs to Service Studio. The editor shares its semantic tokens. */
+.rail,.topbar,.hybrid-top-modes,.hybrid-sim-action,#hybrid-preview,#hybrid-layout-compare { display:none; }
+.shell { display:block; }
+.workspace { width:100%; min-width:0; }
+#rooms-view { height:100dvh; min-height:0; }
+.rooms-shell { min-height:0; }
+.room-kit-grid,#room-kit-tabs,.room-kit-copy,#room-save-template,.room-add-part { display:none; }
+#room-new-part-btn,#room-new-part-type,#room-new-part-title,#room-new-part-duration,#room-new-part-stage { display:none; }
+.studio-readonly .rooms-view { --studio-readonly:1; }
+body { font-family:var(--studio-font,Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif); }
+.studio-map-note { padding:12px; color:var(--text2); font-size:12px; line-height:1.6; }
+
+label[for="room-create-mode"],#room-create-mode { display:none; }
+@media(max-width:900px){
+ #rooms-view .rooms-shell { position:relative; }
+ #rooms-view .hybrid-left-dock,#rooms-view .hybrid-right-dock {
+  position:absolute;top:88px;bottom:8px;width:min(320px,calc(100% - 16px));max-width:calc(100% - 16px);min-width:0;z-index:30;
+ }
+ #rooms-view .hybrid-left-dock { left:8px;right:auto; }
+ #rooms-view .hybrid-right-dock { right:8px;left:auto; }
+}
+@media(max-width:600px){
+ #rooms-view #hybrid-journey { display:none; }
+ #rooms-view #site-overview { overflow-y:auto; }
+ #rooms-view .site-scroll { min-height:200px; }
+ #rooms-view .site-head,#rooms-view .site21-tools,#rooms-view .site21-instruction { flex-shrink:0; }
+ #rooms-view .site-head { padding:12px;gap:10px; }
+ #rooms-view .site-head h3 { font-size:18px;line-height:1.3;margin:0; }
+ #rooms-view .site-head>div>p,#rooms-view .site-head .panel-eyebrow,#rooms-view .site-head-actions [data-site-flow] { display:none; }
+ #rooms-view .site-head-actions { display:flex;flex-direction:row;flex-wrap:wrap;gap:6px; }
+ #rooms-view .site-head-actions button { min-height:38px;font-size:11px;padding:8px; }
+ #rooms-view .site-summary { flex-basis:100%;font-size:10px;line-height:1.5; }
+ #rooms-view .site21-tools { padding:8px;gap:6px; }
+ #rooms-view .site21-modes { display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%; }
+ #rooms-view .site21-modes button { font-size:11px;padding:8px;min-height:36px; }
+ #rooms-view .site21-advanced summary { font-size:11px;padding:6px; }
+ #rooms-view .site21-instruction { font-size:11px;line-height:1.4;padding:8px;margin:0; }
+}

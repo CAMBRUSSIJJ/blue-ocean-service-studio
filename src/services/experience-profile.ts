@@ -62,7 +62,7 @@ export function useExperienceProfile(): ActiveExperienceProfile {
 export function isWorkspaceCapabilityVisible(level: ExperienceLevel, id: string) {
   if (level === 'advanced') return true;
   if (level === 'applied') return !['cockpit', 'readiness'].includes(id);
-  return ['overview', 'research', 'proposition', 'journey', 'blueprint', 'prototypes', 'learning', 'improvement', 'portfolio', 'outcomes', 'operations'].includes(id);
+  return ['overview', 'research', 'proposition', 'journey', 'spaces', 'blueprint', 'prototypes', 'learning', 'improvement', 'portfolio', 'outcomes', 'operations'].includes(id);
 }
 
 export function isResearchTabVisible(level: ExperienceLevel, id: string) {

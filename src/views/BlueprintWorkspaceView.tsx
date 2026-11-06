@@ -1,3 +1,4 @@
+import { ServiceSpaces3DView } from './ServiceSpaces3DView';
 import { ServiceMapsLibrary } from './ServiceMapsLibrary';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, LayoutTemplate, Plus, Table2, Wrench, X } from '../design-system/icons';
@@ -84,7 +85,7 @@ type JourneyHomeApi = {
 // H7.34 legacy contract: type WorkspaceTab = 'overview' | 'research' | 'ecology' | 'proposition' | 'journey' | 'channels' | 'prototypes' | 'learning' | 'decisions' | 'current-future' | 'improvement' | 'blueprint' | 'whiteboard';
 // H7.33 legacy contract: type WorkspaceTab = 'overview' | 'research' | 'ecology' | 'proposition' | 'journey' | 'channels' | 'prototypes' | 'learning' | 'decisions' | 'current-future' | 'blueprint' | 'whiteboard';
 // H7.32 legacy contract: type WorkspaceTab = 'overview' | 'research' | 'ecology' | 'proposition' | 'journey' | 'channels' | 'prototypes' | 'learning' | 'decisions' | 'blueprint' | 'whiteboard';
-type WorkspaceTab = 'overview' | 'cockpit' | 'research' | 'ecology' | 'proposition' | 'journey' | 'channels' | 'prototypes' | 'learning' | 'decisions' | 'current-future' | 'improvement' | 'portfolio' | 'outcomes' | 'governance' | 'operations' | 'blueprint' | 'whiteboard' | 'readiness';
+type WorkspaceTab = 'overview' | 'cockpit' | 'research' | 'ecology' | 'proposition' | 'journey' | 'channels' | 'prototypes' | 'learning' | 'decisions' | 'current-future' | 'improvement' | 'portfolio' | 'outcomes' | 'governance' | 'operations' | 'blueprint' | 'whiteboard' | 'spaces' | 'readiness';
 // H7.40-H3 legacy tab literals: ['overview', 'Visão geral'] · ['journey', 'Journey'] · ['blueprint', 'Blueprint'] · ['whiteboard', 'Whiteboard']
 // H7.40-H3 legacy cockpit/readiness literals: ['cockpit', 'Cockpit', 'service'] · id === 'cockpit' ? <em>{executiveReport.executiveScore}%</em> · ['readiness', 'Prontidão', 'system']
 // H7.40-H3 legacy nav literals preserved for regression gates only:
@@ -102,7 +103,7 @@ const WORKSPACE_GROUPS: Array<{ id: WorkspaceGroup; label: string; defaultTab: W
     { id: 'ecology', label: 'Ecologia', icon: 'service' }, { id: 'proposition', label: 'Proposição', icon: 'solution' },
   ] },
   { id: 'design', label: 'Projetar', defaultTab: 'journey', items: [
-    { id: 'journey', label: 'Mapas do serviço', icon: 'journey' }, { id: 'channels', label: 'Canais', icon: 'channel' }, { id: 'whiteboard', label: 'Whiteboard', icon: 'whiteboard' },
+    { id: 'journey', label: 'Mapas do serviço', icon: 'journey' }, { id: 'spaces', label: 'Salas e 3D', icon: 'service' }, { id: 'channels', label: 'Canais', icon: 'channel' }, { id: 'whiteboard', label: 'Whiteboard', icon: 'whiteboard' },
   ] },
   { id: 'validate', label: 'Validar', defaultTab: 'prototypes', items: [
     { id: 'prototypes', label: 'Protótipos', icon: 'experiment' }, { id: 'learning', label: 'Aprendizados', icon: 'insight' }, { id: 'decisions', label: 'Decisões', icon: 'opportunity' },
@@ -132,7 +133,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
   const [workspaceTab, setWorkspaceTab] = useState<WorkspaceTab>(() => {
     try {
       const stored = sessionStorage.getItem('bo-service-workspace-tab');
-      return ['overview','cockpit','research','ecology','proposition','journey','channels','prototypes','learning','decisions','current-future','improvement','portfolio','outcomes','governance','operations','blueprint','whiteboard','readiness'].includes(String(stored)) ? (stored === 'research' ? 'overview' : stored === 'blueprint' ? 'journey' : stored as WorkspaceTab) : 'overview';
+      return ['overview','cockpit','research','ecology','proposition','journey','channels','prototypes','learning','decisions','current-future','improvement','portfolio','outcomes','governance','operations','blueprint','whiteboard','readiness','spaces'].includes(String(stored)) ? (stored === 'research' ? 'overview' : stored === 'blueprint' ? 'journey' : stored as WorkspaceTab) : 'overview';
     } catch { return 'overview'; }
   });
   const [journeyViewMode, setJourneyViewMode] = useState<LibraryViewMode>('cards');
@@ -590,7 +591,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
   useEffect(() => {
     const openTab = (event: Event) => {
       const id = (event as CustomEvent<WorkspaceTab>).detail;
-      if (!['overview','cockpit','research','ecology','proposition','journey','channels','prototypes','learning','decisions','current-future','improvement','portfolio','outcomes','governance','operations','blueprint','whiteboard','readiness'].includes(String(id))) return;
+      if (!['overview','cockpit','research','ecology','proposition','journey','channels','prototypes','learning','decisions','current-future','improvement','portfolio','outcomes','governance','operations','blueprint','whiteboard','readiness','spaces'].includes(String(id))) return;
       selectWorkspaceTab(id === 'research' ? 'overview' : id);
     };
     window.addEventListener('bo-service-workspace-tab', openTab);
@@ -620,7 +621,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
 
   if (!hasService) return <section className="bo1189-module-empty"><LayoutTemplate size={30}/><h2>Crie um serviço antes de abrir Blueprints</h2><p>Blueprints pertencem a um serviço.</p><button type="button" onClick={() => setActiveTab('home')}>Ir para Dashboard</button></section>;
 
-  return <section className={`bo-h722-service-workspace bo-h724-service-workspace bo-h740h7 ${workspaceTab === 'overview' ? 'is-overview' : 'is-tool'}`} data-unified-service-blueprint-workspace="7.22" data-journey-library-workspace="7.24" data-service-ecology="7.25" data-research-studio="7.26" data-service-proposition="7.27" data-channel-continuity="7.29" data-service-prototype-lab="7.30" data-evidence-learning-system="7.31" data-decision-iteration-loop="7.32" data-current-future-service="7.33" data-improvement-backlog="7.34" data-improvement-portfolio="7.35" data-service-outcomes="7.36" data-service-governance="7.37" data-service-operations-bridge="7.38" data-executive-service-cockpit="7.39" data-product-hardening="7.40" data-product-coherence="7.40-H3" data-product-simplification="7.40-H5" data-guided-service-workspace="7.40-H7" data-interaction-accessibility-polish="7.40-H14" data-usage-relations="7.40-H15.2" data-design-service-ux="7.40-H15.3" data-design-service-visual="7.40-H15.4" data-discovery-ux="7.40-H15.5" data-research-ux="7.40-H15.6" data-adaptive-experience="H16" data-foundation-deep-adaptation="H16.1" data-research-driven-context="H16.2" data-phase-status-consistency="H16.3" data-design-service-proposal="H16.4" data-research-proposal="H16.5" data-research-proposal-hotfix="H16.5.1" data-research-workflow-ux="H16.6" data-flexible-discovery="H16.7" data-design-start-choice="H16.8" data-single-experience="H17" data-direct-journey-reference="H17.0.4" data-experience-level={experience.level} data-experience-density={experience.meta.density}>
+  return <section className={`bo-h722-service-workspace bo-h724-service-workspace bo-h740h7 ${workspaceTab === 'overview' ? 'is-overview' : 'is-tool'} ${workspaceTab === 'spaces' ? 'is-spaces' : ''}`} data-unified-service-blueprint-workspace="7.22" data-journey-library-workspace="7.24" data-service-ecology="7.25" data-research-studio="7.26" data-service-proposition="7.27" data-channel-continuity="7.29" data-service-prototype-lab="7.30" data-evidence-learning-system="7.31" data-decision-iteration-loop="7.32" data-current-future-service="7.33" data-improvement-backlog="7.34" data-improvement-portfolio="7.35" data-service-outcomes="7.36" data-service-governance="7.37" data-service-operations-bridge="7.38" data-executive-service-cockpit="7.39" data-product-hardening="7.40" data-product-coherence="7.40-H3" data-product-simplification="7.40-H5" data-guided-service-workspace="7.40-H7" data-interaction-accessibility-polish="7.40-H14" data-usage-relations="7.40-H15.2" data-design-service-ux="7.40-H15.3" data-design-service-visual="7.40-H15.4" data-discovery-ux="7.40-H15.5" data-research-ux="7.40-H15.6" data-adaptive-experience="H16" data-foundation-deep-adaptation="H16.1" data-research-driven-context="H16.2" data-phase-status-consistency="H16.3" data-design-service-proposal="H16.4" data-research-proposal="H16.5" data-research-proposal-hotfix="H16.5.1" data-research-workflow-ux="H16.6" data-flexible-discovery="H16.7" data-design-start-choice="H16.8" data-single-experience="H17" data-direct-journey-reference="H17.0.4" data-experience-level={experience.level} data-experience-density={experience.meta.density}>
     {workspaceTab === 'overview' && !showServiceStructure ? <header className="bo-h1704-home-header"><div><small>BLUE OCEAN · SERVIÇO ATUAL</small><h1>{graph.service.name || 'Seu serviço'}</h1><p>Comece pelo que quer construir. Pessoas, necessidades e dores podem ser registradas antes ou durante o desenho.</p></div></header> : workspaceTab === 'overview' ? <header className="bo-h740h7-hero">
       <div className="bo-h740h7-hero-main">
         <div className="bo-h722-eyebrow"><BlueOceanObjectIcon kind="blueprint" size={16}/> DESIGN DO SERVIÇO</div>
@@ -664,7 +665,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
     </header>}
 
     {workspaceTab !== 'overview' && !(workspaceTab === 'journey' && journeyCreateOpen) && <>
-      {workspaceTab !== 'research' && workspaceTab !== 'journey' && <nav className="bo-h740h7-tool-phases" aria-label="Fases do serviço">
+      {workspaceTab !== 'spaces' && workspaceTab !== 'research' && workspaceTab !== 'journey' && <nav className="bo-h740h7-tool-phases" aria-label="Fases do serviço">
         <button type="button" onClick={() => selectWorkspaceTab('overview')}>Resumo</button>
         {WORKSPACE_GROUPS.filter((group) => group.id !== 'overview').map((group) => {
           const firstVisible = group.items.find((item) => isWorkspaceCapabilityVisible(experience.level, item.id))?.id ?? group.defaultTab;
@@ -672,7 +673,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
           return <button key={group.id} type="button" className={activeWorkspaceGroup === group.id ? 'active' : ''} onClick={() => selectWorkspaceTab(firstVisible)}>{label}</button>;
         })}
       </nav>}
-      {workspaceTab === 'journey' ? null : workspaceTab === 'research' && experience.level === 'foundation' ? <nav className="bo-h740h3-workspace-subnav bo-h740h7-tool-subnav bo-h166-research-subnav" aria-label="Pesquisa e ferramentas">
+      {workspaceTab === 'spaces' ? null : workspaceTab === 'journey' ? null : workspaceTab === 'research' && experience.level === 'foundation' ? <nav className="bo-h740h3-workspace-subnav bo-h740h7-tool-subnav bo-h166-research-subnav" aria-label="Pesquisa e ferramentas">
         <button type="button" className={researchSurface === 'research' ? 'active' : ''} aria-current={researchSurface === 'research' ? 'page' : undefined} onClick={() => setResearchSurface('research')}><BlueOceanObjectIcon kind="evidence" size={16}/><span>Pesquisa</span></button>
         <button type="button" className={researchSurface === 'tools' ? 'active' : ''} aria-current={researchSurface === 'tools' ? 'page' : undefined} onClick={() => setResearchSurface('tools')}><Wrench size={16}/><span>Ferramentas</span></button>
       </nav> : <nav className="bo-h740h3-workspace-subnav bo-h740h7-tool-subnav" aria-label={`Capacidades de ${WORKSPACE_GROUPS.find((group) => group.id === activeWorkspaceGroup)?.label ?? 'Serviço'}`}>
@@ -847,6 +848,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
     {workspaceTab === 'portfolio' && <ImprovementPortfolioView studio={studio}/>}
     {workspaceTab === 'outcomes' && <ServiceOutcomesView studio={studio}/>}
     {workspaceTab === 'governance' && <ServiceGovernanceView studio={studio}/>}
+    {workspaceTab === 'spaces' && <ServiceSpaces3DView studio={studio} onOpenMap={id => void openJourney(id)}/>}
     {workspaceTab === 'operations' && <ServiceOperationsBridgeView studio={studio}/>}
 
     {workspaceTab === 'journey' && !journeyEditorOpen && !journeyCreateOpen && handoff.readyForJourney && <section className="bo-h78-blueprint-context" data-blueprint-context-handoff="1"><div><small>CONTEXTO DO SERVIÇO</small><strong>{handoff.counts.persona} Personas · {handoff.counts.problem} Problemas · {handoff.counts.evidence} Evidências</strong><span>Use Criar com contexto para manter os vínculos com os registros existentes.</span></div></section>}

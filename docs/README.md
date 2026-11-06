@@ -17,6 +17,7 @@ o fluxo local. Os guias abaixo descrevem o funcionamento atual.
 
 ## Usar e evoluir os editores
 
+- [Salas e 3D integrados ao Service Studio](salas-e-3d.md).
 - [Auditoria de UX e plano de consolidação — 26/10/2026](ux-audit-service-studio-2026-10-26.md).
 - [Entrada e início da Jornada](entry-and-journey-start.md).
 - [Matriz compartilhada de Jornada e Blueprint](shared-map-matrix.md).

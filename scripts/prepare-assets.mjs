@@ -1,3 +1,4 @@
+import { prepareBlueOcean3D } from './prepare-blue-ocean3d.mjs';
 import { transpileModule, ModuleKind, ScriptTarget } from 'typescript';
 import { copyFileSync, mkdirSync, readdirSync, unlinkSync, readFileSync, writeFileSync } from 'node:fs';
 const pkg = JSON.parse(readFileSync('package.json','utf8'));
@@ -147,3 +148,5 @@ const designSystemCss = [
   'src/design-system/legacy-compat.css',
 ].map(file => readFileSync(file, 'utf8')).join('\n\n');
 writeFileSync('public/v1130-design-system.css', designSystemCss);
+
+prepareBlueOcean3D();

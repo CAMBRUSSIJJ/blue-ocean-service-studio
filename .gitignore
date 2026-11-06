@@ -29,3 +29,10 @@ __pycache__/
 /work/
 
 public/journey-cad.css
+
+# Generated from src/integrations/blue-ocean3d
+public/blue-ocean3d/
+public/blue-ocean-ui-h3.css
+
+# BlockSuite build output
+public/blocksuite/
