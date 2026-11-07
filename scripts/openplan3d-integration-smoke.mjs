@@ -60,7 +60,7 @@ test('missing CAD is checked before mounting an iframe, without SPA recursion', 
 test('OpenPlan3D bootstraps original Svelte config before installing adapter-static', () => {
   const script = readFileSync(new URL('./prepare-openplan3d.mjs', import.meta.url), 'utf8');
   const initialInstall = script.indexOf("runNode24('npm ci --include=dev");
-  const adapterInstall = script.indexOf("runNode24('npm install --no-save");
+  const adapterInstall = script.indexOf("runNode24('npm install --prefix .blue-ocean-static-adapter");
   const configSwitch = script.indexOf("write('svelte.config.js',");
   const build = script.indexOf("runNode24('npm run build')");
   assert.ok(initialInstall !== -1 && adapterInstall > initialInstall);
