@@ -71,3 +71,17 @@ test('OpenPlan3D bootstraps original Svelte config before installing adapter-sta
   assert.match(script, /cpSync\(ADAPTER_SRC, ADAPTER_DST/);
   assert.match(script, /rmSync\(ADAPTER_DST/);
 });
+
+
+test('Blue Ocean skin affects appearance only and is scoped to embedded CAD', () => {
+  const script = readFileSync(new URL('./prepare-openplan3d.mjs', import.meta.url), 'utf8');
+  const skin = readFileSync(new URL('../src/integrations/openplan3d-blue-ocean.css', import.meta.url), 'utf8');
+  const cssWithoutComments = skin.replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.match(script, /bo-openplan-embed-v3-branding/);
+  assert.match(script, /data-blue-ocean-cad/);
+  assert.match(script, /openplan3d-blue-ocean\.css/);
+  assert.match(script, /write\('src\/app\.css'/);
+  assert.match(skin, /html\[data-blue-ocean-cad="1"\]/);
+  assert.doesNotMatch(cssWithoutComments, /display\s*:\s*none|pointer-events\s*:\s*none|position\s*:\s*(?:fixed|absolute)/);
+  assert.doesNotMatch(script, /querySelectorAll\([^)]*button/);
+});
