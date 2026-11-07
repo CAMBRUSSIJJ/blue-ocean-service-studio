@@ -78,7 +78,7 @@ test('Blue Ocean skin affects appearance only and is scoped to embedded CAD', ()
   const script = readFileSync(new URL('./prepare-openplan3d.mjs', import.meta.url), 'utf8');
   const skin = readFileSync(new URL('../src/integrations/openplan3d-blue-ocean.css', import.meta.url), 'utf8');
   const cssWithoutComments = skin.replace(/\/\*[\s\S]*?\*\//g, '');
-  assert.match(script, /bo-openplan-embed-v4-focus-tools/);
+  assert.match(script, /bo-openplan-embed-v5-room-journey/);
   assert.match(script, /data-blue-ocean-cad/);
   assert.match(script, /openplan3d-blue-ocean\.css/);
   assert.match(script, /write\('src\/app\.css'/);
@@ -109,6 +109,7 @@ const linkedGraph = (map = mapId) => {
   source.journeys.journey1.stageIds = ['stage1'];
   source.stages = { stage1: { id: 'stage1', journeyId: 'journey1', title: 'Chegada', customerAction: 'Receber cliente' } };
   const drawing = project();
+  drawing.id = cadScopeId(serviceId, map);
   drawing.floors[0].walls.push({ id: 'wall-2', start: { x: 600, y: 0 }, end: { x: 600, y: 600 }, thickness: 15 });
   return applyCadChange(source, serviceId, map, 'null', drawing, date);
 };
