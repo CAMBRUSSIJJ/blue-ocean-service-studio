@@ -152,7 +152,7 @@ test('CAD room relation validates stage, service, floor and real walls', () => {
 test('Room inspector is outside CAD renderer and native selection channel is read-only', () => {
   const host = readFileSync(new URL('../src/views/OpenPlan3DWorkspace.tsx', import.meta.url), 'utf8');
   const panel = readFileSync(new URL('../src/views/CadRoomServicePanel.tsx', import.meta.url), 'utf8');
-  const bridge = readFileSync(new URL('../src/integrations/blue-ocean-room-bridge.ts', import.meta.url), 'utf8');
+  const bridge = readFileSync(new URL('../src/integrations/blue-ocean-room-bridge.source', import.meta.url), 'utf8');
   const preparer = readFileSync(new URL('./prepare-openplan3d.mjs', import.meta.url), 'utf8');
   assert.match(host, /room-context/);
   assert.match(host, /bo-openplan-workspace__context/);
