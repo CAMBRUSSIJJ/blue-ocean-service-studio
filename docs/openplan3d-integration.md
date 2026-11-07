@@ -70,6 +70,32 @@ O CSS não altera geometria, regras de serviço nem o formato de
 revisar visualmente o editor em 1280×720, desktop amplo e celular e validar
 edição de parede, porta, móvel, navegação 2D/3D e reabertura da planta.
 
+## Experiência de edição H8 — foco e organização
+A navegação **Ambientes físicos → Editor CAD** possui um cabeçalho Blue Ocean
+compacto com seleção de mapa, botão de tela cheia e modos CAD/Simulação.
+Na faixa de status existe o controle **Recolher ferramentas / Mostrar
+ferramentas**. Ele envia uma mensagem de apresentação `ui` à instância
+embarcada e alterna uma classe CSS no documento do OpenPlan3D.
+
+**Regras de segurança:**
+- O componente original `BuildPanel` permanece montado: seus botões, busca,
+  categorias, objetos recentes, favoritos e ferramentas são preservados.
+- A paleta recolhe somente em telas de **768px ou mais**; o menu móvel nativo
+  do OpenPlan3D permanece responsável pelo acesso a ferramentas no celular.
+- A ação não altera `currentProject`, paredes, mobiliário, câmeras, seleção,
+  `ServiceGraph`, backups nem o protocolo de salvamento `hydrate/change/ack`.
+- A barra superior nativa continua operável. O CSS de foco afeta somente o
+  iframe com `data-blue-ocean-cad=1`, não o editor upstream isolado.
+- Alternar para Simulação preserva os dados existentes; não ocorre migração
+  geométrica nesta fase.
+- Para reverter apenas a experiência, desabilitar a classe `is-cad` e a
+  mensagem `ui`, ou voltar ao commit anterior à versão H8.
+
+O teste `scripts/openplan3d-branding-browser.py` mede abertura do editor,
+barra superior, painel de propriedades, recolhimento/restauração sem desmontar
+a paleta e quatro viewports, incluindo **1280×720** e celular. Ainda é
+necessário um teste manual em Firefox com plantas reais para aprovar produção.
+
 ## Limites desta versão / verificações necessárias
 - A compilação isolada do SvelteKit estático e a renderização WebGL precisam de validação em Chromium e Firefox após o download das dependências.
 - Testar abertura com mapa geral e com jornadas, edição de paredes, móveis, portas, save/reload, exportação JSON, troca de projetos e backup/restauração.
