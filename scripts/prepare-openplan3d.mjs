@@ -9,7 +9,11 @@ const COMMIT = '98f9cb467e4045c6abc5d9880ada1f03dff50c68';
 const WORK = join(process.cwd(), '.openplan3d-build');
 const TARGET = join(process.cwd(), 'public', 'openplan3d');
 const MARKER = join(TARGET, 'blue-ocean-source-commit.txt');
-const isCurrent = existsSync(MARKER) && readFileSync(MARKER, 'utf8').trim() === COMMIT && existsSync(join(TARGET, 'editor', 'index.html'));
+const TRANSFORM = 'bo-openplan-embed-v2';
+const TRANSFORM_MARKER = join(TARGET, 'blue-ocean-transform-version.txt');
+const isCurrent = existsSync(MARKER) && readFileSync(MARKER, 'utf8').trim() === COMMIT
+  && existsSync(TRANSFORM_MARKER) && readFileSync(TRANSFORM_MARKER, 'utf8').trim() === TRANSFORM
+  && existsSync(join(TARGET, 'editor', 'index.html'));
 if (isCurrent) {
   console.log('OpenPlan3D estático: build verificado em cache (' + COMMIT.slice(0, 8) + ').');
   process.exit(0);
@@ -85,4 +89,5 @@ cpSync(join(output, 'index.html'), join(TARGET, 'editor', 'index.html'));
 cpSync(join(WORK, 'LICENSE'), join(TARGET, 'LICENSE'));
 cpSync(join(WORK, 'MODEL_SOURCES.md'), join(TARGET, 'MODEL_SOURCES.md'));
 writeFileSync(MARKER, COMMIT + '\n');
+writeFileSync(TRANSFORM_MARKER, TRANSFORM + '\n');
 console.log('OpenPlan3D incorporado ao Blue Ocean em /openplan3d/editor/ · fonte ' + COMMIT);
