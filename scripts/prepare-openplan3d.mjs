@@ -60,7 +60,7 @@ write('src/lib/blueOceanBridge.ts', "import { get } from 'svelte/store';\nimport
 // Room-to-journey integration reads room selection only. Its source is
 // isolated from the upstream code and copied into the temporary build.
 write('src/lib/blueOceanRoomBridge.ts', readFileSync(
-  join(process.cwd(), 'src', 'integrations', 'blue-ocean-room-bridge.ts'), 'utf8',
+  join(process.cwd(), 'src', 'integrations', 'blue-ocean-room-bridge.source'), 'utf8',
 ));
 const editorPath = 'src/routes/editor/+page.svelte';
 let editor = read(editorPath);
