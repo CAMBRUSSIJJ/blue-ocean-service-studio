@@ -81,11 +81,27 @@ const runNode24 = command => run(runner, ['--yes', '--package=node@24', '-c', co
 });
 console.log('[OpenPlan3D 1/3] Instalando dependências originais com a configuração upstream...');
 runNode24('npm ci --include=dev --no-audit --no-fund');
-console.log('[OpenPlan3D 2/3] Instalando adaptador estático de forma isolada...');
-runNode24('npm install --no-save --package-lock=false --legacy-peer-deps --ignore-scripts --no-audit --no-fund @sveltejs/adapter-static@3.0.9');
-if (!existsSync(join(WORK, 'node_modules', '@sveltejs', 'adapter-static', 'package.json'))) {
-  throw new Error('Adaptador estático do OpenPlan3D não foi instalado; veja o erro npm acima.');
+console.log('[OpenPlan3D 2/3] Instalando adaptador estático fora da árvore npm do OpenPlan3D...');
+// npm install in WORK re-resolves all upstream dependencies, including Vite.
+// With some registry mirrors this fails with ETARGET vite@^7.3.7 even though
+// the lockfile's npm ci above succeeds. Install adapter in its OWN empty
+// prefix, without peers, then copy just its package into the pinned project.
+// adapter-static@3 has no runtime dependencies and peers on SvelteKit 2.
+const ADAPTER_DIR = join(WORK, '.blue-ocean-static-adapter');
+mkdirSync(ADAPTER_DIR, { recursive: true });
+writeFileSync(join(ADAPTER_DIR, 'package.json'), JSON.stringify({
+  name: 'blue-ocean-static-adapter-bootstrap', private: true, version: '1.0.0',
+}, null, 2) + '\n');
+runNode24('npm install --prefix .blue-ocean-static-adapter --no-save --package-lock=false --legacy-peer-deps --ignore-scripts --no-audit --no-fund @sveltejs/adapter-static@3.0.9');
+const ADAPTER_SRC = join(ADAPTER_DIR, 'node_modules', '@sveltejs', 'adapter-static');
+const ADAPTER_DST = join(WORK, 'node_modules', '@sveltejs', 'adapter-static');
+if (!existsSync(join(ADAPTER_SRC, 'package.json'))) {
+  throw new Error('O npm não instalou adapter-static no diretório isolado; confira a configuração do registry.');
 }
+mkdirSync(join(WORK, 'node_modules', '@sveltejs'), { recursive: true });
+rmSync(ADAPTER_DST, { recursive: true, force: true });
+cpSync(ADAPTER_SRC, ADAPTER_DST, { recursive: true });
+if (!existsSync(join(ADAPTER_DST, 'package.json'))) throw new Error('Não foi possível incorporar o adaptador estático isolado.');
 // Only after both installs succeed may the Svelte config use adapter-static.
 write('svelte.config.js', `import adapter from '@sveltejs/adapter-static';
 export default { kit: { adapter: adapter({ pages: 'build', assets: 'build', fallback: 'index.html' }), paths: { base: '/openplan3d' }, prerender: { entries: [] } } };
