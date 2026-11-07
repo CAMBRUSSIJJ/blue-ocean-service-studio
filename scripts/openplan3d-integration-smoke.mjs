@@ -77,11 +77,27 @@ test('Blue Ocean skin affects appearance only and is scoped to embedded CAD', ()
   const script = readFileSync(new URL('./prepare-openplan3d.mjs', import.meta.url), 'utf8');
   const skin = readFileSync(new URL('../src/integrations/openplan3d-blue-ocean.css', import.meta.url), 'utf8');
   const cssWithoutComments = skin.replace(/\/\*[\s\S]*?\*\//g, '');
-  assert.match(script, /bo-openplan-embed-v3-branding/);
+  assert.match(script, /bo-openplan-embed-v4-focus-tools/);
   assert.match(script, /data-blue-ocean-cad/);
   assert.match(script, /openplan3d-blue-ocean\.css/);
   assert.match(script, /write\('src\/app\.css'/);
   assert.match(skin, /html\[data-blue-ocean-cad="1"\]/);
-  assert.doesNotMatch(cssWithoutComments, /display\s*:\s*none|pointer-events\s*:\s*none|position\s*:\s*(?:fixed|absolute)/);
+  // The sole display:none is scoped to the embedded CAD rail on desktop.
+  assert.equal((cssWithoutComments.match(/display\\s*:\\s*none/g) || []).length, 1);
+  assert.match(cssWithoutComments, /@media\\s*\\(min-width:\\s*768px\\)/);
+  assert.match(cssWithoutComments, /html\\[data-blue-ocean-cad="1"\\]\\.bo-cad-tools-collapsed/);
+  assert.doesNotMatch(cssWithoutComments, /pointer-events\\s*:\\s*none|position\\s*:\\s*(?:fixed|absolute)/);
   assert.doesNotMatch(script, /querySelectorAll\([^)]*button/);
+});
+
+test('tool panel toggle is presentation-only and uses isolated message channel', () => {
+  const host = readFileSync(new URL('../src/views/OpenPlan3DWorkspace.tsx', import.meta.url), 'utf8');
+  const builder = readFileSync(new URL('./prepare-openplan3d.mjs', import.meta.url), 'utf8');
+  const view = readFileSync(new URL('../src/views/ServiceSpaces3DView.tsx', import.meta.url), 'utf8');
+  assert.match(host, /'ui',/);
+  assert.match(host, /toolsCollapsed: !toolsVisible/);
+  assert.match(host, /aria-pressed=\{!toolsVisible\}/);
+  assert.match(builder, /data.type === 'ui'/);
+  assert.match(builder, /classList.toggle\('bo-cad-tools-collapsed'/);
+  assert.match(view, /editorMode === 'cad' \? ' is-cad' : ''/);
 });
