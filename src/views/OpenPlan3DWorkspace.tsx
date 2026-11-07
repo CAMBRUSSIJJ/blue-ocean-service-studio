@@ -97,6 +97,7 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
     {error && <div className="bo-service-spaces__error" role="alert">{error}</div>}
     <iframe
       key={scopeId}
+      name={`boSession:${session}`}
       ref={frame}
       className="bo-service-spaces__frame bo-openplan-workspace__frame"
       title="OpenPlan3D — Editor de plantas físicas integrado ao Blue Ocean"
