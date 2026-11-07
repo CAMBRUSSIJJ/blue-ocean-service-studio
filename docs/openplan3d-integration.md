@@ -15,6 +15,13 @@ As plantas CAD são armazenadas por mapa de serviço e pela planta geral (`servi
 - Os avisos MIT e `MODEL_SOURCES.md` são preservados em `public/openplan3d/` após a compilação.
 - Antes de comercializar, audite licenças de bibliotecas, modelos, texturas e componentes externos. Nem todos os arquivos de mídia têm necessariamente as mesmas permissões do código MIT.
 
+## Correção do fallback duplicado (7/11/2026)
+Se o OpenPlan3D não estiver compilado, o Vite pode responder com o `index.html` do Blue Ocean em uma rota estática inexistente. Isso provoca a interface principal **dentro do próprio editor**.
+
+A entrada CAD agora só monta o iframe depois de confirmar o arquivo `/openplan3d/blue-ocean-source-commit.txt` com a versão fixada e usa o caminho explícito `/openplan3d/editor/index.html`. Há também uma segunda proteção para detectar a home do Blue Ocean no lugar do editor e um aviso limpo com opção de verificar novamente.
+
+O `npm run dev` passa a executar `npm run openplan:prepare` antes de iniciar o Vite. A primeira execução pode demorar e requer acesso à internet; as seguintes usam cache se o build estiver íntegro. Se a preparação falhar, o servidor não será iniciado com um CAD inexistente.
+
 ## Instalação e execução
 O Blue Ocean continua em Node.js 22. Somente o motor OpenPlan3D utiliza Node.js 24, isolado por `npx` no preparo. O comando requer internet na primeira execução e Git.
 
