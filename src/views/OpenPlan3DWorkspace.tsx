@@ -18,6 +18,25 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
   const [message, setMessage] = useState('Iniciando o editor de ambientes…');
   const [error, setError] = useState('');
   const [isReady, setIsReady] = useState(false);
+  const [assetStatus, setAssetStatus] = useState<'checking' | 'ready' | 'missing'>('checking');
+  const [assetRevision, setAssetRevision] = useState(0);
+  const assetRoot = new URL(import.meta.env.BASE_URL, window.location.origin + '/');
+  const frameUrl = new URL('openplan3d/editor/index.html?boSession=' + encodeURIComponent(session), assetRoot).toString();
+
+  // Vite's SPA fallback can return Blue Ocean's own index.html when the CAD
+  // build is absent. Verify the exact upstream build marker BEFORE iframe mount.
+  useEffect(() => {
+    let active = true;
+    setAssetStatus('checking');
+    setError('');
+    const markerUrl = new URL('openplan3d/blue-ocean-source-commit.txt', assetRoot);
+    void fetch(markerUrl, { cache: 'no-store' })
+      .then(async response => response.ok && (await response.text()).trim() === '98f9cb467e4045c6abc5d9880ada1f03dff50c68')
+      .then(valid => { if (active) setAssetStatus(valid ? 'ready' : 'missing'); })
+      .catch(() => { if (active) setAssetStatus('missing'); });
+    return () => { active = false; };
+  }, [assetRevision]);
+
   const frameOrigin = window.location.origin;
   const serviceId = studio.graph.service.id;
   const scopeId = cadScopeId(serviceId, mapId);
@@ -41,6 +60,7 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
   };
 
   useEffect(() => {
+    if (assetStatus !== 'ready') return;
     ready.current = false;
     let disposed = false;
     const receive = (event: MessageEvent) => {
@@ -79,7 +99,7 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
       if (!disposed && !ready.current) setError('O motor OpenPlan3D não iniciou. Execute npm run openplan:prepare para instalar o motor antes de abrir o Blue Ocean.');
     }, 20000);
     return () => { disposed = true; window.removeEventListener('message', receive); window.clearTimeout(timeout); };
-  }, [frameOrigin, mapId, scopeId, serviceId, session]);
+  }, [assetStatus, frameOrigin, mapId, scopeId, serviceId, session]);
 
   useEffect(() => {
     if (!ready.current) return;
@@ -95,15 +115,35 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
       <span className="bo-openplan-workspace__save">Projeto: {({ saved: 'salvo', saving: 'salvando', error: 'falha ao salvar' })[studio.saveStatus]}</span>
     </div>
     {error && <div className="bo-service-spaces__error" role="alert">{error}</div>}
-    <iframe
+    {assetStatus === 'checking' && <div className="bo-openplan-workspace__unavailable" role="status">
+      <strong>Verificando o motor OpenPlan3D…</strong><p>Aguardando confirmação dos arquivos do editor CAD.</p>
+    </div>}
+    {assetStatus === 'missing' && <div className="bo-openplan-workspace__unavailable" role="alert">
+      <strong>Editor CAD ainda não instalado neste ambiente</strong>
+      <p>O servidor do Blue Ocean estava exibindo a própria página dentro do editor. Essa visualização foi bloqueada para evitar a interface duplicada.</p>
+      <p>No terminal do Blue Ocean, encerre a aplicação com Ctrl+C, execute <code>npm run openplan:prepare</code> e depois <code>npm run dev</code>. Na versão corrigida, o comando de desenvolvimento já prepara automaticamente o CAD.</p>
+      <button type="button" className="bo-button bo-button--secondary" onClick={() => setAssetRevision(value => value + 1)}>Verificar novamente</button>
+    </div>}
+    {assetStatus === 'ready' && <iframe
       key={scopeId}
       name={`boSession:${session}`}
       ref={frame}
       className="bo-service-spaces__frame bo-openplan-workspace__frame"
       title="OpenPlan3D — Editor de plantas físicas integrado ao Blue Ocean"
-      src={`${import.meta.env.BASE_URL}openplan3d/editor/?boSession=${encodeURIComponent(session)}`}
+      src={frameUrl}
+      onLoad={() => {
+        try {
+          const doc = frame.current?.contentDocument;
+          // Explicit guard even if the marker existed but the asset route was
+          // unexpectedly rewritten to the Blue Ocean application.
+          if (doc?.getElementById('root') || doc?.title.includes('Blue Ocean Service Studio')) {
+            setAssetStatus('missing');
+            setError('A rota do CAD carregou o Blue Ocean no lugar do OpenPlan3D. Corrija a instalação do motor.');
+          }
+        } catch { /* Cross-origin failures are covered by the handshake timeout. */ }
+      }}
       allow="fullscreen"
-    />
+    />}
     <p className="bo-openplan-workspace__hint">As alterações da planta são registradas no projeto. As atividades, jornadas e a simulação antiga permanecem preservadas na área Simulação.</p>
   </div>;
 }
