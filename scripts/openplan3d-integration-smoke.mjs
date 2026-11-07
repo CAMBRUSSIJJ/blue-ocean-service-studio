@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { applyCadChange, cadEntry, cadScopeId, cadVersion, validateCadProject } from '../src/services/openplan3d-projects.ts';
+
+const serviceId = 'service-1', mapId = 'service-space', scopeId = cadScopeId(serviceId, mapId);
+const date = '2026-11-07T12:00:00.000Z';
+const graph = () => ({
+  service: { id: serviceId, name: 'Clínica', updatedAt: date, journeyIds: [] },
+  journeys: { journey1: { id: 'journey1', serviceId, name: 'Atendimento', stageIds: [] } },
+});
+const project = () => ({
+  id: scopeId, name: 'Recepção', activeFloorId: 'floor-1',
+  floors: [{ id: 'floor-1', walls: [{ id: 'wall-1', start: {x:0,y:0}, end:{x:600,y:0}, thickness:15 }], doors: [], windows: [], furniture: [] }],
+});
+
+test('CAD is scoped to the current service and map', () => {
+  assert.equal(scopeId.startsWith('bo-cad:'), true);
+  const before = graph();
+  const after = applyCadChange(before, serviceId, mapId, 'null', project(), date);
+  assert.equal(cadEntry(after, mapId).project.floors[0].walls.length, 1);
+  assert.equal(cadEntry(after, mapId).revision, 1);
+  assert.equal(before.service.cadPlans, undefined);
+  assert.equal(cadVersion(after, mapId), JSON.stringify(project()));
+});
+test('optimistic concurrency prevents overwriting changes', () => {
+  const after = applyCadChange(graph(), serviceId, mapId, 'null', project(), date);
+  assert.throws(() => applyCadChange(after, serviceId, mapId, 'null', project(), date), /mudou em outra sessão/);
+  const next = structuredClone(project());
+  next.name = 'Recepção ampliada';
+  const updated = applyCadChange(after, serviceId, mapId, cadVersion(after, mapId), next, date);
+  assert.equal(cadEntry(updated, mapId).revision, 2);
+});
+test('does not allow projects or maps to cross scopes', () => {
+  assert.throws(() => applyCadChange(graph(), 'other-service', mapId, 'null', project(), date), /mudou/);
+  assert.throws(() => applyCadChange(graph(), serviceId, 'unknown-map', 'null', project(), date), /não pertence/);
+  assert.throws(() => validateCadProject({ ...project(), id: 'another' }, scopeId), /não pertence/);
+});
+test('rejects malformed floors and oversized plan', () => {
+  assert.throws(() => validateCadProject({ ...project(), activeFloorId: 'missing' }, scopeId), /Pavimento ativo/);
+  assert.throws(() => validateCadProject({ ...project(), floors: [] }, scopeId), /pavimentos/);
+  assert.throws(() => validateCadProject({ ...project(), name: 'x'.repeat(3_000_050) }, scopeId), /grande/);
+});
