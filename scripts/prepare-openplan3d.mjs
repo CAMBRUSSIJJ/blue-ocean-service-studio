@@ -9,7 +9,7 @@ const COMMIT = '98f9cb467e4045c6abc5d9880ada1f03dff50c68';
 const WORK = join(process.cwd(), '.openplan3d-build');
 const TARGET = join(process.cwd(), 'public', 'openplan3d');
 const MARKER = join(TARGET, 'blue-ocean-source-commit.txt');
-const TRANSFORM = 'bo-openplan-embed-v2';
+const TRANSFORM = 'bo-openplan-embed-v3-branding';
 const TRANSFORM_MARKER = join(TARGET, 'blue-ocean-transform-version.txt');
 const isCurrent = existsSync(MARKER) && readFileSync(MARKER, 'utf8').trim() === COMMIT
   && existsSync(TRANSFORM_MARKER) && readFileSync(TRANSFORM_MARKER, 'utf8').trim() === TRANSFORM
@@ -35,10 +35,18 @@ write('src/routes/+layout.ts', 'export const ssr = false;\nexport const prerende
 // The static editor is served as /editor/index.html to bypass Vite SPA fallback.
 // Rewrite only the browser-visible pathname before SvelteKit initializes,
 // otherwise its client router sees an unknown /editor/index.html route.
-const embeddedStartup = '<script>if(location.pathname==="/openplan3d/editor/index.html"){history.replaceState(history.state,"", "/openplan3d/editor/"+location.search+location.hash);}</script>';
+const embeddedStartup = '<script>if(new URLSearchParams(location.search).has("boSession")||window.name.startsWith("boSession:")){document.documentElement.setAttribute("data-blue-ocean-cad","1");}if(location.pathname==="/openplan3d/editor/index.html"){history.replaceState(history.state,"", "/openplan3d/editor/"+location.search+location.hash);}</script>';
 write('src/app.html', read('src/app.html')
   .replace('href="/favicon.svg"', 'href="/openplan3d/favicon.svg"')
   .replace('</head>', embeddedStartup + '</head>'));
+// Visual-only adapter: preserve the upstream CSS and all editor components.
+// Every selector is scoped to the embedded Blue Ocean iframe, and does not
+// affect the standalone OpenPlan3D application or service graph operations.
+const brandFile = join(process.cwd(), 'src', 'integrations', 'openplan3d-blue-ocean.css');
+const brandCss = readFileSync(brandFile, 'utf8');
+if (!brandCss.includes('html[data-blue-ocean-cad="1"]')) throw new Error('Skin de marca precisa permanecer restrita ao editor incorporado.');
+write('src/app.css', read('src/app.css') + '\n/* Blue Ocean embedded CAD skin */\n' + brandCss + '\n');
+
 // Analytics and Firebase handoff belong to the upstream hosted product, not
 // this embedded editor. Disable the auto-import rather than relying on a
 // deployment environment variable in the static client bundle.
