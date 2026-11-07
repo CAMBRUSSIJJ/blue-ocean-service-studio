@@ -110,7 +110,7 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
   return <div className="bo-openplan-workspace" data-openplan3d-editor="1">
     <div className="bo-openplan-workspace__status" role="status">
       <span className={isReady ? 'is-ready' : ''} aria-hidden="true" />
-      <strong>Editor CAD</strong>
+      <strong>BLUE OCEAN · CAD</strong>
       <span>{message}</span>
       <span className="bo-openplan-workspace__save">Projeto: {({ saved: 'salvo', saving: 'salvando', error: 'falha ao salvar' })[studio.saveStatus]}</span>
     </div>
