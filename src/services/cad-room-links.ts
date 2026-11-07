@@ -1,5 +1,5 @@
 import type { ServiceGraph } from '../domain/model';
-import { cadEntry } from './openplan3d-projects';
+import { cadEntry } from './openplan3d-projects.ts';
 
 /**
  * Associations between a physically enclosed CAD room and a canonical journey
