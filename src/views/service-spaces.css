@@ -46,3 +46,10 @@
 .bo-openplan-workspace__hint{margin:0;color:var(--bo-color-text-muted);font-size:11px;line-height:1.4}
 .bo-service-spaces:fullscreen .bo-openplan-workspace__frame{height:0;min-height:300px;flex:1}
 @media(max-width:700px){.bo-service-spaces__modes{align-self:stretch}.bo-service-spaces__modes button{flex:1;padding:9px 6px;font-size:12px}.bo-openplan-workspace__frame{min-height:540px;height:calc(100dvh - 220px)}.bo-openplan-workspace__save{margin-left:0}}
+
+/* Missing CAD assets must never fall back into an embedded copy of the app. */
+.bo-openplan-workspace__unavailable{display:flex;flex-direction:column;gap:10px;align-items:flex-start;justify-content:center;min-height:260px;padding:clamp(20px,4vw,42px);border:1px solid var(--bo-color-border);border-radius:12px;background:var(--bo-color-surface-subtle);color:var(--bo-color-text)}
+.bo-openplan-workspace__unavailable strong{font-size:17px;font-weight:720}
+.bo-openplan-workspace__unavailable p{font-size:13px;line-height:1.7;margin:0;max-width:720px;color:var(--bo-color-text-secondary)}
+.bo-openplan-workspace__unavailable code{padding:2px 5px;border-radius:4px;background:var(--bo-color-surface);border:1px solid var(--bo-color-border);color:var(--bo-color-text);overflow-wrap:anywhere}
+.bo-openplan-workspace__unavailable button{margin-top:8px}
