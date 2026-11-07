@@ -31,9 +31,6 @@ run('git', ['-C', WORK, 'checkout', '-f', 'FETCH_HEAD']);
 
 // The original SvelteKit project uses adapter-node and runtime API routes.
 // Blue Ocean only needs its client-side plan editor (no cloud handoff APIs).
-write('svelte.config.js', `import adapter from '@sveltejs/adapter-static';
-export default { kit: { adapter: adapter({ pages: 'build', assets: 'build', fallback: 'index.html' }), paths: { base: '/openplan3d' }, prerender: { entries: [] } } };
-`);
 write('src/routes/+layout.ts', 'export const ssr = false;\nexport const prerender = false;\nexport const trailingSlash = "always";\n');
 // The static editor is served as /editor/index.html to bypass Vite SPA fallback.
 // Rewrite only the browser-visible pathname before SvelteKit initializes,
@@ -72,13 +69,29 @@ editor = editor.replace(anchor, `
 
 ` + anchor);
 write(editorPath, editor);
-// Install the static adapter without rewriting the pinned upstream lockfile.
-// npx makes the required Node 24 binary available for this isolated build.
+// Bootstrap in stages. Keep upstream's adapter-node config intact during
+// npm ci and npm install: SvelteKit's prepare lifecycle imports svelte.config.js.
+// Otherwise the first npm ci resolves a static adapter that is not installed yet.
+// The upstream lock stays unchanged; --legacy-peer-deps works around npm
+// resolving an optional vite peer as `vite@undefined` on some Linux machines.
 const runner = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-run(runner, ['--yes', '--package=node@24', '-c', 'npm ci --include=dev && npm install --no-save --package-lock=false @sveltejs/adapter-static@3.0.9 && npm run build'], {
+const runNode24 = command => run(runner, ['--yes', '--package=node@24', '-c', command], {
   cwd: WORK,
   env: { ...process.env, NODE_ENV: 'production', NPM_CONFIG_INCLUDE: 'dev', PUBLIC_ENABLE_ANALYTICS: 'false' },
 });
+console.log('[OpenPlan3D 1/3] Instalando dependências originais com a configuração upstream...');
+runNode24('npm ci --include=dev --no-audit --no-fund');
+console.log('[OpenPlan3D 2/3] Instalando adaptador estático de forma isolada...');
+runNode24('npm install --no-save --package-lock=false --legacy-peer-deps --ignore-scripts --no-audit --no-fund @sveltejs/adapter-static@3.0.9');
+if (!existsSync(join(WORK, 'node_modules', '@sveltejs', 'adapter-static', 'package.json'))) {
+  throw new Error('Adaptador estático do OpenPlan3D não foi instalado; veja o erro npm acima.');
+}
+// Only after both installs succeed may the Svelte config use adapter-static.
+write('svelte.config.js', `import adapter from '@sveltejs/adapter-static';
+export default { kit: { adapter: adapter({ pages: 'build', assets: 'build', fallback: 'index.html' }), paths: { base: '/openplan3d' }, prerender: { entries: [] } } };
+`);
+console.log('[OpenPlan3D 3/3] Compilando o motor CAD...');
+runNode24('npm run build');
 const output = join(WORK, 'build');
 if (!existsSync(join(output, 'index.html'))) throw new Error('OpenPlan3D não produziu o HTML estático esperado.');
 rmSync(TARGET, { force: true, recursive: true });
