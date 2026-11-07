@@ -67,4 +67,7 @@ test('OpenPlan3D bootstraps original Svelte config before installing adapter-sta
   assert.ok(configSwitch > adapterInstall && build > configSwitch);
   assert.match(script, /--legacy-peer-deps/);
   assert.match(script, /--ignore-scripts/);
+  assert.match(script, /npm install --prefix \.blue-ocean-static-adapter/);
+  assert.match(script, /cpSync\(ADAPTER_SRC, ADAPTER_DST/);
+  assert.match(script, /rmSync\(ADAPTER_DST/);
 });
