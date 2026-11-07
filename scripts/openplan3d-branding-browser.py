@@ -56,12 +56,22 @@ try:
         assert properties.count() == 1, "O painel de propriedades nativo desapareceu."
         gradient = toolbar.evaluate("(el) => getComputedStyle(el).backgroundImage")
         assert "linear-gradient" in gradient, "A barra superior perdeu o branding do Blue Ocean."
-        for width, height in [(1280, 720), (1600, 900), (768, 900)]:
+        # Collapse is CSS-only: the original palette stays mounted and returns
+        # after the focus state is cleared, preserving its selected tools.
+        tool_rail = page.locator("div.w-64.bg-white.border-r.border-gray-200")
+        assert tool_rail.count() == 1, "A paleta de ferramentas do OpenPlan3D desapareceu."
+        assert tool_rail.is_visible(), "A paleta deve iniciar visível."
+        page.evaluate("document.documentElement.classList.add('bo-cad-tools-collapsed')")
+        assert not tool_rail.is_visible(), "O botão de foco não recolheu o painel."
+        assert tool_rail.count() == 1, "Recolher ferramentas não pode desmontar a paleta."
+        page.evaluate("document.documentElement.classList.remove('bo-cad-tools-collapsed')")
+        assert tool_rail.is_visible(), "A paleta não retornou ao layout."
+        for width, height in [(1280, 720), (1600, 900), (768, 900), (390, 844)]:
             page.set_viewport_size({"width": width, "height": height})
             assert toolbar.is_visible(), f"Toolbar desapareceu em {width}x{height}."
             page.screenshot(path=str(SCREENSHOT_DIR / f"openplan3d-brand-{width}x{height}.png"))
         browser.close()
-    print("PASSOU: editor OpenPlan3D, identidade Blue Ocean, propriedades e 3 viewports.")
+    print("PASSOU: OpenPlan3D, identidade Blue Ocean, paleta recolhível e 4 viewports.")
 finally:
     proc.terminate()
     try:
