@@ -46,6 +46,30 @@ O motor não usa a API/conta hospedada do OpenPlan3D. O hook de analytics upstre
 
 Um iframe de mesma origem **não é um isolamento de segurança contra código malicioso**: o upstream e suas dependências devem ser auditados e revisados a cada atualização. Não altere o commit fixado sem verificar o código.
 
+## Padronização visual Blue Ocean — escopo seguro
+O editor CAD incorporado recebe uma personalização **somente visual**,
+seguindo as cores marinho/cobalto, superfícies claras e estados de foco do
+design system Blue Ocean. O arquivo canônico é
+`src/integrations/openplan3d-blue-ocean.css` e é acrescentado ao CSS
+compilado do motor pelo `scripts/prepare-openplan3d.mjs`.
+
+- A personalização é ativada apenas quando o editor recebe uma sessão
+  `boSession` do Blue Ocean; não altera o aplicativo upstream sem incorporação.
+- A barra de ferramentas original, os botões, os menus, os painéis, o 2D/3D,
+  as medidas, o arraste e o salvamento não são removidos ou reimplementados.
+- O modo escuro do motor mantém seus estilos de base (a maioria das cores
+  da personalização aplica-se somente ao tema claro).
+- O motor compilado recebe uma versão de transformação nova para invalidar
+  o cache local; não é necessário apagar projetos ou o armazenamento do browser.
+- Se uma regressão visual aparecer, a alteração pode ser revertida somente
+  removendo o arquivo de skin, a importação no preparador e a versão de build,
+  sem migrar os dados CAD.
+
+O CSS não altera geometria, regras de serviço nem o formato de
+`ServiceGraph.service.cadPlans`. Para aceitar a integração em produção,
+revisar visualmente o editor em 1280×720, desktop amplo e celular e validar
+edição de parede, porta, móvel, navegação 2D/3D e reabertura da planta.
+
 ## Limites desta versão / verificações necessárias
 - A compilação isolada do SvelteKit estático e a renderização WebGL precisam de validação em Chromium e Firefox após o download das dependências.
 - Testar abertura com mapa geral e com jornadas, edição de paredes, móveis, portas, save/reload, exportação JSON, troca de projetos e backup/restauração.
