@@ -119,6 +119,8 @@ export type Service = {
   spatialDesign?: import('./spatial-design-schema').SpatialDesignState;
   /** Architectural CAD plans keyed by service map; separate from operational spatial simulation. */
   cadPlans?: { version: 1; serviceId: Id; plans: Record<Id, { version: 1; revision: number; updatedAt: string; project: import('../services/openplan3d-projects').OpenPlanProject }> };
+  /** Physical-room to canonical journey-stage relations; never embedded in the CAD geometry. */
+  cadRoomLinks?: import('../services/cad-room-links').CadRoomLinkState;
 };
 
 export type JourneyLaneType = 'text' | 'image' | 'stage' | 'icons' | 'grid' | 'divider' | 'emotion' | 'metric' | 'embed';

@@ -36,7 +36,7 @@ export function ServiceSpaces3DView({ studio, onOpenMap }: { studio: StudioContr
       <button type="button" className={editorMode === 'simulation' ? 'is-active' : ''} aria-current={editorMode === 'simulation' ? 'page' : undefined} onClick={() => setEditorMode('simulation')}>Simulação do serviço</button>
     </nav>
     {editorMode === 'cad'
-      ? <OpenPlan3DWorkspace key={`${graph.service.id}:${activeMap}:cad`} studio={studio} mapId={activeMap} />
+      ? <OpenPlan3DWorkspace key={`${graph.service.id}:${activeMap}:cad`} studio={studio} mapId={activeMap} onOpenMap={onOpenMap} />
       : <SpacesEditor key={`${graph.service.id}:${activeMap}:simulation`} studio={studio} mapId={activeMap} onOpenMap={onOpenMap}/>}
 
   </section>;

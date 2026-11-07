@@ -9,7 +9,7 @@ const COMMIT = '98f9cb467e4045c6abc5d9880ada1f03dff50c68';
 const WORK = join(process.cwd(), '.openplan3d-build');
 const TARGET = join(process.cwd(), 'public', 'openplan3d');
 const MARKER = join(TARGET, 'blue-ocean-source-commit.txt');
-const TRANSFORM = 'bo-openplan-embed-v4-focus-tools';
+const TRANSFORM = 'bo-openplan-embed-v5-room-journey';
 const TRANSFORM_MARKER = join(TARGET, 'blue-ocean-transform-version.txt');
 const isCurrent = existsSync(MARKER) && readFileSync(MARKER, 'utf8').trim() === COMMIT
   && existsSync(TRANSFORM_MARKER) && readFileSync(TRANSFORM_MARKER, 'utf8').trim() === TRANSFORM
@@ -57,22 +57,29 @@ if (!layout.includes(analyticsLine)) throw new Error('Integração de privacidad
 write(layoutPath, layout.replace(analyticsLine, "  onMount(() => { /* Blue Ocean embedded mode: no analytics or Firebase initialization. */ });"));
 
 write('src/lib/blueOceanBridge.ts', "import { get } from 'svelte/store';\nimport { currentProject, createDefaultProject, loadProject } from '$lib/stores/project';\nimport { readProject } from '$lib/utils/projectValidation';\n\nconst CHANNEL = 'blue-ocean-openplan3d/v1';\n\n/** Runs only inside a same-origin Blue Ocean frame with a session token. */\nexport function installBlueOceanBridge(): () => void {\n  const session = new URLSearchParams(window.location.search).get('boSession') || (window.name.startsWith('boSession:') ? window.name.slice(10) : null);\n  if (!session || window.parent === window) return () => {};\n  let scopeId = '';\n  let baseVersion = 'null';\n  let ready = false, waiting = false, sequence = 0;\n  let lastSynced = '', pending = '';\n  let timer: ReturnType<typeof setTimeout> | undefined;\n  const send = (type: string, details: Record<string, unknown> = {}) =>\n    window.parent.postMessage({ channel: CHANNEL, session, type, ...details }, window.location.origin);\n  const transmit = () => {\n    timer = undefined;\n    if (!ready || !scopeId || waiting) return;\n    const value = get(currentProject);\n    if (!value) return;\n    if (value.id !== scopeId) {\n      loadProject({ ...value, id: scopeId });\n      return;\n    }\n    const json = JSON.stringify(value);\n    if (json === lastSynced) return;\n    pending = json;\n    waiting = true;\n    send('change', { sequence: ++sequence, baseVersion, project: JSON.parse(json) });\n  };\n  const changed = currentProject.subscribe(value => {\n    if (!ready || !value) return;\n    if (timer) clearTimeout(timer);\n    timer = setTimeout(transmit, 850);\n  });\n  const onMessage = (event: MessageEvent) => {\n    const data = event.data;\n    if (event.source !== window.parent || event.origin !== window.location.origin ||\n        !data || data.channel !== CHANNEL || data.session !== session) return;\n    if (data.type === 'ui') {\n      // Visual state only: preserve the mounted tools, selected object and CAD data.\n      document.documentElement.classList.toggle('bo-cad-tools-collapsed', data.toolsCollapsed === true);\n      return;\n    }\n    if (data.type === 'hydrate') {\n      try {\n        if (typeof data.scopeId !== 'string' || data.scopeId.length > 500) throw new Error('Identificação inválida.');\n        if (typeof data.baseVersion !== 'string') throw new Error('Versão do projeto inválida.');\n        const value = data.project\n          ? readProject(data.project)\n          : createDefaultProject(typeof data.name === 'string' ? data.name.slice(0, 120) : 'Planta física');\n        scopeId = data.scopeId;\n        baseVersion = data.baseVersion;\n        waiting = false;\n        const project = { ...value, id: scopeId };\n        loadProject(project);\n        lastSynced = JSON.stringify(project);\n        ready = true;\n        send('hydrated');\n      } catch (error) {\n        send('error', { message: error instanceof Error ? error.message : 'Falha ao abrir a planta.' });\n      }\n      return;\n    }\n    if (data.type === 'ack' && waiting && data.sequence === sequence) {\n      waiting = false;\n      if (data.accepted && typeof data.baseVersion === 'string') {\n        baseVersion = data.baseVersion;\n        lastSynced = pending;\n        if (timer) clearTimeout(timer);\n        timer = setTimeout(transmit, 500);\n      } else {\n        ready = false;\n        send('error', { message: typeof data.message === 'string' ? data.message : 'Conflito ao salvar a planta.' });\n      }\n    }\n  };\n  window.addEventListener('message', onMessage);\n  send('ready');\n  return () => {\n    changed();\n    if (timer) clearTimeout(timer);\n    window.removeEventListener('message', onMessage);\n  };\n}\n");
+// Room-to-journey integration reads room selection only. Its source is
+// isolated from the upstream code and copied into the temporary build.
+write('src/lib/blueOceanRoomBridge.ts', readFileSync(
+  join(process.cwd(), 'src', 'integrations', 'blue-ocean-room-bridge.source'), 'utf8',
+));
 const editorPath = 'src/routes/editor/+page.svelte';
 let editor = read(editorPath);
 const imported = "  import { onMount } from 'svelte';";
 if (!editor.includes(imported)) throw new Error('API do editor OpenPlan3D mudou: import onMount ausente.');
-editor = editor.replace(imported, imported + "\n  import { installBlueOceanBridge } from '$lib/blueOceanBridge';");
+editor = editor.replace(imported, imported + "\n  import { installBlueOceanBridge } from '$lib/blueOceanBridge';\n  import { installBlueOceanRoomBridge } from '$lib/blueOceanRoomBridge';");
 const anchor = '  function onEditorKeydown(e: KeyboardEvent) {';
 if (!editor.includes(anchor)) throw new Error('API do editor OpenPlan3D mudou: ponto de montagem ausente.');
 editor = editor.replace(anchor, `
   onMount(() => {
     let stopBridge = () => {};
+    let stopRoomBridge = () => {};
     const timer = window.setInterval(() => {
       if (!ready) return;
       window.clearInterval(timer);
       stopBridge = installBlueOceanBridge();
+      stopRoomBridge = installBlueOceanRoomBridge();
     }, 80);
-    return () => { window.clearInterval(timer); stopBridge(); };
+    return () => { window.clearInterval(timer); stopBridge(); stopRoomBridge(); };
   });
 
 ` + anchor);

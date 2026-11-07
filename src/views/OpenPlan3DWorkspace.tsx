@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import type { StudioController } from '../state/useStudioController';
 import { dataBridge } from '../runtime/client';
 import { applyCadChange, cadEntry, cadScopeId, cadVersion, OPENPLAN_CHANNEL } from '../services/openplan3d-projects';
+import { CadRoomServicePanel, type CadNativeRoom } from './CadRoomServicePanel';
 
 /**
  * OpenPlan3D is a separately built, same-origin SvelteKit microfrontend.
  * The React shell owns project selection and persistence. The iframe only
  * edits a validated floor plan, never writes directly into the service graph.
  */
-export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioController; mapId: string }) {
+export function OpenPlan3DWorkspace({ studio, mapId, onOpenMap }: { studio: StudioController; mapId: string; onOpenMap?: (id: string) => void }) {
   const frame = useRef<HTMLIFrameElement>(null);
   const latest = useRef(studio);
   latest.current = studio;
@@ -20,6 +21,8 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
   const [isReady, setIsReady] = useState(false);
   // Presentation only: toggling the tool rail never unmounts it or edits CAD data.
   const [toolsVisible, setToolsVisible] = useState(true);
+  const [roomContext, setRoomContext] = useState<{ rooms: CadNativeRoom[]; selectedRoomKey: string | null }>({ rooms: [], selectedRoomKey: null });
+  const [showServiceContext, setShowServiceContext] = useState(true);
   const [assetStatus, setAssetStatus] = useState<'checking' | 'ready' | 'missing'>('checking');
   const [assetRevision, setAssetRevision] = useState(0);
   const assetRoot = new URL(import.meta.env.BASE_URL, window.location.origin + '/');
@@ -76,6 +79,21 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
         send.current();
         return;
       }
+      if (payload.type === 'room-context') {
+        if (Array.isArray(payload.rooms) && payload.rooms.length <= 120 &&
+          payload.rooms.every((item: unknown) => item && typeof item === 'object' &&
+            typeof (item as CadNativeRoom).key === 'string' && (item as CadNativeRoom).key.length <= 25000 &&
+            typeof (item as CadNativeRoom).floorId === 'string' && (item as CadNativeRoom).floorId.length <= 180 &&
+            typeof (item as CadNativeRoom).roomId === 'string' &&
+            typeof (item as CadNativeRoom).name === 'string' && (item as CadNativeRoom).name.length <= 120 &&
+            typeof (item as CadNativeRoom).area === 'number' && Number.isFinite((item as CadNativeRoom).area))) {
+          const selectedRoomKey = typeof payload.selectedRoomKey === 'string' &&
+            payload.rooms.some((item: CadNativeRoom) => item.key === payload.selectedRoomKey)
+              ? payload.selectedRoomKey : null;
+          setRoomContext({ rooms: payload.rooms as CadNativeRoom[], selectedRoomKey });
+        }
+        return;
+      }
       if (payload.type === 'hydrated') { setMessage('Planta do serviço pronta para edição.'); return; }
       if (payload.type === 'error') { setError(typeof payload.message === 'string' ? payload.message.slice(0, 300) : 'O editor encontrou um erro.'); return; }
       if (payload.type !== 'change') return;
@@ -128,6 +146,14 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
       <button
         type="button"
         className="bo-openplan-workspace__tools-toggle"
+        aria-pressed={showServiceContext}
+        aria-controls="bo-cad-service-context"
+        title="Mostrar ou recolher os vínculos da sala com o serviço"
+        onClick={() => setShowServiceContext(value => !value)}
+      >{showServiceContext ? 'Recolher contexto' : 'Contexto do serviço'}</button>
+      <button
+        type="button"
+        className="bo-openplan-workspace__tools-toggle"
         aria-label={toolsVisible ? 'Recolher painel de ferramentas do CAD' : 'Mostrar painel de ferramentas do CAD'}
         aria-pressed={!toolsVisible}
         title="Recolher ou mostrar ferramentas sem alterar a planta"
@@ -145,6 +171,7 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
       <p>No terminal do Blue Ocean, encerre a aplicação com Ctrl+C, execute <code>npm run openplan:prepare</code> e depois <code>npm run dev</code>. Na versão corrigida, o comando de desenvolvimento já prepara automaticamente o CAD.</p>
       <button type="button" className="bo-button bo-button--secondary" onClick={() => setAssetRevision(value => value + 1)}>Verificar novamente</button>
     </div>}
+    <div className={`bo-openplan-workspace__body${showServiceContext ? ' is-context-open' : ''}`}>
     {assetStatus === 'ready' && <iframe
       key={scopeId}
       name={`boSession:${session}`}
@@ -165,6 +192,13 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
       }}
       allow="fullscreen"
     />}
+    {assetStatus === 'ready' && <div className="bo-openplan-workspace__context" id="bo-cad-service-context" hidden={!showServiceContext}><CadRoomServicePanel
+      studio={studio} mapId={mapId}
+      rooms={roomContext.rooms}
+      selectedRoomKey={roomContext.selectedRoomKey}
+      onOpenMap={onOpenMap}
+    /></div>}
+    </div>
     <p className="bo-openplan-workspace__hint">As alterações da planta são registradas no projeto. As atividades, jornadas e a simulação antiga permanecem preservadas na área Simulação.</p>
   </div>;
 }

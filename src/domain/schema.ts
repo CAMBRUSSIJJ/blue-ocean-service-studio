@@ -48,7 +48,16 @@ const serviceOperationRun=z.object({id,serviceId:id,bindingId:id,startedAt:z.str
 const serviceOperationsBridge=z.object({version:z.literal(1),bindings:z.record(id,serviceOperationBinding).default({}),runs:z.record(id,serviceOperationRun).default({}),updatedAt:z.string()}).passthrough();
 const cadProjectSchema=z.object({id,name:z.string().max(200),activeFloorId:id,floors:z.array(z.object({id,walls:z.array(z.unknown())}).passthrough()).min(1).max(12)}).passthrough();
 const cadPlansSchema=z.object({version:z.literal(1),serviceId:id,plans:z.record(id,z.object({version:z.literal(1),revision:z.number().int().positive(),updatedAt:z.string(),project:cadProjectSchema}).passthrough())}).passthrough();
-const service=z.object({id,name:z.string(),description:z.string(),journeyIds:idList,createdAt:z.string(),updatedAt:z.string(),project:serviceProject.optional(),proposition:servicePropositionState.optional(),prototypeLab:servicePrototypeLab.optional(),learningSystem:serviceLearningState.optional(),decisionSystem:serviceDecisionState.optional(),currentFuture:currentFutureServiceState.optional(),improvementBacklog:serviceImprovementBacklog.optional(),improvementPortfolio:serviceImprovementPortfolio.optional(),outcomes:serviceOutcomes.optional(),governance:serviceGovernance.optional(),operationsBridge:serviceOperationsBridge.optional(),spatialDesign:spatialDesignSchema.optional(),cadPlans:cadPlansSchema.optional()}).passthrough();
+const cadRoomLinkSchema=z.object({
+  roomKey:z.string().min(1).max(25000),floorId:id,roomName:z.string().max(120),
+  stageId:id,activity:z.string().max(240),owner:z.string().max(120),resources:z.string().max(500),
+  expectedMinutes:z.number().min(0).max(10080).nullable(),
+  capacity:z.number().int().min(1).max(100000).nullable(),
+  challenge:z.string().max(1000),updatedAt:z.string(),
+}).passthrough();
+const cadRoomLinksSchema=z.object({version:z.literal(1),serviceId:id,maps:z.record(id,z.record(z.string(),cadRoomLinkSchema))}).passthrough();
+
+const service=z.object({id,name:z.string(),description:z.string(),journeyIds:idList,createdAt:z.string(),updatedAt:z.string(),project:serviceProject.optional(),proposition:servicePropositionState.optional(),prototypeLab:servicePrototypeLab.optional(),learningSystem:serviceLearningState.optional(),decisionSystem:serviceDecisionState.optional(),currentFuture:currentFutureServiceState.optional(),improvementBacklog:serviceImprovementBacklog.optional(),improvementPortfolio:serviceImprovementPortfolio.optional(),outcomes:serviceOutcomes.optional(),governance:serviceGovernance.optional(),operationsBridge:serviceOperationsBridge.optional(),spatialDesign:spatialDesignSchema.optional(),cadPlans:cadPlansSchema.optional(),cadRoomLinks:cadRoomLinksSchema.optional()}).passthrough();
 const journey=z.object({id,serviceId:id,name:z.string(),stageIds:idList}).passthrough();
 const stage=z.object({id,journeyId:id,title:z.string(),customerAction:z.string(),emotion:z.enum(['negative','neutral','positive']),touchpointIds:idList,problemIds:idList,opportunityIds:idList}).passthrough();
 const channelKind=z.enum(['digital','messaging','phone','email','in_person','physical','partner','system','other']);

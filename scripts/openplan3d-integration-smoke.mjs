@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { applyCadChange, cadEntry, cadScopeId, cadVersion, validateCadProject } from '../src/services/openplan3d-projects.ts';
+import { cadRoomKey, cadRoomLink, saveCadRoomLink, removeCadRoomLink } from '../src/services/cad-room-links.ts';
 
 const serviceId = 'service-1', mapId = 'service-space', scopeId = cadScopeId(serviceId, mapId);
 const date = '2026-11-07T12:00:00.000Z';
@@ -77,7 +78,7 @@ test('Blue Ocean skin affects appearance only and is scoped to embedded CAD', ()
   const script = readFileSync(new URL('./prepare-openplan3d.mjs', import.meta.url), 'utf8');
   const skin = readFileSync(new URL('../src/integrations/openplan3d-blue-ocean.css', import.meta.url), 'utf8');
   const cssWithoutComments = skin.replace(/\/\*[\s\S]*?\*\//g, '');
-  assert.match(script, /bo-openplan-embed-v4-focus-tools/);
+  assert.match(script, /bo-openplan-embed-v5-room-journey/);
   assert.match(script, /data-blue-ocean-cad/);
   assert.match(script, /openplan3d-blue-ocean\.css/);
   assert.match(script, /write\('src\/app\.css'/);
@@ -100,4 +101,67 @@ test('tool panel toggle is presentation-only and uses isolated message channel',
   assert.match(builder, /data.type === 'ui'/);
   assert.match(builder, /classList.toggle\('bo-cad-tools-collapsed'/);
   assert.match(view, /editorMode === 'cad' \? ' is-cad' : ''/);
+});
+
+const linkedGraph = (map = mapId) => {
+  const source = graph();
+  source.service.journeyIds = ['journey1'];
+  source.journeys.journey1.stageIds = ['stage1'];
+  source.stages = { stage1: { id: 'stage1', journeyId: 'journey1', title: 'Chegada', customerAction: 'Receber cliente' } };
+  const drawing = project();
+  drawing.id = cadScopeId(serviceId, map);
+  drawing.floors[0].walls.push({ id: 'wall-2', start: { x: 600, y: 0 }, end: { x: 600, y: 600 }, thickness: 15 });
+  return applyCadChange(source, serviceId, map, 'null', drawing, date);
+};
+const linkInput = () => ({
+  roomKey: cadRoomKey('floor-1', ['wall-1', 'wall-2']),
+  floorId: 'floor-1', roomName: 'Recepção', stageId: 'stage1',
+  activity: 'Atendimento inicial', owner: 'Recepcionista', resources: 'Balcão, computador',
+  expectedMinutes: 5, capacity: 8, challenge: 'Filas na entrada',
+});
+
+test('CAD room can be linked to real journey without mutating geometric plan', () => {
+  const before = linkedGraph();
+  const originalVersion = cadVersion(before, mapId);
+  const after = saveCadRoomLink(before, serviceId, mapId, linkInput(), date);
+  const link = cadRoomLink(after, mapId, linkInput().roomKey);
+  assert.equal(link.stageId, 'stage1');
+  assert.equal(link.expectedMinutes, 5);
+  assert.equal(link.capacity, 8);
+  assert.equal(link.owner, 'Recepcionista');
+  assert.equal(cadVersion(after, mapId), originalVersion);
+  assert.equal(before.service.cadRoomLinks, undefined);
+  assert.equal(after.service.cadRoomLinks.serviceId, serviceId);
+  const removed = removeCadRoomLink(after, serviceId, mapId, linkInput().roomKey);
+  assert.equal(cadRoomLink(removed, mapId, linkInput().roomKey), null);
+  assert.equal(cadVersion(removed, mapId), originalVersion);
+  assert.equal(cadRoomLink(after, mapId, linkInput().roomKey)?.stageId, 'stage1');
+});
+test('CAD room association keeps stable boundary key after room rename and wall reordering', () => {
+  assert.equal(cadRoomKey('floor-1', ['wall-2', 'wall-1']), cadRoomKey('floor-1', ['wall-1', 'wall-2']));
+});
+test('CAD room relation validates stage, service, floor and real walls', () => {
+  const before = linkedGraph();
+  assert.throws(() => saveCadRoomLink(before, 'another-service', mapId, linkInput()), /serviço mudou/);
+  assert.throws(() => saveCadRoomLink(before, serviceId, 'missing-map', linkInput()), /jornada/);
+  assert.throws(() => saveCadRoomLink(before, serviceId, mapId, {...linkInput(), stageId: 'missing'}), /etapa válida/);
+  assert.throws(() => saveCadRoomLink(before, serviceId, mapId, {...linkInput(), roomKey: cadRoomKey('floor-1', ['wall-1','missing'])}), /sala mudou/);
+  assert.throws(() => saveCadRoomLink(before, serviceId, mapId, {...linkInput(), capacity: -1}), /Capacidade/);
+  const onOtherMap = linkedGraph('journey1');
+  assert.equal(saveCadRoomLink(onOtherMap, serviceId, 'journey1', linkInput()).service.cadRoomLinks.maps.journey1[linkInput().roomKey].stageId, 'stage1');
+});
+test('Room inspector is outside CAD renderer and native selection channel is read-only', () => {
+  const host = readFileSync(new URL('../src/views/OpenPlan3DWorkspace.tsx', import.meta.url), 'utf8');
+  const panel = readFileSync(new URL('../src/views/CadRoomServicePanel.tsx', import.meta.url), 'utf8');
+  const bridge = readFileSync(new URL('../src/integrations/blue-ocean-room-bridge.source', import.meta.url), 'utf8');
+  const preparer = readFileSync(new URL('./prepare-openplan3d.mjs', import.meta.url), 'utf8');
+  assert.match(host, /room-context/);
+  assert.match(host, /bo-openplan-workspace__context/);
+  assert.match(panel, /saveCadRoomLink/);
+  assert.match(panel, /removeCadRoomLink/);
+  assert.match(bridge, /selectedRoomId/);
+  assert.match(bridge, /resolveRooms/);
+  assert.doesNotMatch(bridge, /updateWall|updateRoom|updateFurniture|addWall|addFurniture/);
+  assert.match(preparer, /installBlueOceanRoomBridge/);
+  assert.match(preparer, /bo-openplan-embed-v5-room-journey/);
 });
