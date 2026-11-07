@@ -18,6 +18,8 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
   const [message, setMessage] = useState('Iniciando o editor de ambientes…');
   const [error, setError] = useState('');
   const [isReady, setIsReady] = useState(false);
+  // Presentation only: toggling the tool rail never unmounts it or edits CAD data.
+  const [toolsVisible, setToolsVisible] = useState(true);
   const [assetStatus, setAssetStatus] = useState<'checking' | 'ready' | 'missing'>('checking');
   const [assetRevision, setAssetRevision] = useState(0);
   const assetRoot = new URL(import.meta.env.BASE_URL, window.location.origin + '/');
@@ -102,6 +104,16 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
   }, [assetStatus, frameOrigin, mapId, scopeId, serviceId, session]);
 
   useEffect(() => {
+    if (!isReady || assetStatus !== 'ready') return;
+    frame.current?.contentWindow?.postMessage({
+      channel: OPENPLAN_CHANNEL,
+      session,
+      type: 'ui',
+      toolsCollapsed: !toolsVisible,
+    }, frameOrigin);
+  }, [assetStatus, frameOrigin, isReady, session, toolsVisible]);
+
+  useEffect(() => {
     if (!ready.current) return;
     const version = cadVersion(studio.graph, mapId);
     if (version !== lastSentVersion.current) send.current();
@@ -113,6 +125,15 @@ export function OpenPlan3DWorkspace({ studio, mapId }: { studio: StudioControlle
       <strong>BLUE OCEAN · CAD</strong>
       <span>{message}</span>
       <span className="bo-openplan-workspace__save">Projeto: {({ saved: 'salvo', saving: 'salvando', error: 'falha ao salvar' })[studio.saveStatus]}</span>
+      <button
+        type="button"
+        className="bo-openplan-workspace__tools-toggle"
+        aria-label={toolsVisible ? 'Recolher painel de ferramentas do CAD' : 'Mostrar painel de ferramentas do CAD'}
+        aria-pressed={!toolsVisible}
+        title="Recolher ou mostrar ferramentas sem alterar a planta"
+        disabled={!isReady || assetStatus !== 'ready'}
+        onClick={() => setToolsVisible(value => !value)}
+      >{toolsVisible ? 'Recolher ferramentas' : 'Mostrar ferramentas'}</button>
     </div>
     {error && <div className="bo-service-spaces__error" role="alert">{error}</div>}
     {assetStatus === 'checking' && <div className="bo-openplan-workspace__unavailable" role="status">
