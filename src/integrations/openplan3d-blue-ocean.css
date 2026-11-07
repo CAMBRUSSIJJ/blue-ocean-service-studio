@@ -72,3 +72,12 @@ html[data-blue-ocean-cad="1"] :is(button, a, input, select, textarea):focus-visi
     scroll-behavior: auto;
   }
 }
+
+
+/* CAD tool rail focus: keep the original Svelte component mounted.
+   Only collapse on desktop to avoid interfering with the mobile drawer. */
+@media (min-width: 768px) {
+  html[data-blue-ocean-cad="1"].bo-cad-tools-collapsed div.w-64.bg-white.border-r.border-gray-200 {
+    display: none;
+  }
+}
