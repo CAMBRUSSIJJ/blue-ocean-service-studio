@@ -30,8 +30,14 @@ run('git', ['-C', WORK, 'checkout', '-f', 'FETCH_HEAD']);
 write('svelte.config.js', `import adapter from '@sveltejs/adapter-static';
 export default { kit: { adapter: adapter({ pages: 'build', assets: 'build', fallback: 'index.html' }), paths: { base: '/openplan3d' }, prerender: { entries: [] } } };
 `);
-write('src/routes/+layout.ts', 'export const ssr = false;\nexport const prerender = false;\n');
-write('src/app.html', read('src/app.html').replace('href="/favicon.svg"', 'href="/openplan3d/favicon.svg"'));
+write('src/routes/+layout.ts', 'export const ssr = false;\nexport const prerender = false;\nexport const trailingSlash = "always";\n');
+// The static editor is served as /editor/index.html to bypass Vite SPA fallback.
+// Rewrite only the browser-visible pathname before SvelteKit initializes,
+// otherwise its client router sees an unknown /editor/index.html route.
+const embeddedStartup = '<script>if(location.pathname==="/openplan3d/editor/index.html"){history.replaceState(history.state,"", "/openplan3d/editor/"+location.search+location.hash);}</script>';
+write('src/app.html', read('src/app.html')
+  .replace('href="/favicon.svg"', 'href="/openplan3d/favicon.svg"')
+  .replace('</head>', embeddedStartup + '</head>'));
 // Analytics and Firebase handoff belong to the upstream hosted product, not
 // this embedded editor. Disable the auto-import rather than relying on a
 // deployment environment variable in the static client bundle.
