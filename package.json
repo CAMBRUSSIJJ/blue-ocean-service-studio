@@ -6,7 +6,7 @@
   "scripts": {
     "openplan:prepare": "node scripts/prepare-openplan3d.mjs",
     "openplan:smoke": "node --experimental-strip-types scripts/openplan3d-integration-smoke.mjs",
-    "dev": "node scripts/prepare-assets.mjs && vite",
+    "dev": "npm run openplan:prepare && node scripts/prepare-assets.mjs && vite",
     "build": "npm run openplan:prepare && npm run blocksuite:build && node scripts/prepare-assets.mjs && tsc -b && vite build && node scripts/build-provenance.mjs && npm run dist:verify",
     "preview": "vite preview --host 127.0.0.1 --port 4173",
     "pretypecheck": "node scripts/prepare-assets.mjs",
