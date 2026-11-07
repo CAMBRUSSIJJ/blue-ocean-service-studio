@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { OpenPlan3DWorkspace } from './OpenPlan3DWorkspace';
 import type { StudioController } from '../state/useStudioController';
 import { dataBridge, runtimeApi } from '../runtime/client';
 import { applyServiceSpaces, projectServiceSpaces, SERVICE_SPACE, spaceVersion } from '../services/service-spaces';
@@ -9,6 +10,7 @@ export function ServiceSpaces3DView({ studio, onOpenMap }: { studio: StudioContr
   const { graph } = studio;
   const surface = useRef<HTMLElement>(null);
   const [expanded, setExpanded] = useState(false);
+  const [editorMode, setEditorMode] = useState<'cad' | 'simulation'>('cad');
   useEffect(() => {
     const update = () => setExpanded(document.fullscreenElement === surface.current);
     document.addEventListener('fullscreenchange', update);
@@ -21,15 +23,22 @@ export function ServiceSpaces3DView({ studio, onOpenMap }: { studio: StudioContr
   const journeys = graph.service.journeyIds.map(id => graph.journeys[id]).filter(Boolean);
   const [mapId, setMapId] = useState(() => journeys.some(journey => journey.id === studio.journeyId) ? studio.journeyId! : journeys[0]?.id ?? SERVICE_SPACE);
   const activeMap = mapId === SERVICE_SPACE || journeys.some(journey => journey.id === mapId) ? mapId : journeys[0]?.id ?? SERVICE_SPACE;
-  return <section ref={surface} className="bo-service-spaces" data-service-spaces="1" aria-labelledby="bo-spaces-title">
+  return <section ref={surface} className={`bo-service-spaces${editorMode === 'cad' ? ' is-cad' : ''}`} data-service-spaces="1" aria-labelledby="bo-spaces-title">
     <header className="bo-service-spaces__head">
-      <div><span className="bo-service-spaces__eyebrow">BLUE OCEAN 3D</span><h2 id="bo-spaces-title">Salas e 3D</h2><p>Comece pela planta geral, organize as atividades nas salas e depois abra o 3D de cada ambiente.</p></div>
+      <div><span className="bo-service-spaces__eyebrow">BLUE OCEAN · DESIGN DE SERVIÇOS</span><h2 id="bo-spaces-title">Ambientes físicos</h2><p>Projete a planta física ou explore a simulação operacional do serviço.</p></div>
       <label>Mapa do serviço<select aria-label="Mapa para organizar as salas" value={activeMap} onChange={event => setMapId(event.target.value)}>
         <option value={SERVICE_SPACE}>Planta do serviço</option>{journeys.map(journey => <option key={journey.id} value={journey.id}>{journey.name}</option>)}
       </select></label>
       <button type="button" className="bo-button bo-button--secondary" onClick={() => void toggleExpanded()}>{expanded ? 'Sair da tela cheia' : 'Ampliar editor'}</button>
     </header>
-    <SpacesEditor key={`${graph.service.id}:${activeMap}`} studio={studio} mapId={activeMap} onOpenMap={onOpenMap}/>
+    <nav className="bo-service-spaces__modes" aria-label="Ferramenta de ambientes">
+      <button type="button" className={editorMode === 'cad' ? 'is-active' : ''} aria-current={editorMode === 'cad' ? 'page' : undefined} onClick={() => setEditorMode('cad')}>Editor CAD · OpenPlan3D</button>
+      <button type="button" className={editorMode === 'simulation' ? 'is-active' : ''} aria-current={editorMode === 'simulation' ? 'page' : undefined} onClick={() => setEditorMode('simulation')}>Simulação do serviço</button>
+    </nav>
+    {editorMode === 'cad'
+      ? <OpenPlan3DWorkspace key={`${graph.service.id}:${activeMap}:cad`} studio={studio} mapId={activeMap} />
+      : <SpacesEditor key={`${graph.service.id}:${activeMap}:simulation`} studio={studio} mapId={activeMap} onOpenMap={onOpenMap}/>}
+
   </section>;
 }
 
