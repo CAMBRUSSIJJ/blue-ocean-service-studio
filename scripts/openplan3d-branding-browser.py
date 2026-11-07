@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+"""Browser smoke test for Blue Ocean CAD branding, not editor business logic.
+
+Runs against the built Vite preview; catches the SPA fallback regression and
+checks that the OpenPlan3D toolbar, side panel, and CSS skin all load. The test
+never edits project data.
+"""
+from pathlib import Path
+from subprocess import DEVNULL, Popen
+from time import monotonic, sleep
+from urllib.request import urlopen
+
+from playwright.sync_api import sync_playwright
+
+BASE = "http://127.0.0.1:4197"
+MARKER = "98f9cb467e4045c6abc5d9880ada1f03dff50c68"
+SCREENSHOT_DIR = Path("artifacts/e2e-v1162")
+proc = Popen(
+    ["node", "node_modules/vite/bin/vite.js", "preview",
+     "--host", "127.0.0.1", "--port", "4197", "--strictPort"],
+    stdout=DEVNULL,
+    stderr=DEVNULL,
+)
+try:
+    deadline = monotonic() + 30
+    while monotonic() < deadline:
+        if proc.poll() is not None:
+            raise AssertionError("Vite preview fechou antes do teste CAD.")
+        try:
+            with urlopen(BASE + "/openplan3d/blue-ocean-source-commit.txt", timeout=2) as r:
+                if r.status == 200 and r.read().decode().strip() == MARKER:
+                    break
+        except Exception:
+            pass
+        sleep(0.5)
+    else:
+        raise AssertionError("Build estático OpenPlan3D ausente do dist; não há o marcador esperado.")
+
+    SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=True)
+        page = browser.new_page(viewport={"width": 1280, "height": 720})
+        page.goto(
+            BASE + "/openplan3d/editor/index.html?boSession=blue-ocean-brand-smoke",
+            wait_until="domcontentloaded",
+            timeout=30000,
+        )
+        page.wait_for_function(
+            "document.documentElement.getAttribute('data-blue-ocean-cad') === '1'",
+            timeout=10000,
+        )
+        toolbar = page.locator(".h-12.bg-gradient-to-r.from-slate-800.to-slate-700")
+        toolbar.wait_for(state="visible", timeout=25000)
+        assert page.locator("#root").count() == 0, "Blue Ocean carregou dentro do CAD."
+        properties = page.locator("[data-plan-properties]")
+        assert properties.count() == 1, "O painel de propriedades nativo desapareceu."
+        gradient = toolbar.evaluate("(el) => getComputedStyle(el).backgroundImage")
+        assert "linear-gradient" in gradient, "A barra superior perdeu o branding do Blue Ocean."
+        for width, height in [(1280, 720), (1600, 900), (768, 900)]:
+            page.set_viewport_size({"width": width, "height": height})
+            assert toolbar.is_visible(), f"Toolbar desapareceu em {width}x{height}."
+            page.screenshot(path=str(SCREENSHOT_DIR / f"openplan3d-brand-{width}x{height}.png"))
+        browser.close()
+    print("PASSOU: editor OpenPlan3D, identidade Blue Ocean, propriedades e 3 viewports.")
+finally:
+    proc.terminate()
+    try:
+        proc.wait(timeout=5)
+    except Exception:
+        proc.kill()
+        proc.wait(timeout=5)
