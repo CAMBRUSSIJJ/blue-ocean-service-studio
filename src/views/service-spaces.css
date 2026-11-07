@@ -159,3 +159,52 @@
   .bo-service-spaces.is-cad .bo-service-spaces__head > button { grid-column: 2; grid-row: 1; }
   .bo-service-spaces.is-cad:not(:fullscreen) .bo-openplan-workspace__frame { min-height: 490px; }
 }
+
+
+/* CAD room ↔ journey inspector — outer Blue Ocean shell, never inside the
+   OpenPlan3D renderer. Canvas dimensions and input handling remain native. */
+.bo-openplan-workspace__body { display:grid; grid-template-columns:minmax(0,1fr); flex:1; min-height:0; gap:12px; align-items:stretch; }
+.bo-openplan-workspace__body.is-context-open { grid-template-columns:minmax(0,1fr) minmax(265px,310px); }
+.bo-openplan-workspace__body > iframe { width:100%; min-width:0; }
+.bo-openplan-workspace__context { min-width:0; max-height:max(460px,calc(100dvh - 250px)); overflow:auto; overscroll-behavior:contain; }
+.bo-openplan-workspace__context[hidden] { display:none; }
+.bo-cad-relations {
+  background:var(--bo-color-surface);border:1px solid var(--bo-color-border);
+  border-radius:var(--bo-radius-lg,12px);color:var(--bo-color-text);
+  min-height:100%;font-family:var(--bo-font-sans,inherit);box-sizing:border-box;
+}
+.bo-cad-relations__head { display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 14px;border-bottom:1px solid var(--bo-color-border); }
+.bo-cad-relations__eyebrow { display:block;color:var(--bo-color-primary-700);font-size:10px;font-weight:750;letter-spacing:.075em; }
+.bo-cad-relations__head h3 {font-size:15px;font-weight:720;margin:3px 0 0;}
+.bo-cad-relations__toggle {border:0;background:transparent;color:var(--bo-color-primary-700);font:inherit;font-size:12px;font-weight:650;cursor:pointer;}
+.bo-cad-relations__content {display:flex;flex-direction:column;gap:12px;padding:13px 14px 18px;}
+.bo-cad-relations__intro {font-size:12px;line-height:1.5;color:var(--bo-color-text-secondary);margin:0;}
+.bo-cad-relations__empty {padding:13px;border-radius:9px;background:var(--bo-color-surface-subtle);border:1px dashed var(--bo-color-border-strong);font-size:12px;line-height:1.6;color:var(--bo-color-text-muted);}
+.bo-cad-relations__field {display:grid;gap:6px;min-width:0;font-size:12px;font-weight:650;color:var(--bo-color-text-secondary);}
+.bo-cad-relations__field em {color:var(--bo-color-danger-700);font-style:normal;}
+.bo-cad-relations__field :is(input,textarea,select) {box-sizing:border-box;width:100%;min-width:0;min-height:35px;max-width:100%;padding:8px 10px;border:1px solid var(--bo-color-border-strong);border-radius:8px;background:var(--bo-color-surface);color:var(--bo-color-text);font:inherit;font-size:13px;font-weight:450;line-height:1.4;}
+.bo-cad-relations__field textarea {resize:vertical;}
+.bo-cad-relations__field :is(input,textarea,select):focus-visible,.bo-cad-relations__toggle:focus-visible,.bo-cad-relations__actions button:focus-visible,.bo-cad-relations__open:focus-visible {outline:2px solid var(--bo-color-primary-600);outline-offset:2px;}
+.bo-cad-relations__fields-row {display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.bo-cad-relations__meta {margin:-4px 0 0;font-size:11px;color:var(--bo-color-text-muted);}
+.bo-cad-relations__stage-detail {padding:8px 10px;border-radius:8px;background:var(--bo-color-primary-50);color:var(--bo-color-primary-800);font-size:12px;line-height:1.5;margin:-6px 0 0;}
+.bo-cad-relations__notice {padding:8px;color:var(--bo-color-warning-700);background:var(--bo-color-warning-100);border-radius:8px;font-size:12px;line-height:1.4;margin:0;}
+.bo-cad-relations__error {color:var(--bo-color-danger-700);font-size:12px;margin:0;line-height:1.5;}
+.bo-cad-relations__saved {font-size:11px;color:var(--bo-color-success-700);margin:0;}
+.bo-cad-relations__actions {display:flex;gap:8px;flex-wrap:wrap;}
+.bo-cad-relations__actions button {padding:9px 12px;min-height:36px;border-radius:8px;font-size:12px;font-family:inherit;font-weight:650;cursor:pointer;}
+.bo-cad-relations__actions button:disabled {opacity:.55;cursor:not-allowed;}
+.bo-cad-relations__primary {border:1px solid var(--bo-color-primary-600);background:var(--bo-color-primary-600);color:white;}
+.bo-cad-relations__secondary {border:1px solid var(--bo-color-border-strong);background:var(--bo-color-surface);color:var(--bo-color-text-secondary);}
+.bo-cad-relations__open {border:0;background:transparent;color:var(--bo-color-primary-700);font-weight:650;text-align:left;font-size:12px;cursor:pointer;padding:0;}
+@media(max-width:1100px) {
+  .bo-openplan-workspace__body.is-context-open {grid-template-columns:minmax(0,1fr) 270px;}
+}
+@media(max-width:900px) {
+  .bo-openplan-workspace__body.is-context-open {grid-template-columns:minmax(0,1fr);}
+  .bo-openplan-workspace__context {max-height:none;overflow:visible;}
+  .bo-cad-relations {min-height:0;}
+}
+@media(max-width:560px) {
+  .bo-openplan-workspace__status .bo-openplan-workspace__tools-toggle {font-size:11px;padding:6px 8px;}
+}
