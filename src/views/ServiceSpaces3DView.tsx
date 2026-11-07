@@ -23,9 +23,9 @@ export function ServiceSpaces3DView({ studio, onOpenMap }: { studio: StudioContr
   const journeys = graph.service.journeyIds.map(id => graph.journeys[id]).filter(Boolean);
   const [mapId, setMapId] = useState(() => journeys.some(journey => journey.id === studio.journeyId) ? studio.journeyId! : journeys[0]?.id ?? SERVICE_SPACE);
   const activeMap = mapId === SERVICE_SPACE || journeys.some(journey => journey.id === mapId) ? mapId : journeys[0]?.id ?? SERVICE_SPACE;
-  return <section ref={surface} className="bo-service-spaces" data-service-spaces="1" aria-labelledby="bo-spaces-title">
+  return <section ref={surface} className={`bo-service-spaces${editorMode === 'cad' ? ' is-cad' : ''}`} data-service-spaces="1" aria-labelledby="bo-spaces-title">
     <header className="bo-service-spaces__head">
-      <div><span className="bo-service-spaces__eyebrow">BLUE OCEAN · AMBIENTES FÍSICOS</span><h2 id="bo-spaces-title">Salas e 3D</h2><p>Desenhe a planta arquitetônica no CAD ou simule o funcionamento do serviço.</p></div>
+      <div><span className="bo-service-spaces__eyebrow">BLUE OCEAN · DESIGN DE SERVIÇOS</span><h2 id="bo-spaces-title">Ambientes físicos</h2><p>Projete a planta física ou explore a simulação operacional do serviço.</p></div>
       <label>Mapa do serviço<select aria-label="Mapa para organizar as salas" value={activeMap} onChange={event => setMapId(event.target.value)}>
         <option value={SERVICE_SPACE}>Planta do serviço</option>{journeys.map(journey => <option key={journey.id} value={journey.id}>{journey.name}</option>)}
       </select></label>
