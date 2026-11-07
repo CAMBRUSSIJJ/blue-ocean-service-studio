@@ -83,10 +83,10 @@ test('Blue Ocean skin affects appearance only and is scoped to embedded CAD', ()
   assert.match(script, /write\('src\/app\.css'/);
   assert.match(skin, /html\[data-blue-ocean-cad="1"\]/);
   // The sole display:none is scoped to the embedded CAD rail on desktop.
-  assert.equal((cssWithoutComments.match(/display\\s*:\\s*none/g) || []).length, 1);
-  assert.match(cssWithoutComments, /@media\\s*\\(min-width:\\s*768px\\)/);
-  assert.match(cssWithoutComments, /html\\[data-blue-ocean-cad="1"\\]\\.bo-cad-tools-collapsed/);
-  assert.doesNotMatch(cssWithoutComments, /pointer-events\\s*:\\s*none|position\\s*:\\s*(?:fixed|absolute)/);
+  assert.equal((cssWithoutComments.match(/display\s*:\s*none/g) || []).length, 1);
+  assert.match(cssWithoutComments, /@media\s*\(min-width:\s*768px\)/);
+  assert.match(cssWithoutComments, /html\[data-blue-ocean-cad="1"\]\.bo-cad-tools-collapsed/);
+  assert.doesNotMatch(cssWithoutComments, /pointer-events\s*:\s*none|position\s*:\s*(?:fixed|absolute)/);
   assert.doesNotMatch(script, /querySelectorAll\([^)]*button/);
 });
 
