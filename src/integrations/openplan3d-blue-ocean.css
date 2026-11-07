@@ -1,0 +1,74 @@
+/* Blue Ocean Service Studio · CAD embedded skin, visual layer only.
+   Applied to OpenPlan3D ONLY inside the Blue Ocean iframe. The app's
+   2D/3D renderer, geometry, tool sizes, dialog stacking and input handlers
+   are unchanged. Do not use display:none or absolute positioning here. */
+
+html[data-blue-ocean-cad="1"] {
+  --bo-cad-navy: #071b2f;
+  --bo-cad-navy-alt: #0b2d4f;
+  --bo-cad-blue: #1e63f0;
+  --bo-cad-blue-soft: #eaf2ff;
+  --bo-cad-blue-border: #bfd4ff;
+  --bo-cad-text: #172033;
+  --bo-cad-muted: #475467;
+  --bo-cad-surface: #fff;
+  --bo-cad-surface-soft: #f8fafc;
+  --bo-cad-border: #e3e7ed;
+}
+
+html[data-blue-ocean-cad="1"] body {
+  font-family: "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Original OpenPlan toolbar: preserve height, order, menus and click targets. */
+html[data-blue-ocean-cad="1"] .h-12.bg-gradient-to-r.from-slate-800.to-slate-700 {
+  background: linear-gradient(110deg, var(--bo-cad-navy), var(--bo-cad-navy-alt)) !important;
+  box-shadow: 0 1px 5px rgb(7 27 47 / 13%);
+}
+
+/* Light scheme follows Blue Ocean tokens without overriding dark mode. */
+html[data-blue-ocean-cad="1"]:not(.dark) div.w-64.bg-white.border-r.border-gray-200 {
+  background-color: var(--bo-cad-surface-soft);
+  border-color: var(--bo-cad-border);
+}
+html[data-blue-ocean-cad="1"]:not(.dark) [data-plan-properties] {
+  background-color: var(--bo-cad-surface);
+  border-color: var(--bo-cad-border);
+  color: var(--bo-cad-text);
+}
+html[data-blue-ocean-cad="1"]:not(.dark) .bg-blue-50 {
+  background-color: var(--bo-cad-blue-soft);
+}
+html[data-blue-ocean-cad="1"]:not(.dark) .bg-blue-100 {
+  background-color: #dcecff;
+}
+html[data-blue-ocean-cad="1"]:not(.dark) .border-blue-500 {
+  border-color: var(--bo-cad-blue);
+}
+html[data-blue-ocean-cad="1"]:not(.dark) .ring-blue-200 {
+  --tw-ring-color: var(--bo-cad-blue-border);
+}
+html[data-blue-ocean-cad="1"]:not(.dark) .text-blue-600 {
+  color: #174fc0;
+}
+html[data-blue-ocean-cad="1"]:not(.dark) .bg-blue-600 {
+  background-color: var(--bo-cad-blue);
+}
+html[data-blue-ocean-cad="1"]:not(.dark) [data-popup="menu"] {
+  border-color: var(--bo-cad-border);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgb(11 31 59 / 12%);
+}
+
+/* Keyboard focus remains visible, in the same cobalt as Blue Ocean. */
+html[data-blue-ocean-cad="1"] :is(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid var(--bo-cad-blue);
+  outline-offset: 2px;
+}
+
+/* Respect reduced motion; this skin adds no animations or transitions. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-blue-ocean-cad="1"] {
+    scroll-behavior: auto;
+  }
+}
