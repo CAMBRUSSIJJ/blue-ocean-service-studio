@@ -73,6 +73,8 @@ jobs:
       - name: Sidebar recolhida — teste visual de 72px sem textos
         run: python3 scripts/v1205h765-sidebar-collapse-browser.py
       - run: npm run e2e:visual
+      - name: Salas e 3D dentro do layout H7.65
+        run: npm run spaces:browser
       - run: npm run persona:split:browser
       - run: npm run persona:ecosystem:browser
       - name: Armazenar evidências visuais
@@ -84,6 +86,7 @@ jobs:
             artifacts/e2e-v1162
             artifacts/persona-ecosystem
             artifacts/sidebar-collapse-h765
+            artifacts/salas-production
           retention-days: 14
 
   editor-ux:

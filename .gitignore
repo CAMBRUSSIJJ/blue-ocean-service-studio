@@ -29,3 +29,14 @@ __pycache__/
 /work/
 
 public/journey-cad.css
+
+# Generated from src/integrations/blue-ocean3d
+public/blue-ocean3d/
+public/blue-ocean-ui-h3.css
+
+# BlockSuite build output
+public/blocksuite/
+
+# OpenPlan3D isolated MIT static build; reconstructed from pinned upstream source
+.openplan3d-build/
+public/openplan3d/

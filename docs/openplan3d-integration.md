@@ -1,0 +1,108 @@
+# OpenPlan3D dentro do Blue Ocean Service Studio
+
+## Escopo desta primeira integração
+A área **Projeto → Desenho do serviço → Salas e 3D** dispõe de dois modos:
+
+- **Editor CAD · OpenPlan3D:** motor Svelte/Three.js compilado isoladamente e servido em `/openplan3d/editor/` **na mesma origem do Blue Ocean**. Plantas são registradas no `ServiceGraph.service.cadPlans.plans[mapId]`, com revisão, controle de alterações concorrentes e backup pelo fluxo já existente do projeto.
+- **Simulação do serviço:** editor Blue Ocean 3D existente, mantendo ambientes, atividades, vínculos com mapas e simulação operacional em `service.spatialDesign`.
+
+As plantas CAD são armazenadas por mapa de serviço e pela planta geral (`service-space`). A primeira fase **não converte automaticamente** a geometria CAD em paredes da simulação, nem a antiga simulação em CAD. Esses modelos continuam lado a lado sem sobrescrever informações.
+
+## Licença e origem do motor
+- Fonte: https://github.com/laanlabs/openPlan3D
+- Commit fixado: `98f9cb467e4045c6abc5d9880ada1f03dff50c68`
+- Licença: MIT © 2026 theLodgeStudio.
+- Os avisos MIT e `MODEL_SOURCES.md` são preservados em `public/openplan3d/` após a compilação.
+- Antes de comercializar, audite licenças de bibliotecas, modelos, texturas e componentes externos. Nem todos os arquivos de mídia têm necessariamente as mesmas permissões do código MIT.
+
+## Correção do fallback duplicado (7/11/2026)
+Se o OpenPlan3D não estiver compilado, o Vite pode responder com o `index.html` do Blue Ocean em uma rota estática inexistente. Isso provoca a interface principal **dentro do próprio editor**.
+
+A entrada CAD agora só monta o iframe depois de confirmar o arquivo `/openplan3d/blue-ocean-source-commit.txt` com a versão fixada e usa o caminho explícito `/openplan3d/editor/index.html`. Há também uma segunda proteção para detectar a home do Blue Ocean no lugar do editor e um aviso limpo com opção de verificar novamente.
+
+O `npm run dev` passa a executar `npm run openplan:prepare` antes de iniciar o Vite. A primeira execução pode demorar e requer acesso à internet; as seguintes usam cache se o build estiver íntegro. Se a preparação falhar, o servidor não será iniciado com um CAD inexistente.
+
+## Instalação e execução
+O Blue Ocean continua em Node.js 22. Somente o motor OpenPlan3D utiliza Node.js 24, isolado por `npx` no preparo. O comando requer internet na primeira execução e Git.
+
+```bash
+git clone --branch feat/openplan3d-native-service-spaces-20261107 https://github.com/CAMBRUSSIJJ/blue-ocean-service-studio.git
+cd blue-ocean-service-studio
+npm ci
+npm run openplan:prepare
+npm run dev
+```
+
+Abra o endereço exibido pelo Vite, acesse um projeto e selecione **Salas e 3D → Editor CAD**. Para gerar a distribuição, rode `npm run build`, que prepara automaticamente o motor antes do build oficial.
+
+O motor não usa a API/conta hospedada do OpenPlan3D. O hook de analytics upstream é removido na compilação. Alguns catálogos de modelos e texturas de terceiros podem depender de URLs externas, cuja disponibilidade e licença devem ser verificadas. A captura iOS via Firebase e os endpoints de upload da hospedagem original **não são disponibilizados** no modo estático.
+
+## Fluxo de dados e segurança
+1. O iframe é servido na **mesma origem** e recebe uma sessão aleatória criada pela página do Blue Ocean.
+2. A mensagem `hydrate` leva a planta salva no ServiceGraph e seu identificador de serviço/mapa.
+3. O editor transmite alterações após debounce; a página principal valida tipo, tamanho e isolamento do serviço, verifica a versão-base e só então grava uma transação no grafo.
+4. A página principal confirma o recebimento ou solicita reidratação em caso de conflito.
+5. As plantas entram nos backups do Blue Ocean por serem parte do ServiceGraph. O editor upstream também pode gravar dados no armazenamento local do navegador; isso não deve ser confundido com sincronização remota.
+
+Um iframe de mesma origem **não é um isolamento de segurança contra código malicioso**: o upstream e suas dependências devem ser auditados e revisados a cada atualização. Não altere o commit fixado sem verificar o código.
+
+## Padronização visual Blue Ocean — escopo seguro
+O editor CAD incorporado recebe uma personalização **somente visual**,
+seguindo as cores marinho/cobalto, superfícies claras e estados de foco do
+design system Blue Ocean. O arquivo canônico é
+`src/integrations/openplan3d-blue-ocean.css` e é acrescentado ao CSS
+compilado do motor pelo `scripts/prepare-openplan3d.mjs`.
+
+- A personalização é ativada apenas quando o editor recebe uma sessão
+  `boSession` do Blue Ocean; não altera o aplicativo upstream sem incorporação.
+- A barra de ferramentas original, os botões, os menus, os painéis, o 2D/3D,
+  as medidas, o arraste e o salvamento não são removidos ou reimplementados.
+- O modo escuro do motor mantém seus estilos de base (a maioria das cores
+  da personalização aplica-se somente ao tema claro).
+- O motor compilado recebe uma versão de transformação nova para invalidar
+  o cache local; não é necessário apagar projetos ou o armazenamento do browser.
+- Se uma regressão visual aparecer, a alteração pode ser revertida somente
+  removendo o arquivo de skin, a importação no preparador e a versão de build,
+  sem migrar os dados CAD.
+
+O CSS não altera geometria, regras de serviço nem o formato de
+`ServiceGraph.service.cadPlans`. Para aceitar a integração em produção,
+revisar visualmente o editor em 1280×720, desktop amplo e celular e validar
+edição de parede, porta, móvel, navegação 2D/3D e reabertura da planta.
+
+## Experiência de edição H8 — foco e organização
+A navegação **Ambientes físicos → Editor CAD** possui um cabeçalho Blue Ocean
+compacto com seleção de mapa, botão de tela cheia e modos CAD/Simulação.
+Na faixa de status existe o controle **Recolher ferramentas / Mostrar
+ferramentas**. Ele envia uma mensagem de apresentação `ui` à instância
+embarcada e alterna uma classe CSS no documento do OpenPlan3D.
+
+**Regras de segurança:**
+- O componente original `BuildPanel` permanece montado: seus botões, busca,
+  categorias, objetos recentes, favoritos e ferramentas são preservados.
+- A paleta recolhe somente em telas de **768px ou mais**; o menu móvel nativo
+  do OpenPlan3D permanece responsável pelo acesso a ferramentas no celular.
+- A ação não altera `currentProject`, paredes, mobiliário, câmeras, seleção,
+  `ServiceGraph`, backups nem o protocolo de salvamento `hydrate/change/ack`.
+- A barra superior nativa continua operável. O CSS de foco afeta somente o
+  iframe com `data-blue-ocean-cad=1`, não o editor upstream isolado.
+- Alternar para Simulação preserva os dados existentes; não ocorre migração
+  geométrica nesta fase.
+- Para reverter apenas a experiência, desabilitar a classe `is-cad` e a
+  mensagem `ui`, ou voltar ao commit anterior à versão H8.
+
+O teste `scripts/openplan3d-branding-browser.py` mede abertura do editor,
+barra superior, painel de propriedades, recolhimento/restauração sem desmontar
+a paleta e quatro viewports, incluindo **1280×720** e celular. Ainda é
+necessário um teste manual em Firefox com plantas reais para aprovar produção.
+
+## Limites desta versão / verificações necessárias
+- A compilação isolada do SvelteKit estático e a renderização WebGL precisam de validação em Chromium e Firefox após o download das dependências.
+- Testar abertura com mapa geral e com jornadas, edição de paredes, móveis, portas, save/reload, exportação JSON, troca de projetos e backup/restauração.
+- Testar modo de tela cheia, CSS em 1280×720 e celular, sem barras/sobreposições.
+- Testar o comportamento com armazenamento cheio e alterações concorrentes em duas abas.
+- A integração com atividades, rotas e simulação será realizada por um adaptador geométrico, após a estabilização do CAD.
+- Não publicar em production antes de validar o build, a UI e a segurança do iframe.
+
+## Reversão
+A integração é isolada em uma branch/PR. Basta não fazer merge para manter a versão de produção inalterada. Depois de incorporada, pode-se voltar temporariamente ao modo **Simulação do serviço**, que mantém sua implementação e dados anteriores.
