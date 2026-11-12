@@ -78,7 +78,7 @@ test('Blue Ocean skin affects appearance only and is scoped to embedded CAD', ()
   const script = readFileSync(new URL('./prepare-openplan3d.mjs', import.meta.url), 'utf8');
   const skin = readFileSync(new URL('../src/integrations/openplan3d-blue-ocean.css', import.meta.url), 'utf8');
   const cssWithoutComments = skin.replace(/\/\*[\s\S]*?\*\//g, '');
-  assert.match(script, /bo-openplan-embed-v5-room-journey/);
+  assert.match(script, /bo-openplan-embed-v6-cad-controls/);
   assert.match(script, /data-blue-ocean-cad/);
   assert.match(script, /openplan3d-blue-ocean\.css/);
   assert.match(script, /write\('src\/app\.css'/);
@@ -91,15 +91,19 @@ test('Blue Ocean skin affects appearance only and is scoped to embedded CAD', ()
   assert.doesNotMatch(script, /querySelectorAll\([^)]*button/);
 });
 
-test('tool panel toggle is presentation-only and uses isolated message channel', () => {
+test('quick tools use native CAD state and preserve the mounted library', () => {
   const host = readFileSync(new URL('../src/views/OpenPlan3DWorkspace.tsx', import.meta.url), 'utf8');
   const builder = readFileSync(new URL('./prepare-openplan3d.mjs', import.meta.url), 'utf8');
   const view = readFileSync(new URL('../src/views/ServiceSpaces3DView.tsx', import.meta.url), 'utf8');
-  assert.match(host, /'ui',/);
-  assert.match(host, /toolsCollapsed: !toolsVisible/);
-  assert.match(host, /aria-pressed=\{!toolsVisible\}/);
-  assert.match(builder, /data.type === 'ui'/);
-  assert.match(builder, /classList.toggle\('bo-cad-tools-collapsed'/);
+  const controls = readFileSync(new URL('../src/integrations/blue-ocean-cad-controls.source', import.meta.url), 'utf8');
+  assert.match(controls, /selectedTool.set\(tool\)/);
+  assert.match(controls, /activateMeasurementTool\(tool\)/);
+  assert.match(controls, /toggleStairPlacement/);
+  assert.match(controls, /aria-pressed=\{\$selectedTool/);
+  assert.match(controls, /classList.toggle\('bo-cad-tools-collapsed'/);
+  assert.match(builder, /BlueOceanCadControls libraryOpen=\{buildPanelOpen\}/);
+  assert.match(builder, /adapterHash.update/);
+  assert.doesNotMatch(host, /toolsVisible/);
   assert.match(view, /editorMode === 'cad' \? ' is-cad' : ''/);
 });
 
@@ -163,5 +167,5 @@ test('Room inspector is outside CAD renderer and native selection channel is rea
   assert.match(bridge, /resolveRooms/);
   assert.doesNotMatch(bridge, /updateWall|updateRoom|updateFurniture|addWall|addFurniture/);
   assert.match(preparer, /installBlueOceanRoomBridge/);
-  assert.match(preparer, /bo-openplan-embed-v5-room-journey/);
+  assert.match(preparer, /bo-openplan-embed-v6-cad-controls/);
 });

@@ -1,6 +1,7 @@
 import { cpSync, mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
+import { createHash } from 'node:crypto';
 
 // Pinned upstream source. The editor is compiled as a static SPA and served
 // under the Blue Ocean origin; no upstream account, iframe CDN or remote editor.
@@ -9,7 +10,12 @@ const COMMIT = '98f9cb467e4045c6abc5d9880ada1f03dff50c68';
 const WORK = join(process.cwd(), '.openplan3d-build');
 const TARGET = join(process.cwd(), 'public', 'openplan3d');
 const MARKER = join(TARGET, 'blue-ocean-source-commit.txt');
-const TRANSFORM = 'bo-openplan-embed-v5-room-journey';
+// Include local adapters so an edited toolbar cannot reuse an older build.
+const adapterHash = createHash('sha256');
+for (const source of ['scripts/prepare-openplan3d.mjs', 'src/integrations/openplan3d-blue-ocean.css', 'src/integrations/blue-ocean-cad-controls.css', 'src/integrations/blue-ocean-cad-controls.source', 'src/integrations/blue-ocean-room-bridge.source']) {
+  adapterHash.update(readFileSync(join(process.cwd(), source)));
+}
+const TRANSFORM = 'bo-openplan-embed-v6-cad-controls-' + adapterHash.digest('hex').slice(0, 16);
 const TRANSFORM_MARKER = join(TARGET, 'blue-ocean-transform-version.txt');
 const isCurrent = existsSync(MARKER) && readFileSync(MARKER, 'utf8').trim() === COMMIT
   && existsSync(TRANSFORM_MARKER) && readFileSync(TRANSFORM_MARKER, 'utf8').trim() === TRANSFORM
@@ -45,7 +51,9 @@ write('src/app.html', read('src/app.html')
 const brandFile = join(process.cwd(), 'src', 'integrations', 'openplan3d-blue-ocean.css');
 const brandCss = readFileSync(brandFile, 'utf8');
 if (!brandCss.includes('html[data-blue-ocean-cad="1"]')) throw new Error('Skin de marca precisa permanecer restrita ao editor incorporado.');
-write('src/app.css', read('src/app.css') + '\n/* Blue Ocean embedded CAD skin */\n' + brandCss + '\n');
+write('src/app.css', read('src/app.css') + '\n/* Blue Ocean embedded CAD skin */\n' + brandCss + '\n'
+  + readFileSync(join(process.cwd(), 'src/integrations/blue-ocean-cad-controls.css'), 'utf8'));
+write('src/lib/BlueOceanCadControls.svelte', readFileSync(join(process.cwd(), 'src/integrations/blue-ocean-cad-controls.source'), 'utf8'));
 
 // Analytics and Firebase handoff belong to the upstream hosted product, not
 // this embedded editor. Disable the auto-import rather than relying on a
@@ -66,7 +74,13 @@ const editorPath = 'src/routes/editor/+page.svelte';
 let editor = read(editorPath);
 const imported = "  import { onMount } from 'svelte';";
 if (!editor.includes(imported)) throw new Error('API do editor OpenPlan3D mudou: import onMount ausente.');
-editor = editor.replace(imported, imported + "\n  import { installBlueOceanBridge } from '$lib/blueOceanBridge';\n  import { installBlueOceanRoomBridge } from '$lib/blueOceanRoomBridge';");
+editor = editor.replace(imported, imported + "\n  import { installBlueOceanBridge } from '$lib/blueOceanBridge';\n  import { installBlueOceanRoomBridge } from '$lib/blueOceanRoomBridge';\n  import BlueOceanCadControls from '$lib/BlueOceanCadControls.svelte';");
+const canvasAnchor = "      <div class=\"flex-1 min-w-0 relative\">\n        {#if mode === '2d'}";
+if (!editor.includes(canvasAnchor)) throw new Error('API do editor mudou: área da planta ausente.');
+editor = editor.replace(canvasAnchor, '      <div class="flex-1 min-w-0 relative">\n        <BlueOceanCadControls libraryOpen={buildPanelOpen} active={mode === \'2d\'} onLibrary={() => buildPanelOpen = !buildPanelOpen} />\n        {#if mode === \'2d\'}');
+editor = editor.replace('<div class="h-full max-md:fixed', '<div data-bo-library class="h-full max-md:fixed');
+editor = editor.replace('<BuildPanel />', '{#if typeof document !== \'undefined\' && document.documentElement.dataset.blueOceanCad === \'1\'}<div data-bo-library-heading><strong>Biblioteca</strong><button type="button" aria-label="Fechar biblioteca de ferramentas" onclick={() => buildPanelOpen = false}>Fechar</button></div>{/if}\n          <BuildPanel />');
+editor = editor.replace('class="md:hidden fixed bottom-4 left-4 w-12', 'data-bo-mobile-tools class="md:hidden fixed bottom-4 left-4 w-12');
 const anchor = '  function onEditorKeydown(e: KeyboardEvent) {';
 if (!editor.includes(anchor)) throw new Error('API do editor OpenPlan3D mudou: ponto de montagem ausente.');
 editor = editor.replace(anchor, `
@@ -84,6 +98,24 @@ editor = editor.replace(anchor, `
 
 ` + anchor);
 write(editorPath, editor);
+// Tag native controls rather than recreating floor/view/zoom state in React.
+const toolbarPath = 'src/lib/components/toolbar/TopBar.svelte';
+let toolbar = read(toolbarPath);
+const floorAnchor = '<div class="flex items-center gap-1 max-xl:hidden">\n    <select aria-label={$t(\'floorControls.current\')}';
+if (!toolbar.includes(floorAnchor)) throw new Error('API do editor mudou: seletor de pavimento ausente.');
+toolbar = toolbar.replace(floorAnchor, floorAnchor.replace('<div ', '<div data-bo-floor-controls '));
+toolbar = toolbar.replace('<div class="flex bg-white/15 rounded-full p-0.5">', '<div data-bo-view-modes class="flex bg-white/15 rounded-full p-0.5">');
+const embeddedMode = "typeof document !== 'undefined' && document.documentElement.dataset.blueOceanCad === '1'";
+toolbar = toolbar.replace('>2D</button>', '>{#if ' + embeddedMode + '}<span class="bo-cad-view-prefix">Planta </span>{/if}2D</button>')
+  .replace('>3D</button>', '>{#if ' + embeddedMode + '}<span class="bo-cad-view-prefix">Visão </span>{/if}3D</button>');
+toolbar = toolbar.replace("onclick={() => setMode('2d')}", "aria-label={" + embeddedMode + " ? 'Planta 2D' : '2D'} aria-pressed={mode === '2d'} onclick={() => setMode('2d')}")
+  .replace("onclick={() => setMode('3d')}", "aria-label={" + embeddedMode + " ? 'Visão 3D' : '3D'} aria-pressed={mode === '3d'} onclick={() => setMode('3d')}");
+write(toolbarPath, toolbar);
+const canvasPath = 'src/lib/components/editor/FloorPlanCanvas.svelte';
+const canvas = read(canvasPath);
+const zoomAnchor = '<div style:bottom={`${zoomControlsBottom}px`} class="absolute left-3';
+if (!canvas.includes(zoomAnchor)) throw new Error('API do editor mudou: controles de zoom ausentes.');
+write(canvasPath, canvas.replace(zoomAnchor, zoomAnchor.replace('<div ', '<div data-bo-zoom ')));
 // Bootstrap in stages. Keep upstream's adapter-node config intact during
 // npm ci and npm install: SvelteKit's prepare lifecycle imports svelte.config.js.
 // Otherwise the first npm ci resolves a static adapter that is not installed yet.

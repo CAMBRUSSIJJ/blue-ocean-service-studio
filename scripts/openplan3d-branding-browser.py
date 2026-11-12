@@ -6,11 +6,12 @@ checks that the OpenPlan3D toolbar, side panel, and CSS skin all load. The test
 never edits project data.
 """
 from pathlib import Path
+import shutil
 from subprocess import DEVNULL, Popen
 from time import monotonic, sleep
 from urllib.request import urlopen
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 BASE = "http://127.0.0.1:4197"
 MARKER = "98f9cb467e4045c6abc5d9880ada1f03dff50c68"
@@ -38,7 +39,7 @@ try:
 
     SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(headless=True)
+        browser = playwright.chromium.launch(headless=True, executable_path=shutil.which('chromium'), args=['--no-sandbox', '--enable-unsafe-swiftshader'])
         page = browser.new_page(viewport={"width": 1280, "height": 720})
         page.goto(
             BASE + "/openplan3d/editor/index.html?boSession=blue-ocean-brand-smoke",
@@ -60,15 +61,21 @@ try:
         # after the focus state is cleared, preserving its selected tools.
         tool_rail = page.locator("div.w-64.bg-white.border-r.border-gray-200")
         assert tool_rail.count() == 1, "A paleta de ferramentas do OpenPlan3D desapareceu."
-        assert tool_rail.is_visible(), "A paleta deve iniciar visível."
-        page.evaluate("document.documentElement.classList.add('bo-cad-tools-collapsed')")
-        assert not tool_rail.is_visible(), "O botão de foco não recolheu o painel."
+        assert not tool_rail.is_visible(), "A biblioteca deve iniciar recolhida."
+        page.get_by_role('button', name='Biblioteca de ferramentas', exact=True).click()
+        assert tool_rail.is_visible(), "A biblioteca não abriu."
+        page.get_by_role('button', name='Biblioteca de ferramentas', exact=True).click()
+        assert not tool_rail.is_visible(), "O botão de biblioteca não recolheu o painel."
         assert tool_rail.count() == 1, "Recolher ferramentas não pode desmontar a paleta."
-        page.evaluate("document.documentElement.classList.remove('bo-cad-tools-collapsed')")
-        assert tool_rail.is_visible(), "A paleta não retornou ao layout."
         for width, height in [(1280, 720), (1600, 900), (768, 900), (390, 844)]:
             page.set_viewport_size({"width": width, "height": height})
             assert toolbar.is_visible(), f"Toolbar desapareceu em {width}x{height}."
+            if width < 768:
+                expect(tool_rail).not_to_be_in_viewport()
+            expect(page.get_by_role('button', name='Biblioteca de ferramentas', exact=True)).to_be_in_viewport()
+            expect(page.get_by_role('button', name='Save', exact=True)).to_be_in_viewport(ratio=1)
+            expect(page.get_by_role('button', name='Planta 2D', exact=True)).to_be_in_viewport(ratio=1)
+            expect(page.get_by_role('button', name='Visão 3D', exact=True)).to_be_in_viewport(ratio=1)
             page.screenshot(path=str(SCREENSHOT_DIR / f"openplan3d-brand-{width}x{height}.png"))
         browser.close()
     print("PASSOU: OpenPlan3D, identidade Blue Ocean, paleta recolhível e 4 viewports.")

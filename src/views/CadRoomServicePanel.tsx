@@ -21,13 +21,14 @@ const blank = (): Draft => ({
 });
 
 export function CadRoomServicePanel({
-  studio, mapId, rooms, selectedRoomKey, onOpenMap,
+  studio, mapId, rooms, selectedRoomKey, onOpenMap, onClose,
 }: {
   studio: StudioController;
   mapId: string;
   rooms: CadNativeRoom[];
   selectedRoomKey: string | null;
   onOpenMap?: (id: string) => void;
+  onClose?: () => void;
 }) {
   const [roomKey, setRoomKey] = useState('');
   const [draft, setDraft] = useState<Draft>(blank);
@@ -124,8 +125,9 @@ export function CadRoomServicePanel({
       <div><span className="bo-cad-relations__eyebrow">BLUE OCEAN · CONTEXTO</span>
         <h3>Ambiente e jornada</h3></div>
       <button type="button" className="bo-cad-relations__toggle"
-        aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>
-        {expanded ? 'Recolher' : 'Expandir'}
+        aria-label={onClose ? 'Fechar ambiente e jornada' : undefined}
+        aria-expanded={onClose ? undefined : expanded} onClick={onClose ?? (() => setExpanded(value => !value))}>
+        {onClose ? 'Fechar' : expanded ? 'Recolher' : 'Expandir'}
       </button>
     </header>
     {expanded && <div className="bo-cad-relations__content">

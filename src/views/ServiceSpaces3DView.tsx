@@ -30,11 +30,11 @@ export function ServiceSpaces3DView({ studio, onOpenMap }: { studio: StudioContr
         <option value={SERVICE_SPACE}>Planta do serviço</option>{journeys.map(journey => <option key={journey.id} value={journey.id}>{journey.name}</option>)}
       </select></label>
       <button type="button" className="bo-button bo-button--secondary" onClick={() => void toggleExpanded()}>{expanded ? 'Sair da tela cheia' : 'Ampliar editor'}</button>
-    </header>
     <nav className="bo-service-spaces__modes" aria-label="Ferramenta de ambientes">
       <button type="button" className={editorMode === 'cad' ? 'is-active' : ''} aria-current={editorMode === 'cad' ? 'page' : undefined} onClick={() => setEditorMode('cad')}>Editor CAD · OpenPlan3D</button>
       <button type="button" className={editorMode === 'simulation' ? 'is-active' : ''} aria-current={editorMode === 'simulation' ? 'page' : undefined} onClick={() => setEditorMode('simulation')}>Simulação do serviço</button>
     </nav>
+    </header>
     {editorMode === 'cad'
       ? <OpenPlan3DWorkspace key={`${graph.service.id}:${activeMap}:cad`} studio={studio} mapId={activeMap} onOpenMap={onOpenMap} />
       : <SpacesEditor key={`${graph.service.id}:${activeMap}:simulation`} studio={studio} mapId={activeMap} onOpenMap={onOpenMap}/>}
