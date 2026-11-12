@@ -44,3 +44,5 @@ Os documentos do arquivo histórico registram versões anteriores e não substit
 estes guias. Roadmaps antigos descrevem intenções da época, não compromissos de entrega atuais.
 
 - [Salas e 3D com o layout H7.65](salas-production.md): escopo, base visual preservada e validação da integração.
+
+- [Blueprint: cartões e criação contextual](blueprint-builder.md): uso e testes do editor simplificado.

@@ -190,4 +190,13 @@ check('Reference geometry keeps dense cards inside their stage and lane after re
  const customer=layout.rows.find(r=>r.id==='ac'),backstage=layout.rows.find(r=>r.id==='bk');
  assert.ok(backstage.y-customer.y-customer.height>=32,'visibility separator has space when frontstage is not displayed');
 });
+check('Blueprint cells reserve space for adding another card without overlapping saved content',()=>{
+ const source=doc();source.c['fl|0'].push({...structuredClone(source.c['fl|0'][0]),i:'second',hostItemId:'second'});
+ const grid={label:192,stage:320,header:80,cardWidth:288,cardHeight:112,padding:12,gap:12,rowGap:8,minimumRow:120,cellActionHeight:40,reference:true};
+ const layout=buildCanvasLayout(source,rows,null,null,null,grid),row=layout.rows.find(value=>value.id==='fl');
+ const cards=layout.nodes.filter(value=>value.row==='fl'&&value.stageIndex===0),bottom=Math.max(...cards.map(value=>value.y+value.height));
+ assert.equal(cards.length,2);assert.ok(bottom+8+32+grid.padding<=row.y+row.height);
+ assert.deepEqual(source.c['fl|0'].map(value=>value.i),['a','second']);
+ assert.equal(buildCanvasLayout(source,rows).rows.find(value=>value.id==='fl').height,canvasRowHeight(source,rows[1],[0,1]));
+});
 console.log(`Blueprint canvas: ${count}/${count} PASS`);

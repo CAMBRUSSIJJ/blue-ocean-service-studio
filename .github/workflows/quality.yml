@@ -116,6 +116,8 @@ jobs:
         run: npm run blueprint:csp:browser
       - name: Canvas do Blueprint — escrita repetida e edição
         run: npm run blueprint:canvas:browser
+      - name: Blueprint — cartões e criação contextual
+        run: npm run blueprint:builder:browser
       - run: npm run maps:flow:browser
       # Check startup/product navigation early to fail fast on stale legacy routes.
       - run: npm run entry:browser
@@ -170,3 +172,4 @@ jobs:
             artifacts/shared-map-matrix
             artifacts/blueprint-canvas
             artifacts/service-map-flow
+            artifacts/blueprint-builder

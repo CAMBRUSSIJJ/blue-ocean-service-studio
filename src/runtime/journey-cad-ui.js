@@ -4,7 +4,7 @@ const cadState={scene:'',selected:'',creating:null,link:null,drafts:new Map(),ca
 try{const p=JSON.parse(localStorage.getItem('bo-cad-library-prefs-v2')||'{}');cadState.libraryCompact=!!p.compact;cadState.favorites=Array.isArray(p.favorites)?p.favorites.filter(k=>k in cadModel.CANVAS_COMPONENTS):[];cadState.groupOpen=p.groups||{};cadState.sidebarTab=p.sidebarTab==='lanes'?'lanes':'components'}catch{}
 function cadSaveLibraryPreferences(){try{localStorage.setItem('bo-cad-library-prefs-v2',JSON.stringify({compact:cadState.libraryCompact,favorites:cadState.favorites,groups:cadState.groupOpen,sidebarTab:cadState.sidebarTab}))}catch{}}
 function cadReference(){return V.perspective==='blueprint'}
-function cadLayout(widths=cadStageWidths()){return cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,widths,cadRowHeights(),cadReference()?{label:192,stage:320,header:80,cardWidth:288,cardHeight:132,padding:12,gap:16,rowGap:8,minimumRow:120,reference:true}:null)}
+function cadLayout(widths=cadStageWidths()){return cadModel.buildCanvasLayout(cadProjection(),cadRows(),null,widths,cadRowHeights(),cadReference()?{label:192,stage:320,header:80,cardWidth:288,cardHeight:112,padding:12,gap:12,rowGap:8,minimumRow:120,cellActionHeight:40,reference:true}:null)}
 function cadStageWidths(){return cadState.resizePreview||V.stageWidths||[]}
 function cadRowHeights(){return cadState.lanePreviewHeights||V.rowHeights||{}}
 function cadChangeRowHeight(id,height){
@@ -166,7 +166,7 @@ function cadLanePanel(){
  return '<div class="cad-lanes-panel" role="tabpanel" aria-label="Organização das faixas"><div class="cad-lanes-intro"><strong>Estrutura do mapa</strong><p>Mostre, oculte e reordene as faixas. Os dados permanecem guardados.</p><small>'+visible+' de '+rows.length+' faixas visíveis</small></div>'+
   '<div class="cad-lanes-list" aria-label="Reordenar faixas do mapa">'+rows.map((row,i)=>{
    const hidden=V.hiddenRows.includes(row.id),custom=!!(S.lanes||[]).find(value=>value.id===row.id);
-   return '<div class="cad-lane-item'+(hidden?' is-hidden':'')+'" data-row="'+esc(row.id)+'"><span class="cad-lane-grip" draggable="'+!cadLocked()+'" role="img" aria-label="Arraste para reorganizar '+esc(row.n)+'" title="Arrastar para reordenar a faixa">⠿</span><button type="button" class="cad-lane-visibility" data-act="cad-lane-toggle" data-id="'+esc(row.id)+'" aria-label="'+(hidden?'Mostrar ':'Ocultar ')+esc(row.n)+'" aria-pressed="'+(!hidden)+'" '+(cadLocked()?'disabled':'')+'><span aria-hidden="true">'+(hidden?'○':'●')+'</span></button>'+
+   return '<div class="cad-lane-item'+(hidden?' is-hidden':'')+'" data-row="'+esc(row.id)+'"><span class="cad-lane-grip" draggable="'+!cadLocked()+'" role="img" aria-label="Arraste para reorganizar '+esc(row.n)+'" title="Arrastar para reordenar a faixa">⠿</span><button type="button" class="cad-lane-visibility" data-act="cad-lane-toggle" data-id="'+esc(row.id)+'" aria-label="'+(hidden?'Mostrar ':'Ocultar ')+esc(row.n)+'" aria-pressed="'+(!hidden)+'" '+(cadLocked()?'disabled':'')+'><span aria-hidden="true">'+cadVisibilityIcon(!hidden)+'</span></button>'+
     (custom?'<input type="text" data-cad-lane-name="'+esc(row.id)+'" value="'+esc(row.n)+'" aria-label="Nome da faixa" maxlength="90" '+(cadLocked()?'disabled':'')+'>':'<span class="cad-lane-title" title="'+esc(row.n)+'">'+esc(row.n)+'</span>')+
     '<div class="cad-lane-reorder"><button type="button" data-act="cad-lane-order" data-id="'+esc(row.id)+'" data-direction="-1" aria-label="Subir '+esc(row.n)+'" '+(i===0||cadLocked()?'disabled':'')+'>↑</button><button type="button" data-act="cad-lane-order" data-id="'+esc(row.id)+'" data-direction="1" aria-label="Descer '+esc(row.n)+'" '+(i===rows.length-1||cadLocked()?'disabled':'')+'>↓</button></div></div>';
   }).join('')+'</div><div class="cad-lanes-actions">'+cadButton('alane','+ Nova faixa',cadLocked()?'disabled':'')+cadButton('customize','Personalizar faixas')+cadButton('cad-lanes-show-all','Mostrar todas',cadLocked()?'disabled':'')+cadButton('cad-lanes-hide-empty','Ocultar vazias',cadLocked()?'disabled':'')+'</div></div>';
@@ -185,7 +185,7 @@ function cadDraftFor(entry){const [row,index]=entry.key.split('|');return {...bl
 function cadStash(){if(cadState.creating&&cadState.creating.title.trim())cadState.drafts.set('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row,{...cadState.creating})}
 function cadQuickPosition(point={}){return {x:Math.max(12,Math.min(point.x??innerWidth/2-160,innerWidth-344)),y:Math.max(12,Math.min(point.y??170,innerHeight-350))}}
 function cadReveal(row){if(V.hiddenRows.includes(row)){V.hiddenRows=V.hiddenRows.filter(id=>id!==row);V.preset='custom';saveView()}}
-function cadStartQuick(kind,index=businessStageIndex(),row='',point={}){
+function cadStartQuick(kind,index=businessStageIndex(),row='',point={},cellQuick=false){
  if(cadLocked())return;if(!S.steps.length){cadStartStage();return}
  if(kind==='emotion'){cadEditEmotion(index,point);return}const component=cadModel.CANVAS_COMPONENTS[kind];if(!component)return;
  index=Number.isInteger(index)&&S.steps[index]?index:0;row=row||component.row;
@@ -195,16 +195,22 @@ function cadStartQuick(kind,index=businessStageIndex(),row='',point={}){
  }
  cadStash();const stage=S.steps[index],stageKey=cadStageKey(stage),key='new:'+kind+':'+stageKey+':'+row;
  cadState.selected='';cadState.link=null;cadState.inspector=false;cadState.library=false;cadState.choosing=null;cadState.menu=null;cadState.error='';
- cadState.creating={kind,row,stageKey,title:'',description:'',resourceRefs:[],...cadState.drafts.get(key),mode:'card',emotionScore:stage.e??0,emotionNote:stage.note||'',...cadQuickPosition(point)};
+ cadState.creating={kind,row,stageKey,title:'',description:'',resourceRefs:[],...cadState.drafts.get(key),mode:'card',cellQuick,emotionScore:stage.e??0,emotionNote:stage.note||'',...cadQuickPosition(point)};
  cadState.quick=cadState.creating;cadReveal(row);rerender();cadFocusQuick();requestAnimationFrame(()=>cadEnsureVisible('@draft'));
 }
 function cadStartStage(index=S.steps.length-1,point={}){
  if(cadLocked())return;cadStash();cadState.creating=null;cadState.choosing=null;cadState.menu=null;cadState.inspector=false;cadState.quick={mode:'stage',title:'',after:cadStageKey(S.steps[index]||{}),...cadQuickPosition(point)};rerender();cadFocusQuick();
 }
 function cadFocusQuick(){requestAnimationFrame(()=>{const field=app.querySelector('#cad-quick-form input:not([type=hidden]),#cad-quick-form select,#cad-quick-form textarea');field?.focus();if(field?.value&&typeof field.select==='function')field.select()})}
+function cadCellQuickForm(draft,step,heading){
+ const kinds=Object.entries(cadModel.CANVAS_COMPONENTS).filter(([kind])=>kind!=='emotion'&&cadModel.canvasAcceptsNewRow(kind,draft.row));
+ const context=(step?.n||'')+' · '+(rowDefs().find(row=>row.id===draft.row)?.n||draft.row);
+ return '<div class="cad-quick-backdrop" data-act="cad-cancel" aria-hidden="true"></div><section class="cad-quick cad-quick--cell" role="dialog" aria-labelledby="cad-quick-title" aria-describedby="cad-quick-context" style="left:'+draft.x+'px;top:'+draft.y+'px;--cad-popup-y:'+draft.y+'px"><form id="cad-quick-form"><header><h2 id="cad-quick-title">'+esc(heading)+'</h2>'+cadButton('cad-cancel','×','aria-label="Fechar edição rápida"')+'</header><p id="cad-quick-context">'+esc(context)+'</p>'+cadField('title','Nome do cartão',draft.title,'text','required maxlength="240" autocomplete="off" placeholder="'+esc('Ex.: '+cadCardExample(draft.kind))+'"')+'<details class="cad-quick-details" '+(draft.detailsOpen?'open':'')+'><summary>Mais opções</summary><label>Tipo de componente<select name="kind" data-cad-quick-kind>'+kinds.map(([kind,item])=>'<option value="'+kind+'" '+(kind===draft.kind?'selected':'')+'>'+esc(item.title)+'</option>').join('')+'</select></label><label>Descrição (opcional)<textarea name="description" maxlength="1000" rows="2" placeholder="Acrescente detalhes quando precisar">'+esc(draft.description||'')+'</textarea></label></details><p class="form-error" role="alert">'+esc(cadState.error)+'</p><footer><small>Enter confirma · Esc cancela</small>'+cadButton('cad-cancel','Cancelar')+'<button type="submit" '+(cadLocked()?'disabled':'')+'>Criar cartão</button></footer></form></section>';
+}
 function cadQuickForm(){
  const draft=cadState.quick;if(!draft)return '';
  const stageMode=['stage','stage-edit'].includes(draft.mode),isEmotion=draft.kind==='emotion',step=S.steps.find(value=>cadStageKey(value)===draft.stageKey);
+ if(draft.cellQuick&&!stageMode&&!isEmotion)return cadCellQuickForm(draft,step,cadModel.CANVAS_COMPONENTS[draft.kind]?.title||'Cartão');
  const componentHint=cadCardHint(draft.kind),example=cadCardExample(draft.kind);
  const heading=stageMode?(draft.mode==='stage'?'Nova etapa':'Editar etapa'):(isEmotion?'Emoção na jornada':draft.editingId?'Editar cartão':cadModel.CANVAS_COMPONENTS[draft.kind]?.title||'Cartão');
  return '<section class="cad-quick" role="dialog" aria-labelledby="cad-quick-title" style="left:'+draft.x+'px;top:'+draft.y+'px;--cad-popup-y:'+draft.y+'px"><form id="cad-quick-form"><header><h2 id="cad-quick-title">'+esc(heading)+'</h2>'+cadButton('cad-cancel','×','aria-label="Fechar edição rápida"')+'</header>'+(!stageMode?'<p>'+esc(step?.n||'')+' · '+esc(rowDefs().find(row=>row.id===draft.row)?.n||draft.row)+'</p><p class="cad-quick-guidance">'+esc(isEmotion?componentHint:componentHint+'. Ex.: '+example+'.')+'</p>':'')+(isEmotion?'<label>Como o cliente se sente?<select name="emotionScore">'+EM.map((label,index)=>'<option value="'+(index-2)+'" '+(Number(draft.emotionScore)===index-2?'selected':'')+'>'+['😞','🙁','😐','🙂','😊'][index]+' '+label+'</option>').join('')+'</select></label><label>Observação opcional<textarea name="emotionNote" maxlength="1000" placeholder="O que aconteceu nesta etapa?">'+esc(draft.emotionNote||'')+'</textarea></label><input type="hidden" name="title" value="Emoção do cliente"><label class="cad-emotion-reset"><input type="checkbox" name="emotionUnknown" '+(draft.emotionUnknown?'checked':'')+'>Não informado (remover ponto)</label>':cadField('title',stageMode?'Nome da etapa':'Nome do cartão',draft.title,'text','required maxlength="240" autocomplete="off" placeholder="'+esc(stageMode?'Ex.: Agendamento':'Ex.: '+example)+'"'))+(!stageMode&&!isEmotion?'<label class="cad-quick-description">Descrição (opcional)<textarea name="description" maxlength="1000" rows="2" placeholder="Explique o papel deste componente nesta etapa">'+esc(draft.description||'')+'</textarea></label>':'')+(!stageMode&&['system','resource','metric','channel','persona','need','pain','opportunity'].includes(draft.kind)&&cadCatalog(draft.kind).length?'<details class="cad-quick-reuse"><summary>Usar um registro existente</summary><label>Registro do serviço<select name="referenceId">'+cadOptions(cadCatalog(draft.kind),draft.referenceId,'Criar novo')+'</select></label></details>':'')+'<p class="form-error" role="alert">'+esc(cadState.error)+'</p><footer><small>'+(draft.editingId?'Enter salva · Esc cancela':'Rascunho · Enter confirma')+'</small><button type="submit" '+(cadLocked()?'disabled':'')+'>'+(isEmotion?'Salvar emoção':stageMode?'Adicionar etapa':draft.editingId?'Salvar':'Criar cartão')+'</button></footer></form></section>';
@@ -235,7 +241,9 @@ function cadEmotionSvg(row,layout){
    controllers, history and host acknowledgements. No sample records are embedded. */
 function cadReferenceLibrary(){
  const tile=(kind,title,hint,row='')=>'<div class="cad-component-item"><button type="button" class="cad-component-main" data-act="cad-add" data-kind="'+kind+'" data-placement="default" data-row="'+row+'" draggable="'+!cadLocked()+'" aria-label="Adicionar '+esc(title)+'" title="'+esc(title)+'" '+(cadLocked()?'disabled':'')+'><span data-kind="'+kind+'">'+cadIcon(kind)+'</span><b>'+esc(title)+'</b><small>'+esc(hint)+'</small></button></div>';
- return '<div class="bo-h756-palette-action">'+cadButton('cad-library','+ Novo componente','aria-label="Novo componente" '+(cadLocked()?'disabled':''))+'</div><div class="cad-reference-palette"><section><h3>Experiência</h3>'+tile('customer-action','Ação do cliente','O que a pessoa faz')+tile('touchpoint','Ponto de contato','Interação com a marca')+tile('emotion','Emoção','Curva de sentimento')+'</section><section><h3>Operação</h3>'+tile('activity','Linha de frente','Atendimento direto','fl')+tile('activity','Bastidores','Suporte interno','bk')+'</section><details class="cad-reference-more"><summary>Mais componentes</summary><div>'+tile('channel','Canal','Onde acontece o contato')+tile('artifact','Evidência física/digital','O que o cliente vê ou recebe')+Object.entries(cadModel.CANVAS_COMPONENTS).filter(([kind])=>!['customer-action','touchpoint','emotion','activity','channel','artifact'].includes(kind)).map(([kind,item])=>tile(kind,item.title,item.hint)).join('')+'</div></details></div><div class="cad-reference-structure">'+cadSidebarTabs()+(cadState.sidebarTab==='lanes'?cadLanePanel():'')+'</div>';
+ const tabs='<div class="cad-reference-structure" data-cad-sidebar-view="'+cadState.sidebarTab+'">'+cadSidebarTabs()+'</div>';
+ if(cadState.sidebarTab==='lanes')return tabs+cadLanePanel();
+ return tabs+'<div class="bo-h756-palette-action">'+cadButton('cad-library','+ Novo componente','aria-label="Novo componente" '+(cadLocked()?'disabled':''))+'</div><div class="cad-reference-palette"><section><h3>Experiência</h3>'+tile('customer-action','Ação do cliente','O que a pessoa faz')+tile('touchpoint','Ponto de contato','Interação com a marca')+tile('emotion','Emoção','Curva de sentimento')+'</section><section><h3>Operação</h3>'+tile('activity','Linha de frente','Atendimento direto','fl')+tile('activity','Bastidores','Suporte interno','bk')+'</section><details class="cad-reference-more"><summary>Mais componentes</summary><div>'+tile('channel','Canal','Onde acontece o contato')+tile('artifact','Evidência física/digital','O que o cliente vê ou recebe')+Object.entries(cadModel.CANVAS_COMPONENTS).filter(([kind])=>!['customer-action','touchpoint','emotion','activity','channel','artifact'].includes(kind)).map(([kind,item])=>tile(kind,item.title,item.hint)).join('')+'</div></details></div>';
 }
 function cadReferenceSvg(){
  const layout=cadState.layout,cam=cadState.camera||{x:32,y:32,zoom:1};
@@ -254,9 +262,11 @@ function cadReferenceSvg(){
   if(boundary){const label=row.id==='bk'?'Linha de visibilidade':row.id==='fl'?'Linha de interação':'Linha de interação interna';html+='<path d="M'+start+' '+(row.y-16)+' H'+end+'" class="cad-boundary"/><text x="'+((start+end)/2)+'" y="'+(row.y-12)+'" text-anchor="middle" class="cad-boundary-name">'+esc(label.toUpperCase())+'</text>'}
   html+='<g class="cad-reference-lane" data-lane="'+row.id+'"><rect x="'+start+'" y="'+row.y+'" width="'+(end-start)+'" height="'+row.height+'" rx="12" class="cad-lane-bg"/><path d="M'+start+' '+row.y+' V'+(row.y+row.height)+'" class="cad-reference-label-line"/><path d="M'+start+' '+(row.y+row.height)+' H'+end+'" class="cad-reference-row-line"/><text x="0" y="'+(row.y+29)+'" class="cad-lane-name">'+esc(title)+'</text>'+(hint?'<text x="0" y="'+(row.y+49)+'" class="cad-reference-lane-hint">'+esc(hint)+'</text>':'')+'<g class="cad-lane-select'+(cadState.selectedRow===row.id?' is-selected':'')+'" role="button" tabindex="0" data-act="cad-lane-select" data-id="'+esc(row.id)+'" aria-label="Propriedades da faixa '+esc(title)+'"><rect x="0" y="'+row.y+'" width="192" height="'+row.height+'" fill="transparent"/></g>';
   for(const stage of layout.stages){
-   const empty=!layout.nodes.some(node=>node.row===row.id&&node.stageIndex===stage.index),width=Math.min(288,stage.width-32);
-   html+='<rect x="'+stage.x+'" y="'+row.y+'" width="'+stage.width+'" height="'+row.height+'" class="cad-cell" data-row="'+row.id+'" data-si="'+stage.index+'"/>';
-   if(!cadLocked()&&empty&&row.id!=='em')html+='<g role="button" tabindex="0" class="cad-cell-add" data-act="cad-cell-add" data-row="'+row.id+'" data-si="'+stage.index+'" aria-label="Adicionar cartão em '+esc(stage.step.n)+' — '+esc(title)+'"><rect x="'+(stage.x+(stage.width-width)/2)+'" y="'+(row.y+12)+'" width="'+width+'" height="96" rx="12"/><text x="'+(stage.x+stage.width/2)+'" y="'+(row.y+65)+'" text-anchor="middle">+ '+esc(addLabels[row.id]||'Adicionar cartão')+'</text></g>';
+   const cellNodes=layout.nodes.filter(node=>node.row===row.id&&node.stageIndex===stage.index),empty=!cellNodes.length;
+   const width=Math.min(180,stage.width-32),addY=empty?row.y+row.height/2-16:Math.max(...cellNodes.map(node=>node.y+node.height))+8;
+   html+='<g class="cad-cell-group" data-row="'+row.id+'" data-si="'+stage.index+'"><rect x="'+stage.x+'" y="'+row.y+'" width="'+stage.width+'" height="'+row.height+'" rx="10" class="cad-cell" data-row="'+row.id+'" data-si="'+stage.index+'"/>';
+   if(!cadLocked()&&row.id!=='em')html+='<g role="button" tabindex="0" class="cad-cell-add" data-act="cad-cell-add" data-row="'+row.id+'" data-si="'+stage.index+'" aria-label="Adicionar cartão em '+esc(stage.step.n)+' — '+esc(title)+'"><rect x="'+(stage.x+(stage.width-width)/2)+'" y="'+addY+'" width="'+width+'" height="32" rx="16"/><text x="'+(stage.x+stage.width/2)+'" y="'+(addY+21)+'" text-anchor="middle">+ '+esc(addLabels[row.id]||'Adicionar cartão')+'</text></g>';
+   html+='</g>';
   }
   if(row.id==='em')html+=cadEmotionSvg(row,layout);
   if(!cadLocked())html+='<g class="cad-lane-resize" role="separator" tabindex="0" data-act="cad-lane-resize" data-id="'+esc(row.id)+'" aria-label="Redimensionar faixa '+esc(title)+'" aria-orientation="horizontal" aria-valuemin="90" aria-valuemax="540" aria-valuenow="'+row.height+'"><rect x="0" y="'+(row.y+row.height-6)+'" width="'+layout.width+'" height="12"/><path d="M0 '+(row.y+row.height)+' H'+end+'"/></g></g>';
@@ -270,7 +280,7 @@ function cadReferenceSvg(){
   if(node.row==='em')continue;
   const kind=cadModel.canvasKind(node.note,node.row),title=cadTitle(node.note),description=node.note.canvas?.description||node.note.canonicalDescription||'',tone=node.note.canvas?.tone||'default',media=kind==='artifact'?cadModel.canvasSafeUrl(node.note.canvas?.imageUrl||node.note.url):'',url=cadModel.canvasSafeUrl(node.note.canvas?.linkUrl);
   const action=node.note.draft?'cad-quick-focus':node.note.virtualLabel?'cad-virtual':'cad-select',typeLabel=cadCardType(node.note,node.row,kind),hint=cadCardHint(kind);
-  html+='<g class="cad-node-wrap'+(node.id===cadState.selected?' is-selected':'')+(cadState.connectFrom&&node.id!==cadState.connectFrom?' is-connect-target':'')+'" data-group-id="'+esc(node.id)+'" data-tone="'+esc(tone)+'" data-row="'+node.row+'" transform="translate('+node.x+' '+node.y+')"><g class="cad-node'+(node.note.draft?' is-draft':'')+'" data-act="'+action+'" data-id="'+esc(node.id)+'" data-row="'+node.row+'" data-si="'+node.stageIndex+'" role="button" tabindex="0" aria-label="'+esc(typeLabel+': '+title)+'"><title>'+esc(typeLabel+' · '+title+' · '+(description||hint))+'</title><rect width="'+node.width+'" height="'+node.height+'" rx="12" class="cad-node-bg"/><foreignObject width="'+node.width+'" height="'+node.height+'" pointer-events="none"><div xmlns="http://www.w3.org/1999/xhtml" class="cad-reference-card" data-kind="'+esc(kind)+'"><div class="cad-reference-card-head"><span class="cad-reference-card-icon" aria-hidden="true">'+cadIcon(node.note.canvas?.iconKey||kind)+'</span><span class="cad-reference-card-type">'+esc(typeLabel)+'</span></div>'+(media?'<img src="'+esc(media)+'" alt=""/>':'')+'<h4>'+esc(title)+'</h4>'+(description?'<p>'+esc(description)+'</p>':'<span class="cad-card-help">'+esc(hint)+'</span>')+'</div></foreignObject></g>';
+  html+='<g class="cad-node-wrap'+(node.id===cadState.selected?' is-selected':'')+(cadState.connectFrom&&node.id!==cadState.connectFrom?' is-connect-target':'')+'" data-group-id="'+esc(node.id)+'" data-tone="'+esc(tone)+'" data-row="'+node.row+'" data-si="'+node.stageIndex+'" transform="translate('+node.x+' '+node.y+')"><g class="cad-node'+(node.note.draft?' is-draft':'')+'" data-act="'+action+'" data-id="'+esc(node.id)+'" data-row="'+node.row+'" data-si="'+node.stageIndex+'" role="button" tabindex="0" aria-label="'+esc(typeLabel+': '+title)+'"><title>'+esc(typeLabel+' · '+title+' · '+(description||hint))+'</title><rect width="'+node.width+'" height="'+node.height+'" rx="12" class="cad-node-bg"/><foreignObject width="'+node.width+'" height="'+node.height+'" pointer-events="none"><div xmlns="http://www.w3.org/1999/xhtml" class="cad-reference-card" data-kind="'+esc(kind)+'"><div class="cad-reference-card-head"><span class="cad-reference-card-icon" aria-hidden="true">'+cadIcon(node.note.canvas?.iconKey||kind)+'</span><span class="cad-reference-card-type">'+esc(typeLabel)+'</span></div>'+(media?'<img src="'+esc(media)+'" alt=""/>':'')+'<h4>'+esc(title)+'</h4>'+(description?'<p>'+esc(description)+'</p>':'<span class="cad-card-help">'+esc(hint)+'</span>')+'</div></foreignObject></g>';
   if(node.row==='ac')html+='<circle class="cad-reference-inlet" cx="0" cy="'+(node.height/2)+'" r="7"/>';
   if(!cadLocked()&&!node.note.virtualLabel&&!node.note.draft){
    html+='<g class="cad-port" role="button" tabindex="0" data-act="cad-connect" data-id="'+esc(node.id)+'" aria-label="Conectar '+esc(title)+'"><circle cx="'+node.width+'" cy="'+(node.height/2)+'" r="7"/><title>Conectar cartão</title></g><g class="cad-node-menu" role="button" tabindex="0" data-act="cad-menu" data-id="'+esc(node.id)+'" aria-label="Ações de '+esc(title)+'"><rect x="'+(node.width-40)+'" y="12" width="28" height="28" rx="5"/><text x="'+(node.width-26)+'" y="32" text-anchor="middle">···</text></g><g class="cad-node-resize" role="separator" tabindex="0" data-act="cad-node-resize" data-id="'+esc(node.id)+'" aria-label="Redimensionar '+esc(title)+'" aria-orientation="vertical" aria-valuemin="80" aria-valuemax="480" aria-valuenow="'+node.height+'"><rect class="cad-node-resize-hit" x="'+(node.width-26)+'" y="'+(node.height-26)+'" width="26" height="26"/><path d="M'+(node.width-16)+' '+(node.height-6)+' L'+(node.width-6)+' '+(node.height-16)+'"/></g>';
@@ -466,6 +476,13 @@ function cadAction(action,data,button){
  if(action==='cad-close-chooser'){cadState.choosing=null;rerender();return true}
  if(action==='cad-close-link'){cadState.link=null;rerender();return true}
  if(action==='cad-close-library'){cadState.library=false;app.querySelector('#cad-library-sheet')?.close();return true}
+ if(action==='cad-cell-add'&&cadReference()){
+  const index=Number(data.si),row=data.row;
+  if(cadLocked()||!S.steps[index]||!cadRows().some(value=>value.id===row))return true;
+  cadState.activeCell={row,index};cadState.libraryFilter='compatible';
+  const kind=({ev:'artifact',ch:'channel',ac:'customer-action',fl:'activity',bk:'activity',sy:'system'})[row]||'text';
+  cadStartQuick(kind,index,row,point,true);return true;
+ }
  if(action==='cad-library'||action==='cad-cell-add'){
   if(cadLocked())return true;
   if(action==='cad-cell-add'){cadState.activeCell={row:data.row,index:Number(data.si)};cadState.libraryFilter='compatible';}
@@ -530,8 +547,9 @@ function cadAction(action,data,button){
   cadState.selectedRow='';const entry=blueprintNote(data.id||cadState.selected);if(!entry)return true;cadState.selected=entry.note.i;cadState.creating=null;cadState.drafts.set(entry.note.i,cadDraftFor(entry));cadOpenInspector();return true;
  }
  if(action==='cad-cancel'){
+  const cell=cadState.quick?.cellQuick?{row:cadState.quick.row,index:S.steps.findIndex(step=>cadStageKey(step)===cadState.quick.stageKey)}:null;
   if(cadState.creating)cadState.drafts.delete('new:'+cadState.creating.kind+':'+cadState.creating.stageKey+':'+cadState.creating.row);
-  cadState.drafts.delete(cadState.selected);Object.assign(cadState,{creating:null,quick:null,link:null,menu:null,selected:'',selectedRow:'',inspector:false,error:'',connectFrom:'',pointer:null,lastCardClick:null});rerender();return true;
+  cadState.drafts.delete(cadState.selected);Object.assign(cadState,{creating:null,quick:null,link:null,menu:null,selected:'',selectedRow:'',inspector:false,error:'',connectFrom:'',pointer:null,lastCardClick:null});rerender();if(cell)requestAnimationFrame(()=>[...app.querySelectorAll('[data-act="cad-cell-add"]')].find(button=>button.dataset.row===cell.row&&Number(button.dataset.si)===cell.index)?.focus());return true;
  }
  if(action==='cad-add'){
   const kind=data.kind||'text',active=cadState.activeCell,index=data.si!==undefined?Number(data.si):cadState.choosing?.index??active?.index??businessStageIndex();
@@ -577,7 +595,17 @@ function cadAction(action,data,button){
 function cadWorld(event){const rect=app.querySelector('.cad-viewport').getBoundingClientRect(),cam=cadState.camera;return {x:(event.clientX-rect.left-cam.x)/cam.zoom,y:(event.clientY-rect.top-cam.y)/cam.zoom}}
 function cadDropTarget(point){return {row:cadState.layout.rows.find(row=>point.y>=row.y&&point.y<=row.y+row.height),stage:cadState.layout.stages.find(stage=>point.x>=stage.x&&point.x<=stage.x+stage.width)}}
 function cadHighlight(target,kind,existing=false){const valid=!!target.row&&!!target.stage&&(!kind||(existing?cadModel.canvasAcceptsRow(kind,target.row.id):cadModel.canvasAcceptsNewRow(kind,target.row.id)));app.querySelectorAll('.cad-cell').forEach(cell=>{const hit=cell.dataset.row===target.row?.id&&Number(cell.dataset.si)===target.stage?.index;cell.classList.toggle('is-target',hit&&valid);cell.classList.toggle('is-invalid',hit&&!valid)});return valid}
+function cadHoverCell(target){
+ const context=target?.closest?.('#cad-svg [data-row][data-si]');
+ const groups=app.querySelectorAll('#cad-svg .cad-cell-group');
+ for(const cell of groups)cell.classList.toggle('is-hovered',!!context&&cell.dataset.row===context.dataset.row&&cell.dataset.si===context.dataset.si);
+}
+function cadVisibilityIcon(visible){
+ return '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>'+(!visible?'<path d="m3 3 18 18"/>':'')+'</svg>';
+}
 function cadBind(){
+ app.addEventListener('pointerover',event=>{if(cadReference())cadHoverCell(event.target)});
+ app.addEventListener('pointerout',event=>{if(cadReference())cadHoverCell(event.relatedTarget)});
  app.addEventListener('submit',event=>{if(event.target.id==='cad-quick-form'){event.preventDefault();cadQuickSubmit(event.target)}else if(['cad-component-form','cad-link-form'].includes(event.target.id)){event.preventDefault();cadSubmit(event.target)}});
  app.addEventListener('input',event=>{
   const field=event.target,form=field.form;
@@ -587,6 +615,10 @@ function cadBind(){
  });
  app.addEventListener('change',event=>{
   const field=event.target;
+  if(field.matches('[data-cad-quick-kind]')&&cadState.quick?.cellQuick){
+   Object.assign(cadState.quick,Object.fromEntries(new FormData(field.form)),{referenceId:'',detailsOpen:true});
+   rerender();requestAnimationFrame(()=>app.querySelector('[data-cad-quick-kind]')?.focus());return;
+  }
   if(field.form?.id==='cad-quick-form'&&field.name==='emotionScore'){
     const checkbox=field.form.elements.emotionUnknown;if(checkbox)checkbox.checked=false;if(cadState.quick)cadState.quick.emotionUnknown=false;
    }
