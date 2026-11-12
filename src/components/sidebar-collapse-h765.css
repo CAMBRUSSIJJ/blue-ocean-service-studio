@@ -162,7 +162,8 @@
   [data-layout-corrigido="H7.65"] > .bo-h765-sidebar[data-sidebar-collapsed="1"]{
     position:fixed!important;
     inset:0 auto 0 0!important;
-    z-index:92!important;
+    /* Keep the drawer above the existing mobile backdrop (2147482990). */
+    z-index:2147483000!important;
     flex:0 0 256px!important;
     width:256px!important;
     min-width:0!important;

@@ -133,7 +133,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
         : activeTab === 'journey' && !externalNav
           ? 'Jornadas'
           : activeTab === 'canvas' && !externalNav
-          ? ({ journey: 'Mapas do serviço', blueprint: 'Mapas do serviço', whiteboard: 'Whiteboard', channels: 'Canais', overview: 'Design do serviço' } as Record<string, string>)[serviceWorkspaceTab] ?? 'Design do serviço'
+          ? ({ journey: 'Mapas do serviço', blueprint: 'Mapas do serviço', whiteboard: 'Whiteboard', spaces: 'Salas e 3D', channels: 'Canais', overview: 'Design do serviço' } as Record<string, string>)[serviceWorkspaceTab] ?? 'Design do serviço'
           : 'Plano de Ação'
   );
 
@@ -423,7 +423,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
           evidence:'evidence', hypotheses:'hypotheses', hierarchies:'hierarchies',
           portfolio:'portfolio', metrics:'metrics', templates:'templates', archive:'archive' } as Record<WorkspaceLibraryPage,SidebarNavKeyH764>)[libraryPage]
     : activeTab === 'canvas' && !externalNav
-      ? ({ journey:'maps', blueprint:'maps', whiteboard:'whiteboard', prototypes:'prototypes',
+      ? ({ journey:'maps', blueprint:'maps', whiteboard:'whiteboard', spaces:'spaces', prototypes:'prototypes',
           portfolio:'improvements', outcomes:'outcomes' } as Record<string,SidebarNavKeyH764>)[serviceWorkspaceTab] ?? 'servico'
     : activeTab === 'whiteboards' ? 'whiteboard'
     : 'home';
@@ -435,6 +435,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
       case 'servico': hasService ? openCurrentProjectHome() : openGlobalHome('projects'); break;
       case 'maps': openServiceWorkspaceTab('journey'); break;
       case 'whiteboard': openServiceWorkspaceTab('whiteboard'); break;
+      case 'spaces': openServiceWorkspaceTab('spaces'); break;
       case 'prototypes': openServiceWorkspaceTab('prototypes'); break;
       case 'improvements': openServiceWorkspaceTab('portfolio'); break;
       case 'outcomes': openServiceWorkspaceTab('outcomes'); break;

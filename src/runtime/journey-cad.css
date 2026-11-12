@@ -557,3 +557,74 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 
 .bo-h756-blueprint #cad-svg .cad-stage-insert{opacity:0}
 .bo-h756-blueprint #cad-svg .cad-stage-insert:hover,.bo-h756-blueprint #cad-svg .cad-stage-insert:focus-visible{opacity:1}
+
+/* Blueprint builder: quiet cells, readable cards and writing in context. */
+.bo-h756-blueprint #cad-svg .cad-reference-row-line{stroke:#e2e8f0;stroke-dasharray:none;stroke-opacity:.45}
+.bo-h756-blueprint #cad-svg .cad-reference-label-line{stroke:#e2e8f0;stroke-width:1}
+.bo-h756-blueprint #cad-svg .cad-reference-lane[data-lane="ac"] .cad-lane-bg{fill:transparent}
+.bo-h756-blueprint #cad-svg .cad-cell{fill:transparent;stroke:transparent;stroke-width:1;transition:fill .15s ease,stroke .15s ease}
+.bo-h756-blueprint #cad-svg .cad-cell-group:is(:hover,:focus-within,.is-hovered) .cad-cell{fill:#f1f5f9;fill-opacity:.65;stroke:#e2e8f0}
+.bo-h756-blueprint #cad-svg .cad-cell.is-target{fill:#dbeafe;stroke:#60a5fa;fill-opacity:1}
+.bo-h756-blueprint #cad-svg .cad-cell.is-invalid{fill:#fff1f2;stroke:#e11d48;fill-opacity:1}
+.bo-h756-blueprint #cad-svg .cad-cell-add{opacity:0;transition:opacity .15s ease}
+.bo-h756-blueprint #cad-svg .cad-cell-group:is(:hover,:focus-within,.is-hovered) .cad-cell-add{opacity:1}
+.bo-h756-blueprint #cad-svg .cad-cell-add rect{fill:#eff6ff;stroke:transparent;stroke-width:1;stroke-dasharray:none}
+.bo-h756-blueprint #cad-svg .cad-cell-add text{fill:#2563eb;font-size:12px;font-weight:600}
+.bo-h756-blueprint #cad-svg .cad-cell-add:hover rect{fill:#dbeafe;stroke:#bfdbfe}
+.bo-h756-blueprint #cad-svg .cad-cell-add:focus-visible{opacity:1;outline:none}
+.bo-h756-blueprint #cad-svg .cad-cell-add:focus-visible rect{fill:#dbeafe;stroke:#2563eb;stroke-width:2}
+.bo-h756-blueprint #cad-svg .cad-node-bg{fill:#fff;stroke:#e2e8f0;stroke-width:1;filter:drop-shadow(0 1px 2px #0f172a09);transition:stroke .15s ease,filter .15s ease}
+.bo-h756-blueprint #cad-svg .cad-node-wrap[data-row="ac"] .cad-node-bg{stroke:#e2e8f0;stroke-width:1}
+.bo-h756-blueprint #cad-svg .cad-node-wrap:is(:hover,:focus-within,.is-selected) .cad-node-bg{stroke:#93c5fd;filter:drop-shadow(0 3px 5px #0f172a0d)}
+.bo-h756-blueprint #cad-svg .cad-node-wrap.is-selected .cad-node-bg{stroke:#2563eb;stroke-width:2}
+.bo-h756-blueprint .cad-reference-card{padding:14px 16px}
+.bo-h756-blueprint .cad-reference-card-head{margin-bottom:6px;gap:6px;color:#64748b}
+.bo-h756-blueprint .cad-reference-card-icon{width:18px;height:18px;border-radius:4px;background:transparent}
+.bo-h756-blueprint .cad-reference-card-type{font-size:10px;font-weight:500;line-height:14px}
+.bo-h756-blueprint .cad-reference-card h4{font-weight:550;line-height:21px;color:#334155}
+.bo-h756-blueprint .cad-reference-card .cad-card-help{display:none}
+.bo-h756-blueprint #cad-svg .cad-node-wrap :is(.cad-port,.cad-node-menu,.cad-node-resize,.cad-reference-inlet){opacity:0}
+.bo-h756-blueprint #cad-svg .cad-node-wrap:is(:hover,:focus-within,.is-selected) :is(.cad-port,.cad-node-menu,.cad-node-resize,.cad-reference-inlet){opacity:1}
+.bo-h756-blueprint #cad-svg :is(.cad-port,.cad-node-menu,.cad-node-resize):focus-visible{opacity:1}
+.bo-h756-blueprint .cad-lanes-intro{padding:8px 0;background:transparent;border:0;margin-bottom:8px}
+.bo-h756-blueprint .cad-lanes-intro p{display:none}
+.bo-h756-blueprint .cad-lanes-intro small{display:block;margin-top:5px;font-size:11px;color:#64748b}
+.bo-h756-blueprint .cad-lane-item{border-color:transparent;background:#f8fafc;min-height:42px}
+.bo-h756-blueprint .cad-lane-item.is-hidden{background:transparent;border-color:#e2e8f0;border-style:solid}
+.cad-lane-visibility span{display:grid;place-items:center}
+.cad-quick-backdrop{position:fixed;inset:0;z-index:90;background:transparent}
+.cad-quick.cad-quick--cell{width:320px;max-width:calc(100vw - 24px);padding:16px;border-color:#e2e8f0;border-radius:14px;box-shadow:0 12px 36px #0f172a1c}
+.cad-quick--cell #cad-quick-context{font-size:11px;line-height:17px;color:#64748b}
+.cad-quick--cell form{gap:12px}
+.cad-quick--cell label{font-size:12px;color:#475569}
+.cad-quick--cell .cad-quick-details{border-top:1px solid #f1f5f9;padding-top:10px}
+.cad-quick--cell .cad-quick-details summary{cursor:pointer;color:#64748b;font-size:12px}
+.cad-quick--cell .cad-quick-details[open] label{margin-top:12px}
+.cad-quick--cell footer{flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.cad-quick--cell footer small{flex-basis:100%;font-size:10px;color:#64748b}
+.cad-quick--cell footer button{min-height:36px;font-size:12px}
+.bo-h756-blueprint .cad-mobile-lane{background:transparent;border-color:#e2e8f0;border-radius:12px}
+.bo-h756-blueprint .cad-mobile-card{border-color:#e2e8f0;border-radius:10px;box-shadow:0 1px 2px #0f172a05}
+.bo-h756-blueprint .cad-mobile-card b{font-weight:550;line-height:21px;color:#334155}
+.bo-h756-blueprint .cad-mobile-lane>[data-act="cad-cell-add"]{display:block;width:100%;margin-top:12px;border-radius:20px;border-color:#dbeafe;background:#eff6ff;color:#2563eb;min-height:44px}
+@media(hover:none),(pointer:coarse){
+ .bo-h756-blueprint #cad-svg .cad-cell-add{opacity:1}
+ .bo-h756-blueprint #cad-svg .cad-node-menu{opacity:1}
+}
+@media(max-width:760px){
+ .cad-quick.cad-quick--cell{top:84px!important;max-height:calc(100dvh - 108px)}
+ .cad-quick--cell footer button{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+ .bo-h756-blueprint #cad-svg :is(.cad-cell,.cad-cell-add,.cad-node-bg){transition:none}
+}
+/* Keep lane controls open while editing them, including after a re-render. */
+.bo-h756-blueprint .cad-library .cad-reference-structure{visibility:visible;margin-bottom:12px}
+.bo-h756-blueprint .cad-library-tabs{flex-direction:column;gap:4px}
+.bo-h756-blueprint .cad-library-tabs button{font-size:0;min-height:36px;padding:8px}
+.bo-h756-blueprint .cad-library-tabs .cad-tab-icon{display:grid;place-items:center}
+.bo-h756-blueprint .cad-library:has([data-cad-sidebar-view="lanes"]){width:256px}
+.bo-h756-blueprint .cad-library:is(:hover,:focus-within,:has([data-cad-sidebar-view="lanes"])) .cad-library-tabs{flex-direction:row}
+.bo-h756-blueprint .cad-library:is(:hover,:focus-within,:has([data-cad-sidebar-view="lanes"])) .cad-library-tabs button{font-size:12px}
+.bo-h756-blueprint .cad-library:is(:hover,:focus-within,:has([data-cad-sidebar-view="lanes"])) .cad-library-tabs .cad-tab-icon{display:none}
+.cad-sheet .cad-reference-structure{visibility:visible;margin-bottom:12px}

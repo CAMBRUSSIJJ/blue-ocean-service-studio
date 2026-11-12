@@ -1,0 +1,201 @@
+.bo-service-spaces{color:var(--bo-color-text);min-width:0;display:grid;gap:12px}
+.bo-h722-service-workspace.is-spaces{display:flex;flex-direction:column;min-height:0;height:100%;overflow:hidden}
+.bo-h722-service-workspace.is-spaces>.bo-h740h7-compact-head{flex:0 0 auto}
+.bo-h722-service-workspace.is-spaces>.bo-service-spaces{display:flex;flex-direction:column;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:12px}
+.bo-h722-service-workspace.is-spaces>.bo-service-spaces>*{flex-shrink:0}
+.bo-service-spaces__head{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.bo-service-spaces__head h2{font-size:22px;font-weight:700;margin:4px 0 6px}
+.bo-service-spaces__head p,.bo-service-spaces__actions p{color:var(--bo-color-text-secondary);font-size:13px;line-height:1.6;margin:0;max-width:720px}
+.bo-service-spaces__eyebrow{color:var(--bo-color-primary-700);font-size:11px;font-weight:700;letter-spacing:.08em}
+.bo-service-spaces__head label{display:grid;gap:6px;font-size:12px;font-weight:600;max-width:100%;min-width:220px}
+.bo-service-spaces__head select{background:var(--bo-color-surface);border:1px solid var(--bo-color-border-strong);border-radius:8px;color:var(--bo-color-text);padding:10px;max-width:340px;width:100%}
+.bo-service-spaces__actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;background:var(--bo-color-surface-subtle);border:1px solid var(--bo-color-border);border-radius:10px}
+.bo-service-spaces__actions>div{display:flex;gap:8px;flex-wrap:wrap}
+.bo-service-spaces__status{font-size:12px;color:var(--bo-color-text-secondary);display:flex;gap:16px;flex-wrap:wrap;margin:0}
+.bo-service-spaces__error{padding:12px;background:#fff3e9;color:#8a350b;border:1px solid #e4bda1;border-radius:8px;font-size:13px}
+.bo-service-spaces__frame{width:100%;height:max(640px,calc(100dvh - 200px));border:1px solid var(--bo-color-border);border-radius:12px;background:var(--bo-color-canvas)}
+.bo-service-spaces:fullscreen{display:flex;flex-direction:column;overflow:auto;background:var(--bo-color-canvas);padding:18px;height:100dvh;gap:10px}
+.bo-service-spaces:fullscreen .bo-service-spaces__frame{flex:1;min-height:320px;height:0}
+.bo-service-spaces:fullscreen .bo-service-spaces__head{flex-wrap:nowrap}
+@media(max-width:700px){.bo-service-spaces__head label{width:100%;min-width:0}.bo-service-spaces__head select{max-width:100%}.bo-service-spaces__frame{height:max(520px,calc(100dvh - 240px));min-height:520px}.bo-service-spaces__actions{padding:10px}.bo-service-spaces__actions .bo-button{min-height:40px}}
+@media(max-width:600px){
+ .bo-service-spaces__head{display:grid;grid-template-columns:1fr auto;gap:8px}
+ .bo-service-spaces__head>div p,.bo-service-spaces__actions>p{display:none}
+ .bo-service-spaces__head>label{grid-column:1/-1;grid-row:2}
+ .bo-service-spaces__head>button{grid-column:2;grid-row:1}
+ .bo-service-spaces__head h2{font-size:20px;margin-bottom:0}
+ .bo-service-spaces__actions>div{flex-wrap:nowrap;overflow:auto;width:100%}
+ .bo-service-spaces__actions button{flex-shrink:0}
+ .bo-service-spaces__status{font-size:11px;gap:6px}
+ .bo-service-spaces:fullscreen{padding:8px}
+}
+
+
+/* Embedded OpenPlan3D — same workspace, isolated 3D rendering surface. */
+.bo-service-spaces__modes{display:flex;gap:4px;align-items:center;align-self:flex-start;max-width:100%;padding:4px;border:1px solid var(--bo-color-border);border-radius:11px;background:var(--bo-color-surface-subtle)}
+.bo-service-spaces__modes button{border:0;border-radius:8px;background:transparent;color:var(--bo-color-text-secondary);padding:9px 14px;font:inherit;font-size:13px;font-weight:650;cursor:pointer;min-height:40px}
+.bo-service-spaces__modes button.is-active{color:var(--bo-color-primary-700);background:var(--bo-color-surface);box-shadow:0 1px 4px rgba(17,43,81,.12)}
+.bo-service-spaces__modes button:focus-visible{outline:2px solid var(--bo-color-primary-600);outline-offset:2px}
+.bo-openplan-workspace{display:flex;flex:1;flex-direction:column;min-height:0;gap:8px;width:100%}
+.bo-openplan-workspace__status{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:var(--bo-color-text-secondary);font-size:12px;padding:0 2px}
+.bo-openplan-workspace__status strong{color:var(--bo-color-text);font-size:12px}
+.bo-openplan-workspace__status>span:first-child{width:7px;height:7px;border-radius:50%;background:#d6a23e}
+.bo-openplan-workspace__status>span:first-child.is-ready{background:#208d70}
+.bo-openplan-workspace__save{margin-left:auto}
+.bo-openplan-workspace__frame{flex:1;min-height:clamp(430px,calc(100dvh - 295px),900px);height:calc(100dvh - 295px);max-height:none;border-radius:10px}
+.bo-openplan-workspace__hint{margin:0;color:var(--bo-color-text-muted);font-size:11px;line-height:1.4}
+.bo-service-spaces:fullscreen .bo-openplan-workspace__frame{height:0;min-height:300px;flex:1}
+@media(max-width:700px){.bo-service-spaces__modes{align-self:stretch}.bo-service-spaces__modes button{flex:1;padding:9px 6px;font-size:12px}.bo-openplan-workspace__frame{min-height:540px;height:calc(100dvh - 220px)}.bo-openplan-workspace__save{margin-left:0}}
+
+/* Missing CAD assets must never fall back into an embedded copy of the app. */
+.bo-openplan-workspace__unavailable{display:flex;flex-direction:column;gap:10px;align-items:flex-start;justify-content:center;min-height:260px;padding:clamp(20px,4vw,42px);border:1px solid var(--bo-color-border);border-radius:12px;background:var(--bo-color-surface-subtle);color:var(--bo-color-text)}
+.bo-openplan-workspace__unavailable strong{font-size:17px;font-weight:720}
+.bo-openplan-workspace__unavailable p{font-size:13px;line-height:1.7;margin:0;max-width:720px;color:var(--bo-color-text-secondary)}
+.bo-openplan-workspace__unavailable code{padding:2px 5px;border-radius:4px;background:var(--bo-color-surface);border:1px solid var(--bo-color-border);color:var(--bo-color-text);overflow-wrap:anywhere}
+.bo-openplan-workspace__unavailable button{margin-top:8px}
+
+
+/* Light Blue Ocean shell refinements. Frame size and drawing controls untouched. */
+.bo-openplan-workspace__status {
+  padding: 8px 11px;
+  background: var(--bo-color-surface);
+  border: 1px solid var(--bo-color-border);
+  border-radius: var(--bo-radius-md, 8px);
+}
+.bo-openplan-workspace__status strong {
+  color: var(--bo-color-primary-800);
+  font-size: 11px;
+  letter-spacing: .045em;
+  white-space: nowrap;
+}
+.bo-openplan-workspace__frame {
+  box-shadow: var(--bo-shadow-xs, 0 1px 2px rgba(11,31,59,.05));
+}
+@media(max-width:700px) {
+  .bo-openplan-workspace__status {
+    align-items: flex-start;
+    gap: 6px 8px;
+    padding: 8px;
+  }
+}
+
+
+/* H8 — CAD first: compact Blue Ocean controls while retaining every action. */
+.bo-service-spaces.is-cad { gap: 8px; }
+.bo-service-spaces.is-cad .bo-service-spaces__head {
+  gap: 8px 12px;
+  padding: 8px 12px;
+  background: var(--bo-color-surface);
+  border: 1px solid var(--bo-color-border);
+  border-radius: var(--bo-radius-lg, 12px);
+}
+.bo-service-spaces.is-cad .bo-service-spaces__head > div:first-child { flex: 1 1 175px; min-width: 0; }
+.bo-service-spaces.is-cad .bo-service-spaces__head h2 { margin: 2px 0 0; font-size: 17px; line-height: 1.3; }
+.bo-service-spaces.is-cad .bo-service-spaces__head p { display: none; }
+.bo-service-spaces.is-cad .bo-service-spaces__eyebrow { font-size: 10px; letter-spacing: .06em; }
+.bo-service-spaces.is-cad .bo-service-spaces__head label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 11px;
+}
+.bo-service-spaces.is-cad .bo-service-spaces__head select {
+  max-width: min(230px, 34vw);
+  min-width: 130px;
+  width: auto;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+.bo-service-spaces.is-cad .bo-service-spaces__head > button { min-height: 34px; padding: 6px 11px; }
+.bo-service-spaces.is-cad .bo-service-spaces__modes { flex-shrink: 0; }
+.bo-service-spaces.is-cad .bo-service-spaces__modes button { min-height: 34px; padding: 7px 12px; }
+.bo-service-spaces.is-cad:not(:fullscreen) .bo-openplan-workspace__frame {
+  min-height: clamp(440px, calc(100dvh - 255px), 900px);
+  height: calc(100dvh - 245px);
+}
+@media (max-width: 600px) {
+  .bo-service-spaces.is-cad .bo-service-spaces__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 10px;
+  }
+  .bo-service-spaces.is-cad .bo-service-spaces__head > label {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    align-items: stretch;
+  }
+  .bo-service-spaces.is-cad .bo-service-spaces__head select { max-width: 100%; width: 100%; }
+  .bo-service-spaces.is-cad .bo-service-spaces__head > button { grid-column: 2; grid-row: 1; }
+  .bo-service-spaces.is-cad:not(:fullscreen) .bo-openplan-workspace__frame { min-height: 490px; }
+}
+
+
+/* CAD room ↔ journey inspector — outer Blue Ocean shell, never inside the
+   OpenPlan3D renderer. Canvas dimensions and input handling remain native. */
+.bo-openplan-workspace__body { position:relative; display:flex; flex:1; min-height:0; isolation:isolate; }
+.bo-openplan-workspace__body > iframe { width:100%; min-width:0; }
+.bo-openplan-workspace__context { position:absolute; z-index:3; top:60px; right:12px; bottom:12px; width:min(330px,calc(100% - 24px)); min-width:0; overflow:auto; overscroll-behavior:contain; border-radius:12px; box-shadow:0 8px 32px rgb(11 31 59 / 16%); }
+.bo-openplan-workspace__context[hidden] { display:none; }
+.bo-cad-relations {
+  background:var(--bo-color-surface);border:1px solid var(--bo-color-border);
+  border-radius:var(--bo-radius-lg,12px);color:var(--bo-color-text);
+  min-height:0;font-family:var(--bo-font-sans,inherit);box-sizing:border-box;
+}
+.bo-cad-relations__head { position:sticky;top:0;z-index:1;background:var(--bo-color-surface);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 14px;border-bottom:1px solid var(--bo-color-border); }
+.bo-cad-relations__eyebrow { display:block;color:var(--bo-color-primary-700);font-size:10px;font-weight:750;letter-spacing:.075em; }
+.bo-cad-relations__head h3 {font-size:15px;font-weight:720;margin:3px 0 0;}
+.bo-cad-relations__toggle {border:0;background:transparent;color:var(--bo-color-primary-700);font:inherit;font-size:12px;font-weight:650;cursor:pointer;}
+.bo-cad-relations__content {display:flex;flex-direction:column;gap:12px;padding:13px 14px 18px;}
+.bo-cad-relations__intro {font-size:12px;line-height:1.5;color:var(--bo-color-text-secondary);margin:0;}
+.bo-cad-relations__empty {padding:13px;border-radius:9px;background:var(--bo-color-surface-subtle);border:1px dashed var(--bo-color-border-strong);font-size:12px;line-height:1.6;color:var(--bo-color-text-muted);}
+.bo-cad-relations__field {display:grid;gap:6px;min-width:0;font-size:12px;font-weight:650;color:var(--bo-color-text-secondary);}
+.bo-cad-relations__field em {color:var(--bo-color-danger-700);font-style:normal;}
+.bo-cad-relations__field :is(input,textarea,select) {box-sizing:border-box;width:100%;min-width:0;min-height:35px;max-width:100%;padding:8px 10px;border:1px solid var(--bo-color-border-strong);border-radius:8px;background:var(--bo-color-surface);color:var(--bo-color-text);font:inherit;font-size:13px;font-weight:450;line-height:1.4;}
+.bo-cad-relations__field textarea {resize:vertical;}
+.bo-cad-relations__field :is(input,textarea,select):focus-visible,.bo-cad-relations__toggle:focus-visible,.bo-cad-relations__actions button:focus-visible,.bo-cad-relations__open:focus-visible {outline:2px solid var(--bo-color-primary-600);outline-offset:2px;}
+.bo-cad-relations__fields-row {display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.bo-cad-relations__meta {margin:-4px 0 0;font-size:11px;color:var(--bo-color-text-muted);}
+.bo-cad-relations__stage-detail {padding:8px 10px;border-radius:8px;background:var(--bo-color-primary-50);color:var(--bo-color-primary-800);font-size:12px;line-height:1.5;margin:-6px 0 0;}
+.bo-cad-relations__notice {padding:8px;color:var(--bo-color-warning-700);background:var(--bo-color-warning-100);border-radius:8px;font-size:12px;line-height:1.4;margin:0;}
+.bo-cad-relations__error {color:var(--bo-color-danger-700);font-size:12px;margin:0;line-height:1.5;}
+.bo-cad-relations__saved {font-size:11px;color:var(--bo-color-success-700);margin:0;}
+.bo-cad-relations__actions {display:flex;gap:8px;flex-wrap:wrap;}
+.bo-cad-relations__actions button {padding:9px 12px;min-height:36px;border-radius:8px;font-size:12px;font-family:inherit;font-weight:650;cursor:pointer;}
+.bo-cad-relations__actions button:disabled {opacity:.55;cursor:not-allowed;}
+.bo-cad-relations__primary {border:1px solid var(--bo-color-primary-600);background:var(--bo-color-primary-600);color:white;}
+.bo-cad-relations__secondary {border:1px solid var(--bo-color-border-strong);background:var(--bo-color-surface);color:var(--bo-color-text-secondary);}
+.bo-cad-relations__open {border:0;background:transparent;color:var(--bo-color-primary-700);font-weight:650;text-align:left;font-size:12px;cursor:pointer;padding:0;}
+/* Compact workspace header; Home and the global sidebar keep their own styles. */
+.bo-service-spaces__modes {order:1;align-self:center;margin-left:auto;padding:3px;}
+.bo-service-spaces__head {gap:8px 12px;}
+.bo-service-spaces__head > label {order:2;}
+.bo-service-spaces__head > button {order:3;}
+.bo-openplan-workspace__context-trigger {
+  position:absolute;z-index:2;top:62px;right:14px;display:flex;align-items:center;gap:10px;
+  min-height:40px;padding:8px 12px;border:1px solid var(--bo-color-border-strong);border-radius:10px;
+  background:var(--bo-color-surface);color:var(--bo-color-primary-800);box-shadow:0 3px 14px rgb(11 31 59 / 9%);
+  font:inherit;font-size:12px;font-weight:650;cursor:pointer;
+}
+.bo-openplan-workspace__context-trigger span {display:grid;place-items:center;min-width:20px;height:20px;border-radius:6px;background:var(--bo-color-primary-50);color:var(--bo-color-primary-700);}
+.bo-openplan-workspace__context-trigger:focus-visible {outline:2px solid var(--bo-color-primary-600);outline-offset:2px;}
+.bo-openplan-workspace__context-trigger[aria-expanded="true"] {visibility:hidden;}
+.bo-openplan-workspace__context-trigger[hidden] {display:none;}
+.bo-cad-relations__actions {position:sticky;bottom:-18px;background:var(--bo-color-surface);padding:10px 0;margin:-4px 0 -10px;}
+@media(max-width:1050px) and (min-width:601px) {
+  .bo-service-spaces.is-cad .bo-service-spaces__head > div:first-child {flex-basis:150px;}
+  .bo-service-spaces__modes {margin-left:0;}
+}
+@media(max-width:600px) {
+  .bo-service-spaces.is-cad .bo-service-spaces__eyebrow {display:none;}
+  .bo-service-spaces.is-cad .bo-service-spaces__head > label {display:flex;flex-direction:row;align-items:center;}
+  .bo-service-spaces.is-cad .bo-service-spaces__head select {flex:1;min-width:0;}
+  .bo-h722-service-workspace.is-spaces > .bo-service-spaces.is-cad > .bo-openplan-workspace {flex:1 1 0;min-height:420px;}
+  .bo-service-spaces.is-cad:not(:fullscreen) .bo-openplan-workspace__frame {min-height:0;height:100%;}
+  .bo-service-spaces__head .bo-service-spaces__modes {grid-column:1/-1;grid-row:3;margin:0;align-self:stretch;}
+  .bo-service-spaces.is-cad .bo-service-spaces__modes button {min-width:0;white-space:normal;font-size:11px;line-height:1.3;padding:7px 5px;}
+  .bo-openplan-workspace__status > span:nth-of-type(2) {display:none;}
+  .bo-openplan-workspace__save {margin-left:auto;}
+  .bo-openplan-workspace__context-trigger {top:118px;right:8px;padding:7px 9px;}
+  .bo-openplan-workspace__context {top:auto;right:8px;left:8px;bottom:8px;width:auto;max-height:calc(100% - 64px);}
+}

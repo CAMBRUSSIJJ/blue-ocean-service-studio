@@ -1,3 +1,4 @@
+import { spatialDesignSchema } from './spatial-design-schema.ts';
 import { z } from 'zod';
 import type { ServiceGraph } from './model';
 import { validateGraphIntegrity } from './integrity.ts';
@@ -45,7 +46,18 @@ const serviceGovernance=z.object({version:z.literal(1),records:z.record(id,servi
 const serviceOperationBinding=z.object({id,serviceId:id,targetKind:z.enum(['touchpoint','journey','channel','blueprint','initiative','metric']),targetId:id,targetLabel:z.string(),targetActive:z.boolean(),operationKind:z.enum(['activity','workflow','communication','process','execution','data_source']),provider:z.enum(['internal','realtalent_crm','webhook','manual','other']),externalRef:z.string().optional(),direction:z.enum(['design_to_ops','ops_to_design','bidirectional']),syncMode:z.enum(['reference','manual','scheduled','event']),status:z.enum(['draft','active','paused','error','archived']),owner:z.string().optional(),note:z.string().optional(),lastRunAt:z.string().optional(),lastRunStatus:z.enum(['simulated','success','partial','failed']).optional(),lastRunMessage:z.string().optional(),createdAt:z.string(),updatedAt:z.string()}).passthrough();
 const serviceOperationRun=z.object({id,serviceId:id,bindingId:id,startedAt:z.string(),completedAt:z.string().optional(),status:z.enum(['simulated','success','partial','failed']),message:z.string().optional(),createdAt:z.string()}).passthrough();
 const serviceOperationsBridge=z.object({version:z.literal(1),bindings:z.record(id,serviceOperationBinding).default({}),runs:z.record(id,serviceOperationRun).default({}),updatedAt:z.string()}).passthrough();
-const service=z.object({id,name:z.string(),description:z.string(),journeyIds:idList,createdAt:z.string(),updatedAt:z.string(),project:serviceProject.optional(),proposition:servicePropositionState.optional(),prototypeLab:servicePrototypeLab.optional(),learningSystem:serviceLearningState.optional(),decisionSystem:serviceDecisionState.optional(),currentFuture:currentFutureServiceState.optional(),improvementBacklog:serviceImprovementBacklog.optional(),improvementPortfolio:serviceImprovementPortfolio.optional(),outcomes:serviceOutcomes.optional(),governance:serviceGovernance.optional(),operationsBridge:serviceOperationsBridge.optional()}).passthrough();
+const cadProjectSchema=z.object({id,name:z.string().max(200),activeFloorId:id,floors:z.array(z.object({id,walls:z.array(z.unknown())}).passthrough()).min(1).max(12)}).passthrough();
+const cadPlansSchema=z.object({version:z.literal(1),serviceId:id,plans:z.record(id,z.object({version:z.literal(1),revision:z.number().int().positive(),updatedAt:z.string(),project:cadProjectSchema}).passthrough())}).passthrough();
+const cadRoomLinkSchema=z.object({
+  roomKey:z.string().min(1).max(25000),floorId:id,roomName:z.string().max(120),
+  stageId:id,activity:z.string().max(240),owner:z.string().max(120),resources:z.string().max(500),
+  expectedMinutes:z.number().min(0).max(10080).nullable(),
+  capacity:z.number().int().min(1).max(100000).nullable(),
+  challenge:z.string().max(1000),updatedAt:z.string(),
+}).passthrough();
+const cadRoomLinksSchema=z.object({version:z.literal(1),serviceId:id,maps:z.record(id,z.record(z.string(),cadRoomLinkSchema))}).passthrough();
+
+const service=z.object({id,name:z.string(),description:z.string(),journeyIds:idList,createdAt:z.string(),updatedAt:z.string(),project:serviceProject.optional(),proposition:servicePropositionState.optional(),prototypeLab:servicePrototypeLab.optional(),learningSystem:serviceLearningState.optional(),decisionSystem:serviceDecisionState.optional(),currentFuture:currentFutureServiceState.optional(),improvementBacklog:serviceImprovementBacklog.optional(),improvementPortfolio:serviceImprovementPortfolio.optional(),outcomes:serviceOutcomes.optional(),governance:serviceGovernance.optional(),operationsBridge:serviceOperationsBridge.optional(),spatialDesign:spatialDesignSchema.optional(),cadPlans:cadPlansSchema.optional(),cadRoomLinks:cadRoomLinksSchema.optional()}).passthrough();
 const journey=z.object({id,serviceId:id,name:z.string(),stageIds:idList}).passthrough();
 const stage=z.object({id,journeyId:id,title:z.string(),customerAction:z.string(),emotion:z.enum(['negative','neutral','positive']),touchpointIds:idList,problemIds:idList,opportunityIds:idList}).passthrough();
 const channelKind=z.enum(['digital','messaging','phone','email','in_person','physical','partner','system','other']);
@@ -86,6 +98,8 @@ const views=z.object({whiteboards:z.record(id,whiteboard)}).passthrough();
 export const legacyGraphSchema=graphData.omit({entities:true,research:true,integrity:true});
 export const graphV2Schema=graphData.extend({schemaVersion:z.literal(2),views});
 export const graphSchema=graphData.extend({schemaVersion:z.literal(3),views,research:research.default({sources:{},projects:{},observations:{},collections:{}}),entities:z.record(z.string(),z.record(id,graphEntity)).default({})}).passthrough().superRefine((graph,ctx)=>{
+  if(graph.service.cadPlans && graph.service.cadPlans.serviceId !== graph.service.id)ctx.addIssue({code:'custom',path:['service','cadPlans','serviceId'],message:'As plantas CAD pertencem a outro serviço.'});
+  if(graph.service.spatialDesign && graph.service.spatialDesign.serviceId !== graph.service.id)ctx.addIssue({code:'custom',path:['service','spatialDesign','serviceId'],message:'Os ambientes pertencem a outro serviço.'});
   const report=validateGraphIntegrity(graph as unknown as ServiceGraph);
   for(const issue of report.errors)ctx.addIssue({code:'custom',path:issue.path.split('.'),message:issue.message});
 });

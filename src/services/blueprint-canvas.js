@@ -51,7 +51,7 @@ export function canvasRowHeight(doc,definition,indices,minimum=0,grid=CANVAS_GRI
   const g=grid;
   const total=indices.map(index=>{
     const notes=doc.c[definition.id+'|'+index]||[];
-    return notes.length?g.padding*2+notes.reduce((sum,note)=>sum+(g.rowGap===undefined||note.canvas?.height!=null?canvasCardHeight(note,definition.id):Math.max(g.cardHeight,canvasCardHeight(note,definition.id))),0)+Math.max(0,notes.length-1)*g.gap:0;
+    return notes.length?g.padding*2+notes.reduce((sum,note)=>sum+(g.rowGap===undefined||note.canvas?.height!=null?canvasCardHeight(note,definition.id):Math.max(g.cardHeight,canvasCardHeight(note,definition.id))),0)+Math.max(0,notes.length-1)*g.gap+(g.cellActionHeight||0):0;
   });
   return Math.max(g.minimumRow||90,...total,Math.min(540,Math.max(0,Number(minimum)||0)));
 }

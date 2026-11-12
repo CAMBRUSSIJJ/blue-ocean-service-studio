@@ -1,0 +1,35 @@
+/* Layout adapter for the embedded engine. All actions use native CAD stores. */
+html[data-blue-ocean-cad="1"] .bo-cad-quick-tools {
+  position:absolute;top:14px;left:12px;z-index:25;display:flex;flex-direction:column;
+  gap:4px;padding:6px;background:var(--bo-cad-surface);color:var(--bo-cad-text);
+  border:1px solid var(--bo-cad-border);border-radius:13px;box-shadow:0 4px 18px rgb(11 31 59 / 10%);
+}
+html[data-blue-ocean-cad="1"] .bo-cad-quick-tools button {
+  display:flex;align-items:center;justify-content:center;width:38px;height:38px;
+  border:0;border-radius:8px;background:transparent;color:inherit;cursor:pointer;
+}
+html[data-blue-ocean-cad="1"] .bo-cad-quick-tools button:hover {background:var(--bo-cad-surface-soft)}
+html[data-blue-ocean-cad="1"] .bo-cad-quick-tools button:is([aria-pressed="true"],[aria-expanded="true"]) {background:var(--bo-cad-blue-soft);color:var(--bo-cad-blue)}
+html[data-blue-ocean-cad="1"] .bo-cad-quick-tools__divider {height:1px;background:var(--bo-cad-border);margin:3px}
+html[data-blue-ocean-cad="1"] [data-bo-mobile-tools] {display:none}
+html[data-blue-ocean-cad="1"] [data-bo-library-heading] {display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bo-cad-surface);border-bottom:1px solid var(--bo-cad-border);font-size:12px;color:var(--bo-cad-text)}
+html[data-blue-ocean-cad="1"] [data-bo-library-heading] button {min-height:32px;padding:4px 8px;border-radius:6px;color:var(--bo-cad-blue);cursor:pointer}
+html[data-blue-ocean-cad="1"] [data-bo-library] {display:flex;flex-direction:column}
+html[data-blue-ocean-cad="1"] [data-bo-library] > div.w-64 {flex:1;min-height:0}
+@media(min-width:768px) {
+  html[data-blue-ocean-cad="1"].bo-cad-tools-collapsed [data-bo-library] {display:none}
+}
+html[data-blue-ocean-cad="1"] [data-bo-zoom] {left:148px;border-radius:10px;padding:4px;box-shadow:0 3px 14px rgb(11 31 59 / 10%)}
+html[data-blue-ocean-cad="1"] [data-bo-zoom] button {min-width:32px;min-height:32px}
+@media(min-width:768px) {
+  html[data-blue-ocean-cad="1"] [data-bo-floor-controls] {display:flex}
+}
+@media(max-width:767px) {
+  html[data-blue-ocean-cad="1"] .bo-cad-quick-tools {flex-direction:row;top:10px;left:8px;padding:4px;gap:2px}
+  html[data-blue-ocean-cad="1"] .bo-cad-quick-tools button {width:40px;height:40px}
+  html[data-blue-ocean-cad="1"] .bo-cad-quick-tools__divider {height:28px;width:1px;align-self:center}
+  html[data-blue-ocean-cad="1"] [data-bo-view-modes] button {white-space:nowrap;font-size:11px;padding:4px 6px}
+  html[data-blue-ocean-cad="1"] .bo-cad-view-prefix {display:none}
+  html[data-blue-ocean-cad="1"] [data-bo-zoom] {left:8px;bottom:12px!important}
+  html[data-blue-ocean-cad="1"] [data-bo-zoom] button {min-width:36px;min-height:40px}
+}

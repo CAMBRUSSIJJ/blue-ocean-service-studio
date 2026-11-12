@@ -12,7 +12,7 @@ import {
  */
 export type SidebarNavKeyH764 =
   | 'home' | 'servico' | 'maps' | 'personas' | 'pains' | 'projects' | 'archive'
-  | 'whiteboard' | 'needs' | 'jobs' | 'problems' | 'evidence' | 'hierarchies'
+  | 'spaces' | 'whiteboard' | 'needs' | 'jobs' | 'problems' | 'evidence' | 'hierarchies'
   | 'hypotheses' | 'portfolio' | 'metrics' | 'templates' | 'collaboration'
   | 'prototypes' | 'improvements' | 'outcomes' | 'settings';
 
@@ -40,6 +40,7 @@ const sections = [
   { id: 'design', title: 'Desenho do serviço', items: [
     { id: 'servico', label: 'Serviço', icon: LayoutTemplate },
     { id: 'maps', label: 'Mapas do serviço', icon: Map },
+    { id: 'spaces', label: 'Salas e 3D', icon: Layers3 },
   ] },
   { id: 'context', title: 'Público-alvo', items: [
     { id: 'personas', label: 'Personas', icon: Users },
@@ -113,6 +114,7 @@ export function NativeAnimatedSidebarH764({
       key={item.id} type="button" data-sidebar-item={item.id}
       data-service-projects-nav={item.id === 'servico' ? '1' : undefined}
       data-service-journey-nav={item.id === 'maps' ? '1' : undefined}
+      data-service-spaces-nav={item.id === 'spaces' ? 'standard' : undefined}
       data-blue-ocean-whiteboard-nav={item.id === 'whiteboard' ? 'standard' : undefined}
       data-sidebar-projects-nav={item.id === 'projects' ? 'H7.64' : undefined}
       data-bo1173-settings-nav={item.id === 'settings' ? '1' : undefined}

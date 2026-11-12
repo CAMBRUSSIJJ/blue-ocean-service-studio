@@ -1,0 +1,61 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import { activateMeasurementTool, selectedTool, panMode, placingFurnitureId, placingEntourageId, placingStair, placingColumn } from '$lib/stores/project';
+  import type { Tool } from '$lib/stores/project';
+  import { toggleStairPlacement } from '$lib/utils/placementArming';
+
+  let { libraryOpen, onLibrary, active }: { libraryOpen: boolean; onLibrary: () => void; active: boolean } = $props();
+  let embedded = $state(false);
+  const tools: { id: Tool; label: string; shortcut: string; path: string }[] = [
+    { id: 'select', label: 'Selecionar', shortcut: 'V', path: 'M5 3l14 9-7 1-3 7z' },
+    { id: 'wall', label: 'Desenhar paredes', shortcut: 'W', path: 'M4 20V4h16v16M4 10h16M10 4v6m4 0v10' },
+    { id: 'text', label: 'Adicionar texto', shortcut: 'T', path: 'M4 6V4h16v2M12 4v16M8 20h8' },
+    { id: 'measure', label: 'Medir distância', shortcut: 'M', path: 'M3 16L16 3l5 5L8 21zM7 12l3 3m0-6 3 3m0-6 3 3' },
+  ];
+
+  onMount(() => {
+    embedded = document.documentElement.dataset.blueOceanCad === '1';
+    return () => document.documentElement.classList.remove('bo-cad-tools-collapsed');
+  });
+  $effect(() => {
+    if (!embedded) return;
+    document.documentElement.classList.toggle('bo-cad-tools-collapsed', !active || !libraryOpen);
+    const session = new URLSearchParams(location.search).get('boSession') || (window.name.startsWith('boSession:') ? window.name.slice(10) : null);
+    if (session && window.parent !== window) window.parent.postMessage({
+      channel: 'blue-ocean-openplan3d/v1', session, type: 'cad-ui', libraryOpen: active && libraryOpen,
+    }, location.origin);
+  });
+
+  function choose(tool: Tool) {
+    panMode.set(false);
+    if (tool === 'measure') activateMeasurementTool(tool);
+    else {
+      selectedTool.set(tool);
+      placingFurnitureId.set(null);
+      placingEntourageId.set(null);
+      placingStair.set(false);
+      placingColumn.set(false);
+    }
+  }
+</script>
+
+{#if embedded && active}
+  <div class="bo-cad-quick-tools" role="toolbar" aria-label="Ferramentas rápidas da planta">
+    {#each tools as tool}
+      <button type="button" aria-label={tool.label} title={`${tool.label} (${tool.shortcut})`}
+        aria-pressed={$selectedTool === tool.id && !$placingStair && !$placingColumn && !$placingFurnitureId && !$placingEntourageId}
+        onclick={() => choose(tool.id)}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={tool.path}/></svg>
+      </button>
+    {/each}
+    <button type="button" aria-label="Adicionar escada" title="Adicionar escada"
+      aria-pressed={$placingStair} onclick={toggleStairPlacement}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h5v-5h5v-5h5V5h3M3 4v16h18"/></svg>
+    </button>
+    <span class="bo-cad-quick-tools__divider" aria-hidden="true"></span>
+    <button type="button" aria-label="Biblioteca de ferramentas" title="Salas, portas, janelas e mobiliário"
+      aria-expanded={libraryOpen} onclick={onLibrary}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17h7m-3.5-3.5v7"/></svg>
+    </button>
+  </div>
+{/if}
