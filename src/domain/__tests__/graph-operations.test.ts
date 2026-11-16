@@ -308,6 +308,38 @@ describe('pasteStageBundles', () => {
     expect(g2.stages[newIds[0]].title).toContain('cópia');
   });
 
+  it('cria novo touchpoint quando nome não existe no grafo de destino', () => {
+    const base = createServiceGraph('S');
+    const journeyId = nextId('journey');
+    const stageId = nextId('stage');
+    const tpId = nextId('tp');
+
+    const stage: Stage = {
+      id: stageId, journeyId, title: 'Orig', customerAction: 'A', emotion: 'neutral',
+      touchpointIds: [tpId], problemIds: [], opportunityIds: [],
+    };
+    const graph: ServiceGraph = {
+      ...base,
+      service: { ...base.service, journeyIds: [journeyId] },
+      journeys: { [journeyId]: { id: journeyId, serviceId: base.service.id, name: 'J', stageIds: [stageId], status: 'draft' } },
+      stages: { [stageId]: stage },
+      touchpoints: { [tpId]: { id: tpId, serviceId: base.service.id, name: 'Touchpoint Único', channel: 'Digital' } },
+    };
+
+    // Remove o touchpoint do grafo destino para forçar a criação de um novo
+    const graphWithoutTp: ServiceGraph = { ...graph, touchpoints: {} };
+    const bundle = snapshotStage(graph, stage);
+    const { graph: g2, newIds } = pasteStageBundles(graphWithoutTp, [bundle]);
+
+    // Um novo touchpoint deve ter sido criado
+    const pastedStageId = newIds[0];
+    const pastedStage = g2.stages[pastedStageId];
+    expect(pastedStage.touchpointIds).toHaveLength(1);
+    const newTpId = pastedStage.touchpointIds[0];
+    expect(newTpId).not.toBe(tpId);
+    expect(g2.touchpoints[newTpId].name).toBe('Touchpoint Único');
+  });
+
   it('reutiliza touchpoint existente pelo nome normalizado', () => {
     const { graph, stageIds, touchpointId, journeyId } = makeGraph({ stages: 1, withTouchpoint: true });
     const stage = graph.stages[stageIds[0]];
@@ -451,6 +483,29 @@ describe('deleteStageFromGraph', () => {
     const g2 = deleteStageFromGraph(graph, stageId);
     const lane = g2.journeys[journeyId].mapLayout!.lanes[0];
     expect(stageId in lane.cards).toBe(false);
+  });
+
+  it('desvincula entidades da etapa removida (entity.stageId → "")', () => {
+    const base = createServiceGraph('S');
+    const journeyId = nextId('journey');
+    const stageId = nextId('stage');
+    const entityId = nextId('entity');
+
+    const stage: Stage = {
+      id: stageId, journeyId, title: 'E', customerAction: 'A', emotion: 'neutral',
+      touchpointIds: [], problemIds: [], opportunityIds: [],
+    };
+    const graph: ServiceGraph = {
+      ...base,
+      service: { ...base.service, journeyIds: [journeyId] },
+      journeys: { [journeyId]: { id: journeyId, serviceId: base.service.id, name: 'J', stageIds: [stageId], status: 'draft' } },
+      stages: { [stageId]: stage },
+      entities: { persona: { [entityId]: { id: entityId, stageId } } },
+      touchpoints: {},
+    };
+
+    const g2 = deleteStageFromGraph(graph, stageId);
+    expect(g2.entities!['persona'][entityId].stageId).toBe('');
   });
 
   it('não muta o grafo original', () => {
