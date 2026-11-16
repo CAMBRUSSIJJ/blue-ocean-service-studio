@@ -1,22 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Save, Upload, Download, KanbanSquare, X, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, PanelLeftClose, PanelLeftOpen, ChevronsUpDown } from './design-system/icons';
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
 import { useStudioController } from './state/useStudioController';
-import { JourneyView } from './views/JourneyView';
-import { EditorSurface } from './views/EditorSurface';
-import { BlueprintWorkspaceView } from './views/BlueprintWorkspaceView';
-import { ActionPlanView } from './views/ActionPlanView';
-import { ProjectHomeView, type ProjectHomeSection } from './views/ProjectHomeView';
-import { ProjectShellView, type ProjectShellSection } from './views/ProjectShellView';
-import { WhiteboardsView } from './views/WhiteboardsView';
-import { WorkspaceLibraryView, type WorkspaceLibraryPage } from './views/WorkspaceLibraryView';
+// Tipos extraídos em compile-time; os módulos de view são carregados sob demanda (code splitting).
+import type { ProjectHomeSection } from './views/ProjectHomeView';
+import type { ProjectShellSection } from './views/ProjectShellView';
+import type { WorkspaceLibraryPage } from './views/WorkspaceLibraryView';
+import { DesignSystemView } from './views/DesignSystemView';
 import { Toast } from './components/Toast';
 import { APP_VERSION } from './generated/app-version';
-import { DesignSystemView } from './views/DesignSystemView';
 import type { AuthUser } from './auth/auth';
 import { useExperienceProfile } from './services/experience-profile';
 import { hideLegacyPageSurfaces } from './compat/legacy-contracts';
 import { deriveVirtualPath, trackPageview } from './analytics/plausible';
+
+// ─── Code-split views — cada um vira um chunk separado no build de produção ──────
+const ActionPlanView      = React.lazy(() => import('./views/ActionPlanView').then(m => ({ default: m.ActionPlanView })));
+const BlueprintWorkspaceView = React.lazy(() => import('./views/BlueprintWorkspaceView').then(m => ({ default: m.BlueprintWorkspaceView })));
+const EditorSurface       = React.lazy(() => import('./views/EditorSurface').then(m => ({ default: m.EditorSurface })));
+const JourneyView         = React.lazy(() => import('./views/JourneyView').then(m => ({ default: m.JourneyView })));
+const ProjectHomeView     = React.lazy(() => import('./views/ProjectHomeView').then(m => ({ default: m.ProjectHomeView })));
+const ProjectShellView    = React.lazy(() => import('./views/ProjectShellView').then(m => ({ default: m.ProjectShellView })));
+const WhiteboardsView     = React.lazy(() => import('./views/WhiteboardsView').then(m => ({ default: m.WhiteboardsView })));
+const WorkspaceLibraryView = React.lazy(() => import('./views/WorkspaceLibraryView').then(m => ({ default: m.WorkspaceLibraryView })));
+
+/** Spinner leve exibido enquanto o chunk de um view carrega. */
+function ViewLoader() {
+  return (
+    <div className="flex flex-1 items-center justify-center text-slate-400" aria-label="Carregando…">
+      <Loader2 size={26} className="animate-spin" />
+    </div>
+  );
+}
 
 type AppProps = { authUser?: AuthUser; onSignOut?: () => void };
 
@@ -556,14 +571,16 @@ export default function App({ authUser, onSignOut }: AppProps) {
         {/* A sidebar owns global navigation; the project workspace supplies contextual views. */}
 
         <main id="bo-main-content" data-bo-precision-workspace-native="1" data-bo-active-view={externalNav ?? activeTab} className={`flex-1 flex flex-col min-w-0 ${activeTab === 'canvas' && !externalNav ? 'overflow-hidden p-0' : activeTab === 'home' && !externalNav ? 'overflow-y-auto p-0' : 'px-4 md:px-6 overflow-y-auto'}`}>
-          {isGlobalHome && <ProjectHomeView studio={studio} section={projectHomeSection} setSection={setProjectHomeSection} openProjectWorkspace={openCurrentProjectWorkspace} />}
-          {isProjectHome && hasService && <ProjectShellView key={activeProjectId || graph.service.id} studio={studio} section="overview" openService={() => openServiceWorkspaceTab('journey')} onCreateMap={createMapFromProject} openWhiteboards={() => openServiceWorkspaceTab('whiteboard')} openLibraryPage={openLibraryPage} />}
-          {!hasService && activeTab !== 'home' && !externalNav && <section className="bo-h740h2-service-gate" data-requested-view={activeTab}><div className="bo-h740h2-service-gate__icon"><BlueOceanObjectIcon kind="service" size={34}/></div><small>COMECE PELO SERVIÇO</small><h2>{activeViewTitle} está pronta para você</h2><p>Você pode navegar por toda a plataforma. Para criar, editar ou conectar objetos nesta área, crie primeiro o serviço que será desenhado.</p><div><button type="button" className="primary" onClick={requestServiceCreation}>Criar meu primeiro serviço</button><button type="button" onClick={() => { loadDemoService(); setExternalNav(null); }}>Explorar serviço de exemplo</button></div></section>}
-          {hasService && activeTab === 'context' && !externalNav && <WorkspaceLibraryView studio={studio} page={libraryPage} />}
-          {hasService && activeTab === 'whiteboards' && !externalNav && <WhiteboardsView studio={studio} />}
-          {hasService && activeTab === 'journey' && !externalNav && <EditorSurface><JourneyView studio={studio} onBack={() => { selectCore('canvas'); window.setTimeout(() => window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'journey' })), 0); }}/></EditorSurface>}
-          {hasService && activeTab === 'canvas' && !externalNav && <BlueprintWorkspaceView studio={studio} createMapIntent={createMapIntent} onCreateMapIntentConsumed={() => setCreateMapIntent(false)} />}
-          {hasService && activeTab === 'action' && !externalNav && <ActionPlanView studio={studio} />}
+          <Suspense fallback={<ViewLoader />}>
+            {isGlobalHome && <ProjectHomeView studio={studio} section={projectHomeSection} setSection={setProjectHomeSection} openProjectWorkspace={openCurrentProjectWorkspace} />}
+            {isProjectHome && hasService && <ProjectShellView key={activeProjectId || graph.service.id} studio={studio} section="overview" openService={() => openServiceWorkspaceTab('journey')} onCreateMap={createMapFromProject} openWhiteboards={() => openServiceWorkspaceTab('whiteboard')} openLibraryPage={openLibraryPage} />}
+            {!hasService && activeTab !== 'home' && !externalNav && <section className="bo-h740h2-service-gate" data-requested-view={activeTab}><div className="bo-h740h2-service-gate__icon"><BlueOceanObjectIcon kind="service" size={34}/></div><small>COMECE PELO SERVIÇO</small><h2>{activeViewTitle} está pronta para você</h2><p>Você pode navegar por toda a plataforma. Para criar, editar ou conectar objetos nesta área, crie primeiro o serviço que será desenhado.</p><div><button type="button" className="primary" onClick={requestServiceCreation}>Criar meu primeiro serviço</button><button type="button" onClick={() => { loadDemoService(); setExternalNav(null); }}>Explorar serviço de exemplo</button></div></section>}
+            {hasService && activeTab === 'context' && !externalNav && <WorkspaceLibraryView studio={studio} page={libraryPage} />}
+            {hasService && activeTab === 'whiteboards' && !externalNav && <WhiteboardsView studio={studio} />}
+            {hasService && activeTab === 'journey' && !externalNav && <EditorSurface><JourneyView studio={studio} onBack={() => { selectCore('canvas'); window.setTimeout(() => window.dispatchEvent(new CustomEvent('bo-service-workspace-tab', { detail: 'journey' })), 0); }}/></EditorSurface>}
+            {hasService && activeTab === 'canvas' && !externalNav && <BlueprintWorkspaceView studio={studio} createMapIntent={createMapIntent} onCreateMapIntentConsumed={() => setCreateMapIntent(false)} />}
+            {hasService && activeTab === 'action' && !externalNav && <ActionPlanView studio={studio} />}
+          </Suspense>
         </main>
       </div>
       <nav className="bo1175-mobile-nav" aria-label="Navegação rápida">

@@ -16,7 +16,7 @@ import {
   duplicateCellCard,
   formatCardText,
 } from '../journey-card-operations';
-import type { JourneyLane } from '../model';
+import type { Journey, JourneyLane } from '../model';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -46,7 +46,7 @@ function graphWithJourney() {
         name: 'Jornada Teste',
         stageIds: [] as string[],
         status: 'draft' as const,
-      },
+      } as Journey,
     },
   };
   return { graph, journeyId };
