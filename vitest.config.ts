@@ -8,7 +8,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
-      include: ['src/domain/**', 'src/services/**', 'src/runtime/data-integrity.ts', 'src/runtime/persistence-kernel.ts'],
+      include: ['src/domain/**', 'src/services/**', 'src/runtime/client.ts', 'src/runtime/data-integrity.ts', 'src/runtime/persistence-kernel.ts'],
       exclude: ['src/**/*.{test,spec}.{ts,tsx}', 'src/services/experience-profile.ts'],
     },
   },
