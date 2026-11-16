@@ -5,8 +5,10 @@ const appVersion = String(pkg.version);
 
 mkdirSync('public', { recursive: true });
 mkdirSync('src/generated', { recursive: true });
-writeFileSync('public/v1102-blueprint-methodology.js', transpileModule(readFileSync('src/services/blueprint-methodology.ts', 'utf8'), { compilerOptions: { module: ModuleKind.ESNext, target: ScriptTarget.ES2022 } }).outputText);
-copyFileSync('src/services/blueprint-guided-reading.js', 'public/v1102-blueprint-guided-reading.js');
+const tsOpts = { compilerOptions: { module: ModuleKind.ESNext, target: ScriptTarget.ES2022 } };
+const transpile = src => transpileModule(readFileSync(src, 'utf8'), tsOpts).outputText;
+writeFileSync('public/v1102-blueprint-methodology.js', transpile('src/services/blueprint-methodology.ts'));
+writeFileSync('public/v1102-blueprint-guided-reading.js', transpile('src/services/blueprint-guided-reading.ts'));
 copyFileSync('src/runtime/blueprint-reference-view.js', 'public/v1102-blueprint-reference-view.js');
 copyFileSync('src/runtime/journey-matrix.html', 'public/blueprint-reference-original.html');
 copyFileSync('src/runtime/journey-matrix.css', 'public/journey-matrix.css');
@@ -17,21 +19,25 @@ copyFileSync('src/runtime/journey-business-ui.js', 'public/v1102-journey-busines
 copyFileSync('src/runtime/journey-cad-ui.js', 'public/v1102-journey-cad-ui.js');
 copyFileSync('src/runtime/journey-cad.css', 'public/journey-cad.css');
 copyFileSync('src/design-system/unified-ui-h3.css','public/blue-ocean-ui-h3.css');
-writeFileSync('public/v1102-blueprint-canvas.js',readFileSync('src/services/blueprint-canvas.js','utf8').replace('./journey-content.js','./v1102-journey-content.js'));
-const canvasShared=readFileSync('src/services/blueprint-canvas.js','utf8').replace(/^import .*;\n/,'').replace(/^export /gm,'');
+const canvasJs = transpile('src/services/blueprint-canvas.ts');
+writeFileSync('public/v1102-blueprint-canvas.js', canvasJs.replace('./journey-content.ts','./v1102-journey-content.js'));
+const canvasShared = canvasJs.replace(/^import .*;\n/m,'').replace(/^export /gm,'');
 writeFileSync('public/v1102-blueprint-canvas-shared.js','(()=>{const {normalizeMatrixActivity,validateMatrixDocument,normalizeMatrixConnection}=window.BlueOceanJourneyContent;'+canvasShared+';window.BlueOceanBlueprintCanvas={CANVAS_COMPONENTS,canvasAcceptsNewRow,canvasPlacementHint,CANVAS_GRID,CANVAS_STAGE_MIN,CANVAS_STAGE_MAX,canvasStageWidth,canvasEmotionScore,canvasEmotionPoint,canvasSafeUrl,canvasDimension,canvasCardWidth,canvasCardHeight,canvasRowHeight,canvasAcceptsRow,insertCanvasStage,canvasBoundary,normalizeCanvasMetadata,canvasKind,canvasStageIndex,prepareCanvasInput,moveCanvasCard,canvasTitleLines,canvasConnectionOffsets,buildCanvasLayout,canvasEdgeGeometry,exportCanvasSvg};})();');
 copyFileSync('src/runtime/journey-card-tools-ui.js', 'public/v1102-journey-card-tools-ui.js');
 copyFileSync('src/runtime/journey-views-ui.js', 'public/v1102-journey-views-ui.js');
-writeFileSync('public/v1102-journey-views.js', readFileSync('src/services/journey-views.js', 'utf8').replace('./journey-content.js', './v1102-journey-content.js'));
+const viewsJs = transpile('src/services/journey-views.ts');
+writeFileSync('public/v1102-journey-views.js', viewsJs.replace('./journey-content.ts', './v1102-journey-content.js'));
 copyFileSync('src/runtime/journey-context-ui.js', 'public/v1102-journey-context-ui.js');
-copyFileSync('src/services/journey-context.js', 'public/v1102-journey-context.js');
+writeFileSync('public/v1102-journey-context.js', transpile('src/services/journey-context.ts').replaceAll('../domain/model', ''));
 copyFileSync('src/runtime/journey-picker-ui.js', 'public/v1102-journey-picker-ui.js');
 copyFileSync('src/runtime/journey-elements-ui.js', 'public/v1102-journey-elements-ui.js');
-writeFileSync('public/v1102-journey-elements.js', readFileSync('src/services/journey-elements.js', 'utf8').replace('./journey-content.js', './v1102-journey-content.js').replace('./journey-context.js', './v1102-journey-context.js'));
-copyFileSync('src/services/journey-content.js', 'public/v1102-journey-content.js');
-const contentShared = readFileSync('src/services/journey-content.js', 'utf8').replace(/^export /gm, '');
+const elementsJs = transpile('src/services/journey-elements.ts');
+writeFileSync('public/v1102-journey-elements.js', elementsJs.replace('./journey-content.ts', './v1102-journey-content.js').replace('./journey-context.ts', './v1102-journey-context.js').replace("import type { ServiceGraph } from '../domain/model';\n",''));
+const contentJs = transpile('src/services/journey-content.ts');
+writeFileSync('public/v1102-journey-content.js', contentJs.replace("import type { ServiceGraph, JourneyMatrixBlock, JourneyMatrixActivity, JourneyMatrixConnection } from '../domain/model';\n",''));
+const contentShared = contentJs.replace(/^import .*;\n/m, '').replace(/^export /gm, '');
 writeFileSync('public/v1102-journey-content-shared.js', '(()=>{'+contentShared+';window.BlueOceanJourneyContent={insertMatrixBlock,duplicateMatrixBlock,MATRIX_REFERENCE_TYPES,MATRIX_CONTENT_TYPES,MATRIX_IMAGE_LIMIT,MATRIX_IMAGE_BUDGET,MATRIX_CARD_TONES,MATRIX_CONNECTION_TYPES,normalizeMatrixActivity,matrixActivityFromRecord,writeMatrixActivity,normalizeMatrixConnection,validateMatrixConnections,matrixStageGeometry,matrixCardHasContent,normalizeMatrixCardMetadata,normalizeMatrixCardFilters,matrixCardMatches,applyMatrixCardAction,matrixSafeUrl,matrixEmbedUrl,normalizeMatrixScale,normalizeMatrixBlock,normalizeMatrixRow,validateMatrixDocument};})();');
-const viewShared = readFileSync('src/services/journey-views.js','utf8').replace(/^import .*;\n/, '').replace(/^export /gm,'');
+const viewShared = viewsJs.replace(/^import .*;\n/m, '').replace(/^export /gm,'');
 writeFileSync('public/v1102-journey-views-shared.js','(()=>{const {normalizeMatrixCardFilters}=window.BlueOceanJourneyContent;'+viewShared+';window.BlueOceanJourneyViews={normalizeSavedMatrixView,switchMatrixPerspective,matrixBlueprintBoundary};})();');
 for (const name of ['journey-growth', 'improvement-backlog', 'improvement-portfolio', 'service-outcomes', 'current-future-service']) {
   let generated = transpileModule(readFileSync(`src/services/${name}.ts`, 'utf8'), { compilerOptions: { module: ModuleKind.ESNext, target: ScriptTarget.ES2022 } }).outputText;
@@ -116,14 +122,20 @@ for (const [source, target] of [
       './blueprint-from-selection.js':'./v1102-blueprint-from-selection.js',
       './blueprint-methodology.js':'./v1102-blueprint-methodology.js',
       '../services/blueprint-guided-reading.js':'./v1102-blueprint-guided-reading.js',
+      '../services/blueprint-guided-reading.ts':'./v1102-blueprint-guided-reading.js',
       './guidance-engine.js':'./v1188-guidance-engine.js',
       './blueprint-reference-view.js':'./v1102-blueprint-reference-view.js',
       '../services/journey-growth.js':'./v1102-journey-growth.js',
       '../services/journey-content.js':'./v1102-journey-content.js',
+      '../services/journey-content.ts':'./v1102-journey-content.js',
       '../services/journey-elements.js':'./v1102-journey-elements.js',
+      '../services/journey-elements.ts':'./v1102-journey-elements.js',
       '../services/blueprint-canvas.js':'./v1102-blueprint-canvas.js',
+      '../services/blueprint-canvas.ts':'./v1102-blueprint-canvas.js',
       '../services/journey-context.js':'./v1102-journey-context.js',
+      '../services/journey-context.ts':'./v1102-journey-context.js',
       '../services/journey-views.js':'./v1102-journey-views.js',
+      '../services/journey-views.ts':'./v1102-journey-views.js',
       './practical-simulation-data.js':'./v1102-practical-simulation-data.js',
     };
     for (const [a,b] of Object.entries(rewrites)) text=text.split(a).join(b);
