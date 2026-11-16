@@ -1,3 +1,9 @@
+/**
+ * @deprecated ExperienceLevel foi fixado em 'advanced' desde H17.
+ * O sistema de três níveis permanece somente para compatibilidade de tipos e estilos legados.
+ * Para uso futuro como "modo AI guiada": ver PRD v2.0 Fase 3 — reativação planejada.
+ * Não usar em código novo. Importar apenas para manter contratos de runtime existentes.
+ */
 export type ExperienceLevel = 'foundation' | 'applied' | 'advanced';
 export type ExperienceDensity = 'guided' | 'balanced' | 'dense';
 
@@ -30,6 +36,7 @@ export const EXPERIENCE_LEVELS: Record<ExperienceLevel, {
   },
 };
 
+/** Nível canônico único desde H17. Nunca alterar sem revisão do PRD (Fase 3). */
 export const ACTIVE_EXPERIENCE_LEVEL: ExperienceLevel = 'advanced';
 
 export type ActiveExperienceProfile = {
