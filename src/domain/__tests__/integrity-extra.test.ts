@@ -382,4 +382,136 @@ describe('applyJourneyStarter', () => {
     expect(result.journeys[jid].updatedAt).toBe(fakeNow);
     expect(result.service.updatedAt).toBe(fakeNow);
   });
+}); // fim describe('applyJourneyStarter')
+
+// ─── validateGraphIntegrity — tasks e entities (linhas 19-24) ────────────────
+
+describe('validateGraphIntegrity — tasks e entities', () => {
+  it('erro task-stage quando task.stageId aponta etapa inexistente', () => {
+    const { graph } = baseGraph();
+    const taskId = id('task');
+    const broken: ServiceGraph = {
+      ...graph,
+      tasks: { [taskId]: { id: taskId, opportunityId: 'opp-x', title: 'T', status: 'todo', stageId: 'ghost-stage' } },
+    };
+    const report = validateGraphIntegrity(broken);
+    expect(report.errors.some(e => e.code === 'task-stage')).toBe(true);
+  });
+
+  it('sem erro task-stage quando stageId é undefined', () => {
+    const { graph } = baseGraph();
+    const taskId = id('task');
+    const ok: ServiceGraph = {
+      ...graph,
+      tasks: { [taskId]: { id: taskId, opportunityId: 'opp-x', title: 'T', status: 'todo' } },
+    };
+    const report = validateGraphIntegrity(ok);
+    expect(report.errors.some(e => e.code === 'task-stage')).toBe(false);
+  });
+
+  it('erro task-dependency quando dep inexistente', () => {
+    const { graph } = baseGraph();
+    const taskId = id('task');
+    const broken: ServiceGraph = {
+      ...graph,
+      tasks: { [taskId]: { id: taskId, opportunityId: 'opp-x', title: 'T', status: 'todo', dependencyIds: ['ghost-task'] } },
+    };
+    const report = validateGraphIntegrity(broken);
+    expect(report.errors.some(e => e.code === 'task-dependency')).toBe(true);
+  });
+
+  it('erro task-dependency quando task depende de si mesma', () => {
+    const { graph } = baseGraph();
+    const taskId = id('task');
+    const broken: ServiceGraph = {
+      ...graph,
+      tasks: { [taskId]: { id: taskId, opportunityId: 'opp-x', title: 'T', status: 'todo', dependencyIds: [taskId] } },
+    };
+    const report = validateGraphIntegrity(broken);
+    expect(report.errors.some(e => e.code === 'task-dependency')).toBe(true);
+  });
+
+  it('erro entity-stage quando entity.stageId aponta etapa inexistente', () => {
+    const { graph } = baseGraph();
+    const entityId = id('entity');
+    const broken: ServiceGraph = {
+      ...graph,
+      entities: { persona: { [entityId]: { id: entityId, stageId: 'ghost-stage' } } },
+    };
+    const report = validateGraphIntegrity(broken);
+    expect(report.errors.some(e => e.code === 'entity-stage')).toBe(true);
+  });
+
+  it('erro entity-journey quando entity.journeyId aponta jornada inexistente', () => {
+    const { graph } = baseGraph();
+    const entityId = id('entity');
+    const broken: ServiceGraph = {
+      ...graph,
+      entities: { persona: { [entityId]: { id: entityId, journeyId: 'ghost-journey' } } },
+    };
+    const report = validateGraphIntegrity(broken);
+    expect(report.errors.some(e => e.code === 'entity-journey')).toBe(true);
+  });
+
+  it('sem erros de entity para entidade com stageId e journeyId válidos', () => {
+    const { graph, journeyId, stageIds } = baseGraph();
+    const entityId = id('entity');
+    const ok: ServiceGraph = {
+      ...graph,
+      entities: { persona: { [entityId]: { id: entityId, stageId: stageIds[0], journeyId } } },
+    };
+    const report = validateGraphIntegrity(ok);
+    expect(report.errors.some(e => e.code === 'entity-stage' || e.code === 'entity-journey')).toBe(false);
+  });
+});
+
+// ─── validateGraphIntegrity — whiteboard edges (linha 37) ────────────────────
+
+describe('validateGraphIntegrity — whiteboard edges', () => {
+  it('erro edge quando toId não existe no whiteboard', () => {
+    const { graph } = baseGraph();
+    const boardId = id('board');
+    const itemId = id('item');
+    const edgeId = id('edge');
+    const broken: ServiceGraph = {
+      ...graph,
+      views: {
+        whiteboards: {
+          [boardId]: {
+            id: boardId, serviceId: graph.service.id, name: 'Board', viewKind: 'free',
+            items: { [itemId]: { id: itemId, kind: 'free', shape: 'shape', text: '', x: 0, y: 0, width: 100, height: 50 } },
+            edges: { [edgeId]: { id: edgeId, fromId: itemId, toId: 'ghost', label: '', style: 'solid', arrow: 'end' } },
+          },
+        },
+      },
+    };
+    const report = validateGraphIntegrity(broken);
+    expect(report.errors.some(e => e.code === 'edge')).toBe(true);
+    expect(report.ok).toBe(false);
+  });
+
+  it('sem erro edge quando from/to existem e são distintos', () => {
+    const { graph } = baseGraph();
+    const boardId = id('board');
+    const itemA = id('item');
+    const itemB = id('item');
+    const edgeId = id('edge');
+    const ok: ServiceGraph = {
+      ...graph,
+      views: {
+        whiteboards: {
+          [boardId]: {
+            id: boardId, serviceId: graph.service.id, name: 'Board', viewKind: 'free',
+            items: {
+              [itemA]: { id: itemA, kind: 'free', shape: 'shape', text: '', x: 0, y: 0, width: 100, height: 50 },
+              [itemB]: { id: itemB, kind: 'free', shape: 'shape', text: '', x: 100, y: 0, width: 100, height: 50 },
+            },
+            edges: { [edgeId]: { id: edgeId, fromId: itemA, toId: itemB, label: '', style: 'solid', arrow: 'end' } },
+          },
+        },
+      },
+    };
+    const report = validateGraphIntegrity(ok);
+    expect(report.errors.some(e => e.code === 'edge')).toBe(false);
+  });
 });
