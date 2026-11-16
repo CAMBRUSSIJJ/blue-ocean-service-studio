@@ -237,7 +237,10 @@
     "project:h31:test": "node scripts/project-firefox-h31-test.mjs && python3 scripts/linux-frame-security-test.py",
     "blueprint:csp:browser": "python3 scripts/blueprint-csp-browser.py",
     "maps:flow:browser": "python3 scripts/service-map-flow-browser.py",
-    "blocksuite:build": "npm --prefix integrations/blocksuite install --no-audit --no-fund --package-lock=false && npm --prefix integrations/blocksuite run build"
+    "blocksuite:build": "npm --prefix integrations/blocksuite install --no-audit --no-fund --package-lock=false && npm --prefix integrations/blocksuite run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.118.0",
@@ -250,14 +253,17 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/coverage-v8": "^5.1.0",
     "autoprefixer": "^10.4.21",
     "axe-core": "4.14.0",
+    "happy-dom": "^21.0.4",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vitest": "^5.1.0"
   },
-  "description": "V1.20.5-H17.0.5 Journey Free Canvas · V1.20.5-H17.0.4 Reference Journey Workflow · V1.20.5-H17.0.3.1 Guided Target Typecheck Hotfix · V1.20.5-H17.0.3 Direct Creation & Audience-first UX · V1.20.5-H17.0.2 Design Overview Focus · V1.20.5-H17.0.1 Sidebar Icon Typecheck Hotfix · V1.20.5-H17 Single Experience Baseline · V1.20.5-H16.8 Design Start Choice & In-Flow Discovery · V1.20.5-H16.7 Research Flow & Flexible Discovery · V1.20.5-H16.6.1 CSS Build Hotfix · V1.20.5-H16.6 Research Workflow UX · V1.20.5-H16.5.1 Research Proposal Typecheck Hotfix · V1.20.5-H16.5 Research Proposal Layout · V1.20.5-H16.4 Design do Serviço Proposal Layout · V1.20.5-H16.3 Phase Status Consistency · V1.20.5-H16.2 Research-Driven Context + View Modes · V1.20.5-H16.1 Foundation Experience Deep Adaptation · V1.20.5-H16 Adaptive Experience Foundation · V1.20.5-H7.40-H15.6 Research Studio UX & Guided Actions · V1.20.5-H7.40-H15.5 Discovery UX & Guided Actions · V1.20.5-H7.40-H15.4 Design do Serviço Visual Polish · V1.20.5-H7.40-H15.3 Design do Serviço UX Refinement · V1.20.5-H7.40-H15.2 Usage & Relations · V1.20.5-H7.40-H15 Service Model Integration · V1.20.5-H7.40-H11 Service-first Project Navigation · V1.20.5-H7.40-H12 Primary Sidebar + Project Context Switch · V1.20.5-H7.40-H13 Persistent Global Sidebar · V1.20.5-H7.40-H14 Interaction & Accessibility Polish · V1.20.5-H7.40-H10 Project Shell & Contextual Navigation · V1.20.5-H7.40-H9 Project Architecture Hardening · V1.20.5-H7.40-H8 Project Home & Workspace Architecture · V1.20.5-H7.40-H7 Guided Service Workspace · V1.20.5-H7.40-H6 Typecheck Final Cleanup · V1.20.5-H7.40-H5 Service Workspace Simplification · V1.20.5-H7.40-H4 UX Polish · V1.20.5-H7.40-H3 Product Coherence & Navigation · BLUE OCEAN Service Studio — V1.20.5-H7.40 Professional Product Hardening · V1.20.5-H7.39 Executive Service Cockpit · V1.20.5-H7.38 Service Operations Bridge · V1.20.5-H7.37 Service Governance · V1.20.5-H7.36 Metrics & Service Outcomes · V1.20.5-H7.35 Improvement Portfolio · H7.34 Problems, Opportunities & Prioritization · H7.33 Current × Future Service · H7.32 Decision & Iteration Loop · H7.31 Evidence & Learning System · H7.30 Service Prototype Lab · H7.29 Channels + Touchpoints + Continuity · H7.28 Blueprint Semantic Zoom + Custom Layers · H7.27 Service Proposition + What-if Scenarios · H7.26 Research Studio + Insight Pipeline · H7.25 Service Ecology + Stakeholder Network · H7.24 Journey Library & Collapsible Sidebar · H7.23 Journey Editor UX 4.0 · H7.22 Unified Service Blueprint Workspace · H7.20 Dashboard Composition & Density",
+  "description": "Blue Ocean Service Studio — CX & Service Design platform",
   "engines": {
     "node": ">=20 <23",
     "npm": ">=10"
