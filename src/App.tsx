@@ -1,21 +1,3 @@
-// H7.40-H8 legacy visible-source contracts preserved after H11: Home</span> >Projetos</span> >Templates</span> · Todos os projetos · Home</button> · Projetos</button>
-// H7.40-H11 Service-first navigation: Serviço é a entrada global; projetos vivem dentro de Serviço; projeto abre o Project Shell.
-// H7.40-H12 Primary Sidebar + Project Context Switch: a sidebar principal mantém as entidades; só muda após abrir um projeto.
-// H7.40-H13 Persistent Global Sidebar: a sidebar principal permanece idêntica em todos os contextos; projeto muda apenas o conteúdo central.
-// H7.40-H14 Interaction & Accessibility Polish: Design do serviço, header compacto, seções recolhíveis, status de salvamento explícito e alvos acessíveis.
-// H7.40-H15.2 Usage & Relations: o Service Model torna relações visíveis e navegáveis sem alterar a arquitetura global.
-// H7.40-H14 legacy save contract: Falha ao salvar
-// H7.40-H9 legacy scope contract: data-project-scope={isGlobalHome ? "global" : "project"}
-// H7.40-H10 legacy scope expression preserved for regression: projectShellOpen || activeTab !== 'home'
-// H7.40-H3 legacy catalog labels: >Oportunidades</span></button> >Catálogo de métricas</span></button>
-// H7.19 legacy glyph count markers: bo-h719-sidebar-icon bo-h719-sidebar-icon bo-h719-sidebar-icon bo-h719-sidebar-icon bo-h719-sidebar-icon bo-h719-sidebar-icon
-// H7.18 legacy glyph count markers: bo-h718-sidebar-icon bo-h718-sidebar-icon bo-h718-sidebar-icon bo-h718-sidebar-icon bo-h718-sidebar-icon
-// H7.18 legacy semantic sidebar glyph contracts retained after H10 contextual nav:
-// bo-h718-sidebar-icon BlueOceanObjectIcon kind="journey" BlueOceanObjectIcon kind="blueprint" BlueOceanObjectIcon kind="whiteboard" BlueOceanObjectIcon kind="problem" BlueOceanObjectIcon kind="evidence"
-// V1.18.7 legacy dashboard parity marker: >Journey maps<
-// V1.18.1-H1 legacy native-nav ownership markers: openLibraryPage('personas') openLibraryPage('portfolio') openLibraryPage('metrics')
-// V1.17 legacy shell copy: Próximo passo, saúde, continuidade e atenção do serviço
-// H7.40-H3 legacy sidebar labels: Blueprints · Portfólio · Métricas
 import React, { useEffect, useRef, useState } from 'react';
 import { Save, Upload, Download, KanbanSquare, X, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, PanelLeftClose, PanelLeftOpen, ChevronsUpDown } from './design-system/icons';
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
@@ -33,40 +15,9 @@ import { APP_VERSION } from './generated/app-version';
 import { DesignSystemView } from './views/DesignSystemView';
 import type { AuthUser } from './auth/auth';
 import { useExperienceProfile } from './services/experience-profile';
+import { hideLegacyPageSurfaces } from './compat/legacy-contracts';
 
 type AppProps = { authUser?: AuthUser; onSignOut?: () => void };
-
-type LegacySurfaceApi = { hide?: () => void };
-// H7.40-H2 legacy contract marker: disabled={!hasService} was replaced by a navigable service gate.
-type LegacyGlobalShellApi = { hideBlueprintHome?: () => void };
-// V1.16.3 compatibility markers: activeViewGroup · Serviço atual. H8 replaces them in the visible UI with project-aware breadcrumbs and Projeto atual.
-// V1.18.7 compatibility markers retained for historical Dashboard parity: >Dashboard< · bo1187-dashboard-header__title">Dashboard<. H8 exposes Home globally and keeps the old Dashboard source file for regression.
-// V1.18.9 compatibility marker: <WorkspaceDashboardView remains in source history; H8 replaces the visible global Dashboard with ProjectHomeView while the H2 navigation guard remains removed from functional navigation.
-// V1.20.5-H6.1 compatibility marker: const { activeTab, graph, journey, hasService — journey is intentionally no longer destructured in H8.
-
-const LEGACY_PAGE_ROOTS = [
-  '#bo-v114-workspace-home',
-  '#rt187-journey-home',
-  '#rt182-blueprint-home',
-  '#rt192-research-home',
-  '#rt195-intelligence-home',
-  '#rt196-benefits-home',
-  '#rt197-review-home',
-  '#rt1102-practical-simulation',
-  '#rt1101-collaboration',
-  '#bo1173-settings-home',
-] as const;
-
-function hideLegacyPageSurfaces() {
-  for (const selector of LEGACY_PAGE_ROOTS) {
-    const element = document.querySelector<HTMLElement>(selector);
-    if (element) element.hidden = true;
-  }
-  for (const apiName of ['workspaceHome', 'journeyHomeShell', 'researchWorkspace', 'serviceIntelligence', 'benefitsRealization', 'operatingReview', 'practicalSimulation', 'collaboration', 'unifiedWorkspaces']) {
-    window.BlueOceanRuntime?.api<LegacySurfaceApi>(apiName)?.hide?.();
-  }
-  window.BlueOceanRuntime?.api<LegacyGlobalShellApi>('globalShell')?.hideBlueprintHome?.();
-}
 
 export default function App({ authUser, onSignOut }: AppProps) {
   const studio = useStudioController();
