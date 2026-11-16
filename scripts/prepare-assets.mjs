@@ -1,10 +1,49 @@
 import { transpileModule, ModuleKind, ScriptTarget } from 'typescript';
 import { copyFileSync, mkdirSync, readdirSync, unlinkSync, readFileSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 const pkg = JSON.parse(readFileSync('package.json','utf8'));
 const appVersion = String(pkg.version);
 
 mkdirSync('public', { recursive: true });
 mkdirSync('src/generated', { recursive: true });
+
+// ── Gera tokens.css a partir de tokens.ts ─────────────────────────────────
+{
+  const tsOpts2 = { compilerOptions: { module: ModuleKind.CommonJS, target: ScriptTarget.ES2022 } };
+  const tsSrc = readFileSync('src/design-system/tokens.ts', 'utf8');
+  const jsSrc = transpileModule(tsSrc, tsOpts2).outputText;
+  const mod = { exports: {} };
+  new Function('module', 'exports', 'require', jsSrc)(mod, mod.exports, createRequire(import.meta.url));
+  const { boTokens } = mod.exports;
+  if (!boTokens) throw new Error('boTokens não encontrado em tokens.ts');
+
+  const COMMENTS = {
+    '--bo-color-primary-950': '/* ── Paleta de cores ─────────────────────────────────────────────────── */',
+    '--bo-ocean-deep':        '\n  /* ── H7.13 — Blue Ocean Identity System ──────────────────────────── */',
+    '--bo-color-canvas':      '\n  /* ── Cores semânticas de superfície e texto ───────────────────────── */',
+    '--bo-color-success-700': '\n  /* ── Estados semânticos ────────────────────────────────────────────── */',
+    '--bo-font-sans':         '\n  /* ── Tipografia ─────────────────────────────────────────────────────── */',
+    '--bo-space-1':           '\n  /* ── Espaçamento ────────────────────────────────────────────────────── */',
+    '--bo-radius-sm':         '\n  /* ── Raio / Sombras / Sobreposição ──────────────────────────────────── */',
+    '--bo-control-h-sm':      '\n  /* ── Controles / Ícones / Layout ───────────────────────────────────── */',
+    '--bo-transition-fast':   '\n  /* ── Motion / Z-index ───────────────────────────────────────────────── */',
+    '--bo-board-canvas':      '\n  /* ── Aliases semânticos do Board ───────────────────────────────────── */',
+    '--bo-navy':              '\n  /* ── Aliases de compatibilidade (módulos legados) ──────────────────── */',
+  };
+  const lines = [
+    '/* BLUE OCEAN Service Studio — Design Tokens',
+    '   ARQUIVO GERADO — edite src/design-system/tokens.ts, não este arquivo.',
+    '   Gerado por scripts/prepare-assets.mjs */',
+    ':root{', '  color-scheme:light;',
+  ];
+  for (const [k, v] of Object.entries(boTokens)) {
+    if (COMMENTS[k]) lines.push(COMMENTS[k]);
+    lines.push(`  ${k}:${v};`);
+  }
+  lines.push('}', '');
+  writeFileSync('src/design-system/tokens.css', lines.join('\n'), 'utf8');
+  console.log(`[tokens] ${Object.keys(boTokens).length} tokens → src/design-system/tokens.css`);
+}
 const tsOpts = { compilerOptions: { module: ModuleKind.ESNext, target: ScriptTarget.ES2022 } };
 const transpile = src => transpileModule(readFileSync(src, 'utf8'), tsOpts).outputText;
 writeFileSync('public/v1102-blueprint-methodology.js', transpile('src/services/blueprint-methodology.ts'));

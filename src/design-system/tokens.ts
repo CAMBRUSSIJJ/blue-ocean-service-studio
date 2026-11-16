@@ -1,18 +1,196 @@
+/**
+ * BLUE OCEAN Service Studio — Design Tokens (fonte única de verdade)
+ *
+ * Este objeto é a única fonte de tokens do design system.
+ * O arquivo `tokens.css` é GERADO a partir daqui por `scripts/generate-tokens-css.mjs`.
+ * Nunca edite `tokens.css` manualmente — edite aqui e rode `npm run prepare-assets`.
+ *
+ * Convenção de chaves: nome exato da CSS custom property sem `--`.
+ * Valores são strings CSS prontas para uso direto (px, hex, rgba, var(), etc.).
+ */
+
+type CssVar = `--bo-${string}` | `--rt-${string}`;
+type TokenMap = Record<CssVar, string>;
+
+export const boTokens = {
+  // ─── Paleta de cores ─────────────────────────────────────────────────────
+  '--bo-color-primary-950': '#07162b',
+  '--bo-color-primary-900': '#0b1f3b',
+  '--bo-color-primary-800': '#123760',
+  '--bo-color-primary-700': '#174fc0',
+  '--bo-color-primary-600': '#1e63f0',
+  '--bo-color-primary-500': '#2f76f3',
+  '--bo-color-primary-200': '#bfd4ff',
+  '--bo-color-primary-100': '#eaf2ff',
+  '--bo-color-primary-50':  '#f5f8ff',
+  '--bo-color-accent-600':  '#008ebd',
+  '--bo-color-accent-500':  '#00a3ff',
+  '--bo-color-accent-400':  '#00b8a9',
+
+  // ─── H7.13 — Blue Ocean Identity System ──────────────────────────────────
+  '--bo-ocean-deep':    '#071b2f',
+  '--bo-ocean-depth':   '#0b2d4f',
+  '--bo-ocean-current': '#2563eb',
+  '--bo-ocean-tide':    '#4b8df8',
+  '--bo-ocean-shallow': '#dcecff',
+  '--bo-ocean-foam':    '#f5f9fd',
+  '--bo-ocean-mist':    '#edf4fa',
+  '--bo-ocean-horizon': 'rgba(75,141,248,.24)',
+  '--bo-wave-primary':  'rgba(37,99,235,.14)',
+  '--bo-wave-secondary':'rgba(0,163,255,.09)',
+  '--bo-wave-foam':     'rgba(255,255,255,.62)',
+
+  // ─── Cores semânticas de superfície e texto ────────────────────────────
+  '--bo-color-canvas':         '#f7f8fa',
+  '--bo-color-surface':        '#ffffff',
+  '--bo-color-sidebar':        '#f3f5f8',
+  '--bo-color-surface-subtle': '#f8fafc',
+  '--bo-color-surface-muted':  '#f3f5f8',
+  '--bo-color-surface-raised': '#ffffff',
+  '--bo-color-border':         '#e3e7ed',
+  '--bo-color-border-strong':  '#d0d7e2',
+  '--bo-color-border-soft':    '#edf0f4',
+  '--bo-color-text':           '#172033',
+  '--bo-color-text-secondary': '#475467',
+  '--bo-color-text-muted':     '#667085',
+  '--bo-color-text-faint':     '#667085',
+
+  // ─── Estados semânticos ────────────────────────────────────────────────
+  '--bo-color-success-700': '#047857',
+  '--bo-color-success-600': '#059669',
+  '--bo-color-success-100': '#d1fae5',
+  '--bo-color-warning-700': '#a16207',
+  '--bo-color-warning-600': '#d97706',
+  '--bo-color-warning-100': '#fef3c7',
+  '--bo-color-danger-700':  '#b42318',
+  '--bo-color-danger-600':  '#dc2626',
+  '--bo-color-danger-100':  '#fee2e2',
+  '--bo-color-info-700':    '#1d4ed8',
+  '--bo-color-info-100':    '#dbeafe',
+
+  // ─── Tipografia ────────────────────────────────────────────────────────
+  '--bo-font-sans': '"Geist","Geist Sans",Inter,"Segoe UI",Roboto,Helvetica,Arial,sans-serif',
+  '--bo-font-mono': '"SFMono-Regular",Consolas,"Liberation Mono",monospace',
+  '--bo-font-size-2xs':     '11px',
+  '--bo-font-size-xs':      '12px',
+  '--bo-font-size-sm':      '13px',
+  '--bo-font-size-md':      '14px',
+  '--bo-font-size-lg':      '16px',
+  '--bo-font-size-xl':      '20px',
+  '--bo-font-size-2xl':     '28px',
+  '--bo-font-size-3xl':     '36px',
+  '--bo-font-size-display': '52px',
+  '--bo-line-tight':    '1.2',
+  '--bo-line-snug':     '1.35',
+  '--bo-line-normal':   '1.45',
+  '--bo-line-relaxed':  '1.6',
+  '--bo-weight-medium':   '550',
+  '--bo-weight-semibold': '650',
+  '--bo-weight-bold':     '750',
+
+  // ─── Espaçamento ───────────────────────────────────────────────────────
+  '--bo-space-1':  '4px',
+  '--bo-space-2':  '8px',
+  '--bo-space-3':  '12px',
+  '--bo-space-4':  '16px',
+  '--bo-space-5':  '20px',
+  '--bo-space-6':  '24px',
+  '--bo-space-8':  '32px',
+  '--bo-space-10': '40px',
+  '--bo-space-12': '48px',
+
+  // ─── Raio / Sombras / Sobreposição ────────────────────────────────────
+  '--bo-radius-sm':   '6px',
+  '--bo-radius-md':   '8px',
+  '--bo-radius-lg':   '12px',
+  '--bo-radius-xl':   '16px',
+  '--bo-radius-pill': '999px',
+  '--bo-shadow-xs': '0 1px 2px rgba(11,31,59,.05)',
+  '--bo-shadow-sm': '0 4px 14px rgba(11,31,59,.07)',
+  '--bo-shadow-md': '0 12px 32px rgba(11,31,59,.10)',
+  '--bo-shadow-lg': '0 28px 70px rgba(11,31,59,.16)',
+  '--bo-overlay':    'rgba(7,22,43,.38)',
+  '--bo-scrim':      'rgba(7,22,43,.18)',
+  '--bo-focus-ring': '0 0 0 3px rgba(30,99,240,.16)',
+
+  // ─── Controles / Ícones / Layout ──────────────────────────────────────
+  '--bo-control-h-sm': '32px',
+  '--bo-control-h-md': '36px',
+  '--bo-control-h-lg': '40px',
+  '--bo-control-h-xl': '44px',
+  '--bo-icon-sm': '14px',
+  '--bo-icon-md': '18px',
+  '--bo-icon-lg': '22px',
+  '--bo-sidebar-w':   '216px',
+  '--bo-header-h':    '48px',
+  '--bo-inspector-w': '320px',
+
+  // ─── Motion / Z-index ─────────────────────────────────────────────────
+  '--bo-transition-fast':   '120ms ease',
+  '--bo-transition-normal': '180ms ease',
+  '--bo-layer-base':    '0',
+  '--bo-layer-sticky':  '20',
+  '--bo-layer-toolbar': '50',
+  '--bo-layer-panel':   '60',
+  '--bo-layer-dialog':  '1000',
+  '--bo-layer-toast':   '1100',
+
+  // ─── Aliases semânticos do Board ──────────────────────────────────────
+  '--bo-board-canvas':  'var(--bo-color-canvas)',
+  '--bo-board-surface': 'var(--bo-color-surface)',
+  '--bo-board-border':  'var(--bo-color-border)',
+  '--bo-board-text':    'var(--bo-color-text)',
+  '--bo-board-muted':   'var(--bo-color-text-muted)',
+  '--bo-board-focus':   'var(--bo-color-primary-600)',
+
+  // ─── Aliases de compatibilidade (módulos legados) ─────────────────────
+  '--bo-navy':     'var(--bo-color-primary-900)',
+  '--bo-navy-2':   'var(--bo-color-primary-800)',
+  '--bo-cobalt':   'var(--bo-color-primary-600)',
+  '--bo-electric': 'var(--bo-color-accent-500)',
+  '--bo-turquoise':'var(--bo-color-accent-400)',
+  '--bo-bg':       'var(--bo-color-canvas)',
+  '--bo-surface':  'var(--bo-color-surface)',
+  '--bo-surface-2':'var(--bo-color-surface-muted)',
+  '--bo-active':   'var(--bo-color-primary-100)',
+  '--bo-border':   'var(--bo-color-border)',
+  '--bo-text':     'var(--bo-color-text)',
+  '--bo-muted':    'var(--bo-color-text-muted)',
+  '--bo-muted-2':  'var(--bo-color-text-faint)',
+  '--rt-primary':     'var(--bo-color-primary-900)',
+  '--rt-primary-2':   'var(--bo-color-primary-800)',
+  '--rt-accent':      'var(--bo-color-primary-600)',
+  '--rt-accent-soft': 'var(--bo-color-primary-100)',
+  '--rt-bg':          'var(--bo-color-canvas)',
+  '--rt-surface':     'var(--bo-color-surface-muted)',
+  '--rt-border':      'var(--bo-color-border)',
+  '--rt-text':        'var(--bo-color-text)',
+  '--rt-muted':       'var(--bo-color-text-muted)',
+  '--rt-sidebar':     'var(--bo-sidebar-w)',
+} as const satisfies TokenMap;
+
+export type BoToken = keyof typeof boTokens;
+export type BoTokenValue = (typeof boTokens)[BoToken];
+
+/**
+ * @deprecated Use `boTokens` para acessar tokens individuais com tipagem completa.
+ * Mantido para retrocompatibilidade; será removido na V1.22.
+ */
 export const blueOceanTokens = {
   colors: {
-    primary900: '#0B1F3B',
-    primary600: '#1E63F0',
-    electric: '#00A3FF',
-    turquoise: '#00D4C4',
-    canvas: '#F6F8FB',
-    surface: '#FFFFFF',
-    text: '#17263B',
-    muted: '#718198',
-    border: '#DBE4EF',
+    primary900: boTokens['--bo-color-primary-900'],
+    primary600: boTokens['--bo-color-primary-600'],
+    electric:   boTokens['--bo-color-accent-500'],
+    turquoise:  boTokens['--bo-color-accent-400'],
+    canvas:     boTokens['--bo-color-canvas'],
+    surface:    boTokens['--bo-color-surface'],
+    text:       boTokens['--bo-color-text'],
+    muted:      boTokens['--bo-color-text-muted'],
+    border:     boTokens['--bo-color-border'],
   },
-  radius: { sm: 6, md: 8, lg: 12, xl: 16 },
-  controlHeight: { sm: 30, md: 36, lg: 42 },
-  layout: { sidebar: 244, header: 64, inspector: 340 },
+  radius:        { sm: 6, md: 8, lg: 12, xl: 16 },
+  controlHeight: { sm: 32, md: 36, lg: 40 },
+  layout:        { sidebar: 216, header: 48, inspector: 320 },
 } as const;
 
 export type BlueOceanTokens = typeof blueOceanTokens;

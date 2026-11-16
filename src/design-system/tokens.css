@@ -1,7 +1,9 @@
-/* BLUE OCEAN Service Studio — Design Tokens V4 (V1.16.2 — Semantic Scale & Board Convergence)
-   Single semantic token layer for React, runtime modules and future views. */
+/* BLUE OCEAN Service Studio — Design Tokens
+   ARQUIVO GERADO — edite src/design-system/tokens.ts, não este arquivo.
+   Gerado por scripts/prepare-assets.mjs */
 :root{
   color-scheme:light;
+/* ── Paleta de cores ─────────────────────────────────────────────────── */
   --bo-color-primary-950:#07162b;
   --bo-color-primary-900:#0b1f3b;
   --bo-color-primary-800:#123760;
@@ -15,7 +17,7 @@
   --bo-color-accent-500:#00a3ff;
   --bo-color-accent-400:#00b8a9;
 
-  /* H7.13 — Blue Ocean Identity System. Brand-only aliases; semantic states stay separate. */
+  /* ── H7.13 — Blue Ocean Identity System ──────────────────────────── */
   --bo-ocean-deep:#071b2f;
   --bo-ocean-depth:#0b2d4f;
   --bo-ocean-current:#2563eb;
@@ -28,6 +30,7 @@
   --bo-wave-secondary:rgba(0,163,255,.09);
   --bo-wave-foam:rgba(255,255,255,.62);
 
+  /* ── Cores semânticas de superfície e texto ───────────────────────── */
   --bo-color-canvas:#f7f8fa;
   --bo-color-surface:#ffffff;
   --bo-color-sidebar:#f3f5f8;
@@ -42,6 +45,7 @@
   --bo-color-text-muted:#667085;
   --bo-color-text-faint:#667085;
 
+  /* ── Estados semânticos ────────────────────────────────────────────── */
   --bo-color-success-700:#047857;
   --bo-color-success-600:#059669;
   --bo-color-success-100:#d1fae5;
@@ -54,6 +58,7 @@
   --bo-color-info-700:#1d4ed8;
   --bo-color-info-100:#dbeafe;
 
+  /* ── Tipografia ─────────────────────────────────────────────────────── */
   --bo-font-sans:"Geist","Geist Sans",Inter,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --bo-font-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
   --bo-font-size-2xs:11px;
@@ -73,6 +78,7 @@
   --bo-weight-semibold:650;
   --bo-weight-bold:750;
 
+  /* ── Espaçamento ────────────────────────────────────────────────────── */
   --bo-space-1:4px;
   --bo-space-2:8px;
   --bo-space-3:12px;
@@ -83,6 +89,7 @@
   --bo-space-10:40px;
   --bo-space-12:48px;
 
+  /* ── Raio / Sombras / Sobreposição ──────────────────────────────────── */
   --bo-radius-sm:6px;
   --bo-radius-md:8px;
   --bo-radius-lg:12px;
@@ -96,6 +103,7 @@
   --bo-scrim:rgba(7,22,43,.18);
   --bo-focus-ring:0 0 0 3px rgba(30,99,240,.16);
 
+  /* ── Controles / Ícones / Layout ───────────────────────────────────── */
   --bo-control-h-sm:32px;
   --bo-control-h-md:36px;
   --bo-control-h-lg:40px;
@@ -106,9 +114,10 @@
   --bo-sidebar-w:216px;
   --bo-header-h:48px;
   --bo-inspector-w:320px;
+
+  /* ── Motion / Z-index ───────────────────────────────────────────────── */
   --bo-transition-fast:120ms ease;
   --bo-transition-normal:180ms ease;
-
   --bo-layer-base:0;
   --bo-layer-sticky:20;
   --bo-layer-toolbar:50;
@@ -116,7 +125,7 @@
   --bo-layer-dialog:1000;
   --bo-layer-toast:1100;
 
-  /* Board semantic aliases: the board no longer owns a parallel slate/blue palette. */
+  /* ── Aliases semânticos do Board ───────────────────────────────────── */
   --bo-board-canvas:var(--bo-color-canvas);
   --bo-board-surface:var(--bo-color-surface);
   --bo-board-border:var(--bo-color-border);
@@ -124,7 +133,7 @@
   --bo-board-muted:var(--bo-color-text-muted);
   --bo-board-focus:var(--bo-color-primary-600);
 
-  /* Compatibility aliases. Existing modules resolve into the same system. */
+  /* ── Aliases de compatibilidade (módulos legados) ──────────────────── */
   --bo-navy:var(--bo-color-primary-900);
   --bo-navy-2:var(--bo-color-primary-800);
   --bo-cobalt:var(--bo-color-primary-600);
