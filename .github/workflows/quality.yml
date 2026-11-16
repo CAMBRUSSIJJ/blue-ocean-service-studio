@@ -27,6 +27,7 @@ jobs:
       # The generated version module is intentionally ignored by Git.
       # A clean checkout must still be able to run typecheck directly.
       - run: rm -f src/generated/app-version.ts && npm run typecheck
+      - run: npm test
       - run: python3 -m py_compile scripts/journey-selector-browser.py scripts/journey-observation-browser.py scripts/journey-editor-ux-browser.py scripts/blueprint-connections-browser.py
       - run: npm run docs:check
       - run: node scripts/journey-visualization-test.mjs
