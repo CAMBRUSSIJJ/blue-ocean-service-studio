@@ -167,7 +167,7 @@ describe('repairGraphReferences', () => {
         whiteboards: {
           [boardId]: {
             id: boardId, serviceId: graph.service.id, name: 'Board', viewKind: 'free',
-            items: { [itemId]: { id: itemId, kind: 'free', shape: 'rect', text: '', x: 0, y: 0, width: 100, height: 50 } },
+            items: { [itemId]: { id: itemId, kind: 'free', shape: 'shape', text: '', x: 0, y: 0, width: 100, height: 50 } },
             edges: { [edgeId]: { id: edgeId, fromId: itemId, toId: 'ghost-item', label: '', style: 'solid', arrow: 'end' } },
           },
         },
@@ -188,7 +188,7 @@ describe('repairGraphReferences', () => {
         whiteboards: {
           [boardId]: {
             id: boardId, serviceId: graph.service.id, name: 'Board', viewKind: 'free',
-            items: { [itemId]: { id: itemId, kind: 'free', shape: 'rect', text: '', x: 0, y: 0, width: 100, height: 50 } },
+            items: { [itemId]: { id: itemId, kind: 'free', shape: 'shape', text: '', x: 0, y: 0, width: 100, height: 50 } },
             edges: { [edgeId]: { id: edgeId, fromId: itemId, toId: itemId, label: '', style: 'solid', arrow: 'end' } },
           },
         },
@@ -233,7 +233,7 @@ describe('repairGraphReferences', () => {
   });
 
   it('não muta o grafo original', () => {
-    const { graph, journeyId } = baseGraph();
+    const { graph } = baseGraph();
     const original = { ...graph, service: { ...graph.service, journeyIds: [...graph.service.journeyIds, 'ghost'] } };
     repairGraphReferences(original);
     expect(original.service.journeyIds).toContain('ghost');
@@ -312,7 +312,6 @@ describe('applyJourneyStarter', () => {
   });
 
   it('cria 3 etapas padrão quando jornada não tem nenhuma', () => {
-    const { graph, journeyId } = baseGraph();
     // baseGraph já chamou applyJourneyStarter — usamos uma jornada nova e vazia
     const base = createServiceGraph('S2');
     const jid = id('journey');
