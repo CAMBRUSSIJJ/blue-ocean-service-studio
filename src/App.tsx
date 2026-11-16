@@ -16,6 +16,7 @@ import { DesignSystemView } from './views/DesignSystemView';
 import type { AuthUser } from './auth/auth';
 import { useExperienceProfile } from './services/experience-profile';
 import { hideLegacyPageSurfaces } from './compat/legacy-contracts';
+import { deriveVirtualPath, trackPageview } from './analytics/plausible';
 
 type AppProps = { authUser?: AuthUser; onSignOut?: () => void };
 
@@ -107,6 +108,11 @@ export default function App({ authUser, onSignOut }: AppProps) {
     document.body.classList.toggle('bo1175-mobile-nav-open', isMobileNavOpen);
     return () => document.body.classList.remove('bo1175-mobile-nav-open');
   }, [isMobileNavOpen]);
+
+  // Rastreamento de pageview virtual para o Plausible (SPA sem roteamento por URL).
+  useEffect(() => {
+    trackPageview(deriveVirtualPath({ activeTab, serviceWorkspaceTab, externalNav, libraryPage, projectShellOpen, projectShellSection }));
+  }, [activeTab, serviceWorkspaceTab, externalNav, libraryPage, projectShellOpen, projectShellSection]);
 
   useEffect(() => {
     let frame = 0;
