@@ -18,11 +18,17 @@ const PHASE_LABELS: Record<string, string> = {
   discovery: 'Entender', definition: 'Definir', design: 'Projetar', validation: 'Validar', improvement: 'Melhorar',
 };
 
-const TEMPLATES: Array<{ id: ProjectTemplate; title: string; detail: string; service: string }> = [
+const TEMPLATES: Array<{ id: ProjectTemplate; title: string; detail: string; service: string; sector?: boolean }> = [
   { id: 'blank', title: 'Novo serviço', detail: 'Comece com uma base limpa e siga o caminho guiado do serviço.', service: 'Novo serviço' },
   { id: 'redesign', title: 'Redesenho de serviço', detail: 'Mapeie o estado atual, encontre gaps e desenhe o estado futuro.', service: 'Serviço a redesenhar' },
   { id: 'blueprint', title: 'Service Blueprint', detail: 'Parta da experiência e conecte frontstage, backstage, processos e sistemas.', service: 'Serviço para Blueprint' },
   { id: 'omnichannel', title: 'Experiência omnichannel', detail: 'Mapeie canais, touchpoints e handoffs antes de redesenhar a operação.', service: 'Experiência omnichannel' },
+  // ── Setoriais (Ciclo 1) ──────────────────────────────────────────────────
+  { id: 'saas', title: 'SaaS', detail: '2 jornadas pré-mapeadas: aquisição (trial → ativação) e retenção (valor → expansão).', service: 'Produto SaaS', sector: true },
+  { id: 'varejo', title: 'Varejo', detail: '2 jornadas: compra (descoberta → pedido) e pós-venda (entrega → fidelização).', service: 'Loja / e-commerce', sector: true },
+  { id: 'saude', title: 'Saúde', detail: '2 jornadas: atendimento (agendamento → consulta) e acompanhamento (retorno → prevenção).', service: 'Clínica / serviço de saúde', sector: true },
+  { id: 'educacao', title: 'Educação', detail: '2 jornadas: matrícula (pesquisa → integração) e aprendizado (aulas → certificação).', service: 'Escola / curso', sector: true },
+  { id: 'restaurante', title: 'Restaurante', detail: '2 jornadas: presencial (reserva → pagamento) e delivery (pedido → avaliação).', service: 'Restaurante / delivery', sector: true },
 ];
 
 function dateLabel(value: string) {
@@ -137,14 +143,25 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
       {favorites.length > 0 && <section className="bo-h740h8-section"><header><div><small>FAVORITOS</small><h2>Acesso rápido</h2></div></header><div className="bo-h740h8-project-grid compact">{favorites.map(card)}</div></section>}
 
-      <section className="bo-h740h8-section"><header><div><small>TEMPLATES GLOBAIS</small><h2>Começar com um template</h2><p>Escolha um ponto de partida para criar outro projeto sem alterar o projeto atual.</p></div><button type="button" onClick={() => setSection('templates')}>Ver templates <ArrowRight size={13}/></button></header><div className="bo-h740h8-template-grid">{TEMPLATES.slice(0, 4).map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><LayoutTemplate size={18}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>Usar template <ArrowRight size={12}/></em></button>)}</div></section>
+      <section className="bo-h740h8-section">
+        <header><div><small>TEMPLATES GLOBAIS</small><h2>Começar com um template</h2><p>Escolha um ponto de partida para criar outro projeto sem alterar o projeto atual.</p></div><button type="button" onClick={() => setSection('templates')}>Ver todos <ArrowRight size={13}/></button></header>
+        <div className="bo-h740h8-template-grid">{TEMPLATES.filter((item) => !item.sector).map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><LayoutTemplate size={18}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>Usar template <ArrowRight size={12}/></em></button>)}</div>
+        <div className="bo-h740h8-sector-heading"><small>TEMPLATES SETORIAIS</small></div>
+        <div className="bo-h740h8-template-grid">{TEMPLATES.filter((item) => item.sector).map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><Sparkles size={18}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>Usar template <ArrowRight size={12}/></em></button>)}</div>
+      </section>
     </>}
 
     {section === 'projects' && <section className="bo-h740h8-section bo-h740h8-all-projects" data-service-projects="1"><header className="bo-h740h11-service-projects-head"><div><small>SERVIÇO</small><h2>Escolha um projeto</h2><p>Abra um projeto para consultar informações, público, pesquisa, mapas e melhorias. As ferramentas continuam disponíveis no menu lateral.</p></div></header><div className="bo-h740h8-toolbar"><label><Search size={17}/><input type="search" aria-label="Buscar projetos ou serviços" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar projetos ou serviços"/></label><span>{filtered.length} projeto{filtered.length === 1 ? '' : 's'} ativo{filtered.length === 1 ? '' : 's'}</span></div>{filtered.length ? <div className="bo-h740h8-project-grid">{filtered.map(card)}</div> : <div className="bo-h740h8-empty"><Search size={24}/><strong>Nenhum projeto encontrado</strong><p>Tente outro termo ou crie um novo projeto.</p></div>}
       {archivedProjects.length > 0 && <section className="bo-h740h9-archived"><header><div><small>ARQUIVADOS</small><h2>Projetos preservados</h2><p>Arquivar remove da lista ativa, mas mantém metadados e snapshot local.</p></div></header><div>{archivedProjects.map((project) => <article key={project.id}><span><Archive size={16}/></span><div><strong>{project.title}</strong><small>Serviço: {project.serviceName} · atualizado {dateLabel(project.updatedAt)}</small></div><button type="button" onClick={() => restoreWorkspaceProject(project.id)}><RotateCcw size={14}/> Restaurar</button></article>)}</div></section>}
     </section>}
 
-    {section === 'templates' && <section className="bo-h740h8-section"><div className="bo-h740h8-template-grid large">{TEMPLATES.map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><Sparkles size={19}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>{projectTemplateLabel(item.id)} <ArrowRight size={12}/></em></button>)}</div></section>}
+    {section === 'templates' && <section className="bo-h740h8-section">
+      <header><div><small>TEMPLATES</small><h2>Escolha um ponto de partida</h2><p>Cada template gera jornadas pré-estruturadas. Nenhum dado é inventado — as etapas são rótulos genéricos para você adaptar.</p></div></header>
+      <div className="bo-h740h8-template-heading"><small>ESTRUTURAIS</small></div>
+      <div className="bo-h740h8-template-grid large">{TEMPLATES.filter((item) => !item.sector).map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><LayoutTemplate size={19}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>{projectTemplateLabel(item.id)} <ArrowRight size={12}/></em></button>)}</div>
+      <div className="bo-h740h8-template-heading"><small>SETORIAIS</small></div>
+      <div className="bo-h740h8-template-grid large">{TEMPLATES.filter((item) => item.sector).map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><Sparkles size={19}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>{projectTemplateLabel(item.id)} <ArrowRight size={12}/></em></button>)}</div>
+    </section>}
 
     {dialog && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}><section className="bo-h740h8-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h8-create-title"><header><div><small>NOVO PROJETO · {projectTemplateLabel(dialog).toUpperCase()}</small><h2 id="bo-h740h8-create-title">Crie o espaço de trabalho</h2><p>Projeto e serviço são conceitos separados. O projeto organiza o trabalho; o serviço é o objeto que será desenhado.</p></div><button type="button" onClick={() => setDialog(null)} aria-label="Fechar"><X size={18}/></button></header><div className="bo-h740h8-modal-body"><label><span>Nome do projeto</span><input autoFocus value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Redesenho da experiência da lavanderia"/></label><label><span>Serviço principal</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Lavanderia com entrega e coleta"/></label><label className="full"><span>Descrição <em>opcional</em></span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Qual objetivo ou transformação este projeto pretende conduzir?"/></label></div><footer><button type="button" onClick={() => setDialog(null)}>Cancelar</button><button type="button" className="primary" disabled={!projectName.trim()} onClick={submit}>Criar projeto</button></footer></section></div>}
 

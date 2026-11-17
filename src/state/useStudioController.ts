@@ -297,6 +297,52 @@ export function useStudioController() {
       }
       nextGraph.service.updatedAt = now;
     }
+    // ── Sector templates (Ciclo 1 — Templates setoriais prontos) ──────────────
+    // Five pre-built journey structures for the most common service verticals.
+    // No real customer data is invented: stage titles are generic structural labels.
+    if (template === 'saas' || template === 'varejo' || template === 'saude' || template === 'educacao' || template === 'restaurante') {
+      const now = nowIso();
+      const addJourney = (title: string, steps: string[]) => {
+        const id = makeId('journey');
+        const stageIds = steps.map((step) => {
+          const stageId = makeId('stage');
+          nextGraph.stages[stageId] = {
+            id: stageId, journeyId: id, title: step, customerAction: '',
+            emotion: 'neutral', touchpointIds: [], problemIds: [], opportunityIds: [],
+            needIds: [], evidenceIds: [], validatedProblemIds: [],
+          };
+          return stageId;
+        });
+        nextGraph.journeys[id] = {
+          id, serviceId: nextGraph.service.id, name: title,
+          stageIds, status: 'draft', createdAt: now, updatedAt: now,
+        };
+        nextGraph.service.journeyIds.push(id);
+        return id;
+      };
+      if (template === 'saas') {
+        // SaaS: acquisition → activation → value realization → expansion
+        addJourney('Jornada de Aquisição', ['Descoberta do produto', 'Avaliação de alternativas', 'Cadastro e trial', 'Primeiro login', 'Ativação inicial']);
+        addJourney('Jornada de Retenção', ['Uso recorrente', 'Descoberta de valor', 'Suporte e dúvidas', 'Renovação de plano', 'Expansão da conta']);
+      } else if (template === 'varejo') {
+        // Varejo: discovery → purchase → delivery → support → loyalty
+        addJourney('Jornada de Compra', ['Descoberta do produto', 'Comparação e avaliação', 'Decisão de compra', 'Pagamento', 'Confirmação do pedido']);
+        addJourney('Jornada Pós-venda', ['Aguardar entrega', 'Recebimento', 'Uso do produto', 'Suporte / troca', 'Fidelização']);
+      } else if (template === 'saude') {
+        // Saúde: awareness → scheduling → care → follow-up → prevention
+        addJourney('Jornada de Atendimento', ['Identificação da necessidade', 'Agendamento', 'Chegada à clínica', 'Consulta / procedimento', 'Prescrição e orientação']);
+        addJourney('Jornada de Acompanhamento', ['Pós-consulta', 'Exames e laudos', 'Retorno', 'Adesão ao tratamento', 'Prevenção e bem-estar']);
+      } else if (template === 'educacao') {
+        // Educação: interest → enrollment → learning → completion → career
+        addJourney('Jornada de Matrícula', ['Descoberta do curso', 'Pesquisa e comparação', 'Contato com a instituição', 'Processo de matrícula', 'Boas-vindas e integração']);
+        addJourney('Jornada de Aprendizado', ['Início das aulas', 'Engajamento com conteúdo', 'Avaliações', 'Dificuldades e suporte', 'Conclusão e certificação']);
+      } else if (template === 'restaurante') {
+        // Restaurante: discovery → reservation → experience → payment → loyalty
+        addJourney('Jornada Presencial', ['Descoberta e escolha', 'Reserva ou chegada', 'Recepção e espera', 'Pedido e atendimento', 'Consumo da refeição', 'Pagamento e saída']);
+        addJourney('Jornada Delivery', ['Acesso ao canal de pedido', 'Escolha do cardápio', 'Realização do pedido', 'Aguardar entrega', 'Recebimento e consumo', 'Avaliação']);
+      }
+      nextGraph.service.updatedAt = now;
+    }
     const projectId = nextGraph.service.project?.id || `project-${nextGraph.service.id}`;
     saveProjectSnapshot(nextGraph, { id: projectId, title: projectName, serviceName, description: input.description ?? '', template, favorite: false, archived: false, lastOpenedAt: nowIso() });
     markProjectOpened(projectId);

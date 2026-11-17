@@ -4,7 +4,8 @@ const INDEX_KEY = 'blue-ocean-project-library-v1';
 const ACTIVE_KEY = 'blue-ocean-project-library-active-v1';
 const SNAPSHOT_PREFIX = 'blue-ocean-project-snapshot-v1:';
 
-export type ProjectTemplate = 'blank' | 'redesign' | 'blueprint' | 'research' | 'omnichannel' | 'demo';
+export type ProjectTemplate = 'blank' | 'redesign' | 'blueprint' | 'research' | 'omnichannel' | 'demo'
+  | 'saas' | 'varejo' | 'saude' | 'educacao' | 'restaurante';
 
 export type ProjectLibraryEntry = {
   id: Id;
@@ -174,5 +175,6 @@ export function setProjectArchived(id: Id, archived: boolean, store = storage())
 export function projectTemplateLabel(template: ProjectTemplate) {
   return ({
     blank: 'Novo serviço', redesign: 'Redesenho de serviço', blueprint: 'Service Blueprint', research: 'Pesquisa de serviço', omnichannel: 'Experiência omnichannel', demo: 'Projeto de exemplo',
+    saas: 'Template SaaS', varejo: 'Template Varejo', saude: 'Template Saúde', educacao: 'Template Educação', restaurante: 'Template Restaurante',
   } as Record<ProjectTemplate, string>)[template];
 }
