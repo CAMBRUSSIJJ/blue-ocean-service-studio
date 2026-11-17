@@ -1,5 +1,6 @@
 import { useMemo, useState, type DragEvent } from 'react';
-import { ArrowRight, CheckCircle2, FileText, GripVertical, Lightbulb, Microscope, Plus, Quote, Search, Sparkles, Wrench, X } from '../design-system/icons';
+import { ArrowRight, CheckCircle2, FileText, GripVertical, Lightbulb, Microscope, Plus, Quote, Search, Sparkles, Upload, Wrench, X } from '../design-system/icons';
+import { ResearchImportWizard } from '../components/ResearchImportWizard';
 import { BlueOceanObjectIcon } from '../design-system/blue-ocean-objects';
 import type { ResearchMethod, ResearchObservationKind } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
@@ -46,6 +47,7 @@ export function ResearchStudioView({ studio, foundationSurface = 'research' }: {
   const [sourceDraft, setSourceDraft] = useState({ title: '', type: 'interview' as ResearchMethod, summary: '', participant: '', owner: '', method: '', sample: '', date: '' });
   const [observationDraft, setObservationDraft] = useState({ text: '', kind: 'said' as ResearchObservationKind, sourceId: '', context: '', participant: '', observedAt: '' });
   const [insightDraft, setInsightDraft] = useState({ title: '', description: '', evidenceIds: [] as string[] });
+  const [showImportWizard, setShowImportWizard] = useState(false);
   const q = query.trim().toLocaleLowerCase('pt-BR');
   const activeProject = report.activeProject;
   const researchTabs: Array<[ResearchTab, string]> = [
@@ -388,7 +390,7 @@ export function ResearchStudioView({ studio, foundationSurface = 'research' }: {
         {!report.projects.length && <div className="bo-h156-empty-start"><div className="bo-h156-empty-icon"><Microscope size={26}/></div><small>COMECE PELA PERGUNTA</small><h3>Nenhum projeto de pesquisa ainda</h3><p>Estruture primeiro o que precisa ser aprendido. Isso evita coletar material sem saber qual decisão a pesquisa precisa sustentar.</p><ol><li><b>1</b><span><strong>Defina o que queremos aprender</strong><small>Escreva a pergunta ou objetivo da pesquisa.</small></span></li><li><b>2</b><span><strong>Escolha como investigar</strong><small>Entrevista, observação, survey, documento ou outro método.</small></span></li><li><b>3</b><span><strong>Colete sem interpretar cedo demais</strong><small>Depois organize observações, evidências e insights.</small></span></li></ol><button type="button" className="primary" onClick={() => setDialog('project')}><Plus size={14}/> Criar primeiro projeto</button><div><button type="button" onClick={() => setDialog('source')}>Adicionar material existente</button><button type="button" onClick={() => setDialog('observation')}>Registrar observação</button></div></div>}
       </section>}
 
-      {tab === 'field' && <section className="bo-h726-pane bo-h156-pane"><div className="bo-h726-pane-head"><div><small>CAMPO E MATERIAIS</small><h3>Preserve o que aconteceu antes de interpretar</h3><p>Materiais guardam a origem; observações registram aquilo que foi dito, visto ou medido.</p></div><div><button type="button" onClick={() => setDialog('source')}><FileText size={15}/> Adicionar material</button><button type="button" className="primary" onClick={() => setDialog('observation')}><Quote size={15}/> Registrar observação</button></div></div>
+      {tab === 'field' && <section className="bo-h726-pane bo-h156-pane"><div className="bo-h726-pane-head"><div><small>CAMPO E MATERIAIS</small><h3>Preserve o que aconteceu antes de interpretar</h3><p>Materiais guardam a origem; observações registram aquilo que foi dito, visto ou medido.</p></div><div><button type="button" onClick={() => setShowImportWizard(true)}><Upload size={15}/> Importar CSV</button><button type="button" onClick={() => setDialog('source')}><FileText size={15}/> Adicionar material</button><button type="button" className="primary" onClick={() => setDialog('observation')}><Quote size={15}/> Registrar observação</button></div></div>
         {!activeProject && <div className="bo-h156-context-note"><Microscope size={16}/><div><strong>Você ainda não tem um projeto ativo.</strong><p>É possível registrar material solto, mas criar um projeto primeiro melhora contexto e rastreabilidade.</p></div><button type="button" onClick={() => setDialog('project')}>Criar projeto</button></div>}
         <div className="bo-h726-split"><div><h4>Materiais <span>{filteredSources.length}</span></h4><div className="bo-h726-stack">{filteredSources.map((source) => <article key={source.id} className="bo-h726-source-card"><header><b>{RESEARCH_METHOD_LABELS[source.type]}</b><time>{formatDate(source.date || source.updatedAt)}</time></header><strong>{source.title}</strong><p>{source.summary || 'Sem resumo.'}</p><footer><span>{source.participant || source.sample || 'Contexto não informado'}</span><span>{source.owner || 'Sem responsável'}</span></footer></article>)}</div></div>
         <div><h4>Observações <span>{filteredObservations.length}</span></h4><div className="bo-h726-stack">{filteredObservations.map((observation) => <article key={observation.id} className={`bo-h726-observation-card is-${observation.kind}`}><header><b>{OBSERVATION_KIND_LABELS[observation.kind]}</b>{observation.evidenceId ? <span className="is-linked"><CheckCircle2 size={13}/> Evidência criada</span> : null}</header><blockquote>{observation.text}</blockquote>{observation.context && <p>{observation.context}</p>}<footer><span>{observation.participant || 'Contexto não informado'}</span>{!observation.evidenceId && <button type="button" onClick={() => promoteObservation(observation.id)}>Transformar em Evidência <ArrowRight size={13}/></button>}</footer></article>)}</div></div></div>
@@ -421,5 +423,13 @@ export function ResearchStudioView({ studio, foundationSurface = 'research' }: {
       {dialog === 'insight' && <div className="bo-h726-form"><label className="full"><span>{experience.level === 'foundation' ? 'Aprendizado' : 'Insight'}</span><input autoFocus value={insightDraft.title} onChange={(e) => setInsightDraft({ ...insightDraft, title: e.target.value })} placeholder="Ex.: Confirmação reduz ansiedade antes da coleta"/></label><label className="full"><span>O que isso significa?</span><textarea value={insightDraft.description} onChange={(e) => setInsightDraft({ ...insightDraft, description: e.target.value })} placeholder="Interprete o padrão — não copie a observação."/></label><div className="full bo-h726-evidence-picker"><span>Evidências que sustentam este {experience.level === 'foundation' ? 'aprendizado' : 'Insight'}</span>{report.evidence.map((evidence) => <label key={evidence.id}><input type="checkbox" checked={insightDraft.evidenceIds.includes(evidence.id)} onChange={(e) => setInsightDraft({ ...insightDraft, evidenceIds: e.target.checked ? [...insightDraft.evidenceIds, evidence.id] : insightDraft.evidenceIds.filter((id) => id !== evidence.id) })}/><span><BlueOceanObjectIcon kind="evidence" size={14}/>{titleOf(evidence)}</span></label>)}</div></div>}
       <footer><button type="button" onClick={() => setDialog(null)}>Cancelar</button><button type="button" className="primary" onClick={dialog === 'project' ? saveProject : dialog === 'source' ? saveSource : dialog === 'observation' ? saveObservation : saveInsight}>Salvar</button></footer>
     </div></div>}
+
+    {showImportWizard && (
+      <ResearchImportWizard
+        graph={graph}
+        studio={studio}
+        onClose={() => setShowImportWizard(false)}
+      />
+    )}
   </div>;
 }

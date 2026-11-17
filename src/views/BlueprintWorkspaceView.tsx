@@ -45,6 +45,7 @@ import { ServiceHealthWidget } from '../components/ServiceHealthWidget';
 import { JourneyPresentationMode } from '../components/JourneyPresentationMode';
 import { NamedSnapshotPanel } from '../components/NamedSnapshotPanel';
 import { StageComments } from '../components/StageComments';
+import { PartnerProgramPanel } from '../components/PartnerProgramPanel';
 
 type BlueprintApi = {
   create?(name?: string): Promise<{ id: string; name: string } | null> | { id: string; name: string } | null;
@@ -165,6 +166,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
   const [researchSurface, setResearchSurface] = useState<'research' | 'tools'>('research');
   const [presentJourneyId, setPresentJourneyId] = useState<string | null>(null);
   const [showSnapshotPanel, setShowSnapshotPanel] = useState(false);
+  const [showPartnerPanel, setShowPartnerPanel] = useState(false);
   const [showCommentPanel, setShowCommentPanel] = useState(false);
   const [commentJourneyId, setCommentJourneyId] = useState<string | null>(null);
   const [overviewPhase, setOverviewPhase] = useState<GuidedWorkspacePhase>('understand');
@@ -706,6 +708,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
         </div>
         <div className="bo-h1704-secondary-links"><button type="button" onClick={() => openAudience(false)}><BlueOceanObjectIcon kind="persona" size={18}/> Público-alvo <ArrowRight size={14}/></button><button type="button" onClick={continueWhiteboardFromDesign}><BlueOceanObjectIcon kind="whiteboard" size={18}/> Whiteboard <ArrowRight size={14}/></button><button type="button" onClick={() => selectWorkspaceTab('blueprint')}><BlueOceanObjectIcon kind="blueprint" size={18}/> Blueprints <ArrowRight size={14}/></button><button type="button" onClick={() => { try { sessionStorage.setItem('bo-context-kind','metric'); } catch { /* opcional */ } setActiveTab('context'); }}><BlueOceanObjectIcon kind="metric" size={18}/> Métricas <ArrowRight size={14}/></button>{hasService && <button type="button" onClick={() => setShowSnapshotPanel(true)}><BlueOceanObjectIcon kind="insight" size={18}/> Histórico <ArrowRight size={14}/></button>}</div>
         <button className="bo-h1704-structure-toggle" type="button" onClick={() => setShowServiceStructure((current) => !current)} aria-expanded={showServiceStructure}>{showServiceStructure ? 'Ocultar' : 'Ver'} estrutura completa do serviço <ArrowRight size={14}/></button>
+        <div className="bo-c3-partner-cta-bar"><div className="bo-c3-partner-cta-copy"><strong>Blue Ocean Partner Network</strong><span>Seja um consultor certificado e amplie seu alcance</span></div><button type="button" className="bo-c3-partner-cta-btn" onClick={() => setShowPartnerPanel(true)}>Registrar interesse <ArrowRight size={13}/></button></div>
       </section>
       {showServiceStructure && <section className="bo-h740h7-path">
         {/* Ações diretas agora pertencem ao dashboard principal; não duplicar dentro das fases. */}
@@ -901,6 +904,9 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
 
     {/* C2.5 — Painel de histórico de versões */}
     {showSnapshotPanel && <NamedSnapshotPanel graph={graph} onClose={() => setShowSnapshotPanel(false)} onRestore={(g) => { studio.setGraph(() => g, 'Restaurar snapshot'); setShowSnapshotPanel(false); }} />}
+
+    {/* C3.4 — Programa de parceiros */}
+    {showPartnerPanel && <PartnerProgramPanel onClose={() => setShowPartnerPanel(false)} />}
 
     <span className="sr-only" data-unified-legacy-targets="Journey maps|Whiteboards|Blueprints">Journey maps · Whiteboards · Blueprints continuam disponíveis dentro do Service Workspace. Um serviço, três perspectivas. Whiteboard permite explorar e conectar livremente.</span>
   </section>;

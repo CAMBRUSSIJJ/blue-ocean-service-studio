@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, Calendar, CheckCircle2, Link2, Plus, Target } from '../design-system/icons';
+import { AlertTriangle, Calendar, CheckCircle2, Download, Link2, Plus, Target } from '../design-system/icons';
+import { IntegrationExportPanel } from '../components/IntegrationExportPanel';
 import { BlueOceanObjectIcon } from '../design-system/blue-ocean-objects';
 import type { Id, ImprovementInitiativeRisk, ImprovementInitiativeStatus } from '../domain/model';
 import type { StudioController } from '../state/useStudioController';
@@ -16,6 +17,7 @@ export function ImprovementPortfolioView({ studio }: { studio: StudioController 
   const { graph, setGraph, showToast } = studio;
   const report = useMemo(() => buildImprovementPortfolioReport(graph), [graph]);
   const [selectedId, setSelectedId] = useState<Id>('');
+  const [showExportPanel, setShowExportPanel] = useState(false);
   const selected = report.initiatives.find((item) => item.id === selectedId) ?? report.initiatives[0] ?? null;
 
   useEffect(() => {
@@ -48,7 +50,13 @@ export function ImprovementPortfolioView({ studio }: { studio: StudioController 
   return <section className="bo-h735" data-improvement-portfolio="7.35">
     <header className="bo-h735-hero">
       <div><span className="bo-h735-kicker"><Target size={14}/> H7.35 · IMPROVEMENT PORTFOLIO</span><h2>Transforme oportunidades escolhidas em melhoria executável.</h2><p>Planeje iniciativas sem perder o porquê da mudança. Cada iniciativa permanece ligada à oportunidade, aos problemas de origem e, quando necessário, às decisões, experimentos, métricas e dependências que governam a execução.</p></div>
-      <div className="bo-h735-hero-score"><strong>{report.averageProgress}%</strong><span>progresso médio</span><em>{report.counts.inProgress} em execução · {report.counts.validating} validando</em></div>
+      <div className="bo-h735-hero-score"><strong>{report.averageProgress}%</strong><span>progresso médio</span><em>{report.counts.inProgress} em execução · {report.counts.validating} validando</em>
+        {report.counts.initiatives > 0 && (
+          <button type="button" className="bo-c3-export-trigger" onClick={() => setShowExportPanel(true)}>
+            <Download size={14}/> Exportar
+          </button>
+        )}
+      </div>
     </header>
 
     <div className="bo-h735-kpis">
@@ -90,5 +98,12 @@ export function ImprovementPortfolioView({ studio }: { studio: StudioController 
         </> : <div className="bo-h735-empty"><BlueOceanObjectIcon kind="task" size={28}/><strong>Portfolio ainda vazio</strong><p>Selecione uma oportunidade na H7.34 e transforme-a em iniciativa para começar.</p></div>}
       </aside>
     </section>
+
+    {showExportPanel && (
+      <IntegrationExportPanel
+        graph={graph}
+        onClose={() => setShowExportPanel(false)}
+      />
+    )}
   </section>;
 }
