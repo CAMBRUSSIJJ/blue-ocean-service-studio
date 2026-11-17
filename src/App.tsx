@@ -1,6 +1,8 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Save, Upload, Download, KanbanSquare, X, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, PanelLeftClose, PanelLeftOpen, ChevronsUpDown } from './design-system/icons';
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
+import { OnboardingFlow } from './components/OnboardingFlow';
+import type { OnboardingAction } from './components/OnboardingFlow';
 import { useStudioController } from './state/useStudioController';
 // Tipos extraídos em compile-time; os módulos de view são carregados sob demanda (code splitting).
 import type { ProjectHomeSection } from './views/ProjectHomeView';
@@ -62,6 +64,10 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const [projectShellOpen, setProjectShellOpen] = useState(false);
   const [createMapIntent, setCreateMapIntent] = useState(false);
   const [projectShellSection] = useState<ProjectShellSection>('overview');
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    // Mostrar onboarding apenas uma vez, quando o workspace está vazio.
+    try { return localStorage.getItem('bo-onboarding-v1') !== '1'; } catch { return true; }
+  });
   const { activeTab, graph, hasService, projects, activeProjectId, saveStatus, handleSave, handleImport, handleExport, createService, loadDemoService,
     isCreateStageOpen, setIsCreateStageOpen, stageDraft, setStageDraft, createStage,
     showShortcuts, setShowShortcuts, toast } = studio;
@@ -335,6 +341,17 @@ export default function App({ authUser, onSignOut }: AppProps) {
   };
 
   const requestServiceCreation = () => window.dispatchEvent(new CustomEvent('bo-create-service'));
+
+  const dismissOnboarding = () => {
+    try { localStorage.setItem('bo-onboarding-v1', '1'); } catch { /* local preference only */ }
+    setShowOnboarding(false);
+  };
+
+  const handleOnboardingNavigate = (action: OnboardingAction) => {
+    if (action === 'journey') { openServiceWorkspaceTab('journey'); return; }
+    if (action === 'personas') { openPrimaryLibraryPage('personas'); return; }
+    openGlobalHome('home');
+  };
 
   const openServiceWorkspaceTab = (requestedTab: string) => {
     const tab = requestedTab === 'blueprint' ? 'journey' : requestedTab;
@@ -647,6 +664,23 @@ export default function App({ authUser, onSignOut }: AppProps) {
       )}
 
       <Toast message={toast.message} isVisible={toast.show} />
+
+      {showOnboarding && !hasService && (
+        <OnboardingFlow
+          onCreateService={(name, description) => {
+            const ok = createService(name, description);
+            if (ok) dismissOnboarding();
+            return ok;
+          }}
+          onLoadDemo={() => {
+            const ok = loadDemoService();
+            if (ok) dismissOnboarding();
+            return ok;
+          }}
+          onNavigate={handleOnboardingNavigate}
+          onClose={dismissOnboarding}
+        />
+      )}
 
       <style
         dangerouslySetInnerHTML={{
