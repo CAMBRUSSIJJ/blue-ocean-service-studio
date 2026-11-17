@@ -3,6 +3,9 @@ import { Save, Upload, Download, KanbanSquare, X, Sparkles, Search, CheckCircle2
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import type { OnboardingAction } from './components/OnboardingFlow';
+import { GlobalSearchModal } from './components/GlobalSearchModal';
+import type { ResultKind as GlobalSearchKind } from './components/GlobalSearchModal';
+import { runtimeRegistry } from './runtime/client';
 import { useStudioController } from './state/useStudioController';
 // Tipos extraídos em compile-time; os módulos de view são carregados sob demanda (code splitting).
 import type { ProjectHomeSection } from './views/ProjectHomeView';
@@ -68,6 +71,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
     // Mostrar onboarding apenas uma vez, quando o workspace está vazio.
     try { return localStorage.getItem('bo-onboarding-v1') !== '1'; } catch { return true; }
   });
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const { activeTab, graph, hasService, projects, activeProjectId, saveStatus, handleSave, handleImport, handleExport, createService, loadDemoService,
     isCreateStageOpen, setIsCreateStageOpen, stageDraft, setStageDraft, createStage,
     showShortcuts, setShowShortcuts, toast } = studio;
@@ -353,6 +357,17 @@ export default function App({ authUser, onSignOut }: AppProps) {
     openGlobalHome('home');
   };
 
+  const handleGlobalSearchNavigate = (kind: GlobalSearchKind, _id: string) => {
+    // Journeys e stages → abre o canvas de journeys
+    if (kind === 'journey' || kind === 'stage') { openServiceWorkspaceTab('journey'); return; }
+    // Entidades → abre a página de biblioteca correspondente
+    if (kind === 'persona') { openPrimaryLibraryPage('personas'); return; }
+    if (kind === 'need') { openPrimaryLibraryPage('needs'); return; }
+    if (kind === 'pain') { openPrimaryLibraryPage('pains'); return; }
+    if (kind === 'problem') { openPrimaryLibraryPage('problems'); return; }
+    if (kind === 'evidence') { openPrimaryLibraryPage('evidence'); return; }
+  };
+
   const openServiceWorkspaceTab = (requestedTab: string) => {
     const tab = requestedTab === 'blueprint' ? 'journey' : requestedTab;
     if (tab === 'research') { openPrimaryLibraryPage('personas'); return; }
@@ -380,6 +395,22 @@ export default function App({ authUser, onSignOut }: AppProps) {
     const changed = (event: Event) => { const target = String((event as CustomEvent<string>).detail || 'overview'); setServiceWorkspaceTab(target === 'research' ? 'overview' : target === 'blueprint' ? 'journey' : target); };
     window.addEventListener('bo-service-workspace-tab-changed', changed);
     return () => window.removeEventListener('bo-service-workspace-tab-changed', changed);
+  }, []);
+
+  // Registro do globalNavigation runtime API + atalho Ctrl+K / Cmd+K
+  useEffect(() => {
+    runtimeRegistry().register('globalNavigation', { open: () => setShowGlobalSearch(true) });
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowGlobalSearch((prev) => !prev);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const openExternal = (key: string, apiName: string, arg?: string) => {
@@ -681,6 +712,13 @@ export default function App({ authUser, onSignOut }: AppProps) {
           onClose={dismissOnboarding}
         />
       )}
+
+      <GlobalSearchModal
+        graph={hasService ? graph : null}
+        open={showGlobalSearch}
+        onClose={() => setShowGlobalSearch(false)}
+        onNavigate={handleGlobalSearchNavigate}
+      />
 
       <style
         dangerouslySetInnerHTML={{
