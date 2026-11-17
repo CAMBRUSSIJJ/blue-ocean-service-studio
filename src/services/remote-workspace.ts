@@ -140,3 +140,51 @@ export async function remoteDownloadVersion(revision: number) {
   const link = document.createElement('a'); link.href = href; link.download = `Blue-Ocean-remoto-versao-${revision}.json`; link.click(); URL.revokeObjectURL(href);
 }
 export function remoteLocalBackup() { runtimeApi<{ export(): void }>('dataBridge')?.export(); }
+
+// ─── Realtime presence & change subscription ──────────────────────────────────
+
+export type PresenceMember = { userId: string; name: string; joinedAt: string };
+
+/** Subscribe to document revision changes for the current workspace.
+ *  Returns an unsubscribe function. No-op when remote is not configured or no binding. */
+export function remoteSubscribeChanges(onRevision: (revision: number) => void): () => void {
+  if (!binding || !remoteConfigured) return () => {};
+  const workspaceId = binding.workspaceId;
+  const channel = remoteClient()
+    .channel(`bo:changes:${workspaceId}`)
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'bo_documents', filter: `workspace_id=eq.${workspaceId}` },
+      (payload) => {
+        const rev = (payload.new as Record<string, unknown>)?.revision;
+        if (typeof rev === 'number') onRevision(rev);
+      },
+    )
+    .subscribe();
+  return () => { void remoteClient().removeChannel(channel); };
+}
+
+/** Broadcast your presence and receive real-time list of online members for the current workspace.
+ *  Returns an unsubscribe function. No-op when not signed in or no binding. */
+export function remotePresenceJoin(name: string, onPresence: (members: PresenceMember[]) => void): () => void {
+  if (!binding || !session) return () => {};
+  const workspaceId = binding.workspaceId;
+  const userId = session.user.id;
+  const channel = remoteClient()
+    .channel(`bo:presence:${workspaceId}`, { config: { presence: { key: userId } } })
+    .on('presence', { event: 'sync' }, () => {
+      const state = channel.presenceState<{ name: string; joinedAt: string }>();
+      const members: PresenceMember[] = Object.entries(state).map(([uid, payloads]) => {
+        const p = Array.isArray(payloads) ? (payloads as Array<{ name: string; joinedAt: string }>)[0] : (payloads as { name: string; joinedAt: string });
+        return { userId: uid, name: p?.name ?? 'Usuário', joinedAt: p?.joinedAt ?? new Date().toISOString() };
+      });
+      onPresence(members);
+    })
+    .subscribe(async (status) => {
+      if (status === 'SUBSCRIBED') {
+        await channel.track({ name, joinedAt: new Date().toISOString() });
+      }
+    });
+  changed();
+  return () => { void remoteClient().removeChannel(channel); changed(); };
+}

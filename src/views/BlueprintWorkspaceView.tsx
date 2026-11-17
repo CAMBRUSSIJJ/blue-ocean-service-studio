@@ -1,6 +1,6 @@
 import { ServiceMapsLibrary } from './ServiceMapsLibrary';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, LayoutTemplate, Plus, Table2, Wrench, X } from '../design-system/icons';
+import { ArrowLeft, ArrowRight, LayoutTemplate, MessageSquare, Plus, Table2, Wrench, X } from '../design-system/icons';
 import { BlueOceanObjectIcon, type BlueOceanObjectKind } from '../design-system/blue-ocean-objects';
 import type { StudioController } from '../state/useStudioController';
 import { buildDesignHandoffReport, prepareBlueprintFromDefinition } from '../services/design-handoff';
@@ -41,6 +41,10 @@ import { buildExecutiveServiceCockpitReport } from '../services/executive-servic
 import { buildGuidedWorkspaceRecommendation, type GuidedWorkspacePhase, type GuidedWorkspaceTarget } from '../services/guided-service-workspace';
 import { experiencePhaseLanguage, experienceTerm, isWorkspaceCapabilityVisible, projectExperienceCapability, useExperienceProfile } from '../services/experience-profile';
 import { listContextEntities } from '../services/context-library';
+import { ServiceHealthWidget } from '../components/ServiceHealthWidget';
+import { JourneyPresentationMode } from '../components/JourneyPresentationMode';
+import { NamedSnapshotPanel } from '../components/NamedSnapshotPanel';
+import { StageComments } from '../components/StageComments';
 
 type BlueprintApi = {
   create?(name?: string): Promise<{ id: string; name: string } | null> | { id: string; name: string } | null;
@@ -159,6 +163,10 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
   ];
   const [showServiceStructure, setShowServiceStructure] = useState(false);
   const [researchSurface, setResearchSurface] = useState<'research' | 'tools'>('research');
+  const [presentJourneyId, setPresentJourneyId] = useState<string | null>(null);
+  const [showSnapshotPanel, setShowSnapshotPanel] = useState(false);
+  const [showCommentPanel, setShowCommentPanel] = useState(false);
+  const [commentJourneyId, setCommentJourneyId] = useState<string | null>(null);
   const [overviewPhase, setOverviewPhase] = useState<GuidedWorkspacePhase>('understand');
   const [phaseViewMode, setPhaseViewMode] = useState<'cards' | 'list'>(() => {
     try {
@@ -685,6 +693,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
 
     {workspaceTab === 'overview' && <div className="bo-h722-overview bo-h740h5-overview bo-h740h7-overview" data-service-workspace-overview="1" data-service-workspace-simplification="7.40-H5" data-guided-overview="1">
       {/* H7.22 legacy semantic contracts: Journey mostra o que o cliente vive · Blueprint mostra como a operação entrega · Whiteboard permite explorar e conectar livremente · bo-h722-flow */}
+      {hasService && <ServiceHealthWidget graph={graph} />}
       <section className="bo-h1704-direct-dashboard" data-journey-reference-flow="H17.0.4" aria-label="Comece pelo que quer construir">
         <div className="bo-h1704-create-bar">
           <button type="button" className="is-primary" onClick={() => { selectWorkspaceTab('journey'); setJourneyStartTemplate('blank'); setJourneyCreateOpen(true); }}><BlueOceanObjectIcon kind="journey" size={22}/><span><b>+ Nova Jornada</b><small>Desenhe a experiência</small></span></button>
@@ -693,9 +702,9 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
         </div>
         <div className="bo-h1704-home-group">
           <header><div><small>SEUS TRABALHOS</small><h2>Jornadas recentes</h2><p>Abra um mapa existente ou crie um novo, sem preencher Pesquisa primeiro.</p></div><button type="button" onClick={() => selectWorkspaceTab('journey')}>Ver todas as Jornadas <ArrowRight size={15}/></button></header>
-          {recentJourneys.length ? <div className="bo-h1704-recent-grid">{recentJourneys.map((item) => <button key={item.id} type="button" className="bo-h1704-recent-card" onClick={() => { selectWorkspaceTab('journey'); void openJourney(item.id); }}><div className="bo-h1704-recent-cover"><img src={journeyPreviewSrc(item, graph)} alt="" loading="lazy"/></div><strong>{item.name}</strong><span>{item.stageIds.length} {item.stageIds.length === 1 ? 'etapa' : 'etapas'} · {item.status === 'active' ? 'Ativa' : 'Em construção'}</span><small>Atualizada em {formatDate(item.updatedAt)}</small></button>)}</div> : <div className="bo-h1704-no-recent"><BlueOceanObjectIcon kind="journey" size={30}/><strong>Sua primeira Jornada começa aqui.</strong><p>Escolha um quadro em branco ou um modelo editável e entre direto no mapa.</p><button type="button" onClick={() => { selectWorkspaceTab('journey'); setJourneyCreateOpen(true); }}>Criar primeira Jornada <ArrowRight size={15}/></button></div>}
+          {recentJourneys.length ? <div className="bo-h1704-recent-grid">{recentJourneys.map((item) => <div key={item.id} className="bo-h1704-recent-card-wrap"><button type="button" className="bo-h1704-recent-card" onClick={() => { selectWorkspaceTab('journey'); void openJourney(item.id); }}><div className="bo-h1704-recent-cover"><img src={journeyPreviewSrc(item, graph)} alt="" loading="lazy"/></div><strong>{item.name}</strong><span>{item.stageIds.length} {item.stageIds.length === 1 ? 'etapa' : 'etapas'} · {item.status === 'active' ? 'Ativa' : 'Em construção'}</span><small>Atualizada em {formatDate(item.updatedAt)}</small></button>{item.stageIds.length > 0 && <button type="button" className="bo-c2-present-btn" title="Modo apresentação" onClick={() => setPresentJourneyId(item.id)} aria-label={`Apresentar ${item.name}`}>▶ Apresentar</button>}</div>)}</div> : <div className="bo-h1704-no-recent"><BlueOceanObjectIcon kind="journey" size={30}/><strong>Sua primeira Jornada começa aqui.</strong><p>Escolha um quadro em branco ou um modelo editável e entre direto no mapa.</p><button type="button" onClick={() => { selectWorkspaceTab('journey'); setJourneyCreateOpen(true); }}>Criar primeira Jornada <ArrowRight size={15}/></button></div>}
         </div>
-        <div className="bo-h1704-secondary-links"><button type="button" onClick={() => openAudience(false)}><BlueOceanObjectIcon kind="persona" size={18}/> Público-alvo <ArrowRight size={14}/></button><button type="button" onClick={continueWhiteboardFromDesign}><BlueOceanObjectIcon kind="whiteboard" size={18}/> Whiteboard <ArrowRight size={14}/></button><button type="button" onClick={() => selectWorkspaceTab('blueprint')}><BlueOceanObjectIcon kind="blueprint" size={18}/> Blueprints <ArrowRight size={14}/></button><button type="button" onClick={() => { try { sessionStorage.setItem('bo-context-kind','metric'); } catch { /* opcional */ } setActiveTab('context'); }}><BlueOceanObjectIcon kind="metric" size={18}/> Métricas <ArrowRight size={14}/></button></div>
+        <div className="bo-h1704-secondary-links"><button type="button" onClick={() => openAudience(false)}><BlueOceanObjectIcon kind="persona" size={18}/> Público-alvo <ArrowRight size={14}/></button><button type="button" onClick={continueWhiteboardFromDesign}><BlueOceanObjectIcon kind="whiteboard" size={18}/> Whiteboard <ArrowRight size={14}/></button><button type="button" onClick={() => selectWorkspaceTab('blueprint')}><BlueOceanObjectIcon kind="blueprint" size={18}/> Blueprints <ArrowRight size={14}/></button><button type="button" onClick={() => { try { sessionStorage.setItem('bo-context-kind','metric'); } catch { /* opcional */ } setActiveTab('context'); }}><BlueOceanObjectIcon kind="metric" size={18}/> Métricas <ArrowRight size={14}/></button>{hasService && <button type="button" onClick={() => setShowSnapshotPanel(true)}><BlueOceanObjectIcon kind="insight" size={18}/> Histórico <ArrowRight size={14}/></button>}</div>
         <button className="bo-h1704-structure-toggle" type="button" onClick={() => setShowServiceStructure((current) => !current)} aria-expanded={showServiceStructure}>{showServiceStructure ? 'Ocultar' : 'Ver'} estrutura completa do serviço <ArrowRight size={14}/></button>
       </section>
       {showServiceStructure && <section className="bo-h740h7-path">
@@ -853,7 +862,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
 
     {workspaceTab === 'journey' && !journeyEditorOpen && !journeyCreateOpen && <ServiceMapsLibrary graph={graph} query={journeyQuery} onQuery={setJourneyQuery} view={journeyViewMode} onView={setJourneyViewMode} onCreate={() => setJourneyCreateOpen(true)} onOpen={id => void openJourney(id)} onOpenBoard={id => void runtimeCall('open', id)} onRemove={(id, name) => setJourneyToDelete({ id, name })} onRemoveBoard={(id, name) => setBlueprintToDelete({ id, name })}/>}
 
-    {workspaceTab === 'journey' && journeyEditorOpen && <EditorSurface><div className="bo-h724-journey-editor-shell"><div className="bo-h722-embedded bo-h722-embedded--journey" data-unified-journey-pane="1"><JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/></div></div></EditorSurface>}
+    {workspaceTab === 'journey' && journeyEditorOpen && <EditorSurface><div className="bo-h724-journey-editor-shell"><div className="bo-h722-embedded bo-h722-embedded--journey" data-unified-journey-pane="1"><JourneyView studio={studio} onBack={() => setJourneyEditorOpen(false)}/></div><button type="button" className="bo-c2-comments-fab" title="Comentários inline" aria-label="Abrir painel de comentários" onClick={() => { setCommentJourneyId(studio.graph.service.journeyIds.find(id => graph.journeys[id]) ?? null); setShowCommentPanel(true); }}><MessageSquare size={18}/></button></div></EditorSurface>}
 
     {workspaceTab === 'whiteboard' && <div className="bo-h722-embedded bo-h722-embedded--whiteboard" data-unified-whiteboard-pane="1"><WhiteboardsView studio={studio}/></div>}
 
@@ -883,6 +892,15 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
         <footer><button type="button" className="bo-button bo-button--secondary" onClick={() => setJourneyToDelete(null)}>Cancelar</button><button type="button" className="danger bo-button bo-button--danger" onClick={deleteJourney}>Confirmar exclusão</button></footer>
       </div>
     </div>}
+
+    {/* C2.3 — Modo apresentação de jornada */}
+    {presentJourneyId && <JourneyPresentationMode graph={graph} journeyId={presentJourneyId} onClose={() => setPresentJourneyId(null)} />}
+
+    {/* C2.4 — Comentários inline no canvas */}
+    {showCommentPanel && <StageComments graph={graph} studio={studio} journeyId={commentJourneyId} onClose={() => setShowCommentPanel(false)} />}
+
+    {/* C2.5 — Painel de histórico de versões */}
+    {showSnapshotPanel && <NamedSnapshotPanel graph={graph} onClose={() => setShowSnapshotPanel(false)} onRestore={(g) => { studio.setGraph(() => g, 'Restaurar snapshot'); setShowSnapshotPanel(false); }} />}
 
     <span className="sr-only" data-unified-legacy-targets="Journey maps|Whiteboards|Blueprints">Journey maps · Whiteboards · Blueprints continuam disponíveis dentro do Service Workspace. Um serviço, três perspectivas. Whiteboard permite explorar e conectar livremente.</span>
   </section>;
