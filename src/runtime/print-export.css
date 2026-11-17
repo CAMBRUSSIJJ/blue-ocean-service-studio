@@ -1,0 +1,145 @@
+/* BLUE OCEAN — Export / Print styles
+   Applied when body has class  .bo-print-journey  or  .bo-print-blueprint
+   The @media print rules kick in when window.print() is called.
+   ------------------------------------------------------------------ */
+
+/* ── 1. When export is pending, darken everything to signal "preparing" ── */
+body.bo-print-journey::after,
+body.bo-print-blueprint::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 9998;
+  pointer-events: none;
+}
+
+/* ── 2. Print page setup ── */
+@media print {
+  @page {
+    size: A3 landscape;
+    margin: 12mm 10mm;
+  }
+
+  /* Reset everything to white/black for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* ── 3. Journey map export ── */
+  body.bo-print-journey {
+    background: #fff !important;
+  }
+
+  body.bo-print-journey::after {
+    display: none !important;
+  }
+
+  /* Hide all chrome: sidebar, header, toolbar, more-menu, tabs, overlays */
+  body.bo-print-journey .bo-sidebar,
+  body.bo-print-journey .bo-topbar,
+  body.bo-print-journey .bo-h721-workspace-tabs,
+  body.bo-print-journey .bo-h723-toolbar,
+  body.bo-print-journey .bo-h79-row-picker,
+  body.bo-print-journey .bo-h723-journey-bar,
+  body.bo-print-journey .bo-h721-panel-heading,
+  body.bo-print-journey [data-panel="right"],
+  body.bo-print-journey [role="dialog"],
+  body.bo-print-journey .bo-modal-overlay,
+  body.bo-print-journey [data-toast],
+  body.bo-print-journey [data-onboarding] {
+    display: none !important;
+  }
+
+  /* Make journey scroll area fill the page */
+  body.bo-print-journey [data-journey-workspace] {
+    page-break-inside: avoid;
+  }
+
+  body.bo-print-journey .flex-1.min-w-0.overflow-x-auto.overflow-y-auto {
+    overflow: visible !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  /* Stage cards: prevent breaking across pages */
+  body.bo-print-journey [data-journey-stage-id] {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Emotion curve */
+  body.bo-print-journey .bo-h721-emotion-curve,
+  body.bo-print-journey .bo-h723-emotion-curve {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* ── 4. Blueprint export ── */
+  body.bo-print-blueprint {
+    background: #fff !important;
+  }
+
+  body.bo-print-blueprint::after {
+    display: none !important;
+  }
+
+  body.bo-print-blueprint .bo-sidebar,
+  body.bo-print-blueprint .bo-topbar,
+  body.bo-print-blueprint [data-workspace-tabs],
+  body.bo-print-blueprint .bo-h723-toolbar,
+  body.bo-print-blueprint [data-panel="right"],
+  body.bo-print-blueprint [role="dialog"],
+  body.bo-print-blueprint .bo-modal-overlay,
+  body.bo-print-blueprint [data-toast],
+  body.bo-print-blueprint [data-onboarding] {
+    display: none !important;
+  }
+
+  body.bo-print-blueprint .bo-blueprint-canvas,
+  body.bo-print-blueprint [data-blueprint-canvas] {
+    overflow: visible !important;
+    max-width: none !important;
+  }
+
+  body.bo-print-blueprint [data-blueprint-swimlane] {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* ── 5. Print header / footer injected by JS ── */
+  .bo-print-header {
+    display: none;
+  }
+
+  body.bo-print-journey .bo-print-header,
+  body.bo-print-blueprint .bo-print-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0 8mm;
+    border-bottom: 1.5px solid #e2e8f0;
+    margin-bottom: 6mm;
+    font-family: system-ui, sans-serif;
+  }
+
+  .bo-print-header__title {
+    font-size: 15pt;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .bo-print-header__meta {
+    font-size: 9pt;
+    color: #64748b;
+  }
+
+  .bo-print-header__logo {
+    font-size: 10pt;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #3b82f6;
+    text-transform: uppercase;
+  }
+}

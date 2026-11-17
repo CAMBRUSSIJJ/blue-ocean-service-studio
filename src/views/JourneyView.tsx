@@ -7,7 +7,7 @@ import { runtimeApi } from '../runtime/client';
 import {
   Map as MapIcon, Undo2, Redo2, Copy, ClipboardPaste, Layers3, Trash2, Focus, Keyboard, ListFilter,
   ZoomIn, ZoomOut, Plus, GripVertical, PanelRightOpen, ArrowLeft, ArrowRight, X, LayoutTemplate,
-  Sparkles, BookOpen, Target, CheckCircle2, Image as ImageIcon, Upload, RotateCcw, Star, Activity, CircleAlert, MoreHorizontal, Maximize2,
+  Sparkles, BookOpen, Target, CheckCircle2, Image as ImageIcon, Upload, RotateCcw, Star, Activity, CircleAlert, MoreHorizontal, Maximize2, Printer,
 } from '../design-system/icons';
 import { hasCustomJourneyCover, journeyCoverSrc, prepareJourneyCoverFile } from '../services/journey-cover';
 import { buildChannelContinuityReport } from '../services/channel-continuity';
@@ -133,6 +133,33 @@ export function JourneyView({ studio, onBack }: { studio: StudioController; onBa
   const essentialRows = new Set(['customerAction', 'thoughts', 'emotion', 'touchpoints', 'validatedProblems']);
   const mapRowVisible = (row: (typeof JOURNEY_ROWS)[number]['id']) => rowVisible(row) && (detailMode || essentialRows.has(row));
   const visibleMapRowCount = JOURNEY_ROWS.filter((row) => mapRowVisible(row.id)).length;
+  const exportJourneyAsPDF = () => {
+    const title = journey.name?.trim() || 'Journey Map';
+    // Inject a print-only header into the document temporarily
+    const header = document.createElement('div');
+    header.className = 'bo-print-header';
+    header.innerHTML = `
+      <span class="bo-print-header__logo">BLUE OCEAN</span>
+      <span class="bo-print-header__title">${title}</span>
+      <span class="bo-print-header__meta">Exportado em ${new Date().toLocaleDateString('pt-BR')}</span>
+    `;
+    document.body.prepend(header);
+    document.body.classList.add('bo-print-journey');
+    const cleanup = () => {
+      document.body.classList.remove('bo-print-journey');
+      header.remove();
+    };
+    // Use matchMedia to detect when print dialog closes
+    const mq = window.matchMedia('print');
+    const onPrintEnd = (e: MediaQueryListEvent) => {
+      if (!e.matches) { cleanup(); mq.removeEventListener('change', onPrintEnd); }
+    };
+    mq.addEventListener('change', onPrintEnd);
+    // Also listen for afterprint as fallback
+    window.addEventListener('afterprint', cleanup, { once: true });
+    window.print();
+  };
+
   const fitJourneyToViewport = () => {
     const viewport = scrollRef.current?.clientWidth ?? 0;
     const content = 208 + Math.max(1, visibleStages.length) * (stageWidth + 16) + 170;
@@ -305,6 +332,7 @@ export function JourneyView({ studio, onBack }: { studio: StudioController; onBa
                 <button type="button" onClick={() => { insertBundles(clipboard); setShowMoreTools(false); }} disabled={!clipboard.length}><ClipboardPaste size={15}/>Colar etapas</button>
                 <button type="button" onClick={() => { duplicateSelected(); setShowMoreTools(false); }} disabled={!selectedCount}><Layers3 size={15}/>Duplicar seleção</button>
                 <button type="button" className="danger" onClick={() => { removeSelected(); setShowMoreTools(false); }} disabled={!selectedCount}><Trash2 size={15}/>Excluir seleção</button>
+                <button type="button" onClick={() => { exportJourneyAsPDF(); setShowMoreTools(false); }}><Printer size={15}/>Exportar como PDF</button>
                 <button type="button" onClick={() => { setShowShortcuts(true); setShowMoreTools(false); }}><Keyboard size={15}/>Atalhos</button>
               </div>}
             </div>
