@@ -24,8 +24,19 @@ import {
   normalizeMatrixRow,
   validateMatrixDocument,
   applyMatrixCardAction,
+  matrixServiceReferences,
+  matrixContentFromDocument,
+  restoreMatrixContent,
 } from '../journey-content';
-import type { JourneyMatrixBlock } from '../../domain/model';
+import { createServiceGraph } from '../../domain/graph-operations';
+import type { JourneyMatrixBlock, ServiceGraph } from '../../domain/model';
+
+const NOW = '2024-11-01T10:00:00.000Z';
+
+function baseGraph(): ServiceGraph {
+  const g = createServiceGraph('S');
+  return { ...g, service: { ...g.service, id: 'S', updatedAt: NOW } };
+}
 
 function makeBlock(id: string, text = 'Hello', type = 'card'): Record<string, unknown> {
   return { id, type, text, i: id };
@@ -556,5 +567,176 @@ describe('applyMatrixCardAction', () => {
 
   it('throws when selected id not found', () => {
     expect(() => applyMatrixCardAction(cells, ['missing'], 'tone', { tone: 'blue' })).toThrow();
+  });
+});
+
+// ─── matrixServiceReferences ───────────────────────────────────────────────────
+
+describe('matrixServiceReferences', () => {
+  it('returns empty arrays for empty graph', () => {
+    const result = matrixServiceReferences(baseGraph());
+    expect(result['channel']).toHaveLength(0);
+    expect(result['persona']).toHaveLength(0);
+    expect(result['pain']).toHaveLength(0);
+  });
+
+  it('includes personas from entities', () => {
+    const g: ServiceGraph = {
+      ...baseGraph(),
+      entities: {
+        ...baseGraph().entities,
+        persona: { 'p1': { id: 'p1', serviceId: 'S', kind: 'persona', title: 'Alice', createdAt: NOW, updatedAt: NOW } },
+      },
+    } as ServiceGraph;
+    const result = matrixServiceReferences(g);
+    expect(result['persona'].some(r => r['id'] === 'p1')).toBe(true);
+  });
+
+  it('includes pain from entities', () => {
+    const g: ServiceGraph = {
+      ...baseGraph(),
+      entities: {
+        ...baseGraph().entities,
+        pain: { 'pa1': { id: 'pa1', serviceId: 'S', kind: 'pain', title: 'Pain 1', createdAt: NOW, updatedAt: NOW } },
+      },
+    } as ServiceGraph;
+    const result = matrixServiceReferences(g);
+    expect(result['pain'].some(r => r['id'] === 'pa1')).toBe(true);
+  });
+
+  it('includes problems as pain', () => {
+    const g: ServiceGraph = {
+      ...baseGraph(),
+      problems: { 'prob1': { id: 'prob1', serviceId: 'S', description: 'Issue', createdAt: NOW, updatedAt: NOW } as ServiceGraph['problems'][string] },
+    };
+    const result = matrixServiceReferences(g);
+    expect(result['pain'].some(r => r['id'] === 'prob1')).toBe(true);
+  });
+
+  it('excludes entities from other services', () => {
+    const g: ServiceGraph = {
+      ...baseGraph(),
+      entities: {
+        ...baseGraph().entities,
+        persona: { 'p-other': { id: 'p-other', serviceId: 'OTHER', kind: 'persona', title: 'Bob', createdAt: NOW, updatedAt: NOW } },
+      },
+    } as ServiceGraph;
+    const result = matrixServiceReferences(g);
+    expect(result['persona'].some(r => r['id'] === 'p-other')).toBe(false);
+  });
+
+  it('marks inJourney for persona linked to journey', () => {
+    const g: ServiceGraph = {
+      ...baseGraph(),
+      journeys: { j1: { id: 'j1', serviceId: 'S', name: 'J', status: 'active', stageIds: [], personaId: 'p1', createdAt: NOW, updatedAt: NOW } as ServiceGraph['journeys'][string] },
+      entities: {
+        ...baseGraph().entities,
+        persona: { 'p1': { id: 'p1', serviceId: 'S', kind: 'persona', title: 'Alice', createdAt: NOW, updatedAt: NOW } },
+      },
+    } as ServiceGraph;
+    const result = matrixServiceReferences(g, { journeyId: 'j1' });
+    const alice = result['persona'].find(r => r['id'] === 'p1');
+    expect(alice?.['inJourney']).toBe(true);
+  });
+});
+
+// ─── matrixContentFromDocument ────────────────────────────────────────────────
+
+describe('matrixContentFromDocument', () => {
+  it('returns empty structure for empty doc', () => {
+    const result = matrixContentFromDocument({}, ['s1']);
+    expect(result.version).toBe(1);
+    expect(result.cells['s1']).toEqual({});
+    expect(result.connections).toHaveLength(0);
+  });
+
+  it('maps cells from doc columns to stageIds', () => {
+    const doc = {
+      c: { 'fl|0': [{ i: 'card1', id: 'card1', type: 'card', text: 'Hello', personaIds: [], tags: [], tone: 'neutral' }] },
+    };
+    const result = matrixContentFromDocument(doc, ['s1']);
+    expect(result.cells['s1']['fl']).toHaveLength(1);
+    expect(result.cells['s1']['fl'][0].id).toBe('card1');
+  });
+
+  it('remaps ids using syncNotes', () => {
+    const doc = {
+      c: { 'fl|0': [{ i: 'local1', type: 'card', text: 'Card', personaIds: [], tags: [], tone: 'neutral' }] },
+    };
+    const result = matrixContentFromDocument(doc, ['s1'], { notes: { local1: 'global-id-1' } });
+    expect(result.cells['s1']['fl'][0].id).toBe('global-id-1');
+  });
+
+  it('ignores columns not matching stageId index', () => {
+    const doc = {
+      c: {
+        'fl|0': [{ i: 'c1', type: 'card', text: 'C1', personaIds: [], tags: [], tone: 'neutral' }],
+        'fl|1': [{ i: 'c2', type: 'card', text: 'C2', personaIds: [], tags: [], tone: 'neutral' }],
+      },
+    };
+    // Only stageId 's1' maps to column 0
+    const result = matrixContentFromDocument(doc, ['s1']);
+    expect(result.cells['s1']['fl']).toHaveLength(1);
+  });
+
+  it('extracts rowSettings from doc', () => {
+    const doc = {
+      rowSettings: { 'custom': { n: 'Custom Row', h: 'Help', icon: '★', defaultType: 'card', tone: 'neutral' } },
+      c: {},
+    };
+    const result = matrixContentFromDocument(doc, ['s1']);
+    expect(result.rows['custom']).toBeDefined();
+    expect(result.rows['custom'].n).toBe('Custom Row');
+  });
+});
+
+// ─── restoreMatrixContent ─────────────────────────────────────────────────────
+
+describe('restoreMatrixContent', () => {
+  it('returns ref unchanged when stored is null', () => {
+    const ref = { c: { 'fl|0': [] }, steps: [] } as Record<string, unknown>;
+    const result = restoreMatrixContent(ref, null, ['s1']);
+    expect(result).toBe(ref);
+  });
+
+  it('restores supplemental row cells from stored content', () => {
+    const ref: Record<string, unknown> = { c: { 'sd|0': [] }, steps: [] };
+    const stored = {
+      cells: { 's1': { 'sd': [{ id: 'note1', type: 'card', text: 'Note', personaIds: [], tags: [], tone: 'neutral' }] } },
+    };
+    restoreMatrixContent(ref, stored, ['s1']);
+    const cells = ref['c'] as Record<string, unknown[]>;
+    expect(cells['sd|0']).toHaveLength(1);
+  });
+
+  it('merges existing notes from ref with stored metadata', () => {
+    const ref: Record<string, unknown> = {
+      c: { 'fl|0': [{ i: 'x1', type: 'card', text: 'Title', personaIds: [], tags: [], tone: 'neutral' }] },
+      steps: [],
+    };
+    const stored = {
+      cells: { 's1': { 'fl': [{ id: 'x1', type: 'card', text: 'Title Updated', tone: 'blue', personaIds: [], tags: [] }] } },
+    };
+    restoreMatrixContent(ref, stored, ['s1']);
+    const cells = ref['c'] as Record<string, Record<string, unknown>[]>;
+    // existing note should be preserved with merged metadata
+    expect(cells['fl|0']).toHaveLength(1);
+  });
+
+  it('restores connections from stored content', () => {
+    const ref: Record<string, unknown> = {
+      c: {
+        'fl|0': [{ i: 'a1', type: 'card', text: 'A', personaIds: [], tags: [], tone: 'neutral' }],
+        'fl|1': [{ i: 'b1', type: 'card', text: 'B', personaIds: [], tags: [], tone: 'neutral' }],
+      },
+      steps: [],
+    };
+    const stored = {
+      cells: {},
+      connections: [{ id: 'conn1', a: 'a1', b: 'b1', type: 'sequence', label: '' }],
+    };
+    restoreMatrixContent(ref, stored, ['s1', 's2']);
+    expect(Array.isArray(ref['links'])).toBe(true);
+    expect((ref['links'] as unknown[]).length).toBeGreaterThan(0);
   });
 });

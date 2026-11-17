@@ -4,6 +4,7 @@ import {
   readJourneyEmotion,
   writeJourneyEmotion,
   journeyPainContexts,
+  saveJourneyPainEvidence,
 } from '../journey-context';
 import { createServiceGraph } from '../../domain/graph-operations';
 import type { ServiceGraph } from '../../domain/model';
@@ -193,5 +194,173 @@ describe('journeyPainContexts', () => {
     const contexts = journeyPainContexts(g, 'j1');
     const ctx = contexts.find(c => c.id === 'prob1');
     expect(ctx?.inJourney).toBe(true);
+  });
+});
+
+// ─── writeJourneyEmotion with persona ─────────────────────────────────────────
+
+describe('writeJourneyEmotion with persona', () => {
+  it('creates a new emotion record and updates emotionIds/personaIds', () => {
+    let g = withJourneyAndStage(base());
+    g = withPersona(g, 'p1');
+    const stage: Record<string, unknown> = { id: 's1' };
+    writeJourneyEmotion(g, { personaId: 'p1' }, stage, { e: 1, emotionRecorded: true, emotionStatus: 'hypothesis' }, NOW);
+    expect(Array.isArray(stage['emotionIds'])).toBe(true);
+    expect((stage['emotionIds'] as string[]).length).toBe(1);
+    expect(Array.isArray(stage['personaIds'])).toBe(true);
+    expect((stage['personaIds'] as string[])).toContain('p1');
+  });
+
+  it('does not duplicate personaId or emotionId on second call', () => {
+    let g = withJourneyAndStage(base());
+    g = withPersona(g, 'p1');
+    const stage: Record<string, unknown> = { id: 's1' };
+    writeJourneyEmotion(g, { personaId: 'p1' }, stage, { e: 1, emotionRecorded: true }, NOW);
+    writeJourneyEmotion(g, { personaId: 'p1' }, stage, { e: 2, emotionRecorded: true }, NOW);
+    expect((stage['emotionIds'] as string[]).length).toBe(1);
+    expect((stage['personaIds'] as string[]).filter(id => id === 'p1').length).toBe(1);
+  });
+
+  it('no-op if unrecorded, no note, no source and no existing record', () => {
+    let g = withJourneyAndStage(base());
+    g = withPersona(g, 'p1');
+    const stage: Record<string, unknown> = { id: 's1' };
+    writeJourneyEmotion(g, { personaId: 'p1' }, stage, { e: 0, emotionRecorded: false }, NOW);
+    expect(stage['emotionIds']).toBeUndefined();
+  });
+
+  it('throws for unavailable persona', () => {
+    const g = withJourneyAndStage(base());
+    const stage: Record<string, unknown> = { id: 's1' };
+    expect(() => writeJourneyEmotion(g, { personaId: 'ghost' }, stage, { e: 1, emotionRecorded: true }, NOW)).toThrow('Selecione uma Persona disponível');
+  });
+});
+
+// ─── saveJourneyPainEvidence ───────────────────────────────────────────────────
+
+function withEvidence(graph: ServiceGraph, id: string): ServiceGraph {
+  return {
+    ...graph,
+    entities: {
+      ...graph.entities,
+      evidence: {
+        ...((graph.entities as unknown as Record<string, Record<string, unknown>>)?.['evidence'] ?? {}),
+        [id]: { id, serviceId: 'S', kind: 'evidence', title: `Evidence ${id}`, createdAt: NOW, updatedAt: NOW },
+      },
+    },
+  } as ServiceGraph;
+}
+
+function withPain(graph: ServiceGraph, id: string): ServiceGraph {
+  return {
+    ...graph,
+    entities: {
+      ...graph.entities,
+      pain: {
+        ...((graph.entities as unknown as Record<string, Record<string, unknown>>)?.['pain'] ?? {}),
+        [id]: { id, serviceId: 'S', kind: 'pain', title: `Pain ${id}`, stageId: 's1', createdAt: NOW, updatedAt: NOW },
+      },
+    },
+  } as ServiceGraph;
+}
+
+describe('saveJourneyPainEvidence', () => {
+  it('saves evidenceIds to a pain entity', () => {
+    let g = withJourneyAndStage(base());
+    g = withPain(g, 'pain1');
+    g = withEvidence(g, 'ev1');
+    const { graph: result } = saveJourneyPainEvidence(g, 'j1', 'pain1', ['ev1'], 's1', false, NOW);
+    const entities = result.entities as unknown as Record<string, Record<string, Record<string, unknown>>>;
+    expect(entities['pain']['pain1']['evidenceIds']).toEqual(['ev1']);
+  });
+
+  it('deduplicates evidenceIds', () => {
+    let g = withJourneyAndStage(base());
+    g = withPain(g, 'pain1');
+    g = withEvidence(g, 'ev1');
+    const { graph: result } = saveJourneyPainEvidence(g, 'j1', 'pain1', ['ev1', 'ev1'], 's1', false, NOW);
+    const entities = result.entities as unknown as Record<string, Record<string, Record<string, unknown>>>;
+    expect((entities['pain']['pain1']['evidenceIds'] as string[]).length).toBe(1);
+  });
+
+  it('saves evidenceIds to native problem in journey', () => {
+    let g = withJourneyAndStage(base());
+    g = withEvidence(g, 'ev1');
+    g = {
+      ...g,
+      problems: { 'prob1': { id: 'prob1', stageId: 's1', serviceId: 'S', description: 'Issue', createdAt: NOW, updatedAt: NOW } as ServiceGraph['problems'][string] },
+    };
+    const { graph: result, problemId } = saveJourneyPainEvidence(g, 'j1', 'prob1', ['ev1'], 's1', false, NOW);
+    expect(problemId).toBe('prob1');
+    const problems = result.problems as unknown as Record<string, Record<string, unknown>>;
+    expect(problems['prob1']['evidenceIds']).toEqual(['ev1']);
+  });
+
+  it('creates new journey problem when planNext=true with research pain', () => {
+    let g = withJourneyAndStage(base());
+    g = withPain(g, 'pain1');
+    g = withEvidence(g, 'ev1');
+    const { problemId } = saveJourneyPainEvidence(g, 'j1', 'pain1', ['ev1'], 's1', true, NOW);
+    expect(typeof problemId).toBe('string');
+    expect(problemId).not.toBe('');
+  });
+
+  it('throws for unavailable pain', () => {
+    const g = withJourneyAndStage(base());
+    expect(() => saveJourneyPainEvidence(g, 'j1', 'ghost', [], 's1', false, NOW)).toThrow('Dor indisponível');
+  });
+
+  it('throws for missing journey', () => {
+    const g = withJourneyAndStage(base());
+    expect(() => saveJourneyPainEvidence(g, 'ghost', 'pain1', [], 's1', false, NOW)).toThrow('Jornada indisponível');
+  });
+
+  it('throws for invalid evidenceIds (not array)', () => {
+    let g = withJourneyAndStage(base());
+    g = withPain(g, 'pain1');
+    expect(() => saveJourneyPainEvidence(g, 'j1', 'pain1', 'bad' as unknown as string[], 's1', false, NOW)).toThrow('Seleção de evidências inválida');
+  });
+
+  it('throws for evidence from another service', () => {
+    let g = withJourneyAndStage(base());
+    g = withPain(g, 'pain1');
+    g = {
+      ...g,
+      entities: {
+        ...g.entities,
+        evidence: { 'ev-other': { id: 'ev-other', serviceId: 'OTHER', kind: 'evidence', createdAt: NOW, updatedAt: NOW } },
+      },
+    } as ServiceGraph;
+    expect(() => saveJourneyPainEvidence(g, 'j1', 'pain1', ['ev-other'], 's1', false, NOW)).toThrow('evidências disponíveis');
+  });
+
+  it('throws for native problem in another journey', () => {
+    let g: ServiceGraph = {
+      ...withJourneyAndStage(base()),
+      journeys: {
+        j1: { id: 'j1', serviceId: 'S', name: 'Journey 1', status: 'active', stageIds: ['s1'], createdAt: NOW, updatedAt: NOW } as ServiceGraph['journeys'][string],
+        j2: { id: 'j2', serviceId: 'S', name: 'Journey 2', status: 'active', stageIds: ['s2'], createdAt: NOW, updatedAt: NOW } as ServiceGraph['journeys'][string],
+      },
+      stages: {
+        s1: { id: 's1', journeyId: 'j1', serviceId: 'S', title: 'Stage 1', customerAction: '', touchpointIds: [], opportunityIds: [], problemIds: [], createdAt: NOW, updatedAt: NOW } as ServiceGraph['stages'][string],
+        s2: { id: 's2', journeyId: 'j2', serviceId: 'S', title: 'Stage 2', customerAction: '', touchpointIds: [], opportunityIds: [], problemIds: [], createdAt: NOW, updatedAt: NOW } as ServiceGraph['stages'][string],
+      },
+      problems: {
+        'prob-j2': { id: 'prob-j2', stageId: 's2', serviceId: 'S', description: 'Problem in j2', createdAt: NOW, updatedAt: NOW } as ServiceGraph['problems'][string],
+      },
+    };
+    expect(() => saveJourneyPainEvidence(g, 'j1', 'prob-j2', [], 's1', false, NOW)).toThrow('outra Jornada');
+  });
+
+  it('throws planNext with research pain and stage not in journey', () => {
+    let g: ServiceGraph = {
+      ...withJourneyAndStage(base()),
+      stages: {
+        s1: { id: 's1', journeyId: 'j1', serviceId: 'S', title: 'Stage 1', customerAction: '', touchpointIds: [], opportunityIds: [], problemIds: [], createdAt: NOW, updatedAt: NOW } as ServiceGraph['stages'][string],
+        s_other: { id: 's_other', journeyId: 'other', serviceId: 'S', title: 'Other Stage', customerAction: '', touchpointIds: [], opportunityIds: [], problemIds: [], createdAt: NOW, updatedAt: NOW } as ServiceGraph['stages'][string],
+      },
+    };
+    g = withPain(g, 'pain1');
+    expect(() => saveJourneyPainEvidence(g, 'j1', 'pain1', [], 's_other', true, NOW)).toThrow('etapa desta Jornada');
   });
 });
