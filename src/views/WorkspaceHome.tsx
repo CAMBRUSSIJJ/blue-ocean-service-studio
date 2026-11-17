@@ -99,6 +99,12 @@ export function WorkspaceHome({ studio, onImport, onExport }: Props) {
   const { graph, setGraph, setActiveTab, hasService, createService, loadDemoService, showToast } = studio;
   const preferenceScope = useMemo(() => ({ userId: getStoredUser()?.id ?? 'local_guest', workspaceId: graph.service.id }), [graph.service.id]);
   const [workspacePreferences, setWorkspacePreferencesState] = useState<WorkspacePreferences>(() => readCachedWorkspacePreferences(preferenceScope));
+  const [showReadiness, setShowReadiness] = useState(() => {
+    try { return localStorage.getItem('bo-home-readiness-expanded') === '1'; } catch { return false; }
+  });
+  const [showLearn, setShowLearn] = useState(() => {
+    try { return localStorage.getItem('bo-home-learn-expanded') !== '0'; } catch { return true; }
+  });
   const [showAllRecents, setShowAllRecents] = useState(false);
   const [showHealthDetails, setShowHealthDetails] = useState(false);
   const [showAttentionDetails, setShowAttentionDetails] = useState(false);
@@ -668,23 +674,25 @@ export function WorkspaceHome({ studio, onImport, onExport }: Props) {
           ))}
         </nav>
 
-        <section className={`bo1204-readiness is-${serviceReadinessReport.state}`} data-service-readiness="1" data-ready-for-design={serviceReadinessReport.readyForDesign ? '1' : '0'} data-blocking-gaps={serviceReadinessReport.blockingGaps.length}>
-          <header className="bo1204-readiness-head">
-            <div><small>SERVICE READINESS · V1</small><h2>{serviceReadinessReport.readyForDesign ? 'Contexto suficiente para avançar com confiança' : 'Feche as lacunas antes de consolidar o desenho'}</h2><p>Readiness mede preparo para desenhar. Não é Health e não é Coverage: cada critério aponta para uma evidência concreta no Service Graph.</p></div>
-            <div className="bo1204-readiness-score"><span>PRONTIDÃO</span><strong>{serviceReadinessReport.score}%</strong><small>{serviceReadinessReport.complete} / {serviceReadinessReport.total} critérios</small><i><b style={{ width: `${serviceReadinessReport.score}%` }} /></i></div>
+        <section className={`bo1204-readiness is-${serviceReadinessReport.state}${showReadiness ? ' is-expanded' : ' is-collapsed'}`} data-service-readiness="1" data-ready-for-design={serviceReadinessReport.readyForDesign ? '1' : '0'} data-blocking-gaps={serviceReadinessReport.blockingGaps.length}>
+          <header className="bo1204-readiness-head" style={{ cursor: 'pointer' }} onClick={() => { const next = !showReadiness; setShowReadiness(next); try { localStorage.setItem('bo-home-readiness-expanded', next ? '1' : '0'); } catch { /* ignore */ } }}>
+            <div><small>SERVICE READINESS · V1</small><h2>{serviceReadinessReport.readyForDesign ? 'Contexto suficiente para avançar com confiança' : 'Feche as lacunas antes de consolidar o desenho'}</h2>{showReadiness && <p>Readiness mede preparo para desenhar. Não é Health e não é Coverage: cada critério aponta para uma evidência concreta no Service Graph.</p>}</div>
+            <div className="bo1204-readiness-score"><span>PRONTIDÃO</span><strong>{serviceReadinessReport.score}%</strong><small>{serviceReadinessReport.complete} / {serviceReadinessReport.total} critérios</small>{showReadiness && <i><b style={{ width: `${serviceReadinessReport.score}%` }} /></i>}<em className="bo1204-readiness-toggle">{showReadiness ? '▲' : '▼'}</em></div>
           </header>
-          <div className="bo1204-readiness-sections">
-            {(['context', 'definition', 'structure'] as const).map((key) => { const section = serviceReadinessReport.sections[key]; const gaps = section.criteria.filter((item) => !item.complete); return <article key={key} data-readiness-section={key}>
-              <header><div><small>{key === 'context' ? '01 · ENTENDER' : key === 'definition' ? '02 · DEFINIR' : '03 · ESTRUTURAR'}</small><strong>{section.label}</strong></div><b>{section.score}%</b></header>
-              <p>{section.description}</p><i className="bo1204-section-progress"><b style={{ width: `${section.score}%` }} /></i>
-              <div className="bo1204-section-status"><span>{section.complete}/{section.total} completos</span><em>{gaps.length ? `${gaps.length} lacuna(s)` : 'Sem bloqueios'}</em></div>
-              <details><summary>Ver critérios</summary>{section.criteria.map((item) => <button type="button" key={item.id} className={item.complete ? 'is-done' : 'is-gap'} onClick={() => !item.complete && resolveReadinessGap(item)}><b>{item.complete ? '✓' : '—'}</b><span><strong>{item.label}</strong><small>{item.detail}</small></span>{!item.complete && <em>{item.action.label} →</em>}</button>)}</details>
-            </article>; })}
-          </div>
-          <footer className="bo1204-readiness-next">
-            <div><small>{serviceReadinessReport.readyForDesign ? 'GATE LIBERADO' : 'PRÓXIMA LACUNA'}</small><strong>{serviceReadinessReport.readyForDesign ? 'Ready to Design' : serviceReadinessReport.nextAction?.label}</strong><p>{serviceReadinessReport.readyForDesign ? `Discovery, Definition e Service Frame atendem os ${serviceReadinessReport.total} critérios mínimos.` : serviceReadinessReport.nextAction?.detail}</p></div>
-            {serviceReadinessReport.readyForDesign ? <button type="button" className="primary" onClick={() => changeProjectPhase('design')}>Ir para Desenhar <ArrowRight size={14}/></button> : <button type="button" className="primary" onClick={() => resolveReadinessGap(serviceReadinessReport.nextAction)}>{serviceReadinessReport.nextAction?.action.label ?? 'Resolver próxima lacuna'} <ArrowRight size={14}/></button>}
-          </footer>
+          {showReadiness && <>
+            <div className="bo1204-readiness-sections">
+              {(['context', 'definition', 'structure'] as const).map((key) => { const section = serviceReadinessReport.sections[key]; const gaps = section.criteria.filter((item) => !item.complete); return <article key={key} data-readiness-section={key}>
+                <header><div><small>{key === 'context' ? '01 · ENTENDER' : key === 'definition' ? '02 · DEFINIR' : '03 · ESTRUTURAR'}</small><strong>{section.label}</strong></div><b>{section.score}%</b></header>
+                <p>{section.description}</p><i className="bo1204-section-progress"><b style={{ width: `${section.score}%` }} /></i>
+                <div className="bo1204-section-status"><span>{section.complete}/{section.total} completos</span><em>{gaps.length ? `${gaps.length} lacuna(s)` : 'Sem bloqueios'}</em></div>
+                <details><summary>Ver critérios</summary>{section.criteria.map((item) => <button type="button" key={item.id} className={item.complete ? 'is-done' : 'is-gap'} onClick={() => !item.complete && resolveReadinessGap(item)}><b>{item.complete ? '✓' : '—'}</b><span><strong>{item.label}</strong><small>{item.detail}</small></span>{!item.complete && <em>{item.action.label} →</em>}</button>)}</details>
+              </article>; })}
+            </div>
+            <footer className="bo1204-readiness-next">
+              <div><small>{serviceReadinessReport.readyForDesign ? 'GATE LIBERADO' : 'PRÓXIMA LACUNA'}</small><strong>{serviceReadinessReport.readyForDesign ? 'Ready to Design' : serviceReadinessReport.nextAction?.label}</strong><p>{serviceReadinessReport.readyForDesign ? `Discovery, Definition e Service Frame atendem os ${serviceReadinessReport.total} critérios mínimos.` : serviceReadinessReport.nextAction?.detail}</p></div>
+              {serviceReadinessReport.readyForDesign ? <button type="button" className="primary" onClick={(e) => { e.stopPropagation(); changeProjectPhase('design'); }}>Ir para Desenhar <ArrowRight size={14}/></button> : <button type="button" className="primary" onClick={(e) => { e.stopPropagation(); resolveReadinessGap(serviceReadinessReport.nextAction); }}>{serviceReadinessReport.nextAction?.action.label ?? 'Resolver próxima lacuna'} <ArrowRight size={14}/></button>}
+            </footer>
+          </>}
         </section>
 
         <div className="bo1195-project-layout bo1197-project-layout">
@@ -1004,9 +1012,9 @@ export function WorkspaceHome({ studio, onImport, onExport }: Props) {
         {pinnedItems.length > 0 && <small className="bo1187-pins-note"><Pin size={12} />{pinnedItems.length} {pinnedItems.length === 1 ? 'item fixado permanece priorizado' : 'itens fixados permanecem priorizados'} no seu workspace.</small>}
       </section>
 
-      <section className="bo1187-learn" aria-labelledby="bo1187-learn-title">
-        <h2 id="bo1187-learn-title"><GraduationCap size={18} />Aprender</h2>
-        <div className="bo1187-learn-grid">
+      <section className={`bo1187-learn${showLearn ? ' is-expanded' : ' is-collapsed'}`} aria-labelledby="bo1187-learn-title">
+        <h2 id="bo1187-learn-title" style={{ cursor: 'pointer' }} onClick={() => { const next = !showLearn; setShowLearn(next); try { localStorage.setItem('bo-home-learn-expanded', next ? '1' : '0'); } catch { /* ignore */ } }}><GraduationCap size={18} />Aprender<em className="bo1187-section-toggle">{showLearn ? '▲' : '▼'}</em></h2>
+        {showLearn && <div className="bo1187-learn-grid">
           {learnCards.map((card) => (
             <button type="button" key={card.label} onClick={card.action}>
               <span className={`bo1187-learn-icon ${card.tone}`}>{card.icon}</span>
@@ -1014,7 +1022,7 @@ export function WorkspaceHome({ studio, onImport, onExport }: Props) {
               <i aria-hidden="true" />
             </button>
           ))}
-        </div>
+        </div>}
       </section>
 
       <div className="bo1187-dashboard-footnote">

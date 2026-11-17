@@ -1,4 +1,5 @@
 @import './design-system/index.css';
+@import './components/cards.css';
 @import './runtime/dashboard-parity.css';
 @import './runtime/creation-reset.css';
 @import './runtime/service-builder-assistant.css';
@@ -114,11 +115,11 @@ button, input, textarea, select { font: inherit; }
 /* C3.2 — ResearchImportWizard */
 .bo-c3-import-overlay{position:fixed;inset:0;z-index:220;background:rgba(16,36,68,.45);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
 .bo-c3-import-panel{width:min(680px,100%);max-height:92dvh;overflow:hidden;display:flex;flex-direction:column;background:#fff;border-radius:16px;border:1px solid #dbe5f5;box-shadow:0 24px 80px rgba(19,38,75,.22)}
-.bo-c3-import-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #eef1f6;flex-shrink:0}
+.bo-c3-import-header{display:flex;align-items:center;justify-content:space-between;padding:24px 32px 20px;border-bottom:1px solid #eef1f6;flex-shrink:0}
 .bo-c3-import-title{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:#142944}
 .bo-c3-import-step-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#eff5ff;color:#2460ff}
 .bo-c3-import-close{border:none;background:none;cursor:pointer;padding:4px;border-radius:6px;color:#667085;display:flex;align-items:center;justify-content:center}.bo-c3-import-close:hover{background:#f5f7fa}
-.bo-c3-import-body{padding:20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px}
+.bo-c3-import-body{padding:32px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px}
 .bo-c3-import-body--done{align-items:center;text-align:center;padding:36px 24px}
 .bo-c3-import-desc{font-size:13px;color:#526885;line-height:1.6;margin:0}
 .bo-c3-import-dropzone{border:2px dashed #c9d9f0;border-radius:12px;background:#f7faff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:40px 24px;cursor:pointer;transition:border-color .15s,background .15s;color:#526885;font-size:13px}.bo-c3-import-dropzone:hover,.bo-c3-import-dropzone--over{border-color:#2460ff;background:#eff5ff}
@@ -154,10 +155,10 @@ button, input, textarea, select { font: inherit; }
 .bo-c3-export-trigger{display:inline-flex;align-items:center;gap:5px;margin-top:10px;padding:7px 13px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s}.bo-c3-export-trigger:hover{background:rgba(255,255,255,.22)}
 .bo-c3-export-overlay{position:fixed;inset:0;z-index:220;background:rgba(16,36,68,.45);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box}
 .bo-c3-export-panel{width:min(600px,100%);max-height:92dvh;overflow:hidden;display:flex;flex-direction:column;background:#fff;border-radius:16px;border:1px solid #dbe5f5;box-shadow:0 24px 80px rgba(19,38,75,.22)}
-.bo-c3-export-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #eef1f6;flex-shrink:0}
+.bo-c3-export-header{display:flex;align-items:center;justify-content:space-between;padding:24px 32px 20px;border-bottom:1px solid #eef1f6;flex-shrink:0}
 .bo-c3-export-title{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;color:#142944}
 .bo-c3-export-close{border:none;background:none;cursor:pointer;padding:4px;border-radius:6px;color:#667085;display:flex;align-items:center}.bo-c3-export-close:hover{background:#f5f7fa}
-.bo-c3-export-body{padding:20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px}
+.bo-c3-export-body{padding:32px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:14px}
 .bo-c3-export-desc{font-size:13px;color:#3d5a7a;line-height:1.6;margin:0}
 .bo-c3-export-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:32px;color:#526885}.bo-c3-export-empty strong{color:#142944;font-size:15px}.bo-c3-export-empty p{font-size:13px;line-height:1.6;max-width:340px}
 .bo-c3-export-options{display:flex;gap:8px}
@@ -187,11 +188,11 @@ button, input, textarea, select { font: inherit; }
 .bo-c3-partner-cta-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;border:1px solid rgba(36,96,255,.5);background:rgba(36,96,255,.2);color:#a8c4ff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s}.bo-c3-partner-cta-btn:hover{background:rgba(36,96,255,.35);border-color:rgba(36,96,255,.8);color:#d4e3ff}
 .bo-c3-partner-overlay{position:fixed;inset:0;z-index:1200;background:rgba(10,20,38,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px}
 .bo-c3-partner-panel{background:#fff;border-radius:16px;box-shadow:0 24px 64px rgba(10,20,38,.22);width:100%;max-width:680px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
-.bo-c3-partner-header{display:flex;align-items:flex-start;justify-content:space-between;padding:22px 24px 16px;border-bottom:1px solid #e8edf4;flex-shrink:0}
+.bo-c3-partner-header{display:flex;align-items:flex-start;justify-content:space-between;padding:24px 32px 20px;border-bottom:1px solid #e8edf4;flex-shrink:0}
 .bo-c3-partner-kicker{display:block;font-size:10px;font-weight:700;letter-spacing:.08em;color:#2460ff;text-transform:uppercase;margin-bottom:4px}
 .bo-c3-partner-title{font-size:18px;font-weight:700;color:#0f1f38;margin:0}
 .bo-c3-partner-close{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;border:1px solid #d9e3ef;background:transparent;color:#526885;cursor:pointer;transition:background .15s}.bo-c3-partner-close:hover{background:#f0f4f9}
-.bo-c3-partner-body{overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:28px}
+.bo-c3-partner-body{overflow-y:auto;padding:32px;display:flex;flex-direction:column;gap:28px}
 .bo-c3-partner-desc{font-size:13px;color:#3d5a7a;line-height:1.65;margin:0 0 16px}
 .bo-c3-partner-benefit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .bo-c3-partner-benefit-card{padding:14px 16px;border-radius:10px;background:#f7f9fc;border:1px solid #e3eaf4;display:flex;flex-direction:column;gap:6px}
