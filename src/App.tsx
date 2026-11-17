@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react';
-import { Save, Upload, Download, KanbanSquare, X, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, PanelLeftClose, PanelLeftOpen, ChevronsUpDown } from './design-system/icons';
+import { Save, Upload, Download, KanbanSquare, X, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, PanelLeftClose, PanelLeftOpen, ChevronsUpDown, Moon, Sun } from './design-system/icons';
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import type { OnboardingAction } from './components/OnboardingFlow';
@@ -52,8 +52,16 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const [collapsedSidebarSections, setCollapsedSidebarSections] = useState<Record<'design' | 'context' | 'management', boolean>>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem('bo-sidebar-sections') || '{}') as Partial<Record<'design' | 'context' | 'management', boolean>>;
-      return { design: Boolean(stored.design), context: Boolean(stored.context), management: Boolean(stored.management) };
-    } catch { return { design: false, context: false, management: false }; }
+      // context & management collapsed by default — só "Desenho do serviço" aberto inicialmente
+      return {
+        design: Boolean(stored.design),
+        context: stored.context !== undefined ? Boolean(stored.context) : true,
+        management: stored.management !== undefined ? Boolean(stored.management) : true,
+      };
+    } catch { return { design: false, context: true, management: true }; }
+  });
+  const [darkMode, setDarkMode] = useState(() => {
+    try { return localStorage.getItem('bo-dark-mode') === '1'; } catch { return false; }
   });
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const experience = useExperienceProfile();
@@ -184,6 +192,11 @@ export default function App({ authUser, onSignOut }: AppProps) {
     window.addEventListener('bo-native-sidebar', change);
     return () => { document.body.classList.remove('bo-h724-sidebar-collapsed'); window.removeEventListener('resize', resize); window.removeEventListener('bo-native-sidebar', change); };
   }, [isSidebarCollapsed]);
+
+  useEffect(() => {
+    document.body.classList.toggle('dark', darkMode);
+    try { localStorage.setItem('bo-dark-mode', darkMode ? '1' : '0'); } catch { /* ignore */ }
+  }, [darkMode]);
 
   useEffect(() => {
     const dismiss = (event: MouseEvent | KeyboardEvent) => {
@@ -539,6 +552,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
           <div className="bo1205h3-sidebar-bottom bo-h701-sidebar-bottom">
             <button type="button" data-rt-collab-nav="1" aria-label="Colaboração" className={externalNav === 'collaboration' ? 'is-active' : ''} onClick={() => openExternal('collaboration', 'collaboration', 'workspace')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="collaboration"><BlueOceanUtilityIcon kind="collaboration" size={16}/></span><span className="hidden md:inline">Colaboração</span></button>
             <button type="button" data-bo1173-settings-nav="1" aria-label="Configurações" className={externalNav === 'settings' ? 'is-active' : ''} onClick={() => openExternal('settings', 'unifiedWorkspaces')}><span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="settings"><BlueOceanUtilityIcon kind="settings" size={16}/></span><span className="hidden md:inline">Configurações</span></button>
+            <button type="button" className="bo-dark-toggle" aria-label={darkMode ? 'Mudar para modo claro' : 'Mudar para modo escuro'} title={darkMode ? 'Modo claro' : 'Modo escuro (navy)'} onClick={() => setDarkMode(d => !d)}>{darkMode ? <Sun size={15}/> : <Moon size={15}/>}</button>
           </div>
         </nav>
 

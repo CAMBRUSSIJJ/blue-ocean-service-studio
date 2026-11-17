@@ -1,0 +1,197 @@
+/* ============================================================
+   BLUE OCEAN — Dark mode navy
+   Ativado por: body.dark
+   Começando pela sidebar + header (P2-A).
+   Tokens semânticos são sobrescritos aqui; a sidebar-h701.css
+   usa hardcoded colors com !important — usamos especificidade
+   maior para prevalecer.
+   ============================================================ */
+
+body.dark {
+  color-scheme: dark;
+
+  /* Canvas / fundos */
+  --bo-color-canvas: #071628;
+  --bo-color-surface: #0d2040;
+  --bo-color-sidebar: #071628;
+  --bo-color-surface-subtle: #0f2644;
+  --bo-color-surface-muted: #0a1c35;
+  --bo-color-surface-raised: #102848;
+
+  /* Bordas */
+  --bo-color-border: rgba(145, 175, 215, 0.12);
+  --bo-color-border-strong: rgba(145, 175, 215, 0.22);
+  --bo-color-border-soft: rgba(145, 175, 215, 0.07);
+
+  /* Texto */
+  --bo-color-text: #dde6f2;
+  --bo-color-text-secondary: #8fa9c8;
+  --bo-color-text-muted: #607a9a;
+  --bo-color-text-faint: #5a7190;
+
+  /* Primary mantém #1e63f0 — azul ocean é vívido sobre navy */
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+/* stylelint-disable declaration-no-important */
+/* Sidebar e header usam !important na camada legacy (sidebar-h701.css, shell.css).
+   Esta seção é a camada de override do dark mode — !important é obrigatório aqui. */
+
+body.dark .bo1205h3-sidebar {
+  background: #0b1f3b !important;
+  border-right-color: rgba(145, 175, 215, 0.1) !important;
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark .bo1205h3-sidebar .rt182-host-brand {
+  background: rgba(7, 22, 40, 0.94) !important;
+  border-bottom-color: rgba(145, 175, 215, 0.1) !important;
+}
+
+body.dark .bo1205h3-sidebar .rt182-host-brand h1 {
+  color: #c8d9ee !important;
+}
+
+body.dark .bo1205h3-sidebar .rt182-host-brand p {
+  color: rgba(145, 175, 215, 0.55) !important;
+}
+
+body.dark .bo1205h3-sidebar .bo1163-service-switcher {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(145, 175, 215, 0.14) !important;
+}
+
+body.dark .bo1205h3-sidebar .bo1163-service-switcher:hover {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-color: rgba(145, 175, 215, 0.24) !important;
+}
+
+body.dark .bo1205h3-sidebar .bo1163-service-switcher__mark {
+  background: rgba(30, 99, 240, 0.22) !important;
+  border-color: rgba(30, 99, 240, 0.35) !important;
+}
+
+body.dark .bo1205h3-sidebar .bo1163-service-switcher__copy small {
+  color: rgba(145, 175, 215, 0.5) !important;
+}
+
+body.dark .bo1205h3-sidebar .bo1163-service-switcher__copy strong {
+  color: #9bacc5 !important;
+}
+
+/* Nav items */
+body.dark .bo1205h3-sidebar .bo1205h3-nav-root,
+body.dark .bo1205h3-sidebar .bo1205h3-nav-child,
+body.dark .bo1205h3-sidebar .bo1205h3-sidebar-bottom button {
+  color: #8fa9c8 !important;
+}
+
+body.dark .bo1205h3-sidebar .bo1205h3-nav-root svg,
+body.dark .bo1205h3-sidebar .bo1205h3-nav-child svg,
+body.dark .bo1205h3-sidebar .bo1205h3-sidebar-bottom svg {
+  color: rgba(145, 175, 215, 0.5) !important;
+}
+
+body.dark .bo1205h3-sidebar .bo1205h3-nav-root:hover,
+body.dark .bo1205h3-sidebar .bo1205h3-nav-child:hover,
+body.dark .bo1205h3-sidebar .bo1205h3-sidebar-bottom button:hover {
+  background: rgba(255, 255, 255, 0.07) !important;
+  color: #c8d9ee !important;
+}
+
+body.dark .bo1205h3-sidebar .bo1205h3-nav-root.is-active,
+body.dark .bo1205h3-sidebar .bo1205h3-nav-child.is-active {
+  background: rgba(30, 99, 240, 0.2) !important;
+  color: #7eb3ff !important;
+}
+
+body.dark .bo1205h3-sidebar .bo1205h3-nav-root.is-active::before,
+body.dark .bo1205h3-sidebar .bo1205h3-nav-child.is-active::before {
+  background: #4b8df8 !important;
+}
+
+body.dark .bo1205h3-sidebar .bo1205h3-nav-root.is-active svg,
+body.dark .bo1205h3-sidebar .bo1205h3-nav-child.is-active svg {
+  color: #4b8df8 !important;
+}
+
+/* Section labels */
+body.dark .bo-h701-nav-section__label {
+  color: rgba(145, 175, 215, 0.45) !important;
+}
+
+body.dark .bo-h701-nav-section {
+  border-top-color: rgba(145, 175, 215, 0.08) !important;
+}
+
+/* Bottom bar */
+body.dark .bo-h701-sidebar-bottom {
+  border-top-color: rgba(145, 175, 215, 0.1) !important;
+  background: linear-gradient(180deg, rgba(11, 31, 59, 0.72), rgba(7, 22, 40, 0.96)) !important;
+}
+
+/* Ocean wave — fica mais sutil no dark */
+body.dark .bo-h701-sidebar-wave {
+  opacity: 0.35 !important;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+
+body.dark .bo1175-header {
+  background: #0b1f3b !important;
+  border-bottom-color: rgba(145, 175, 215, 0.12) !important;
+}
+
+body.dark .bo1175-header h2,
+body.dark .bo1187-dashboard-header__title {
+  color: #c8d9ee !important;
+}
+
+body.dark .bo1175-header .tool-button,
+body.dark .bo1175-header button:not(.primary):not([class*="bg-blue"]) {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(145, 175, 215, 0.14) !important;
+  color: #8fa9c8 !important;
+}
+
+body.dark .bo1175-header .tool-button:hover,
+body.dark .bo1175-header button:not(.primary):not([class*="bg-blue"]):hover {
+  background: rgba(255, 255, 255, 0.11) !important;
+  color: #c8d9ee !important;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+/* stylelint-enable declaration-no-important */
+
+/* stylelint-disable declaration-no-important */
+body.dark .bo-h701-sidebar-nav {
+  scrollbar-color: rgba(145, 175, 215, 0.2) transparent !important;
+}
+/* stylelint-enable declaration-no-important */
+
+/* ── Toggle button (injetado pelo App.tsx) ───────────────── */
+
+.bo-dark-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.16s ease, background-color 0.16s ease;
+  flex-shrink: 0;
+}
+
+.bo-dark-toggle:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body.dark .bo-dark-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
