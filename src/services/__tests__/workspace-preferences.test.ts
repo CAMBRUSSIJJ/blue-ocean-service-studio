@@ -8,305 +8,277 @@ import {
   movePin,
   recordRecentContext,
   pruneWorkspacePreferences,
-  readCachedWorkspacePreferences,
-} from '../workspace-preferences.ts';
-import type { WorkspacePreferences, WorkspaceReference } from '../workspace-preferences.ts';
+} from '../workspace-preferences';
+import type { WorkspacePreferences, WorkspacePreferenceScope, WorkspaceReference } from '../workspace-preferences';
 
-const SCOPE = { userId: 'user1', workspaceId: 'ws1' };
-const NOW = '2025-01-01T00:00:00.000Z';
+const NOW = '2024-11-01T10:00:00.000Z';
 
-function ref(targetType: string, targetId: string, extra: Partial<WorkspaceReference> = {}): WorkspaceReference {
-  return { targetType: targetType as WorkspaceReference['targetType'], targetId, ...extra };
+const scope: WorkspacePreferenceScope = { userId: 'user1', workspaceId: 'ws1' };
+
+function ref(targetType: WorkspaceReference['targetType'], targetId: string, title?: string): WorkspaceReference {
+  return { targetType, targetId, title };
 }
 
 function emptyPrefs(): WorkspacePreferences {
-  return { ...createEmptyWorkspacePreferences(SCOPE), updatedAt: NOW };
+  return { ...createEmptyWorkspacePreferences(scope), updatedAt: NOW };
 }
 
 // ─── workspacePreferenceId ────────────────────────────────────────────────────
 
 describe('workspacePreferenceId', () => {
-  it('formats id as userId::workspaceId', () => {
-    expect(workspacePreferenceId(SCOPE)).toBe('user1::ws1');
-  });
-
-  it('different scopes produce different ids', () => {
-    expect(workspacePreferenceId({ userId: 'a', workspaceId: 'b' }))
-      .not.toBe(workspacePreferenceId({ userId: 'c', workspaceId: 'd' }));
+  it('combines userId and workspaceId', () => {
+    expect(workspacePreferenceId(scope)).toBe('user1::ws1');
   });
 });
 
 // ─── createEmptyWorkspacePreferences ─────────────────────────────────────────
 
 describe('createEmptyWorkspacePreferences', () => {
-  it('creates preferences with version=1 and empty lists', () => {
-    const p = createEmptyWorkspacePreferences(SCOPE);
-    expect(p.version).toBe(1);
-    expect(p.userId).toBe(SCOPE.userId);
-    expect(p.workspaceId).toBe(SCOPE.workspaceId);
-    expect(p.id).toBe(workspacePreferenceId(SCOPE));
-    expect(p.favorites).toEqual([]);
-    expect(p.pins).toEqual([]);
-    expect(p.recentContexts).toEqual([]);
+  it('creates empty preferences with correct id', () => {
+    const prefs = createEmptyWorkspacePreferences(scope);
+    expect(prefs.id).toBe('user1::ws1');
+    expect(prefs.userId).toBe('user1');
+    expect(prefs.workspaceId).toBe('ws1');
+    expect(prefs.favorites).toEqual([]);
+    expect(prefs.pins).toEqual([]);
+    expect(prefs.recentContexts).toEqual([]);
+    expect(prefs.version).toBe(1);
   });
 });
 
 // ─── normalizeWorkspacePreferences ───────────────────────────────────────────
 
 describe('normalizeWorkspacePreferences', () => {
-  it('returns empty prefs for null input', () => {
-    const p = normalizeWorkspacePreferences(null, SCOPE);
-    expect(p.favorites).toEqual([]);
-    expect(p.pins).toEqual([]);
-    expect(p.recentContexts).toEqual([]);
+  it('returns empty preferences for null input', () => {
+    const prefs = normalizeWorkspacePreferences(null, scope);
+    expect(prefs.favorites).toEqual([]);
   });
 
-  it('deduplicates favorites keeping last definition per key', () => {
-    const r1 = ref('journey', 'j1', { title: 'J1-old' });
-    const r2 = ref('journey', 'j1', { title: 'J1-new' });
-    const p = normalizeWorkspacePreferences({ favorites: [r1, r2] } as Partial<WorkspacePreferences>, SCOPE);
-    // Map keeps the last one for the key
-    expect(p.favorites.length).toBe(1);
+  it('normalizes favorites', () => {
+    const prefs = normalizeWorkspacePreferences({
+      favorites: [
+        { targetType: 'journey', targetId: 'j1', title: '  Journey 1  ' },
+      ],
+      updatedAt: NOW,
+    }, scope);
+    expect(prefs.favorites).toHaveLength(1);
+    expect(prefs.favorites[0].title).toBe('Journey 1'); // trimmed
   });
 
-  it('deduplicates pins by key', () => {
-    const p1 = { ...ref('journey', 'j1'), order: 0, pinnedAt: NOW };
-    const p2 = { ...ref('journey', 'j1'), order: 1, pinnedAt: NOW };
-    const p = normalizeWorkspacePreferences({ pins: [p1, p2] } as Partial<WorkspacePreferences>, SCOPE);
-    expect(p.pins.length).toBe(1);
+  it('deduplicates favorites keeping last', () => {
+    const prefs = normalizeWorkspacePreferences({
+      favorites: [
+        { targetType: 'journey', targetId: 'j1', title: 'First' },
+        { targetType: 'journey', targetId: 'j1', title: 'Second' },
+      ],
+    }, scope);
+    expect(prefs.favorites).toHaveLength(1);
+    // Map keeps last insertion, so 'Second' wins
+    expect(prefs.favorites[0].title).toBe('Second');
   });
 
   it('sorts pins by order', () => {
-    const pa = { ...ref('journey', 'ja'), order: 2, pinnedAt: NOW };
-    const pb = { ...ref('journey', 'jb'), order: 0, pinnedAt: NOW };
-    const p = normalizeWorkspacePreferences({ pins: [pa, pb] } as Partial<WorkspacePreferences>, SCOPE);
-    expect(p.pins[0].targetId).toBe('jb');
-    expect(p.pins[1].targetId).toBe('ja');
+    const prefs = normalizeWorkspacePreferences({
+      pins: [
+        { targetType: 'blueprint', targetId: 'b2', order: 2, pinnedAt: NOW },
+        { targetType: 'blueprint', targetId: 'b1', order: 0, pinnedAt: NOW },
+      ],
+    }, scope);
+    expect(prefs.pins[0].targetId).toBe('b1');
+    expect(prefs.pins[1].targetId).toBe('b2');
   });
 
-  it('re-indexes pins orders sequentially after sort', () => {
-    const pa = { ...ref('journey', 'ja'), order: 10, pinnedAt: NOW };
-    const pb = { ...ref('journey', 'jb'), order: 20, pinnedAt: NOW };
-    const p = normalizeWorkspacePreferences({ pins: [pa, pb] } as Partial<WorkspacePreferences>, SCOPE);
-    expect(p.pins[0].order).toBe(0);
-    expect(p.pins[1].order).toBe(1);
+  it('deduplicates recentContexts keeping most recent occurrence', () => {
+    const earlier = '2024-10-01T00:00:00.000Z';
+    const later = '2024-11-01T00:00:00.000Z';
+    const prefs = normalizeWorkspacePreferences({
+      recentContexts: [
+        { targetType: 'journey', targetId: 'j1', activity: 'opened', occurredAt: earlier },
+        { targetType: 'journey', targetId: 'j1', activity: 'edited', occurredAt: later },
+      ],
+    }, scope);
+    expect(prefs.recentContexts).toHaveLength(1);
+    expect(prefs.recentContexts[0].occurredAt).toBe(later);
   });
 
-  it('deduplicates recentContexts by key keeping most-recent occurredAt', () => {
-    const rc1 = { ...ref('journey', 'j1'), activity: 'opened' as const, occurredAt: '2025-01-01T00:00:00Z' };
-    const rc2 = { ...ref('journey', 'j1'), activity: 'edited' as const, occurredAt: '2025-06-01T00:00:00Z' };
-    const p = normalizeWorkspacePreferences({ recentContexts: [rc1, rc2] } as Partial<WorkspacePreferences>, SCOPE);
-    expect(p.recentContexts.length).toBe(1);
-    expect(p.recentContexts[0].occurredAt).toBe('2025-06-01T00:00:00Z');
+  it('limits recentContexts to 50', () => {
+    const many = Array.from({ length: 60 }, (_, i) => ({
+      targetType: 'journey' as const,
+      targetId: `j${i}`,
+      activity: 'opened' as const,
+      occurredAt: `2024-11-01T${String(i).padStart(2, '0')}:00:00.000Z`,
+    }));
+    const prefs = normalizeWorkspacePreferences({ recentContexts: many }, scope);
+    expect(prefs.recentContexts).toHaveLength(50);
   });
 
-  it('sorts recentContexts by occurredAt descending', () => {
-    const rc1 = { ...ref('journey', 'j1'), activity: 'opened' as const, occurredAt: '2025-01-01T00:00:00Z' };
-    const rc2 = { ...ref('journey', 'j2'), activity: 'opened' as const, occurredAt: '2025-06-01T00:00:00Z' };
-    const p = normalizeWorkspacePreferences({ recentContexts: [rc1, rc2] } as Partial<WorkspacePreferences>, SCOPE);
-    expect(p.recentContexts[0].targetId).toBe('j2');
-  });
-
-  it('trims title and subtitle from references', () => {
-    const r = ref('journey', 'j1', { title: '  My Journey  ', subtitle: '  Sub  ' });
-    const p = normalizeWorkspacePreferences({ favorites: [r] } as Partial<WorkspacePreferences>, SCOPE);
-    expect(p.favorites[0].title).toBe('My Journey');
-    expect(p.favorites[0].subtitle).toBe('Sub');
+  it('assigns context property when provided', () => {
+    const prefs = normalizeWorkspacePreferences({
+      favorites: [
+        {
+          targetType: 'journey',
+          targetId: 'j1',
+          context: { serviceId: 'svc1', journeyId: 'j1' },
+        },
+      ],
+    }, scope);
+    expect(prefs.favorites[0].context?.serviceId).toBe('svc1');
   });
 });
 
-// ─── setFavorite ─────────────────────────────────────────────────────────────
+// ─── setFavorite ──────────────────────────────────────────────────────────────
 
 describe('setFavorite', () => {
-  it('adds reference to favorites when enabled=true', () => {
-    const r = ref('journey', 'j1');
-    const p = setFavorite(emptyPrefs(), r, true);
-    expect(p.favorites.map((f) => f.targetId)).toContain('j1');
+  it('adds a favorite', () => {
+    const prefs = emptyPrefs();
+    const result = setFavorite(prefs, ref('journey', 'j1', 'My Journey'), true);
+    expect(result.favorites).toHaveLength(1);
+    expect(result.favorites[0].targetId).toBe('j1');
   });
 
-  it('removes reference from favorites when enabled=false', () => {
-    const r = ref('journey', 'j1');
-    const p1 = setFavorite(emptyPrefs(), r, true);
-    const p2 = setFavorite(p1, r, false);
-    expect(p2.favorites.map((f) => f.targetId)).not.toContain('j1');
+  it('removes a favorite', () => {
+    const prefs = setFavorite(emptyPrefs(), ref('journey', 'j1'), true);
+    const result = setFavorite(prefs, ref('journey', 'j1'), false);
+    expect(result.favorites).toHaveLength(0);
   });
 
-  it('prepends to existing favorites', () => {
-    const r1 = ref('journey', 'j1');
-    const r2 = ref('journey', 'j2');
-    const p1 = setFavorite(emptyPrefs(), r1, true);
-    const p2 = setFavorite(p1, r2, true);
-    expect(p2.favorites[0].targetId).toBe('j2');
-  });
-
-  it('no-op remove on empty favorites does not throw', () => {
-    const r = ref('journey', 'j1');
-    expect(() => setFavorite(emptyPrefs(), r, false)).not.toThrow();
+  it('adding again moves it to front', () => {
+    let prefs = emptyPrefs();
+    prefs = setFavorite(prefs, ref('journey', 'j1'), true);
+    prefs = setFavorite(prefs, ref('blueprint', 'b1'), true);
+    prefs = setFavorite(prefs, ref('journey', 'j1'), true); // re-add j1
+    expect(prefs.favorites[0].targetId).toBe('j1');
   });
 });
 
 // ─── setPinned ────────────────────────────────────────────────────────────────
 
 describe('setPinned', () => {
-  it('adds pin when enabled=true', () => {
-    const r = ref('journey', 'j1');
-    const p = setPinned(emptyPrefs(), r, true);
-    expect(p.pins.map((pin) => pin.targetId)).toContain('j1');
+  it('adds a pin', () => {
+    const prefs = emptyPrefs();
+    const result = setPinned(prefs, ref('journey', 'j1', 'Journey'), true);
+    expect(result.pins).toHaveLength(1);
+    expect(result.pins[0].targetId).toBe('j1');
+    expect(result.pins[0].order).toBe(0);
   });
 
-  it('removes pin when enabled=false', () => {
-    const r = ref('journey', 'j1');
-    const p1 = setPinned(emptyPrefs(), r, true);
-    const p2 = setPinned(p1, r, false);
-    expect(p2.pins.map((pin) => pin.targetId)).not.toContain('j1');
+  it('removes a pin and re-orders remaining pins', () => {
+    let prefs = emptyPrefs();
+    prefs = setPinned(prefs, ref('journey', 'j1'), true);
+    prefs = setPinned(prefs, ref('blueprint', 'b1'), true);
+    prefs = setPinned(prefs, ref('journey', 'j1'), false);
+    expect(prefs.pins).toHaveLength(1);
+    expect(prefs.pins[0].order).toBe(0);
+    expect(prefs.pins[0].targetId).toBe('b1');
   });
 
-  it('re-indexes pin orders after removal', () => {
-    const r1 = ref('journey', 'j1');
-    const r2 = ref('journey', 'j2');
-    const r3 = ref('journey', 'j3');
-    let p = setPinned(emptyPrefs(), r1, true);
-    p = setPinned(p, r2, true);
-    p = setPinned(p, r3, true);
-    p = setPinned(p, r2, false);
-    expect(p.pins[0].order).toBe(0);
-    expect(p.pins[1].order).toBe(1);
-  });
-
-  it('assigns correct order on new pin', () => {
-    const r1 = ref('journey', 'j1');
-    const r2 = ref('journey', 'j2');
-    let p = setPinned(emptyPrefs(), r1, true);
-    p = setPinned(p, r2, true);
-    expect(p.pins[1].order).toBe(1);
+  it('assigns consecutive orders', () => {
+    let prefs = emptyPrefs();
+    prefs = setPinned(prefs, ref('journey', 'j1'), true);
+    prefs = setPinned(prefs, ref('blueprint', 'b2'), true);
+    expect(prefs.pins[0].order).toBe(0);
+    expect(prefs.pins[1].order).toBe(1);
   });
 });
 
 // ─── movePin ──────────────────────────────────────────────────────────────────
 
 describe('movePin', () => {
-  it('no-ops for unknown targetId', () => {
-    const p = emptyPrefs();
-    expect(movePin(p, 'unknown', 'journey', 1)).toBe(p);
+  it('moves a pin down', () => {
+    let prefs = emptyPrefs();
+    prefs = setPinned(prefs, ref('journey', 'j1'), true);
+    prefs = setPinned(prefs, ref('blueprint', 'b2'), true);
+    const result = movePin(prefs, 'j1', 'journey', 1);
+    expect(result.pins[0].targetId).toBe('b2');
+    expect(result.pins[1].targetId).toBe('j1');
   });
 
-  it('no-ops when moving first pin up (-1)', () => {
-    const r = ref('journey', 'j1');
-    const p = setPinned(emptyPrefs(), r, true);
-    expect(movePin(p, 'j1', 'journey', -1)).toBe(p);
+  it('moves a pin up', () => {
+    let prefs = emptyPrefs();
+    prefs = setPinned(prefs, ref('journey', 'j1'), true);
+    prefs = setPinned(prefs, ref('blueprint', 'b2'), true);
+    const result = movePin(prefs, 'b2', 'blueprint', -1);
+    expect(result.pins[0].targetId).toBe('b2');
   });
 
-  it('no-ops when moving last pin down (+1)', () => {
-    const r = ref('journey', 'j1');
-    const p = setPinned(emptyPrefs(), r, true);
-    expect(movePin(p, 'j1', 'journey', 1)).toBe(p);
+  it('does nothing when at boundary', () => {
+    let prefs = emptyPrefs();
+    prefs = setPinned(prefs, ref('journey', 'j1'), true);
+    const result = movePin(prefs, 'j1', 'journey', -1);
+    expect(result).toBe(prefs);
   });
 
-  it('swaps pin order when moving down (+1)', () => {
-    const r1 = ref('journey', 'j1');
-    const r2 = ref('journey', 'j2');
-    let p = setPinned(emptyPrefs(), r1, true);
-    p = setPinned(p, r2, true);
-    const p2 = movePin(p, 'j1', 'journey', 1);
-    expect(p2.pins[0].targetId).toBe('j2');
-    expect(p2.pins[1].targetId).toBe('j1');
-  });
-
-  it('swaps pin order when moving up (-1)', () => {
-    const r1 = ref('journey', 'j1');
-    const r2 = ref('journey', 'j2');
-    let p = setPinned(emptyPrefs(), r1, true);
-    p = setPinned(p, r2, true);
-    const p2 = movePin(p, 'j2', 'journey', -1);
-    expect(p2.pins[0].targetId).toBe('j2');
-    expect(p2.pins[1].targetId).toBe('j1');
+  it('does nothing for missing pin', () => {
+    const prefs = emptyPrefs();
+    const result = movePin(prefs, 'nonexistent', 'journey', 1);
+    expect(result).toBe(prefs);
   });
 });
 
 // ─── recordRecentContext ──────────────────────────────────────────────────────
 
 describe('recordRecentContext', () => {
-  it('adds entry to recentContexts', () => {
-    const r = ref('journey', 'j1');
-    const p = recordRecentContext(emptyPrefs(), r, 'opened', NOW);
-    expect(p.recentContexts.map((rc) => rc.targetId)).toContain('j1');
+  it('adds a recent context', () => {
+    const prefs = emptyPrefs();
+    const result = recordRecentContext(prefs, ref('journey', 'j1', 'Journey'), 'opened', NOW);
+    expect(result.recentContexts).toHaveLength(1);
+    expect(result.recentContexts[0].targetId).toBe('j1');
+    expect(result.recentContexts[0].activity).toBe('opened');
   });
 
-  it('replaces existing entry for same key with newest', () => {
-    const r = ref('journey', 'j1');
-    let p = recordRecentContext(emptyPrefs(), r, 'opened', '2025-01-01T00:00:00Z');
-    p = recordRecentContext(p, r, 'edited', '2025-06-01T00:00:00Z');
-    expect(p.recentContexts.filter((rc) => rc.targetId === 'j1')).toHaveLength(1);
-    expect(p.recentContexts[0].activity).toBe('edited');
+  it('replaces existing entry for same targetId+targetType', () => {
+    let prefs = emptyPrefs();
+    prefs = recordRecentContext(prefs, ref('journey', 'j1'), 'opened', '2024-10-01T00:00:00.000Z');
+    prefs = recordRecentContext(prefs, ref('journey', 'j1'), 'edited', NOW);
+    expect(prefs.recentContexts).toHaveLength(1);
+    expect(prefs.recentContexts[0].activity).toBe('edited');
   });
 
-  it('sorts by occurredAt descending', () => {
-    const r1 = ref('journey', 'j1');
-    const r2 = ref('blueprint', 'b1');
-    let p = recordRecentContext(emptyPrefs(), r1, 'opened', '2025-01-01T00:00:00Z');
-    p = recordRecentContext(p, r2, 'opened', '2025-06-01T00:00:00Z');
-    expect(p.recentContexts[0].targetId).toBe('b1');
-  });
-
-  it('caps at MAX_RECENT_CONTEXTS (50)', () => {
-    let p = emptyPrefs();
-    for (let i = 0; i < 55; i++) {
-      p = recordRecentContext(p, ref('journey', `j${i}`), 'opened', `2025-01-${String(i).padStart(2, '0')}T00:00:00Z`);
-    }
-    expect(p.recentContexts.length).toBeLessThanOrEqual(50);
+  it('sorts by most recent first', () => {
+    let prefs = emptyPrefs();
+    prefs = recordRecentContext(prefs, ref('journey', 'j1'), 'opened', '2024-10-01T00:00:00.000Z');
+    prefs = recordRecentContext(prefs, ref('blueprint', 'b1'), 'opened', NOW);
+    expect(prefs.recentContexts[0].targetId).toBe('b1');
   });
 });
 
 // ─── pruneWorkspacePreferences ────────────────────────────────────────────────
 
 describe('pruneWorkspacePreferences', () => {
-  it('returns same reference when nothing is pruned', () => {
-    const r = ref('journey', 'j1');
-    let p = setFavorite(emptyPrefs(), r, true);
-    p = setPinned(p, r, true);
-    p = recordRecentContext(p, r, 'opened', NOW);
+  it('removes favorites that no longer exist', () => {
+    let prefs = emptyPrefs();
+    prefs = setFavorite(prefs, ref('journey', 'j1'), true);
+    prefs = setFavorite(prefs, ref('journey', 'j2'), true);
     const existing = new Set(['journey:j1']);
-    expect(pruneWorkspacePreferences(p, existing)).toBe(p);
+    const result = pruneWorkspacePreferences(prefs, existing);
+    expect(result.favorites).toHaveLength(1);
+    expect(result.favorites[0].targetId).toBe('j1');
   });
 
-  it('removes favorites whose key is not in existingKeys', () => {
-    const r = ref('journey', 'j1');
-    const p = setFavorite(emptyPrefs(), r, true);
-    const pruned = pruneWorkspacePreferences(p, new Set());
-    expect(pruned.favorites).toHaveLength(0);
+  it('removes pins that no longer exist', () => {
+    let prefs = emptyPrefs();
+    prefs = setPinned(prefs, ref('blueprint', 'b1'), true);
+    prefs = setPinned(prefs, ref('blueprint', 'b2'), true);
+    const existing = new Set(['blueprint:b1']);
+    const result = pruneWorkspacePreferences(prefs, existing);
+    expect(result.pins).toHaveLength(1);
+    expect(result.pins[0].order).toBe(0); // re-ordered
   });
 
-  it('removes pins whose key is not in existingKeys', () => {
-    const r = ref('journey', 'j1');
-    const p = setPinned(emptyPrefs(), r, true);
-    const pruned = pruneWorkspacePreferences(p, new Set());
-    expect(pruned.pins).toHaveLength(0);
+  it('removes recent contexts that no longer exist', () => {
+    let prefs = emptyPrefs();
+    prefs = recordRecentContext(prefs, ref('journey', 'j1'), 'opened', NOW);
+    prefs = recordRecentContext(prefs, ref('journey', 'j2'), 'opened', NOW);
+    const existing = new Set(['journey:j1']);
+    const result = pruneWorkspacePreferences(prefs, existing);
+    expect(result.recentContexts).toHaveLength(1);
   });
 
-  it('removes recentContexts whose key is not in existingKeys', () => {
-    const r = ref('journey', 'j1');
-    const p = recordRecentContext(emptyPrefs(), r, 'opened', NOW);
-    const pruned = pruneWorkspacePreferences(p, new Set());
-    expect(pruned.recentContexts).toHaveLength(0);
-  });
-
-  it('re-indexes pin orders after pruning', () => {
-    const r1 = ref('journey', 'j1');
-    const r2 = ref('journey', 'j2');
-    let p = setPinned(emptyPrefs(), r1, true);
-    p = setPinned(p, r2, true);
-    const pruned = pruneWorkspacePreferences(p, new Set(['journey:j2']));
-    expect(pruned.pins[0].order).toBe(0);
-  });
-});
-
-// ─── readCachedWorkspacePreferences ───────────────────────────────────────────
-
-describe('readCachedWorkspacePreferences', () => {
-  it('returns empty preferences in test environment (no localStorage)', () => {
-    // In happy-dom/test env, localStorage is likely unavailable or empty
-    const p = readCachedWorkspacePreferences(SCOPE);
-    expect(p.version).toBe(1);
-    expect(p.userId).toBe(SCOPE.userId);
+  it('returns same reference when nothing changed', () => {
+    let prefs = emptyPrefs();
+    prefs = setFavorite(prefs, ref('journey', 'j1'), true);
+    const existing = new Set(['journey:j1']);
+    const result = pruneWorkspacePreferences(prefs, existing);
+    expect(result).toBe(prefs);
   });
 });

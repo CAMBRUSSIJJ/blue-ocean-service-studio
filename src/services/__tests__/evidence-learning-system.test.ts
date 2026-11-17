@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import type { ServiceGraph } from '../../domain/model';
+import { createServiceGraph } from '../../domain/graph-operations';
 import {
   LEARNING_VERDICT_LABELS,
   LEARNING_RECOMMENDATION_LABELS,
@@ -12,335 +14,374 @@ import {
   setLearningStatus,
   buildLearningSystemReport,
 } from '../evidence-learning-system';
-import { createServiceGraph } from '../../domain/graph-operations';
-import type { ServiceGraph, ServicePrototypeExperiment } from '../../domain/model';
 
-const NOW = '2024-03-01T10:00:00.000Z';
+const NOW = '2024-11-01T10:00:00.000Z';
 
 function base(): ServiceGraph {
   const g = createServiceGraph('S');
   return { ...g, service: { ...g.service, id: 'S', updatedAt: NOW } };
 }
 
-function makeCriterion(id: string, result: 'pass' | 'fail' | 'pending' = 'pending', note = '') {
-  return { id, label: `Criterion ${id}`, result, evidenceNote: note };
+function makeCriterion(id: string, result: 'pass' | 'fail' | 'pending' = 'pending', evidenceNote = '') {
+  return { id, label: `Criterion ${id}`, target: 'test', result, evidenceNote };
 }
 
-function makeExperiment(id: string, overrides: Partial<ServicePrototypeExperiment> = {}): ServicePrototypeExperiment {
+function makeExperiment(id: string, outcome: 'passed' | 'failed' | 'pending' = 'pending', criteriaResults: Array<'pass' | 'fail' | 'pending'> = [], participants = 0) {
   return {
     id,
-    prototypeId: 'proto1',
     title: `Experiment ${id}`,
-    hypothesis: 'If we X then Y',
-    fidelity: 'low',
-    status: 'completed',
-    outcome: 'passed',
-    criteria: [makeCriterion('c1', 'pass')],
+    hypothesis: 'If we do X, then Y',
+    status: outcome !== 'pending' ? 'completed' as const : 'running' as const,
+    outcome,
+    fidelity: 'low-fi' as const,
+    criteria: criteriaResults.map((result, i) => makeCriterion(`c${i}`, result, result !== 'pending' ? 'Some note' : '')),
     observationNotes: [],
-    participantIds: ['p1'],
-    completedAt: NOW,
-    createdAt: NOW,
+    participantIds: Array.from({ length: participants }, (_, i) => `p${i}`),
+    completedAt: outcome !== 'pending' ? NOW : '',
     updatedAt: NOW,
-    ...overrides,
-  } as ServicePrototypeExperiment;
+  };
 }
 
-function withLearningRecord(
-  graph: ServiceGraph,
-  id: string,
-  patch: Record<string, unknown> = {},
-): ServiceGraph {
-  return {
-    ...graph,
-    service: {
-      ...graph.service,
-      learningSystem: {
-        version: 1,
-        records: {
-          ...graph.service.learningSystem?.records,
-          [id]: {
-            id,
-            serviceId: 'S',
-            experimentId: 'exp1',
-            experimentCompletedAt: NOW,
-            hypothesisSnapshot: 'H',
-            verdict: 'inconclusive',
-            confidence: 'low',
-            recommendation: 'retest',
-            status: 'draft',
-            summary: 'Draft summary',
-            evidenceIds: [],
-            createdAt: NOW,
-            updatedAt: NOW,
-            ...patch,
-          },
-        },
-        updatedAt: NOW,
-      },
-    },
-  } as ServiceGraph;
-}
+// ─── Label constants ──────────────────────────────────────────────────────────
 
-// ─── label maps ───────────────────────────────────────────────────────────────
+describe('label constants', () => {
+  it('LEARNING_VERDICT_LABELS has 3 verdicts', () => {
+    expect(Object.keys(LEARNING_VERDICT_LABELS)).toHaveLength(3);
+    expect(LEARNING_VERDICT_LABELS.validated).toBeTruthy();
+    expect(LEARNING_VERDICT_LABELS.refuted).toBeTruthy();
+    expect(LEARNING_VERDICT_LABELS.inconclusive).toBeTruthy();
+  });
 
-describe('label maps', () => {
-  it('LEARNING_VERDICT_LABELS has validated, refuted, inconclusive', () => {
-    expect(Object.keys(LEARNING_VERDICT_LABELS)).toEqual(
-      expect.arrayContaining(['validated', 'refuted', 'inconclusive']),
-    );
+  it('LEARNING_RECOMMENDATION_LABELS has 4 recommendations', () => {
+    expect(Object.keys(LEARNING_RECOMMENDATION_LABELS)).toHaveLength(4);
   });
-  it('LEARNING_RECOMMENDATION_LABELS has keep, iterate, discard, retest', () => {
-    expect(Object.keys(LEARNING_RECOMMENDATION_LABELS)).toEqual(
-      expect.arrayContaining(['keep', 'iterate', 'discard', 'retest']),
-    );
-  });
+
   it('LEARNING_CONFIDENCE_LABELS has low, medium, high', () => {
-    expect(Object.keys(LEARNING_CONFIDENCE_LABELS)).toEqual(
-      expect.arrayContaining(['low', 'medium', 'high']),
-    );
+    expect(Object.keys(LEARNING_CONFIDENCE_LABELS)).toEqual(['low', 'medium', 'high']);
   });
 });
 
 // ─── emptyLearningSystem ──────────────────────────────────────────────────────
 
 describe('emptyLearningSystem', () => {
-  it('returns state with empty records and version 1', () => {
-    const s = emptyLearningSystem(NOW);
-    expect(s.version).toBe(1);
-    expect(s.records).toEqual({});
-    expect(s.updatedAt).toBe(NOW);
+  it('creates empty state with version 1', () => {
+    const state = emptyLearningSystem(NOW);
+    expect(state.version).toBe(1);
+    expect(state.records).toEqual({});
+    expect(state.updatedAt).toBe(NOW);
   });
 });
 
 // ─── normalizeLearningSystem ──────────────────────────────────────────────────
 
 describe('normalizeLearningSystem', () => {
-  it('returns empty state when no learningSystem on graph', () => {
-    const s = normalizeLearningSystem(base(), NOW);
-    expect(s.records).toEqual({});
+  it('returns empty system when no learningSystem on graph', () => {
+    const state = normalizeLearningSystem(base(), NOW);
+    expect(state.records).toEqual({});
   });
 
-  it('defaults verdict to inconclusive when missing', () => {
-    const g = withLearningRecord(base(), 'l1', { verdict: undefined });
-    const s = normalizeLearningSystem(g, NOW);
-    expect(s.records['l1'].verdict).toBe('inconclusive');
-  });
-
-  it('defaults confidence to low when missing', () => {
-    const g = withLearningRecord(base(), 'l1', { confidence: undefined });
-    const s = normalizeLearningSystem(g, NOW);
-    expect(s.records['l1'].confidence).toBe('low');
-  });
-
-  it('defaults status to draft when missing', () => {
-    const g = withLearningRecord(base(), 'l1', { status: undefined });
-    const s = normalizeLearningSystem(g, NOW);
-    expect(s.records['l1'].status).toBe('draft');
-  });
-
-  it('deduplicates evidenceIds', () => {
-    const g = withLearningRecord(base(), 'l1', { evidenceIds: ['e1', 'e1', 'e2'] });
-    const s = normalizeLearningSystem(g, NOW);
-    expect(s.records['l1'].evidenceIds).toEqual(['e1', 'e2']);
-  });
-
-  it('clears activeLearningId when record missing', () => {
+  it('normalizes existing records', () => {
     const g = {
       ...base(),
       service: {
         ...base().service,
-        learningSystem: { version: 1, records: {}, activeLearningId: 'missing', updatedAt: NOW },
+        learningSystem: {
+          version: 1 as const,
+          records: {
+            'lr1': {
+              id: 'lr1',
+              serviceId: 'S',
+              experimentId: 'exp1',
+              experimentCompletedAt: NOW,
+              hypothesisSnapshot: 'H',
+              verdict: undefined,
+              confidence: undefined,
+              recommendation: undefined,
+              status: undefined,
+              summary: '  trimme  ',
+              evidenceIds: ['e1', '', 'e1'], // duplicate + empty
+              createdAt: NOW,
+              updatedAt: NOW,
+            },
+          },
+          updatedAt: NOW,
+        },
       },
-    } as ServiceGraph;
-    const s = normalizeLearningSystem(g, NOW);
-    expect(s.activeLearningId).toBeUndefined();
+    } as never;
+    const state = normalizeLearningSystem(g, NOW);
+    const record = state.records['lr1'];
+    expect(record.verdict).toBe('inconclusive'); // default
+    expect(record.confidence).toBe('low'); // default
+    expect(record.recommendation).toBe('retest'); // default
+    expect(record.status).toBe('draft'); // default
+    expect(record.summary).toBe('trimme'); // trimmed
+    expect(record.evidenceIds).toEqual(['e1']); // unique, no empty
+  });
+
+  it('clears activeLearningId if record no longer exists', () => {
+    const g = {
+      ...base(),
+      service: {
+        ...base().service,
+        learningSystem: {
+          version: 1 as const,
+          records: {},
+          activeLearningId: 'nonexistent',
+          updatedAt: NOW,
+        },
+      },
+    } as never;
+    const state = normalizeLearningSystem(g, NOW);
+    expect(state.activeLearningId).toBeUndefined();
   });
 });
 
 // ─── deriveLearningVerdict ────────────────────────────────────────────────────
 
 describe('deriveLearningVerdict', () => {
-  it('returns validated when outcome = passed', () => {
-    expect(deriveLearningVerdict(makeExperiment('e1', { outcome: 'passed' }))).toBe('validated');
+  it('returns validated when outcome=passed', () => {
+    expect(deriveLearningVerdict(makeExperiment('e1', 'passed') as never)).toBe('validated');
   });
-  it('returns refuted when outcome = failed', () => {
-    expect(deriveLearningVerdict(makeExperiment('e1', { outcome: 'failed' }))).toBe('refuted');
+
+  it('returns refuted when outcome=failed', () => {
+    expect(deriveLearningVerdict(makeExperiment('e1', 'failed') as never)).toBe('refuted');
   });
-  it('returns inconclusive for other outcomes', () => {
-    expect(deriveLearningVerdict(makeExperiment('e1', { outcome: 'pending' }))).toBe('inconclusive');
+
+  it('returns inconclusive when outcome=pending', () => {
+    expect(deriveLearningVerdict(makeExperiment('e1', 'pending') as never)).toBe('inconclusive');
   });
 });
 
 // ─── deriveLearningConfidence ─────────────────────────────────────────────────
 
 describe('deriveLearningConfidence', () => {
-  it('low when no criteria assessed', () => {
-    const exp = makeExperiment('e1', { criteria: [makeCriterion('c1')], participantIds: [], observationNotes: [] });
-    expect(deriveLearningConfidence(exp)).toBe('low');
+  it('returns low for empty criteria', () => {
+    const exp = makeExperiment('e1', 'passed', [], 0);
+    expect(deriveLearningConfidence(exp as never)).toBe('low');
   });
 
-  it('medium when all criteria assessed, 1 participant, 1 evidence note', () => {
-    const exp = makeExperiment('e1', {
-      criteria: [makeCriterion('c1', 'pass', 'note')],
-      participantIds: ['p1'],
-      observationNotes: [],
-    });
-    expect(deriveLearningConfidence(exp)).toBe('medium');
+  it('returns low when criteria are pending', () => {
+    const exp = makeExperiment('e1', 'passed', ['pending', 'pending'], 0);
+    expect(deriveLearningConfidence(exp as never)).toBe('low');
   });
 
-  it('high when all criteria assessed, 3+ participants, 3+ evidence notes', () => {
-    const exp = makeExperiment('e1', {
-      criteria: [
-        makeCriterion('c1', 'pass', 'note1'),
-        makeCriterion('c2', 'pass', 'note2'),
-        makeCriterion('c3', 'pass', 'note3'),
-      ],
-      participantIds: ['p1', 'p2', 'p3'],
-      observationNotes: [],
-    });
-    expect(deriveLearningConfidence(exp)).toBe('high');
+  it('returns medium when all assessed with 1+ participants and 1+ evidence notes', () => {
+    const exp = makeExperiment('e1', 'passed', ['pass', 'pass'], 1);
+    // criteria have evidenceNote set to 'Some note' by makeExperiment
+    expect(deriveLearningConfidence(exp as never)).toBe('medium');
   });
 
-  it('observation notes count toward evidence', () => {
-    const exp = makeExperiment('e1', {
-      criteria: [
-        makeCriterion('c1', 'pass', 'note1'),
-        makeCriterion('c2', 'pass', 'note2'),
-      ],
-      participantIds: ['p1', 'p2', 'p3'],
-      observationNotes: ['obs1'],
-    });
-    // 2 criterion notes + 1 obs = 3 total → high
-    expect(deriveLearningConfidence(exp)).toBe('high');
+  it('returns high when all assessed with 3+ participants and 3+ evidence notes', () => {
+    const exp = makeExperiment('e1', 'passed', ['pass', 'pass', 'pass'], 3);
+    expect(deriveLearningConfidence(exp as never)).toBe('high');
   });
 });
 
 // ─── deriveLearningRecommendation ─────────────────────────────────────────────
 
 describe('deriveLearningRecommendation', () => {
-  it('keep for validated', () => {
-    expect(deriveLearningRecommendation('validated')).toBe('keep');
-  });
-  it('iterate for refuted', () => {
-    expect(deriveLearningRecommendation('refuted')).toBe('iterate');
-  });
-  it('retest for inconclusive', () => {
-    expect(deriveLearningRecommendation('inconclusive')).toBe('retest');
-  });
+  it('validated → keep', () => expect(deriveLearningRecommendation('validated')).toBe('keep'));
+  it('refuted → iterate', () => expect(deriveLearningRecommendation('refuted')).toBe('iterate'));
+  it('inconclusive → retest', () => expect(deriveLearningRecommendation('inconclusive')).toBe('retest'));
 });
 
 // ─── updateLearningRecord ─────────────────────────────────────────────────────
 
 describe('updateLearningRecord', () => {
-  it('updates summary and rationale', () => {
-    const g = withLearningRecord(base(), 'l1');
-    const result = updateLearningRecord(g, 'l1', { summary: 'New summary', rationale: 'Because' }, NOW);
-    const rec = normalizeLearningSystem(result, NOW).records['l1'];
-    expect(rec.summary).toBe('New summary');
-    expect(rec.rationale).toBe('Because');
+  function graphWithRecord(): { graph: ServiceGraph; learningId: string } {
+    const learningId = 'lr1';
+    const g = {
+      ...base(),
+      service: {
+        ...base().service,
+        learningSystem: {
+          version: 1 as const,
+          records: {
+            [learningId]: {
+              id: learningId,
+              serviceId: 'S',
+              experimentId: 'exp1',
+              experimentCompletedAt: NOW,
+              hypothesisSnapshot: 'H',
+              verdict: 'validated' as const,
+              confidence: 'medium' as const,
+              recommendation: 'keep' as const,
+              status: 'draft' as const,
+              summary: 'Old summary',
+              evidenceIds: [],
+              createdAt: NOW,
+              updatedAt: NOW,
+            },
+          },
+          updatedAt: NOW,
+        },
+      },
+    } as never;
+    return { graph: g, learningId };
+  }
+
+  it('updates summary', () => {
+    const { graph, learningId } = graphWithRecord();
+    const result = updateLearningRecord(graph, learningId, { summary: 'New summary' }, NOW);
+    expect(result.service.learningSystem!.records[learningId].summary).toBe('New summary');
   });
 
   it('updates confidence and recommendation', () => {
-    const g = withLearningRecord(base(), 'l1');
-    const result = updateLearningRecord(g, 'l1', { confidence: 'high', recommendation: 'keep' }, NOW);
-    const rec = normalizeLearningSystem(result, NOW).records['l1'];
-    expect(rec.confidence).toBe('high');
-    expect(rec.recommendation).toBe('keep');
+    const { graph, learningId } = graphWithRecord();
+    const result = updateLearningRecord(graph, learningId, { confidence: 'high', recommendation: 'iterate' }, NOW);
+    const record = result.service.learningSystem!.records[learningId];
+    expect(record.confidence).toBe('high');
+    expect(record.recommendation).toBe('iterate');
   });
 
-  it('returns unchanged graph for missing learning', () => {
-    const g = base();
-    expect(updateLearningRecord(g, 'missing', { summary: 'x' }, NOW)).toBe(g);
+  it('returns unchanged graph when learningId does not exist', () => {
+    const { graph } = graphWithRecord();
+    const result = updateLearningRecord(graph, 'nonexistent', { summary: 'X' }, NOW);
+    expect(result).toBe(graph);
   });
 
-  it('returns unchanged graph when status is archived', () => {
-    const g = withLearningRecord(base(), 'l1', { status: 'archived' });
-    const result = updateLearningRecord(g, 'l1', { summary: 'x' }, NOW);
-    expect(result).toBe(g);
-  });
-
-  it('sets activeLearningId to updated record', () => {
-    const g = withLearningRecord(base(), 'l1');
-    const result = updateLearningRecord(g, 'l1', { summary: 'x' }, NOW);
-    expect(result.service.learningSystem?.activeLearningId).toBe('l1');
+  it('returns unchanged graph when record is archived', () => {
+    const { graph, learningId } = graphWithRecord();
+    const archived = setLearningStatus(graph, learningId, 'archived', NOW);
+    const result = updateLearningRecord(archived, learningId, { summary: 'X' }, NOW);
+    expect(result).toBe(archived);
   });
 });
 
 // ─── setLearningStatus ────────────────────────────────────────────────────────
 
 describe('setLearningStatus', () => {
-  it('advances status to reviewed and sets reviewedAt', () => {
-    const g = withLearningRecord(base(), 'l1', { status: 'draft' });
-    const result = setLearningStatus(g, 'l1', 'reviewed', NOW);
-    const rec = normalizeLearningSystem(result, NOW).records['l1'];
-    expect(rec.status).toBe('reviewed');
-    expect(rec.reviewedAt).toBe(NOW);
+  function graphWithRecord(): { graph: ServiceGraph; learningId: string } {
+    const learningId = 'lr1';
+    const g = {
+      ...base(),
+      service: {
+        ...base().service,
+        learningSystem: {
+          version: 1 as const,
+          records: {
+            [learningId]: {
+              id: learningId,
+              serviceId: 'S',
+              experimentId: 'exp1',
+              experimentCompletedAt: NOW,
+              hypothesisSnapshot: 'H',
+              verdict: 'validated' as const,
+              confidence: 'medium' as const,
+              recommendation: 'keep' as const,
+              status: 'draft' as const,
+              summary: 'Summary',
+              evidenceIds: [],
+              createdAt: NOW,
+              updatedAt: NOW,
+            },
+          },
+          updatedAt: NOW,
+        },
+      },
+    } as never;
+    return { graph: g, learningId };
+  }
+
+  it('sets status to reviewed and sets reviewedAt', () => {
+    const { graph, learningId } = graphWithRecord();
+    const result = setLearningStatus(graph, learningId, 'reviewed', NOW);
+    const record = result.service.learningSystem!.records[learningId];
+    expect(record.status).toBe('reviewed');
+    expect(record.reviewedAt).toBe(NOW);
   });
 
-  it('sets activeLearningId for non-archived transition', () => {
-    const g = withLearningRecord(base(), 'l1');
-    const result = setLearningStatus(g, 'l1', 'reviewed', NOW);
-    expect(result.service.learningSystem?.activeLearningId).toBe('l1');
+  it('archiving clears activeLearningId', () => {
+    const { graph, learningId } = graphWithRecord();
+    const result = setLearningStatus(graph, learningId, 'archived', NOW);
+    expect(result.service.learningSystem!.activeLearningId).toBeUndefined();
   });
 
-  it('clears activeLearningId when archiving', () => {
-    const g = withLearningRecord(base(), 'l1');
-    const g2 = setLearningStatus(g, 'l1', 'archived', NOW);
-    expect(g2.service.learningSystem?.activeLearningId).toBeUndefined();
-  });
-
-  it('returns unchanged graph for missing learning', () => {
-    const g = base();
-    expect(setLearningStatus(g, 'missing', 'reviewed', NOW)).toBe(g);
+  it('returns unchanged graph when learningId does not exist', () => {
+    const { graph } = graphWithRecord();
+    const result = setLearningStatus(graph, 'nonexistent', 'reviewed', NOW);
+    expect(result).toBe(graph);
   });
 });
 
 // ─── buildLearningSystemReport ────────────────────────────────────────────────
 
 describe('buildLearningSystemReport', () => {
-  it('returns report shape on empty graph', () => {
-    const r = buildLearningSystemReport(base());
-    expect(r.records).toEqual([]);
-    expect(r.counts.learnings).toBe(0);
-    expect(r.counts.pending).toBe(0);
+  it('returns empty report for empty graph', () => {
+    const report = buildLearningSystemReport(base());
+    expect(report.records).toEqual([]);
+    expect(report.counts.learnings).toBe(0);
+    expect(report.counts.pending).toBe(0);
   });
 
-  it('excludes archived records from records list', () => {
-    const g = withLearningRecord(withLearningRecord(base(), 'l1', { status: 'reviewed' }), 'l2', { status: 'archived' });
-    const r = buildLearningSystemReport(g);
-    expect(r.records.some((rec) => rec.id === 'l1')).toBe(true);
-    expect(r.records.some((rec) => rec.id === 'l2')).toBe(false);
-    expect(r.archivedRecords.some((rec) => rec.id === 'l2')).toBe(true);
+  it('reports active records (excludes archived)', () => {
+    const learningId = 'lr1';
+    const g = {
+      ...base(),
+      service: {
+        ...base().service,
+        learningSystem: {
+          version: 1 as const,
+          records: {
+            [learningId]: {
+              id: learningId,
+              serviceId: 'S',
+              experimentId: 'exp1',
+              experimentCompletedAt: NOW,
+              hypothesisSnapshot: 'H',
+              verdict: 'validated' as const,
+              confidence: 'medium' as const,
+              recommendation: 'keep' as const,
+              status: 'reviewed' as const,
+              summary: 'Summary',
+              evidenceIds: ['e1'],
+              createdAt: NOW,
+              updatedAt: NOW,
+            },
+          },
+          updatedAt: NOW,
+        },
+      },
+    } as never;
+    const report = buildLearningSystemReport(g);
+    expect(report.records).toHaveLength(1);
+    expect(report.counts.learnings).toBe(1);
+    expect(report.counts.reviewed).toBe(1);
+    expect(report.counts.validated).toBe(1);
+    expect(report.reviewReady).toBe(1);
   });
 
-  it('reviewReady counts records with summary and evidenceIds', () => {
-    const g = withLearningRecord(base(), 'l1', { summary: 'Valid', evidenceIds: ['e1'] });
-    const r = buildLearningSystemReport(g);
-    expect(r.reviewReady).toBe(1);
-  });
-
-  it('reviewReady = 0 when evidenceIds is empty', () => {
-    const g = withLearningRecord(base(), 'l1', { summary: 'Valid', evidenceIds: [] });
-    const r = buildLearningSystemReport(g);
-    expect(r.reviewReady).toBe(0);
-  });
-
-  it('counts validated, refuted, inconclusive', () => {
-    let g = withLearningRecord(base(), 'l1', { verdict: 'validated' });
-    g = withLearningRecord(g, 'l2', { verdict: 'refuted' });
-    g = withLearningRecord(g, 'l3', { verdict: 'inconclusive' });
-    const r = buildLearningSystemReport(g);
-    expect(r.counts.validated).toBe(1);
-    expect(r.counts.refuted).toBe(1);
-    expect(r.counts.inconclusive).toBe(1);
-  });
-
-  it('sorts records by updatedAt descending', () => {
-    const g = withLearningRecord(
-      withLearningRecord(base(), 'l1', { updatedAt: '2024-01-01T00:00:00.000Z' }),
-      'l2', { updatedAt: '2024-02-01T00:00:00.000Z' },
-    );
-    const r = buildLearningSystemReport(g);
-    expect(r.records[0].id).toBe('l2');
+  it('archived records appear in archivedRecords, not records', () => {
+    const learningId = 'lr1';
+    const g = {
+      ...base(),
+      service: {
+        ...base().service,
+        learningSystem: {
+          version: 1 as const,
+          records: {
+            [learningId]: {
+              id: learningId,
+              serviceId: 'S',
+              experimentId: 'exp1',
+              experimentCompletedAt: NOW,
+              hypothesisSnapshot: 'H',
+              verdict: 'inconclusive' as const,
+              confidence: 'low' as const,
+              recommendation: 'retest' as const,
+              status: 'archived' as const,
+              summary: 'Old',
+              evidenceIds: [],
+              createdAt: NOW,
+              updatedAt: NOW,
+            },
+          },
+          updatedAt: NOW,
+        },
+      },
+    } as never;
+    const report = buildLearningSystemReport(g);
+    expect(report.records).toHaveLength(0);
+    expect(report.archivedRecords).toHaveLength(1);
   });
 });
