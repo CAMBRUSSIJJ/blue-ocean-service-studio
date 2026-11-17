@@ -64,7 +64,7 @@ body.bo-v1187 header.rt182-host-header .bo-simple-project-actions[open]>div>butt
 .bo1174-board.bo-simple-blueprint .bo1174-toolrail .rt144-tool{height:55px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 .bo-simple-blueprint .bo1203-cell-add{opacity:0;pointer-events:none;border-color:transparent!important;background:transparent!important;box-shadow:none!important;min-height:36px!important;color:#475569!important}
 .bo-simple-blueprint .bo-simple-next-cell .bo1203-cell-add,.bo-simple-blueprint .bo1203-service-cell:hover .bo1203-cell-add,.bo-simple-blueprint .bo1203-service-cell:focus-within .bo1203-cell-add{opacity:1;pointer-events:auto}
-.bo-simple-blueprint .bo1203-cell-add:focus-visible{opacity:1;pointer-events:auto;outline:2px solid #2563eb}
+.bo-simple-blueprint .bo1203-cell-add:focus-visible{opacity:1;pointer-events:auto;outline:2px solid #1e63f0}
 .bo-simple-blueprint .bo-simple-empty-cell{cursor:text}
 .bo-simple-blueprint .bo1205-stage-operation{border:0!important;background:transparent!important;box-shadow:none!important;font-size:11px}
 .bo-simple-blueprint .bo1205-stage-operation>span{display:none}

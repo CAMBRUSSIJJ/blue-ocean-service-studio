@@ -6,7 +6,7 @@
 .bo-h161-foundation-nav{padding:5px 0 8px}
 .bo-h161-foundation-nav section{padding:7px 10px 5px;border-top:1px solid #eef3f7}
 .bo-h161-foundation-nav section:first-child{border-top:0}
-.bo-h161-foundation-nav section>strong{display:block;margin:0 5px 5px;color:#7890a4;font-size:8px;letter-spacing:.12em}
+.bo-h161-foundation-nav section>strong{display:block;margin:0 5px 5px;color:#7890a4;font-size:11px;letter-spacing:.12em}
 .bo-h161-foundation-nav section>button{width:100%;min-height:38px;display:grid;grid-template-columns:20px minmax(0,1fr);align-items:center;gap:8px;padding:7px 8px;border:0;border-radius:9px;background:transparent;color:#486179;text-align:left;cursor:pointer}
 .bo-h161-foundation-nav section>button:hover{background:#f5f9fd;color:#1f4f78}
 .bo-h161-foundation-nav section>button.is-active{background:#eaf4fd;color:#155e95;font-weight:750}

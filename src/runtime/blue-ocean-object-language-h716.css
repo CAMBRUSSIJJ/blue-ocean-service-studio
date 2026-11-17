@@ -1,7 +1,7 @@
 /* H7.16 — Blue Ocean Object Language
    One visual grammar for artifacts, context objects and operational Smart Objects. */
 :root{
-  --bo-object-journey:#2563eb;
+  --bo-object-journey:#1e63f0;
   --bo-object-blueprint:#0f8f83;
   --bo-object-whiteboard:#7657d6;
   --bo-object-persona:#7657d6;
@@ -23,7 +23,7 @@
 .bo-h716 .bo1215-depth-icon{border-radius:10px 10px 7px 10px!important}
 
 .bo-h716-recent-preview>.bo-h716-artifact-preview{position:relative;z-index:1}
-.bo-h716-artifact-preview{position:relative;display:block;width:92px;height:62px;color:#2563eb}
+.bo-h716-artifact-preview{position:relative;display:block;width:92px;height:62px;color:#1e63f0}
 .bo-h716-artifact-preview i,.bo-h716-artifact-preview b{position:absolute;display:block;box-sizing:border-box}
 .bo-h716-artifact-preview.is-journey i{width:17px;height:17px;border:2px solid currentColor;border-radius:50%;background:#fff;top:24px}
 .bo-h716-artifact-preview.is-journey i:nth-child(1){left:4px}.bo-h716-artifact-preview.is-journey i:nth-child(2){left:38px;top:12px}.bo-h716-artifact-preview.is-journey i:nth-child(3){right:4px;top:29px}
@@ -56,18 +56,18 @@
 .bo-h716-object-card[data-bo-object-shape="layer"]{border-radius:9px 14px 9px 14px!important}
 .bo-h716-object-card[data-bo-object-shape="block"]{border-radius:8px!important}
 .bo-h716-object-card[data-bo-object="problem"]::after{content:'';position:absolute;right:10px;top:-1px;width:16px;height:7px;background:var(--bo-h716-accent);clip-path:polygon(0 0,100% 0,50% 100%);opacity:.8}
-.bo-h716-object-card[data-bo-object="evidence"]::after{content:'•••';position:absolute;right:10px;bottom:7px;color:var(--bo-h716-accent);font-size:8px;letter-spacing:2px;opacity:.55}
+.bo-h716-object-card[data-bo-object="evidence"]::after{content:'•••';position:absolute;right:10px;bottom:7px;color:var(--bo-h716-accent);font-size:11px;letter-spacing:2px;opacity:.55}
 .bo-h716-object-card[data-bo-object="frontstage"]::after,.bo-h716-object-card[data-bo-object="backstage"]::after{content:'';position:absolute;left:13px;right:13px;height:1px;background:linear-gradient(90deg,transparent,var(--bo-h716-accent),transparent);opacity:.45}
 .bo-h716-object-card[data-bo-object="frontstage"]::after{top:8px}.bo-h716-object-card[data-bo-object="backstage"]::after{bottom:8px}
 .bo-h716-object-head{min-height:27px}
 .bo-h716-object-icon{width:27px;height:27px;display:grid;place-items:center;flex:0 0 auto;border-radius:8px;color:var(--bo-h716-accent);background:color-mix(in srgb,var(--bo-h716-accent) 8%,white);border:1px solid color-mix(in srgb,var(--bo-h716-accent) 24%,transparent)}
 .bo-h716-object-label{color:var(--bo-h716-ink,#475569)!important;letter-spacing:.10em!important}
-.bo-h716-graph-chip{color:var(--bo-h716-ink,#174ea6)!important;background:color-mix(in srgb,var(--bo-h716-accent,#2563eb) 10%,white)!important;border:1px solid color-mix(in srgb,var(--bo-h716-accent,#2563eb) 18%,transparent)!important;padding:2px 5px;border-radius:5px}
+.bo-h716-graph-chip{color:var(--bo-h716-ink,#174ea6)!important;background:color-mix(in srgb,var(--bo-h716-accent,#1e63f0) 10%,white)!important;border:1px solid color-mix(in srgb,var(--bo-h716-accent,#1e63f0) 18%,transparent)!important;padding:2px 5px;border-radius:5px}
 
 /* Object library uses the same grammar as canvas objects. */
 .bo-h716-library-icon{width:26px;height:26px;display:inline-grid;place-items:center;margin-right:7px;border-radius:7px;background:#f3f6fa;color:#315d92;vertical-align:middle}
 .bo-h716-library-object-row{display:flex;align-items:center;gap:6px;margin-bottom:2px;color:#315d92}.bo-h716-library-object-row span{color:inherit}
-.bo-h716-inspector-type{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;font-weight:750;color:#27364a}.bo-h716-inspector-type svg{color:#2563eb}
+.bo-h716-inspector-type{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;font-weight:750;color:#27364a}.bo-h716-inspector-type svg{color:#1e63f0}
 
 /* Relation language: semantic presets remain legible in the inspector and the canvas. */
 .bo-h716-relation-presets>span{display:block;margin-bottom:7px;font-size:11px;font-weight:700;color:#475569}.bo-h716-relation-presets>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.bo-h716-relation-presets button{height:29px;border:1px solid #dfe4eb;border-radius:7px;background:#fff;font-size:10px;font-weight:750;color:#516071;cursor:pointer}.bo-h716-relation-presets button[data-relation="supports"]{color:#0d7299;border-color:#bce2f0;background:#f1fbff}.bo-h716-relation-presets button[data-relation="contradicts"]{color:#a42d3c;border-color:#f0c4ca;background:#fff5f6}.bo-h716-relation-presets button[data-relation="contextualizes"]{color:#5941ab;border-color:#d8cef6;background:#f8f6ff}.bo-h716-relation-presets button[data-relation="depends"]{color:#536173;background:#f6f7f9}.bo-h716-relation-presets button:hover{filter:brightness(.985);box-shadow:0 2px 7px rgba(20,34,53,.05)}

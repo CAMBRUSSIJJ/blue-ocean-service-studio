@@ -2,7 +2,7 @@
    Keep the H7.17 composition intact; add slow motion and make the icon language unmistakably Blue Ocean. */
 
 :root{
-  --bo-h718-current:#2563eb;
+  --bo-h718-current:#1e63f0;
   --bo-h718-aqua:#38bfc7;
   --bo-h718-depth:#0b3154;
   --bo-h718-foam:#eef8ff;
@@ -72,7 +72,7 @@
   background:linear-gradient(90deg,transparent,var(--bo-h718-nav-accent));opacity:.42;
 }
 
-.bo-h718 [data-icon-kind="dashboard"],.bo-h718 [data-icon-kind="journey"]{--bo-h718-nav-accent:#2563eb;--bo-h718-nav-surface:#eef5ff}
+.bo-h718 [data-icon-kind="dashboard"],.bo-h718 [data-icon-kind="journey"]{--bo-h718-nav-accent:#1e63f0;--bo-h718-nav-surface:#eef5ff}
 .bo-h718 [data-icon-kind="blueprint"]{--bo-h718-nav-accent:#0f8f83;--bo-h718-nav-surface:#eaf8f6}
 .bo-h718 [data-icon-kind="whiteboard"]{--bo-h718-nav-accent:#7657d6;--bo-h718-nav-surface:#f3f0ff}
 .bo-h718 [data-icon-kind="hierarchy"],.bo-h718 [data-icon-kind="job"]{--bo-h718-nav-accent:#4f63c7;--bo-h718-nav-surface:#eff1ff}
@@ -95,7 +95,7 @@
 
 /* --- Home headers and utility icons: no generic SaaS pictograms. --- */
 .bo-h718 .bo1207-dashboard-section h2>svg,
-.bo-h718 .bo1215-learn-grid button i>svg{color:#2563eb}
+.bo-h718 .bo1215-learn-grid button i>svg{color:#1e63f0}
 .bo-h718 .bo1207-action-copy strong>svg{color:currentColor;opacity:.78}
 
 .bo-h718 .bo-h718-recents-header{align-items:flex-start!important}
@@ -111,7 +111,7 @@
 
 /* --- Recents: artifact identity is visible before the user reads the label. --- */
 .bo-h718 .bo-h718-recent-kind{display:flex!important;align-items:center;gap:4px;color:#61738a!important;font-weight:750!important;letter-spacing:.035em}
-.bo-h718 .bo1215-recent-card[data-artifact-type="Journey"] .bo-h718-recent-kind svg{color:#2563eb}
+.bo-h718 .bo1215-recent-card[data-artifact-type="Journey"] .bo-h718-recent-kind svg{color:#1e63f0}
 .bo-h718 .bo1215-recent-card[data-artifact-type="Blueprint"] .bo-h718-recent-kind svg{color:#0f8f83}
 .bo-h718 .bo1215-recent-card[data-artifact-type="Whiteboard"] .bo-h718-recent-kind svg{color:#7657d6}
 

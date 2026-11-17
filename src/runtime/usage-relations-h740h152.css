@@ -17,7 +17,7 @@
 
 .bo-h152-touchpoint-open:hover,
 .bo-h152-touchpoint-open.is-selected {
-  background: color-mix(in srgb, var(--bo-accent, #2563eb) 10%, transparent);
+  background: color-mix(in srgb, var(--bo-accent, #1e63f0) 10%, transparent);
 }
 
 .bo-h152-touchpoint-open:focus-visible {

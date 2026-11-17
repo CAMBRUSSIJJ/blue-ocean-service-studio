@@ -5,7 +5,7 @@
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-maturity>b{font-size:15px;letter-spacing:-.01em;color:#47617e;align-self:center;font-weight:800}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-meter{height:7px}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-next{min-height:0;border-radius:14px;padding:16px 18px;gap:7px;box-shadow:0 10px 24px rgba(15,55,92,.11)}
-.bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-next>small{font-size:8px;letter-spacing:.13em}
+.bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-next>small{font-size:11px;letter-spacing:.13em}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h153-guidance-basis{font-size:9px;line-height:1.35;opacity:.68;margin-top:-3px}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-next h2{font-size:18px;margin-top:2px}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-next p{font-size:10.5px;line-height:1.5}
@@ -17,14 +17,14 @@
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-stepper button>span{width:36px;height:36px;border-width:2px}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-stepper button::before{top:18px;right:calc(50% + 19px);width:calc(100% - 38px);height:2px}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-capability-panel>header{padding:12px 14px;background:#f8fbfe}
-.bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h153-phase-kicker{display:block;margin-bottom:3px;font-size:8px;line-height:1;font-weight:900;letter-spacing:.12em;color:#4d78a7}
+.bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h153-phase-kicker{display:block;margin-bottom:3px;font-size:11px;line-height:1;font-weight:900;letter-spacing:.12em;color:#4d78a7}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-capability-panel h3{font-size:16px}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-capability-panel li{grid-template-columns:minmax(0,1fr) minmax(175px,230px) auto;min-height:62px;padding:10px 14px}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-capability-panel li>button{min-width:92px;min-height:36px}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h740h7-capability-panel li[data-capability-target="whiteboard"] .bo-h740h7-capability-main p i{background:#f3f0fb;color:#654da8}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h153-phase-connections{margin-top:13px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,.9fr);gap:16px;align-items:center;padding:14px 15px;border:1px solid #dfe8f1;border-radius:13px;background:linear-gradient(135deg,#f9fcff,#fff)}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h153-phase-connections__copy{min-width:0}
-.bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h153-phase-connections__copy>small{display:block;font-size:8px;font-weight:900;letter-spacing:.11em;color:#4776a5}
+.bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h153-phase-connections__copy>small{display:block;font-size:11px;font-weight:900;letter-spacing:.11em;color:#4776a5}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h153-phase-connections__copy>strong{display:block;margin-top:4px;font-size:12px;color:#243a53}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h153-phase-connections__copy>p{margin:4px 0 0;font-size:10px;line-height:1.5;color:#687b8e}
 .bo-h740h7[data-design-service-ux="7.40-H15.3"] .bo-h153-phase-connections__copy>em{display:block;margin-top:5px;font-size:9px;font-style:normal;color:#6f6190}

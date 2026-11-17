@@ -72,7 +72,9 @@ body.bo-v1130 ::selection{background:var(--bo-color-primary-200);color:var(--bo-
 
 .bo-skeleton{background:linear-gradient(90deg,var(--bo-color-surface-muted) 25%,var(--bo-color-surface-subtle) 50%,var(--bo-color-surface-muted) 75%);background-size:200% 100%;border-radius:var(--bo-radius-sm);animation:bo-shimmer 1.35s infinite linear}
 @keyframes bo-shimmer{to{background-position:-200% 0}}
+/* stylelint-disable declaration-no-important */
 @media (prefers-reduced-motion:reduce){body.bo-v1130 *,body.bo-v1130 *::before,body.bo-v1130 *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+/* stylelint-enable declaration-no-important */
 
 
 /* V1.16.2 — component primitives added to close recurring one-off patterns. */

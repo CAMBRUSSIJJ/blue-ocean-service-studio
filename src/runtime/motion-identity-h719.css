@@ -4,7 +4,7 @@
 :root{
   --bo-h719-deep:#06182b;
   --bo-h719-depth:#0a3150;
-  --bo-h719-current:#2563eb;
+  --bo-h719-current:#1e63f0;
   --bo-h719-aqua:#55d2d0;
   --bo-h719-foam:#f5fbff;
 }
@@ -127,7 +127,7 @@
 
 /* Brand mark in shell gets the same ocean halo as the navigation system. */
 .bo-h719 .rt182-host-brand>div:first-child{
-  background:linear-gradient(145deg,#174a88,#2563eb 58%,#1598c9)!important;
+  background:linear-gradient(145deg,#174a88,#1e63f0 58%,#1598c9)!important;
   box-shadow:0 6px 18px rgba(37,99,235,.18),inset 0 1px 0 rgba(255,255,255,.25);
   border-radius:50% 50% 44% 56%!important;
 }

@@ -51,7 +51,7 @@
   font-size:13px!important;
 }
 .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy em{
-  font-size:8.5px!important;
+  font-size:11px!important;
   margin-top:3px!important;
 }
 .bo-h720h1 .bo1215-depth-chip{
@@ -65,7 +65,7 @@
   border-radius:10px!important;
 }
 .bo-h720h1 .bo1215-depth-chip>span:nth-of-type(2) small{
-  font-size:7px!important;
+  font-size:11px!important;
   letter-spacing:.10em!important;
 }
 .bo-h720h1 .bo1215-depth-chip>span:nth-of-type(2) strong{
@@ -130,11 +130,11 @@
   line-height:1.22!important;
 }
 .bo-h720h1 .bo1215-recent-card .bo1207-recent-meta{
-  font-size:8.5px!important;
+  font-size:11px!important;
   margin-top:5px!important;
 }
 .bo-h720h1 .bo1215-recent-card>em{
-  font-size:7.5px!important;
+  font-size:11px!important;
   margin-top:6px!important;
 }
 
@@ -183,7 +183,7 @@
   height:38px!important;
 }
 .bo-h720h1 .bo1215-learn-grid>button strong{font-size:10px!important}
-.bo-h720h1 .bo1215-learn-grid>button small{font-size:7.8px!important}
+.bo-h720h1 .bo1215-learn-grid>button small{font-size:11px!important}
 .bo-h720h1 .bo1215-learn-grid>button.is-recommended strong{font-size:10.5px!important}
 
 /* Keep the ocean floor as atmosphere only; don't let it become the layout's focal point. */

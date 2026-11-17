@@ -1,0 +1,10 @@
+# Runtime CSS files are legacy — accumulated across 168 ciclos.
+# Lint is applied only to new, canonical design-system and component files.
+# Migration path: move component styles to src/components/ over time.
+src/runtime/
+src/style.css
+src/design-system/legacy-compat.css
+src/design-system/unified-ui-h3.css
+dist/
+node_modules/
+integrations/

@@ -6,7 +6,7 @@
 .bo-h16-experience-trigger:hover{background:#f7fbff;border-color:#b9d2e8}
 .bo-h16-experience-menu{position:absolute;right:0;top:41px;z-index:160;width:min(410px,calc(100vw - 28px));padding:10px;border:1px solid #d8e4ef;border-radius:14px;background:#fff;box-shadow:0 18px 50px rgba(25,54,79,.18)}
 .bo-h16-experience-menu>header{padding:8px 9px 10px;border-bottom:1px solid #edf2f6}
-.bo-h16-experience-menu>header small{display:block;font-size:8px;font-weight:900;letter-spacing:.11em;color:#557794}
+.bo-h16-experience-menu>header small{display:block;font-size:11px;font-weight:900;letter-spacing:.11em;color:#557794}
 .bo-h16-experience-menu>header strong{display:block;margin-top:3px;font-size:13px;color:#173650}
 .bo-h16-experience-menu>header p{margin:5px 0 0;font-size:10px;line-height:1.45;color:#6b7f91}
 .bo-h16-experience-menu>button{width:100%;display:grid;grid-template-columns:minmax(0,1fr) 20px;align-items:center;gap:10px;margin-top:6px;padding:10px;border:1px solid transparent;border-radius:10px;background:#fff;text-align:left;cursor:pointer;color:#3c556d}
@@ -16,24 +16,24 @@
 .bo-h16-experience-menu>button:hover{background:#f7fbff;border-color:#d8e8f5}
 .bo-h16-experience-menu>button.is-active{background:#edf6ff;border-color:#b9d6ee;color:#17669e}
 
-.bo-h16-profile-chip{display:inline-flex;align-items:center;width:max-content;margin-top:7px;padding:4px 7px;border:1px solid #d7e5f1;border-radius:999px;background:#f7fbff;color:#4e6e89;font-size:8px;font-weight:800;font-style:normal;letter-spacing:.04em;text-transform:uppercase}
+.bo-h16-profile-chip{display:inline-flex;align-items:center;width:max-content;margin-top:7px;padding:4px 7px;border:1px solid #d7e5f1;border-radius:999px;background:#f7fbff;color:#4e6e89;font-size:11px;font-weight:800;font-style:normal;letter-spacing:.04em;text-transform:uppercase}
 
 .bo1187-app-shell[data-experience-level="foundation"] [data-experience-nav="expanded"]{display:none!important}
 .bo1187-app-shell[data-experience-level="foundation"] .bo-h740h14-save-status span{display:none}
 
 .bo-h16-foundation-guide{margin:12px 0;padding:14px;border:1px solid #d8e7f4;border-radius:15px;background:linear-gradient(135deg,#f7fbff,#fff)}
-.bo-h16-foundation-guide>small{display:block;margin-bottom:10px;font-size:8px;font-weight:900;letter-spacing:.11em;color:#557994}
+.bo-h16-foundation-guide>small{display:block;margin-bottom:10px;font-size:11px;font-weight:900;letter-spacing:.11em;color:#557994}
 .bo-h16-foundation-guide>div{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:9px;align-items:center}
 .bo-h16-foundation-guide span{min-width:0;display:grid;grid-template-columns:26px 1fr;grid-template-areas:'n t' 'n d';column-gap:8px;align-items:center;padding:9px;border:1px solid #e2ecf5;border-radius:11px;background:#fff}
 .bo-h16-foundation-guide span b{grid-area:n;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#e8f3fc;color:#1c6ca4;font-size:10px}
 .bo-h16-foundation-guide span strong{grid-area:t;font-size:10px;color:#1e405d}
-.bo-h16-foundation-guide span em{grid-area:d;margin-top:2px;font-size:8.5px;font-style:normal;color:#71869a;line-height:1.35}
+.bo-h16-foundation-guide span em{grid-area:d;margin-top:2px;font-size:11px;font-style:normal;color:#71869a;line-height:1.35}
 .bo-h16-foundation-guide>div>i{font-style:normal;color:#9ab2c7}
 
 .bo-h16-advanced-research{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:10px 0}
 .bo-h16-advanced-research article{padding:9px 10px;border:1px solid #dce6ef;border-radius:10px;background:#fbfdff}
 .bo-h16-advanced-research span,.bo-h16-advanced-research strong{display:block}
-.bo-h16-advanced-research span{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#71869a}
+.bo-h16-advanced-research span{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#71869a}
 .bo-h16-advanced-research strong{margin-top:3px;font-size:15px;color:#183f61}
 
 .bo-h740h7[data-adaptive-experience="H16"][data-experience-level="foundation"] .bo-h154-phase-progress{display:none}
