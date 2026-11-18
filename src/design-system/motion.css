@@ -241,3 +241,13 @@ body.bo1179-auth-visible .bo-auth-brand>div{box-shadow:0 0 0 1px rgba(255,255,25
   .bo1205h3-sidebar button.is-wave-source{animation:bo-motion-nav-reduced-pulse 240ms ease-out both!important}
   .bo1205h3-sidebar button.is-wave-source::after{animation:none!important;display:none!important}
 }
+
+/* ───────────────────────── Sidebar: "Outras ferramentas" ─────────────────────────
+   Agrupa as ferramentas fora das abas principais, recolhido por padrão. */
+.bo-other-tools{margin:6px 0 4px;padding-top:8px;border-top:1px solid #f0eeec}
+.bo-other-tools__toggle{display:flex;align-items:center;justify-content:space-between;width:100%;height:30px;padding:0 10px;border:0;background:transparent;border-radius:var(--bo-radius-sm);color:var(--bo-color-text-secondary);font-size:var(--bo-font-size-sm);font-weight:var(--bo-font-weight-medium);cursor:pointer;transition:background-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard)}
+.bo-other-tools__toggle:hover{background:var(--bo-color-surface-muted);color:var(--bo-color-text)}
+.bo-other-tools__toggle span:last-child{color:var(--bo-color-text-muted);font-size:var(--bo-font-size-md);line-height:1}
+.bo-other-tools__items{display:flex;flex-direction:column;padding-top:2px}
+/* Recolhida, o grupo some junto com as outras abas. */
+.bo-h724-sidebar.is-collapsed:not(:hover) .bo-other-tools__toggle span:first-child{display:none}
