@@ -8,7 +8,7 @@
     "build": "npm run blocksuite:build && node scripts/prepare-assets.mjs && tsc --noEmit -p tsconfig.build.json && vite build && node scripts/build-provenance.mjs && npm run dist:verify",
     "preview": "vite preview --host 127.0.0.1 --port 4173",
     "pretypecheck": "node scripts/prepare-assets.mjs",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.build.json",
     "docs:check": "node scripts/check-docs.mjs",
     "demo:smoke": "node scripts/v1102-demo-smoke.mjs",
     "stability:smoke": "node scripts/v1120-stability-smoke.mjs",
