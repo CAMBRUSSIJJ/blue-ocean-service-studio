@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 const read=p=>readFileSync(p,'utf8');
 const pkg=JSON.parse(read('package.json'));
 const css=read('src/runtime/brand-polish.css');
+const motion=read('src/design-system/motion.css');
 const js=read('src/runtime/brand-polish.js');
 const prep=read('scripts/prepare-assets.mjs');
 const index=read('index.html');
@@ -23,7 +24,7 @@ check('marca final usa blue-ocean-mark',css.includes("url('/blue-ocean-mark.svg'
 check('estado vazio usa SVG BLUE OCEAN',css.includes("url('/blue-ocean-empty-state.svg')"));
 check('motion usa 120–200 ms',css.includes('--bo1176-motion-fast:120ms')&&css.includes('--bo1176-motion-normal:180ms')&&css.includes('--bo1176-motion-slow:200ms'));
 check('reduced motion permanece respeitado',css.includes('@media(prefers-reduced-motion:reduce)'));
-check('loading branded inclui mark e skeleton',js.includes('bo1176-state-mark')&&js.includes('bo1176-boot-lines')&&css.includes('bo1176-shimmer'));
+check('loading branded inclui mark e skeleton',js.includes('bo1176-state-mark')&&js.includes('bo1176-boot-lines')&&css.includes('bo-motion-shimmer')&&motion.includes('@keyframes bo-motion-shimmer'));
 check('offline recebe microcopy e aria-live',js.includes("aria-live','polite")&&js.includes('Você está offline. O trabalho local continua disponível'));
 check('fatal state preserva dados e usa ações padronizadas',boundary.includes('Seus dados locais foram preservados')&&boundary.includes('bo1176-error-actions'));
 check('404 branded existe',existsSync('public/404.html')&&read('public/404.html').includes('BLUE OCEAN · 404'));

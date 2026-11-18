@@ -70,8 +70,7 @@ body.bo-v1130 ::selection{background:var(--bo-color-primary-200);color:var(--bo-
 .bo-table th,.bo-table td{padding:10px 12px;border-bottom:1px solid var(--bo-color-border-soft)}
 .bo-table tr:last-child td{border-bottom:0}
 
-.bo-skeleton{background:linear-gradient(90deg,var(--bo-color-surface-muted) 25%,var(--bo-color-surface-subtle) 50%,var(--bo-color-surface-muted) 75%);background-size:200% 100%;border-radius:var(--bo-radius-sm);animation:bo-shimmer 1.35s infinite linear}
-@keyframes bo-shimmer{to{background-position:-200% 0}}
+.bo-skeleton{background:linear-gradient(90deg,var(--bo-color-surface-muted) 25%,var(--bo-color-surface-subtle) 50%,var(--bo-color-surface-muted) 75%);background-size:200% 100%;border-radius:var(--bo-radius-sm);animation:bo-motion-shimmer 1.3s linear infinite}
 /* stylelint-disable declaration-no-important */
 @media (prefers-reduced-motion:reduce){body.bo-v1130 *,body.bo-v1130 *::before,body.bo-v1130 *::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 /* stylelint-enable declaration-no-important */

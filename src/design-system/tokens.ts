@@ -126,8 +126,25 @@ export const boTokens = {
   '--bo-inspector-w': '320px',
 
   // ─── Motion / Z-index ─────────────────────────────────────────────────
-  '--bo-transition-fast':   '120ms ease',
-  '--bo-transition-normal': '180ms ease',
+  // Durações: instant (feedback de toque) · fast (hover/cor) · base (estado/UI)
+  // moderate (painéis, drawers) · slow (entrada de tela) · ambient (oceano)
+  '--bo-motion-duration-instant':  '90ms',
+  '--bo-motion-duration-fast':     '140ms',
+  '--bo-motion-duration-base':     '200ms',
+  '--bo-motion-duration-moderate': '280ms',
+  '--bo-motion-duration-slow':     '600ms',
+  '--bo-motion-duration-ambient':  '1400ms',
+  // Curvas: standard (mudança de estado) · enter (desacelera) · exit (acelera)
+  '--bo-motion-ease-standard': 'cubic-bezier(.2,0,0,1)',
+  '--bo-motion-ease-enter':    'cubic-bezier(.2,.75,.2,1)',
+  '--bo-motion-ease-exit':     'cubic-bezier(.4,0,1,1)',
+  // Deslocamentos padronizados de hover/entrada
+  '--bo-motion-lift-sm':       '-1px',
+  '--bo-motion-lift-md':       '-2px',
+  '--bo-motion-enter-distance':'8px',
+  // Aliases legados (mantidos para não quebrar CSS existente)
+  '--bo-transition-fast':   'var(--bo-motion-duration-fast) var(--bo-motion-ease-standard)',
+  '--bo-transition-normal': 'var(--bo-motion-duration-base) var(--bo-motion-ease-standard)',
   '--bo-layer-base':    '0',
   '--bo-layer-sticky':  '20',
   '--bo-layer-toolbar': '50',

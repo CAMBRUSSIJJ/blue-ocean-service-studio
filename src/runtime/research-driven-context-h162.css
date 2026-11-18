@@ -30,7 +30,7 @@
 .bo-h162-context-flow{display:flex;align-items:center;gap:7px;flex:0 0 auto;padding:7px 9px;border:1px solid #deE8f1;border-radius:10px;background:#fff;color:#52728d;font-size:11px;font-weight:800}
 .bo-h162-context-flow span{padding:4px 6px;border-radius:6px;background:#f2f7fb}
 .bo-h162-context-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:13px}
-.bo-h162-context-grid button{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:8px;align-items:center;min-width:0;padding:11px;border:1px solid #e0e9f1;border-radius:11px;background:#fff;color:#214563;text-align:left;cursor:pointer;transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease}
+.bo-h162-context-grid button{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:8px;align-items:center;min-width:0;padding:11px;border:1px solid #e0e9f1;border-radius:11px;background:#fff;color:#214563;text-align:left;cursor:pointer;transition:border-color var(--bo-motion-duration-base) ease,box-shadow var(--bo-motion-duration-base) ease,transform var(--bo-motion-duration-base) ease}
 .bo-h162-context-grid button:hover{transform:translateY(-1px);border-color:#bdd3e5;box-shadow:0 6px 16px rgba(31,76,113,.07)}
 .bo-h162-context-grid button>svg{width:34px;height:34px;padding:8px;border-radius:9px;background:#eef6fc;color:#176da0}
 .bo-h162-context-grid button span{min-width:0}

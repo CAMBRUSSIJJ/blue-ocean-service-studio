@@ -183,7 +183,7 @@ body.dark .bo-h701-sidebar-nav {
   color: inherit;
   cursor: pointer;
   opacity: 0.6;
-  transition: opacity 0.16s ease, background-color 0.16s ease;
+  transition: opacity var(--bo-motion-duration-base) ease, background-color var(--bo-motion-duration-base) ease;
   flex-shrink: 0;
 }
 

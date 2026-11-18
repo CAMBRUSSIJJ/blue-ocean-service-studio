@@ -13,8 +13,8 @@
 .bo-h701-nav-section{position:relative;margin:0 0 7px;padding-top:8px;border-top:1px solid #f0eeec}
 .bo-h701-nav-section:first-of-type{border-top:0;padding-top:5px}
 .bo-h701-nav-section__label{height:22px;align-items:center;padding:0 8px;color:#8b95a5;font-size:11px;line-height:1;font-weight:800;letter-spacing:.11em;text-transform:uppercase;user-select:none}
-.bo1205h3-sidebar .bo1205h3-nav-root,.bo1205h3-sidebar .bo1205h3-nav-child,.bo1205h3-sidebar .bo1205h3-sidebar-bottom button{position:relative;width:100%;height:32px;display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#475467!important;border-radius:7px!important;font-size:11px!important;font-weight:550!important;text-align:left;padding:0 9px!important;margin:1px 0;cursor:pointer;transition:background-color .16s ease,color .16s ease,transform .16s ease}
-.bo1205h3-sidebar .bo1205h3-nav-root svg,.bo1205h3-sidebar .bo1205h3-nav-child svg,.bo1205h3-sidebar .bo1205h3-sidebar-bottom svg{color:#7c8798;flex:0 0 auto;transition:color .16s ease,transform .16s ease}
+.bo1205h3-sidebar .bo1205h3-nav-root,.bo1205h3-sidebar .bo1205h3-nav-child,.bo1205h3-sidebar .bo1205h3-sidebar-bottom button{position:relative;width:100%;height:32px;display:flex;align-items:center;gap:9px;border:0;background:transparent;color:#475467!important;border-radius:7px!important;font-size:11px!important;font-weight:550!important;text-align:left;padding:0 9px!important;margin:1px 0;cursor:pointer;transition:background-color var(--bo-motion-duration-base) ease,color var(--bo-motion-duration-base) ease,transform var(--bo-motion-duration-base) ease}
+.bo1205h3-sidebar .bo1205h3-nav-root svg,.bo1205h3-sidebar .bo1205h3-nav-child svg,.bo1205h3-sidebar .bo1205h3-sidebar-bottom svg{color:#7c8798;flex:0 0 auto;transition:color var(--bo-motion-duration-base) ease,transform var(--bo-motion-duration-base) ease}
 .bo1205h3-sidebar .bo1205h3-nav-root:hover,.bo1205h3-sidebar .bo1205h3-nav-child:hover,.bo1205h3-sidebar .bo1205h3-sidebar-bottom button:hover{background:#f7f8fa!important;color:#172033!important;transform:translateX(1px)}
 .bo1205h3-sidebar .bo1205h3-nav-root.is-active,.bo1205h3-sidebar .bo1205h3-nav-child.is-active,.bo1205h3-sidebar .bo1205h3-sidebar-bottom button.is-active{background:#eef4ff!important;color:#0b4fb3!important;font-weight:700!important}
 .bo1205h3-sidebar .bo1205h3-nav-root.is-active::before,.bo1205h3-sidebar .bo1205h3-nav-child.is-active::before,.bo1205h3-sidebar .bo1205h3-sidebar-bottom button.is-active::before{content:'';position:absolute;left:-4px;top:7px;bottom:7px;width:3px;border-radius:99px;background:#1e63f0}
@@ -23,40 +23,10 @@
 .bo-h701-sidebar-bottom{position:relative!important;z-index:3;margin-top:10px!important;border-top:1px solid #ece9e6!important;padding:9px 0 4px!important;background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.94))!important;backdrop-filter:blur(5px)}
 .bo-h701-sidebar-wave{position:absolute;z-index:1;left:0;right:0;bottom:0;height:86px;pointer-events:none;overflow:hidden;opacity:.82}
 .bo-h701-sidebar-wave svg{position:absolute;left:-10%;bottom:0;width:130%;height:86px;overflow:visible}
-.bo-h701-wave-back{fill:rgba(11,99,246,.075);transform-origin:center;animation:bo-h701-wave-drift 12s ease-in-out infinite alternate}
-.bo-h701-wave-front{fill:rgba(14,165,233,.075);transform-origin:center;animation:bo-h701-wave-drift-front 8s ease-in-out infinite alternate-reverse}
-@keyframes bo-h701-wave-drift{0%{transform:translate3d(-12px,3px,0) scaleY(.96)}50%{transform:translate3d(10px,-3px,0) scaleY(1.03)}100%{transform:translate3d(24px,2px,0) scaleY(.98)}}
-@keyframes bo-h701-wave-drift-front{0%{transform:translate3d(8px,2px,0) scaleY(1)}50%{transform:translate3d(-14px,-2px,0) scaleY(.95)}100%{transform:translate3d(-26px,3px,0) scaleY(1.04)}}
+.bo-h701-wave-back{fill:rgba(11,99,246,.075)}
+.bo-h701-wave-front{fill:rgba(14,165,233,.075)}
 @media(max-width:767px){.bo1205h3-sidebar .bo1163-service-context{display:none!important}.bo-h701-sidebar-nav{padding:9px 8px 76px!important}.bo-h701-nav-section{padding-top:5px;margin-bottom:4px}.bo1205h3-sidebar .bo1205h3-nav-root,.bo1205h3-sidebar .bo1205h3-nav-child,.bo1205h3-sidebar .bo1205h3-sidebar-bottom button{justify-content:center;height:38px;padding:0!important}.bo1205h3-sidebar .bo1205h3-nav-root.is-active::before,.bo1205h3-sidebar .bo1205h3-nav-child.is-active::before,.bo1205h3-sidebar .bo1205h3-sidebar-bottom button.is-active::before{left:-2px}.bo-h701-sidebar-wave{height:70px}}
-@media(prefers-reduced-motion:reduce){.bo-h701-wave-back,.bo-h701-wave-front{animation:none!important}.bo1205h3-sidebar .bo1205h3-nav-root,.bo1205h3-sidebar .bo1205h3-nav-child,.bo1205h3-sidebar .bo1205h3-sidebar-bottom button{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.bo1205h3-sidebar .bo1205h3-nav-root,.bo1205h3-sidebar .bo1205h3-nav-child,.bo1205h3-sidebar .bo1205h3-sidebar-bottom button{transition:none!important}}
 
 
-/* H7.0.3 — every sidebar navigation click emits a local wave and a bottom-ocean surge. */
-.bo1205h3-sidebar{--bo-wave-origin-y:50%}
-.bo1205h3-sidebar::after{content:'';position:absolute;z-index:1;left:-28%;width:156%;height:96px;top:calc(var(--bo-wave-origin-y) - 48px);pointer-events:none;opacity:0;border-radius:50%;background:radial-gradient(ellipse at center,rgba(11,99,246,.18) 0 8%,rgba(14,165,233,.11) 9% 18%,rgba(11,99,246,.055) 19% 30%,transparent 58%);transform:translate3d(0,0,0) scaleX(.48) scaleY(.22)}
-.bo1205h3-sidebar.is-wave-reacting::after{animation:bo-h703-sidebar-ripple .76s cubic-bezier(.18,.7,.22,1) both}
-.bo1205h3-sidebar.is-wave-reacting .bo-h701-sidebar-wave{animation:bo-h703-ocean-surge .76s cubic-bezier(.16,.78,.22,1) both}
-.bo1205h3-sidebar button.is-wave-source{animation:bo-h703-nav-crest .58s ease-out both}
-@keyframes bo-h703-sidebar-ripple{0%{opacity:0;transform:translate3d(-5%,0,0) scaleX(.42) scaleY(.18)}18%{opacity:.92;transform:translate3d(0,-2px,0) scaleX(.72) scaleY(.42)}58%{opacity:.38;transform:translate3d(4%,12px,0) scaleX(1.05) scaleY(.72)}100%{opacity:0;transform:translate3d(8%,28px,0) scaleX(1.32) scaleY(.92)}}
-@keyframes bo-h703-ocean-surge{0%{transform:translate3d(0,0,0) scaleY(1);opacity:.82}24%{transform:translate3d(-3px,-8px,0) scaleY(1.22);opacity:1}52%{transform:translate3d(4px,3px,0) scaleY(.92);opacity:.9}100%{transform:translate3d(0,0,0) scaleY(1);opacity:.82}}
-@keyframes bo-h703-nav-crest{0%{box-shadow:0 0 0 0 rgba(11,99,246,0),inset 0 0 0 0 rgba(14,165,233,0)}32%{box-shadow:0 0 0 4px rgba(11,99,246,.08),inset 0 -2px 0 rgba(14,165,233,.62)}100%{box-shadow:0 0 0 0 rgba(11,99,246,0),inset 0 0 0 0 rgba(14,165,233,0)}}
-@media(prefers-reduced-motion:reduce){.bo1205h3-sidebar.is-wave-reacting::after,.bo1205h3-sidebar.is-wave-reacting .bo-h701-sidebar-wave,.bo1205h3-sidebar button.is-wave-source{animation:none!important}.bo1205h3-sidebar::after{display:none!important}}
-
-/* H7.0.4 — visible click wave: the navigation pulse must render above the nav surface. */
-.bo1205h3-sidebar::after{z-index:4;height:118px;top:calc(var(--bo-wave-origin-y) - 59px);background:radial-gradient(ellipse at center,rgba(11,99,246,.28) 0 7%,rgba(14,165,233,.20) 8% 17%,rgba(56,189,248,.11) 18% 31%,rgba(11,99,246,.045) 32% 44%,transparent 65%);mix-blend-mode:multiply}
-.bo1205h3-sidebar.is-wave-reacting::after{animation:bo-h704-sidebar-ripple .82s cubic-bezier(.16,.78,.22,1) both}
-.bo1205h3-sidebar.is-wave-reacting .bo-h701-sidebar-wave{z-index:4;animation:bo-h704-ocean-surge .82s cubic-bezier(.16,.78,.22,1) both}
-.bo1205h3-sidebar button.is-wave-source{overflow:hidden;isolation:isolate;animation:bo-h704-nav-crest .68s ease-out both}
-.bo1205h3-sidebar button.is-wave-source::after{content:'';position:absolute;z-index:-1;left:18px;top:50%;width:18px;height:18px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(255,255,255,.92) 0 10%,rgba(56,189,248,.42) 11% 30%,rgba(11,99,246,.22) 31% 52%,transparent 70%);transform:translate(-50%,-50%) scale(.15);opacity:0;animation:bo-h704-button-ripple .62s cubic-bezier(.16,.75,.22,1) both}
-.bo1205h3-sidebar button.is-wave-source svg,.bo1205h3-sidebar button.is-wave-source>span,.bo1205h3-sidebar button.is-wave-source>div{position:relative;z-index:1}
-@keyframes bo-h704-sidebar-ripple{0%{opacity:0;transform:translate3d(-10%,0,0) scaleX(.36) scaleY(.16)}12%{opacity:1;transform:translate3d(-2%,-2px,0) scaleX(.58) scaleY(.34)}46%{opacity:.62;transform:translate3d(4%,4px,0) scaleX(1.02) scaleY(.76)}100%{opacity:0;transform:translate3d(12%,24px,0) scaleX(1.52) scaleY(1.05)}}
-@keyframes bo-h704-ocean-surge{0%{transform:translate3d(0,0,0) scaleY(1);opacity:.82;filter:saturate(1)}22%{transform:translate3d(-5px,-18px,0) scaleY(1.48);opacity:1;filter:saturate(1.35)}48%{transform:translate3d(5px,-5px,0) scaleY(1.16);opacity:.96;filter:saturate(1.2)}100%{transform:translate3d(0,0,0) scaleY(1);opacity:.82;filter:saturate(1)}}
-@keyframes bo-h704-nav-crest{0%{background-color:transparent;box-shadow:0 0 0 0 rgba(11,99,246,0),inset 0 0 0 0 rgba(14,165,233,0)}24%{background-color:rgba(239,246,255,.96);box-shadow:0 0 0 4px rgba(11,99,246,.12),inset 0 -3px 0 rgba(14,165,233,.78)}100%{box-shadow:0 0 0 0 rgba(11,99,246,0),inset 0 0 0 0 rgba(14,165,233,0)}}
-@keyframes bo-h704-button-ripple{0%{opacity:0;transform:translate(-50%,-50%) scale(.15)}16%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(12)}}
-@media(prefers-reduced-motion:reduce){
-  .bo1205h3-sidebar.is-wave-reacting::after,.bo1205h3-sidebar.is-wave-reacting .bo-h701-sidebar-wave{animation:none!important}
-  .bo1205h3-sidebar::after{display:none!important}
-  .bo1205h3-sidebar button.is-wave-source{animation:bo-h704-reduced-pulse .24s ease-out both!important}
-  .bo1205h3-sidebar button.is-wave-source::after{animation:none!important;display:none!important}
-}
-@keyframes bo-h704-reduced-pulse{0%{background:#dff3ff;box-shadow:inset 3px 0 0 #1e63f0}100%{background:#eef4ff;box-shadow:inset 0 0 0 transparent}}
+/* H7.0.3/H7.0.4 — a reação de onda da navegação (ripple, crista e surge) vive em src/design-system/motion.css. */

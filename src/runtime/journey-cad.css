@@ -248,7 +248,7 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 #cad-svg .cad-node-wrap .cad-media-title{font-weight:620;letter-spacing:-.01em}
 #cad-svg .cad-node-wrap [data-act="cad-open-link"]{cursor:pointer}
 #cad-svg .cad-node-wrap [data-act="cad-open-link"]:hover rect{fill:#d6e7fa;stroke:#458ccf}
-#cad-svg .cad-node-wrap .cad-node-bg{transition:stroke .1s ease,fill .1s ease}
+#cad-svg .cad-node-wrap .cad-node-bg{transition:stroke var(--bo-motion-duration-instant) ease,fill var(--bo-motion-duration-instant) ease}
 #cad-svg .cad-node-wrap:hover .cad-node-bg{stroke:#8aaad0}
 #cad-svg .cad-node-wrap.is-selected .cad-node-bg{stroke:#2c6fc8;stroke-width:2.4}
 @media(prefers-reduced-motion:reduce){#cad-svg .cad-node-wrap .cad-node-bg{transition:none}}
@@ -265,7 +265,7 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 #cad-svg .cad-lane-resize,
 #cad-svg .cad-node-resize{
   opacity:0;
-  transition:opacity 110ms ease;
+  transition:opacity var(--bo-motion-duration-fast) ease;
 }
 #cad-svg .cad-stage-resize:hover,
 #cad-svg .cad-stage-resize:focus-visible,
@@ -315,7 +315,7 @@ body.cad-mode{margin:0;background:#fff;color:#172b4d;overflow:hidden}
 @media (hover:none){#cad-svg .cad-lane-resize{opacity:.35}}
 
 /* H2 — semantic editor, denser library and structured inspector. */
-.cad-lane-item{gap:6px;transition:border-color .12s ease,background-color .12s ease}
+.cad-lane-item{gap:6px;transition:border-color var(--bo-motion-duration-fast) ease,background-color var(--bo-motion-duration-fast) ease}
 .cad-lane-item.is-drag-over{background:#eaf3ff;border-color:#2872d0;outline:2px solid #c4ddfa;outline-offset:-2px}
 .cad-lane-grip{flex:0 0 18px;display:grid;place-items:center;align-self:stretch;color:#6f849e;cursor:grab;font-size:18px;user-select:none;touch-action:auto}
 .cad-lane-grip:active{cursor:grabbing}

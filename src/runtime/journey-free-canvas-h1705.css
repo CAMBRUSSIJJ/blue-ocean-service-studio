@@ -1,7 +1,7 @@
 /* H17.0.5 · Journey canvas uncluttered, inspired by the reference layout; no data migration. */
 .bo-h1705-journey{--j-ink:#283447;--j-line:#e6e9ee;--j-muted:#8992a2;display:flex;flex-direction:column;width:100%;height:min(850px,calc(100dvh - 205px));min-height:460px;min-width:0;background:#fff;color:var(--j-ink);font-family:inherit;isolation:isolate;overflow:hidden}
 .bo-h1705-journey.is-expanded{position:fixed;inset:0;z-index:9999;width:100vw;height:100dvh;min-height:0;border-radius:0;box-shadow:none}
-.bo-h1705-journey button{cursor:pointer;transition:background-color .12s ease,border-color .12s ease,color .12s ease}
+.bo-h1705-journey button{cursor:pointer;transition:background-color var(--bo-motion-duration-fast) ease,border-color var(--bo-motion-duration-fast) ease,color var(--bo-motion-duration-fast) ease}
 .bo-h1705-journey button:disabled{cursor:not-allowed;opacity:.38}
 .bo-h1705-journey button:focus-visible,.bo-h1705-journey input:focus-visible,.bo-h1705-journey textarea:focus-visible,.bo-h1705-journey select:focus-visible{outline:2px solid #4a74f3;outline-offset:2px}
 .bo-h1705-topbar{height:65px;min-height:65px;display:flex;gap:18px;align-items:center;border-bottom:1px solid var(--j-line);padding:0 24px;background:#fff}
@@ -156,7 +156,7 @@
 .bo-j-trend{position:absolute;left:0;top:6px;width:100%;height:96px;pointer-events:none}
 .bo-j-trend path{fill:none;stroke:#4278c1;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .bo-j-score-choices{position:relative;z-index:1;display:flex;justify-content:space-evenly;gap:3px;margin:99px 8px 0}
-.bo-j-score-choices button{flex:1;min-width:0;max-width:46px;padding:7px 2px;border:1px solid #dae3ef;border-radius:8px;background:rgba(255,255,255,.95);font-size:19px;line-height:1.2;opacity:.65;transition:background-color .15s,border-color .15s}
+.bo-j-score-choices button{flex:1;min-width:0;max-width:46px;padding:7px 2px;border:1px solid #dae3ef;border-radius:8px;background:rgba(255,255,255,.95);font-size:19px;line-height:1.2;opacity:.65;transition:background-color var(--bo-motion-duration-fast),border-color var(--bo-motion-duration-fast)}
 .bo-j-score-choices button[aria-pressed="true"]{opacity:1;background:#e7f1ff;border-color:#5e92d1;box-shadow:0 1px 5px #4278c120}
 .bo-j-score-choices button:focus-visible,.bo-j-metric input:focus-visible{outline:2px solid #285cbb;outline-offset:2px}
 .bo-j-metric label{z-index:1;position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:100px 14px 0;font-size:11px;color:#52627a}

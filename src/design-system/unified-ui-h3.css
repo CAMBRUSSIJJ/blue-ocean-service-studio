@@ -84,7 +84,7 @@
   cursor:not-allowed;
   box-shadow:none;
 }
-:where(.bo-remote-dialog,.bo-project-context-panel,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser) button:not(:disabled){transition:background-color 120ms ease,border-color 120ms ease,color 120ms ease}
+:where(.bo-remote-dialog,.bo-project-context-panel,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser) button:not(:disabled){transition:background-color var(--bo-motion-duration-fast) ease,border-color var(--bo-motion-duration-fast) ease,color var(--bo-motion-duration-fast) ease}
 :where(.bo-project-context-panel,.cad-shell,.cad-sheet,.cad-quick,.cad-chooser) :is(button,input:not([type="checkbox"]),select,textarea){
   border-radius:var(--bo-ui-radius);
 }

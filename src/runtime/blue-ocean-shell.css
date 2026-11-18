@@ -80,7 +80,7 @@ body.rt182-host .rt182-host-sidebar nav button{
   font-family:Inter,"Segoe UI",Arial,sans-serif!important;
   font-size:12.5px!important;font-weight:600!important;
   line-height:1!important;box-shadow:none!important;
-  transition:background .13s ease,color .13s ease!important;
+  transition:background var(--bo-motion-duration-fast) ease,color var(--bo-motion-duration-fast) ease!important;
 }
 body.rt182-host .rt182-host-sidebar nav button:hover{background:#F0F4F9!important;color:var(--bo-navy)!important}
 body.rt182-host .rt182-host-sidebar nav button[aria-current="page"],

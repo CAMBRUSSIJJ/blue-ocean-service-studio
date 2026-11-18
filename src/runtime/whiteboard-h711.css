@@ -34,7 +34,7 @@
 .bo-wb-home .bo-wb-toolbar input{font-size:13px;min-width:0}
 .bo-wb-home .bo-wb-toolbar>div button{font-size:12px;min-height:36px;border-radius:8px;padding:0 12px}
 .bo-wb-home .bo-wb-toolbar>div button.active{font-weight:730}
-.bo-wb-home .bo-h711-board-card{border:1px solid var(--bo-border,#e2e8ee);border-radius:13px;overflow:visible;box-shadow:0 2px 7px rgba(20,48,74,.045);transition:border-color .12s,box-shadow .12s}
+.bo-wb-home .bo-h711-board-card{border:1px solid var(--bo-border,#e2e8ee);border-radius:13px;overflow:visible;box-shadow:0 2px 7px rgba(20,48,74,.045);transition:border-color var(--bo-motion-duration-fast),box-shadow var(--bo-motion-duration-fast)}
 .bo-wb-home .bo-h711-board-card:hover{border-color:color-mix(in srgb,var(--bo-wb-blue) 35%,#dfe6ed);box-shadow:0 7px 18px rgba(20,48,74,.07)}
 .bo-wb-home .bo-wb-preview-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;color:#7095b7;min-height:122px;font-size:12px;font-weight:600}
 .bo-wb-home .bo1193-board-card>.bo1193-card-menu-trigger{z-index:4;width:35px;height:35px;display:grid;place-items:center;background:var(--bo-surface,#fff);border:1px solid var(--bo-border,#dae4ec);border-radius:9px;color:var(--bo-wb-muted);font-size:24px;line-height:1;padding:0}

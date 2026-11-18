@@ -114,10 +114,22 @@
   --bo-sidebar-w:216px;
   --bo-header-h:48px;
   --bo-inspector-w:320px;
+  --bo-motion-duration-instant:90ms;
+  --bo-motion-duration-fast:140ms;
+  --bo-motion-duration-base:200ms;
+  --bo-motion-duration-moderate:280ms;
+  --bo-motion-duration-slow:600ms;
+  --bo-motion-duration-ambient:1400ms;
+  --bo-motion-ease-standard:cubic-bezier(.2,0,0,1);
+  --bo-motion-ease-enter:cubic-bezier(.2,.75,.2,1);
+  --bo-motion-ease-exit:cubic-bezier(.4,0,1,1);
+  --bo-motion-lift-sm:-1px;
+  --bo-motion-lift-md:-2px;
+  --bo-motion-enter-distance:8px;
 
   /* ── Motion / Z-index ───────────────────────────────────────────────── */
-  --bo-transition-fast:120ms ease;
-  --bo-transition-normal:180ms ease;
+  --bo-transition-fast:var(--bo-motion-duration-fast) var(--bo-motion-ease-standard);
+  --bo-transition-normal:var(--bo-motion-duration-base) var(--bo-motion-ease-standard);
   --bo-layer-base:0;
   --bo-layer-sticky:20;
   --bo-layer-toolbar:50;

@@ -8,44 +8,7 @@
   --bo-h718-foam:#eef8ff;
 }
 
-/* --- Motion: same waves, only a restrained drift. --- */
-.bo-h718 .bo-auth-shell::before{
-  animation:bo-h718-auth-wave-drift 18s ease-in-out infinite;
-  will-change:background-position;
-}
-@keyframes bo-h718-auth-wave-drift{
-  0%,100%{background-position:50% 100%}
-  35%{background-position:51.15% 100%}
-  70%{background-position:49.25% 100%}
-}
-
-/* Workspace receives a second, very light moving current over the H7.17 static surface. */
-.bo-h718 .bo1215-dashboard[data-ocean-home="7.15"]::after{
-  content:''!important;
-  display:block!important;
-  position:absolute;
-  pointer-events:none;
-  z-index:-1;
-  left:-2.5%;
-  right:-2.5%;
-  bottom:-2px;
-  height:342px;
-  background:url('/blue-ocean-surface-light-h717.svg') center bottom/100% 340px no-repeat;
-  opacity:.34;
-  animation:bo-h718-workspace-current 22s ease-in-out infinite;
-  will-change:transform,opacity;
-}
-@keyframes bo-h718-workspace-current{
-  0%,100%{transform:translate3d(0,0,0);opacity:.31}
-  32%{transform:translate3d(1.1%,2px,0);opacity:.37}
-  68%{transform:translate3d(-.8%,-2px,0);opacity:.33}
-}
-
-/* The sidebar wave moves too, but never changes its silhouette. */
-.bo-h718 .bo-h701-wave-back{animation:bo-h718-sidebar-current-back 12s ease-in-out infinite;transform-origin:center}
-.bo-h718 .bo-h701-wave-front{animation:bo-h718-sidebar-current-front 9s ease-in-out infinite;transform-origin:center}
-@keyframes bo-h718-sidebar-current-back{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
-@keyframes bo-h718-sidebar-current-front{0%,100%{transform:translateX(0)}50%{transform:translateX(-4px)}}
+/* --- Motion: movido para src/design-system/motion.css (oceano em repouso, sem loops no workspace). --- */
 
 /* --- Sidebar: each module now has a branded semantic glyph container. --- */
 .bo-h718 .bo-h701-sidebar-nav button{position:relative}
@@ -58,7 +21,7 @@
   background:var(--bo-h718-nav-surface);
   border:1px solid color-mix(in srgb,var(--bo-h718-nav-accent) 17%,transparent);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
-  transition:transform .16s ease,background-color .16s ease,border-color .16s ease,color .16s ease;
+  transition:transform var(--bo-motion-duration-base) ease,background-color var(--bo-motion-duration-base) ease,border-color var(--bo-motion-duration-base) ease,color var(--bo-motion-duration-base) ease;
 }
 .bo-h718 .bo-h701-sidebar-nav button:hover .bo-h718-sidebar-icon{transform:translateY(-1px);border-color:color-mix(in srgb,var(--bo-h718-nav-accent) 30%,transparent)}
 .bo-h718 .bo-h701-sidebar-nav button.is-active .bo-h718-sidebar-icon,
@@ -138,9 +101,5 @@
 }
 
 @media(prefers-reduced-motion:reduce){
-  .bo-h718 .bo-auth-shell::before,
-  .bo-h718 .bo1215-dashboard[data-ocean-home="7.15"]::after,
-  .bo-h718 .bo-h701-wave-back,
-  .bo-h718 .bo-h701-wave-front{animation:none!important;transform:none!important}
   .bo-h718 .bo-h718-sidebar-icon{transition:none!important}
 }

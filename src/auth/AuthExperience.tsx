@@ -190,11 +190,6 @@ export function AuthExperience() {
   return (
     <main className="bo-auth-shell">
       <WaveBackdrop />
-      <div className="bo-h719-auth-motion" data-motion-identity="7.19" aria-hidden="true">
-        <span className="bo-h719-auth-motion__depth" />
-        <span className="bo-h719-auth-motion__current" />
-        <span className="bo-h719-auth-motion__foam" />
-      </div>
       <section className="bo-auth-story" aria-label="BLUE OCEAN Service Studio">
         <div className="bo-auth-story__veil" aria-hidden="true" />
         <div className="bo-auth-brand"><div><img src="/blue-ocean-mark.svg" alt="" /></div><span><strong>BLUE OCEAN</strong><small>Service Studio</small></span></div>

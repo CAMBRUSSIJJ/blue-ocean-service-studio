@@ -3,9 +3,8 @@ body.bo1179-auth-visible{display:block!important;margin:0!important;padding:0!im
 body.bo1179-auth-visible #root{width:100%!important;max-width:none!important;margin:0!important;min-height:100dvh}
 body.bo1179-auth-visible #root main.bo-auth-shell{width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;box-sizing:border-box;padding:clamp(24px,4vw,64px)!important;background:radial-gradient(ellipse at 16% 10%,#153e5b 0,transparent 58%),linear-gradient(140deg,#081d32,#08233b 60%,#0d3450)!important;color:#fff!important}
 body.bo1179-auth-visible .bo-auth-shell::before,body.bo1179-auth-visible .bo-auth-shell::after{content:none!important;animation:none!important}
-body.bo1179-auth-visible .bo-h719-auth-motion{display:none!important}
 body.bo1179-auth-visible .bo-auth-wave{display:block!important;z-index:-1;opacity:.44!important}
-body.bo1179-auth-visible .bo-auth-wave__track{top:73%;height:clamp(320px,48vh,620px);animation:bo1181-ocean-scroll 26s linear infinite!important}
+body.bo1179-auth-visible .bo-auth-wave__track{top:73%;height:clamp(320px,48vh,620px)}
 body.bo1179-auth-visible .bo-auth-story__veil{display:none!important}
 body.bo1179-auth-visible .bo-auth-story{justify-content:space-between;padding:0}
 body.bo1179-auth-visible .bo-auth-story__copy{margin:auto 0;max-width:720px;padding:64px 0}

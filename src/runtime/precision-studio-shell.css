@@ -20,7 +20,7 @@ body.bo-v1152 aside.rt182-host-sidebar{
   background:#FBFCFD!important;
   border-right:1px solid var(--bo-color-border)!important;
   box-shadow:none!important;
-  transition:width 160ms ease!important;
+  transition:width var(--bo-motion-duration-base) ease!important;
 }
 body.bo-v1152 .rt182-host-brand{
   position:relative!important;
@@ -51,7 +51,7 @@ body.bo-v1152 .rt182-host-sidebar nav button{
   position:relative!important;min-height:34px!important;height:34px!important;padding:0 9px!important;gap:9px!important;
   border:1px solid transparent!important;border-radius:7px!important;background:transparent!important;
   color:#667085!important;font-size:11px!important;font-weight:620!important;box-shadow:none!important;
-  transition:background 110ms ease,color 110ms ease,border-color 110ms ease!important;
+  transition:background var(--bo-motion-duration-fast) ease,color var(--bo-motion-duration-fast) ease,border-color var(--bo-motion-duration-fast) ease!important;
 }
 body.bo-v1152 .rt182-host-sidebar nav button:hover{background:#F2F4F7!important;color:#344054!important;border-color:transparent!important}
 body.bo-v1152 .rt182-host-sidebar nav button[aria-current="page"],

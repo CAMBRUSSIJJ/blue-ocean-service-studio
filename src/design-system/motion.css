@@ -1,0 +1,143 @@
+/* Blue Ocean — Motion System (v1.21)
+   Fonte única de movimento do produto: entrada do login, oceano do workspace,
+   reação da navegação e skeleton. Substitui as camadas H7.0.1/H7.0.3/H7.0.4/H7.18/H7.19/H7.19-H1.
+
+   Regras do sistema
+   1. Dentro do workspace o oceano não roda em loop: ele assenta ao entrar e reage a eventos
+      (navegação), depois volta ao repouso. A única deriva contínua é a onda do login (auth.css),
+      que é uma tela de marca sem trabalho em andamento.
+   2. Por frame, só transform e opacity variam.
+   3. Durações, curvas e deslocamentos vêm dos tokens --bo-motion-* (tokens.ts).
+   4. prefers-reduced-motion remove deslocamento e loops, mas mantém feedback de estado.
+
+   Importado no fim da cascata das camadas oceânicas (style.css), por isso vence as regras legadas
+   sem precisar de !important novo — exceto onde a camada antiga já usava !important. */
+
+/* ───────────────────────── 1. Primitivas ───────────────────────── */
+@keyframes bo-motion-enter-up{
+  from{opacity:0;transform:translate3d(0,var(--bo-motion-enter-distance),0)}
+  to{opacity:1;transform:none}
+}
+@keyframes bo-motion-enter-side{
+  from{opacity:0;transform:translate3d(12px,0,0) scale(.992)}
+  to{opacity:1;transform:none}
+}
+@keyframes bo-motion-shimmer{to{background-position:-200% 0}}
+
+/* ───────────────────────── 2. Login: coreografia de entrada ─────────────────────────
+   O conteúdo entra uma única vez; a onda WebP de auth.css é a única camada ambiente. */
+.bo-auth-brand{animation:bo-motion-enter-up var(--bo-motion-duration-slow) var(--bo-motion-ease-enter) both}
+.bo-auth-story__copy{animation:bo-motion-enter-up var(--bo-motion-duration-slow) 80ms var(--bo-motion-ease-enter) both}
+.bo-auth-story__signal{animation:bo-motion-enter-up var(--bo-motion-duration-slow) 160ms var(--bo-motion-ease-enter) both}
+.bo-auth-story footer{animation:bo-motion-enter-up var(--bo-motion-duration-slow) 240ms var(--bo-motion-ease-enter) both}
+.bo-auth-card{animation:bo-motion-enter-side var(--bo-motion-duration-slow) 60ms var(--bo-motion-ease-enter) both}
+
+/* Um único brilho na marca ao entrar. */
+.bo-auth-brand>div{position:relative;overflow:hidden}
+.bo-auth-brand>div::after{
+  content:'';position:absolute;inset:-35% auto -35% 0;width:45%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent);
+  transform:translate3d(-160%,0,0) skewX(-20deg);opacity:0;pointer-events:none;
+  animation:bo-motion-mark-glint 1s 420ms ease-out both;
+}
+@keyframes bo-motion-mark-glint{
+  from{transform:translate3d(-160%,0,0) skewX(-20deg);opacity:0}
+  20%{opacity:1}
+  to{transform:translate3d(320%,0,0) skewX(-20deg);opacity:0}
+}
+
+/* CTA principal: corrente passa por baixo no hover, sem mover o botão. */
+.bo-auth-primary{position:relative;overflow:hidden;isolation:isolate}
+.bo-auth-primary::after{
+  content:'';position:absolute;left:0;bottom:0;width:34%;height:2px;border-radius:99px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#8cf4eb,rgba(255,255,255,.9),transparent);
+  transform:translate3d(-100%,0,0);opacity:0;
+}
+.bo-auth-primary:hover::after{animation:bo-motion-cta-current 700ms var(--bo-motion-ease-standard)}
+@keyframes bo-motion-cta-current{
+  0%{transform:translate3d(-100%,0,0);opacity:0}
+  18%{opacity:.9}
+  100%{transform:translate3d(300%,0,0);opacity:0}
+}
+
+/* ───────────────────────── 3. Workspace: oceano em repouso ─────────────────────────
+   A superfície ilustrada (H7.17 ::before) é estática. O brilho ::after assenta uma vez ao abrir
+   o dashboard e então fica parado — sem deriva contínua competindo com o conteúdo. */
+body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{
+  content:'';display:block!important;position:absolute;pointer-events:none;z-index:-1;
+  left:-5%;right:-5%;bottom:-12px;height:250px;
+  background:
+    radial-gradient(58% 58% at 28% 100%,rgba(75,200,202,.075),transparent 72%),
+    radial-gradient(62% 62% at 76% 102%,rgba(37,99,235,.055),transparent 74%);
+  animation:bo-motion-ocean-settle var(--bo-motion-duration-ambient) var(--bo-motion-ease-enter) both;
+}
+@keyframes bo-motion-ocean-settle{
+  from{opacity:0;transform:translate3d(0,24px,0) scaleY(.9)}
+  to{opacity:1;transform:none}
+}
+
+/* ───────────────────────── 4. Sidebar: a onda reage à navegação ─────────────────────────
+   Em repouso a onda inferior fica parada. Cada clique (App.tsx → is-wave-reacting/is-wave-source)
+   emite um ripple na altura do item, uma crista no botão e um surge na onda inferior. */
+.bo-h701-wave-back,.bo-h701-wave-front{animation:none;transform-origin:center}
+
+.bo1205h3-sidebar{--bo-wave-origin-y:50%;--bo-motion-wave-duration:700ms}
+.bo1205h3-sidebar::after{
+  content:'';position:absolute;z-index:4;left:-28%;width:156%;height:118px;
+  top:calc(var(--bo-wave-origin-y) - 59px);pointer-events:none;opacity:0;border-radius:50%;
+  background:radial-gradient(ellipse at center,rgba(30,99,240,.28) 0 7%,rgba(14,165,233,.20) 8% 17%,rgba(56,189,248,.11) 18% 31%,rgba(30,99,240,.045) 32% 44%,transparent 65%);
+  mix-blend-mode:multiply;transform:scaleX(.36) scaleY(.16);
+}
+.bo1205h3-sidebar.is-wave-reacting::after{animation:bo-motion-nav-ripple var(--bo-motion-wave-duration) var(--bo-motion-ease-enter) both}
+.bo1205h3-sidebar.is-wave-reacting .bo-h701-sidebar-wave{z-index:4;animation:bo-motion-nav-surge var(--bo-motion-wave-duration) var(--bo-motion-ease-enter) both}
+.bo1205h3-sidebar button.is-wave-source{overflow:hidden;isolation:isolate;animation:bo-motion-nav-crest 560ms var(--bo-motion-ease-standard) both}
+.bo1205h3-sidebar button.is-wave-source::after{
+  content:'';position:absolute;z-index:-1;left:18px;top:50%;width:18px;height:18px;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,255,255,.92) 0 10%,rgba(56,189,248,.42) 11% 30%,rgba(30,99,240,.22) 31% 52%,transparent 70%);
+  transform:translate(-50%,-50%) scale(.15);opacity:0;
+  animation:bo-motion-nav-button-ripple 560ms var(--bo-motion-ease-enter) both;
+}
+.bo1205h3-sidebar button.is-wave-source svg,
+.bo1205h3-sidebar button.is-wave-source>span,
+.bo1205h3-sidebar button.is-wave-source>div{position:relative;z-index:1}
+
+@keyframes bo-motion-nav-ripple{
+  0%{opacity:0;transform:translate3d(-10%,0,0) scaleX(.36) scaleY(.16)}
+  12%{opacity:1;transform:translate3d(-2%,-2px,0) scaleX(.58) scaleY(.34)}
+  46%{opacity:.62;transform:translate3d(4%,4px,0) scaleX(1.02) scaleY(.76)}
+  100%{opacity:0;transform:translate3d(12%,24px,0) scaleX(1.52) scaleY(1.05)}
+}
+@keyframes bo-motion-nav-surge{
+  0%{transform:translate3d(0,0,0) scaleY(1)}
+  24%{transform:translate3d(-5px,-14px,0) scaleY(1.36)}
+  52%{transform:translate3d(4px,-3px,0) scaleY(1.1)}
+  100%{transform:translate3d(0,0,0) scaleY(1)}
+}
+@keyframes bo-motion-nav-crest{
+  0%{box-shadow:0 0 0 0 rgba(30,99,240,0),inset 0 0 0 0 rgba(14,165,233,0)}
+  24%{box-shadow:0 0 0 4px rgba(30,99,240,.12),inset 0 -3px 0 rgba(14,165,233,.78)}
+  100%{box-shadow:0 0 0 0 rgba(30,99,240,0),inset 0 0 0 0 rgba(14,165,233,0)}
+}
+@keyframes bo-motion-nav-button-ripple{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.15)}
+  16%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(12)}
+}
+@keyframes bo-motion-nav-reduced-pulse{
+  0%{background:#dff3ff;box-shadow:inset 3px 0 0 var(--bo-color-primary-600,#1e63f0)}
+  100%{background:#eef4ff;box-shadow:inset 0 0 0 transparent}
+}
+
+/* ───────────────────────── 6. Movimento reduzido ───────────────────────── */
+@media(prefers-reduced-motion:reduce){
+  .bo-auth-brand,.bo-auth-story__copy,.bo-auth-story__signal,.bo-auth-story footer,.bo-auth-card,
+  .bo-auth-brand>div::after,.bo-auth-primary:hover::after,
+  body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after,
+  .bo1205h3-sidebar.is-wave-reacting::after,
+  .bo1205h3-sidebar.is-wave-reacting .bo-h701-sidebar-wave,
+  .bo-skeleton,.bo1176-boot-lines i{animation:none!important;transform:none!important}
+  .bo-auth-brand>div::after,.bo-auth-primary::after,.bo1205h3-sidebar::after{display:none!important}
+  /* Feedback de navegação continua existindo, só sem deslocamento. */
+  .bo1205h3-sidebar button.is-wave-source{animation:bo-motion-nav-reduced-pulse 240ms ease-out both!important}
+  .bo1205h3-sidebar button.is-wave-source::after{animation:none!important;display:none!important}
+}

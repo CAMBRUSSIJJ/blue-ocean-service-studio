@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 const read = (p) => fs.readFileSync(p, 'utf8');
 const app = read('src/App.tsx');
-const css = read('src/runtime/sidebar-h701.css');
+// Motion System v1.21: a reação de onda migrou de sidebar-h701.css para motion.css.
+const css = read('src/runtime/sidebar-h701.css') + read('src/design-system/motion.css');
 const pkg = JSON.parse(read('package.json'));
 let ok=0, fail=0;
 function check(c,l){if(c){console.log('OK  ',l);ok++;}else{console.log('FAIL',l);fail++;}}
@@ -10,9 +11,9 @@ check(app.includes('onClickCapture={handleSidebarWaveInteraction}'), 'sidebar ca
 check(app.includes("--bo-wave-origin-y"), 'origem vertical da onda deriva do item clicado');
 check(app.includes("classList.add('is-wave-reacting')") && app.includes("classList.add('is-wave-source')"), 'classes transitórias de onda e crista são disparadas');
 check(css.includes('.bo1205h3-sidebar.is-wave-reacting::after'), 'ripple local da sidebar existe');
-check(css.includes('@keyframes bo-h703-sidebar-ripple'), 'keyframes do ripple local existem');
-check(css.includes('@keyframes bo-h703-ocean-surge'), 'onda inferior reage ao clique');
-check(css.includes('@keyframes bo-h703-nav-crest'), 'item clicado recebe crista visual');
+check(css.includes('@keyframes bo-motion-nav-ripple'), 'keyframes do ripple local existem');
+check(css.includes('@keyframes bo-motion-nav-surge'), 'onda inferior reage ao clique');
+check(css.includes('@keyframes bo-motion-nav-crest'), 'item clicado recebe crista visual');
 check(css.includes('prefers-reduced-motion:reduce') && css.includes('.bo1205h3-sidebar.is-wave-reacting::after'), 'interação respeita redução de movimento');
 check(!css.toLowerCase().includes('#1d9e75') && !css.includes('rgba(29,158,117'), 'interação não reintroduz verde estrutural legado');
 check(pkg.scripts['v1205h703:wave-navigation-interaction-smoke'], 'script H7.0.3 registrado');

@@ -17,7 +17,7 @@ body.bo-v1187 .bo1163-service-menu{top:48px;left:8px;right:8px;width:auto;border
 body.bo-v1187 aside[data-bo-precision-sidebar-native="1"] nav{padding:16px 12px 12px!important}
 body.bo-v1187 aside[data-bo-precision-sidebar-native="1"] nav>.mb-3{display:none!important}
 body.bo-v1187 aside[data-bo-precision-sidebar-native="1"] nav .flex.flex-col{gap:1px!important}
-body.bo-v1187 aside[data-bo-precision-sidebar-native="1"] nav button{min-height:34px!important;border:0!important;border-radius:5px!important;background:transparent!important;color:#262626!important;font-size:12.5px!important;font-weight:500!important;padding:7px 10px!important;gap:10px!important;box-shadow:none!important;justify-content:flex-start!important;transition:background .12s ease,color .12s ease!important}
+body.bo-v1187 aside[data-bo-precision-sidebar-native="1"] nav button{min-height:34px!important;border:0!important;border-radius:5px!important;background:transparent!important;color:#262626!important;font-size:12.5px!important;font-weight:500!important;padding:7px 10px!important;gap:10px!important;box-shadow:none!important;justify-content:flex-start!important;transition:background var(--bo-motion-duration-fast) ease,color var(--bo-motion-duration-fast) ease!important}
 body.bo-v1187 aside[data-bo-precision-sidebar-native="1"] nav button:hover{background:#f5f3f1!important;color:#111!important}
 body.bo-v1187 aside[data-bo-precision-sidebar-native="1"] nav button[aria-current="page"]{background:#f3f1ef!important;color:#111!important;font-weight:700!important}
 body.bo-v1187 aside[data-bo-precision-sidebar-native="1"] nav button svg{width:15px!important;height:15px!important;stroke-width:1.8!important;flex:0 0 auto}
@@ -69,7 +69,7 @@ body.bo-v1187 .bo1187-recent-preview{height:88px;flex:0 0 88px;width:100%;backgr
 body.bo-v1187 .bo1187-recent-main>strong{font-size:11.5px;line-height:1.14;font-weight:650;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:25px}
 body.bo-v1187 .bo1187-recent-main>small{display:block;margin-top:3px;font-size:10.5px;line-height:1.2;color:#77716d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body.bo-v1187 .bo1187-preview-badge{position:absolute;left:6px;top:6px;z-index:2;padding:2px 5px;border-radius:3px;background:#202020;color:#fff;font-size:9px;font-weight:650;line-height:1.2}
-body.bo-v1187 .bo1187-card-actions{position:absolute;right:5px;top:5px;z-index:3;display:flex;gap:3px;opacity:0;transition:opacity .12s ease}
+body.bo-v1187 .bo1187-card-actions{position:absolute;right:5px;top:5px;z-index:3;display:flex;gap:3px;opacity:0;transition:opacity var(--bo-motion-duration-fast) ease}
 body.bo-v1187 .bo1187-recent-card:hover .bo1187-card-actions,body.bo-v1187 .bo1187-card-actions:focus-within{opacity:1}
 body.bo-v1187 .bo1187-card-actions button{width:24px;height:24px;border:1px solid #ded9d5;border-radius:4px;background:rgba(255,255,255,.94);color:#6d6865;display:grid;place-items:center;cursor:pointer;padding:0}
 body.bo-v1187 .bo1187-card-actions button.active{color:#2d28ce;border-color:#c8c5ef;background:#f5f4ff;opacity:1}

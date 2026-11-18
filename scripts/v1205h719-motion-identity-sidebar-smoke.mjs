@@ -11,22 +11,15 @@ const pkg=JSON.parse(read('package.json'));
 let ok=0,fail=0; const check=(v,l)=>{if(v){console.log('OK  ',l);ok++}else{console.log('FAIL',l);fail++}};
 
 check(css.includes('H7.19 — Motion Identity & Sidebar Icon System'),'CSS declara H7.19');
-check(css.includes('.bo-h719-auth-motion'),'login possui compositor de movimento próprio');
-check(css.includes('bo-h719-auth-motion__depth')&&css.includes('bo-h719-auth-motion__current')&&css.includes('bo-h719-auth-motion__foam'),'login possui profundidade, corrente e espuma');
-check(css.includes('@keyframes bo-h719-depth-breathe'),'profundidade respira lentamente');
-check(css.includes('@keyframes bo-h719-current-drift'),'corrente possui deriva independente');
-check(css.includes('@keyframes bo-h719-foam-drift'),'espuma possui deriva independente');
-check(css.includes('@keyframes bo-h719-base-tide'),'onda base mantém composição com maré lenta');
-check(css.includes('@keyframes bo-h719-card-arrive'),'card entra sem alterar layout');
-check(css.includes('@keyframes bo-h719-mark-glint'),'marca possui brilho de entrada controlado');
-check(css.includes('@keyframes bo-h719-button-current'),'CTA possui corrente no hover');
-check(css.includes('@media(prefers-reduced-motion:reduce)'),'motion respeita reduced-motion');
-
-check(auth.includes('bo-h719-auth-motion__depth'),'Auth renderiza camada depth');
-check(auth.includes('bo-h719-auth-motion__current'),'Auth renderiza camada current');
-check(auth.includes('bo-h719-auth-motion__foam'),'Auth renderiza camada foam');
-check(auth.includes('data-motion-identity="7.19"'),'Auth declara H7.19');
-
+// Motion System v1.21: as camadas depth/current/foam eram ocultadas pelo layout de entrada e foram removidas;
+// a coreografia de entrada do login agora vive em src/design-system/motion.css.
+const motion=read('src/design-system/motion.css');
+check(!auth.includes('bo-h719-auth-motion'),'login não renderiza camadas de oceano ocultas (código morto removido)');
+check(!css.includes('infinite'),'H7.19 não mantém loops de movimento');
+check(motion.includes('@keyframes bo-motion-enter-side')&&motion.includes('.bo-auth-card{animation:bo-motion-enter-side'),'card entra sem alterar layout');
+check(motion.includes('@keyframes bo-motion-mark-glint'),'marca possui brilho de entrada controlado');
+check(motion.includes('@keyframes bo-motion-cta-current'),'CTA possui corrente no hover');
+check(css.includes('@media(prefers-reduced-motion:reduce)')&&motion.includes('@media(prefers-reduced-motion:reduce)'),'motion respeita reduced-motion');
 check(css.includes('.bo-h719-sidebar-icon'),'sidebar possui assinatura H7.19');
 check(css.includes('border-radius:50% 50% 45% 55%'),'container abandona quadrado genérico por forma orgânica');
 check(css.includes('.bo-h719-sidebar-icon::after'),'ícones recebem current line');

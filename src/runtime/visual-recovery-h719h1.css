@@ -10,79 +10,7 @@
   --bo-h719h1-surface:#f5f9fd;
 }
 
-/* ---------- Login recovery: one real wave surface + atmospheric motion only. ---------- */
-.bo-h719h1 .bo-auth-shell{isolation:isolate}
-.bo-h719h1 .bo-h719-auth-motion{z-index:0!important;overflow:hidden!important;mix-blend-mode:normal!important}
-.bo-h719h1 .bo-h719-auth-motion>span{inset:0!important;background-repeat:no-repeat!important;mix-blend-mode:normal!important;filter:none!important}
-
-/* Keep depth as a soft field. No hard edges, no reused full-size SVG. */
-.bo-h719h1 .bo-h719-auth-motion__depth{
-  background:
-    radial-gradient(48% 42% at 18% 28%,rgba(33,112,176,.12),transparent 72%),
-    radial-gradient(42% 36% at 73% 18%,rgba(75,200,202,.075),transparent 74%)!important;
-  opacity:.9!important;
-  animation:bo-h719h1-depth 30s ease-in-out infinite!important;
-}
-
-/* H7.19 duplicated the full ocean SVG here, producing ghost bands. Replace it with a feathered current glow. */
-.bo-h719h1 .bo-h719-auth-motion__current{
-  top:auto!important;left:-10%!important;right:-10%!important;bottom:-8%!important;height:58%!important;
-  background:
-    radial-gradient(78% 62% at 30% 110%,rgba(29,110,209,.18),transparent 70%),
-    radial-gradient(70% 56% at 78% 108%,rgba(75,200,202,.11),transparent 73%)!important;
-  opacity:.86!important;
-  animation:bo-h719h1-current 26s ease-in-out infinite!important;
-}
-
-/* Foam is now a soft luminous field instead of another clipped copy of the wave artwork. */
-.bo-h719h1 .bo-h719-auth-motion__foam{
-  top:auto!important;left:-12%!important;right:-12%!important;bottom:-10%!important;height:42%!important;
-  background:
-    radial-gradient(64% 46% at 67% 112%,rgba(220,249,255,.16),transparent 72%),
-    radial-gradient(54% 42% at 22% 108%,rgba(117,224,224,.10),transparent 74%)!important;
-  opacity:.72!important;
-  filter:blur(7px)!important;
-  animation:bo-h719h1-foam 20s ease-in-out infinite!important;
-}
-
-@keyframes bo-h719h1-depth{
-  0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.84}
-  50%{transform:translate3d(.7%,-.35%,0) scale(1.018);opacity:1}
-}
-@keyframes bo-h719h1-current{
-  0%,100%{transform:translate3d(-.5%,0,0) scale(1)}
-  50%{transform:translate3d(1.4%,-4px,0) scale(1.012)}
-}
-@keyframes bo-h719h1-foam{
-  0%,100%{transform:translate3d(.7%,2px,0)}
-  50%{transform:translate3d(-1.2%,-3px,0)}
-}
-
-/* The actual H7.17 wave remains the only illustrated wave layer. */
-.bo-h719h1 .bo-auth-shell::before{
-  animation:bo-h719h1-base-tide 34s ease-in-out infinite!important;
-  will-change:background-position,opacity;
-}
-@keyframes bo-h719h1-base-tide{
-  0%,100%{background-position:50% 100%;opacity:.95}
-  50%{background-position:50.8% 100%;opacity:.985}
-}
-
-/* Dashboard keeps one illustrated bottom surface; animated overlay becomes only a low-contrast glow. */
-.bo-h719h1 .bo1215-dashboard[data-ocean-home="7.15"]::after{
-  display:block!important;
-  left:-5%!important;right:-5%!important;bottom:-12px!important;height:250px!important;
-  background:
-    radial-gradient(58% 58% at 28% 100%,rgba(75,200,202,.075),transparent 72%),
-    radial-gradient(62% 62% at 76% 102%,rgba(37,99,235,.055),transparent 74%)!important;
-  opacity:1!important;
-  animation:bo-h719h1-workspace-current 24s ease-in-out infinite!important;
-  filter:none!important;
-}
-@keyframes bo-h719h1-workspace-current{
-  0%,100%{transform:translate3d(-.5%,0,0)}
-  50%{transform:translate3d(.8%,-3px,0)}
-}
+/* ---------- Login e dashboard: o movimento oceânico agora é definido uma única vez em src/design-system/motion.css. ---------- */
 
 /* ---------- Sidebar recovery: glyph-first, not bubble-first. ---------- */
 .bo-h719h1 .bo1205h3-sidebar .bo1205h3-nav-root,
@@ -103,7 +31,7 @@
   box-shadow:none!important;
   color:#5a7185!important;
   transform:none!important;
-  transition:color .16s ease,background-color .16s ease,transform .16s ease!important;
+  transition:color var(--bo-motion-duration-base) ease,background-color var(--bo-motion-duration-base) ease,transform var(--bo-motion-duration-base) ease!important;
 }
 .bo-h719h1 .bo-h719-sidebar-icon svg{width:17px!important;height:17px!important;stroke-width:1.8!important;transform:none!important;filter:none!important}
 .bo-h719h1 .bo-h719-sidebar-icon::after{
@@ -152,7 +80,7 @@
   width:18px!important;height:18px!important;border-radius:50%!important;
   background:radial-gradient(circle,rgba(255,255,255,.92) 0 10%,rgba(56,189,248,.42) 11% 30%,rgba(11,99,246,.22) 31% 52%,transparent 70%)!important;
   transform:translate(-50%,-50%) scale(.15)!important;opacity:0!important;
-  animation:bo-h704-button-ripple .62s cubic-bezier(.16,.75,.22,1) both!important;
+  animation:bo-motion-nav-button-ripple 560ms var(--bo-motion-ease-enter) both!important;
 }
 
 /* Section labels become one quiet hierarchy instead of extra colored ornaments. */
@@ -184,8 +112,6 @@
 }
 
 @media(prefers-reduced-motion:reduce){
-  .bo-h719h1 .bo-h719-auth-motion>span,
-  .bo-h719h1 .bo-auth-shell::before,
-  .bo-h719h1 .bo1215-dashboard[data-ocean-home="7.15"]::after{animation:none!important;transform:none!important}
+  .bo-h719h1 .bo1205h3-sidebar button.is-wave-source::after{animation:none!important;display:none!important}
   .bo-h719h1 .bo-h719-sidebar-icon{transition:none!important}
 }

@@ -5,7 +5,7 @@
 
 /* Premium service path */
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper{position:relative;gap:8px;margin:18px 0 20px;padding:6px 2px 2px}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button{position:relative;grid-template-columns:44px minmax(0,1fr);gap:10px;min-height:76px;padding:10px 11px;border:1px solid transparent;border-radius:14px;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease;color:#64778b}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button{position:relative;grid-template-columns:44px minmax(0,1fr);gap:10px;min-height:76px;padding:10px 11px;border:1px solid transparent;border-radius:14px;transition:background var(--bo-motion-duration-base) ease,border-color var(--bo-motion-duration-base) ease,box-shadow var(--bo-motion-duration-base) ease,transform var(--bo-motion-duration-base) ease;color:#64778b}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button:hover{background:#f6faff;border-color:#dbe7f3;transform:translateY(-1px)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button::before{top:31px;right:calc(50% + 28px);width:calc(100% - 48px);height:3px;border-radius:999px;background:#dfe8f2;z-index:0}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.is-complete::before,.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.is-partial::before,.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.active::before{background:linear-gradient(90deg,#2d63d7,#4b8fe8)}
@@ -32,18 +32,18 @@
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-progress strong{font-size:18px;color:#245db4;letter-spacing:-.03em}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-progress span{font-size:11px;color:#72869a;font-weight:700}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-meter{height:5px;overflow:hidden;border-radius:999px;background:#e1eaf3}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-meter i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#2e65d5,#58a4e8);transition:width .22s ease}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-meter i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#2e65d5,#58a4e8);transition:width var(--bo-motion-duration-base) ease}
 
 /* Capability surfaces */
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel ul{display:grid;gap:9px;padding:11px 0 0;background:transparent}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li{grid-template-columns:minmax(0,1fr) minmax(175px,235px) auto;min-height:68px;padding:12px 13px;border:1px solid #e0e8f0!important;border-radius:13px;background:#fff;box-shadow:0 3px 12px rgba(29,61,94,.035);transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li{grid-template-columns:minmax(0,1fr) minmax(175px,235px) auto;min-height:68px;padding:12px 13px;border:1px solid #e0e8f0!important;border-radius:13px;background:#fff;box-shadow:0 3px 12px rgba(29,61,94,.035);transition:border-color var(--bo-motion-duration-base) ease,box-shadow var(--bo-motion-duration-base) ease,transform var(--bo-motion-duration-base) ease}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li:hover{border-color:#c9daea!important;box-shadow:0 8px 22px rgba(29,73,116,.07);transform:translateY(-1px)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-main>span{width:38px;height:38px;border-radius:11px;background:linear-gradient(145deg,#f2f7fc,#eaf2fa);box-shadow:inset 0 0 0 1px #e2ebf3}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-main{grid-template-columns:38px minmax(0,1fr);gap:11px}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-main strong{font-size:12.5px;color:#20384f}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-main p{margin-top:4px;color:#6d7f91}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>em{justify-self:end;color:#63788d;font-size:10px;font-weight:650}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>button{min-width:94px;border-radius:9px;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>button{min-width:94px;border-radius:9px;transition:transform var(--bo-motion-duration-fast) ease,box-shadow var(--bo-motion-duration-fast) ease,border-color var(--bo-motion-duration-fast) ease}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>button:hover{transform:translateY(-1px);border-color:#a9c7e5;box-shadow:0 5px 12px rgba(37,84,132,.08)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>button.primary{box-shadow:0 6px 14px rgba(36,87,214,.18)}
 

@@ -35,13 +35,13 @@ body{background:var(--sf)}
 .r[data-row=im]>.lb{color:var(--pnt)}
 .n{background:var(--cd);min-height:36px;padding:9px 11px;overflow-wrap:anywhere}
 .r[data-row=sd] .n:empty{background:transparent}
-.r[data-row=sd] .n:empty::before{opacity:0;transition:opacity .12s}
+.r[data-row=sd] .n:empty::before{opacity:0;transition:opacity var(--bo-motion-duration-fast)}
 .r[data-row=sd] .n:hover::before,.r[data-row=sd] .n:focus::before{opacity:1}
 .nw .n{max-height:156px;overflow:auto}
 .nw.expanded .n,.nw:focus-within .n{max-height:none}
 .expand-note{border:0;background:transparent;font-size:11px;min-height:28px;color:var(--mut);position:absolute;bottom:0;right:4px}
 .ad,.bt button{border:0;border-radius:6px;color:var(--mut);text-align:left;font-weight:400;padding:8px 10px}
-.c>.ad,.c>.bt{opacity:0;transition:opacity .12s}
+.c>.ad,.c>.bt{opacity:0;transition:opacity var(--bo-motion-duration-fast)}
 .c:hover>.ad,.c:focus-within>.ad,.c:hover>.bt,.c:focus-within>.bt{opacity:1}
 .ad:hover,.bt button:hover{background:var(--cd);color:var(--ink)}
 .row-tools{padding:10px 12px;display:flex;gap:8px}
@@ -49,7 +49,7 @@ body{background:var(--sf)}
 .sh{min-width:0;padding:12px 10px;position:relative;align-content:start;min-height:76px}
 .sn{min-width:0;overflow-wrap:anywhere}
 .sh i{width:22px;height:22px;font-size:11px;background:var(--cd);color:var(--mut)}
-.sa{opacity:0;height:22px;transition:opacity .12s}
+.sa{opacity:0;height:22px;transition:opacity var(--bo-motion-duration-fast)}
 .sh:hover .sa,.sh:focus-within .sa{opacity:1}
 .sa .x{min-height:26px;font-size:14px}
 .dv{padding:7px 12px;border-top:0;font-size:10px}
@@ -298,7 +298,7 @@ body:has(.card-bulk-bar) .wrap{padding-bottom:110px}
 .r[data-row]:not([data-row=st])>.lb{position:sticky;left:0;z-index:4;padding-right:12px}
 .r[data-row]:not([data-row=st])>.lb>.row-name{display:block;max-width:100%;padding-right:42px}
 .r[data-row]:not([data-row=st])>.lb>small{padding-right:12px}
-.lane-direct-actions{display:flex;align-items:center;gap:2px;position:absolute;right:6px;top:7px;opacity:0;transition:opacity .12s ease}
+.lane-direct-actions{display:flex;align-items:center;gap:2px;position:absolute;right:6px;top:7px;opacity:0;transition:opacity var(--bo-motion-duration-fast) ease}
 .lb:hover .lane-direct-actions,.lb:focus-within .lane-direct-actions,.lane-drop-target .lane-direct-actions{opacity:1}
 .lane-grip{display:grid;place-items:center;width:28px;height:30px;font-size:17px;color:var(--mut);cursor:grab;border-radius:6px;user-select:none;touch-action:pan-y}
 .lane-grip:active{cursor:grabbing}
@@ -343,7 +343,7 @@ body:has(.card-bulk-bar) .wrap{padding-bottom:110px}
 .map-toolset--views{display:flex;align-items:center;gap:5px;flex:0 1 auto;min-width:0}
 .map-toolset--views>.tb{white-space:nowrap}
 .map-toolset--views .map-customize{font-weight:600}
-.editor-head .toolbar .tb,.editor-head .toolbar .menu>summary{border-radius:8px;transition:background-color .12s ease,border-color .12s ease,box-shadow .12s ease}
+.editor-head .toolbar .tb,.editor-head .toolbar .menu>summary{border-radius:8px;transition:background-color var(--bo-motion-duration-fast) ease,border-color var(--bo-motion-duration-fast) ease,box-shadow var(--bo-motion-duration-fast) ease}
 .editor-head .toolbar .tb:not(.p):hover:not(:disabled),.editor-head .toolbar .menu>summary:hover{border-color:var(--ac);background:var(--acs);color:var(--act)}
 .editor-head .toolbar .tb:not(.p):active:not(:disabled){transform:translateY(1px)}
 .editor-head .toolbar .tb:disabled{opacity:.38;cursor:not-allowed}
@@ -353,7 +353,7 @@ body:has(.card-bulk-bar) .wrap{padding-bottom:110px}
 .editor-head .toolbar .tb[data-active=true],.editor-head .toolbar .tb[aria-expanded=true],.editor-head .toolbar .menu[open]>summary{background:var(--acs);border-color:var(--ac);color:var(--act)}
 .editor-head .toolbar .tb[data-active=true] .insight-count{background:var(--ac);color:var(--onac)}
 .editor-head .toolbar .tb.map-secondary{font-size:12px;min-height:36px;padding:0 11px}
-.toolbar-chevron{display:inline-block;font-size:15px;line-height:1;transform:translateY(-1px);color:var(--mut);transition:transform .12s ease}
+.toolbar-chevron{display:inline-block;font-size:15px;line-height:1;transform:translateY(-1px);color:var(--mut);transition:transform var(--bo-motion-duration-fast) ease}
 .menu[open] .toolbar-chevron{transform:rotate(180deg) translateY(1px)}
 .menu-heading{display:block;padding:8px 8px 4px;color:var(--mut);font-weight:750;font-size:10px;letter-spacing:.09em;line-height:1.3}
 .menu-heading:not(:first-child){margin-top:5px;border-top:1px solid var(--ln);padding-top:12px}
