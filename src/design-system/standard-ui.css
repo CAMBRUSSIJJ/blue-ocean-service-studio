@@ -1,0 +1,76 @@
+/* Blue Ocean — Padrão único de modais e botões (v1.21).
+   Camada final: cobre as famílias de classes legadas e as novas, para que tudo siga a mesma linguagem.
+   Botões de texto: pílula. Ícones: quadrado de 32px com raio 8px. Modais: cartão de 16px, fundo desfocado, entrada suave. */
+
+/* ───────── Modais ───────── */
+.bo-h71-modal-backdrop,.bo1189-modal-backdrop,.bo-h740h8-modal-backdrop,.bo1205h3-modal-backdrop,
+.bo1187-dialog-backdrop,.bo-remote-backdrop,[data-modal-backdrop]{
+  background:rgba(10,24,44,.28)!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  animation:bo-std-fade var(--bo-motion-duration-moderate) var(--bo-motion-ease-standard) both;
+}
+.bo-h71-create-modal,.bo1189-modal,.bo-h740h8-modal,.bo1205h3-modal,.bo1187-dialog,.bo1187-insight-dialog,
+.bo-h168-choice-modal,.bo1193-rename-modal,.bo1189-service-modal,.bo1195-discovery-modal,.bo1199-delete-dialog,
+.bo-remote-dialog,.bo-h740h9-rename-modal,.rt188-task-modal,.bo1215-recents-dialog,.bo1187-recents-dialog,
+[role="dialog"][aria-modal="true"]{
+  border-radius:16px!important;
+  border:1px solid rgba(16,24,40,.08)!important;
+  background:#fff!important;
+  box-shadow:0 24px 60px -20px rgba(10,24,44,.35),0 2px 6px rgba(16,24,40,.06)!important;
+  animation:bo-std-pop var(--bo-motion-duration-moderate) var(--bo-motion-ease-enter) both;
+}
+/* Títulos de modal: mesmo peso e tamanho em todos. */
+:is(.bo-h71-create-modal,.bo1189-modal,.bo-h740h8-modal,.bo1205h3-modal,.bo1187-dialog,.bo1187-insight-dialog,.bo1193-rename-modal,.bo1189-service-modal,.bo1199-delete-dialog,.bo-remote-dialog,.bo-h740h9-rename-modal,[role="dialog"][aria-modal="true"]) :is(h1,h2){
+  font-size:var(--bo-font-size-lg)!important;font-weight:var(--bo-font-weight-semibold)!important;letter-spacing:-.01em;color:var(--bo-color-text)!important;
+}
+/* Botão de fechar do modal: redondo, gira no hover. */
+[role="dialog"][aria-modal="true"] button[aria-label="Fechar"],[role="dialog"][aria-modal="true"] button[aria-label="Close"]{
+  border-radius:999px!important;width:32px;height:32px;display:inline-grid;place-items:center;border:0;background:transparent;transition:background-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),transform var(--bo-motion-duration-moderate) var(--bo-btn-spring)}
+[role="dialog"][aria-modal="true"] button[aria-label="Fechar"]:hover{background:var(--bo-color-surface-muted);transform:rotate(90deg)}
+
+/* ───────── Botões de texto ───────── */
+button.primary,.bo-button--primary,.btn-primary,a.primary{
+  border-radius:999px!important;min-height:var(--bo-control-h-md);padding:0 20px!important;
+  background:var(--bo-color-primary-600)!important;border:0!important;color:#fff!important;
+  font-size:var(--bo-font-size-sm);font-weight:var(--bo-font-weight-medium);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 2px rgba(16,35,80,.18);
+  transition:transform var(--bo-motion-duration-moderate) var(--bo-btn-spring),background-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),box-shadow var(--bo-motion-duration-base) var(--bo-motion-ease-standard);
+}
+button.primary:hover:not(:disabled),.bo-button--primary:hover:not(:disabled),.btn-primary:hover:not(:disabled){transform:scale(1.035);background:var(--bo-color-primary-700)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 12px 24px -10px rgba(30,99,240,.55)}
+button.secondary,.bo-button--secondary,.btn-secondary{
+  border-radius:999px!important;min-height:var(--bo-control-h-md);padding:0 20px!important;
+  background:#fff!important;border:1px solid rgba(16,24,40,.10)!important;color:var(--bo-color-text)!important;
+  font-size:var(--bo-font-size-sm);font-weight:var(--bo-font-weight-medium);box-shadow:0 1px 2px rgba(16,24,40,.06);
+  transition:transform var(--bo-motion-duration-moderate) var(--bo-btn-spring),border-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),box-shadow var(--bo-motion-duration-base) var(--bo-motion-ease-standard);
+}
+button.secondary:hover:not(:disabled),.bo-button--secondary:hover:not(:disabled),.btn-secondary:hover:not(:disabled){transform:scale(1.035);border-color:var(--bo-color-primary-200)!important;color:var(--bo-color-primary-700)!important;box-shadow:0 10px 22px -12px rgba(30,99,240,.35)}
+button.danger,.bo-button--danger,.btn-danger{
+  border-radius:999px!important;min-height:var(--bo-control-h-md);padding:0 18px!important;
+  background:#fff!important;border:1px solid #f3c4c0!important;color:var(--bo-color-danger-700,#b42318)!important;
+  font-size:var(--bo-font-size-sm);font-weight:var(--bo-font-weight-medium);
+  transition:transform var(--bo-motion-duration-moderate) var(--bo-btn-spring),background-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),border-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard);
+}
+button.danger:hover:not(:disabled),.bo-button--danger:hover:not(:disabled),.btn-danger:hover:not(:disabled){transform:scale(1.035);background:#fff5f4!important;border-color:#e98a82!important}
+button.ghost,.btn-ghost,.bo-button--ghost{border-radius:999px!important;padding:0 14px!important;transition:background-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),transform var(--bo-motion-duration-moderate) var(--bo-btn-spring)}
+button.ghost:hover:not(:disabled),.btn-ghost:hover:not(:disabled),.bo-button--ghost:hover:not(:disabled){background:var(--bo-color-surface-muted);transform:scale(1.03)}
+/* Clique: encolhe um instante em todos os botões de texto. */
+button.primary:active:not(:disabled),button.secondary:active:not(:disabled),button.danger:active:not(:disabled),button.ghost:active:not(:disabled),.bo-button--primary:active:not(:disabled),.bo-button--secondary:active:not(:disabled),.bo-button--danger:active:not(:disabled){transform:scale(.965)!important;transition-duration:var(--bo-motion-duration-instant)!important}
+/* Ícone do primário/secundário se mexe no hover. */
+button.primary>svg:first-child,button.secondary>svg:first-child,.bo-button--primary>svg:first-child,.bo-button--secondary>svg:first-child{transition:transform var(--bo-motion-duration-moderate) var(--bo-btn-spring)}
+button.primary:hover>svg:first-child,button.secondary:hover>svg:first-child,.bo-button--primary:hover>svg:first-child,.bo-button--secondary:hover>svg:first-child{transform:translateX(-1px) rotate(90deg)}
+
+/* ───────── Botões de ferramenta (ícone) ───────── */
+.tool-button,.bo-icon-button{
+  border-radius:8px!important;min-height:32px;min-width:32px;
+  transition:background-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),transform var(--bo-motion-duration-moderate) var(--bo-btn-spring);
+}
+.tool-button:hover:not(:disabled),.bo-icon-button:hover:not(:disabled){background:var(--bo-color-surface-muted);transform:scale(1.06)}
+.tool-button:active:not(:disabled),.bo-icon-button:active:not(:disabled){transform:scale(.94);transition-duration:var(--bo-motion-duration-instant)}
+
+/* ───────── Entradas ───────── */
+@keyframes bo-std-fade{from{opacity:0}to{opacity:1}}
+@keyframes bo-std-pop{from{opacity:0;transform:translate3d(0,8px,0) scale(.98)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){
+  .bo-h71-modal-backdrop,.bo1189-modal-backdrop,.bo-h740h8-modal-backdrop,.bo1205h3-modal-backdrop,.bo1187-dialog-backdrop,.bo-remote-backdrop,[data-modal-backdrop],
+  .bo-h71-create-modal,.bo1189-modal,.bo-h740h8-modal,.bo1205h3-modal,.bo1187-dialog,.bo1187-insight-dialog,.bo-h168-choice-modal,.bo1193-rename-modal,.bo1189-service-modal,.bo1195-discovery-modal,.bo1199-delete-dialog,.bo-remote-dialog,.bo-h740h9-rename-modal,.rt188-task-modal,.bo1215-recents-dialog,.bo1187-recents-dialog,[role="dialog"][aria-modal="true"]{animation:none!important}
+  button.primary:hover:not(:disabled),button.secondary:hover:not(:disabled),button.danger:hover:not(:disabled),.bo-button--primary:hover:not(:disabled),.bo-button--secondary:hover:not(:disabled),.bo-button--danger:hover:not(:disabled),.tool-button:hover:not(:disabled){transform:none!important}
+}

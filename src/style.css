@@ -102,6 +102,7 @@
 @import './design-system/buttons-brand.css';
 @import './design-system/modal-brand.css';
 @import './design-system/chrome-minimal.css';
+@import './design-system/standard-ui.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
