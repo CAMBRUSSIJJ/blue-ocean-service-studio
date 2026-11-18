@@ -1,0 +1,16 @@
+/* Blue Ocean — Topbar mínima (v1.21).
+   A faixa branca do topo sai. Busca (Ctrl K) e conta ficam num grupo flutuante no canto superior direito. */
+html body #root .bo1187-app-shell header[data-bo-precision-header-native].bo1175-header{
+  position:absolute!important;top:12px;right:16px;left:auto!important;
+  width:auto!important;height:auto!important;min-height:0!important;
+  padding:0!important;margin:0!important;border:0!important;
+  background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  z-index:25!important;
+}
+/* Título e breadcrumbs saem da faixa; ficam só os controles. */
+html body #root .bo1187-app-shell header[data-bo-precision-header-native]>div:first-child,
+html body #root .bo1187-app-shell header[data-bo-precision-header-native] .bo1163-header-copy,
+html body #root .bo1187-app-shell header[data-bo-precision-header-native] .bo1187-dashboard-header__title{display:none!important}
+/* Controles em pílula de vidro. */
+html body #root .bo1187-app-shell header[data-bo-precision-header-native] .bo1187-dashboard-header__actions,
+html body #root .bo1187-app-shell header[data-bo-precision-header-native] .bo1163-header-actions{display:flex;align-items:center;gap:8px;padding:4px;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(16,24,40,.07);box-shadow:0 6px 20px -12px rgba(10,24,44,.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
