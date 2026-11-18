@@ -3,6 +3,9 @@ import React from 'react';
 export { BlobButton } from './blob-button';
 export type { BlobButtonProps } from './blob-button';
 
+export { CollapsibleSidebar } from './collapsible-sidebar';
+export type { CollapsibleSidebarProps, SidebarItem } from './collapsible-sidebar';
+
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
