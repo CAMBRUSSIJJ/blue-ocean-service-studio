@@ -1,0 +1,13 @@
+artifacts/
+__pycache__/
+*.pyc
+*.pyo
+node_modules/
+.worktrees/
+.claude/token-reduce-state/
+.claude/token-reduce-config.json
+skills/devin-delegate
+tools/token-reduce-skill/
+.env
+.env.*
+.env.local

@@ -1,12 +1,26 @@
 {
   "version": 2,
   "skills": {
+    "caveman": {
+      "source": "JuliusBrussee/caveman",
+      "commit": "a192894723a8f47e7f504c7b5041967ff1f18e55",
+      "sourceType": "github",
+      "skillPath": "skills/caveman/SKILL.md",
+      "computedHash": "b51af74aacdadbc3c2d6bb79f05db58dc521854b87f7ffabd48faf286a81ed31"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "83485963700bcf11d5bf78118facb301676b69d918fee2e45a95e7f1a2840f6c"
+    },
+    "token-reduce": {
+      "source": "chimera-defi/token-reduce-skill",
+      "commit": "199968ca2bd0a6ebd2e34a0460d152f3e5b3c3a3",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "43e06641a086b06fedf323a3bc5202a6314d8a232eac344db6d19ac15bca6a5f"
     }
   }
 }
