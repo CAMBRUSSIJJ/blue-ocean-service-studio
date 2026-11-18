@@ -82,3 +82,14 @@ button.primary:hover>svg:first-child,button.secondary:hover>svg:first-child,.bo-
 .cad-toolbar>button.cad-primary-action{background:var(--bo-color-primary-600)!important;border:0!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 2px rgba(16,35,80,.18)}
 .cad-toolbar>button.cad-primary-action:hover:not(:disabled){background:var(--bo-color-primary-700)!important;color:#fff!important}
 .cad-toolbar>button:disabled{opacity:.45}
+
+/* ───────── Editor de mapa: prioridades 3 e 4 ─────────
+   3) Rótulos de linha maiores, mais fortes e com contraste melhor.
+   4) "+ Adicionar cartão" mais leve, para o mapa não ficar pesado. */
+#cad-svg .cad-boundary-name{font-size:var(--bo-font-size-sm)!important;font-weight:var(--bo-font-weight-semibold);fill:#24466f!important;letter-spacing:.005em}
+#cad-svg .cad-boundary{stroke:#7f97b5;stroke-dasharray:4 6}
+#cad-svg .cad-cell-add{opacity:.42;transition:opacity var(--bo-motion-duration-fast) var(--bo-motion-ease-standard)}
+#cad-svg .cad-cell-add:hover,#cad-svg .cad-cell-add:focus{opacity:1}
+#cad-svg .cad-cell-add rect{stroke:#c9d8ea;stroke-dasharray:4 4;fill:#fbfdff}
+#cad-svg .cad-cell-add:hover rect{stroke:var(--bo-color-primary-600);fill:#fff}
+#cad-svg .cad-cell-add text{fill:#4a6a90}
