@@ -1,0 +1,38 @@
+/* Blue Ocean — Modal de criação (v1.21), inspirado no modal de edição de perfil da referência.
+   Cabeçalho com título e fechar · corpo em duas colunas (formulário + prévia ao vivo) · rodapé com contexto e ações.
+   Entrada: fade e escala suave. Saída: a tela fecha sem animação (exige estado de saída; próximo passo). */
+.bo-brand-modal-backdrop{background:rgba(10,24,44,.28)!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:bo-brand-fade var(--bo-motion-duration-moderate) var(--bo-motion-ease-standard) both}
+.bo-brand-modal{width:min(780px,calc(100vw - 32px))!important;max-width:none!important;padding:0!important;border-radius:16px!important;border:1px solid rgba(16,24,40,.08);background:#fff;box-shadow:0 24px 60px -20px rgba(10,24,44,.35),0 2px 6px rgba(16,24,40,.06);overflow:hidden;animation:bo-brand-pop var(--bo-motion-duration-moderate) var(--bo-motion-ease-enter) both}
+@keyframes bo-brand-fade{from{opacity:0}to{opacity:1}}
+@keyframes bo-brand-pop{from{opacity:0;transform:translate3d(0,8px,0) scale(.98)}to{opacity:1;transform:none}}
+.bo-brand-modal__header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid rgba(16,24,40,.07)}
+.bo-brand-modal__header h2{margin:0;font-size:var(--bo-font-size-lg);font-weight:var(--bo-font-weight-semibold);color:var(--bo-color-text);letter-spacing:-.01em}
+.bo-brand-modal__close{display:grid;place-items:center;width:32px;height:32px;border:0;border-radius:999px;background:transparent;color:var(--bo-color-text-muted);cursor:pointer;transition:background-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),transform var(--bo-motion-duration-moderate) var(--bo-btn-spring)}
+.bo-brand-modal__close:hover{background:var(--bo-color-surface-muted);color:var(--bo-color-text);transform:rotate(90deg)}
+.bo-brand-modal__body{display:grid;grid-template-columns:minmax(0,1fr) 250px;min-height:0}
+.bo-brand-modal__form{display:grid;gap:14px;padding:22px;border-right:1px solid rgba(16,24,40,.07)}
+.bo-brand-modal__form label{display:grid;gap:6px}
+.bo-brand-modal__form label>span{font-size:var(--bo-font-size-xs);font-weight:var(--bo-font-weight-medium);color:var(--bo-color-text-secondary)}
+.bo-brand-modal__form label>span em{font-style:normal;color:var(--bo-color-text-muted);font-weight:var(--bo-font-weight-regular)}
+.bo-brand-modal__form input,.bo-brand-modal__form textarea{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--bo-color-border-strong);border-radius:10px;background:#fff;font:inherit;font-size:var(--bo-font-size-sm);color:var(--bo-color-text);transition:border-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),box-shadow var(--bo-motion-duration-fast) var(--bo-motion-ease-standard)}
+.bo-brand-modal__form textarea{min-height:84px;resize:vertical}
+.bo-brand-modal__form input:focus,.bo-brand-modal__form textarea:focus{outline:none;border-color:var(--bo-color-primary-600);box-shadow:0 0 0 3px rgba(30,99,240,.14)}
+.bo-brand-modal__preview{display:grid;align-content:start;justify-items:center;gap:6px;padding:22px 18px;background:linear-gradient(180deg,rgba(30,99,240,.05),rgba(56,191,199,.05));text-align:center}
+.bo-brand-modal__eyebrow{font-size:var(--bo-font-size-xs);font-weight:var(--bo-font-weight-medium);color:var(--bo-color-text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.bo-brand-modal__mark{display:grid;place-items:center;width:64px;height:64px;border-radius:18px;background:#fff;color:var(--bo-color-primary-600);box-shadow:0 8px 20px -10px rgba(30,99,240,.45);margin-bottom:6px}
+.bo-brand-modal__preview strong{font-size:var(--bo-font-size-md);font-weight:var(--bo-font-weight-semibold);color:var(--bo-color-text);word-break:break-word}
+.bo-brand-modal__preview small{font-size:var(--bo-font-size-sm);color:var(--bo-color-text-secondary)}
+.bo-brand-modal__preview em{font-style:normal;margin-top:6px;padding:4px 10px;border-radius:999px;background:#fff;border:1px solid rgba(16,24,40,.08);font-size:var(--bo-font-size-xs);color:var(--bo-color-text-secondary)}
+.bo-brand-modal__footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;border-top:1px solid rgba(16,24,40,.07);background:#fcfdff}
+.bo-brand-modal__footer>div{display:flex;gap:8px}
+.bo-brand-modal__meta{font-size:var(--bo-font-size-xs);color:var(--bo-color-text-muted)}
+@media(max-width:720px){
+  .bo-brand-modal__body{grid-template-columns:1fr}
+  .bo-brand-modal__form{border-right:0;border-bottom:1px solid rgba(16,24,40,.07)}
+  .bo-brand-modal__preview{grid-auto-flow:column;justify-content:start;text-align:left;justify-items:start;gap:12px}
+  .bo-brand-modal__mark{width:44px;height:44px;margin:0}
+  .bo-brand-modal__eyebrow{display:none}
+  .bo-brand-modal__footer{flex-direction:column-reverse;align-items:stretch}
+  .bo-brand-modal__footer>div{justify-content:flex-end}
+}
+@media(prefers-reduced-motion:reduce){.bo-brand-modal-backdrop,.bo-brand-modal{animation:none}}

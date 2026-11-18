@@ -167,7 +167,35 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
       <div className="bo-h740h8-template-grid large">{TEMPLATES.filter((item) => item.sector).map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><Sparkles size={19}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>{projectTemplateLabel(item.id)} <ArrowRight size={12}/></em></button>)}</div>
     </section>}
 
-    {dialog && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}><section className="bo-h740h8-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h8-create-title"><header><div><small>NOVO PROJETO · {projectTemplateLabel(dialog).toUpperCase()}</small><h2 id="bo-h740h8-create-title">Crie o espaço de trabalho</h2><p>Projeto e serviço são conceitos separados. O projeto organiza o trabalho; o serviço é o objeto que será desenhado.</p></div><button type="button" onClick={() => setDialog(null)} aria-label="Fechar"><X size={18}/></button></header><div className="bo-h740h8-modal-body"><label><span>Nome do projeto</span><input autoFocus value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Redesenho da experiência da lavanderia"/></label><label><span>Serviço principal</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Lavanderia com entrega e coleta"/></label><label className="full"><span>Descrição <em>opcional</em></span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Qual objetivo ou transformação este projeto pretende conduzir?"/></label></div><footer><button type="button" onClick={() => setDialog(null)}>Cancelar</button><button type="button" className="primary" disabled={!projectName.trim()} onClick={submit}>Criar projeto</button></footer></section></div>}
+    {dialog && <div className="bo-h740h8-modal-backdrop bo-brand-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setDialog(null); }}>
+      <section className="bo-h740h8-modal bo-brand-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h8-create-title">
+        <header className="bo-brand-modal__header">
+          <h2 id="bo-h740h8-create-title">Crie o espaço de trabalho</h2>
+          <button type="button" className="bo-brand-modal__close" onClick={() => setDialog(null)} aria-label="Fechar"><X size={18}/></button>
+        </header>
+        <div className="bo-brand-modal__body">
+          <div className="bo-brand-modal__form">
+            <label><span>Nome do projeto</span><input autoFocus value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Redesenho da experiência da lavanderia"/></label>
+            <label><span>Serviço principal</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Lavanderia com entrega e coleta"/></label>
+            <label><span>Descrição <em>opcional</em></span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Qual objetivo ou transformação este projeto pretende conduzir?"/></label>
+          </div>
+          <aside className="bo-brand-modal__preview" aria-label="Prévia do projeto">
+            <span className="bo-brand-modal__eyebrow">Prévia</span>
+            <div className="bo-brand-modal__mark"><FolderKanban size={24}/></div>
+            <strong>{projectName.trim() || 'Nome do projeto'}</strong>
+            <small>{serviceName.trim() || 'Serviço principal'}</small>
+            <em>{projectTemplateLabel(dialog)}</em>
+          </aside>
+        </div>
+        <footer className="bo-brand-modal__footer">
+          <span className="bo-brand-modal__meta">Modelo: {TEMPLATES.find((item) => item.id === dialog)?.title ?? projectTemplateLabel(dialog)}</span>
+          <div>
+            <button type="button" className="secondary" onClick={() => setDialog(null)}>Cancelar</button>
+            <button type="button" className="primary" disabled={!projectName.trim()} onClick={submit}>Criar projeto</button>
+          </div>
+        </footer>
+      </section>
+    </div>}
 
     {renameTarget && <div className="bo-h740h8-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setRenameTarget(null); }}><section className="bo-h740h8-modal bo-h740h9-rename-modal" role="dialog" aria-modal="true" aria-labelledby="bo-h740h9-rename-title"><header><div><small>PROJETO</small><h2 id="bo-h740h9-rename-title">Renomear projeto</h2><p>O nome do serviço permanece independente e não será alterado.</p></div><button type="button" onClick={() => setRenameTarget(null)} aria-label="Fechar"><X size={18}/></button></header><div className="bo-h740h8-modal-body"><label className="full"><span>Nome do projeto</span><input autoFocus value={renameValue} onChange={(event) => setRenameValue(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && renameValue.trim()) submitRename(); }}/></label></div><footer><button type="button" onClick={() => setRenameTarget(null)}>Cancelar</button><button type="button" className="primary" disabled={!renameValue.trim()} onClick={submitRename}>Salvar nome</button></footer></section></div>}
   </section>;
