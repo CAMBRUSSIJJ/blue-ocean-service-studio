@@ -214,6 +214,8 @@ body.bo1179-auth-visible .bo-auth-story,body.bo1179-auth-visible .bo-auth-card{p
 body.bo1179-auth-visible .bo-auth-brand>div{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 10px 34px rgba(56,191,199,.28);animation:bo-motion-logo-bloom 1.4s .2s var(--bo-motion-ease-enter) both}
 @keyframes bo-motion-logo-bloom{from{box-shadow:0 0 0 1px rgba(255,255,255,0),0 0 0 rgba(56,191,199,0)}to{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 10px 34px rgba(56,191,199,.28)}}
 
+/* Camadas do fundo ocupam a largura toda: sem caixa de 900px cortando a tela (aparecia um degrau vertical). */
+html body #root #bo-main-content{background-size:100% 520px,100% 440px,100% 340px!important}
 /* ───────────────────────── 3d. Workspace: profundidade estática ─────────────────────────
    Faixa azul no topo da Home e luz mais forte na base, sem loop (o conteúdo continua em destaque). */
 #root #bo-main-content:has(.bo-h740h8-home){
@@ -270,4 +272,6 @@ header[data-bo-precision-header-native]{background:rgba(255,255,255,.72)!importa
 .bo-other-tools__toggle span:last-child{color:var(--bo-color-text-muted);font-size:var(--bo-font-size-md);line-height:1}
 .bo-other-tools__items{display:flex;flex-direction:column;padding-top:2px}
 /* Recolhida, o grupo some junto com as outras abas. */
-.bo-h724-sidebar.is-collapsed:not(:hover) .bo-other-tools__toggle span:first-child{display:none}
+.bo-h724-sidebar.is-collapsed:not(:hover) .bo-other-tools__toggle{font-size:0;padding:0;justify-content:center}
+.bo-h724-sidebar.is-collapsed:not(:hover) .bo-other-tools__toggle>span:last-child{font-size:var(--bo-font-size-md)}
+body .bo-h724-sidebar.is-collapsed:not(:hover) .bo-other-tools__toggle>span:first-child{display:none!important}
