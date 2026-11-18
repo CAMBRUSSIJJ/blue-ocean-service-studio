@@ -1,5 +1,8 @@
 import React from 'react';
 
+export { BlobButton } from './blob-button';
+export type { BlobButtonProps } from './blob-button';
+
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
