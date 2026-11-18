@@ -189,6 +189,7 @@ export function AuthExperience() {
 
   return (
     <main className="bo-auth-shell">
+      <div className="bo-auth-aurora" aria-hidden="true"><span /><span /></div>
       <WaveBackdrop />
       <section className="bo-auth-story" aria-label="BLUE OCEAN Service Studio">
         <div className="bo-auth-story__veil" aria-hidden="true" />

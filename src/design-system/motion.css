@@ -191,6 +191,39 @@ body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{
 .bo-h740h8-hero>div>small{color:var(--bo-color-primary-600);letter-spacing:.14em}
 .bo-h740h8-hero h1{font-weight:var(--bo-font-weight-semibold);letter-spacing:-.025em}
 
+/* ───────────────────────── 3c. Login: aurora de marca e logotipo em destaque ─────────────────────────
+   Vitrine da marca: duas manchas de luz em deriva lenta, por trás do conteúdo. Só no login. */
+body.bo1179-auth-visible #root main.bo-auth-shell{position:relative;isolation:isolate}
+.bo-auth-aurora{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bo-auth-aurora>span{position:absolute;border-radius:50%;filter:blur(64px);will-change:transform}
+.bo-auth-aurora>span:first-child{
+  width:58vmax;height:46vmax;left:-12vmax;top:-14vmax;
+  background:radial-gradient(closest-side,rgba(53,137,203,.42),rgba(53,137,203,0));
+  animation:bo-motion-aurora-a 34s ease-in-out infinite alternate;
+}
+.bo-auth-aurora>span:last-child{
+  width:50vmax;height:42vmax;right:-14vmax;bottom:-16vmax;
+  background:radial-gradient(closest-side,rgba(56,191,199,.34),rgba(56,191,199,0));
+  animation:bo-motion-aurora-b 40s ease-in-out infinite alternate;
+}
+@keyframes bo-motion-aurora-a{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(9vmax,6vmax,0) scale(1.12)}}
+@keyframes bo-motion-aurora-b{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(-7vmax,-5vmax,0) scale(1.1)}}
+/* Conteúdo sempre por cima da aurora. */
+body.bo1179-auth-visible .bo-auth-story,body.bo1179-auth-visible .bo-auth-card{position:relative;z-index:1}
+/* Logotipo: um único brilho suave ao entrar. */
+body.bo1179-auth-visible .bo-auth-brand>div{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 10px 34px rgba(56,191,199,.28);animation:bo-motion-logo-bloom 1.4s .2s var(--bo-motion-ease-enter) both}
+@keyframes bo-motion-logo-bloom{from{box-shadow:0 0 0 1px rgba(255,255,255,0),0 0 0 rgba(56,191,199,0)}to{box-shadow:0 0 0 1px rgba(255,255,255,.12),0 10px 34px rgba(56,191,199,.28)}}
+
+/* ───────────────────────── 3d. Workspace: profundidade estática ─────────────────────────
+   Faixa azul no topo da Home e luz mais forte na base, sem loop (o conteúdo continua em destaque). */
+#bo-main-content:has(.bo-h740h8-home){
+  background-image:
+    linear-gradient(180deg,rgba(30,99,240,.07) 0,rgba(30,99,240,0) 220px),
+    radial-gradient(56% 46% at 8% -4%,rgba(30,99,240,.12),transparent 72%),
+    radial-gradient(44% 40% at 94% 4%,rgba(56,191,199,.14),transparent 70%),
+    radial-gradient(70% 40% at 50% 112%,rgba(30,99,240,.09),transparent 75%)!important;
+}
+
 /* ───────────────────────── 6. Movimento reduzido ───────────────────────── */
 @media(prefers-reduced-motion:reduce){
   .bo-auth-brand,.bo-auth-story__copy,.bo-auth-story__signal,.bo-auth-story footer,.bo-auth-card,
@@ -201,6 +234,8 @@ body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{
   .bo-skeleton,.bo1176-boot-lines i{animation:none!important;transform:none!important}
   .bo-nav-indicator{transition:none!important}
   .bo-h740h8-hero>div{animation:none!important}
+  .bo-auth-aurora>span{animation:none!important}
+  body.bo1179-auth-visible .bo-auth-brand>div{animation:none!important}
   .bo-auth-brand>div::after,.bo-auth-primary::after,.bo1205h3-sidebar::after{display:none!important}
   /* Feedback de navegação continua existindo, só sem deslocamento. */
   .bo1205h3-sidebar button.is-wave-source{animation:bo-motion-nav-reduced-pulse 240ms ease-out both!important}

@@ -8,7 +8,7 @@ check('token global usa Geist Sans',tokens.includes('--bo-font-sans:"Geist","Gei
 check('Tailwind usa Geist',tailwind.includes("'Geist', 'Geist Sans'"));
 check('body herda token tipográfico',style.includes('font-family: var(--bo-font-sans)'));
 check('whiteboard usa token tipográfico',whiteboard.includes('font-family:var(--bo-font-sans)'));
-check('onda fica no shell inteiro',auth.includes('<main className="bo-auth-shell">\n      <WaveBackdrop />'));
+check('onda fica no shell inteiro',auth.includes('<main className="bo-auth-shell">') && auth.includes('<WaveBackdrop />') && auth.includes('bo-auth-aurora'));
 check('story não contém onda própria',!auth.includes('<section className="bo-auth-story" aria-label="BLUE OCEAN Service Studio">\n        <WaveBackdrop'));
 check('onda cobre viewport',css.includes('.bo-auth-wave{')&&css.includes('inset:0;')&&css.includes('z-index:-2'));
 check('animação usa transform compositado',css.includes('translate3d')&&css.includes('will-change:transform'));
