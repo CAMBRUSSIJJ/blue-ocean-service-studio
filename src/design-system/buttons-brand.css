@@ -19,7 +19,7 @@ button.secondary,
   padding-right:20px!important;
   font-size:var(--bo-font-size-sm);
   letter-spacing:-.005em;
-  transition:transform 280ms var(--bo-btn-spring),background-color 160ms ease,border-color 160ms ease,color 160ms ease,box-shadow 240ms ease;
+  transition:transform var(--bo-motion-duration-moderate) var(--bo-btn-spring),background-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),border-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),box-shadow var(--bo-motion-duration-base) var(--bo-motion-ease-standard);
   will-change:transform;
 }
 /* Primário: azul de marca com brilho interno sutil. */
@@ -62,12 +62,12 @@ button.secondary:hover:not(:disabled),
 button.primary:active:not(:disabled),
 button.secondary:active:not(:disabled){
   transform:scale(.965)!important;
-  transition-duration:90ms;
+  transition-duration:var(--bo-motion-duration-instant);
   transition-timing-function:var(--bo-btn-press);
 }
 /* Ícone se mexe no hover (o "+" gira, o carrinho se inclina). */
 .bo-button--primary>svg:first-child,.bo-button--secondary>svg:first-child,
-button.primary>svg:first-child,button.secondary>svg:first-child{transition:transform 320ms var(--bo-btn-spring)}
+button.primary>svg:first-child,button.secondary>svg:first-child{transition:transform var(--bo-motion-duration-moderate) var(--bo-btn-spring)}
 .bo-button--primary:hover>svg:first-child,.bo-button--secondary:hover>svg:first-child,
 button.primary:hover>svg:first-child,button.secondary:hover>svg:first-child{transform:translateX(-1px) rotate(90deg)}
 /* Escuro: secundário com superfície escura. */
