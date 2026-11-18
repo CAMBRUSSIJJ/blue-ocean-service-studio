@@ -137,7 +137,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
         : activeTab === 'journey' && !externalNav
           ? 'Jornadas'
           : activeTab === 'canvas' && !externalNav
-          ? ({ journey: 'Mapas do serviço', blueprint: 'Mapas do serviço', whiteboard: 'Whiteboard', channels: 'Canais', overview: 'Design do serviço' } as Record<string, string>)[serviceWorkspaceTab] ?? 'Design do serviço'
+          ? ({ journey: 'Mapas do serviço', blueprint: 'Mapas do serviço', whiteboard: 'Whiteboard', channels: 'Canais', overview: 'Desenho do serviço' } as Record<string, string>)[serviceWorkspaceTab] ?? 'Design do serviço'
           : 'Plano de Ação'
   );
 

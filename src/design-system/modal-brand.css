@@ -36,3 +36,6 @@
   .bo-brand-modal__footer>div{justify-content:flex-end}
 }
 @media(prefers-reduced-motion:reduce){.bo-brand-modal-backdrop,.bo-brand-modal{animation:none}}
+.bo-brand-modal__hint{font-style:normal;font-size:var(--bo-font-size-xs);color:var(--bo-color-text-muted)}
+.bo-brand-modal__note{margin:auto 0 0;padding:10px 12px;border-radius:10px;background:var(--bo-color-surface-muted);font-size:var(--bo-font-size-xs);line-height:1.45;color:var(--bo-color-text-secondary)}
+.bo-brand-modal__form{align-content:start}

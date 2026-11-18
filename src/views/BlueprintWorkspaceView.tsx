@@ -662,7 +662,7 @@ export function BlueprintWorkspaceView({ studio, createMapIntent = false, onCrea
       </aside>
     </header> : <header className="bo-h740h7-compact-head" data-service-maps-header={workspaceTab === 'journey' ? '1' : undefined}>
       <div>
-        <button type="button" onClick={() => selectWorkspaceTab('overview')}>Design do serviço</button>
+        <button type="button" onClick={() => selectWorkspaceTab('overview')}>Desenho do serviço</button>
         <span>/</span><span>{WORKSPACE_GROUPS.find((group) => group.id === activeWorkspaceGroup)?.label}</span><span>/</span>
         <strong>{projectedWorkspaceItems.find((item) => item.id === workspaceTab)?.label ?? graph.service.name}</strong>
       </div>

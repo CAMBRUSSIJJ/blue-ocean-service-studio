@@ -19,3 +19,5 @@ html body #root .bo1187-app-shell header[data-bo-precision-header-native] .bo116
 html body #root #bo-main-content:not(.p-0){padding-top:60px!important}
 /* Cabeçalho do workspace de serviço (Mapas, Jornada) também reserva a faixa dos controles flutuantes. */
 html body #root .bo-h722-service-workspace{padding-top:60px!important;box-sizing:border-box}
+/* Notificação sobe para não cobrir o indicador "local" no canto inferior direito. */
+html body #root .rt188-toast{bottom:64px!important}

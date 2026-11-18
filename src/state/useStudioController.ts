@@ -347,7 +347,7 @@ export function useStudioController() {
     saveProjectSnapshot(nextGraph, { id: projectId, title: projectName, serviceName, description: input.description ?? '', template, favorite: false, archived: false, lastOpenedAt: nowIso() });
     markProjectOpened(projectId);
     const opened = replaceProjectGraph(nextGraph, 'Criar projeto');
-    if (opened) showToast('Projeto criado. Agora estruture o serviço dentro dele.');
+    if (opened) showToast('Projeto criado. Próximo passo: criar o primeiro mapa do serviço.');
     return opened;
   };
 

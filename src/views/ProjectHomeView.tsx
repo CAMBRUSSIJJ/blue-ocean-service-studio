@@ -92,12 +92,13 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
 
   const startTemplate = (template: ProjectTemplate) => {
     const preset = TEMPLATES.find((item) => item.id === template);
-    setProjectName(''); setServiceName(preset?.service ?? ''); setDescription(''); setDialog(template);
+    setProjectName(''); setServiceName(''); setDescription(''); setDialog(template); void preset;
   };
 
   const submit = () => {
     if (!dialog || !projectName.trim()) return;
-    const ok = createWorkspaceProject({ projectName, serviceName: serviceName.trim() || projectName, description, template: dialog });
+    const preset = TEMPLATES.find((item) => item.id === dialog);
+    const ok = createWorkspaceProject({ projectName, serviceName: serviceName.trim() || preset?.service || 'Novo serviço', description, template: dialog });
     if (!ok) return;
     setDialog(null);
     window.setTimeout(openProjectWorkspace, 0);
@@ -176,8 +177,9 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
         <div className="bo-brand-modal__body">
           <div className="bo-brand-modal__form">
             <label><span>Nome do projeto</span><input autoFocus value={projectName} onChange={(event) => setProjectName(event.target.value)} placeholder="Ex.: Redesenho da experiência da lavanderia"/></label>
-            <label><span>Serviço principal</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder="Ex.: Lavanderia com entrega e coleta"/></label>
+            <label><span>Serviço principal</span><input value={serviceName} onChange={(event) => setServiceName(event.target.value)} placeholder={TEMPLATES.find((item) => item.id === dialog)?.service ?? "Ex.: Lavanderia com entrega e coleta"}/><em className="bo-brand-modal__hint">Se deixar vazio, usamos “{TEMPLATES.find((item) => item.id === dialog)?.service ?? "Novo serviço"}”.</em></label>
             <label><span>Descrição <em>opcional</em></span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Qual objetivo ou transformação este projeto pretende conduzir?"/></label>
+            <p className="bo-brand-modal__note">Seus dados ficam salvos neste navegador e não sincronizam com outros dispositivos.</p>
           </div>
           <aside className="bo-brand-modal__preview" aria-label="Prévia do projeto">
             <span className="bo-brand-modal__eyebrow">Prévia</span>
