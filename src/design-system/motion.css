@@ -176,6 +176,21 @@ body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{
   .bo-h724-sidebar.is-collapsed:not(:hover) .bo-h701-sidebar-nav button,.bo-h724-sidebar.is-collapsed:not(:hover) .bo-h701-sidebar-bottom button{gap:0!important}
 }
 
+/* ───────────────────────── 3b. Fundo da Home: malha suave de marca, estática ─────────────────────────
+   Malha de azul e aqua em baixa opacidade sobre o claro. Sem loop: o fundo não compete com o conteúdo. */
+#bo-main-content:has(.bo-h740h8-home){
+  background-color:#f7fbff!important;
+  background-image:
+    radial-gradient(56% 46% at 8% -4%,rgba(30,99,240,.085),transparent 72%),
+    radial-gradient(44% 40% at 94% 4%,rgba(56,191,199,.10),transparent 70%),
+    radial-gradient(60% 38% at 50% 110%,rgba(30,99,240,.05),transparent 75%)!important;
+}
+/* Entrada única do cabeçalho da Home. */
+.bo-h740h8-hero>div{animation:bo-motion-enter-up var(--bo-motion-duration-slow) var(--bo-motion-ease-enter) both}
+/* Marca: rótulo "BLUE OCEAN" com a cor de marca, sem gradiente decorativo. */
+.bo-h740h8-hero>div>small{color:var(--bo-color-primary-600);letter-spacing:.14em}
+.bo-h740h8-hero h1{font-weight:var(--bo-font-weight-semibold);letter-spacing:-.025em}
+
 /* ───────────────────────── 6. Movimento reduzido ───────────────────────── */
 @media(prefers-reduced-motion:reduce){
   .bo-auth-brand,.bo-auth-story__copy,.bo-auth-story__signal,.bo-auth-story footer,.bo-auth-card,
@@ -185,6 +200,7 @@ body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{
   .bo1205h3-sidebar.is-wave-reacting .bo-h701-sidebar-wave,
   .bo-skeleton,.bo1176-boot-lines i{animation:none!important;transform:none!important}
   .bo-nav-indicator{transition:none!important}
+  .bo-h740h8-hero>div{animation:none!important}
   .bo-auth-brand>div::after,.bo-auth-primary::after,.bo1205h3-sidebar::after{display:none!important}
   /* Feedback de navegação continua existindo, só sem deslocamento. */
   .bo1205h3-sidebar button.is-wave-source{animation:bo-motion-nav-reduced-pulse 240ms ease-out both!important}
