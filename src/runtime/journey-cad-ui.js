@@ -239,6 +239,7 @@ function cadSvg(){
  layout.rows.forEach((row,index)=>{
   const boundary=cadModel.canvasBoundary(row,index,layout.rows),color=cadColors[row.id]||'#64748b';
   html+='<rect x="0" y="'+row.y+'" width="'+layout.width+'" height="'+row.height+'" rx="7" class="cad-lane-bg"/><path d="M2 '+(row.y+8)+' V'+(row.y+row.height-8)+'" stroke="'+color+'" stroke-width="3"/>';
+  {const GROUP={fl:'Frente',bk:'Bastidores',sy:'Apoio'}[row.id]; if(GROUP) html+='<text x="15" y="'+(row.y+14)+'" class="cad-lane-group" data-g="'+row.id+'">● '+GROUP.toUpperCase()+'</text>';}
   cadModel.canvasTitleLines(row.n,Math.max(7,Math.floor(192/(labelFont*.56))),Math.min(3,Math.max(1,Math.floor((row.height-18)/(labelFont+4))))).forEach((line,i)=>{html+='<text x="15" y="'+(row.y+28+i*(labelFont+4))+'" class="cad-lane-name" style="font-size:'+labelFont+'px">'+esc(line)+'</text>'});
    html+='<g class="cad-lane-select'+(cadState.selectedRow===row.id?' is-selected':'')+'" role="button" tabindex="0" data-act="cad-lane-select" data-id="'+esc(row.id)+'" aria-label="Propriedades da faixa '+esc(row.n)+'" title="Editar faixa"><rect x="0" y="'+row.y+'" width="'+(layout.stages[0]?.x||218)+'" height="'+row.height+'" fill="transparent"/></g>';
   if(boundary)html+='<path d="M0 '+(row.y-14)+' H'+layout.width+'" class="cad-boundary"/><text x="'+(layout.width/2)+'" y="'+(row.y-18)+'" text-anchor="middle" class="cad-boundary-name">'+esc(boundary)+'</text>';

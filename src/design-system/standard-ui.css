@@ -93,3 +93,8 @@ button.primary:hover>svg:first-child,button.secondary:hover>svg:first-child,.bo-
 #cad-svg .cad-cell-add rect{stroke:#c9d8ea;stroke-dasharray:4 4;fill:#fbfdff}
 #cad-svg .cad-cell-add:hover rect{stroke:var(--bo-color-primary-600);fill:#fff}
 #cad-svg .cad-cell-add text{fill:#4a6a90}
+/* Editor de mapa — prioridade 5: cada faixa de bastidores/apoio/frente tem um rótulo de texto, além da cor. */
+#cad-svg .cad-lane-group{font-size:var(--bo-font-size-xs);font-weight:var(--bo-font-weight-semibold);letter-spacing:.08em}
+#cad-svg .cad-lane-group[data-g="fl"]{fill:#0f7a6b}
+#cad-svg .cad-lane-group[data-g="bk"]{fill:#b4530f}
+#cad-svg .cad-lane-group[data-g="sy"]{fill:#6d4fd1}
