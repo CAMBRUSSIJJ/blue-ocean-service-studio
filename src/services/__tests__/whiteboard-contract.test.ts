@@ -3,8 +3,6 @@ import { createServiceGraph } from '../../domain/graph-operations';
 import type { ServiceGraph, WhiteboardItem, WhiteboardView } from '../../domain/model';
 import { resolveSmartObject, linkObjectToWhiteboard, pruneDanglingBoardReferences } from '../whiteboard-contract';
 
-const NOW = '2025-06-01T12:00:00.000Z';
-
 // ─── helpers ───────────────────────────────────────────────────────────────
 
 function makeGraph(): ServiceGraph {
@@ -37,7 +35,7 @@ function withEntity(graph: ServiceGraph, kind: string, entityId: string): Servic
 describe('resolveSmartObject', () => {
   it('retorna null para item do tipo free', () => {
     const graph = makeGraph();
-    const item: WhiteboardItem = { id: 'i1', kind: 'free', text: 'nota', x: 0, y: 0, width: 100, height: 50 };
+    const item: WhiteboardItem = { id: 'i1', kind: 'free', shape: 'note', text: 'nota', x: 0, y: 0, width: 100, height: 50 };
     expect(resolveSmartObject(graph, item)).toBeNull();
   });
 
@@ -95,8 +93,9 @@ describe('linkObjectToWhiteboard', () => {
     const item = updated.views.whiteboards['board-1'].items['item-1'];
     expect(item).toBeDefined();
     expect(item.kind).toBe('smart');
-    expect(item.objectKind).toBe('stage');
-    expect(item.objectId).toBe('stage-1');
+    const smartItem = item as Extract<WhiteboardItem, { kind: 'smart' }>;
+    expect(smartItem.objectKind).toBe('stage');
+    expect(smartItem.objectId).toBe('stage-1');
     expect(item.x).toBe(50);
     expect(item.y).toBe(80);
     expect(item.width).toBe(240);
@@ -112,7 +111,7 @@ describe('linkObjectToWhiteboard', () => {
   });
 
   it('preserva items já existentes no quadro', () => {
-    const existingItem: WhiteboardItem = { id: 'old-1', kind: 'free', text: 'nota', x: 0, y: 0, width: 100, height: 50 };
+    const existingItem: WhiteboardItem = { id: 'old-1', kind: 'free', shape: 'note', text: 'nota', x: 0, y: 0, width: 100, height: 50 };
     let graph = withBoard(makeGraph(), 'board-1', { 'old-1': existingItem });
     graph = withStage(graph, 'stage-1');
     const updated = linkObjectToWhiteboard(graph, 'board-1', 'stage', 'stage-1', 'item-new', 0, 0);
@@ -131,7 +130,7 @@ describe('pruneDanglingBoardReferences', () => {
   });
 
   it('mantém items do tipo free independente do estado do grafo', () => {
-    const freeItem: WhiteboardItem = { id: 'f1', kind: 'free', text: 'anotação', x: 0, y: 0, width: 100, height: 50 };
+    const freeItem: WhiteboardItem = { id: 'f1', kind: 'free', shape: 'note', text: 'anotação', x: 0, y: 0, width: 100, height: 50 };
     const graph = withBoard(makeGraph(), 'board-1', { f1: freeItem });
     const result = pruneDanglingBoardReferences(graph);
     expect(result).toBe(graph); // free item válido → sem poda → mesma referência
@@ -157,7 +156,7 @@ describe('pruneDanglingBoardReferences', () => {
     let graph = withStage(makeGraph(), 'stage-1');
     const validItem: WhiteboardItem = { id: 'v1', kind: 'smart', objectKind: 'stage', objectId: 'stage-1', x: 0, y: 0, width: 240, height: 120 };
     const danglingItem: WhiteboardItem = { id: 'd1', kind: 'smart', objectKind: 'stage', objectId: 'ghost', x: 10, y: 10, width: 240, height: 120 };
-    const freeItem: WhiteboardItem = { id: 'f1', kind: 'free', text: 'nota', x: 20, y: 20, width: 100, height: 50 };
+    const freeItem: WhiteboardItem = { id: 'f1', kind: 'free', shape: 'note', text: 'nota', x: 20, y: 20, width: 100, height: 50 };
     graph = withBoard(graph, 'board-1', { v1: validItem, d1: danglingItem, f1: freeItem });
     const result = pruneDanglingBoardReferences(graph);
     const items = result.views.whiteboards['board-1'].items;

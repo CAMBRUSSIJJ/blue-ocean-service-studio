@@ -157,7 +157,7 @@ describe('legacyItemsForCanvas', () => {
         whiteboards: {
           b1: {
             ...withFreeBoard(base()).views.whiteboards['b1'],
-            items: { i1: { id: 'i1', kind: 'free', text: 'Hello', x: 10, y: 20, width: 300, height: 150, shape: 'card' } as ServiceGraph['views']['whiteboards'][string]['items'][string] },
+            items: { i1: { id: 'i1', kind: 'free', text: 'Hello', x: 10, y: 20, width: 300, height: 150, shape: 'note' } as ServiceGraph['views']['whiteboards'][string]['items'][string] },
           },
         },
       },
@@ -193,7 +193,7 @@ describe('legacyItemsForCanvas', () => {
         whiteboards: {
           b1: {
             ...withFreeBoard(base()).views.whiteboards['b1'],
-            items: { i1: { id: 'i1', kind: 'free', text: '   ', x: 0, y: 0, width: 300, height: 150, shape: 'card' } as ServiceGraph['views']['whiteboards'][string]['items'][string] },
+            items: { i1: { id: 'i1', kind: 'free', text: '   ', x: 0, y: 0, width: 300, height: 150, shape: 'note' } as ServiceGraph['views']['whiteboards'][string]['items'][string] },
           },
         },
       },
@@ -209,7 +209,7 @@ describe('legacyItemsForCanvas', () => {
         whiteboards: {
           b1: {
             ...withFreeBoard(base()).views.whiteboards['b1'],
-            items: { i1: { id: 'i1', kind: 'free', text: 'Clamped', x: 999999, y: -999999, width: 50, height: 50, shape: 'card' } as ServiceGraph['views']['whiteboards'][string]['items'][string] },
+            items: { i1: { id: 'i1', kind: 'free', text: 'Clamped', x: 999999, y: -999999, width: 50, height: 50, shape: 'note' } as ServiceGraph['views']['whiteboards'][string]['items'][string] },
           },
         },
       },
