@@ -1,0 +1,80 @@
+/* Blue Ocean — Botões de marca (v1.21)
+   Referência: pílulas com preenchimento de marca no primário e superfície branca com borda leve no secundário.
+   Hover: cresce com mola suave e o ícone se mexe. Clique: encolhe por um instante.
+   Só transform e cor/sombra. Reduced-motion remove a escala e mantém o feedback de cor. */
+:root{
+  --bo-btn-spring:cubic-bezier(.34,1.56,.64,1);
+  --bo-btn-press:cubic-bezier(.2,.8,.3,1);
+}
+.bo-button--primary,
+button.primary,
+.bo-h740h8-home button.primary,
+.bo-h740h8-modal button.primary,
+.bo-button--secondary,
+button.secondary,
+.bo-h740h8-home button.secondary{
+  border-radius:999px!important;
+  min-height:var(--bo-control-h-md);
+  padding-left:20px!important;
+  padding-right:20px!important;
+  font-size:var(--bo-font-size-sm);
+  letter-spacing:-.005em;
+  transition:transform 280ms var(--bo-btn-spring),background-color 160ms ease,border-color 160ms ease,color 160ms ease,box-shadow 240ms ease;
+  will-change:transform;
+}
+/* Primário: azul de marca com brilho interno sutil. */
+.bo-button--primary,
+button.primary,
+.bo-h740h8-home button.primary,
+.bo-h740h8-modal button.primary{
+  background:var(--bo-color-primary-600)!important;
+  border:0!important;
+  color:#fff!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 2px rgba(16,35,80,.18);
+}
+.bo-button--primary:hover:not(:disabled),
+button.primary:hover:not(:disabled),
+.bo-h740h8-home button.primary:hover:not(:disabled),
+.bo-h740h8-modal button.primary:hover:not(:disabled){
+  transform:scale(1.035);
+  background:var(--bo-color-primary-700)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 12px 24px -10px rgba(30,99,240,.55);
+}
+/* Secundário: superfície branca, borda leve. */
+.bo-button--secondary,
+button.secondary,
+.bo-h740h8-home button.secondary{
+  background:#fff!important;
+  border:1px solid rgba(16,24,40,.10)!important;
+  color:var(--bo-color-text)!important;
+  box-shadow:0 1px 2px rgba(16,24,40,.06);
+}
+.bo-button--secondary:hover:not(:disabled),
+button.secondary:hover:not(:disabled),
+.bo-h740h8-home button.secondary:hover:not(:disabled){
+  transform:scale(1.035);
+  border-color:var(--bo-color-primary-200)!important;
+  color:var(--bo-color-primary-700)!important;
+  box-shadow:0 10px 22px -12px rgba(30,99,240,.35);
+}
+/* Clique: encolhe um instante e volta com a mola. */
+.bo-button:active:not(:disabled),
+button.primary:active:not(:disabled),
+button.secondary:active:not(:disabled){
+  transform:scale(.965)!important;
+  transition-duration:90ms;
+  transition-timing-function:var(--bo-btn-press);
+}
+/* Ícone se mexe no hover (o "+" gira, o carrinho se inclina). */
+.bo-button--primary>svg:first-child,.bo-button--secondary>svg:first-child,
+button.primary>svg:first-child,button.secondary>svg:first-child{transition:transform 320ms var(--bo-btn-spring)}
+.bo-button--primary:hover>svg:first-child,.bo-button--secondary:hover>svg:first-child,
+button.primary:hover>svg:first-child,button.secondary:hover>svg:first-child{transform:translateX(-1px) rotate(90deg)}
+/* Escuro: secundário com superfície escura. */
+body.dark .bo-button--secondary,body.dark button.secondary{background:var(--bo-color-surface)!important;border-color:rgba(255,255,255,.12)!important;color:var(--bo-color-text)!important}
+@media(prefers-reduced-motion:reduce){
+  .bo-button--primary:hover:not(:disabled),.bo-button--secondary:hover:not(:disabled),
+  button.primary:hover:not(:disabled),button.secondary:hover:not(:disabled),
+  .bo-button:active:not(:disabled),button.primary:active:not(:disabled),button.secondary:active:not(:disabled){transform:none!important}
+  .bo-button--primary>svg:first-child,button.primary>svg:first-child{transition:none}
+}
