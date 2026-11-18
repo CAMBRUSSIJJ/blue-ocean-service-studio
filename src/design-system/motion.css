@@ -178,8 +178,8 @@ body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{
 
 /* ───────────────────────── 3b. Fundo da Home: malha suave de marca, estática ─────────────────────────
    Malha de azul e aqua em baixa opacidade sobre o claro. Sem loop: o fundo não compete com o conteúdo. */
-#bo-main-content:has(.bo-h740h8-home){
-  background-color:#f7fbff!important;
+#root #bo-main-content:has(.bo-h740h8-home){
+  background-color:transparent!important;
   background-image:
     radial-gradient(56% 46% at 8% -4%,rgba(30,99,240,.085),transparent 72%),
     radial-gradient(44% 40% at 94% 4%,rgba(56,191,199,.10),transparent 70%),
@@ -216,7 +216,7 @@ body.bo1179-auth-visible .bo-auth-brand>div{box-shadow:0 0 0 1px rgba(255,255,25
 
 /* ───────────────────────── 3d. Workspace: profundidade estática ─────────────────────────
    Faixa azul no topo da Home e luz mais forte na base, sem loop (o conteúdo continua em destaque). */
-#bo-main-content:has(.bo-h740h8-home){
+#root #bo-main-content:has(.bo-h740h8-home){
   background-image:
     linear-gradient(180deg,rgba(30,99,240,.07) 0,rgba(30,99,240,0) 220px),
     radial-gradient(56% 46% at 8% -4%,rgba(30,99,240,.12),transparent 72%),
@@ -224,6 +224,26 @@ body.bo1179-auth-visible .bo-auth-brand>div{box-shadow:0 0 0 1px rgba(255,255,25
     radial-gradient(70% 40% at 50% 112%,rgba(30,99,240,.09),transparent 75%)!important;
 }
 
+/* ───────────────────────── 3e. Fundo de todas as abas: aurora da marca ─────────────────────────
+   A mesma linguagem do login (duas manchas de luz em deriva lenta), mais discreta para o trabalho. */
+body.bo-v1187{background:#f5f9fc!important}
+.bo1187-app-shell{background:transparent!important;position:relative;isolation:isolate}
+.bo-app-aurora{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bo-app-aurora>span{position:absolute;border-radius:50%;filter:blur(56px);will-change:transform;opacity:1}
+.bo-app-aurora>span:nth-child(1){width:52vmax;height:40vmax;left:-10vmax;top:-16vmax;background:radial-gradient(closest-side,rgba(53,137,203,.52),rgba(53,137,203,0));animation:bo-motion-aurora-a 44s ease-in-out infinite alternate}
+.bo-app-aurora>span:nth-child(2){width:44vmax;height:36vmax;right:-12vmax;top:-6vmax;background:radial-gradient(closest-side,rgba(56,191,199,.46),rgba(56,191,199,0));animation:bo-motion-aurora-b 52s ease-in-out infinite alternate}
+.bo-app-aurora>span:nth-child(3){width:60vmax;height:30vmax;left:20vmax;bottom:-18vmax;background:radial-gradient(closest-side,rgba(30,99,240,.26),rgba(30,99,240,0));animation:bo-motion-aurora-a 60s ease-in-out infinite alternate-reverse}
+body.dark .bo-app-aurora{display:none}
+/* Conteúdo acima da aurora; cabeçalho e sidebar em vidro, como o cartão do login. */
+.bo1187-app-shell>aside,#bo-main-content{position:relative;z-index:1}
+#root #bo-main-content,body #root #bo-main-content{background-color:transparent!important}
+header[data-bo-precision-header-native]{background:rgba(255,255,255,.72)!important;backdrop-filter:blur(12px) saturate(1.1);-webkit-backdrop-filter:blur(12px) saturate(1.1)}
+.bo1205h3-sidebar{background:rgba(255,255,255,.74)!important;backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1)}
+/* Sidebar mais limpa: sem barrinhas coloridas nos rótulos de seção. */
+.bo-h701-nav-section__label::before,.bo-h701-nav-section__label::after{display:none!important}
+.bo-h701-nav-section__label{letter-spacing:.1em;padding-left:10px!important;color:var(--bo-color-text-muted)!important}
+.bo-h701-nav-section{border-top-color:rgba(16,24,40,.06)}
+@media(prefers-reduced-motion:reduce){.bo-app-aurora>span{animation:none!important}}
 /* ───────────────────────── 6. Movimento reduzido ───────────────────────── */
 @media(prefers-reduced-motion:reduce){
   .bo-auth-brand,.bo-auth-story__copy,.bo-auth-story__signal,.bo-auth-story footer,.bo-auth-card,

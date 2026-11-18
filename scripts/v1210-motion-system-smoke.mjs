@@ -16,8 +16,8 @@ check(ocean > 0 && style.indexOf("@import './design-system/motion.css';") > ocea
 
 const workspaceOcean = ['src/runtime/sidebar-h701.css', 'src/runtime/animated-ocean-branding-h718.css', 'src/runtime/motion-identity-h719.css', 'src/runtime/visual-recovery-h719h1.css'];
 for (const f of workspaceOcean) check(!/infinite/.test(read(f)), `${f.split('/').pop()} sem loop infinito`);
-// Loops permitidos só na aurora do login (vitrine da marca).
-check(!/infinite/.test(motion.replace(/\.bo-auth-aurora[^}]*\}/g, '').replace(/@keyframes[^{]*\{(?:[^{}]*\{[^}]*\})*[^}]*\}/g, '')), 'motion.css não declara animação em loop fora do login');
+// Loops permitidos só nas auroras (login e fundo dos workspaces).
+check(!/infinite/.test(motion.replace(/\.bo-(auth|app)-aurora[^}]*\}/g, '').replace(/@keyframes[^{]*\{(?:[^{}]*\{[^}]*\})*[^}]*\}/g, '')), 'motion.css não declara animação em loop fora do login');
 check(motion.includes('@keyframes bo-motion-ocean-settle'), 'oceano do workspace assenta uma vez');
 check(motion.includes('.bo1205h3-sidebar.is-wave-reacting .bo-h701-sidebar-wave'), 'onda da sidebar reage à navegação');
 check(motion.includes('@media(prefers-reduced-motion:reduce)') && motion.includes('bo-motion-nav-reduced-pulse'), 'reduced-motion mantém feedback sem deslocamento');
