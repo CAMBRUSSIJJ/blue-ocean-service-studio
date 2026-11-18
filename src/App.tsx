@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Save, Upload, Download, KanbanSquare, X, Sparkles, Search, CheckCircle2, AlertCircle, Loader2, Menu, LogOut, UserRound, Bell, Rocket, CircleHelp, MoreHorizontal, PanelLeftClose, PanelLeftOpen, ChevronsUpDown, Moon, Sun } from './design-system/icons';
 import { BlueOceanObjectIcon, BlueOceanUtilityIcon } from './design-system/blue-ocean-objects';
 import { OnboardingFlow } from './components/OnboardingFlow';
@@ -46,6 +46,23 @@ export default function App({ authUser, onSignOut }: AppProps) {
   const sidebarWaveTimerRef = useRef<number | null>(null);
   const [isServiceMenuOpen, setIsServiceMenuOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  // Indicador ativo deslizante: uma única barra que se move até o item com aria-current/is-active.
+  const primaryNavRef = useRef<HTMLElement>(null);
+  const navIndicatorRef = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const nav = primaryNavRef.current;
+    const indicator = navIndicatorRef.current;
+    if (!nav || !indicator) return;
+    const active = nav.querySelector<HTMLElement>('button.is-active, button[aria-current="page"]');
+    const hidden = !active || active.getClientRects().length === 0;
+    if (hidden) { indicator.style.opacity = '0'; return; }
+    // Medido por getBoundingClientRect: o item pode estar dentro de um wrapper que não é o offsetParent.
+    const navRect = nav.getBoundingClientRect();
+    const itemRect = active.getBoundingClientRect();
+    indicator.style.opacity = '1';
+    indicator.style.height = `${itemRect.height - 14}px`;
+    indicator.style.transform = `translate3d(0, ${itemRect.top - navRect.top + nav.scrollTop + 7}px, 0)`;
+  });
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     try { return localStorage.getItem('bo-sidebar-collapsed') === '1'; } catch { return false; }
   });
@@ -482,7 +499,8 @@ export default function App({ authUser, onSignOut }: AppProps) {
           </div>}
           <span className="sr-only bo-h740h11-legacy-switcher"><strong>Serviço</strong><em>Projetos de serviço</em></span>
         </div>
-        <nav id="bo-primary-navigation" className="bo-h701-sidebar-nav flex-1 overflow-y-auto" aria-label="Navegação principal" onClickCapture={handleSidebarWaveInteraction}>
+        <nav ref={primaryNavRef} id="bo-primary-navigation" className="bo-h701-sidebar-nav bo-nav-sliding flex-1 overflow-y-auto" aria-label="Navegação principal" onClickCapture={handleSidebarWaveInteraction}>
+          <span ref={navIndicatorRef} className="bo-nav-indicator" aria-hidden="true" />
           <button type="button" aria-label="Home" title="Home" className={`bo1205h3-nav-root bo-h701-dashboard-link ${isGlobalHome && projectHomeSection === 'home' ? 'is-active' : ''}`} onClick={() => openGlobalHome('home')} aria-current={isGlobalHome && projectHomeSection === 'home' ? 'page' : undefined}>
             <span className="bo-h718-sidebar-icon bo-h719-sidebar-icon" data-icon-kind="dashboard"><BlueOceanUtilityIcon kind="dashboard" size={16}/></span><span className="hidden md:inline">Home</span>
           </button>

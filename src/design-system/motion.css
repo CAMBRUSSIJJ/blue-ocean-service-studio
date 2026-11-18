@@ -128,6 +128,28 @@ body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{
   100%{background:#eef4ff;box-shadow:inset 0 0 0 transparent}
 }
 
+/* ───────────────────────── 4b. Sidebar: recolher animado e indicador deslizante ─────────────────────────
+   Inspirado na referência de sidebar com trilho de ícones. Mantém o visual claro do Blue Ocean. */
+.bo-h724-sidebar{transition:width var(--bo-motion-duration-base) var(--bo-motion-ease-standard)}
+.bo-nav-sliding{position:relative}
+.bo-nav-indicator{
+  position:absolute;left:0;top:0;width:3px;border-radius:0 4px 4px 0;pointer-events:none;z-index:3;
+  background:linear-gradient(180deg,var(--bo-color-primary-600),#1598c9);
+  transition:transform var(--bo-motion-duration-moderate) var(--bo-motion-ease-standard),height var(--bo-motion-duration-moderate) var(--bo-motion-ease-standard),opacity var(--bo-motion-duration-fast) var(--bo-motion-ease-standard);
+}
+/* O indicador global substitui a barra por item, evitando duas barras ao mesmo tempo. */
+.bo-nav-sliding .is-active::before,.bo-nav-sliding [aria-current="page"]::before{display:none!important}
+/* Rótulos: fazem fade e recolhem a largura em vez de sumir de uma vez. */
+@media(min-width:768px){
+  .bo-h701-sidebar-nav button>span.hidden.md\:inline{
+    display:inline-block!important;max-width:180px;opacity:1;overflow:hidden;white-space:nowrap;vertical-align:middle;
+    transition:opacity var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),max-width var(--bo-motion-duration-base) var(--bo-motion-ease-standard);
+  }
+  .bo-h724-sidebar.is-collapsed .bo-h701-sidebar-nav button>span.hidden.md\:inline,
+  .bo-h724-sidebar.is-collapsed .bo-h701-sidebar-bottom button>span.hidden.md\:inline{max-width:0;opacity:0;margin:0}
+  .bo-h724-sidebar.is-collapsed .bo-h701-sidebar-nav button,.bo-h724-sidebar.is-collapsed .bo-h701-sidebar-bottom button{gap:0!important}
+}
+
 /* ───────────────────────── 6. Movimento reduzido ───────────────────────── */
 @media(prefers-reduced-motion:reduce){
   .bo-auth-brand,.bo-auth-story__copy,.bo-auth-story__signal,.bo-auth-story footer,.bo-auth-card,
@@ -136,6 +158,7 @@ body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{
   .bo1205h3-sidebar.is-wave-reacting::after,
   .bo1205h3-sidebar.is-wave-reacting .bo-h701-sidebar-wave,
   .bo-skeleton,.bo1176-boot-lines i{animation:none!important;transform:none!important}
+  .bo-nav-indicator{transition:none!important}
   .bo-auth-brand>div::after,.bo-auth-primary::after,.bo1205h3-sidebar::after{display:none!important}
   /* Feedback de navegação continua existindo, só sem deslocamento. */
   .bo1205h3-sidebar button.is-wave-source{animation:bo-motion-nav-reduced-pulse 240ms ease-out both!important}
