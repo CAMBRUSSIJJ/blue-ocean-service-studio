@@ -29,3 +29,6 @@ __pycache__/
 /work/
 
 public/journey-cad.css
+
+# Saída do build do BlockSuite (npm run blocksuite:build)
+public/blocksuite/
