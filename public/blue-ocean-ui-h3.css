@@ -46,7 +46,7 @@
 :where(.bo-project-context-panel,.bo-remote-dialog,.cad-inspector,.cad-sheet,.cad-quick,.cad-chooser) :is(label,legend){
   color:var(--bo-ui-ink-secondary);
   font-size:var(--bo-ui-label);
-  font-weight:600;
+  font-weight:var(--bo-font-weight-semibold);
 }
 :where(.bo-project-context-panel,.bo-remote-dialog,.cad-inspector,.cad-sheet,.cad-quick,.cad-chooser) small{
   color:var(--bo-ui-muted);
@@ -68,7 +68,7 @@
   border-radius:var(--bo-ui-radius);
   font-family:var(--bo-ui-font);
   font-size:var(--bo-ui-label);
-  font-weight:650;
+  font-weight:var(--bo-font-weight-medium);
   line-height:1.2;
 }
 .bo-button--secondary,.bo-button--ghost,.bo-button--danger{background:var(--bo-ui-surface);border-color:var(--bo-ui-border);color:var(--bo-ui-ink-secondary)}
@@ -145,7 +145,7 @@
 .cad-confirm-backdrop{background:rgba(7,22,43,.42)}
 :where(.cad-quick,.cad-chooser,.cad-confirm-panel) h2{
   font-size:var(--bo-font-size-lg,16px);
-  font-weight:700;
+  font-weight:var(--bo-font-weight-semibold);
   margin-top:0;
 }
 .cad-confirm-panel h2{font-size:var(--bo-font-size-xl,20px)}
@@ -172,7 +172,7 @@
 
 /* Blueprint's font otherwise diverges from the main app's Geist scale. */
 .cad-shell,.cad-sheet,.cad-quick,.cad-chooser,.cad-context-menu{font-family:var(--bo-ui-font);font-size:var(--bo-ui-label)}
-.cad-shell .cad-header>input{font-family:var(--bo-ui-font);font-size:var(--bo-font-size-xl,20px);font-weight:650}
+.cad-shell .cad-header>input{font-family:var(--bo-ui-font);font-size:var(--bo-font-size-xl,20px);font-weight:var(--bo-font-weight-semibold)}
 .cad-shell .cad-header [data-save-status]{font-size:var(--bo-ui-small)}
 .cad-shell .cad-toolbar button{font-size:var(--bo-ui-label)}
 .cad-shell .cad-library-head,.cad-shell .cad-lanes-intro strong{font-size:var(--bo-ui-label)}
@@ -215,7 +215,7 @@ body.bo-v1130 :is(.rt144-modal,.rt192-modal,.rt193-modal,.rt195-modal,.rt196-mod
   outline-offset:3px;
 }
 /* The canonical dialog system and legacy variants have a common footer hierarchy. */
-.bo-dialog__header h2{font-family:var(--bo-ui-font);font-size:var(--bo-font-size-xl,20px);font-weight:700;color:var(--bo-ui-strong)}
+.bo-dialog__header h2{font-family:var(--bo-ui-font);font-size:var(--bo-font-size-xl,20px);font-weight:var(--bo-font-weight-semibold);color:var(--bo-ui-strong)}
 .bo-dialog__body{font-family:var(--bo-ui-font);font-size:var(--bo-ui-copy);line-height:1.5;color:var(--bo-ui-ink)}
 .bo-dialog__footer{border-top:1px solid var(--bo-ui-border-subtle);background:var(--bo-ui-raised)}
 .bo-dialog__footer .bo-button{min-height:var(--bo-ui-control-height)}

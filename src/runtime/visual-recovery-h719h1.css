@@ -16,10 +16,10 @@
 .bo-h719h1 .bo1205h3-sidebar .bo1205h3-nav-root,
 .bo-h719h1 .bo1205h3-sidebar .bo1205h3-nav-child,
 .bo-h719h1 .bo1205h3-sidebar .bo1205h3-sidebar-bottom button{
-  height:34px!important;
+  height:var(--bo-control-h-sm)!important;
   gap:8px!important;
   padding:0 10px!important;
-  border-radius:7px!important;
+  border-radius:var(--bo-radius-md)!important;
 }
 
 /* Neutral resting state. Semantic color appears on interaction, avoiding the rainbow-dot sidebar. */
@@ -88,7 +88,7 @@
 .bo-h719h1 [data-sidebar-section="context"] .bo-h701-nav-section__label,
 .bo-h719h1 [data-sidebar-section="management"] .bo-h701-nav-section__label{
   color:#7a8997!important;
-  font-size:11px!important;
+  font-size:var(--bo-font-size-xs)!important;
   letter-spacing:.12em!important;
   padding-left:10px!important;
 }
@@ -108,7 +108,7 @@
   .bo-h719h1 .bo-h719-sidebar-icon{width:22px!important;height:22px!important;flex-basis:22px!important}
   .bo-h719h1 .bo1205h3-sidebar .bo1205h3-nav-root,
   .bo-h719h1 .bo1205h3-sidebar .bo1205h3-nav-child,
-  .bo-h719h1 .bo1205h3-sidebar .bo1205h3-sidebar-bottom button{height:38px!important;padding:0!important}
+  .bo-h719h1 .bo1205h3-sidebar .bo1205h3-sidebar-bottom button{height:var(--bo-control-h-md)!important;padding:0!important}
 }
 
 @media(prefers-reduced-motion:reduce){

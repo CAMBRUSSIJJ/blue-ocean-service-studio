@@ -61,7 +61,7 @@
   /* ── Tipografia ─────────────────────────────────────────────────────── */
   --bo-font-sans:"Geist","Geist Sans",Inter,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --bo-font-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
-  --bo-font-size-2xs:11px;
+  --bo-font-size-2xs:12px;
   --bo-font-size-xs:12px;
   --bo-font-size-sm:13px;
   --bo-font-size-md:14px;
@@ -70,6 +70,10 @@
   --bo-font-size-2xl:28px;
   --bo-font-size-3xl:36px;
   --bo-font-size-display:52px;
+  --bo-font-weight-regular:400;
+  --bo-font-weight-medium:500;
+  --bo-font-weight-semibold:600;
+  --bo-font-weight-bold:700;
   --bo-line-tight:1.2;
   --bo-line-snug:1.35;
   --bo-line-normal:1.45;
@@ -102,6 +106,7 @@
   --bo-overlay:rgba(7,22,43,.38);
   --bo-scrim:rgba(7,22,43,.18);
   --bo-focus-ring:0 0 0 3px rgba(30,99,240,.16);
+  --bo-control-h-xs:28px;
 
   /* ── Controles / Ícones / Layout ───────────────────────────────────── */
   --bo-control-h-sm:32px;

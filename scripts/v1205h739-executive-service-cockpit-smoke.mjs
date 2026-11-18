@@ -29,7 +29,7 @@ for(const [label,needle] of [
 ]) ok(label,view.includes(needle));
 
 for(const [label,needle] of [
- ['CSS H7.39 existe','.bo-h739{'],['CSS hero','.bo-h739-hero'],['CSS score','.bo-h739-score'],['CSS KPIs','.bo-h739-kpis'],['CSS grid','.bo-h739-grid'],['CSS panels','.bo-h739-panel'],['CSS dimensions','.bo-h739-dimensions'],['CSS bars','.bo-h739-bar'],['CSS risks','.bo-h739-risks'],['CSS actions','.bo-h739-action-list'],['CSS stat row','.bo-h739-stat-row'],['CSS responsive 1100','@media(max-width:1100px)'],['CSS responsive 760','@media(max-width:760px)'],['CSS responsive 520','@media(max-width:520px)'],
+ ['CSS H7.39 existe','.bo-h739:not(body){'],['CSS hero','.bo-h739-hero'],['CSS score','.bo-h739-score'],['CSS KPIs','.bo-h739-kpis'],['CSS grid','.bo-h739-grid'],['CSS panels','.bo-h739-panel'],['CSS dimensions','.bo-h739-dimensions'],['CSS bars','.bo-h739-bar'],['CSS risks','.bo-h739-risks'],['CSS actions','.bo-h739-action-list'],['CSS stat row','.bo-h739-stat-row'],['CSS responsive 1100','@media(max-width:1100px)'],['CSS responsive 760','@media(max-width:760px)'],['CSS responsive 520','@media(max-width:520px)'],
 ]) ok(label,css.includes(needle));
 ok('style importa CSS H7.39',style.includes("@import './runtime/executive-service-cockpit-h739.css';"));
 ok('CSS H7.39 depois de H7.38',style.indexOf('service-operations-bridge-h738.css')<style.indexOf('executive-service-cockpit-h739.css'));

@@ -47,12 +47,12 @@ body.rt182-host .rt182-host-brand>div:first-child{
 }
 body.rt182-host .rt182-host-brand>div:first-child>*{display:none!important}
 body.rt182-host .rt182-host-brand h1{
-  font-family:Inter,"Segoe UI",Arial,sans-serif!important;
-  font-size:12px!important;font-weight:750!important;letter-spacing:.115em!important;
+  font-family:var(--bo-font-sans)!important;
+  font-size:var(--bo-font-size-xs)!important;font-weight:var(--bo-font-weight-semibold)!important;letter-spacing:.115em!important;
   line-height:1.12!important;color:var(--bo-navy)!important;text-transform:uppercase!important;
 }
 body.rt182-host .rt182-host-brand p{
-  font-size:11px!important;font-weight:650!important;letter-spacing:.15em!important;
+  font-size:var(--bo-font-size-xs)!important;font-weight:var(--bo-font-weight-semibold)!important;letter-spacing:.15em!important;
   line-height:1.1!important;color:#7C8CA0!important;text-transform:uppercase!important;margin-top:4px!important;
 }
 
@@ -70,15 +70,15 @@ body.rt182-host .rt182-host-sidebar nav>.flex.flex-col{gap:2px!important}
 
 body.rt182-host .rt182-host-sidebar nav button{
   position:relative!important;
-  min-height:40px!important;height:40px!important;
+  min-height:var(--bo-control-h-lg)!important;height:var(--bo-control-h-lg)!important;
   width:100%!important;
   display:flex!important;align-items:center!important;justify-content:flex-start!important;
   gap:10px!important;padding:0 11px!important;
-  border:0!important;border-radius:8px!important;
+  border:0!important;border-radius:var(--bo-radius-md)!important;
   background:transparent!important;
   color:#5E6E82!important;
-  font-family:Inter,"Segoe UI",Arial,sans-serif!important;
-  font-size:12.5px!important;font-weight:600!important;
+  font-family:var(--bo-font-sans)!important;
+  font-size:12.5px!important;font-weight:var(--bo-font-weight-medium)!important;
   line-height:1!important;box-shadow:none!important;
   transition:background var(--bo-motion-duration-fast) ease,color var(--bo-motion-duration-fast) ease!important;
 }
@@ -87,7 +87,7 @@ body.rt182-host .rt182-host-sidebar nav button[aria-current="page"],
 body.rt182-host .rt182-host-sidebar nav button.rt182-home-active,
 body.rt182-host .rt182-host-sidebar nav button.is-active,
 body.rt182-host .rt182-host-sidebar nav button.active{
-  background:var(--bo-active)!important;color:var(--bo-navy)!important;font-weight:700!important;
+  background:var(--bo-active)!important;color:var(--bo-navy)!important;font-weight:var(--bo-font-weight-medium)!important;
   box-shadow:none!important;
 }
 body.rt182-host .rt182-host-sidebar nav button[aria-current="page"]::after,
@@ -98,7 +98,7 @@ body.rt182-host .rt182-host-sidebar nav button.active::after{
   background:linear-gradient(180deg,var(--bo-cobalt),var(--bo-turquoise));
 }
 body.rt182-host .rt182-host-sidebar nav button svg{width:18px!important;height:18px!important;stroke-width:1.8!important;flex:0 0 18px!important;color:currentColor!important}
-body.rt182-host .rt182-host-sidebar nav button small{margin-left:auto!important;font-size:11px!important;font-weight:700!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#9AA6B5!important}
+body.rt182-host .rt182-host-sidebar nav button small{margin-left:auto!important;font-size:var(--bo-font-size-xs)!important;font-weight:var(--bo-font-weight-medium)!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#9AA6B5!important}
 
 /* Normalize legacy text-symbol icons into one icon system. */
 .rt192-nav-icon,.rt195-nav-icon,.rt196-nav-icon,.rt197-nav-icon,.rt1101-nav-icon,.rt1102-demo-nav>span:first-child{
@@ -117,9 +117,9 @@ body.rt182-host .rt182-host-sidebar nav button small{margin-left:auto!important;
 
 /* Header and workspace normalization */
 body.rt182-host header.rt182-host-header{height:var(--bo-header-h)!important;min-height:var(--bo-header-h)!important;padding:0 22px!important;background:#fff!important;border-bottom:1px solid var(--bo-border)!important;box-shadow:none!important}
-body.rt182-host .rt182-host-header h2{color:var(--bo-navy)!important;font-size:15px!important;font-weight:750!important;letter-spacing:-.015em!important}
-body.rt182-host .rt182-host-header p{color:#748398!important;font-size:11px!important}
-body.rt182-host .rt182-host-header button{height:34px!important;border-radius:7px!important;box-shadow:none!important}
+body.rt182-host .rt182-host-header h2{color:var(--bo-navy)!important;font-size:var(--bo-font-size-md)!important;font-weight:var(--bo-font-weight-semibold)!important;letter-spacing:-.015em!important}
+body.rt182-host .rt182-host-header p{color:#748398!important;font-size:var(--bo-font-size-xs)!important}
+body.rt182-host .rt182-host-header button{height:var(--bo-control-h-sm)!important;border-radius:var(--bo-radius-md)!important;box-shadow:none!important}
 body.rt182-host .rt182-host-header button.bg-blue-600{background:var(--bo-navy)!important;border-color:var(--bo-navy)!important}
 body.rt182-host main{background:var(--bo-bg)!important}
 body.rt182-host .bg-blue-50{background:var(--bo-active)!important}

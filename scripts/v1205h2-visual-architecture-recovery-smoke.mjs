@@ -21,7 +21,8 @@ ok(!shell.includes("headingBefore(action,'improve','MELHORAR')"),'shell não rec
 ok(!shell.includes("headingBefore(review,'operate','OPERAR')"),'shell não recria OPERAR legado');
 ok(publicShell.includes("headingBefore(whiteboards,'design','DESENHO')"),'asset público espelha navegação nova');
 
-ok(app.includes('data-bo-global-search-native="1" className="sr-only"'),'Home bloqueia injeção legada de busca');
+// v1.21: o marcador nativo agora é a própria busca visível da Home (continua bloqueando a injeção legada).
+ok(app.includes('data-bo-global-search-native="1" onClick={() => setShowGlobalSearch(true)}'),'Home bloqueia injeção legada de busca');
 ok(app.includes('data-bo-global-create-native="1" className="sr-only"'),'Home bloqueia injeção legada de Criar');
 ok(dashCss.includes('header collision guard'),'CSS possui proteção contra colisão no header');
 ok(dashCss.includes('.bo1187-dashboard-header__actions .bo114-global-create'),'Criar legado é neutralizado na Home');

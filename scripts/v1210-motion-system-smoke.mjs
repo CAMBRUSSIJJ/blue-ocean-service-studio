@@ -34,5 +34,20 @@ for (const f of cssFiles) {
 check(raw.length === 0, `durações de transição usam tokens (${raw.length} valores soltos)`);
 if (raw.length) console.log(raw.slice(0, 10).join('\n'));
 
+// Tipografia e botões v1.21
+const small = [], heavy = [], inter = [];
+for (const f of cssFiles) {
+  const t = read(f);
+  for (const m of t.matchAll(/font-size:\s*(\d*\.?\d+)px/g)) if (parseFloat(m[1]) < 12) small.push(`${f}: ${m[0]}`);
+  for (const m of t.matchAll(/font-weight:\s*(\d{3})/g)) if (+m[1] > 600) heavy.push(`${f}: ${m[0]}`);
+  if (/font-family:\s*Inter,/.test(t)) inter.push(f);
+}
+check(small.length === 0, `nenhuma fonte abaixo de 12px (${small.length})`);
+check(heavy.length === 0, `nenhum peso acima de 600 (${heavy.length})`);
+check(inter.length === 0, `sem Inter fixo fora do token de fonte (${inter.length})`);
+for (const t of ['xs', 'sm', 'md', 'lg']) check(tokens.includes(`--bo-control-h-${t}:`), `altura de controle ${t}`);
+for (const t of ['regular', 'medium', 'semibold']) check(tokens.includes(`--bo-font-weight-${t}:`), `token de peso ${t}`);
+check(style.includes("@import './design-system/buttons.css';"), 'estados globais de botão importados');
+
 console.log(`\nMotion System v1.21: ${ok} OK / ${fail} FAIL`);
 process.exit(fail ? 1 : 0);

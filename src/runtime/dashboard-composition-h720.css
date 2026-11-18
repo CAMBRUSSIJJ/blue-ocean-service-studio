@@ -35,14 +35,14 @@
 .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-action-card{
   min-height:62px!important;
   padding:9px 12px!important;
-  border-radius:9px!important;
+  border-radius:var(--bo-radius-md)!important;
   box-shadow:0 1px 2px rgba(15,35,58,.025)!important;
 }
 .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-icon{
-  width:37px!important;height:37px!important;border-radius:9px!important;
+  width:37px!important;height:var(--bo-control-h-md)!important;border-radius:var(--bo-radius-md)!important;
 }
-.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy strong{font-size:12px!important}
-.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy em{font-size:11px!important;margin-top:2px!important}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy strong{font-size:var(--bo-font-size-xs)!important}
+.bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy em{font-size:var(--bo-font-size-xs)!important;margin-top:2px!important}
 
 /* Depth remains useful but no longer reads as a floating dashboard widget. */
 .bo-h720 .bo1215-depth-chip{
@@ -55,8 +55,8 @@
   background:rgba(247,251,255,.86)!important;
   border-color:#d7e4f2!important;
 }
-.bo-h720 .bo1215-depth-chip>span:nth-of-type(2) small{font-size:11px!important;letter-spacing:.09em!important}
-.bo-h720 .bo1215-depth-chip>span:nth-of-type(2) strong{font-size:9px!important;margin-top:2px!important}
+.bo-h720 .bo1215-depth-chip>span:nth-of-type(2) small{font-size:var(--bo-font-size-xs)!important;letter-spacing:.09em!important}
+.bo-h720 .bo1215-depth-chip>span:nth-of-type(2) strong{font-size:var(--bo-font-size-xs)!important;margin-top:2px!important}
 .bo-h720 .bo1215-depth-chip>i{height:2px!important;margin-top:5px!important}
 
 /* Recentes: adaptive canvas instead of a full-width empty tray. */
@@ -79,7 +79,7 @@
 .bo-h720 .bo1215-recents[data-recent-count="5"]{max-width:1180px!important}
 .bo-h720 .bo1215-recents>header{min-height:30px!important;align-items:center!important;margin-bottom:8px!important}
 .bo-h720 .bo-h718-service-context{display:none!important}
-.bo-h720 .bo1215-recents>header button{font-size:11px!important;padding:4px 2px!important}
+.bo-h720 .bo1215-recents>header button{font-size:var(--bo-font-size-xs)!important;padding:4px 2px!important}
 .bo-h720 .bo1215-panel-wave{display:none!important}
 
 .bo-h720 .bo1215-recent-grid{
@@ -109,9 +109,9 @@
   border-radius:8px!important;
 }
 .bo-h720 .bo-h718h1-dashboard-journey-cover img{object-fit:cover!important}
-.bo-h720 .bo1215-recent-card>strong{font-size:12px!important;line-height:1.25!important}
-.bo-h720 .bo1215-recent-card .bo1207-recent-meta{font-size:11px!important;margin-top:6px!important}
-.bo-h720 .bo1215-recent-card>em{font-size:11px!important;margin-top:7px!important}
+.bo-h720 .bo1215-recent-card>strong{font-size:var(--bo-font-size-xs)!important;line-height:1.25!important}
+.bo-h720 .bo1215-recent-card .bo1207-recent-meta{font-size:var(--bo-font-size-xs)!important;margin-top:6px!important}
+.bo-h720 .bo1215-recent-card>em{font-size:var(--bo-font-size-xs)!important;margin-top:7px!important}
 
 /* Empty Favorites is a utility row, not a whole dashboard section. */
 .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-favorites{
@@ -128,7 +128,7 @@
 .bo-h720 .bo1215-favorites.is-empty .bo1215-favorite-empty{
   margin:0!important;
   color:#8794a3!important;
-  font-size:11px!important;
+  font-size:var(--bo-font-size-xs)!important;
   line-height:1.2!important;
   white-space:nowrap!important;
   overflow:hidden!important;
@@ -151,20 +151,20 @@
   padding:10px 11px!important;
   grid-template-columns:36px minmax(0,1fr)!important;
   gap:8px!important;
-  border-radius:9px!important;
+  border-radius:var(--bo-radius-md)!important;
   background:rgba(255,255,255,.78)!important;
 }
 .bo-h720 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid>button>i{
-  width:36px!important;height:36px!important;border-radius:8px!important;
+  width:36px!important;height:var(--bo-control-h-md)!important;border-radius:var(--bo-radius-md)!important;
 }
-.bo-h720 .bo1215-learn-grid>button strong{font-size:9.5px!important}
-.bo-h720 .bo1215-learn-grid>button small{font-size:11px!important}
+.bo-h720 .bo1215-learn-grid>button strong{font-size:var(--bo-font-size-xs)!important}
+.bo-h720 .bo1215-learn-grid>button small{font-size:var(--bo-font-size-xs)!important}
 .bo-h720 .bo1215-learn-grid>button.is-recommended{
   background:linear-gradient(145deg,rgba(239,247,255,.96),rgba(248,252,255,.94))!important;
   border-color:#b8cff0!important;
   box-shadow:0 7px 22px rgba(29,110,209,.06)!important;
 }
-.bo-h720 .bo1215-learn-grid>button.is-recommended strong{font-size:10.5px!important}
+.bo-h720 .bo1215-learn-grid>button.is-recommended strong{font-size:var(--bo-font-size-xs)!important}
 .bo-h720 .bo1215-learn-grid>button.is-recommended small{white-space:normal!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden!important}
 
 /* Decorative ocean remains background atmosphere instead of filling unused content space. */

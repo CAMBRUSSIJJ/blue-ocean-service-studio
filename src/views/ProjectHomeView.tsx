@@ -69,6 +69,7 @@ function ProjectCard({ project, active, onOpen, onFavorite, onRename, onArchive 
 export function ProjectHomeView({ studio, section, setSection, openProjectWorkspace }: Props) {
   const { projects, archivedProjects, activeProjectId, openWorkspaceProject, toggleWorkspaceProjectFavorite, renameWorkspaceProject, archiveWorkspaceProject, restoreWorkspaceProject, createWorkspaceProject } = studio;
   const [query, setQuery] = useState('');
+  const [templateTab, setTemplateTab] = useState<'global' | 'sector'>('global');
   const [dialog, setDialog] = useState<ProjectTemplate | null>(null);
   const [renameTarget, setRenameTarget] = useState<ProjectLibraryEntry | null>(null);
   const [renameValue, setRenameValue] = useState('');
@@ -138,16 +139,19 @@ export function ProjectHomeView({ studio, section, setSection, openProjectWorksp
       {current && <section className="bo-h740h8-continue"><div><small>CONTINUE DE ONDE PAROU</small><h2>{current.title}</h2><p><strong>Serviço:</strong> {current.serviceName}</p><div><span>{PHASE_LABELS[current.phase] || 'Em construção'}</span><span>{current.journeyCount} Journeys</span><span>{current.blueprintCount} Blueprints</span><span>{current.whiteboardCount} Whiteboards</span></div></div><button type="button" className="primary" onClick={() => openProject(current)}>Continuar projeto <ArrowRight size={14}/></button></section>}
 
       <section className="bo-h740h8-section bo-h740h11-service-hub" data-service-project-hub="1"><header><div><small>SERVIÇO</small><h2>Projetos do serviço</h2><p>Entre em Serviço para escolher, criar ou retomar um projeto e acessar seu espaço de trabalho.</p></div><button type="button" onClick={() => setSection('projects')}>Ver projetos <ArrowRight size={13}/></button></header>
-        <div className="bo-h740h11-service-summary"><span><FolderKanban size={20}/></span><div><strong>{projects.length} projeto{projects.length === 1 ? '' : 's'} ativo{projects.length === 1 ? '' : 's'}</strong><small>{current ? `Último: ${current.title} · serviço ${current.serviceName}` : 'Nenhum projeto criado ainda'}</small></div><button type="button" className="primary" onClick={() => setSection('projects')}>Abrir Serviço <ArrowRight size={13}/></button></div>
+        <div className="bo-h740h11-service-summary"><span><FolderKanban size={20}/></span><div><strong>{projects.length} projeto{projects.length === 1 ? '' : 's'} ativo{projects.length === 1 ? '' : 's'}</strong><small>{current ? `Último: ${current.title} · serviço ${current.serviceName}` : 'Nenhum projeto criado ainda'}</small></div><button type="button" className="secondary" onClick={() => setSection('projects')}>Abrir Serviço <ArrowRight size={13}/></button></div>
       </section>
 
       {favorites.length > 0 && <section className="bo-h740h8-section"><header><div><small>FAVORITOS</small><h2>Acesso rápido</h2></div></header><div className="bo-h740h8-project-grid compact">{favorites.map(card)}</div></section>}
 
       <section className="bo-h740h8-section">
-        <header><div><small>TEMPLATES GLOBAIS</small><h2>Começar com um template</h2><p>Escolha um ponto de partida para criar outro projeto sem alterar o projeto atual.</p></div><button type="button" onClick={() => setSection('templates')}>Ver todos <ArrowRight size={13}/></button></header>
-        <div className="bo-h740h8-template-grid">{TEMPLATES.filter((item) => !item.sector).map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><LayoutTemplate size={18}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>Usar template <ArrowRight size={12}/></em></button>)}</div>
-        <div className="bo-h740h8-sector-heading"><small>TEMPLATES SETORIAIS</small></div>
-        <div className="bo-h740h8-template-grid">{TEMPLATES.filter((item) => item.sector).map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span><Sparkles size={18}/></span><strong>{item.title}</strong><small>{item.detail}</small><em>Usar template <ArrowRight size={12}/></em></button>)}</div>
+        <header><div><small>TEMPLATES</small><h2>Começar com um template</h2><p>Escolha um ponto de partida para criar outro projeto sem alterar o projeto atual.</p></div><button type="button" onClick={() => setSection('templates')}>Ver todos <ArrowRight size={13}/></button></header>
+        <div className="bo-home-tabs" role="tablist" aria-label="Tipo de template">
+          <button type="button" role="tab" id="bo-home-tab-global" aria-controls="bo-home-panel-templates" aria-selected={templateTab === 'global'} className={templateTab === 'global' ? 'is-active' : ''} onClick={() => setTemplateTab('global')}>Estruturais <span>{TEMPLATES.filter((item) => !item.sector).length}</span></button>
+          <button type="button" role="tab" id="bo-home-tab-sector" aria-controls="bo-home-panel-templates" aria-selected={templateTab === 'sector'} className={templateTab === 'sector' ? 'is-active' : ''} onClick={() => setTemplateTab('sector')}>Setoriais <span>{TEMPLATES.filter((item) => item.sector).length}</span></button>
+        </div>
+        {/* TEMPLATES GLOBAIS · TEMPLATES SETORIAIS agora compartilham um painel com abas. */}
+        <div className="bo-h740h8-template-grid" role="tabpanel" id="bo-home-panel-templates" aria-labelledby={templateTab === 'global' ? 'bo-home-tab-global' : 'bo-home-tab-sector'}>{TEMPLATES.filter((item) => (templateTab === 'sector') === Boolean(item.sector)).map((item) => <button key={item.id} type="button" onClick={() => startTemplate(item.id)}><span>{item.sector ? <Sparkles size={18}/> : <LayoutTemplate size={18}/>}</span><strong>{item.title}</strong><small>{item.detail}</small><em>Usar template <ArrowRight size={12}/></em></button>)}</div>
       </section>
     </>}
 

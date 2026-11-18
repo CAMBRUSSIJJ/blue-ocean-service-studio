@@ -9,15 +9,15 @@
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button:hover{background:#f6faff;border-color:#dbe7f3;transform:translateY(-1px)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button::before{top:31px;right:calc(50% + 28px);width:calc(100% - 48px);height:3px;border-radius:999px;background:#dfe8f2;z-index:0}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.is-complete::before,.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.is-partial::before,.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.active::before{background:linear-gradient(90deg,#2d63d7,#4b8fe8)}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper .bo-h154-phase-node{position:relative;z-index:2;width:42px;height:42px;border:2px solid #d5e0eb;background:#fff;color:#64778b;box-shadow:0 3px 10px rgba(31,62,94,.07);font-size:12px}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper .bo-h154-phase-node{position:relative;z-index:2;width:42px;height:42px;border:2px solid #d5e0eb;background:#fff;color:#64778b;box-shadow:0 3px 10px rgba(31,62,94,.07);font-size:var(--bo-font-size-xs)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.is-complete .bo-h154-phase-node{border-color:#214f91;background:#edf5ff;color:#174a89}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.is-partial .bo-h154-phase-node{border-color:#5f8fc9;background:#f1f7ff;color:#285f99}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.active{border-color:#c8ddf3;background:linear-gradient(145deg,#f5faff,#edf6ff);box-shadow:0 8px 22px rgba(35,94,156,.11)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.active .bo-h154-phase-node{border-color:#2864d7;background:linear-gradient(145deg,#2e6ee5,#2256c7);color:#fff;box-shadow:0 0 0 6px rgba(45,105,218,.10),0 5px 14px rgba(35,88,180,.24)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy{min-width:0;display:flex;flex-direction:column;align-items:flex-start}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy strong{font-size:12.5px;letter-spacing:-.01em;color:#20364e}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy small{margin-top:2px;font-size:9.5px;color:#74869a}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy em{margin-top:5px;padding:3px 7px;border-radius:999px;background:#eef3f8;color:#718296;font-size:11px;font-style:normal;font-weight:800;line-height:1.2;white-space:nowrap}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy small{margin-top:2px;font-size:var(--bo-font-size-xs);color:#74869a}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy em{margin-top:5px;padding:3px 7px;border-radius:999px;background:#eef3f8;color:#718296;font-size:var(--bo-font-size-xs);font-style:normal;font-weight:var(--bo-font-weight-semibold);line-height:1.2;white-space:nowrap}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.active .bo-h154-phase-copy strong{color:#215cc4}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.active .bo-h154-phase-copy em{background:#dcecff;color:#225eb7}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button.is-complete .bo-h154-phase-copy em{background:#eaf3ff;color:#245587}
@@ -26,11 +26,11 @@
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel{border:1px solid #dbe6f0;border-radius:16px;background:transparent;overflow:visible;box-shadow:none}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel>header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;padding:17px 18px;border:0;border-radius:15px;background:linear-gradient(135deg,#f4f9ff,#edf6ff);box-shadow:inset 0 0 0 1px #d9e8f6}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-heading h3{margin-top:3px;font-size:19px;letter-spacing:-.015em;color:#173857}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-heading p{margin-top:4px;max-width:720px;color:#61778e;font-size:11px;line-height:1.5}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-heading p{margin-top:4px;max-width:720px;color:#61778e;font-size:var(--bo-font-size-xs);line-height:1.5}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-progress{display:grid;grid-template-columns:auto;gap:7px;min-width:126px;padding:10px 12px;border:1px solid #d2e2f2;border-radius:12px;background:rgba(255,255,255,.82)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-progress>div:first-child{display:flex;align-items:baseline;gap:5px}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-progress strong{font-size:18px;color:#245db4;letter-spacing:-.03em}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-progress span{font-size:11px;color:#72869a;font-weight:700}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-progress span{font-size:var(--bo-font-size-xs);color:#72869a;font-weight:var(--bo-font-weight-semibold)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-meter{height:5px;overflow:hidden;border-radius:999px;background:#e1eaf3}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-meter i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#2e65d5,#58a4e8);transition:width var(--bo-motion-duration-base) ease}
 
@@ -42,22 +42,22 @@
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-main{grid-template-columns:38px minmax(0,1fr);gap:11px}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-main strong{font-size:12.5px;color:#20384f}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-main p{margin-top:4px;color:#6d7f91}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>em{justify-self:end;color:#63788d;font-size:10px;font-weight:650}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>button{min-width:94px;border-radius:9px;transition:transform var(--bo-motion-duration-fast) ease,box-shadow var(--bo-motion-duration-fast) ease,border-color var(--bo-motion-duration-fast) ease}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>em{justify-self:end;color:#63788d;font-size:var(--bo-font-size-xs);font-weight:var(--bo-font-weight-semibold)}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>button{min-width:94px;border-radius:var(--bo-radius-md);transition:transform var(--bo-motion-duration-fast) ease,box-shadow var(--bo-motion-duration-fast) ease,border-color var(--bo-motion-duration-fast) ease}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>button:hover{transform:translateY(-1px);border-color:#a9c7e5;box-shadow:0 5px 12px rgba(37,84,132,.08)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>button.primary{box-shadow:0 6px 14px rgba(36,87,214,.18)}
 
 /* Connected model map */
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h153-phase-connections{margin-top:14px;grid-template-columns:minmax(0,.95fr) minmax(420px,1.05fr);padding:17px 18px;border-color:#d9e5f0;border-radius:15px;background:linear-gradient(135deg,#f8fbff,#fff);box-shadow:0 5px 18px rgba(32,72,108,.035)}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h153-phase-connections__copy>strong{margin-top:5px;font-size:13px;color:#203d5a}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h153-phase-connections__copy>strong{margin-top:5px;font-size:var(--bo-font-size-sm);color:#203d5a}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-connection-map{position:relative;display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:0;padding:8px 0}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h153-phase-flow{justify-content:flex-end;gap:8px;overflow:visible;padding:0}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h153-phase-flow span{gap:8px;color:#8aa0b5}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h153-phase-flow b{position:relative;padding:9px 12px;border-color:#cfe0ef;border-radius:11px;background:linear-gradient(180deg,#fff,#f7fbff);color:#2c5e90;font-size:9.5px;box-shadow:0 4px 12px rgba(34,74,113,.06)}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h153-phase-flow b{position:relative;padding:9px 12px;border-color:#cfe0ef;border-radius:11px;background:linear-gradient(180deg,#fff,#f7fbff);color:#2c5e90;font-size:var(--bo-font-size-xs);box-shadow:0 4px 12px rgba(34,74,113,.06)}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-support-branch{display:flex;align-items:center;gap:6px;margin-right:14px;color:#75659e}
 .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-support-branch>span{font-size:18px;color:#9a8ab8;transform:rotate(12deg)}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-support-branch>b{padding:6px 9px;border:1px dashed #cfc3e2;border-radius:9px;background:#faf8fd;font-size:9px;color:#67568f}
-.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-support-branch>small{font-size:11px;color:#8a7aa9}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-support-branch>b{padding:6px 9px;border:1px dashed #cfc3e2;border-radius:9px;background:#faf8fd;font-size:var(--bo-font-size-xs);color:#67568f}
+.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-support-branch>small{font-size:var(--bo-font-size-xs);color:#8a7aa9}
 
 @media(max-width:1180px){
   .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button{grid-template-columns:40px minmax(0,1fr);padding:9px 8px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper .bo-h154-phase-node{width:38px;height:38px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy em{display:none}
@@ -65,15 +65,15 @@
 }
 @media(max-width:820px){
   .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-path{padding:17px}
-  .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper{gap:4px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:78px;padding:7px 3px;text-align:center}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button::before{top:26px;right:50%;width:100%}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy{align-items:center}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy small{display:none}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy strong{font-size:10px}
+  .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper{gap:4px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:78px;padding:7px 3px;text-align:center}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button::before{top:26px;right:50%;width:100%}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy{align-items:center}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy small{display:none}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-copy strong{font-size:var(--bo-font-size-xs)}
   .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel>header{grid-template-columns:1fr}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-progress{width:min(180px,100%)}
   .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li{grid-template-columns:minmax(0,1fr) auto}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>em{grid-column:1;margin-left:49px;justify-self:start}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>button{grid-column:2;grid-row:1/3}
   .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-connection-map{overflow-x:auto;padding-bottom:5px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h153-phase-flow{min-width:max-content}
 }
 @media(max-width:560px){
   .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-path{padding:14px;border-radius:14px}
-  .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper{margin:14px -4px 16px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button{min-height:66px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper .bo-h154-phase-node{width:32px;height:32px;font-size:10px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button::before{top:23px}
-  .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel>header{padding:14px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-heading h3{font-size:17px}
+  .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper{margin:14px -4px 16px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button{min-height:66px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper .bo-h154-phase-node{width:32px;height:32px;font-size:var(--bo-font-size-xs)}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-stepper button::before{top:23px}
+  .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel>header{padding:14px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-phase-heading h3{font-size:var(--bo-font-size-lg)}
   .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li{grid-template-columns:1fr;padding:11px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>em{grid-column:1;margin-left:49px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h740h7-capability-panel li>button{grid-column:1;grid-row:auto;margin-left:49px;width:max-content}
   .bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h153-phase-connections{padding:14px}.bo-h740h7[data-design-service-visual="7.40-H15.4"] .bo-h154-support-branch{margin-right:0}
 }

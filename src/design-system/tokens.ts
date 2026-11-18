@@ -71,7 +71,7 @@ export const boTokens = {
   // ─── Tipografia ────────────────────────────────────────────────────────
   '--bo-font-sans': '"Geist","Geist Sans",Inter,"Segoe UI",Roboto,Helvetica,Arial,sans-serif',
   '--bo-font-mono': '"SFMono-Regular",Consolas,"Liberation Mono",monospace',
-  '--bo-font-size-2xs':     '11px',
+  '--bo-font-size-2xs':     '12px', // piso de legibilidade: nada abaixo de 12px
   '--bo-font-size-xs':      '12px',
   '--bo-font-size-sm':      '13px',
   '--bo-font-size-md':      '14px',
@@ -80,6 +80,11 @@ export const boTokens = {
   '--bo-font-size-2xl':     '28px',
   '--bo-font-size-3xl':     '36px',
   '--bo-font-size-display': '52px',
+  // Pesos: 400 texto · 500 UI/botões · 600 títulos · 700 só display
+  '--bo-font-weight-regular':  '400',
+  '--bo-font-weight-medium':   '500',
+  '--bo-font-weight-semibold': '600',
+  '--bo-font-weight-bold':     '700',
   '--bo-line-tight':    '1.2',
   '--bo-line-snug':     '1.35',
   '--bo-line-normal':   '1.45',
@@ -114,6 +119,7 @@ export const boTokens = {
   '--bo-focus-ring': '0 0 0 3px rgba(30,99,240,.16)',
 
   // ─── Controles / Ícones / Layout ──────────────────────────────────────
+  '--bo-control-h-xs': '28px',
   '--bo-control-h-sm': '32px',
   '--bo-control-h-md': '36px',
   '--bo-control-h-lg': '40px',

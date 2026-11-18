@@ -1,15 +1,15 @@
 /* V1.20.5-H16.1 — Foundation Experience Deep Adaptation */
-.bo-h16-experience-menu>footer{margin:8px 4px 2px;padding:8px 9px 2px;border-top:1px solid #edf2f6;color:#718497;font-size:9px;line-height:1.4}
+.bo-h16-experience-menu>footer{margin:8px 4px 2px;padding:8px 9px 2px;border-top:1px solid #edf2f6;color:#718497;font-size:var(--bo-font-size-xs);line-height:1.4}
 
 /* Fundamentos: navegação por intenção, não por taxonomia profissional. */
 .bo-h161-standard-nav.is-hidden{display:none!important}
 .bo-h161-foundation-nav{padding:5px 0 8px}
 .bo-h161-foundation-nav section{padding:7px 10px 5px;border-top:1px solid #eef3f7}
 .bo-h161-foundation-nav section:first-child{border-top:0}
-.bo-h161-foundation-nav section>strong{display:block;margin:0 5px 5px;color:#7890a4;font-size:11px;letter-spacing:.12em}
-.bo-h161-foundation-nav section>button{width:100%;min-height:38px;display:grid;grid-template-columns:20px minmax(0,1fr);align-items:center;gap:8px;padding:7px 8px;border:0;border-radius:9px;background:transparent;color:#486179;text-align:left;cursor:pointer}
+.bo-h161-foundation-nav section>strong{display:block;margin:0 5px 5px;color:#7890a4;font-size:var(--bo-font-size-xs);letter-spacing:.12em}
+.bo-h161-foundation-nav section>button{width:100%;min-height:var(--bo-control-h-md);display:grid;grid-template-columns:20px minmax(0,1fr);align-items:center;gap:8px;padding:7px 8px;border:0;border-radius:var(--bo-radius-md);background:transparent;color:#486179;text-align:left;cursor:pointer}
 .bo-h161-foundation-nav section>button:hover{background:#f5f9fd;color:#1f4f78}
-.bo-h161-foundation-nav section>button.is-active{background:#eaf4fd;color:#155e95;font-weight:750}
+.bo-h161-foundation-nav section>button.is-active{background:#eaf4fd;color:#155e95;font-weight:var(--bo-font-weight-medium)}
 .bo-h161-foundation-nav section>button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* O modo selecionado nunca pinta o conector como se a fase estivesse concluída. */
@@ -32,7 +32,7 @@
 .bo-h740h7[data-foundation-deep-adaptation="H16.1"][data-experience-level="foundation"] .bo-h740h7-capability-panel li>button{grid-column:2;grid-row:1/3;min-width:132px}
 
 /* Pesquisa em Fundamentos evita porcentagens como se fossem uma nota científica. */
-.bo-h726-research[data-foundation-deep-adaptation="H16.1"][data-experience-level="foundation"] .bo-h156-progress-head strong{font-size:15px;letter-spacing:-.01em}
+.bo-h726-research[data-foundation-deep-adaptation="H16.1"][data-experience-level="foundation"] .bo-h156-progress-head strong{font-size:var(--bo-font-size-md);letter-spacing:-.01em}
 .bo-h726-research[data-foundation-deep-adaptation="H16.1"][data-experience-level="foundation"] .bo-h156-progress-head span{max-width:420px}
 
 @media(max-width:1180px){

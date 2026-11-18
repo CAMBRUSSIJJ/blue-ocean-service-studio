@@ -1,0 +1,17 @@
+/* Blue Ocean — Tipografia (v1.21)
+   Geist em toda a interface. Escala: 12 (rótulo) · 13 (secundário) · 14 (corpo) · 16 · 20 · 28 · 36.
+   Pesos: 400 texto · 500 UI/botões · 600 títulos. Nada abaixo de 12px. */
+body{
+  font-family:var(--bo-font-sans);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+  font-feature-settings:"ss01" off,"cv11" on;
+}
+/* Números alinhados em tabelas, métricas e contadores. */
+table,
+[class*="metric"],[class*="kpi"],[class*="-count"],[class*="score"],[class*="stat-"],[class*="__value"]{
+  font-variant-numeric:tabular-nums;
+}
+/* Rótulos em caixa-alta: tracking moderado, peso médio. */
+:where(.bo-h701-nav-section__label,[class*="eyebrow"],[class*="overline"]){letter-spacing:.08em}

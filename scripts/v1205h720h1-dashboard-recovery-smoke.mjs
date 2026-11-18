@@ -20,7 +20,8 @@ check(css.includes('flex:0 0 198px!important'),'cards recentes têm largura est�
 check(css.includes('height:108px!important'),'capas mantêm boa presença');
 check(css.includes('width:min(760px,calc(100% - 220px))!important'),'ações usam espaço de forma equilibrada');
 check(css.includes('flex:0 0 184px!important'),'profundidade recupera dimensão legível');
-check(css.includes('font-size:11px!important'),'profundidade recupera tipografia legível');
+// v1.21: tipografia legível agora vem do token de 12px.
+check(css.includes('font-size:var(--bo-font-size-xs)!important')&&!/font-size:(9|10|11)px/.test(css),'profundidade recupera tipografia legível');
 check(css.includes('grid-template-columns:minmax(260px,1.25fr) repeat(4,minmax(190px,1fr))'),'Aprender volta a preencher a largura');
 check(css.includes('@media(max-width:1280px)'),'breakpoint desktop intermediário');
 check(css.includes('@media(max-width:920px)'),'breakpoint tablet');

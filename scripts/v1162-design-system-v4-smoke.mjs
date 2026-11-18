@@ -12,7 +12,8 @@ let ok=0, total=0;
 function check(name,pass){total++; if(!pass){console.error('FAIL '+name);process.exitCode=1}else{ok++;console.log('OK   '+name)}}
 const v=String(pkg.version||'').split('.').map(Number); const atLeast1162=(v[0]>1)||(v[0]===1&&(v[1]>16||(v[1]===16&&v[2]>=2)));
 check('baseline V1.16.2 preservada em versão >= 1.16.2',atLeast1162);
-check('escala tipográfica v4 começa em 11px',tokens.includes('--bo-font-size-2xs:11px')&&!tokens.includes('--bo-font-size-2xs:10px'));
+// v1.21: piso de legibilidade subiu para 12px.
+check('escala tipográfica começa em 12px',tokens.includes('--bo-font-size-2xs:12px')&&!/--bo-font-size-2xs:(9|10|11)px/.test(tokens));
 check('tokens de ícone e camadas',tokens.includes('--bo-icon-md:18px')&&tokens.includes('--bo-layer-dialog:1000'));
 check('aliases semânticos do board',tokens.includes('--bo-board-canvas:')&&tokens.includes('--bo-board-focus:'));
 check('aliases legados sem !important nos custom properties',!/--rt-[^;]+!important/.test(tokens));

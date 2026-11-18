@@ -1,0 +1,32 @@
+/* Blue Ocean — Botões (v1.21)
+   Tamanhos: 28 (xs, toolbars) · 32 (sm, padrão) · 36 (md, ação principal) · 40 (lg) — tokens --bo-control-h-*.
+   Raio único --bo-radius-md (8px). Peso 500. Uma ação primária por tela.
+   Este arquivo só define estados comuns com especificidade zero (:where), para não brigar com variantes. */
+:where(button,[role="button"]){
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+/* Pressionado: resposta tátil discreta. */
+:where(button,[role="button"]):active:not(:disabled){
+  transform:translateY(.5px);
+  transition-duration:var(--bo-motion-duration-instant);
+}
+/* Foco visível consistente em todo o produto. */
+:where(button,[role="button"],a,summary):focus-visible{
+  outline:2px solid var(--bo-color-primary-600);
+  outline-offset:2px;
+}
+:where(button):disabled{cursor:not-allowed}
+/* Sistema base (.bo-button / <Button>): tamanhos e estado de carregamento. */
+.bo-button{font-weight:var(--bo-font-weight-medium);border-radius:var(--bo-radius-md);transition:background-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),border-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),box-shadow var(--bo-motion-duration-fast) var(--bo-motion-ease-standard)}
+.bo-button--xs{min-height:var(--bo-control-h-xs);padding:0 10px;font-size:var(--bo-font-size-xs)}
+.bo-button--sm,.bo-button--md{min-height:var(--bo-control-h-sm);padding:0 12px;font-size:var(--bo-font-size-sm)}
+.bo-button--lg{min-height:var(--bo-control-h-md);padding:0 16px;font-size:var(--bo-font-size-md)}
+.bo-button--primary:active:not(:disabled){background:var(--bo-color-primary-800)}
+.bo-button[aria-busy="true"]{position:relative;color:transparent!important;pointer-events:none}
+.bo-button[aria-busy="true"]::after{content:'';position:absolute;inset:0;margin:auto;width:14px;height:14px;border-radius:50%;border:2px solid currentColor;border-color:rgba(255,255,255,.9) rgba(255,255,255,.9) rgba(255,255,255,.9) transparent;animation:bo-button-spin .7s linear infinite}
+.bo-button--secondary[aria-busy="true"]::after,.bo-button--ghost[aria-busy="true"]::after{border-color:var(--bo-color-primary-600) var(--bo-color-primary-600) var(--bo-color-primary-600) transparent}
+@keyframes bo-button-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){:where(button,[role="button"]):active:not(:disabled){transform:none}.bo-button[aria-busy="true"]::after{animation-duration:1.6s}}
+/* Atalhos de teclado usam a fonte da interface, não monoespaçada. */
+.bo115-search-trigger kbd,kbd{font-family:var(--bo-font-sans);font-weight:var(--bo-font-weight-medium);font-size:var(--bo-font-size-xs);letter-spacing:.02em}

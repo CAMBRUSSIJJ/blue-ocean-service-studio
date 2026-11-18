@@ -40,18 +40,18 @@
 .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-action-card{
   min-height:72px!important;
   padding:12px 14px!important;
-  border-radius:10px!important;
+  border-radius:var(--bo-radius-md)!important;
 }
 .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-icon{
   width:40px!important;
-  height:40px!important;
-  border-radius:9px!important;
+  height:var(--bo-control-h-lg)!important;
+  border-radius:var(--bo-radius-md)!important;
 }
 .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy strong{
-  font-size:13px!important;
+  font-size:var(--bo-font-size-sm)!important;
 }
 .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1207-action-copy em{
-  font-size:11px!important;
+  font-size:var(--bo-font-size-xs)!important;
   margin-top:3px!important;
 }
 .bo-h720h1 .bo1215-depth-chip{
@@ -65,11 +65,11 @@
   border-radius:10px!important;
 }
 .bo-h720h1 .bo1215-depth-chip>span:nth-of-type(2) small{
-  font-size:11px!important;
+  font-size:var(--bo-font-size-xs)!important;
   letter-spacing:.10em!important;
 }
 .bo-h720h1 .bo1215-depth-chip>span:nth-of-type(2) strong{
-  font-size:11px!important;
+  font-size:var(--bo-font-size-xs)!important;
   margin-top:2px!important;
 }
 .bo-h720h1 .bo1215-depth-chip>i{
@@ -102,7 +102,7 @@
   margin-bottom:10px!important;
 }
 .bo-h720h1 .bo1215-recents>header button{
-  font-size:9px!important;
+  font-size:var(--bo-font-size-xs)!important;
   padding:4px 2px!important;
 }
 .bo-h720h1 .bo1215-recent-grid{
@@ -126,15 +126,15 @@
   border-radius:8px!important;
 }
 .bo-h720h1 .bo1215-recent-card>strong{
-  font-size:11.5px!important;
+  font-size:var(--bo-font-size-xs)!important;
   line-height:1.22!important;
 }
 .bo-h720h1 .bo1215-recent-card .bo1207-recent-meta{
-  font-size:11px!important;
+  font-size:var(--bo-font-size-xs)!important;
   margin-top:5px!important;
 }
 .bo-h720h1 .bo1215-recent-card>em{
-  font-size:11px!important;
+  font-size:var(--bo-font-size-xs)!important;
   margin-top:6px!important;
 }
 
@@ -150,7 +150,7 @@
   gap:14px!important;
 }
 .bo-h720h1 .bo1215-favorites.is-empty .bo1215-favorite-empty{
-  font-size:9px!important;
+  font-size:var(--bo-font-size-xs)!important;
   color:#7f8c9b!important;
   white-space:normal!important;
   overflow:visible!important;
@@ -176,15 +176,15 @@
   padding:10px 12px!important;
   grid-template-columns:38px minmax(0,1fr)!important;
   gap:9px!important;
-  border-radius:9px!important;
+  border-radius:var(--bo-radius-md)!important;
 }
 .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"] .bo1215-learn-grid>button>i{
   width:38px!important;
-  height:38px!important;
+  height:var(--bo-control-h-md)!important;
 }
-.bo-h720h1 .bo1215-learn-grid>button strong{font-size:10px!important}
-.bo-h720h1 .bo1215-learn-grid>button small{font-size:11px!important}
-.bo-h720h1 .bo1215-learn-grid>button.is-recommended strong{font-size:10.5px!important}
+.bo-h720h1 .bo1215-learn-grid>button strong{font-size:var(--bo-font-size-xs)!important}
+.bo-h720h1 .bo1215-learn-grid>button small{font-size:var(--bo-font-size-xs)!important}
+.bo-h720h1 .bo1215-learn-grid>button.is-recommended strong{font-size:var(--bo-font-size-xs)!important}
 
 /* Keep the ocean floor as atmosphere only; don't let it become the layout's focal point. */
 .bo-h720h1 .bo1215-dashboard[data-dashboard-composition="7.20"]::before{

@@ -176,8 +176,8 @@ body.dark .bo-h701-sidebar-nav {
   align-items: center;
   justify-content: center;
   width: 28px;
-  height: 28px;
-  border-radius: 7px;
+  height: var(--bo-control-h-xs);
+  border-radius: var(--bo-radius-md);
   border: 1px solid transparent;
   background: transparent;
   color: inherit;

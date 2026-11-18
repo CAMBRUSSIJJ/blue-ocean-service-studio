@@ -17,7 +17,8 @@ check('tooltips do rail exibem kbd',js.includes('<kbd>${entry.shortcut}</kbd>')&
 check('barra inferior única existe',js.includes('bo1174-statusbar')&&js.includes("role','toolbar"));
 check('barra contém zoom fit minimapa densidade e status',js.includes("group('zoom')")&&js.includes("group('fit')")&&js.includes("Mapa ✓")&&js.includes('Cards · ${densityLabel}')&&js.includes("p.gridVisible?'Grade':'Sem grade'"));
 check('minimapa ancorado à barra',css.includes('.rt148-minimap{right:14px!important;bottom:58px!important'));
-check('card hierarchy 11 14 12',css.includes('.itemmeta small{font-size:11px!important')&&css.includes('.itemtitle{font-size:14px!important')&&css.includes('.itemsub{font-size:12px!important'));
+// v1.21: escala por tokens; meta e subtítulo no piso de 12px, título em 14px.
+check('card hierarchy 12 14 12',css.includes('.itemmeta small{font-size:var(--bo-font-size-xs)!important')&&css.includes('.itemtitle{font-size:var(--bo-font-size-md)!important')&&css.includes('.itemsub{font-size:var(--bo-font-size-xs)!important'));
 check('densidades possuem comportamento visual distinto',css.includes('rt1811-density-compact')&&css.includes('rt1811-density-normal')&&css.includes('rt1811-density-detailed'));
 check('Inspector universal consolidado 320px',css.includes('.rt144-inspector{width:320px!important;max-width:320px!important'));
 check('guia não compete com superfícies ativas',js.includes('showLibrary||showLayers||showOutline||showInspector||showBlueprintDocument||selected.length||selectedEdge'));

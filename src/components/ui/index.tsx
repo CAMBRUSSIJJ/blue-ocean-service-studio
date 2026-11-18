@@ -1,18 +1,20 @@
 import React from 'react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  /** Mostra o spinner e bloqueia cliques repetidos, mantendo a largura do botão. */
+  loading?: boolean;
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'secondary', size = 'md', className = '', ...props },
+  { variant = 'secondary', size = 'md', loading = false, className = '', disabled, ...props },
   ref,
 ) {
-  return <button ref={ref} className={`bo-button bo-button--${variant} bo-button--${size} ${className}`.trim()} {...props} />;
+  return <button ref={ref} className={`bo-button bo-button--${variant} bo-button--${size} ${className}`.trim()} aria-busy={loading || undefined} disabled={disabled || loading} {...props} />;
 });
 
 export const IconButton = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(function IconButton(

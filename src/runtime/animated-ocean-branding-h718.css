@@ -67,13 +67,13 @@
 .bo-h718 .bo-h718-service-context{
   display:inline-flex;align-items:center;gap:5px;max-width:340px;padding:4px 8px;
   border-radius:999px;background:rgba(238,245,255,.9);border:1px solid #d6e5f6;
-  color:#41627f;font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:#41627f;font-size:var(--bo-font-size-xs);font-weight:var(--bo-font-weight-semibold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .bo-h718 .bo-h718-service-context svg{flex:0 0 auto;color:#174a88}
 .bo-h718 .bo-h718-recents-header>button{display:inline-flex!important;align-items:center!important;gap:5px!important}
 
 /* --- Recents: artifact identity is visible before the user reads the label. --- */
-.bo-h718 .bo-h718-recent-kind{display:flex!important;align-items:center;gap:4px;color:#61738a!important;font-weight:750!important;letter-spacing:.035em}
+.bo-h718 .bo-h718-recent-kind{display:flex!important;align-items:center;gap:4px;color:#61738a!important;font-weight:var(--bo-font-weight-semibold)!important;letter-spacing:.035em}
 .bo-h718 .bo1215-recent-card[data-artifact-type="Journey"] .bo-h718-recent-kind svg{color:#1e63f0}
 .bo-h718 .bo1215-recent-card[data-artifact-type="Blueprint"] .bo-h718-recent-kind svg{color:#0f8f83}
 .bo-h718 .bo1215-recent-card[data-artifact-type="Whiteboard"] .bo-h718-recent-kind svg{color:#7657d6}

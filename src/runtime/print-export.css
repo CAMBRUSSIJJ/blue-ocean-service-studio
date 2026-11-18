@@ -126,7 +126,7 @@ body.bo-print-blueprint::after {
 
   .bo-print-header__title {
     font-size: 15pt;
-    font-weight: 700;
+    font-weight:var(--bo-font-weight-semibold);
     color: #0f172a;
   }
 
@@ -137,7 +137,7 @@ body.bo-print-blueprint::after {
 
   .bo-print-header__logo {
     font-size: 10pt;
-    font-weight: 800;
+    font-weight:var(--bo-font-weight-semibold);
     letter-spacing: 0.08em;
     color: #3b82f6;
     text-transform: uppercase;

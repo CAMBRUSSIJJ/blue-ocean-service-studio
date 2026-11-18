@@ -458,10 +458,10 @@ export default function App({ authUser, onSignOut }: AppProps) {
             <img src="/blue-ocean-mark.svg" alt="" className="h-[22px] w-[22px]" aria-hidden="true" />
           </div>
           <div className="hidden md:block min-w-0">
-            <h1 className="font-bold text-slate-800 tracking-tight leading-tight truncate">
+            <h1 className="font-semibold text-slate-800 tracking-tight leading-tight truncate">
               BLUE OCEAN
             </h1>
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider truncate">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider truncate">
               Service Studio
             </p>
           </div>
@@ -566,7 +566,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
         <div className="rt182-host-footer p-3 md:p-4 border-t border-slate-200">
           <div className="hidden md:block rounded-lg bg-slate-50 border border-slate-200 px-3 py-3">
             <p className="text-xs font-semibold text-slate-700 truncate">{isGlobalScope ? 'Blue Ocean' : projectTitle}</p>
-            <p className="text-[11px] text-slate-500 mt-0.5 truncate">{isGlobalScope ? `${projects.length} projeto${projects.length === 1 ? '' : 's'}` : graph.service.name}</p>
+            <p className="text-xs text-slate-500 mt-0.5 truncate">{isGlobalScope ? `${projects.length} projeto${projects.length === 1 ? '' : 's'}` : graph.service.name}</p>
           </div>
           <div className="bo1187-sidebar-footer">
             <button type="button" onClick={() => openExternal('settings', 'unifiedWorkspaces')}>Configurações</button>
@@ -584,7 +584,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
               <h2 className="bo1187-dashboard-header__title">{activeTab === 'context' && !externalNav ? libraryTitles[libraryPage] : isPrimaryResearch ? 'Pesquisa' : projectHomeSection === 'home' ? 'Home' : projectHomeSection === 'projects' ? 'Serviço' : 'Templates'}</h2>
             </div>
             <div className="bo1187-dashboard-header__actions">
-              <span data-bo-global-search-native="1" className="sr-only" aria-hidden="true" />
+              <button type="button" data-bo-global-search-native="1" onClick={() => setShowGlobalSearch(true)} className="bo115-search-trigger bo-home-search" title="Busca global · Ctrl+K" aria-label="Abrir busca global"><Search size={15} /><span>Buscar</span><kbd>Ctrl K</kbd></button>
               <span data-bo-global-create-native="1" className="sr-only" aria-hidden="true" />
               {hasService && <button type="button" onClick={openGuidance} title="Assistência guiada" aria-label="Abrir assistência guiada"><CircleHelp size={17} /></button>}
               {hasService && <button type="button" onClick={() => window.dispatchEvent(new CustomEvent('bo-dashboard-architecture'))} title="Arquitetura do serviço" aria-label="Abrir arquitetura do serviço"><Rocket size={17} /></button>}
@@ -673,8 +673,8 @@ export default function App({ authUser, onSignOut }: AppProps) {
           <div className="w-full max-w-lg bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-200 flex items-start justify-between gap-4">
               <div>
-                <div className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] font-bold text-blue-600"><Sparkles size={13} /> Criação guiada</div>
-                <h3 id="new-stage-title" className="text-lg font-bold text-slate-800 mt-1">Nova etapa da jornada</h3>
+                <div className="inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.14em] font-semibold text-blue-600"><Sparkles size={13} /> Criação guiada</div>
+                <h3 id="new-stage-title" className="text-lg font-semibold text-slate-800 mt-1">Nova etapa da jornada</h3>
                 <p className="text-sm text-slate-500 mt-1">Comece só pelo essencial. Os detalhes podem ser completados depois no Inspector.</p>
               </div>
               <button type="button" onClick={() => setIsCreateStageOpen(false)} className="p-2 rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Fechar"><X size={18} /></button>
@@ -695,7 +695,7 @@ export default function App({ authUser, onSignOut }: AppProps) {
       {showShortcuts && (
         <div className="fixed inset-0 z-50 bg-slate-950/40 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowShortcuts(false); }}>
           <div className="w-full max-w-md rounded-2xl bg-white border border-slate-200 shadow-2xl p-6">
-            <div className="flex items-center justify-between"><h3 id="shortcuts-title" className="text-lg font-bold text-slate-800">Atalhos da Jornada</h3><button type="button" onClick={() => setShowShortcuts(false)} aria-label="Fechar atalhos" className="p-2 rounded hover:bg-slate-100"><X size={18} /></button></div>
+            <div className="flex items-center justify-between"><h3 id="shortcuts-title" className="text-lg font-semibold text-slate-800">Atalhos da Jornada</h3><button type="button" onClick={() => setShowShortcuts(false)} aria-label="Fechar atalhos" className="p-2 rounded hover:bg-slate-100"><X size={18} /></button></div>
             <p className="text-xs text-slate-500 mt-1">Os atalhos funcionam fora dos campos de texto. Copiar e colar atuam dentro deste editor.</p>
             <div className="mt-5 grid grid-cols-[1fr_auto] gap-x-4 gap-y-3 text-sm text-slate-700">
               {[

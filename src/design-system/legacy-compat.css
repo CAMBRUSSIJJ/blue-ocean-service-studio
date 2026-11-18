@@ -44,7 +44,7 @@ body.bo-v1130 :is(.rt144-modalbox,.rt192-dialog,.rt193-dialog,.rt195-dialog,.rt1
 /* Sidebar / header are canonical components. */
 body.bo-v1130 aside.rt182-host-sidebar{width:var(--bo-sidebar-w)!important;background:var(--bo-color-surface)!important;border-color:var(--bo-color-border)!important}
 body.bo-v1130 header.rt182-host-header{height:var(--bo-header-h)!important;min-height:var(--bo-header-h)!important;background:var(--bo-color-surface)!important;border-color:var(--bo-color-border)!important}
-body.bo-v1130 .rt182-host-sidebar nav button{border-radius:var(--bo-radius-md)!important;min-height:40px!important}
+body.bo-v1130 .rt182-host-sidebar nav button{border-radius:var(--bo-radius-md)!important;min-height:var(--bo-control-h-lg)!important}
 body.bo-v1130 .rt182-host-sidebar nav button[aria-current="page"],body.bo-v1130 .rt182-host-sidebar nav button.is-active,body.bo-v1130 .rt182-host-sidebar nav button.active{background:var(--bo-color-primary-100)!important;color:var(--bo-color-primary-900)!important}
 
 /* React/Tailwind compatibility for core views */
