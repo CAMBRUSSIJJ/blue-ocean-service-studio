@@ -14,3 +14,8 @@ html body #root .bo1187-app-shell header[data-bo-precision-header-native] .bo118
 /* Controles em pílula de vidro. */
 html body #root .bo1187-app-shell header[data-bo-precision-header-native] .bo1187-dashboard-header__actions,
 html body #root .bo1187-app-shell header[data-bo-precision-header-native] .bo1163-header-actions{display:flex;align-items:center;gap:8px;padding:4px;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(16,24,40,.07);box-shadow:0 6px 20px -12px rgba(10,24,44,.25);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+/* Reserva a faixa dos controles flutuantes no topo das telas comuns, para não cobrir ações de página
+   (ex.: "Criar mapa"). Home e telas de canvas (overflow-hidden) não mudam. */
+html body #root #bo-main-content:not(.p-0){padding-top:60px!important}
+/* Cabeçalho do workspace de serviço (Mapas, Jornada) também reserva a faixa dos controles flutuantes. */
+html body #root .bo-h722-service-workspace{padding-top:60px!important;box-sizing:border-box}
