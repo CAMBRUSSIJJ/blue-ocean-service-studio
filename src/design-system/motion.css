@@ -128,6 +128,32 @@ body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{
   100%{background:#eef4ff;box-shadow:inset 0 0 0 transparent}
 }
 
+/* ───────────────────────── 4c. Sidebar flutuante no modo recolhido ─────────────────────────
+   Expandida: colada ao lado (em fluxo). Recolhida: trilho flutuante com margem, cantos e sombra.
+   Ao passar o mouse no trilho, expande por cima do conteúdo, sem empurrar o canvas. */
+@media(min-width:768px){
+  .bo1187-app-shell{position:relative}
+  .bo1187-app-shell>aside.bo-h724-sidebar.is-collapsed{
+    position:absolute!important;top:12px;bottom:12px;left:12px;z-index:30;
+    border:1px solid var(--bo-color-border);border-radius:16px;
+    box-shadow:0 8px 24px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.06);
+    transition:width var(--bo-motion-duration-base) var(--bo-motion-ease-standard),box-shadow var(--bo-motion-duration-base) var(--bo-motion-ease-standard);
+  }
+  .bo1187-app-shell>aside.bo-h724-sidebar.is-collapsed:hover{
+    width:216px!important;
+    box-shadow:0 16px 40px rgba(16,24,40,.14),0 2px 6px rgba(16,24,40,.08);
+  }
+  /* Expandida por hover: alinha os itens à esquerda, como na sidebar fixa (vence as regras de centro do trilho). */
+  body.bo-v1187 .bo-h724-sidebar.is-collapsed:hover nav button,
+  body.bo-v1187 .bo-h724-sidebar.is-collapsed:hover .bo-h701-sidebar-bottom button{justify-content:flex-start!important;padding-left:9px!important;padding-right:9px!important}
+  body.bo-v1187 .bo-h724-sidebar.is-collapsed:hover nav button>span.hidden.md\:inline,
+  body.bo-v1187 .bo-h724-sidebar.is-collapsed:hover nav button>span.md\:inline{display:inline-block!important;max-width:180px!important;opacity:1!important;margin:0!important}
+  /* Reserva a faixa do trilho, para o conteúdo não ficar embaixo dele. */
+  .bo1187-app-shell>aside.bo-h724-sidebar.is-collapsed+div{margin-left:96px;transition:margin-left var(--bo-motion-duration-base) var(--bo-motion-ease-standard)}
+  .bo1187-app-shell>aside.bo-h724-sidebar+div{transition:margin-left var(--bo-motion-duration-base) var(--bo-motion-ease-standard)}
+}
+@media(prefers-reduced-motion:reduce){.bo1187-app-shell>aside.bo-h724-sidebar+div{transition:none!important}}
+
 /* ───────────────────────── 4b. Sidebar: recolher animado e indicador deslizante ─────────────────────────
    Inspirado na referência de sidebar com trilho de ícones. Mantém o visual claro do Blue Ocean. */
 .bo-h724-sidebar{transition:width var(--bo-motion-duration-base) var(--bo-motion-ease-standard)}
@@ -145,9 +171,9 @@ body.bo-h717 .bo1215-dashboard[data-ocean-home="7.15"]::after{
     display:inline-block!important;max-width:180px;opacity:1;overflow:hidden;white-space:nowrap;vertical-align:middle;
     transition:opacity var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),max-width var(--bo-motion-duration-base) var(--bo-motion-ease-standard);
   }
-  .bo-h724-sidebar.is-collapsed .bo-h701-sidebar-nav button>span.hidden.md\:inline,
-  .bo-h724-sidebar.is-collapsed .bo-h701-sidebar-bottom button>span.hidden.md\:inline{max-width:0;opacity:0;margin:0}
-  .bo-h724-sidebar.is-collapsed .bo-h701-sidebar-nav button,.bo-h724-sidebar.is-collapsed .bo-h701-sidebar-bottom button{gap:0!important}
+  .bo-h724-sidebar.is-collapsed:not(:hover) .bo-h701-sidebar-nav button>span.hidden.md\:inline,
+  .bo-h724-sidebar.is-collapsed:not(:hover) .bo-h701-sidebar-bottom button>span.hidden.md\:inline{max-width:0;opacity:0;margin:0}
+  .bo-h724-sidebar.is-collapsed:not(:hover) .bo-h701-sidebar-nav button,.bo-h724-sidebar.is-collapsed:not(:hover) .bo-h701-sidebar-bottom button{gap:0!important}
 }
 
 /* ───────────────────────── 6. Movimento reduzido ───────────────────────── */
