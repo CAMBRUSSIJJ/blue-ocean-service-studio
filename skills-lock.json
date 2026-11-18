@@ -8,12 +8,26 @@
       "skillPath": "skills/caveman/SKILL.md",
       "computedHash": "b51af74aacdadbc3c2d6bb79f05db58dc521854b87f7ffabd48faf286a81ed31"
     },
+    "css-animation-creator": {
+      "source": "onewave-ai/claude-skills",
+      "commit": "b2267d9171af4f56848d82992381b20b89b44056",
+      "sourceType": "github",
+      "skillPath": "css-animation-creator/SKILL.md",
+      "computedHash": "6fd6576c6645c5ce8dd0c0a760853e1f8c9eb312e572ea8c0e24e636f2d7e140"
+    },
     "frontend-design": {
       "source": "anthropics/skills",
       "commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "83485963700bcf11d5bf78118facb301676b69d918fee2e45a95e7f1a2840f6c"
+    },
+    "motion-background": {
+      "source": "iart-ai/motion-design-skills",
+      "commit": "b85e50c4cef5ff17aa2187a10d49d2dae9226c74",
+      "sourceType": "github",
+      "skillPath": "skills/motion-background/SKILL.md",
+      "computedHash": "73d38e3b04071caff0df7535e65344914a5952b54dad1236d6fbab262ef07dce"
     },
     "token-reduce": {
       "source": "chimera-defi/token-reduce-skill",
