@@ -103,6 +103,7 @@
 @import './design-system/modal-brand.css';
 @import './design-system/chrome-minimal.css';
 @import './design-system/standard-ui.css';
+@import './design-system/template-cards.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

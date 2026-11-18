@@ -1,0 +1,42 @@
+/* Blue Ocean — Cards de template (v1.21), adaptados do card de informações da referência.
+   Cabeçalho (ícone + chip de estado) · título e descrição · linhas de chave/valor · ação em pílula.
+   Hover: sobe 2px, borda de marca, ação preenche. Entrada escalonada ao trocar de aba. */
+.bo-h740h8-template-grid .bo-tpl-card{
+  display:grid;gap:10px;align-content:start;text-align:left;
+  padding:18px;border-radius:16px;border:1px solid rgba(16,24,40,.08);background:#fff;
+  box-shadow:0 1px 2px rgba(16,24,40,.04);color:var(--bo-color-text);cursor:pointer;
+  transition:transform var(--bo-motion-duration-moderate) var(--bo-motion-ease-enter),border-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),box-shadow var(--bo-motion-duration-base) var(--bo-motion-ease-standard);
+  animation:bo-tpl-in var(--bo-motion-duration-moderate) var(--bo-motion-ease-enter) both;
+  animation-delay:calc(var(--i,0) * 40ms);
+}
+.bo-h740h8-template-grid .bo-tpl-card:nth-child(1){--i:0}
+.bo-h740h8-template-grid .bo-tpl-card:nth-child(2){--i:1}
+.bo-h740h8-template-grid .bo-tpl-card:nth-child(3){--i:2}
+.bo-h740h8-template-grid .bo-tpl-card:nth-child(4){--i:3}
+.bo-h740h8-template-grid .bo-tpl-card:hover{transform:translateY(-2px);border-color:rgba(30,99,240,.28);box-shadow:0 14px 30px -18px rgba(30,99,240,.4)}
+.bo-h740h8-template-grid .bo-tpl-card:active{transform:translateY(0) scale(.99);transition-duration:var(--bo-motion-duration-instant)}
+.bo-tpl-card__head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.bo-tpl-card__icon{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:linear-gradient(145deg,rgba(30,99,240,.12),rgba(56,191,199,.14));color:var(--bo-color-primary-600);transition:transform var(--bo-motion-duration-moderate) var(--bo-btn-spring)}
+.bo-tpl-card:hover .bo-tpl-card__icon{transform:rotate(-6deg) scale(1.06)}
+.bo-tpl-card__chip{padding:3px 9px;border-radius:999px;background:var(--bo-color-surface-muted);color:var(--bo-color-text-secondary);font-size:var(--bo-font-size-xs);font-weight:var(--bo-font-weight-medium)}
+.bo-tpl-card strong{font-size:var(--bo-font-size-md);font-weight:var(--bo-font-weight-semibold);letter-spacing:-.01em}
+.bo-tpl-card>small{font-size:var(--bo-font-size-sm);line-height:1.45;color:var(--bo-color-text-secondary)}
+.bo-tpl-card__rows{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:var(--bo-color-surface-subtle,#f7f9fc);border:1px solid rgba(16,24,40,.05)}
+.bo-tpl-card__rows>span{display:flex;align-items:center;justify-content:space-between;font-size:var(--bo-font-size-xs)}
+.bo-tpl-card__rows i{font-style:normal;color:var(--bo-color-text-muted)}
+.bo-tpl-card__rows b{font-weight:var(--bo-font-weight-medium);color:var(--bo-color-text)}
+.bo-tpl-card__cta{justify-self:start;display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;font-style:normal;font-size:var(--bo-font-size-sm);font-weight:var(--bo-font-weight-medium);color:var(--bo-color-primary-700);background:var(--bo-color-primary-50);transition:background-color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),color var(--bo-motion-duration-fast) var(--bo-motion-ease-standard),gap var(--bo-motion-duration-moderate) var(--bo-btn-spring)}
+.bo-tpl-card:hover .bo-tpl-card__cta{background:var(--bo-color-primary-600);color:#fff;gap:10px}
+@keyframes bo-tpl-in{from{opacity:0;transform:translate3d(0,10px,0) scale(.98)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.bo-h740h8-template-grid .bo-tpl-card{animation:none;transition:none}.bo-h740h8-template-grid .bo-tpl-card:hover{transform:none}}
+/* Anula as regras antigas de "botão de template" (span 32px, alinhamento de coluna) dentro do card novo. */
+.bo-h740h8-template-grid>button.bo-tpl-card>span{width:auto;height:auto;min-height:0;display:block;background:none;border-radius:0;color:inherit;place-items:initial;position:static}
+.bo-h740h8-template-grid>button.bo-tpl-card>span.bo-tpl-card__head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.bo-h740h8-template-grid>button.bo-tpl-card>span.bo-tpl-card__icon,.bo-h740h8-template-grid>button.bo-tpl-card .bo-tpl-card__head>span.bo-tpl-card__icon{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:linear-gradient(145deg,rgba(30,99,240,.12),rgba(56,191,199,.14));color:var(--bo-color-primary-600)}
+.bo-h740h8-template-grid>button.bo-tpl-card>span.bo-tpl-card__rows{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:var(--bo-color-surface-subtle,#f7f9fc);border:1px solid rgba(16,24,40,.05)}
+.bo-h740h8-template-grid>button.bo-tpl-card>span.bo-tpl-card__rows>span{display:flex;align-items:center;justify-content:space-between;font-size:var(--bo-font-size-xs);width:auto;height:auto;background:none}
+.bo-h740h8-template-grid>button.bo-tpl-card>span.bo-tpl-card__head>span.bo-tpl-card__chip{display:inline-block;width:auto;height:auto;padding:3px 9px;border-radius:999px;background:var(--bo-color-surface-muted);color:var(--bo-color-text-secondary);font-size:var(--bo-font-size-xs);font-weight:var(--bo-font-weight-medium)}
+.bo-h740h8-template-grid>button.bo-tpl-card>em.bo-tpl-card__cta{display:inline-flex;align-items:center;gap:6px;width:auto;height:auto;min-height:0;padding:7px 14px;border-radius:999px;background:var(--bo-color-primary-50);color:var(--bo-color-primary-700);font-style:normal}
+.bo-h740h8-template-grid>button.bo-tpl-card:hover>em.bo-tpl-card__cta{background:var(--bo-color-primary-600);color:#fff}
+.bo-h740h8-template-grid>button.bo-tpl-card{align-content:stretch;height:100%;box-sizing:border-box}
+.bo-h740h8-template-grid>button.bo-tpl-card>em.bo-tpl-card__cta{margin-top:auto;justify-self:start}
